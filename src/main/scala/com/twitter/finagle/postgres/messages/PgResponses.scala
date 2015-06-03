@@ -7,7 +7,12 @@ trait PgResponse
 
 case class SingleMessageResponse(msg: BackendMessage) extends PgResponse
 
-case class Error(msg: Option[String]) extends PgResponse
+case class Error(msg: Option[String], severity: Option[String] = None, sqlState: Option[String] = None, detail: Option[String] = None, hint: Option[String] = None, position: Option[String] = None) extends PgResponse
+
+object Error {
+  def apply(params: Map[Char,String]): Error =
+    Error(params.get('M'), params.get('S'), params.get('C'), params.get('D'), params.get('H'), params.get('P'))
+}
 
 case object SslSupportedResponse extends PgResponse
 

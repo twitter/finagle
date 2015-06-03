@@ -88,6 +88,8 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
   transition {
     case (EmptyQueryResponse, SimpleQuery) => (None, EmitOnReadyForQuery(SelectResult(IndexedSeq(), List())))
     case (CommandComplete(CreateTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+    case (CommandComplete(CreateType), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+    case (CommandComplete(CreateExtension), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(DropTable), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(Insert(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
     case (CommandComplete(Update(count)), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(count)))
@@ -97,14 +99,23 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (CommandComplete(Savepoint), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(RollBack), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
     case (CommandComplete(Commit), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+    case (CommandComplete(Do), SimpleQuery) => (None, EmitOnReadyForQuery(CommandCompleteResponse(1)))
+
     case (RowDescription(fields), SimpleQuery) =>
       (None, AggregateRows(fields.map(f => Field(f.name, f.fieldFormat, f.dataType))))
     case (ErrorResponse(details), SimpleQuery) => (None, EmitOnReadyForQuery(Error(details)))
   }
 
   transition {
+    //for multiple commands in one query, we recieve multiple CommandComplete tags before becoming ready
+    case (CommandComplete(_), EmitOnReadyForQuery(old)) => (None, EmitOnReadyForQuery(old))
+  }
+
+  transition {
     case (EmptyQueryResponse, ExecutePreparedStatement) => (Some(SelectResult(IndexedSeq(), List())), Connected)
     case (CommandComplete(CreateTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
+    case (CommandComplete(CreateType), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
+    case (CommandComplete(CreateExtension), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(DropTable), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(Insert(count)), ExecutePreparedStatement) => (Some(CommandCompleteResponse(count)), Connected)
     case (CommandComplete(Update(count)), ExecutePreparedStatement) => (Some(CommandCompleteResponse(count)), Connected)
@@ -113,6 +124,7 @@ class ConnectionStateMachine(state: State = AuthenticationRequired) extends Stat
     case (CommandComplete(Savepoint), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(RollBack), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (CommandComplete(Commit), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
+    case (CommandComplete(Do), ExecutePreparedStatement) => (Some(CommandCompleteResponse(1)), Connected)
     case (row:DataRow, ExecutePreparedStatement) => (None, AggregateRowsWithoutFields(ListBuffer(row)))
     case (row:DataRow, state:AggregateRowsWithoutFields) =>
       state.buff += row

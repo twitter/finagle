@@ -4,7 +4,7 @@ import com.twitter.logging.Logger
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{UUID, Date}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
@@ -102,6 +102,8 @@ trait ValueParser {
 
   def parseTimestampTZ(b: ChannelBuffer): Value[Timestamp]
 
+  def parseUUID(b:ChannelBuffer): Value[UUID]
+
   def parseHStore(b: ChannelBuffer): Value[Map[String, String]]
 
   def parseUnknown(b: ChannelBuffer): Value[String]
@@ -157,6 +159,8 @@ object StringValueParser extends ValueParser {
     Value[Timestamp](new Timestamp(parsedDate.getTime))
   }
 
+  def parseUUID(b:ChannelBuffer): Value[UUID] = Value[UUID](UUID.fromString(b.toString(Charsets.Utf8)))
+
   def parseHStore(b: ChannelBuffer) = {
     val data = b.toString(Charsets.Utf8)
 
@@ -204,6 +208,7 @@ object ValueParser {
         case VAR_CHAR => valueParser.parseVarChar
         case TIMESTAMP => valueParser.parseTimestamp
         case TIMESTAMP_TZ => valueParser.parseTimestampTZ
+        case Type.UUID => valueParser.parseUUID
         case _ => {
           customTypes.get(dataType.toString) match {
             case Some("hstore") => {

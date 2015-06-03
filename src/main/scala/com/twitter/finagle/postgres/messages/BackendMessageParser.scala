@@ -105,12 +105,17 @@ class BackendMessageParser {
   def parseE(packet: Packet): Option[BackendMessage] = {
     val Packet(_, _, content, _) = packet
 
-    val builder = new StringBuilder()
-    while (content.readable) {
-      builder.append(Buffers.readCString(content))
-    }
+    def fieldStream(buf: ChannelBuffer):Stream[(Char,String)] =
+      if(buf.readable)
+        Buffers.readCString(buf) match {
+          case "" => Stream.empty
+          case nonempty => (nonempty.splitAt(1) match { case (fieldId, value) => (fieldId.charAt(0), value) }) #:: fieldStream(buf)
+        }
+      else Stream.empty[(Char,String)]
 
-    Some(new ErrorResponse(Some(builder.toString)))
+    val fields = fieldStream(content).foldLeft(Map.empty[Char,String])(_ + _)
+
+    Some(new ErrorResponse(fields))
   }
 
   def parseN(packet: Packet): Option[BackendMessage] = {
@@ -228,10 +233,10 @@ class BackendMessageParser {
         case "INSERT" => Insert(parts(2).toInt)
         case "DELETE" => Delete(parts(1).toInt)
         case "UPDATE" => Update(parts(1).toInt)
-	case "BEGIN"  => Begin
-	case "SAVEPOINT" => Savepoint
-	case "ROLLBACK"  => RollBack
-	case "COMMIT" => Commit
+        case "BEGIN"  => Begin
+        case "SAVEPOINT" => Savepoint
+        case "ROLLBACK"  => RollBack
+        case "COMMIT" => Commit
         case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
       }
     }

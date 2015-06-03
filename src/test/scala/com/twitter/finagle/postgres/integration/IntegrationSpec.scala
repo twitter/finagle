@@ -294,6 +294,14 @@ class IntegrationSpec extends Spec {
       }
     }
 
+    "create an extension using CREATE EXTENSION" in {
+      if(postgresAvailable) {
+        val client = getClient
+        val preparedStatement = client.prepareAndExecute("CREATE EXTENSION hstore")
+        Await.result(preparedStatement)
+      }
+    }
+
     "throw a ServerError" when {
       "query has error" in {
         if (postgresAvailable) {

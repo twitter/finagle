@@ -11,7 +11,7 @@ case object SwitchToSsl extends BackendMessage
 
 case object SslNotSupported extends BackendMessage
 
-case class ErrorResponse(msg: Option[String] = None) extends BackendMessage
+case class ErrorResponse(params: Map[Char,String] = Map.empty) extends BackendMessage
 
 case class NoticeResponse(msg: Option[String]) extends BackendMessage
 
@@ -49,9 +49,15 @@ sealed trait CommandCompleteStatus
 
 case object CreateTable extends CommandCompleteStatus
 
+case object CreateType extends CommandCompleteStatus
+
+case object CreateExtension extends CommandCompleteStatus
+
 case object DropTable extends CommandCompleteStatus
 
 case object DiscardAll extends CommandCompleteStatus
+
+case object Do extends CommandCompleteStatus
 
 case class Insert(count : Int) extends CommandCompleteStatus
 
