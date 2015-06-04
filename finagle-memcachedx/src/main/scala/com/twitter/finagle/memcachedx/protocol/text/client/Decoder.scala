@@ -1,54 +1,64 @@
 package com.twitter.finagle.memcachedx.protocol.text.client
 
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel._
-
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
 import com.twitter.finagle.memcachedx.protocol.ServerError
-import com.twitter.finagle.memcachedx.util.ParserUtils
 import com.twitter.finagle.memcachedx.protocol.text._
+import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcachedx.util.ParserUtils
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.util.StateMachine
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel._
 
 object Decoder {
   private val END   = "END": ChannelBuffer
   private val ITEM  = "ITEM": ChannelBuffer
   private val STAT  = "STAT": ChannelBuffer
   private val VALUE = "VALUE": ChannelBuffer
+
+  private val EmptyValueLines = ValueLines(Seq.empty)
+
+  private val NeedMoreData: Decoding = null
 }
 
 class Decoder extends AbstractDecoder with StateMachine {
   import Decoder._
 
-  case class AwaitingResponse()                                                  extends State
-  case class AwaitingResponseOrEnd(valuesSoFar: Seq[TokensWithData])             extends State
-  case class AwaitingStatsOrEnd(valuesSoFar: Seq[Tokens])                        extends State
-  case class AwaitingData(valuesSoFar: Seq[TokensWithData], tokens: Seq[ChannelBuffer], bytesNeeded: Int) extends State
+  case object AwaitingResponse extends State
+  case class AwaitingResponseOrEnd(valuesSoFar: Seq[TokensWithData]) extends State
+  case class AwaitingStatsOrEnd(valuesSoFar: Seq[Tokens]) extends State
+  case class AwaitingData(
+      valuesSoFar: Seq[TokensWithData],
+      tokens: Seq[ChannelBuffer],
+      bytesNeeded: Int)
+    extends State
 
   final protected[memcachedx] def start() {
-    state = AwaitingResponse()
+    state = AwaitingResponse
+  }
+
+  private[this] val awaitingResponseContinue: Seq[ChannelBuffer] => Decoding = { tokens =>
+    if (isEnd(tokens)) {
+      EmptyValueLines
+    } else if (isStats(tokens)) {
+      awaitStatsOrEnd(Seq(Tokens(tokens.map(ChannelBufferBuf.Owned(_)))))
+      NeedMoreData
+    } else {
+      Tokens(tokens.map(ChannelBufferBuf.Owned(_)))
+    }
   }
 
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Decoding = {
     state match {
-      case AwaitingResponse() =>
-        decodeLine(buffer, needsData(_)) { tokens =>
-          if (isEnd(tokens)) {
-            ValueLines(Seq[TokensWithData]())
-          } else if (isStats(tokens)) {
-            awaitStatsOrEnd(Seq(Tokens(tokens.map { ChannelBufferBuf(_) } )))
-            needMoreData
-          } else {
-            Tokens(tokens.map { ChannelBufferBuf(_) })
-          }
-        }
+      case AwaitingResponse =>
+        decodeLine(buffer, needsData)(awaitingResponseContinue)
+
       case AwaitingStatsOrEnd(linesSoFar) =>
-        decodeLine(buffer, needsData(_)) { tokens =>
+        decodeLine(buffer, needsData) { tokens =>
           if (isEnd(tokens)) {
             StatLines(linesSoFar)
           } else if (isStats(tokens)) {
-            awaitStatsOrEnd(linesSoFar ++ Seq(Tokens(tokens.map { ChannelBufferBuf(_) })))
-            needMoreData
+            awaitStatsOrEnd(linesSoFar :+ Tokens(tokens.map(ChannelBufferBuf.Owned(_))))
+            NeedMoreData
           } else {
             throw new ServerError("Invalid reply from STATS command")
           }
@@ -56,56 +66,58 @@ class Decoder extends AbstractDecoder with StateMachine {
       case AwaitingData(valuesSoFar, tokens, bytesNeeded) =>
         decodeData(bytesNeeded, buffer) { data =>
           awaitResponseOrEnd(
-            valuesSoFar ++
-            Seq(TokensWithData(tokens.map { ChannelBufferBuf(_) }, ChannelBufferBuf(data))))
-          needMoreData
+            valuesSoFar :+
+              TokensWithData(tokens.map(ChannelBufferBuf.Owned(_)), ChannelBufferBuf.Owned(data))
+          )
+          NeedMoreData
         }
       case AwaitingResponseOrEnd(valuesSoFar) =>
-        decodeLine(buffer, needsData(_)) { tokens =>
+        decodeLine(buffer, needsData) { tokens =>
           if (isEnd(tokens)) {
             ValueLines(valuesSoFar)
-          } else needMoreData
+          } else NeedMoreData
         }
     }
   }
 
-  final protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) = {
+  final protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int): Unit = {
     state match {
-      case AwaitingResponse() =>
+      case AwaitingResponse =>
         awaitData(Nil, tokens, bytesNeeded)
       case AwaitingResponseOrEnd(valuesSoFar) =>
         awaitData(valuesSoFar, tokens, bytesNeeded)
     }
   }
 
-  private[this] def awaitData(valuesSoFar: Seq[TokensWithData], tokens: Seq[ChannelBuffer], bytesNeeded: Int) {
+  private[this] def awaitData(
+    valuesSoFar: Seq[TokensWithData],
+    tokens: Seq[ChannelBuffer],
+    bytesNeeded: Int
+  ): Unit = {
     state = AwaitingData(valuesSoFar, tokens, bytesNeeded)
   }
 
-  private[this] def awaitResponseOrEnd(valuesSoFar: Seq[TokensWithData]) {
+  private[this] def awaitResponseOrEnd(valuesSoFar: Seq[TokensWithData]): Unit = {
     state = AwaitingResponseOrEnd(valuesSoFar)
   }
 
-  private[this] def awaitStatsOrEnd(valuesSoFar: Seq[Tokens]) {
+  private[this] def awaitStatsOrEnd(valuesSoFar: Seq[Tokens]): Unit = {
     state = AwaitingStatsOrEnd(valuesSoFar)
   }
 
-  private[this] val needMoreData = null: Decoding
-
   private[this] def isEnd(tokens: Seq[ChannelBuffer]) =
-    (tokens.length == 1 && tokens.head == END)
+    tokens.length == 1 && tokens.head == END
 
   private[this] def isStats(tokens: Seq[ChannelBuffer]) =
-    (tokens.length > 0 && (tokens.head == STAT || tokens.head == ITEM))
+    tokens.nonEmpty && (tokens.head == STAT || tokens.head == ITEM)
 
-  private[this] def needsData(tokens: Seq[ChannelBuffer]) = {
+  private[this] val needsData: Seq[ChannelBuffer] => Int = { tokens =>
     val responseName = tokens.head
     if (responseName == VALUE) {
       validateValueResponse(tokens)
-      Some(tokens(3).toInt)
-    } else None
+      tokens(3).toInt
+    } else -1
   }
-
 
   private[this] def validateValueResponse(args: Seq[ChannelBuffer]) {
     if (args.length < 4) throw new ServerError("Too few arguments")
