@@ -32,6 +32,7 @@ object StackClient {
    * Note that this is terminated by a [[com.twitter.finagle.service.FailingFactory]]:
    * users are expected to terminate it with a concrete service factory.
    *
+   * @see [[com.twitter.finagle.tracing.WireTracingFilter]]
    * @see [[com.twitter.finagle.service.ExpiringService]]
    * @see [[com.twitter.finagle.service.FailFastFactory]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
@@ -51,6 +52,7 @@ object StackClient {
 
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](nilStack[Req, Rep])
     stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(WireTracingFilter.module)
     stk.push(ExpiringService.module)
     stk.push(FailFastFactory.module)
     stk.push(DefaultPool.module)

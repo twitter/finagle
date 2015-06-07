@@ -1,17 +1,17 @@
 package com.twitter.finagle.kestrel
 
 import scala.collection.JavaConversions._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.util.{Command=>_, _}
+
+import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
 import com.twitter.finagle.kestrel.protocol._
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.{ServiceFactory, Service}
 import com.twitter.finagle.thrift.ThriftClientRequest
-import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledClient
+import com.twitter.io.Buf
+import com.twitter.util.{Command=>_, _}
 
 /**
  * Indicates that a [[com.twitter.finagle.kestrel.ReadHandle]] has been closed.
@@ -29,7 +29,7 @@ object OutOfRetriesException extends Exception
  * an offer to acknowledge.
  */
 case class ReadMessage(
-  bytes: ChannelBuffer, ack: Offer[Unit], abort: Offer[Unit] = Offer.const(Unit)
+  bytes: Buf, ack: Offer[Unit], abort: Offer[Unit] = Offer.const(Unit)
 )
 
 /**
@@ -39,14 +39,14 @@ case class ReadMessage(
  * by invoking `Offer.foreach` on them. For example:
  * {{{
  * val readHandle: ReadHandle = ...
- * readHandle.messages foreach { msg =>
+ * readHandle.messages.foreach { msg =>
  *   try {
  *     System.out.println(msg.bytes.toString("UTF-8"))
  *   } finally {
- *     msg.ack() // if we don't do this, no more messages will come to us
+ *     msg.ack() // if we don't do this, no more msgs will come to us
  *   }
  * }
- * readHandle.error foreach { System.error.println("zomg! got an error " + _.getMessage) }
+ * readHandle.error.foreach { System.error.println("zomg! got an error " + _.getMessage) }
  * }}}
  */
 abstract class ReadHandle {
@@ -143,6 +143,7 @@ object ReadHandle {
     closeOf: Offer[Unit]
   ): ReadHandle = ReadHandle(messages, error, closeOf)
 
+
   /**
    * Provide a merged ReadHandle, combining the messages & errors of
    * the given underlying handles.  Closing this handle will close all
@@ -155,7 +156,7 @@ object ReadHandle {
   }
 
   /**
-   * A Java-friendly interface to {{merged}}.
+   * A java-friendly interface to {{merged}}
    */
   def merged(handles: _root_.java.util.Iterator[ReadHandle]): ReadHandle =
     merged(handles.toSeq)
@@ -205,7 +206,7 @@ trait Client {
    * if it isn't dequeued in time).  Time.epoch (0) means the item will never
    * expire.
    */
-  def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch): Future[Response]
+  def set(queueName: String, value: Buf, expiry: Time = Time.epoch): Future[Response]
 
   /**
    * Dequeue an item.
@@ -215,7 +216,7 @@ trait Client {
    * returning None.
    * 0.seconds (the default) means no waiting, as opposed to infinite wait.
    */
-  def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]]
+  def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[Buf]]
 
   /**
    * Delete a queue. Removes the journal file on the remote server.
@@ -262,7 +263,6 @@ trait Client {
     val close = new Broker[Unit]
 
     def loop(handle: ReadHandle, backoffs: Stream[Duration]) {
-      // proxy the close, and close our reliable channel
       Offer.prioritize(
         close.recv { _ =>
           handle.close()
@@ -305,7 +305,7 @@ trait Client {
    *
    * @return a Future indicating client failure.
    */
-  def write(queueName: String, offer: Offer[ChannelBuffer]): Future[Throwable]
+  def write(queueName: String, offer: Offer[Buf]): Future[Throwable]
 
   /**
    * Close any consume resources such as TCP Connections. This should will not
@@ -351,7 +351,7 @@ abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply,
   // note: this implementation uses "GET" requests, not "MONITOR",
   // so it will incur many roundtrips on quiet queues.
   protected def read(
-    processResponse: Reply => Try[Option[(ChannelBuffer, ItemId)]],
+    processResponse: Reply => Try[Option[(Buf, ItemId)]],
     openCommand: CommandExecutor => Future[Reply],
     closeAndOpenCommand: ItemId => (CommandExecutor => Future[Reply]),
     abortCommand: ItemId => (CommandExecutor => Future[Reply])): ReadHandle = {
@@ -380,7 +380,6 @@ abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply,
                   ack.recv { id => recv(service, closeAndOpenCommand(id)) },
                   abort.recv { id => recv(service, abortCommand(id)) }
                 ).sync()
-
               case Return(None) =>
                 recv(service, openCommand)
 
@@ -408,7 +407,7 @@ abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply,
     ReadHandle(messages.recv, error.recv, close.send(()))
   }
 
-  def write(queueName: String, offer: Offer[ChannelBuffer]): Future[Throwable] = {
+  def write(queueName: String, offer: Offer[Buf]): Future[Throwable] = {
     val closed = new Promise[Throwable]
     write(queueName, offer, closed)
     closed
@@ -416,10 +415,10 @@ abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply,
 
   private[this] def write(
     queueName: String,
-    offer: Offer[ChannelBuffer],
+    offer: Offer[Buf],
     closed: Promise[Throwable]
   ) {
-    offer.sync() foreach { item =>
+    offer.sync().foreach { item =>
       set(queueName, item).unit respond {
         case Return(_) => write(queueName, offer)
         case Throw(t) => closed() = Return(t)
@@ -460,18 +459,18 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
   import ConnectedClient._
 
   def flush(queueName: String): Future[Response] =
-    underlying.toService(Flush(queueName))
+    underlying.toService(Flush(Buf.Utf8(queueName)))
 
   def delete(queueName: String): Future[Response] =
-    underlying.toService(Delete(queueName))
+    underlying.toService(Delete(Buf.Utf8(queueName)))
 
-  def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch): Future[Response] =
-    underlying.toService(Set(queueName, expiry, value))
+  def set(queueName: String, value: Buf, expiry: Time = Time.epoch): Future[Response] =
+    underlying.toService(Set(Buf.Utf8(queueName), expiry, value))
 
-  def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]] =
-    underlying.toService(Get(queueName, Some(waitUpTo))).map {
+  def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[Buf]] =
+    underlying.toService(Get(Buf.Utf8(queueName), Some(waitUpTo))).map {
       case Values(Seq()) => None
-      case Values(Seq(Value(key, value))) => Some(value)
+      case Values(Seq(Value(key, value: Buf))) => Some(value)
       case _ => throw new IllegalArgumentException
     }
 
@@ -479,10 +478,10 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     service(command)
 
   def read(queueName: String): ReadHandle = {
-    val queueChannelBuffer: ChannelBuffer = queueName
-    val open = MemCommand(Open(queueChannelBuffer, SomeTop))_
-    val closeAndOpen = MemCommand(CloseAndOpen(queueChannelBuffer, SomeTop))_
-    val abort = MemCommand(Abort(queueName))_
+    val queueBuffer: Buf = Buf.Utf8(queueName)
+    val open = MemCommand(Open(queueBuffer, SomeTop))_
+    val closeAndOpen = MemCommand(CloseAndOpen(queueBuffer, SomeTop))_
+    val abort = MemCommand(Abort(Buf.Utf8(queueName)))_
 
     read(
       (response: Response) =>
@@ -555,20 +554,20 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
         _ => Deleted()
       })
 
-  def set(queueName: String, value: ChannelBuffer, expiry: Time = Time.epoch): Future[Response] = {
+  def set(queueName: String, value: Buf, expiry: Time = Time.epoch): Future[Response] = {
     val timeout = safeLongToInt(expiry.inMilliseconds)
     withClient[Response](client =>
-      client.put(queueName, List(value.toByteBuffer), timeout).map {
+      client.put(queueName, List(Buf.toByteBuffer(value)), timeout).map {
         _ => Stored()
       })
   }
 
-  def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[ChannelBuffer]] = {
+  def get(queueName: String, waitUpTo: Duration = 0.seconds): Future[Option[Buf]] = {
     val waitUpToMsec = safeLongToInt(waitUpTo.inMilliseconds)
-    withClient[Option[ChannelBuffer]](client =>
+    withClient[Option[Buf]](client =>
       client.get(queueName, 1, waitUpToMsec).map {
         case Seq() => None
-        case Seq(item: Item) => Some(ChannelBuffers.wrappedBuffer(item.data))
+        case Seq(item: Item) => Some(Buf.ByteBuffer(item.data))
         case _ => throw new IllegalArgumentException
       })
   }
@@ -593,14 +592,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
   def read(queueName: String): ReadHandle =
     read(
       (response: Seq[Item]) => response match {
-        case Seq(Item(data, id)) => {
-          val item = ChannelBuffers.copiedBuffer(
-            data.order(),
-            data.array(),
-            data.position(),
-            data.remaining())
-          Return(Some((item, id)))
-        }
+        case Seq(Item(data, id)) => Return(Some(Buf.ByteBuffer(data), id))
         case Seq() => Return(None)
         case _ => Throw(new IllegalArgumentException("invalid reply from kestrel"))
       },

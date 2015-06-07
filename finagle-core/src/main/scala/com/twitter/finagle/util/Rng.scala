@@ -1,9 +1,6 @@
 package com.twitter.finagle.util
 
-// When we can rely on JDK7, switch to the ThreadLocalRandom
-// distributed there.
-import scala.concurrent.forkjoin.ThreadLocalRandom
-//import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.ThreadLocalRandom
 
 /**
  * A random number generator. Java's divergent interfaces
@@ -17,6 +14,9 @@ trait Rng {
   def nextLong(n: Long): Long
 }
 
+/**
+ * See [[Rngs]] for Java compatible APIs.
+ */
 object Rng {
   def apply(): Rng = Rng(new java.util.Random)
   def apply(seed: Long): Rng = Rng(new java.util.Random(seed))
@@ -49,5 +49,10 @@ object Rng {
     def nextInt(): Int = ThreadLocalRandom.current().nextInt()
     def nextLong(n: Long): Long = ThreadLocalRandom.current().nextLong(n)
   }
+}
+
+/** Java compatible forwarders. */
+object Rngs {
+  val threadLocal: Rng = Rng.threadLocal
 }
 

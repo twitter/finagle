@@ -2,9 +2,8 @@ package com.twitter.finagle.kestrel.unit
 
 import com.twitter.concurrent.Broker
 import com.twitter.finagle.kestrel.{ReadHandle, ReadMessage}
-import com.twitter.io.Charsets
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.Await
-import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -14,7 +13,7 @@ class ReadHandleTest extends FunSuite {
   def msg_(i: Int) = {
     val ack = new Broker[Unit]
     val abort = new Broker[Unit]
-    (ack.recv, ReadMessage(ChannelBuffers.wrappedBuffer(i.toString.getBytes), ack.send(()), abort.send(())))
+    (ack.recv, ReadMessage(Buf.Utf8(i.toString), ack.send(()), abort.send(())))
   }
 
   def msg(i: Int) = { val (_, m) = msg_(i); m }
@@ -85,7 +84,9 @@ class ReadHandleTest extends FunSuite {
       0 until N foreach { i =>
         val recvd = (buffered.messages ?)
         assert(recvd.isDefined === true)
-        assert(Await.result(recvd).bytes.toString(Charsets.Utf8) === i.toString)
+        val Buf.Utf8(res) = Await.result(recvd).bytes
+
+        assert(res === i.toString)
       }
     }
   }

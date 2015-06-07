@@ -74,7 +74,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ): Service[mux.Request, mux.Response] = {
       val param.Stats(sr) = params[param.Stats]
       val param.Label(name) = params[param.Label]
-      new mux.ClientDispatcher(name, transport, sr)
+      new mux.ClientDispatcher(name, transport, sr.scope("mux"))
     }
   }
 

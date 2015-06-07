@@ -7,7 +7,6 @@ scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-core',
     '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
-    '3rdparty/jvm/com/google/guava',
     '3rdparty/jvm/com/twitter/common/zookeeper:client',
     '3rdparty/jvm/com/twitter/common/zookeeper:server-set',
     '3rdparty/jvm/com/twitter/common:service-thrift',

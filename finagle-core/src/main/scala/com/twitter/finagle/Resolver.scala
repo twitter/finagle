@@ -298,7 +298,7 @@ private class SyncInetResolver extends InetResolver {
     val (hosts, ports, weights) = whp.unzip3
     val hostports = hosts.zip(ports)
     val addrs = resolveHostPortsSeq(hostports)
-    val weighted = addrs.zip(weights) collect {
+    val weighted: Seq[SocketAddress] = addrs.zip(weights) collect {
       case (Seq(a, _*), w) => WeightedSocketAddress(a, w)
     }
 

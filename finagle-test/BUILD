@@ -1,6 +1,6 @@
 maven_layout()
 
-jar_library(name='finagle-test',
+target(name='finagle-test',
   dependencies=[
     'finagle/finagle-test/src/main/scala'
   ]

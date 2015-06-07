@@ -5,8 +5,41 @@
 6.x
 -----
 
+6.26.0
+------
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Define `WeightedSocketAddress` as a case class. Add
+    `WeightedSocketAddress.extract` method to extract weight.
+
+  * finagle-core: Constructing a new Balancer that can be injected into a Finagle client
+    was unnecessarily complex and non-uniform. We removed the legacy constructors around
+    defining the collection of endpoints and simplified the interface to `LoadBalancerFactory`.
+    Now, `com.twitter.finagle.loadbalancer.Balancers` defines the collection of balancer
+    constructors.
+
+  * finagle-core: Aperture can no longer be enabled via command line flags. Configuring
+    per-client settings globally is generally not a good idea and we're working to remove
+    these flags from Finagle. Use the constructors in `com.twitter.finagle.loadbalancer.Balancers`
+    to create an instance that can be injected into a client.
+
+  * finagle-exception: `com.twitter.finagle.exception.ExceptionReporter` is no longer used
+    as the default `com.twitter.finagle.util.ReporterFactory`.
+
+  * finagle-kestrel: Replace deprecated finagle-kestrel package with finagle-kestrelx.
+
+New Features
+~~~~~~~~~~~~
+  * finagle-httpx: Support nacks between Finagle Http clients and servers. When a server fails 
+    with retryable exceptions (exceptions wrapped by `Failure.rejected`), it sends back a "Nack" 
+    response, i.e. 503 Response code with a new "finagle-http-nack" header. This allows clients 
+    to safely retry failed requests, and keep connections open.
+
+
 6.25.0
-~~~~~~~
+------
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

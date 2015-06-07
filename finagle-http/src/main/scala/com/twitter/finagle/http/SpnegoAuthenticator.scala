@@ -8,6 +8,7 @@ import java.security.PrivilegedAction
 import javax.security.auth.Subject
 import javax.security.auth.login.LoginContext
 import org.ietf.jgss._
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{
   HttpRequest,
   HttpResponse,
@@ -101,9 +102,19 @@ object SpnegoAuthenticator {
      * blocking calls are wrapped in a FuturePool.
      */
     object JAAS {
-      // Oid for the KRB5 mechanism
+      /**
+       * Oid for the KRB5 mechanism  These come from
+       * http://www.oid-info.com/get/1.2.840.113554.1.2.2
+       *
+       */
       val Krb5Mechanism = new Oid("1.2.840.113554.1.2.2")
       val Krb5PrincipalType = new Oid("1.2.840.113554.1.2.2.1")
+      /**
+       * Oid for the Spnego mechanism  These come from
+       * http://www.oid-info.com/get/1.3.6.1.5.5.2
+       *
+       */
+      val SpnegoMechanism = new Oid("1.3.6.1.5.5.2")
     }
 
     trait JAAS {
@@ -172,15 +183,22 @@ object SpnegoAuthenticator {
         Negotiated(established, wwwAuthenticate)
       }
 
-      protected def createGSSContext(): GSSContext =
-        manager.createContext(
-          manager.createCredential(
-            selfPrincipal.orNull,
-            lifetime,
-            mechanism,
-            GSSCredential.ACCEPT_ONLY
-          )
+      protected def createGSSContext(): GSSContext = {
+        val cred = manager.createCredential(
+          selfPrincipal.orNull,
+          lifetime,
+          JAAS.SpnegoMechanism,
+          GSSCredential.ACCEPT_ONLY
         )
+        cred.add(
+          selfPrincipal.orNull,
+          lifetime,
+          lifetime,
+          JAAS.Krb5Mechanism,
+          GSSCredential.ACCEPT_ONLY
+        )
+        manager.createContext(cred)
+      }
     }
   }
 
@@ -299,7 +317,7 @@ object SpnegoAuthenticator {
 
     final def apply(req: Req, authed: Service[Authenticated[Req], Rsp]): Future[Rsp] =
       reqs.authorizationHeader(req).collect {
-        case AuthHeader(negotiation) => negotiation
+        case AuthHeader(negotiation) =>
           credSrc.load() flatMap {
             credSrc.accept(_, negotiation)
           } flatMap { negotiated =>
@@ -320,6 +338,7 @@ object SpnegoAuthenticator {
             }
           }
       } getOrElse {
+        log.debug("Request had no AuthHeader information.  Returning Unauthorized.")
         Future value unauthorized(req)
       }
   }

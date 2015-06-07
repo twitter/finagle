@@ -13,6 +13,8 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
+import com.twitter.util.registry.GlobalRegistry
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
 import scala.util.matching.Regex
@@ -60,10 +62,18 @@ class JsonExporter(
     mkRegex(regexesString)
   }
 
+  private[this] val registryLoaded = new AtomicBoolean(false)
+
   // thread-safety provided by synchronization on `this`
   private[this] var deltas: Option[CounterDeltas] = None
 
   def apply(request: Request): Future[Response] = {
+    if (registryLoaded.compareAndSet(false, true)) {
+      GlobalRegistry.get.put(
+        Seq("stats", "commons_metrics", "counters_latched"),
+        useCounterDeltas().toString)
+    }
+
     val response = Response()
     response.contentType = MediaType.Json
 

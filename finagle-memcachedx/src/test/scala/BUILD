@@ -4,6 +4,11 @@ EXTERNAL_SOURCES = [
 ]
 
 scala_library(name='external',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-memcachedx-testutils',
+    repo = artifactory,
+  ),
   dependencies=[
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',

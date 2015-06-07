@@ -107,6 +107,7 @@ class EndToEndTest extends FunSuite {
       client.close()
     }
 
+    if (!sys.props.contains("SKIP_FLAKY"))
     test("Streams %s: the server does not admit concurrent requests".format(what)) {
       val c = new WorkItContext()
       import c._
@@ -197,6 +198,10 @@ class EndToEndTest extends FunSuite {
 
       error !! EOF
       assert(Await.result(recvd?, 1.second) match {
+        // Flaky because ChannelEvent can be an ExceptionEvent of
+        // "java.io.IOException: Connection reset by peer". Uncomment the
+        // following line to observe.
+        // case e: ExceptionEvent => throw new Exception(e.getCause)
         case m: MessageEvent =>
           m.getMessage match {
             case res: HttpChunkTrailer => res.isLast

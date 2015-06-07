@@ -34,10 +34,15 @@ case class Record(
 
 sealed trait Annotation
 object Annotation {
+  case object WireSend                             extends Annotation
+  case object WireRecv                             extends Annotation
+  case class WireRecvError(error: String)          extends Annotation
   case class ClientSend()                          extends Annotation
   case class ClientRecv()                          extends Annotation
+  case class ClientRecvError(error: String)        extends Annotation
   case class ServerSend()                          extends Annotation
   case class ServerRecv()                          extends Annotation
+  case class ServerSendError(error: String)        extends Annotation
   case class ClientSendFragment()                  extends Annotation
   case class ClientRecvFragment()                  extends Annotation
   case class ServerSendFragment()                  extends Annotation

@@ -2,8 +2,13 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.base.Supplier
 import com.twitter.common.stats.{Percentile, Stats}
+import com.twitter.util.registry.GlobalRegistry
 
 class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
+  GlobalRegistry.get.put(
+    Seq("stats", "commons_stats", "counters_latched"),
+    "false")
+
   val repr = Stats.STATS_PROVIDER
 
   @volatile private[this] var stats = Map.empty[Seq[String], Stat]
@@ -11,17 +16,17 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
 
   private[this] def variableName(name: Seq[String]) = name mkString "_"
 
-  protected[this] def registerGauge(name: Seq[String], f: => Float) {
+  protected[this] def registerGauge(name: Seq[String], f: => Float): Unit = {
     Stats.STATS_PROVIDER.makeGauge(variableName(name), new Supplier[java.lang.Float] {
       def get = new java.lang.Float(f)
     })
   }
 
-  protected[this] def deregisterGauge(name: Seq[String]) {
+  protected[this] def deregisterGauge(name: Seq[String]): Unit = {
     // not implemented in commons
   }
 
-  def counter(name: String*) = {
+  def counter(name: String*): Counter = {
     if (!counters.contains(name)) synchronized {
       if (!counters.contains(name)) {
         val counter = new Counter {
@@ -36,7 +41,7 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
     counters(name)
   }
 
-  def stat(name: String*) = {
+  def stat(name: String*): Stat = {
     if (!stats.contains(name)) synchronized {
       if (!stats.contains(name)) {
         val stat = new Stat {
