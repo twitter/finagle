@@ -1,14 +1,13 @@
 package com.twitter.finagle.memcachedx.protocol.text.server
 
-import org.jboss.netty.channel._
-import org.jboss.netty.buffer.ChannelBuffer
-
 import com.twitter.finagle.memcachedx.protocol.ClientError
 import com.twitter.finagle.memcachedx.protocol.text._
 import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
 import com.twitter.finagle.memcachedx.util.ParserUtils
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.util.StateMachine
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel._
 
 class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDecoder with StateMachine {
 
@@ -26,12 +25,12 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
   def decode(ctx: ChannelHandlerContext, channel: Channel, buffer: ChannelBuffer): Decoding = {
     state match {
       case AwaitingCommand() =>
-        decodeLine(buffer, needsData(_)) { tokens =>
-          Tokens(tokens.map { ChannelBufferBuf(_) })
+        decodeLine(buffer, needsData) { tokens =>
+          Tokens(tokens.map { ChannelBufferBuf.Owned(_) })
         }
       case AwaitingData(tokens, bytesNeeded) =>
         decodeData(bytesNeeded, buffer) { data =>
-          TokensWithData(tokens.map { ChannelBufferBuf(_) }, ChannelBufferBuf(data))
+          TokensWithData(tokens.map { ChannelBufferBuf.Owned(_) }, ChannelBufferBuf.Owned(data))
         }
     }
   }
@@ -40,13 +39,13 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
     state = AwaitingData(tokens, bytesNeeded)
   }
 
-  private[this] def needsData(tokens: Seq[ChannelBuffer]) = {
+  private[this] def needsData(tokens: Seq[ChannelBuffer]): Int = {
     val commandName = tokens.head
     if (storageCommands.contains(commandName)) {
       validateStorageCommand(tokens)
       val bytesNeeded = tokens(4).toInt
-      Some(bytesNeeded)
-    } else None
+      bytesNeeded
+    } else -1
   }
 
   private[this] def validateStorageCommand(tokens: Seq[ChannelBuffer]) = {

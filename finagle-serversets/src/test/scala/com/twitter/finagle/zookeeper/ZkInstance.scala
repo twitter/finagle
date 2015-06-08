@@ -29,12 +29,11 @@ class ZkInstance {
     val txn = new FileTxnSnapLog(createTempDir(), createTempDir())
     val zkdb = new ZKDatabase(txn)
     zookeeperServer = new ZooKeeperServer(
-      txn,
-      ZooKeeperServer.DEFAULT_TICK_TIME,
-      100, 100,  // min/max sesssion timeouts in milliseconds
-      new ZooKeeperServer.BasicDataTreeBuilder,
-      zkdb
-      )
+      createTempDir(),
+      createTempDir(),
+      ZooKeeperServer.DEFAULT_TICK_TIME)
+    zookeeperServer.setMaxSessionTimeout(100)
+    zookeeperServer.setMinSessionTimeout(100)
     connectionFactory = ServerCnxnFactory(InetAddress.getLoopbackAddress)
     connectionFactory.startup(zookeeperServer)
     zookeeperClient = new ZooKeeperClient(

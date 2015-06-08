@@ -15,7 +15,6 @@ import com.twitter.zk.ServerCnxnFactory
 import java.io.ByteArrayOutputStream
 import java.net.{InetAddress, InetSocketAddress}
 import org.apache.zookeeper.server.ZooKeeperServer
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
@@ -44,8 +43,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     // start zookeeper server and create zookeeper client
     zookeeperServer = new ZooKeeperServer(
-      new FileTxnSnapLog(createTempDir(), createTempDir()),
-      new ZooKeeperServer.BasicDataTreeBuilder)
+      createTempDir(),
+      createTempDir(),
+      ZooKeeperServer.DEFAULT_TICK_TIME)
     connectionFactory = ServerCnxnFactory(loopback)
     connectionFactory.startup(zookeeperServer)
     zookeeperServerPort = zookeeperServer.getClientPort

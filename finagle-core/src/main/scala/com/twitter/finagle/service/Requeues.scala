@@ -9,16 +9,16 @@ import com.twitter.util.Future
 private[finagle] object Requeues {
   val role = Stack.Role("Requeues")
 
+  /** Cost determines the relative cost of a reissue vs. an initial issue. */
+  val Cost = 5
+
+  /** The upper bound on service acquisition attempts */
+  val Effort = 25
+
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = Requeues.role
       val description = "Requeue requests that have been rejected at the service application level"
-
-      /** Cost determines the relative cost of a reissue vs. an initial issue. */
-      private[this] val Cost = 5
-
-      /** The upper bound on service acquisition attempts */
-      private[this] val Effort = 25
 
       def make(stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(sr0) = stats

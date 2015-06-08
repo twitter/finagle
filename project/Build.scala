@@ -4,7 +4,7 @@ import Tests._
 import com.twitter.scrooge.ScroogeSBT
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
-import pl.project13.scala.sbt.SbtJmh.jmhSettings
+import pl.project13.scala.sbt.JmhPlugin
 import sbtunidoc.Plugin.UnidocKeys._
 import sbtunidoc.Plugin.{ScalaUnidoc, unidocSettings}
 
@@ -542,13 +542,14 @@ object Finagle extends Build {
     base = file("finagle-benchmark"),
     settings = Project.defaultSettings ++
       ScroogeSBT.newSettings ++
-      sharedSettings ++ jmhSettings
-  ).settings(
+      sharedSettings ++ JmhPlugin.projectSettings
+  )
+  .enablePlugins(JmhPlugin)
+  .settings(
     name := "finagle-benchmark",
     libraryDependencies ++= Seq(
       util("codec"),
       "com.google.caliper" % "caliper" % "0.5-rc1",
-      "org.openjdk.jmh" % "jmh-core" % "1.6.1",
       "com.twitter.common" % "metrics-data-sample" % "0.0.1"
     )
   ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin, finagleMemcached)

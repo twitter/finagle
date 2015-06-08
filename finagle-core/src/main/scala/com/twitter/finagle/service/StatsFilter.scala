@@ -4,8 +4,8 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.{
   MultiCategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
+import com.twitter.jsr166e.LongAdder
 import com.twitter.util.{Future, Stopwatch, Throw, Return, Time, Duration}
-import java.util.concurrent.atomic.AtomicInteger
 
 object StatsFilter {
   val role = Stack.Role("RequestStats")
@@ -21,7 +21,7 @@ object StatsFilter {
         val param.Stats(statsReceiver) = _stats
         val param.ExceptionStatsHandler(handler) = _exceptions
         if (statsReceiver.isNull) next
-        else new StatsFilter(statsReceiver, handler) andThen next
+        else new StatsFilter(statsReceiver, handler).andThen(next)
       }
     }
 
@@ -49,19 +49,19 @@ class StatsFilter[Req, Rep](
 {
   def this(statsReceiver: StatsReceiver) = this(statsReceiver, StatsFilter.DefaultExceptions)
 
-  private[this] val outstandingRequestCount = new AtomicInteger(0)
+  private[this] val outstandingRequestCount = new LongAdder()
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
   private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
-  private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.get }
+  private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.sum() }
   private[this] val outstandingRequestCountGauge =
-    statsReceiver.addGauge("pending") { outstandingRequestCount.get }
+    statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
   private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
   private[this] val budgetTimeStat = statsReceiver.stat("deadline_budget_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val elapsed = Stopwatch.start()
-    
+
     Contexts.broadcast.get(Deadline) match {
       case None =>
       case Some(Deadline(timestamp, deadline)) =>
@@ -70,9 +70,9 @@ class StatsFilter[Req, Rep](
         budgetTimeStat.add(((deadline-now) max Duration.Zero).inMilliseconds)
     }
 
-    outstandingRequestCount.incrementAndGet()
-    service(request) respond { response =>
-      outstandingRequestCount.decrementAndGet()
+    outstandingRequestCount.increment()
+    service(request).respond { response =>
+      outstandingRequestCount.decrement()
       response match {
         case Throw(BackupRequestLost) | Throw(WriteException(BackupRequestLost)) =>
           // We blackhole this request. It doesn't count for anything.

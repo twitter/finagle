@@ -65,10 +65,8 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   /**
    * Determines whether this service is available (can accept requests
    * with a reasonable likelihood of success).
-   *
-   * TODO(CSL-1336): Finalize isAvailable
    */
-  def isAvailable: Boolean = status == Status.Open
+  final def isAvailable: Boolean = status == Status.Open
 }
 
 /**
@@ -124,13 +122,6 @@ abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
    */
   override def status = self.status
 
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceProxy.status]] and [[ServiceProxy.isAvailable]] must be
-   * overridden together, pending CSL-1336.
-   */
-  override def isAvailable = self.isAvailable
   override def toString = self.toString
 }
 
@@ -163,8 +154,7 @@ abstract class ServiceFactory[-Req, +Rep]
           f(service) onFailure { _ => service.close() }
         }
       def close(deadline: Time) = self.close(deadline)
-      // TODO(CSL-1336): Finalize isAvailable
-      override def isAvailable = self.isAvailable
+      override def status: Status = self.status
       override def toString() = self.toString()
     }
 
@@ -186,8 +176,7 @@ abstract class ServiceFactory[-Req, +Rep]
    */
   def status: Status = Status.Open
 
-  // TODO(CSL-1336): Finalize isAvailable
-  def isAvailable: Boolean = status == Status.Open
+  final def isAvailable: Boolean = status == Status.Open
 }
 
 object ServiceFactory {
@@ -221,14 +210,6 @@ trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Prox
    * be overridden together, pending CSL-1336.
    */
   override def status = self.status
-
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceFactoryProxy.status]] and [[ServiceFactoryProxy.isAvailable]] must
-   * be overridden together, pending CSL-1336.
-   */
-  override def isAvailable = self.isAvailable
 }
 
 /**
@@ -318,8 +299,6 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
 
   override def close(deadline: Time): Future[Unit] = factory.close(deadline)
   override def status: Status = factory.status
-  // TODO(CSL-1336): Finalize isAvailable
-  override def isAvailable: Boolean = factory.isAvailable
 }
 
 /**

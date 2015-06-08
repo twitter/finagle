@@ -1,11 +1,8 @@
 package com.twitter.finagle.memcachedx.util
 
-import java.util.regex.Pattern
-
-import org.jboss.netty.buffer.ChannelBuffer
-
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
+import java.util.regex.Pattern
+import org.jboss.netty.buffer.ChannelBuffer
 
 object ParserUtils {
 
