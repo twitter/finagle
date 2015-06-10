@@ -119,8 +119,9 @@ private[finagle] case class ThriftClientPreparer(
     clientId: Option[ClientId] = None,
     useCallerSeqIds: Boolean = false) {
 
-  def prepareService(service: Service[ThriftClientRequest, Array[Byte]])
-    : Future[Service[ThriftClientRequest, Array[Byte]]] = {
+  def prepareService(
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
     // Attempt to upgrade the protocol the first time around by
     // sending a magic method invocation.
     val buffer = new OutputBuffer(protocolFactory)

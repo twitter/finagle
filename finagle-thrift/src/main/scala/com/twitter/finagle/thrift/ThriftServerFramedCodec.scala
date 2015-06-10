@@ -1,6 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
+import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.io.Buf
@@ -62,9 +63,8 @@ class ThriftServerFramedCodec(
 }
 
 private[finagle] case class ThriftServerPreparer(
-  protocolFactory: TProtocolFactory,
-  serviceName: String) {
-
+    protocolFactory: TProtocolFactory,
+    serviceName: String) {
   private[this] val uncaughtExceptionsFilter =
     new UncaughtAppExceptionFilter(protocolFactory)
 
@@ -135,12 +135,11 @@ private[finagle] class UncaughtAppExceptionFilter(protocolFactory: TProtocolFact
   def apply(
     request: Array[Byte],
     service: Service[Array[Byte], Array[Byte]]
-  ): Future[Array[Byte]] = {
+  ): Future[Array[Byte]] =
     service(request).handle {
       case e if !e.isInstanceOf[TException] =>
         val buf = Buf.ByteArray.Owned(request)
         val msg = writeExceptionMessage(buf, e, protocolFactory)
         Buf.ByteArray.Owned.extract(msg)
     }
-  }
 }

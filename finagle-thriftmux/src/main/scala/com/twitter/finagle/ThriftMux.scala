@@ -5,6 +5,7 @@ import com.twitter.finagle.client.{StackClient, StackBasedClient}
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
+import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.tracing.Trace
@@ -57,7 +58,7 @@ object ThriftMux
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux servers.
    */
-  private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] = {
+  private[twitter] val BaseServerStack: Stack[ServiceFactory[mux.Request, mux.Response]] =
     // NOTE: ideally this would not use the `prepConn` role, but it's conveniently
     // located in the right location of the stack and is defaulted to a no-op.
     // We would like this located anywhere before the StatsFilter so that success
@@ -65,7 +66,6 @@ object ThriftMux
     // byte arrays. see CSL-1351
     ThriftMuxUtil.protocolRecorder +:
       Mux.server.stack.replace(StackServer.Role.preparer, Server.ExnHandler)
-  }
 
   private[this] def recordRpc(buffer: Array[Byte]): Unit = try {
     val inputTransport = new TMemoryInputTransport(buffer)
@@ -278,15 +278,16 @@ object ThriftMux
       def apply(
         request: mux.Request,
         service: Service[mux.Request, mux.Response]
-      ): Future[mux.Response] = {
-        service(request).handle {
+      ): Future[mux.Response] =
+        service(request).rescue {
+          case e@RetryPolicy.RetryableWriteException(_) =>
+            Future.exception(e)
           case e if !e.isInstanceOf[TException] =>
             val msg = UncaughtAppExceptionFilter.writeExceptionMessage(
               request.body, e, protocolFactory)
-            mux.Response(msg)
+            Future.value(mux.Response(msg))
         }
       }
-    }
 
     private[ThriftMux] val ExnHandler =
       new Stack.Module1[Thrift.param.ProtocolFactory, ServiceFactory[mux.Request, mux.Response]]
