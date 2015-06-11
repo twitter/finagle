@@ -1,7 +1,9 @@
 package com.twitter.finagle.http
 
-import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, DefaultHttpResponse, HttpMethod,
-  HttpResponseStatus, HttpVersion}
+import com.twitter.conversions.time._
+import com.twitter.io.Buf
+import com.twitter.util.Await
+import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -20,6 +22,14 @@ class ResponseTest extends FunSuite {
       assert(response.status === HttpResponseStatus.OK)
       assert("""Response\("HTTP/1.1 200 OK"\)""".r.findFirstIn(response.toString) === Some(response.toString))
     }
+  }
+
+  test("preserve stream in construction") {
+    val res = Response()
+    res.writer.write(Buf.Utf8("12")) before res.writer.close()
+    val f = Response(res).reader.read(1)
+    val g = Response(res).reader.read(1)
+    Await.result(f.join(g), 1.second) == (Buf.Utf8("1"), Buf.Utf8("2"))
   }
 
   test("encode") {
