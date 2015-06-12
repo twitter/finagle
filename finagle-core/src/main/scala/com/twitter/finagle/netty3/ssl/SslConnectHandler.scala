@@ -1,4 +1,4 @@
-package com.twitter.finagle.ssl
+package com.twitter.finagle.netty3.ssl
 
 import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.{Ok, Error, Cancelled}

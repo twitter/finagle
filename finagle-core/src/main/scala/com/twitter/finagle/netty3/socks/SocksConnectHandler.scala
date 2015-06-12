@@ -1,20 +1,12 @@
-package com.twitter.finagle.socks
-
-import java.net.{Inet4Address, Inet6Address, InetSocketAddress, SocketAddress}
-import java.util.concurrent.atomic.AtomicReference
-
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel._
+package com.twitter.finagle.netty3.socks
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
+import com.twitter.finagle.socks.{AuthenticationSetting, Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.io.Charsets
-
-sealed abstract class AuthenticationSetting(val typeByte: Byte)
-
-object Unauthenticated extends AuthenticationSetting(0x00)
-
-case class UsernamePassAuthenticationSetting(username: String, password: String)
-    extends AuthenticationSetting(0x02)
+import java.net.{Inet4Address, Inet6Address, InetSocketAddress, SocketAddress}
+import java.util.concurrent.atomic.AtomicReference
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.channel._
 
 object SocksConnectHandler {
   // Throwables used as `cause` fields for ConnectionFailedExceptions.

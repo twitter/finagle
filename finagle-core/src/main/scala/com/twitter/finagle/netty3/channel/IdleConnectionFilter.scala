@@ -1,4 +1,4 @@
-package com.twitter.finagle.channel
+package com.twitter.finagle.netty3.channel
 
 import com.twitter.collection.BucketGenerationalQueue
 import com.twitter.finagle.service.FailedService
@@ -21,7 +21,7 @@ object IdleConnectionFilter {
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
-   * [[com.twitter.finagle.channel.IdleConnectionFilter]].
+   * [[com.twitter.finagle.netty3.channel.IdleConnectionFilter]].
    */
   case class Param(thres: Option[OpenConnectionsThresholds]) {
     def mk(): (Param, Stack.Param[Param]) =
@@ -32,7 +32,8 @@ object IdleConnectionFilter {
   }
 
   /**
-   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.channel.IdleConnectionFilter]].
+   * Creates a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.netty3.channel.IdleConnectionFilter]].
    */
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[Param, param.Stats, ServiceFactory[Req, Rep]] {

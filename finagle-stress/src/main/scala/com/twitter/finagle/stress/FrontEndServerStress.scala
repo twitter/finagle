@@ -2,7 +2,7 @@ package com.twitter.finagle.stress
 
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.channel.OpenConnectionsThresholds
+import com.twitter.finagle.netty3.channel.OpenConnectionsThresholds
 import com.twitter.finagle.Service
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._

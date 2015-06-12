@@ -1,4 +1,4 @@
-package com.twitter.finagle.ssl
+package com.twitter.finagle.netty3.ssl
 
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

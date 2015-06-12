@@ -1,4 +1,4 @@
-package com.twitter.finagle.channel
+package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.{ClientConnection, Service, ServiceFactory}
 import com.twitter.util.TimeConversions._

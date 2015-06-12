@@ -1,17 +1,18 @@
-package com.twitter.finagle.socks
+package com.twitter.finagle.netty3.socks
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import com.twitter.finagle.ConnectionFailedException
+import com.twitter.finagle.socks.UsernamePassAuthenticationSetting
+import java.net.{SocketAddress, InetAddress, InetSocketAddress}
+import java.util.Arrays
+import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.channel._
 import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when, atLeastOnce}
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
-import java.util.Arrays
-import org.jboss.netty.channel._
-import java.net.{SocketAddress, InetAddress, InetSocketAddress}
-import com.twitter.finagle.ConnectionFailedException
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class SocksConnectHandlerTest extends FunSuite with MockitoSugar {

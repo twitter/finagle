@@ -1,4 +1,4 @@
-package com.twitter.finagle.channel
+package com.twitter.finagle.netty3.channel
 
 /**
  * Dispatches channel events to a {{com.twitter.concurrent.Broker}}.

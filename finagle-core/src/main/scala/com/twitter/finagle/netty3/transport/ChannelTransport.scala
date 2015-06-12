@@ -1,6 +1,7 @@
-package com.twitter.finagle.transport
+package com.twitter.finagle.netty3.transport
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledWriteException, ChannelClosedException, ChannelException, Status}
 import com.twitter.util.{Future, NonFatal, Promise, Return, Time}
 import java.net.SocketAddress

@@ -1,16 +1,15 @@
 package com.twitter.finagle.spdy
 
+import com.twitter.conversions.storage._
+import com.twitter.finagle._
+import com.twitter.finagle.netty3.transport.ChannelTransport
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Closable, StorageUnit}
 import java.util.concurrent.atomic.AtomicInteger
-
 import org.jboss.netty.channel.{Channel, ChannelPipelineFactory, Channels}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 import org.jboss.netty.handler.codec.spdy._
-
-import com.twitter.conversions.storage._
-import com.twitter.finagle._
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
-import com.twitter.util.{Closable, StorageUnit}
 
 class AnnotateSpdyStreamId extends SimpleFilter[HttpRequest, HttpResponse] {
   def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {

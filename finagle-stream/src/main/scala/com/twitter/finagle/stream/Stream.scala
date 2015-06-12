@@ -1,7 +1,8 @@
 package com.twitter.finagle.stream
 
+import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{Transport, ChannelTransport}
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{
   Codec, CodecFactory, Service, ServiceFactory, ServiceProxy, TooManyConcurrentRequestsException}
 import com.twitter.util.{Future, Promise, Time, Closable}

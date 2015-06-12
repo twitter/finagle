@@ -1,4 +1,4 @@
-package com.twitter.finagle.channel
+package com.twitter.finagle.netty3.channel
 
 /**
  * A channel stats handler that keeps per-connection request

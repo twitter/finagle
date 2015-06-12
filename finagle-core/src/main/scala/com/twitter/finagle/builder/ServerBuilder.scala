@@ -1,8 +1,8 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle.{Server => FinagleServer, _}
-import com.twitter.finagle.channel.IdleConnectionFilter
-import com.twitter.finagle.channel.OpenConnectionsThresholds
+import com.twitter.finagle.netty3.channel.IdleConnectionFilter
+import com.twitter.finagle.netty3.channel.OpenConnectionsThresholds
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.ProtocolLibrary

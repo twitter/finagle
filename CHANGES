@@ -10,6 +10,9 @@
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+  * finagle-core: Moved netty3 specific things into a netty3 namespace. For
+    these symbols, the namespace translation follows this pattern:
+    c.t.f.MODULE._ => c.t.f.netty3.MODULE._.
 
   * finagle-core: Define `WeightedSocketAddress` as a case class. Add
     `WeightedSocketAddress.extract` method to extract weight.

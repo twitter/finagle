@@ -1,12 +1,13 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
+import com.twitter.finagle.netty3.channel._
+import com.twitter.finagle.netty3.ssl.SslShutdownHandler
+import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.server.{Listener, ServerRegistry}
-import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
+import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
 import java.net.SocketAddress

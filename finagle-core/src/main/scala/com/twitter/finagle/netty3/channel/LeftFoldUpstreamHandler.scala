@@ -1,4 +1,4 @@
-package com.twitter.finagle.channel
+package com.twitter.finagle.netty3.channel
 
 /**
  * Introduces a "foldable" channel handler for easy state machine

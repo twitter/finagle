@@ -1,4 +1,4 @@
-package com.twitter.finagle.transport
+package com.twitter.finagle.netty3.transport
 
 import com.twitter.finagle.ChannelException
 import com.twitter.util.{Return, Throw, Await}
