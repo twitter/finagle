@@ -144,11 +144,12 @@ abstract class LoadBalancerFactory {
  * clients:
  *
  * {{
- *    val balancer = Balancers.newAperture(...)
+ *    val balancer = Balancers.aperture(...)
  *    Protocol.configured(LoadBalancerFactory.Param(balancer))
  * }}
  */
-object defaultBalancer extends GlobalFlag("heap", "Default load balancer")
+@deprecated("Use com.twitter.finagle.loadbalancer.Balancers per-client.", "2015-06-15")
+object defaultBalancer extends GlobalFlag("choice", "Default load balancer")
 
 package exp {
   object loadMetric extends GlobalFlag("leastReq",
@@ -156,22 +157,12 @@ package exp {
 }
 
 object DefaultBalancerFactory extends LoadBalancerFactory {
-  import com.twitter.finagle.util.parsers._
-  import com.twitter.conversions.time._
-
   private val log = Logger.getLogger(getClass.getName)
 
-  /**
-   * Instantiate P2C with a load metric read from the `exp.loadMetric` flag.
-   */
   private def p2c(): LoadBalancerFactory =
     exp.loadMetric() match {
-      case "ewma" =>
-        log.info("Using load metric ewma")
-        Balancers.p2cPeakEwma()
-      case _ =>
-        log.info("Using load metric leastReq")
-        Balancers.p2c()
+      case "ewma" => Balancers.p2cPeakEwma()
+      case _ => Balancers.p2c()
     }
 
   private val underlying =
@@ -179,8 +170,8 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
       case "heap" => Balancers.heap()
       case "choice" => p2c()
       case x =>
-        log.warning(s"""Invalid load balancer ${x}, using "heap" balancer.""")
-        Balancers.heap()
+        log.warning(s"""Invalid load balancer ${x}, using "choice" balancer.""")
+        p2c()
     }
 
   def newBalancer[Req, Rep](
