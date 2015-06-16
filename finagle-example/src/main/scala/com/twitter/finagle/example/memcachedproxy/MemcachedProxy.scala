@@ -1,7 +1,7 @@
 package com.twitter.finagle.example.memcachedproxy
 
-import com.twitter.finagle.memcached.protocol.text.Memcached
-import com.twitter.finagle.memcached.protocol.{Command, Response}
+import com.twitter.finagle.memcachedx.protocol.text.Memcached
+import com.twitter.finagle.memcachedx.protocol.{Command, Response}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{Server, ClientBuilder, ServerBuilder}
 import java.net.{ConnectException, Socket, InetSocketAddress}

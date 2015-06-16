@@ -35,7 +35,6 @@ private[finagle] object ChannelBufferUtils {
   private val Byte0 = '0'.toByte
 
   class RichChannelBuffer(val buffer: ChannelBuffer) extends AnyVal {
-
     /**
      * Converts `buffer` to a positive integer.
      *

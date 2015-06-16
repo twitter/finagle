@@ -5,6 +5,11 @@
 6.x
 -----
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-memcached: Deprecated in favor of finagle-memcachedx and now removed.
+
 6.26.0
 ------
 

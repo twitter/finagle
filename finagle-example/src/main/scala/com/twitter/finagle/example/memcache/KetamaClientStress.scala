@@ -4,17 +4,18 @@ import com.twitter.app.Flag
 import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
-import com.twitter.finagle.memcached
+import com.twitter.finagle.memcachedx
 import com.twitter.finagle.cacheresolver.{CacheNode, CachePoolCluster}
-import com.twitter.finagle.memcached.protocol.text.Memcached
-import com.twitter.finagle.memcached.replication._
-import com.twitter.finagle.memcached.PartitionedClient
+import com.twitter.finagle.memcachedx.protocol.text.Memcached
+import com.twitter.finagle.memcachedx.replication._
+import com.twitter.finagle.memcachedx.PartitionedClient
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.Buf
 import com.twitter.ostrich.admin.{AdminHttpService, RuntimeEnvironment}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicLong
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import scala.collection.mutable
 
 object KetamaClientStress extends App {
 
@@ -85,9 +86,11 @@ object KetamaClientStress extends App {
     println(builder)
 
     // the test keys/values
-    val keyValueSet: Seq[(String, ChannelBuffer)] = (1 to config.numkeys()).map { _ =>
-      (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes)) }
-    def nextKeyValue: (String, ChannelBuffer) = keyValueSet((load_count.getAndIncrement()%config.numkeys()).toInt)
+    val keyValueSet: Seq[(String, Buf)] = List.fill(config.numkeys()) {
+      (randomString(config.keysize()), Buf.Utf8(randomString(config.valuesize())))
+    }
+
+    def nextKeyValue: (String, Buf) = keyValueSet((load_count.getAndIncrement()%config.numkeys()).toInt)
 
     // local admin service
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
@@ -101,7 +104,7 @@ object KetamaClientStress extends App {
     }
 
     if (replicaPool == null) {
-      val ketamaClient = memcached.KetamaClientBuilder()
+      val ketamaClient = memcachedx.KetamaClientBuilder()
           .clientBuilder(builder)
           .cachePoolCluster(primaryPool)
           .failureAccrualParams(Int.MaxValue, Duration.Top)
@@ -139,7 +142,7 @@ object KetamaClientStress extends App {
           }
         case "getsThenCas" =>
           keyValueSet.map { case (k, v) => ketamaClient.set(k, v)() }
-          val casMap: scala.collection.mutable.Map[String, (ChannelBuffer, ChannelBuffer)] = scala.collection.mutable.Map()
+          val casMap = mutable.Map.empty[String, (Buf, Buf)]
 
           () => {
             val (key, value) = nextKeyValue
@@ -152,10 +155,8 @@ object KetamaClientStress extends App {
             }
           }
         case "add" =>
-          val (key, value) = (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes))
-          () => {
-            ketamaClient.add(key+load_count.getAndIncrement().toString, value)
-          }
+          val (key, value) = (randomString(config.keysize()), Buf.Utf8(randomString(config.valuesize())))
+          () => ketamaClient.add(key+load_count.getAndIncrement().toString, value)
         case "replace" =>
           keyValueSet foreach { case (k, v) => ketamaClient.set(k, v)() }
           () => {
@@ -225,7 +226,7 @@ object KetamaClientStress extends App {
           }
         case "getsAllThenCas" =>
           keyValueSet.map { case (k, v) => replicationClient.set(k, v)() }
-          val casMap: scala.collection.mutable.Map[String, ReplicationStatus[Option[(ChannelBuffer, ReplicaCasUnique)]]] = scala.collection.mutable.Map()
+          val casMap: scala.collection.mutable.Map[String, ReplicationStatus[Option[(Buf, ReplicaCasUnique)]]] = scala.collection.mutable.Map()
 
           () => {
             val (key, value) = nextKeyValue
@@ -245,7 +246,7 @@ object KetamaClientStress extends App {
             }
           }
         case "add" =>
-          val (key, value) = (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes))
+          val (key, value) = (randomString(config.keysize()), Buf.Utf8(randomString(config.valuesize())))
           () => {
             replicationClient.add(key+load_count.getAndIncrement().toString, value)
           }

@@ -4,15 +4,15 @@ import com.twitter.app.Flag
 import com.twitter.app.App
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcached
-import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcachedx
+import com.twitter.finagle.memcachedx.protocol.text.Memcached
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.io.Buf
 import com.twitter.ostrich.admin.{RuntimeEnvironment, AdminHttpService}
 import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 
 class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep]) extends Service[Req, Rep] {
@@ -38,7 +38,7 @@ object MemcacheStress extends App {
   }
   val count = new AtomicLong
 
-  def proc(client: memcached.Client, key: String, value: ChannelBuffer) {
+  def proc(client: memcachedx.Client, key: String, value: Buf) {
     client.set(key, value) ensure {
       count.incrementAndGet()
       proc(client, key, value)
@@ -66,7 +66,7 @@ object MemcacheStress extends App {
     else                 com.twitter.finagle.tracing.Trace.disable()
 
     val key = "x" * config.keysize()
-    val value = ChannelBuffers.wrappedBuffer(("y" * config.valuesize()).getBytes)
+    val value = Buf.Utf8("y" * config.valuesize())
 
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
     val adminService = new AdminHttpService(2000, 100/*backlog*/, runtime)
@@ -78,7 +78,7 @@ object MemcacheStress extends App {
 
     for (_ <- 0 until config.concurrency()) {
       val svc = new PersistentService(factory)
-      val client = memcached.Client(svc)
+      val client = memcachedx.Client(svc)
       proc(client, key, value)
     }
 
