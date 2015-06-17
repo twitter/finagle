@@ -8,12 +8,17 @@ import com.twitter.util.{Var, Time, Future, Await}
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class BalancerStackModuleTest extends FunSuite with StringClient {
+class BalancerStackModuleTest
+  extends FunSuite
+  with StringClient
+  with Eventually
+  with IntegrationPatience {
   type WeightedFactory[Req, Rep] = (ServiceFactory[Req, Rep], Double)
 
   trait PerHostFlagCtx extends App {
@@ -52,11 +57,15 @@ class BalancerStackModuleTest extends FunSuite with StringClient {
       perHostStats.let(true) {
         client.configured(LoadBalancerFactory.HostStats(sr))
           .newService(port)
-        assert(sr.self.gauges(perHostStatKey).apply == 1.0)
+        eventually {
+          assert(sr.self.gauges(perHostStatKey).apply == 1.0)
+        }
 
         client.configured(LoadBalancerFactory.HostStats(sr1))
           .newService(port)
-        assert(sr1.gauges(perHostStatKey).apply == 1.0)
+        eventually {
+          assert(sr1.gauges(perHostStatKey).apply == 1.0)
+        }
       }
     }
   }
