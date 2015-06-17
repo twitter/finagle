@@ -2,6 +2,8 @@
   (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
   as it is included in Finagle's user's guide.
 
+Note that ``RB_ID=#`` correspond to associated messages in commits.
+
 6.x
 -----
 
@@ -13,43 +15,45 @@ Deprecations
 6.26.0
 ------
 
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
-  * finagle-core: Moved netty3 specific things into a netty3 namespace. For
-    these symbols, the namespace translation follows this pattern:
-    c.t.f.MODULE._ => c.t.f.netty3.MODULE._.
-
-  * finagle-core: Define `WeightedSocketAddress` as a case class. Add
-    `WeightedSocketAddress.extract` method to extract weight.
-
-  * finagle-core: Constructing a new Balancer that can be injected into a Finagle client
-    was unnecessarily complex and non-uniform. We removed the legacy constructors around
-    defining the collection of endpoints and simplified the interface to `LoadBalancerFactory`.
-    Now, `com.twitter.finagle.loadbalancer.Balancers` defines the collection of balancer
-    constructors.
-
-  * finagle-core: Aperture can no longer be enabled via command line flags. Configuring
-    per-client settings globally is generally not a good idea and we're working to remove
-    these flags from Finagle. Use the constructors in `com.twitter.finagle.loadbalancer.Balancers`
-    to create an instance that can be injected into a client.
-
-  * finagle-core: The default load balancer has changed to p2c from heap.
-
-  * finagle-core: `Service.isAvailable` and `ServiceFactory.isAvailable` is finalized.
-    `Service.status` and `ServiceFactory.status` supersedes `isAvailable` usage since 6.24.0 release.
-
-  * finagle-exception: `com.twitter.finagle.exception.ExceptionReporter` is no longer used
-    as the default `com.twitter.finagle.util.ReporterFactory`.
-
-  * finagle-kestrel: Replace deprecated finagle-kestrel package with finagle-kestrelx.
-
 New Features
 ~~~~~~~~~~~~
 
   * finagle-httpx: Support nacks between Finagle Http clients and servers. When a server fails
     with retryable exceptions (exceptions wrapped by `Failure.rejected`), it sends back a "Nack"
     response, i.e. 503 Response code with a new "finagle-http-nack" header. This allows clients
-    to safely retry failed requests, and keep connections open.
+    to safely retry failed requests, and keep connections open. ``RB_ID=670046``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+  * finagle-core: Moved netty3 specific things into a netty3 namespace. For
+    these symbols, the namespace translation follows this pattern:
+    `c.t.f.$MODULE._ => c.t.f.netty3.$MODULE._.` ``RB_ID=691746``
+
+  * finagle-core: Define `WeightedSocketAddress` as a case class. Add
+    `WeightedSocketAddress.extract` method to extract weight. ``RB_ID=614228``
+
+  * finagle-core: Constructing a new Balancer that can be injected into a Finagle client
+    was unnecessarily complex and non-uniform. We removed the legacy constructors around
+    defining the collection of endpoints and simplified the interface to `LoadBalancerFactory`.
+    Now, `com.twitter.finagle.loadbalancer.Balancers` defines the collection of balancer
+    constructors. ``RB_ID=660730``
+
+  * finagle-core: Aperture can no longer be enabled via command line flags. Configuring
+    per-client settings globally is generally not a good idea and we're working to remove
+    these flags from Finagle. Use the constructors in `com.twitter.finagle.loadbalancer.Balancers`
+    to create an instance that can be injected into a client. ``RB_ID=663194``
+
+  * finagle-core: The default load balancer has changed to p2c from heap. ``RB_ID=693450``
+
+  * finagle-core: `Service.isAvailable` and `ServiceFactory.isAvailable` is finalized.
+    `Service.status` and `ServiceFactory.status` supersedes `isAvailable` usage since 6.24.0 release.
+    ``RB_ID=678588``
+
+  * finagle-exception: `com.twitter.finagle.exception.ExceptionReporter` is no longer used
+    as the default `com.twitter.finagle.util.ReporterFactory`. ``RB_ID=674646``
+
+  * finagle-kestrel: Replace deprecated finagle-kestrel package with finagle-kestrelx.
+    ``RB_ID=667920``
 
 
 6.25.0
