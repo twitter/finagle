@@ -6,22 +6,40 @@ import com.twitter.finagle.stats.{
   MultiCategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
 import com.twitter.jsr166e.LongAdder
 import com.twitter.util.{Future, Stopwatch, Throw, Return, Time, Duration}
+import java.util.concurrent.TimeUnit
 
 object StatsFilter {
   val role = Stack.Role("RequestStats")
 
   /**
+   * Configures a [[StatsFilter.module]] to track latency using the
+   * given [[TimeUnit]].
+   */
+  case class Param(unit: TimeUnit) {
+    def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
+  }
+
+  object Param {
+    implicit val param = Stack.Param(Param(TimeUnit.MILLISECONDS))
+  }
+
+  /**
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.StatsFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[param.Stats, param.ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
+    new Stack.Module3[param.Stats, param.ExceptionStatsHandler, Param, ServiceFactory[Req, Rep]] {
       val role = StatsFilter.role
       val description = "Report request statistics"
-      def make(_stats: param.Stats, _exceptions: param.ExceptionStatsHandler, next: ServiceFactory[Req, Rep]) = {
+      def make(
+        _stats: param.Stats,
+        _exceptions: param.ExceptionStatsHandler,
+        _param: Param,
+        next: ServiceFactory[Req, Rep]
+      ) = {
         val param.Stats(statsReceiver) = _stats
         val param.ExceptionStatsHandler(handler) = _exceptions
         if (statsReceiver.isNull) next
-        else new StatsFilter(statsReceiver, handler).andThen(next)
+        else new StatsFilter(statsReceiver, handler, _param.unit).andThen(next)
       }
     }
 
@@ -34,6 +52,12 @@ object StatsFilter {
 /**
  * StatsFilter reports request statistics to the given receiver.
  *
+ * @param timeUnit this controls what granularity is used for
+ * measuring latency, transit time, and budget time. The default is milliseconds,
+ * but other values are valid. The choice of this changes the name of the stat
+ * attached to the given [[StatsReceiver]]. For the common units,
+ * it will be "request_latency_ms", "transit_latency_ms" and "deadline_budget_ms".
+ *
  * @note The innocent bystander may find the semantics with respect
  * to backup requests a bit puzzling; they are entangled in legacy.
  * "requests" counts the total number of requests: subtracting
@@ -44,20 +68,34 @@ object StatsFilter {
  */
 class StatsFilter[Req, Rep](
     statsReceiver: StatsReceiver,
-    exceptionStatsHandler: ExceptionStatsHandler)
+    exceptionStatsHandler: ExceptionStatsHandler,
+    timeUnit: TimeUnit)
   extends SimpleFilter[Req, Rep]
 {
+  def this(statsReceiver: StatsReceiver, exceptionStatsHandler: ExceptionStatsHandler) =
+    this(statsReceiver, exceptionStatsHandler, TimeUnit.MILLISECONDS)
+
   def this(statsReceiver: StatsReceiver) = this(statsReceiver, StatsFilter.DefaultExceptions)
+
+  private[this] def latencyStatSuffix: String = {
+    timeUnit match {
+      case TimeUnit.NANOSECONDS => "ns"
+      case TimeUnit.MICROSECONDS => "us"
+      case TimeUnit.MILLISECONDS => "ms"
+      case TimeUnit.SECONDS => "secs"
+      case _ => timeUnit.toString.toLowerCase
+    }
+  }
 
   private[this] val outstandingRequestCount = new LongAdder()
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
-  private[this] val latencyStat = statsReceiver.stat("request_latency_ms")
+  private[this] val latencyStat = statsReceiver.stat(s"request_latency_$latencyStatSuffix")
   private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.sum() }
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
-  private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
-  private[this] val budgetTimeStat = statsReceiver.stat("deadline_budget_ms")
+  private[this] val transitTimeStat = statsReceiver.stat(s"transit_latency_$latencyStatSuffix")
+  private[this] val budgetTimeStat = statsReceiver.stat(s"deadline_budget_$latencyStatSuffix")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val elapsed = Stopwatch.start()
@@ -66,8 +104,8 @@ class StatsFilter[Req, Rep](
       case None =>
       case Some(Deadline(timestamp, deadline)) =>
         val now = Time.now
-        transitTimeStat.add(((now-timestamp) max Duration.Zero).inMilliseconds)
-        budgetTimeStat.add(((deadline-now) max Duration.Zero).inMilliseconds)
+        transitTimeStat.add(((now-timestamp) max Duration.Zero).inUnit(timeUnit))
+        budgetTimeStat.add(((deadline-now) max Duration.Zero).inUnit(timeUnit))
     }
 
     outstandingRequestCount.increment()
@@ -84,12 +122,12 @@ class StatsFilter[Req, Rep](
           // is wrapped only once.
         case Throw(e) =>
           dispatchCount.incr()
-          latencyStat.add(elapsed().inMilliseconds)
+          latencyStat.add(elapsed().inUnit(timeUnit))
           exceptionStatsHandler.record(statsReceiver, e)
         case Return(_) =>
           dispatchCount.incr()
           successCount.incr()
-          latencyStat.add(elapsed().inMilliseconds)
+          latencyStat.add(elapsed().inUnit(timeUnit))
       }
     }
   }
