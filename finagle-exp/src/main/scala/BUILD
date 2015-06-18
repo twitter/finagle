@@ -15,7 +15,6 @@ scala_library(name='scala',
 benchmark(name='benchmark',
   dependencies=[
     ':scala',
-    '3rdparty/jvm/com/google/caliper',
     'util/util-core',
   ],
   sources=rglobs('com/twitter/finagle/benchmark/*.scala')

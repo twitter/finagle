@@ -536,7 +536,13 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1",
       "com.twitter.common" % "metrics-data-sample" % "0.0.1"
     )
-  ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin, finagleMemcachedX)
+  ).dependsOn(
+    finagleCore,
+    finagleExp,
+    finagleMemcachedX,
+    finagleOstrich4,
+    finagleStats,
+    finagleZipkin)
 
   lazy val finagleTesters = Project(
     id = "finagle-testers",

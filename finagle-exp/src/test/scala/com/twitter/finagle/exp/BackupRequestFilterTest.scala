@@ -2,20 +2,22 @@ package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.util.WindowedAdder
 import com.twitter.finagle.{Service, MockTimer, BackupRequestLost}
-import com.twitter.util.{Future, Promise, Time, Return, TimeControl, Duration}
+import com.twitter.util.{Future, Promise, Time, Return, Duration}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.FunSuite
+import org.scalatest.{Matchers, FunSuite}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
-class BackupRequestFilterTest extends FunSuite with MockitoSugar {
+class BackupRequestFilterTest extends FunSuite
+  with MockitoSugar
+  with Matchers
+{
   def quantile(ds: Seq[Duration], which: Int) = {
     val sorted = ds.sorted
     sorted(which*sorted.size/100)
@@ -28,13 +30,13 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
     val underlying = mock[Service[String, String]]
     when(underlying.close(anyObject())) thenReturn Future.Done
     val filter = new BackupRequestFilter[String, String](
-      95, range, timer, statsReceiver, Duration.Top, WindowedAdder.timeMs)
+      95, range, timer, statsReceiver, Duration.Top, WindowedAdder.timeMs, 1, 0.05)
     val service = filter andThen underlying
-    val cutoffGauge = statsReceiver.gauges(Seq("cutoff_ms"))
-    def cutoff() = Duration.fromMilliseconds(cutoffGauge().toInt)
+    def cutoff() =
+      Duration.fromMilliseconds(filter.cutoffMs())
     val rng = new Random(123)
     val latencies = Seq.fill(100) {
-      Duration.fromMilliseconds(rng.nextInt).abs % (range/2)
+      Duration.fromMilliseconds(rng.nextInt()).abs % (range/2)
     }
   }
 
@@ -52,7 +54,15 @@ class BackupRequestFilterTest extends FunSuite with MockitoSugar {
         tc.advance(l)
         p.setValue("ok")
         assert(f.poll === Some(Return("ok")))
-        assert(quantile(latencies take i+1, 95) === cutoff())
+        val ideal = quantile(latencies take i+1, 95)
+        val actual = cutoff()
+        BackupRequestFilter.defaultError(range) match {
+          case 0.0 =>
+            assert(ideal === actual)
+          case error =>
+            val epsilon = range.inMillis * error
+            actual.inMillis.toDouble should be(ideal.inMillis.toDouble +- epsilon)
+        }
       }
     }
   }
