@@ -9,8 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.TimeUnit
 import scala.io.Source
 
-private[finagle] object LatencyProfile {
+private object LatencyProfile {
   private val rng = Rng("seed".hashCode)
+
   /**
    * Creates a latency profile from a file where each line
    * represents recorded latencies.
@@ -24,12 +25,49 @@ private[finagle] object LatencyProfile {
     () => { i = i + 1; latencies(i%size) }
   }
 
+  /**
+   * Returns a function which generates a duration between `low`
+   * and `high` when applied.
+   */
+  def between(low: Duration, high: Duration): () => Duration = {
+    require(low <= high)
+    () => low + ((high - low) * math.random)
+  }
+
+  /**
+   * Returns a function which represents the given latency probability distribution.
+   */
   def apply(
-    dist: IndexedSeq[Double],
-    latencies: IndexedSeq[Duration]
+    min: Duration,
+    p50: Duration,
+    p90: Duration,
+    p95: Duration,
+    p99: Duration,
+    p999: Duration,
+    p9999: Duration
+  ): () => Duration = {
+    val dist = Seq(
+      0.5 -> between(min, p50),
+      0.4 -> between(p50, p90),
+      0.05 -> between(p90, p95),
+      0.04 -> between(p95, p99),
+      0.009 -> between(p99, p999),
+      0.0009 -> between(p999, p9999)
+    )
+    val (d, l) = dist.unzip
+    apply(d, l.toIndexedSeq)
+  }
+
+  /**
+   * Creates a function that applies the probability distribution in
+   * `dist` over the latency functions in `latencies`.
+   */
+  def apply(
+    dist: Seq[Double],
+    latencies: IndexedSeq[() => Duration]
   ): () => Duration = {
     val drv = Drv(dist)
-    () => latencies(drv(rng))
+    () => latencies(drv(rng))()
   }
 }
 
@@ -57,12 +95,20 @@ private[finagle] class LatencyProfile(stopWatch: () => Duration) {
   }
 }
 
+trait Weighted { val weight: Double }
+
 /**
  * Creates a ServiceFactory that applies a latency profile to Services
  * it creates.
  */
 private[finagle] class LatencyFactory(sr: StatsReceiver) {
-  def apply(name: Int, next: () => Duration): ServiceFactory[Unit, Unit] = {
+  import Simulation.WeightedFactory
+
+  def apply(
+    name: Int,
+    next: () => Duration,
+    _weight: Double = 1.0
+  ): WeightedFactory = {
     val service = new Service[Unit, Unit] {
       implicit val timer = DefaultTimer.twitter
       val load = new AtomicInteger(0)
@@ -85,7 +131,8 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
       }
     }
 
-    new ServiceFactory[Unit, Unit] {
+    new ServiceFactory[Unit, Unit] with Weighted {
+      val weight = _weight
       def apply(conn: ClientConnection) = Future.value(service)
       def close(deadline: Time) = Future.Done
       override def toString = name.toString
@@ -94,6 +141,8 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
 }
 
 private[finagle] object Simulation extends com.twitter.app.App {
+  type WeightedFactory = ServiceFactory[Unit, Unit] with Weighted
+
   val qps = flag("qps", 1250, "QPS at which to run the benchmark")
   val dur = flag("dur", 45.seconds, "Benchmark duration")
   val nstable = flag("stable", 10, "Number of stable hosts")
@@ -109,19 +158,27 @@ private[finagle] object Simulation extends com.twitter.app.App {
 
     val data = getClass.getClassLoader.getResource("resources/real_latencies.data")
     val dist = LatencyProfile.fromFile(data)
-    val stable: Set[ServiceFactory[Unit, Unit]] =
+    val stable: Set[WeightedFactory] =
       Seq.tabulate(nstable())(i => newFactory(i, dist)).toSet
 
     val underlying = Var(stable)
+    val activity: Activity[Set[(ServiceFactory[Unit, Unit], Double)]] =
+      Activity(underlying.map { facs => Activity.Ok(facs.map { f => (f, f.weight) }) })
+
     val factory = bal() match {
       case "p2c" => Balancers.p2c().newBalancer(
-        Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
+        activity,
+        statsReceiver=stats.scope("p2c"),
+        noBrokers)
+
+      case "ewma" => Balancers.p2cPeakEwma().newBalancer(
+        activity,
         statsReceiver=stats.scope("p2c"),
         noBrokers)
 
       case "aperture" =>
         Balancers.aperture().newBalancer(
-          Activity(underlying map { facs => Activity.Ok(facs map { fac => (fac, 1D) }) }),
+          activity,
           statsReceiver=stats.scope("aperture"),
           noBrokers)
     }
@@ -137,6 +194,8 @@ private[finagle] object Simulation extends com.twitter.app.App {
     val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
     underlying() += newFactory(nstable()+1, coldStart(dist))
     underlying() += newFactory(nstable()+2, p.slowBy(2)(dist))
+    underlying() += newFactory(nstable()+3, dist, 2.0)
+    underlying() += newFactory(nstable()+4, dist, 2.0)
 
     var ms = 0
     while (stopWatch() < dur()) {

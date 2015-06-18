@@ -41,7 +41,9 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
-      new P2CBalancer(endpoints, maxEffort, rng, sr, exc)
+      new P2CBalancer(endpoints, maxEffort, rng, sr, exc) {
+        private[this] val gauge = sr.addGauge("p2c")(1)
+      }
   }
 
   /**
@@ -75,7 +77,9 @@ object Balancers {
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
-      new P2CBalancerPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc)
+      new P2CBalancerPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc) {
+        private[this] val gauge = sr.addGauge("p2cPeakEwma")(1)
+      }
   }
 
   /**
@@ -87,11 +91,13 @@ object Balancers {
     new LoadBalancerFactory {
       def newBalancer[Req, Rep](
         endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
-        statsReceiver: StatsReceiver,
-        emptyException: NoBrokersAvailableException
+        sr: StatsReceiver,
+        exc: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
         val unweighted = endpoints.map { set => set.map { case (f, _) => f } }
-        new HeapBalancer(unweighted, statsReceiver, emptyException, rng)
+        new HeapBalancer(unweighted, sr, exc, rng) {
+          private[this] val gauge = sr.addGauge("heap")(1)
+        }
       }
     }
 
@@ -123,7 +129,9 @@ object Balancers {
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
       new ApertureLoadBandBalancer(endpoints, smoothWin, lowLoad,
-        highLoad, minAperture, maxEffort, rng, timer, sr, exc)
+        highLoad, minAperture, maxEffort, rng, timer, sr, exc) {
+        private[this] val gauge = sr.addGauge("aperture")(1)
+      }
     }
   }
 }
