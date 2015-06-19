@@ -55,7 +55,7 @@ object Protocols {
     statsReceiver: StatsReceiver = DefaultStatsReceiver
   ): TProtocolFactory = {
     if (!optimizedBinarySupported) {
-      new TBinaryProtocol.Factory(strictRead, strictWrite, readLength)
+      new TBinaryProtocol.Factory(strictRead, strictWrite)
     } else {
       // Factories are created rarely while the creation of their TProtocol's
       // is a common event. Minimize counter creation to just once per Factory.
@@ -65,9 +65,6 @@ object Protocols {
         override def getProtocol(trans: TTransport): TProtocol = {
           val proto = new TFinagleBinaryProtocol(
             trans, fastEncodeFailed, largerThanTlOutBuffer, strictRead, strictWrite)
-          if (readLength != 0) {
-            proto.setReadLength(readLength)
-          }
           proto
         }
       }

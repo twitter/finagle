@@ -182,6 +182,7 @@ object Finagle extends Build {
 
     // Removing projects with specs tests and their dependencies
     // finagleExample
+      ,finagleSwift
   )
 
   lazy val finagleTest = Project(
@@ -577,7 +578,7 @@ object Finagle extends Build {
   ).dependsOn(finagleCore)
 
 
-/*  lazy val finagleSwift = Project(
+  lazy val finagleSwift = Project(
     id = "finagle-swift",
     base = file("finagle-swift"),
     settings = Project.defaultSettings ++
@@ -585,9 +586,9 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-swift",
     libraryDependencies ++= Seq(
-      "com.twitter.com.facebook.swift" % "swift-codec" % "0.6.0"
+      "com.facebook.swift" % "swift-codec" % "0.15.1"
     )
-  ).dependsOn(finagleCore, finagleThrift)*/
+  ).dependsOn(finagleCore, finagleThrift)
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",

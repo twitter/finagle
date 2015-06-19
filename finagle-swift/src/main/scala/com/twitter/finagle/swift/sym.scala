@@ -1,9 +1,10 @@
 package com.twitter.finagle.exp.swift
 
 import com.facebook.swift.codec.metadata.ReflectionHelper.{
-  getAllClassAnnotations, findAnnotatedMethods,
+  getEffectiveClassAnnotations, findAnnotatedMethods,
   extractParameterNames}
 import com.facebook.swift.codec.metadata.ThriftType
+import com.facebook.swift.service.{ThriftMethod, ThriftService}
 import com.google.common.collect.Iterables
 import java.lang.reflect.Method
 import com.twitter.finagle.Service
@@ -22,7 +23,7 @@ case class ServiceSym(name: String, methods: Seq[MethodSym])
 
 object ServiceSym {
   def isService(k: Class[_]): Boolean =
-    !getAllClassAnnotations(k, classOf[ThriftService]).isEmpty
+    !getEffectiveClassAnnotations(k, classOf[ThriftService]).isEmpty
 
   /**
    * Construct a service symbol from a java class using the
@@ -34,7 +35,7 @@ object ServiceSym {
    */
   def apply(k: Class[_]): ServiceSym = {
     val annot = {
-      val all = getAllClassAnnotations(k, classOf[ThriftService])
+      val all = getEffectiveClassAnnotations(k, classOf[ThriftService])
       require(!all.isEmpty)
       Iterables.getOnlyElement(all)
     }

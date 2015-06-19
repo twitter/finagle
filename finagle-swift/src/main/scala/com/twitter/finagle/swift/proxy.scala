@@ -25,6 +25,15 @@ object SwiftProxy {
       new ProxyHandler(sym, service)
     ).asInstanceOf[T]
   }
+
+  def newJavaClient(service: Service[ThriftClientRequest, Array[Byte]], k: Class[_]) = {
+    val sym = ServiceSym(k)
+    Proxy.newProxyInstance(
+      k.getClassLoader(),
+      Array(k),
+      new ProxyHandler(sym, service)
+    )
+  }
 }
 
 private class ProxyHandler(
@@ -80,12 +89,14 @@ class MethodCodec(sym: MethodSym) {
     val out = new TBinaryProtocol(buf)
     out.writeMessageBegin(new TMessage(sym.name, TMessageType.CALL, 0))
     val writer = new TProtocolWriter(out)
-    writer.writeStructBegin(sym.name+"_args")
-    for (i <- Range(0, args.size)) {
-      val ArgSym(name, id, thriftType) = sym.args(i)
-      val codec = ThriftCodecManager
-        .getCodec(thriftType).asInstanceOf[ThriftCodec[Object]]
-      writer.writeField(name, id, codec, args(i))
+    writer.writeStructBegin(sym.name + "_args")
+    if (args != null) {
+      for (i <- Range(0, args.size)) {
+        val ArgSym(name, id, thriftType) = sym.args(i)
+        val codec = ThriftCodecManager
+          .getCodec(thriftType).asInstanceOf[ThriftCodec[Object]]
+        writer.writeField(name, id, codec, args(i))
+      }
     }
     writer.writeStructEnd()
     out.writeMessageEnd()
