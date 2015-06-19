@@ -32,7 +32,7 @@ class MemcachedTest extends FunSuite with MockitoSugar {
     assert(stack.contains(SingletonPool.role))
     
     val params = client.params
-    val FailureAccrualFactory.Param(numFailures, markDeadFor) = params[FailureAccrualFactory.Param]
+    val FailureAccrualFactory.Param.Configured(numFailures, markDeadFor) = params[FailureAccrualFactory.Param]
     assert(numFailures == 20)
     assert(markDeadFor() == 1.seconds)
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))

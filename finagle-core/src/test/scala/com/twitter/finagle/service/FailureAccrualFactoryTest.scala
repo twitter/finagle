@@ -2,7 +2,8 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.finagle.{Status, MockTimer, ServiceFactory, Service}
+import com.twitter.finagle.{Status, MockTimer, ServiceFactory, Service, ServiceFactoryWrapper, Stack}
+import com.twitter.finagle.param
 import com.twitter.util._
 import java.util.concurrent.TimeUnit
 import org.junit.runner.RunWith
@@ -323,5 +324,49 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       assert(diff >= 0)
       assert(diff < 200)
     }
+  }
+
+  test("param") {
+    import FailureAccrualFactory._
+
+    val p1: Param = Param(42, () => Duration.fromSeconds(10))
+    val p2: Param = Replaced(_ => ServiceFactoryWrapper.identity)
+    val p3: Param = Disabled
+
+    assert((p1 match { case Param.Configured(x, _) => x }) == 42)
+    assert((p2 match { case Param.Replaced(f) => f(null) }) == ServiceFactoryWrapper.identity)
+    assert(p3 match { case Disabled => true })
+
+    val ps1: Stack.Params = Stack.Params.empty + p1
+    assert(ps1.contains[Param])
+    assert((ps1[Param] match { case Param.Configured(x, _) => x }) == 42)
+
+    val ps2: Stack.Params = Stack.Params.empty + p2 + p1
+    assert(ps2.contains[Param])
+    assert((ps2[Param] match { case Param.Configured(x, _) => x }) == 42)
+
+    val ps3: Stack.Params = Stack.Params.empty + p1 + p2 + p3
+    assert(ps3.contains[Param])
+    assert(ps3[Param] match { case Disabled => true })
+  }
+
+  test("module") {
+    val h = new Helper
+    val s: Stack[ServiceFactory[Int, Int]] =
+      FailureAccrualFactory.module[Int, Int].toStack(Stack.Leaf(Stack.Role("Service"), h.underlying))
+
+    val ps: Stack.Params = Stack.Params.empty + param.Stats(h.statsReceiver)
+
+    // disabled
+    Await.ready(s.make(ps + FailureAccrualFactory.Disabled).toService(10))
+    assert(!h.statsReceiver.counters.contains(Seq("failure_accrual", "removals")))
+
+    // replaced
+    Await.ready(s.make(ps + FailureAccrualFactory.Replaced(ServiceFactoryWrapper.identity)).toService(10))
+    assert(!h.statsReceiver.counters.contains(Seq("failure_accrual", "removals")))
+
+    // configured
+    Await.ready(s.make(ps + FailureAccrualFactory.Param(1, Duration.Top)).toService(10))
+    assert(h.statsReceiver.counters.contains(Seq("failure_accrual", "removals")))
   }
 }

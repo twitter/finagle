@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Name
 import com.twitter.finagle.memcachedx.param.EjectFailedHost
 import com.twitter.finagle.memcachedx.protocol.ClientError
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
 import com.twitter.finagle.memcachedx.{Client, Memcached, PartitionedClient}
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.io.Buf

@@ -74,7 +74,7 @@ public class StackParamCompilationTest {
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
         .configured(new FailFastFactory.FailFast(true).mk())
-        .configured(new FailureAccrualFactory.Param(0, Duration.Top()).mk())
+        .configured(FailureAccrualFactory.Param(10, Duration.Bottom()).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())

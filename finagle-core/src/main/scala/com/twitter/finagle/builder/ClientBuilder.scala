@@ -2,13 +2,12 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.client.{DefaultPool, StackBasedClient, StackClient, StdStackClient}
+import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient}
 import com.twitter.finagle.client.{StackBasedClient, Transporter}
 import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
 import com.twitter.finagle.filter.ExceptionSourceFilter
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.netty3.Netty3Transporter
-import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.service._
 import com.twitter.finagle.ssl.Ssl
@@ -139,18 +138,6 @@ object ClientConfig {
     implicit val param = Stack.Param(Daemonize(true))
   }
 
-  // TODO - @bmdhacks - make these private after deprecation ends
-  @deprecated("Please use `FailureAccrualFactory.Param` instead", "6.22.1")
-  case class FailureAccrualFac(fac: util.Timer => ServiceFactoryWrapper) {
-    def mk(): (FailureAccrualFac, Stack.Param[FailureAccrualFac]) =
-      (this, FailureAccrualFac.param)
-  }
-  @deprecated("Please use `FailureAccrualFactory.Param` instead", "6.22.1")
-  object FailureAccrualFac {
-    implicit val param =
-      Stack.Param(FailureAccrualFac(Function.const(ServiceFactoryWrapper.identity)_))
-  }
-
   case class MonitorFactory(mFactory: String => util.Monitor) {
     def mk(): (MonitorFactory, Stack.Param[MonitorFactory]) =
       (this, MonitorFactory.param)
@@ -251,7 +238,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `hostConnectionIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxWaiters`: `Int.MaxValue`
  *  - `failFast`: true
- *  - `failureAccrualParams`, `failureAccrual`, `failureAccrualFactory`:
+ *  - `failureAccrualParams`, `failureAccrualFactory`:
  *    `numFailures` = 5, `markDeadFor` = 5 seconds
  *
  * Advanced options:
@@ -745,23 +732,34 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(Logger(logger))
 
   /**
-   * Use the given paramters for failure accrual.  The first parameter
+   * Use the given parameters for failure accrual.  The first parameter
    * is the number of *successive* failures that are required to mark
-   * a host failed.  The second paramter specifies how long the host
+   * a host failed.  The second parameter specifies how long the host
    * is dead for, once marked.
+   *
+   * To completely disable [[FailureAccrualFactory]] use `noFailureAccrual`.
    */
   def failureAccrualParams(pair: (Int, Duration)): This = {
     val (numFailures, markDeadFor) = pair
-    failureAccrualFactory(FailureAccrualFactory.wrapper(statsReceiver, numFailures, () => markDeadFor)(_))
+    configured(FailureAccrualFactory.Param(numFailures, () => markDeadFor))
   }
 
-  @deprecated("Use failureAccrualParams", "6.22.1")
-  def failureAccrual(failureAccrual: ServiceFactoryWrapper): This =
-    failureAccrualFactory { _ => failureAccrual }
+  /**
+   * Disables [[FailureAccrualFactory]].
+   *
+   * To replace the [[FailureAccrualFactory]] use `failureAccrualFactory`.
+   */
+  def noFailureAccrual: This =
+    configured(FailureAccrualFactory.Disabled)
 
-  @deprecated("Use failureAccrualParams", "6.22.1")
+  /**
+   * Completely replaces the [[FailureAccrualFactory]] from the underlying stack
+   * with the [[ServiceFactoryWrapper]] returned from the given function `factory`.
+   *
+   * To completely disable [[FailureAccrualFactory]] use `noFailureAccrual`.
+   */
   def failureAccrualFactory(factory: util.Timer => ServiceFactoryWrapper): This =
-    configured(FailureAccrualFac(factory))
+    configured(FailureAccrualFactory.Replaced(factory))
 
   @deprecated(
     "No longer experimental: Use failFast()." +
@@ -772,7 +770,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Marks a host dead on connection failure. The host remains dead
-   * until we succesfully connect. Intermediate connection attempts
+   * until we successfully connect. Intermediate connection attempts
    * *are* respected, but host availability is turned off during the
    * reconnection period.
    */
@@ -1048,14 +1046,12 @@ private case class CodecClient[Req, Rep](
   stack: Stack[ServiceFactory[Req, Rep]] = StackClient.newStack[Req, Rep],
   params: Stack.Params = ClientConfig.DefaultParams
 ) extends StackClient[Req, Rep] {
-  import ClientConfig._
   import com.twitter.finagle.param._
 
   def withParams(ps: Stack.Params) = copy(params = ps)
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]) = copy(stack = stack)
 
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
-    val Timer(timer) = params[Timer]
     val codec = codecFactory(ClientCodecConfig(label))
 
     val prepConn = new Stack.Module1[Stats, ServiceFactory[Req, Rep]] {
@@ -1083,20 +1079,10 @@ private case class CodecClient[Req, Rep](
         codec.prepareServiceFactory(next))
         .replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
-      // transform stack wrt. failure accrual
-      val stack1 =
-        if (params.contains[FailureAccrualFac]) {
-          val FailureAccrualFac(fac) = params[FailureAccrualFac]
-          stack0.replace(FailureAccrualFactory.role, (next: ServiceFactory[Req, Rep]) =>
-            fac(timer) andThen next)
-        } else {
-          stack0
-        }
-
       // disable failFast if the codec requests it or it is
-      // disabled via the ClientBuilder paramater.
+      // disabled via the ClientBuilder parameter.
       val FailFast(failFast) = params[FailFast]
-      if (!codec.failFastOk || !failFast) stack1.remove(FailFastFactory.role) else stack1
+      if (!codec.failFastOk || !failFast) stack0.remove(FailFastFactory.role) else stack0
     }
 
     case class Client(
