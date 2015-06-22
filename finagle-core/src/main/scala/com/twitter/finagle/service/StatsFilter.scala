@@ -1,5 +1,6 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.{
@@ -47,6 +48,14 @@ object StatsFilter {
   val DefaultExceptions = new MultiCategorizingExceptionStatsHandler(
     mkFlags = Failure.flagsOf,
     mkSource = SourcedException.unapply)
+
+  def typeAgnostic(
+    statsReceiver: StatsReceiver,
+    exceptionStatsHandler: ExceptionStatsHandler
+  ): TypeAgnostic = new TypeAgnostic {
+    override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
+      new StatsFilter[Req, Rep](statsReceiver, exceptionStatsHandler)
+  }
 }
 
 /**
