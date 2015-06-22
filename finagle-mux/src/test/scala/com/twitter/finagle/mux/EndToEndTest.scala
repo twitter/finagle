@@ -4,6 +4,7 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.mux.Message._
+import com.twitter.finagle.mux.exp.FailureDetector
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
@@ -48,7 +49,7 @@ class EndToEndTest extends FunSuite
     val serverTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q1, q0)
 
     val server = ServerDispatcher.newRequestResponse(serverTrans, svc)
-    val client = new ClientDispatcher("test", clientTrans, NullStatsReceiver)
+    val client = new ClientDispatcher("test", clientTrans, NullStatsReceiver, FailureDetector.NullConfig)
 
     val f = client(Request(Path.empty, Buf.Empty))
     assert(!f.isDefined)

@@ -11,7 +11,7 @@ import com.twitter.conversions.time._
  * usually by sending ping messages and evaluating response
  * times.
  */
-private trait FailureDetector {
+private[mux] trait FailureDetector {
   def status: Status
 }
 
