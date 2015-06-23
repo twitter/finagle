@@ -14,13 +14,13 @@ Runtime Behavior Changes
     than waiting for all components to be Ok. This enables resilience of unions when part of the
     tree cannot be resolved. ``RB_ID=697114``
 
+6.26.0
+~~~~~~~
+
 Deprecations
 ~~~~~~~~~~~~
 
   * finagle-memcached: Deprecated in favor of finagle-memcachedx and now removed.
-
-6.26.0
-------
 
 New Features
 ~~~~~~~~~~~~

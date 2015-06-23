@@ -12,9 +12,9 @@ object Finagle extends Build {
   val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
   val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
-  val libVersion = "6.25.0" + suffix
-  val utilVersion = "6.24.0" + suffix
-  val ostrichVersion = "9.8.0" + suffix
+  val libVersion = "6.26.0" + suffix
+  val utilVersion = "6.25.0" + suffix
+  val ostrichVersion = "9.9.0" + suffix
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
