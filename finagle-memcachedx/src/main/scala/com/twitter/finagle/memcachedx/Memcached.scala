@@ -198,7 +198,7 @@ case class Memcached(
       }
       val dest = Name.bound(new InetSocketAddress(node.host, node.port))
       val fClient: Service[Command, Response] =
-        mkClient(key, nodeHealthBroker).newClient(dest, label).toService
+        mkClient(key, nodeHealthBroker).newService(dest, label)
       key -> KetamaNode(key.identifier, node.weight, TwemcacheClient(fClient))
     }
 
