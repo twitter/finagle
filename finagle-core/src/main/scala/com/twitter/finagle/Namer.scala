@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.util._
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 
 /**
  * A namer is a context in which a [[com.twitter.finagle.NameTree
@@ -13,7 +13,6 @@ import java.net.{InetSocketAddress, SocketAddress}
  * and thus lookup results are represented by a [[com.twitter.util.Activity Activity]].
  */
 trait Namer { self =>
-  import NameTree._
 
   /**
    * Translate a [[com.twitter.finagle.Path Path]] into a
@@ -157,6 +156,44 @@ object Namer  {
   private def bind(namer: Namer, tree: NameTree[Path]): Activity[NameTree[Name.Bound]] =
     bind(namer, 0)(tree map { path => Name.Path(path) })
 
+  private[this] def bindUnion(
+    namer: Namer,
+    depth: Int,
+    trees: Seq[Weighted[Name]]
+  ): Activity[NameTree[Name.Bound]] = {
+
+    val weightedTreeVars: Seq[Var[Activity.State[NameTree.Weighted[Name.Bound]]]] = trees.map {
+      case Weighted(w, t) =>
+        val treesAct: Activity[NameTree[Name.Bound]] = bind(namer, depth)(t)
+        treesAct.map(Weighted(w, _)).run
+    }
+
+    val stateVar: Var[Activity.State[NameTree[Name.Bound]]] = Var.collect(weightedTreeVars).map {
+      seq: Seq[Activity.State[NameTree.Weighted[Name.Bound]]] =>
+
+      // - if there's at least one activity in Ok state, return the union of them
+      // - if all activities are pending, the union is pending.
+      // - if no subtree is Ok, and there are failures, retain the first failure.
+
+      val oks = seq.collect {
+        case Activity.Ok(t) => t
+      }
+      if (oks.isEmpty) {
+        seq.find {
+          case Activity.Failed(_) => true
+          case _ => false
+        } match {
+          case Some(Activity.Failed(t)) => Activity.Failed(t)
+          case _ => Activity.Pending
+        }
+      }
+      else {
+        Activity.Ok(Union.fromSeq(oks).simplified)
+      }
+    }
+    new Activity(stateVar)
+  }
+
   // values of the returned activity are simplified and contain no Alt nodes
   private def bind(namer: Namer, depth: Int)(tree: NameTree[Name])
   : Activity[NameTree[Name.Bound]] =
@@ -172,12 +209,7 @@ object Namer  {
 
       case Union() => Activity.value(Neg)
       case Union(Weighted(_, tree)) => bind(namer, depth)(tree)
-      case Union(trees@_*) =>
-        Activity.collect(
-          trees map { case Weighted(w, t) => bind(namer, depth)(t) map(Weighted(w, _)) }
-        ) map { trees =>
-          Union.fromSeq(trees).simplified
-        }
+      case Union(trees@_*) => bindUnion(namer, depth, trees)
 
       case Alt() => Activity.value(Neg)
       case Alt(tree) => bind(namer, depth)(tree)
