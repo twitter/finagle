@@ -367,7 +367,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-stream"
-  ).dependsOn(finagleCore, finagleKestrel, finagleTest % "test")
+  ).dependsOn(finagleCore, finagleTest % "test")
 
   lazy val finagleThrift = Project(
     id = "finagle-thrift",
