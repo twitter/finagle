@@ -24,10 +24,9 @@ import com.twitter.finagle.util.Showable
  * the hood to resolve the destination names into the `Name` representation
  * of the appropriate cluster.
  *
- * As names are are bound, a [[com.twitter.finagle.Namer Namer]] may
- * elect to bind only a [[com.twitter.finagle.Name Name]] prefix,
- * leaving an unbound residual name to be processed by a downstream
- * Namer.
+ * As names are bound, a [[com.twitter.finagle.Namer Namer]] may elect
+ * to bind only a [[com.twitter.finagle.Name Name]] prefix, leaving an
+ * unbound residual name to be processed by a downstream Namer.
  */
 sealed trait Name
 
