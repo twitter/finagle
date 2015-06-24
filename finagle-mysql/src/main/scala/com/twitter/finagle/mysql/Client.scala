@@ -143,11 +143,16 @@ private[mysql] class StdClient(factory: ServiceFactory[Request, Result])
     } yield result
 
     // handle failures and put connection back in the pool
-    transaction respond {
-      case Return(_) => singleton.close()
+
+    transaction transform {
+      case Return(r) =>
+        singleton.close()
+        Future.value(r)
       case Throw(e) =>
-        client.query("ROLLBACK") ensure singleton.close()
-        Future.exception(e)
+        client.query("ROLLBACK") transform { _ =>
+          singleton.close()
+          Future.exception(e)
+        }
     }
   }
 

@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http._
 /**
  * Stream StreamResponse messages into HTTP chunks.
  */
-private class StreamServerDispatcher(
+private[twitter] class StreamServerDispatcher(
     trans: Transport[Any, Any],
     service: Service[HttpRequest, StreamResponse])
   extends GenSerialServerDispatcher[HttpRequest, StreamResponse, Any, Any](trans) {

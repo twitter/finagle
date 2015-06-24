@@ -3,11 +3,12 @@ package com.twitter.finagle.netty3
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.param.Label
-import com.twitter.finagle.socks.SocksConnectHandler
+import com.twitter.finagle.netty3.socks.SocksConnectHandler
+import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
 import javax.net.ssl.{SSLEngineResult, SSLEngine, SSLSession}

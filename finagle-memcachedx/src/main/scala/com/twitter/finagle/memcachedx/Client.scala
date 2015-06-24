@@ -1028,7 +1028,7 @@ case class KetamaClientBuilder private[memcachedx] (
       node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, () => Duration)
     ) = {
       builder.hosts(new InetSocketAddress(node.host, node.port))
-          .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost) _)
+          .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost))
           .build()
     }
 

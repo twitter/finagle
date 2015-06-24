@@ -5,8 +5,6 @@ import java.net.SocketAddress;
 import scala.Option;
 
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.channel.IdleConnectionFilter;
-import com.twitter.finagle.channel.OpenConnectionsThresholds;
 import com.twitter.finagle.client.DefaultPool;
 import com.twitter.finagle.client.StackClient;
 import com.twitter.finagle.client.Transporter;
@@ -17,6 +15,8 @@ import com.twitter.finagle.filter.RequestSemaphoreFilter;
 import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
 import com.twitter.finagle.netty3.Netty3Transporter;
+import com.twitter.finagle.netty3.channel.IdleConnectionFilter;
+import com.twitter.finagle.netty3.channel.OpenConnectionsThresholds;
 import com.twitter.finagle.netty3.param.Netty3Timer;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.param.Logger;
@@ -74,7 +74,7 @@ public class StackParamCompilationTest {
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
         .configured(new FailFastFactory.FailFast(true).mk())
-        .configured(new FailureAccrualFactory.Param(0, Duration.Top()).mk())
+        .configured(FailureAccrualFactory.Param(10, Duration.Bottom()).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())

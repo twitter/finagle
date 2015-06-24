@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import com.twitter.finagle.Status
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.{DefaultTimer, Ema}
 import com.twitter.util._
 import com.twitter.conversions.time._
@@ -11,7 +11,7 @@ import com.twitter.conversions.time._
  * usually by sending ping messages and evaluating response
  * times.
  */
-private trait FailureDetector {
+private[mux] trait FailureDetector {
   def status: Status
 }
 
@@ -66,9 +66,14 @@ private class ThresholdFailureDetector(
   // The timestamp of the last ping, in nanoseconds.
   @volatile private[this] var timestamp: Long = 0L
 
-  private[this] val pingLatency = statsReceiver.stat("ping_latency_us")
+  private[this] val pingLatencyStat = statsReceiver.stat("ping_latency_us")
+  private[this] val closeCounter = statsReceiver.counter("close")
+  private[this] val pingCounter = statsReceiver.counter("ping")
+  private[this] val busyCounter = statsReceiver.counter("marked_busy")
+  private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()
 
   private[this] def loop(): Future[Unit] = {
+    pingCounter.incr()
     timestamp = nanoTime()
     val hardTimeout =
       if (closeThreshold > 0)
@@ -79,14 +84,16 @@ private class ThresholdFailureDetector(
     ping().within(hardTimeout) transform {
       case Return(_) =>
         val rtt = nanoTime() - timestamp
-        pingLatency.add(rtt.toFloat/1000)
+        pingLatencyStat.add(rtt.toFloat/1000)
         timestamp = 0L
         emaTime += 1
         ema.update(emaTime, rtt)
         Future.sleep(minPeriod - rtt.nanoseconds) before loop()
       case Throw(_: TimeoutException) =>
+        closeCounter.incr()
         close()
       case Throw(ex) =>
+        failureHandler.record(statsReceiver, ex)
         Future.exception(ex)
     }
   }
@@ -108,6 +115,8 @@ private class ThresholdFailureDetector(
   loop()
 
   def status: Status =
-    if (ema.isEmpty || pendingNs() > threshold * ema.last) Status.Busy
-    else Status.Open
+    if (ema.isEmpty || pendingNs() > threshold * ema.last) {
+      busyCounter.incr()
+      Status.Busy
+    } else Status.Open
 }

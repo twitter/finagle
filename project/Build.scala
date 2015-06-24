@@ -12,9 +12,9 @@ object Finagle extends Build {
   val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
   val suffix = if (branch == "master") "" else "-SNAPSHOT"
 
-  val libVersion = "6.25.0" + suffix
-  val utilVersion = "6.24.0" + suffix
-  val ostrichVersion = "9.8.0" + suffix
+  val libVersion = "6.26.0" + suffix
+  val utilVersion = "6.25.0" + suffix
+  val ostrichVersion = "9.9.0" + suffix
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
@@ -168,7 +168,7 @@ object Finagle extends Build {
 
     // Protocols
     finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
-    finagleThrift, finagleMemcached, finagleMemcachedX, finagleKestrel,
+    finagleThrift, finagleMemcachedX, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
     finagleSpdy, finagleRedis,
 
@@ -367,7 +367,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-stream"
-  ).dependsOn(finagleCore, finagleKestrel, finagleTest % "test")
+  ).dependsOn(finagleCore, finagleTest % "test")
 
   lazy val finagleThrift = Project(
     id = "finagle-thrift",
@@ -391,22 +391,6 @@ object Finagle extends Build {
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
-
-  lazy val finagleMemcached = Project(
-    id = "finagle-memcached",
-    base = file("finagle-memcached"),
-    settings = Project.defaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-memcached",
-    libraryDependencies ++= Seq(
-      util("hashing"),
-      util("zk-test") % "test",
-      "com.google.guava" % "guava" % "16.0.1",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.51" % "test"
-    ),
-    libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
 
   lazy val finagleMemcachedX = Project(
     id = "finagle-memcachedx",
@@ -433,7 +417,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-kestrel",
     libraryDependencies ++= scroogeLibs
-  ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
+  ).dependsOn(finagleCore, finagleMemcachedX, finagleThrift)
 
   lazy val finagleRedis = Project(
     id = "finagle-redis",
@@ -534,7 +518,7 @@ object Finagle extends Build {
     ) ++ scroogeLibs
   ).dependsOn(
     finagleCore, finagleHttp, finagleStream, finagleThrift,
-    finagleMemcached, finagleKestrel, finagleRedis, finagleMySQL,
+    finagleMemcachedX, finagleKestrel, finagleRedis, finagleMySQL,
     finagleOstrich4, finagleStats)
 
   lazy val finagleBenchmark = Project(
@@ -552,7 +536,13 @@ object Finagle extends Build {
       "com.google.caliper" % "caliper" % "0.5-rc1",
       "com.twitter.common" % "metrics-data-sample" % "0.0.1"
     )
-  ).dependsOn(finagleCore, finagleStats, finagleOstrich4, finagleZipkin, finagleMemcached)
+  ).dependsOn(
+    finagleCore,
+    finagleExp,
+    finagleMemcachedX,
+    finagleOstrich4,
+    finagleStats,
+    finagleZipkin)
 
   lazy val finagleTesters = Project(
     id = "finagle-testers",

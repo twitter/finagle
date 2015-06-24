@@ -1,13 +1,17 @@
 package com.twitter.finagle.memcachedx.unit
 
+import _root_.java.net.InetSocketAddress
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.memcachedx._
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.{Name, Stack, WriteException}
+import com.twitter.util.{Time, Await}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -32,11 +36,31 @@ class MemcachedTest extends FunSuite with MockitoSugar {
     assert(stack.contains(SingletonPool.role))
     
     val params = client.params
-    val FailureAccrualFactory.Param(numFailures, markDeadFor) = params[FailureAccrualFactory.Param]
+    val FailureAccrualFactory.Param.Configured(numFailures, markDeadFor) = params[FailureAccrualFactory.Param]
     assert(numFailures == 20)
     assert(markDeadFor() == 1.seconds)
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
     assert(params[param.EjectFailedHost] == param.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))
+  }
+
+  test("Memcache.newClient enables FactoryToService") {
+    val st = new InMemoryStatsReceiver
+    val client =
+      Memcached("memcache")
+        .configured(Stats(st))
+        .newClient(Name.bound(new InetSocketAddress("127.0.0.1", 12345)))
+
+    val numberRequests = 10
+    Time.withCurrentTimeFrozen { _ =>
+      for (i <- 0 until numberRequests)
+        intercept[WriteException](Await.result(client.get("foo")))
+      // Since FactoryToService is enabled, number of requeues should be
+      // limited by leaky bucket util it exhausts retries, instead of
+      // retrying 25 times on service acquisition
+      assert(st.counters(Seq("memcache", "requeue", "budget_exhausted")) == numberRequests)
+      // number of requeues = 100 reserved tokens + 20% of qps in the time window
+      assert(st.counters(Seq("memcache", "requeue", "requeues")) == numberRequests/5 + 100)
+    }
   }
 }

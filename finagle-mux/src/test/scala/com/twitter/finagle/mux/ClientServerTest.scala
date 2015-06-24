@@ -2,6 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.mux.exp.{sessionFailureDetector, FailureDetector}
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.NullStatsReceiver
@@ -48,7 +49,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val clientTransport =
       new QueueTransport(writeq=clientToServer, readq=serverToClient)
     val service = mock[Service[Request, Response]]
-    val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver)
+    val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver, FailureDetector.GlobalFlagConfig)
     val nping = new AtomicInteger(0)
     val pingReq, pingRep = new Latch
     def ping() = {

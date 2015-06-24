@@ -143,21 +143,19 @@ outstanding request. The count is incremented when a request is dispatched and d
 receive a response (note the dependence on latency). The heap is min-ordered to allow for
 efficient access to the least loaded. The distributor inherits all the nice properties of the heap
 (i.e. selecting the top of the heap is constant time and other common operations take `O(log n)`).
-This configuration is the standard in Finagle, but it does have some limitations.
-In particular, it’s difficult to use weighted nodes or swap out a load metric without sacrificing
-the performance of the heap. What’s more, the heap must be updated atomically by each request and
-thus represents a highly contended resource.
+This configuration has some limitations. In particular, it’s difficult to use weighted nodes or
+swap out a load metric without sacrificing the performance of the heap. What’s more, the heap must be
+updated atomically by each request and thus represents a highly contended resource.
 
 Power of Two Choices (P2C) + Least Loaded
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The P2C distributor solves many of the limitations that are inherent with the Heap distributor.
-By employing an elegant (and surprising) mathematical phenomenon [#p2c]_, the algorithm randomly picks two
-nodes from the collection of endpoints and selects the least loaded of the two. By repeatedly using
-this strategy, we can expect a manageable upper bound on the maximum load of any server [#p2c_bounds]_.
-The default load metric for the P2C balancer is least loaded, however, because P2C is fully concurrent [#p2c_jmh]_, it
-allows us to efficiently implement weighted nodes [#weights_api]_ or different load metrics with minimal
-per-request costs. Because of this, P2C is slated to become the default balancer in the client
-stack - its use is pervasive within Twitter.
+The P2C distributor solves many of the limitations that are inherent with the Heap distributor and
+is the default Balancer for Finagle clients. By employing an elegant (and surprising) mathematical
+phenomenon [#p2c]_, the algorithm randomly picks two nodes from the collection of endpoints and selects
+the least loaded of the two. By repeatedly using this strategy, we can expect a manageable upper bound on
+the maximum load of any server [#p2c_bounds]_. The default load metric for the P2C balancer is least
+loaded, however, because P2C is fully concurrent [#p2c_jmh]_, it allows us to efficiently implement
+weighted nodes [#weights_api]_ or different load metrics with minimal per-request costs.
 
 Experimental
 ^^^^^^^^^^^^

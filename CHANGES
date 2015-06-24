@@ -2,44 +2,74 @@
   (http://docutils.sourceforge.net/docs/user/rst/quickstart.html)
   as it is included in Finagle's user's guide.
 
+Note that ``RB_ID=#`` correspond to associated messages in commits.
+
 6.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: When evaluating NameTree unions, return components of the union in Ok state rather
+    than waiting for all components to be Ok. This enables resilience of unions when part of the
+    tree cannot be resolved. ``RB_ID=697114``
+
 6.26.0
-------
+~~~~~~~
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-memcached: Deprecated in favor of finagle-memcachedx and now removed.
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-httpx: Support nacks between Finagle Http clients and servers. When a server fails
+    with retryable exceptions (exceptions wrapped by `Failure.rejected`), it sends back a "Nack"
+    response, i.e. 503 Response code with a new "finagle-http-nack" header. This allows clients
+    to safely retry failed requests, and keep connections open. ``RB_ID=670046``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+  * finagle-core: Moved netty3 specific things into a netty3 namespace. For
+    these symbols, the namespace translation follows this pattern:
+    `c.t.f.$MODULE._ => c.t.f.netty3.$MODULE._.` ``RB_ID=691746``
 
   * finagle-core: Define `WeightedSocketAddress` as a case class. Add
-    `WeightedSocketAddress.extract` method to extract weight.
+    `WeightedSocketAddress.extract` method to extract weight. ``RB_ID=614228``
 
   * finagle-core: Constructing a new Balancer that can be injected into a Finagle client
     was unnecessarily complex and non-uniform. We removed the legacy constructors around
     defining the collection of endpoints and simplified the interface to `LoadBalancerFactory`.
     Now, `com.twitter.finagle.loadbalancer.Balancers` defines the collection of balancer
-    constructors.
+    constructors. ``RB_ID=660730``
 
   * finagle-core: Aperture can no longer be enabled via command line flags. Configuring
     per-client settings globally is generally not a good idea and we're working to remove
     these flags from Finagle. Use the constructors in `com.twitter.finagle.loadbalancer.Balancers`
-    to create an instance that can be injected into a client.
+    to create an instance that can be injected into a client. ``RB_ID=663194``
+
+  * finagle-core: The default load balancer has changed to p2c from heap. ``RB_ID=693450``
 
   * finagle-core: `Service.isAvailable` and `ServiceFactory.isAvailable` is finalized.
     `Service.status` and `ServiceFactory.status` supersedes `isAvailable` usage since 6.24.0 release.
+    ``RB_ID=678588``
+
+  * finagle-core: `ClientBuilder.failureAccrual` method is removed. Use `ClientBuilder.failureAccrualFactory`
+    instead. ``RB_ID=689076``
+
+  * finagle-core: Stack param `ClientBuilder.ClientConfig.FailureAccrualFac` is removed.
+    Use `ClientBuilder.failureAccrualFactory` instead. ``RB_ID=689076``
 
   * finagle-exception: `com.twitter.finagle.exception.ExceptionReporter` is no longer used
-    as the default `com.twitter.finagle.util.ReporterFactory`.
+    as the default `com.twitter.finagle.util.ReporterFactory`. ``RB_ID=674646``
 
   * finagle-kestrel: Replace deprecated finagle-kestrel package with finagle-kestrelx.
+    ``RB_ID=667920``
 
-New Features
-~~~~~~~~~~~~
-
-  * finagle-httpx: Support nacks between Finagle Http clients and servers. When a server fails 
-    with retryable exceptions (exceptions wrapped by `Failure.rejected`), it sends back a "Nack" 
-    response, i.e. 503 Response code with a new "finagle-http-nack" header. This allows clients 
-    to safely retry failed requests, and keep connections open.
+  * finagle-core: Add new method `noFailureAccrual` on `ClientBuilder` that completely disables
+    `FailureAccrualFactory` in the underlying stack. ``RB_ID=689076``
 
 
 6.25.0

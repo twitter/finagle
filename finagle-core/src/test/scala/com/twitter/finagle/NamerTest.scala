@@ -19,7 +19,8 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
     def ia(i: Int) = new InetSocketAddress(i)
 
-    val exc = new Exception {}
+    class TestException extends Exception {}
+    val exc = new TestException {}
 
     val namer = new Namer {
       var acts: Map[Path, (Activity[NameTree[Path]], Witness[Try[NameTree[Path]]])] =
@@ -68,30 +69,47 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
   test("NameTree.bind: union")(new Ctx {
     val res = namer.bind(NameTree.read("/test/0 & /test/1"))
+
+    // Pending & Pending
     assert(res.run.sample() === Activity.Pending)
 
+    // Bind /test/0 to another NameTree
     namer("/test/0").notify(Return(NameTree.read("/test/2")))
     assert(res.run.sample() === Activity.Pending)
 
+    // Ok(Bound) & Pending
     namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
-    assert(res.run.sample() === Activity.Pending)
+    assertEval(res, ia(1))
 
+    // Failed(exc) & Pending
+    namer("/test/1").notify(Throw(exc))
+    intercept[TestException] { res.sample() }
+
+    // Ok(Bound) & Ok(Bound)
+    namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
     namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
-
     assertEval(res, ia(1), ia(2))
 
+    // Ok(Bound) & Ok(Neg)
     namer("/test/2").notify(Return(NameTree.Neg))
     assertEval(res, ia(1))
 
+    // Ok(Bound) & Failed(exc)
+    namer("/test/2").notify(Throw(exc))
+    assertEval(res, ia(1))
+
+    // Failed(exc) & Failed(exc)
+    namer("/test/1").notify(Throw(exc))
+    intercept[TestException] { res.sample() }
+
+    // Ok(Neg) & Ok(Neg)
     namer("/test/1").notify(Return(NameTree.Neg))
+    namer("/test/2").notify(Return(NameTree.Neg))
     assert(res.sample().eval === None)
 
+    // Ok(Empty) & Ok(Neg)
     namer("/test/1").notify(Return(NameTree.Empty))
-
     assert(res.sample().eval === Some(Set.empty))
-
-    namer("/test/2").notify(Throw(exc))
-    assert(res.run.sample() === Activity.Failed(exc))
   })
 
   test("NameTree.bind: failover")(new Ctx {

@@ -117,21 +117,27 @@ case class Memcached(
           _eject: param.EjectFailedHost,
           _timer: finagle.param.Timer,
           next: ServiceFactory[Command, Response]
-        ): ServiceFactory[Command, Response] = {
-          val FailureAccrualFactory.Param(numFailures, markDeadFor) = _param
-          val finagle.param.Timer(timer) = _timer
-          val finagle.param.Stats(statsReceiver) = _stats
-          val param.EjectFailedHost(eject) = _eject
+        ): ServiceFactory[Command, Response] = _param match {
+          case FailureAccrualFactory.Param.Configured(numFailures, markDeadFor) =>
+            val finagle.param.Timer(timer) = _timer
+            val finagle.param.Stats(statsReceiver) = _stats
+            val param.EjectFailedHost(eject) = _eject
 
-          val wrapper = new ServiceFactoryWrapper {
-            def andThen[Command, Response](
-              factory: ServiceFactory[Command, Response]
-            ) =
-              new KetamaFailureAccrualFactory(
-                factory, numFailures, markDeadFor, timer, key, healthBroker,
-                eject, statsReceiver.scope("failure_accrual"))
-          }
-          wrapper.andThen(next)
+            val wrapper = new ServiceFactoryWrapper {
+              def andThen[Command, Response](
+                                              factory: ServiceFactory[Command, Response]
+                                              ) =
+                new KetamaFailureAccrualFactory(
+                  factory, numFailures, markDeadFor, timer, key, healthBroker,
+                  eject, statsReceiver.scope("failure_accrual"))
+            }
+            wrapper.andThen(next)
+
+          case FailureAccrualFactory.Param.Replaced(f) =>
+            val finagle.param.Timer(timer) = _timer
+            f(timer) andThen next
+
+          case FailureAccrualFactory.Param.Disabled => next
         }
       }
     }
@@ -192,7 +198,7 @@ case class Memcached(
       }
       val dest = Name.bound(new InetSocketAddress(node.host, node.port))
       val fClient: Service[Command, Response] =
-        mkClient(key, nodeHealthBroker).newClient(dest, label).toService
+        mkClient(key, nodeHealthBroker).newService(dest, label)
       key -> KetamaNode(key.identifier, node.weight, TwemcacheClient(fClient))
     }
 

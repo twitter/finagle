@@ -14,6 +14,9 @@ import org.scalatest.FunSuite
 class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
   val loopback = InetAddress.getLoopbackAddress
 
+  // CSL-1870: this isn't flaky. It doesn't work in CI because JmDNS uses port 5353 which is
+  // not allowed on some CI hosts.
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("bind locally") {
     val rawIa = new InetSocketAddress(loopback, 0)
 

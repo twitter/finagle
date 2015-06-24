@@ -5,10 +5,11 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.client.{StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
+import com.twitter.finagle.transport.Transport
 import java.net.SocketAddress
 import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
 ChannelPipelineFactory, Channels, DefaultChannelConfig}

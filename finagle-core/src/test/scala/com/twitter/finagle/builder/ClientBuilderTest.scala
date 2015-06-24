@@ -1,6 +1,6 @@
 package com.twitter.finagle.builder
 
-import com.twitter.finagle.{Status, Service, ServiceFactory, WriteException}
+import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -76,7 +76,8 @@ class ClientBuilderTest extends FunSuite
         .reportTo(inMemory)
       val client = builder.build()
 
-      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
+      val FailureAccrualFactory.Param.Configured(numFailures, _) =
+        builder.params(FailureAccrualFactory.Param.param)
 
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
@@ -107,7 +108,8 @@ class ClientBuilderTest extends FunSuite
 
       val client = builder.build()
 
-      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
+      val FailureAccrualFactory.Param.Configured(numFailures, _) =
+        builder.params(FailureAccrualFactory.Param.param)
 
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
@@ -137,7 +139,8 @@ class ClientBuilderTest extends FunSuite
         .reportTo(inMemory)
       val client = builder.build()
 
-      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
+      val FailureAccrualFactory.Param.Configured(numFailures, _) =
+        builder.params(FailureAccrualFactory.Param.param)
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))
       when(service.close(any[Time])) thenReturn Future.Done
@@ -162,11 +165,13 @@ class ClientBuilderTest extends FunSuite
         .stack(m.client)
         .daemon(true) // don't create an exit guard
         .hosts(Seq(m.clientAddress))
+        .failureAccrualParams(25 -> Duration.fromSeconds(10))
         .reportTo(inMemory)
 
       val client = builder.build()
 
-      val FailureAccrualFactory.Param(numFailures, _) = builder.params(FailureAccrualFactory.Param.param)
+      val FailureAccrualFactory.Param.Configured(numFailures, _) =
+        builder.params(FailureAccrualFactory.Param.param)
 
       val service = mock[Service[String, String]]
       when(service("123")) thenReturn Future.exception(WriteException(new Exception()))

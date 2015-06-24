@@ -222,20 +222,32 @@ object Request {
     apply(new DefaultHttpRequest(version, method, uri))
 
   /** Create Request from HttpRequest. */
-  def apply(httpRequestArg: HttpRequest): MockRequest = {
-    new MockRequest {
-      override val httpRequest = httpRequestArg
-      override val httpMessage = httpRequestArg
-      override val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
+  def apply(httpRequestArg: HttpRequest): MockRequest =
+    httpRequestArg match {
+      case req: MockRequest => req
+      case _ => new MockRequest {
+        override val httpRequest = httpRequestArg
+        override val httpMessage = httpRequestArg
+        override val remoteSocketAddress = new InetSocketAddress("127.0.0.1", 12345)
+      }
     }
-  }
 
   /** Create Request from HttpRequest and Channel.  Used by Codec. */
   def apply(httpRequestArg: HttpRequest, channel: Channel): Request =
-    new Request {
-      val httpRequest = httpRequestArg
-      override val httpMessage = httpRequestArg
-      lazy val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+    httpRequestArg match {
+      case req: Request => new Request {
+        val httpRequest = req
+        override val httpMessage = req
+        override val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+        override val reader = req.reader
+        override val writer = req.writer
+      }
+
+      case _ => new Request {
+        val httpRequest = httpRequestArg
+        override val httpMessage = httpRequestArg
+        override val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+      }
     }
 
   // for testing

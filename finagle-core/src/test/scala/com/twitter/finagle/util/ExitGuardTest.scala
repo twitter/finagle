@@ -5,7 +5,6 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
-import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class ExitGuardTest
@@ -15,17 +14,25 @@ class ExitGuardTest
   with Eventually
   with IntegrationPatience {
 
-  if (!sys.props.contains("SKIP_FLAKY"))
-  test("guard creates thread, unguard kills thread") {
-    val guard = ExitGuard.guard("test")
-    val threads = ExitGuard.guards.map { case (thread, _) => thread }
+  test("guard creates thread, unguard removes") {
+    val name = s"ExitGuardTest-${System.nanoTime}"
+    val guard = ExitGuard.guard(name)
+    val (thread, guards) = ExitGuard.guards.get
 
-    assert(threads.nonEmpty)
-    val thread = threads.get
     assert(!thread.isDaemon)
     assert(thread.isAlive)
+    assert(guards.map(_.reason).contains(name))
+
     guard.unguard()
-    eventually { assert(!thread.isAlive, ExitGuard.explainGuards()) }
+
+    // depending on what has been registered and unregistered,
+    // either there should be no guards or our name should not be in the list.
+    ExitGuard.guards match {
+      case None =>
+        eventually { assert(!thread.isAlive, ExitGuard.explainGuards()) }
+      case Some((_, gs)) =>
+        assert(!gs.map(_.reason).contains(name))
+    }
   }
 
   test("explain shows reason") {

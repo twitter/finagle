@@ -1,5 +1,8 @@
 package com.twitter.finagle.http
 
+import com.twitter.conversions.time._
+import com.twitter.io.Buf
+import com.twitter.util.Await
 import org.jboss.netty.handler.codec.http.{DefaultHttpRequest, HttpMethod, HttpVersion}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -23,6 +26,14 @@ class RequestTest extends FunSuite {
       assert(request.remoteHost === "127.0.0.1")
       assert(request.remotePort === 12345)
     }
+  }
+
+  test("preserve stream in construction") {
+    val req = Request()
+    req.writer.write(Buf.Utf8("12")) before req.writer.close()
+    val f = Request(req).reader.read(1)
+    val g = Request(req).reader.read(1)
+    Await.result(f.join(g), 1.second) == (Buf.Utf8("1"), Buf.Utf8("2"))
   }
 
   test("path") {

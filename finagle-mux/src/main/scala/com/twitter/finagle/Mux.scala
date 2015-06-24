@@ -2,12 +2,12 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.mux.exp.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
@@ -74,7 +74,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ): Service[mux.Request, mux.Response] = {
       val param.Stats(sr) = params[param.Stats]
       val param.Label(name) = params[param.Label]
-      new mux.ClientDispatcher(name, transport, sr.scope("mux"))
+      val FailureDetector.Param(failDetectorConfig) = params[FailureDetector.Param]
+      new mux.ClientDispatcher(name, transport, sr.scope("mux"), failDetectorConfig)
     }
   }
 

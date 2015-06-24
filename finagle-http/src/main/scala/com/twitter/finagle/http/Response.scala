@@ -83,8 +83,11 @@ object Response {
 
   /** Create Response from HttpResponse. */
   def apply(httpResponseArg: HttpResponse): Response =
-    new Response {
-      final val httpResponse = httpResponseArg
+    httpResponseArg match {
+      case res: Response => res
+      case _ => new Response {
+        final val httpResponse = httpResponseArg
+      }
     }
 
   /** Create Response from HttpRequest. */

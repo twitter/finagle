@@ -15,7 +15,7 @@ import org.jboss.netty.buffer.{
   ChannelBuffer, ChannelBuffers}
 
 import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.channel.LeftFoldUpstreamHandler
+import com.twitter.finagle.netty3.channel.LeftFoldUpstreamHandler
 
 
 private[finagle] class HttpFailure(ctx: ChannelHandlerContext, status: HttpResponseStatus)

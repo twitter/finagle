@@ -1,9 +1,10 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.{Service, SimpleFilter}
+import com.twitter.finagle.{Filter, Service, SimpleFilter}
 import com.twitter.util.{Function => _, _}
 
 object RetryingService {
@@ -29,6 +30,15 @@ object RetryingFilter {
     statsReceiver: StatsReceiver = NullStatsReceiver
   )(shouldRetry: PartialFunction[Try[Nothing], Boolean])(implicit timer: Timer) =
     new RetryingFilter[Req, Rep](RetryPolicy.backoff(backoffs)(shouldRetry), timer, statsReceiver)
+
+  def typeAgnostic(
+    retryPolicy: RetryPolicy[Try[Nothing]],
+    timer: Timer,
+    statsReceiver: StatsReceiver = NullStatsReceiver
+  ): TypeAgnostic = new TypeAgnostic {
+    override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
+      new RetryingFilter[Req, Rep](retryPolicy, timer, statsReceiver)
+  }
 }
 
 /**

@@ -11,7 +11,7 @@ import org.jboss.netty.handler.codec.http._
 /**
  * Stream chunks into StreamResponses.
  */
-private class StreamClientDispatcher(trans: Transport[Any, Any])
+private[twitter] class StreamClientDispatcher(trans: Transport[Any, Any])
     extends GenSerialClientDispatcher[HttpRequest, StreamResponse, Any, Any](trans) {
   import GenSerialClientDispatcher.wrapWriteException
 

@@ -1,26 +1,20 @@
 package com.twitter.finagle.mux
 
-import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.mux.exp.FailureDetector
+import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Dtab, Service, WriteException, NoStacktrace, Status, Failure}
-import com.twitter.util.{Future, Promise, Time, Duration, Throw, Try, Return, Updatable}
+import com.twitter.finagle.{Dtab, Failure, NoStacktrace, Service, Status, WriteException}
+import com.twitter.util.{Duration, Future, Promise, Return, Throw, Time, Try, Updatable}
+
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.{ChannelBuffer, ReadOnlyChannelBuffer}
-
-// We can't name this 'failureDetector' because it won't
-// build on the Mac, due to its case-insensitive file system.
-object sessionFailureDetector extends GlobalFlag(
-  "none",
-  "The failure detector used to determine session liveness " +
-    "[none|threshold:minPeriod:threshold:win:closeThreshold]")
 
 /**
  * Indicates that the server failed to interpret or act on the request. This
@@ -100,10 +94,11 @@ private[twitter] object ClientDispatcher {
 private[twitter] class ClientDispatcher (
   name: String,
   trans: Transport[ChannelBuffer, ChannelBuffer],
-  sr: StatsReceiver
+  sr: StatsReceiver,
+  failureDetectorConfig: FailureDetector.Config
 ) extends Service[Request, Response] {
   import ClientDispatcher._
-  import Message.{MinTag=>_, MaxTag=>_, _}
+  import Message.{MaxTag => _, MinTag => _, _}
 
   private[this] implicit val timer = DefaultTimer.twitter
   // Maintain the dispatcher's state, whose access is mediated
@@ -364,30 +359,9 @@ private[twitter] class ClientDispatcher (
   }
 
   private[this] val detector = {
-    import com.twitter.finagle.util.parsers._
     val close = () => trans.close(Time.now)
     val dsr = sr.scope("failuredetector")
-
-    sessionFailureDetector() match {
-      case list("threshold", duration(min), double(threshold), int(win), int(closeThreshold)) =>
-        new ThresholdFailureDetector(
-          ping, close, min, threshold, win, closeThreshold, statsReceiver = dsr)
-      case list("threshold", duration(min), double(threshold), int(win)) =>
-        new ThresholdFailureDetector(ping, close, min, threshold, win, statsReceiver = dsr)
-      case list("threshold", duration(min), double(threshold)) =>
-        new ThresholdFailureDetector(ping, close, min, threshold, statsReceiver = dsr)
-      case list("threshold", duration(min)) =>
-        new ThresholdFailureDetector(ping, close, min, statsReceiver = dsr)
-      case list("threshold") =>
-        new ThresholdFailureDetector(ping, close, statsReceiver = dsr)
-
-      case list("none") =>
-        NullFailureDetector
-
-      case list(_*) =>
-        log.warning(s"unknown failure detector ${sessionFailureDetector()} specified")
-        NullFailureDetector
-    }
+    FailureDetector(failureDetectorConfig, ping, close, dsr)
   }
 
   override def status: Status =

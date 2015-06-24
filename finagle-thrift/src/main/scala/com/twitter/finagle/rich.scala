@@ -386,16 +386,15 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
 
   protected lazy val serverStats: StatsReceiver = ServerStatsReceiver.scope(serverLabel)
 
-  private lazy val scoped = serverStats.scope(serverLabel)
   /**
    * $serveIface
    */
   def serveIface(addr: String, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory, scoped, maxThriftBufferSize))
+    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize))
 
   /**
    * $serveIface
    */
   def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory, scoped, maxThriftBufferSize))
+    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize))
 }

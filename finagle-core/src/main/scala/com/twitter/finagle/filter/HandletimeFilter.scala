@@ -2,7 +2,8 @@ package com.twitter.finagle.filter
 
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{param, Service, ServiceFactory, SimpleFilter, Stack, Stackable}
-import com.twitter.util.{Stopwatch, Future}
+import com.twitter.util.Future
+import java.util.concurrent.TimeUnit
 
 private[finagle] object HandletimeFilter {
   val role = Stack.Role("HandleTime")
@@ -16,7 +17,7 @@ private[finagle] object HandletimeFilter {
       val description = "Record elapsed execution time of underlying service"
       def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = _stats
-        new HandletimeFilter(statsReceiver) andThen next
+        new HandletimeFilter(statsReceiver).andThen(next)
       }
     }
 }
@@ -26,6 +27,10 @@ private[finagle] object HandletimeFilter {
  * the underlying [[com.twitter.finagle.Service]]. Durations are recorded in
  * microseconds and emitted as a stat labeled "handletime_us" to the argument
  * [[com.twitter.finagle.stats.StatsReceiver]].
+ *
+ * @note the stat does not include the time that it takes to satisfy
+ *       the returned `Future`, only how long it takes for the `Service`
+ *       to return the `Future`.
  */
 class HandletimeFilter[Req, Rep](statsReceiver: StatsReceiver)
   extends SimpleFilter[Req, Rep]
@@ -33,10 +38,12 @@ class HandletimeFilter[Req, Rep](statsReceiver: StatsReceiver)
   private[this] val stat = statsReceiver.stat("handletime_us")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
-    val elapsed = Stopwatch.start()
+    val startAt = System.nanoTime()
     try
       service(request)
-    finally
-      stat.add(elapsed().inMicroseconds)
+    finally {
+      val elapsedNs = System.nanoTime() - startAt
+      stat.add(TimeUnit.MICROSECONDS.convert(elapsedNs, TimeUnit.NANOSECONDS))
+    }
   }
 }
