@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.25.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.26.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.25.0',
+        VERSION:     '6.26.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -281,15 +281,19 @@ operations)</dd>
 <dd>A counter of the number failed transactional operations</dd>
 <dt><strong>multi_latency_ms</strong></dt>
 <dd>A histogram of the latency, in milliseconds, of transactional operations</dd>
-<dt><strong>session_connects</strong></dt>
-<dd>A counter of the number of successful session connection operations</dd>
-<dt><strong>session_connects_readonly</strong></dt>
-<dd>A counter of the number of successful read-only session connection operations</dd>
-<dt><strong>session_auth_failures</strong></dt>
+<dt><strong>session_sync_connected</strong></dt>
+<dd>A counter of the number of read-write session transitions</dd>
+<dt><strong>session_connected_read_only</strong></dt>
+<dd>A counter of the number of read-only session transitions</dd>
+<dt><strong>session_no_sync_connected</strong></dt>
+<dd>Unused (should always be 0)</dd>
+<dt><strong>session_sasl_authenticated</strong></dt>
+<dd>A counter of the number of sessions upgraded to SASL</dd>
+<dt><strong>session_auth_failed</strong></dt>
 <dd>A counter of the number of session authentication failures</dd>
-<dt><strong>session_disconnects</strong></dt>
-<dd>A counter of the number of session disconnections</dd>
-<dt><strong>session_expirations</strong></dt>
+<dt><strong>session_disconnected</strong></dt>
+<dd>A counter of the number of temporary session disconnects</dd>
+<dt><strong>session_expired</strong></dt>
 <dd>A counter of the number of session expirations</dd>
 </dl>
 </div>
@@ -504,15 +508,39 @@ watermark of connections full and no connections are idle.</dd>
 <dd>a counter of the number of connections that have been closed for being idle</dd>
 </dl>
 </div>
+<div class="section" id="thrift">
+<h3>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>srv/thrift/buffer/resetCount</strong></dt>
+<dd>a counter for the number of times the thrift server re-initialized the buffer for thrift responses. The thrift server maintains a growable reusable buffer for responses. Once the buffer reaches the threshold size it is discarded and reset to a smaller size. This is done to accommodate variable response sizes. A high resetCount means the server is allocating and releasing memory frequently. Use the <cite>com.twitter.finagle.Thrift.param.MaxReusableBufferSize</cite> to set the max buffer size to the size of  a typical thrift response for your server.</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="requeues">
+<h2>Requeues<a class="headerlink" href="#requeues" title="Permalink to this headline">¶</a></h2>
+<p id="id2">These metrics show requeues (automatic retries) by the Finagle Stack. The number of retries are
+controlled by a dynamic budget.</p>
+<dl class="docutils">
+<dt><strong>requeue/requeues</strong></dt>
+<dd>a counter of the number of times requests are requeued</dd>
+<dt><strong>requeue/budget</strong></dt>
+<dd>a gauge of the current available retry budget</dd>
+<dt><strong>requeue/budget_exhausted</strong></dt>
+<dd>a counter of the number of times when the budget is exhausted</dd>
+</dl>
 </div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
 <p id="mux-stats">These stats pertain to <a class="reference internal" href="Protocols.html#mux"><em>Mux</em></a>.</p>
 <dl class="docutils">
-<dt><strong>draining</strong></dt>
+<dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
 <dd>the number of times the server has initiated session draining</dd>
-<dt><strong>drained</strong></dt>
-<dd>the number of times the server has succesfully completed the draining protocol within its allotted time</dd>
+<dt><strong>&lt;server_label&gt;/mux/drained</strong></dt>
+<dd>the number of times the server has successfully completed the draining protocol within its allotted time</dd>
+<dt><strong>&lt;client_label&gt;/mux/draining</strong></dt>
+<dd>the number of times a server initiated session draining</dd>
+<dt><strong>&lt;client_label&gt;/mux/drained</strong></dt>
+<dd>the number of times server-initiated draining completed successfully</dd>
 <dt><strong>clienthangup</strong></dt>
 <dd>the number of times sessions have been abruptly terminated by the client</dd>
 <dt><strong>serverhangup</strong></dt>
@@ -594,8 +622,10 @@ watermark of connections full and no connections are idle.</dd>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
 <li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
 <li><a class="reference internal" href="#idleconnectionfilter">IdleConnectionFilter</a></li>
+<li><a class="reference internal" href="#thrift">Thrift</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#requeues">Requeues</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 </ul>
 </li>

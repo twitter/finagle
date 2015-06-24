@@ -43,7 +43,12 @@
 <span class="extype" name="com.twitter.finagle.httpx.codec.TextualContentCompressor">TextualContentCompressor</span> which will
 compress text-like content-types with the default compression level (6). Otherwise, use
 <span class="extype" name="org.jboss.netty.handler.codec.http.HttpContentCompressor">HttpContentCompressor</span> for all
-content-types with specified compression level.</p></dd></dl><div class="toggleContainer block">
+content-types with specified compression level.</p></dd><dt class="param">_streaming</dt><dd class="cmt"><p>Streaming allows applications to work with HTTP messages
+that have large (or infinite) content bodies. When this flag is set to
+<code>true</code>, the message content is available through a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">com.twitter.io.Reader</a>,
+which gives the application a handle to the byte stream. If <code>false</code>, the
+entire message content is buffered into a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a>.
+</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -99,7 +104,12 @@ content-types with specified compression level.</p></dd></dl><div class="toggleC
 <span class="extype" name="com.twitter.finagle.httpx.codec.TextualContentCompressor">TextualContentCompressor</span> which will
 compress text-like content-types with the default compression level (6). Otherwise, use
 <span class="extype" name="org.jboss.netty.handler.codec.http.HttpContentCompressor">HttpContentCompressor</span> for all
-content-types with specified compression level.</p></dd></dl></div>
+content-types with specified compression level.</p></dd><dt class="param">_streaming</dt><dd class="cmt"><p>Streaming allows applications to work with HTTP messages
+that have large (or infinite) content bodies. When this flag is set to
+<code>true</code>, the message content is available through a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">com.twitter.io.Reader</a>,
+which gives the application a handle to the byte stream. If <code>false</code>, the
+entire message content is buffered into a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a>.
+</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -324,7 +334,7 @@ content-types with specified compression level.</p></div></div>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.httpx.Http#_streaming" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.httpx.Http#_streaming" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="_streaming:Boolean"></a>
       <a id="_streaming:Boolean"></a>
       <h4 class="signature">
@@ -336,7 +346,13 @@ content-types with specified compression level.</p></div></div>
         <span class="name">_streaming</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Streaming allows applications to work with HTTP messages
+that have large (or infinite) content bodies.</p><div class="fullcomment"><div class="comment cmt"><p>Streaming allows applications to work with HTTP messages
+that have large (or infinite) content bodies. When this flag is set to
+<code>true</code>, the message content is available through a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">com.twitter.io.Reader</a>,
+which gives the application a handle to the byte stream. If <code>false</code>, the
+entire message content is buffered into a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">com.twitter.io.Buf</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.httpx.Http#annotateCipherHeader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="annotateCipherHeader(headerName:String):com.twitter.finagle.httpx.Http"></a>
       <a id="annotateCipherHeader(String):Http"></a>
@@ -596,6 +612,20 @@ content-types with specified compression level.</p></div></div>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.Http#protocolLibraryName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="protocolLibraryName:String"></a>
+      <a id="protocolLibraryName:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">protocolLibraryName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A protocol library name to use for displaying which protocol library this client or server is using.</p><div class="fullcomment"><div class="comment cmt"><p>A protocol library name to use for displaying which protocol library this client or server is using.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.httpx.Http">Http</a> → <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
     </li><li name="com.twitter.finagle.httpx.Http#server" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="server:com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[com.twitter.finagle.httpx.Request,com.twitter.finagle.httpx.Response]"></a>
       <a id="server:(ServerCodecConfig)⇒Codec[Request,Response]"></a>

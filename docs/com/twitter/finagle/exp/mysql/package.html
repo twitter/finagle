@@ -85,6 +85,19 @@ mysql binary protocol.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.exp.mysql.CanBeParameter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CanBeParameter[-A]extendsAnyRef"></a>
+      <a id="CanBeParameter[-A]:CanBeParameter[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="CanBeParameter.html"><span class="name">CanBeParameter</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.exp.mysql.Capability" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CapabilityextendsProductwithSerializable"></a>
       <a id="Capability:Capability"></a>
@@ -204,15 +217,15 @@ and has a cmd byte associated with it.</p>
       </h4>
       
     </li><li name="com.twitter.finagle.exp.mysql.ExecuteRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ExecuteRequestextendsCommandRequestwithProductwithSerializable"></a>
+      <a id="ExecuteRequestextendsCommandRequest"></a>
       <a id="ExecuteRequest:ExecuteRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="params">params: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>] = <span class="defval" name="scala.`package`.IndexedSeq.empty[Nothing]">...</span></span>, <span name="hasNewParams">hasNewParams: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a> = <span class="symbol">0</span></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a></span>
       </span>
       </h4>
       <p class="comment cmt">Uses the binary protocol to build an execute request for
@@ -350,6 +363,20 @@ upstream MySQL server.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.exp.mysql.Parameter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ParameterextendsAnyRef"></a>
+      <a id="Parameter:Parameter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Parameter.html"><span class="name">Parameter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence <code>CanBeParameter[A]</code> is
+available in scope.</p>
     </li><li name="com.twitter.finagle.exp.mysql.PrepareOK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PrepareOKextendsResultwithProductwithSerializable"></a>
       <a id="PrepareOK:PrepareOK"></a>
@@ -614,6 +641,19 @@ received from a mysql server.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.exp.mysql.CanBeParameter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CanBeParameter"></a>
+      <a id="CanBeParameter:CanBeParameter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CanBeParameter$.html"><span class="name">CanBeParameter</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.exp.mysql.Capability" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Capability"></a>
       <a id="Capability:Capability"></a>
@@ -748,6 +788,19 @@ contains any warnings and the server status.</p>
       </span>
       </h4>
       <p class="comment cmt">Represents the Error Packet received from the server and the data sent along with it.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.ExecuteRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ExecuteRequest"></a>
+      <a id="ExecuteRequest:ExecuteRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ExecuteRequest$.html"><span class="name">ExecuteRequest</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.exp.mysql.Field" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Field"></a>
       <a id="Field:Field"></a>
@@ -841,6 +894,19 @@ a version of MySQL that the client is incompatible with.</p>
       </span>
       </h4>
       <p class="comment cmt">Represents the OK Packet received from the server.</p>
+    </li><li name="com.twitter.finagle.exp.mysql.Parameter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Parameter"></a>
+      <a id="Parameter:Parameter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Parameter$.html"><span class="name">Parameter</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.exp.mysql.PingRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PingRequest"></a>
       <a id="PingRequest:PingRequest"></a>

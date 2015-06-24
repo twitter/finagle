@@ -113,6 +113,24 @@ request failures.
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.service.StatsFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver,exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler,timeUnit:java.util.concurrent.TimeUnit):com.twitter.finagle.service.StatsFilter[Req,Rep]"></a>
+      <a id="&lt;init&gt;:StatsFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">StatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>, <span name="timeUnit">timeUnit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timeUnit</dt><dd class="cmt"><p>this controls what granularity is used for
+measuring latency, transit time, and budget time. The default is milliseconds,
+but other values are valid. The choice of this changes the name of the stat
+attached to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>. For the common units,
+it will be &quot;request_latency_ms&quot;, &quot;transit_latency_ms&quot; and &quot;deadline_budget_ms&quot;.
+</p></dd></dl></div>
     </li></ol>
             </div>
 

@@ -41,14 +41,14 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An ongoing transactional read (from {{read}}).</p><p>A common usage pattern is to attach asynchronous handlers to <code>messages</code> and <code>error</code>
 by invoking <code>Offer.foreach</code> on them. For example:</p><pre><span class="kw">val</span> readHandle: ReadHandle = ...
-readHandle.messages foreach { msg <span class="kw">=&gt;</span>
+readHandle.messages.foreach { msg <span class="kw">=&gt;</span>
   <span class="kw">try</span> {
     System.out.println(msg.bytes.toString(<span class="lit">"UTF-8"</span>))
   } <span class="kw">finally</span> {
-    msg.ack() <span class="cmt">// if we don't do this, no more messages will come to us</span>
+    msg.ack() <span class="cmt">// if we don't do this, no more msgs will come to us</span>
   }
 }
-readHandle.error foreach { System.error.println(<span class="lit">"zomg! got an error "</span> + _.getMessage) }</pre></div><div class="toggleContainer block">
+readHandle.error.foreach { System.error.println(<span class="lit">"zomg! got an error "</span> + _.getMessage) }</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>

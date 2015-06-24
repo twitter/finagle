@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &mdash; Finagle 6.25.0 documentation</title>
+    <title>Servers &mdash; Finagle 6.26.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.25.0',
+        VERSION:     '6.26.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -79,7 +79,7 @@
 to a <cite>ListeningServer</cite>. The handle allows for management of server resources. The interface comes with
 variants that allow for serving a simple <cite>Service</cite> as well. Typical usage takes the form
 <tt class="docutils literal"><span class="pre">Protocol.serve(...)</span></tt>, for example:</p>
-<div class="highlight-text"><div class="highlight"><pre>val server = Http.serve(&quot;:8080&quot;, myService)
+<div class="highlight-text"><div class="highlight"><pre>val server = Httpx.serve(&quot;:8080&quot;, myService)
 Await.ready(server) // waits until the server resources are released
 </pre></div>
 </div>

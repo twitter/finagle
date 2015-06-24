@@ -283,28 +283,28 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.java.ClientBase#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get(key:String,waitFor:com.twitter.util.Duration):com.twitter.util.Future[org.jboss.netty.buffer.ChannelBuffer]"></a>
-      <a id="get(String,Duration):Future[ChannelBuffer]"></a>
+      <a id="get(key:String,waitFor:com.twitter.util.Duration):com.twitter.util.Future[com.twitter.io.Buf]"></a>
+      <a id="get(String,Duration):Future[Buf]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="waitFor">waitFor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
+        <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="waitFor">waitFor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.java.Client#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get(key:String):com.twitter.util.Future[org.jboss.netty.buffer.ChannelBuffer]"></a>
-      <a id="get(String):Future[ChannelBuffer]"></a>
+      <a id="get(key:String):com.twitter.util.Future[com.twitter.io.Buf]"></a>
+      <a id="get(String):Future[Buf]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
+        <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>
@@ -426,15 +426,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.java.ClientBase#set" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="set(key:String,value:org.jboss.netty.buffer.ChannelBuffer,expiry:com.twitter.util.Time):com.twitter.util.Future[com.twitter.finagle.kestrel.protocol.Response]"></a>
-      <a id="set(String,ChannelBuffer,Time):Future[Response]"></a>
+      <a id="set(key:String,value:com.twitter.io.Buf,expiry:com.twitter.util.Time):com.twitter.util.Future[com.twitter.finagle.kestrel.protocol.Response]"></a>
+      <a id="set(String,Buf,Time):Future[Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
+        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>
@@ -465,15 +465,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.java.Client#set" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="set(key:String,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[com.twitter.finagle.kestrel.protocol.Response]"></a>
-      <a id="set(String,ChannelBuffer):Future[Response]"></a>
+      <a id="set(key:String,value:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.kestrel.protocol.Response]"></a>
+      <a id="set(String,Buf):Future[Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
+        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="java.lang.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>
@@ -561,15 +561,15 @@
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.java.ClientBase#write" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="write(queueName:String,offer:com.twitter.concurrent.Offer[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Throwable]"></a>
-      <a id="write(String,Offer[ChannelBuffer]):Future[Throwable]"></a>
+      <a id="write(queueName:String,offer:com.twitter.concurrent.Offer[com.twitter.io.Buf]):com.twitter.util.Future[Throwable]"></a>
+      <a id="write(String,Offer[Buf]):Future[Throwable]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="java.lang.String">String</span></span>, <span name="offer">offer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Throwable">Throwable</span>]</span>
+        <span class="name">write</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="java.lang.String">String</span></span>, <span name="offer">offer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Throwable">Throwable</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.kestrel.java.ClientBase">ClientBase</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.java.Client">Client</a></dd></dl></div>

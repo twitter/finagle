@@ -81,20 +81,19 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.service.FailureAccrualFactory.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ParamextendsProductwithSerializable"></a>
+              <ol><li name="com.twitter.finagle.service.FailureAccrualFactory.Param" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ParamextendsAnyRef"></a>
       <a id="Param:Param"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="FailureAccrualFactory$$Param.html"><span class="name">Param</span></a><span class="params">(<span name="numFailures">numFailures: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="markDeadFor">markDeadFor: () ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="FailureAccrualFactory$$Param.html"><span class="name">Param</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
-      <p class="comment cmt">A class eligible for configuring a <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">com.twitter.finagle.Stackable</a>
-<span class="extype" name="com.twitter.finagle.service.FailFastFactory">com.twitter.finagle.service.FailFastFactory</span>.</p>
+      <p class="comment cmt">An ADT representing a <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>s <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Param</a>, which is one of the following:</p>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory.State" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="StateextendsAnyRef"></a>
       <a id="State:State"></a>
@@ -206,19 +205,36 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
-    </li><li name="com.twitter.finagle.service.FailureAccrualFactory.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Param"></a>
-      <a id="Param:Param"></a>
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#Param" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Param(numFailures:Int,markDeadFor:com.twitter.util.Duration):com.twitter.finagle.service.FailureAccrualFactory.Param"></a>
+      <a id="Param(Int,Duration):Param"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">object</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <a href="FailureAccrualFactory$$Param$.html"><span class="name">Param</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Param</span><span class="params">(<span name="numFailures">numFailures: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="markDeadFor">markDeadFor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="FailureAccrualFactory$$Param.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Param">Param</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.
+</p></div><dl class="paramcmts block"><dt class="param">numFailures</dt><dd class="cmt"><p>The number of consecutive failures before marking an endpoint as dead.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>The duration to mark an endpoint as dead.
+</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#Param" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Param(numFailures:Int,markDeadFor:()=&gt;com.twitter.util.Duration):com.twitter.finagle.service.FailureAccrualFactory.Param"></a>
+      <a id="Param(Int,()⇒Duration):Param"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Param</span><span class="params">(<span name="numFailures">numFailures: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="markDeadFor">markDeadFor: () ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="FailureAccrualFactory$$Param.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Param">Param</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.</p><p>Note there is a Java-friendly method in the API that takes <code>Duration</code> as a value, not a function.
+</p></div><dl class="paramcmts block"><dt class="param">numFailures</dt><dd class="cmt"><p>The number of consecutive failures before marking an endpoint as dead.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>The duration to mark an endpoint as dead.
+</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>

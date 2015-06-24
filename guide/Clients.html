@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.25.0 documentation</title>
+    <title>Clients &mdash; Finagle 6.26.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.25.0',
+        VERSION:     '6.26.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
     <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -98,10 +98,10 @@ the rich API, a more specialized API is exposed. See the protocols section on
 <p>A default Finagle client is designed to maximize success and minimize latency.
 Each request dispatched through a client will flow through various modules that
 help it achieve these goals. The modules are logically separated into three
-stacks: the <cite>loadbalancer stack</cite> balances requests across multiple endpoints, the
-<cite>endpoint stack</cite> provides failure management and connection pooling, and
-the <cite>connection stack</cite> provides connection life-cycle management and implements
-the wire protocol.</p>
+stacks: the <cite>client stack</cite> manages <cite>name</cite> resolution and balances requests
+across multiple endpoints, the <cite>endpoint stack</cite> provides session qualification
+and connection pooling, and the <cite>connection stack</cite> provides connection life-cycle
+management and implements the wire protocol.</p>
 <div class="figure">
 <img src="_images/clientstack.svg" /><p class="caption">Fig. 1: A visual representation of each module in a default Finagle client
 that is configured with three endpoints and connections.</p>
@@ -140,17 +140,22 @@ certain amount of idle time. The module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p><a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><em>Related stats</em></a></p>
 <p>Finally, timeouts can be enforced outside of these modules on a per-request level using
-<cite>Future#within</cite> <a class="footnote-reference" href="#id3" id="id2">[1]</a>:</p>
+<cite>Future#within</cite> <a class="footnote-reference" href="#raise" id="id2">[1]</a>:</p>
 <div class="highlight-text"><div class="highlight"><pre>val f = client(request)
 f.within(1.seconds) onSuccess { ... } onFailure { ... }
 </pre></div>
 </div>
-<table class="docutils footnote" frame="void" id="id3" rules="none">
+<table class="docutils footnote" frame="void" id="raise" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>The <cite>Future#raiseWithin</cite> variant creates a new future
-that attempts to cancels the original future if a timeout
-occurs.</td></tr>
+that invokes raise on the future when the timeout occurs.
+The affects of which are dependent on the producer of the
+future. In most cases, Finagle will attempt to cancel the
+request if it hasn&#8217;t already been dispatched. If it has been
+dispatched, the behavior is dependent on the protocol (without
+protocol support Finagle needs to tear down the session to signal
+cancellation).</td></tr>
 </tbody>
 </table>
 </div>
@@ -162,30 +167,162 @@ a <a class="reference external" href="https://github.com/twitter/finagle/blob/ma
 </div>
 <div class="section" id="load-balancer">
 <h3>Load Balancer<a class="headerlink" href="#load-balancer" title="Permalink to this headline">¶</a></h3>
-<p id="id4">The role of the load balancer is to equally distribute requests over a collection
-of endpoints. The default balancing strategy, implemented by the
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/HeapBalancer.scala">HeapBalancer</a>, is
-to pick the host with the least number of outstanding requests, which is similar to a
-least connections strategy in other load balancers. Additionally, the load balancer
-deliberately introduces jitter to avoid synchronicity (and thundering herds) in a
-distributed system and to ensure even balancing when request concurrency is low.
-The load balancer also takes endpoint availability into consideration (as defined
-by <cite>ServiceFactory#isAvailable</cite>). If all endpoints are unavailable the load balancer
-ignores this field and continues to balance on least loaded. This remains true until
-a host becomes available again.</p>
-<p><a class="reference internal" href="Metrics.html#loadbalancer-stats"><em>Related stats</em></a></p>
+<p id="id3">Finagle clients come equipped with a load balancer, a pivotal component in the client stack, whose
+responsibility is to dynamically distribute load across a collection of interchangeable endpoints.
+This gives Finagle an opportunity to maximize success and optimize request distribution in an attempt
+to tighten the client&#8217;s tail latencies. To achieve this in a non-cooperative distributed environment,
+the balancer must pass accurate judgments about endpoints based only on its local view. An effective
+feedback mechanism in such environments is latency; the balancers load metrics make use of this
+either implicitly or explicitly.</p>
+<p>Balancer implementations are split into two parts: A <cite>load metric</cite> and a <cite>distributor</cite>. Each node in the
+balancer maintains the load metric and a distributor uses the data to select an endpoint. The following
+distributor and load metric configurations are available:</p>
+<div class="section" id="heap-least-loaded">
+<h4>Heap + Least Loaded<a class="headerlink" href="#heap-least-loaded" title="Permalink to this headline">¶</a></h4>
+<p>The distributor is a heap which is shared across requests. Each node in the heap maintains a count of
+outstanding request. The count is incremented when a request is dispatched and decremented when we
+receive a response (note the dependence on latency). The heap is min-ordered to allow for
+efficient access to the least loaded. The distributor inherits all the nice properties of the heap
+(i.e. selecting the top of the heap is constant time and other common operations take <cite>O(log n)</cite>).
+This configuration has some limitations. In particular, it’s difficult to use weighted nodes or
+swap out a load metric without sacrificing the performance of the heap. What’s more, the heap must be
+updated atomically by each request and thus represents a highly contended resource.</p>
 </div>
+<div class="section" id="power-of-two-choices-p2c-least-loaded">
+<h4>Power of Two Choices (P2C) + Least Loaded<a class="headerlink" href="#power-of-two-choices-p2c-least-loaded" title="Permalink to this headline">¶</a></h4>
+<p>The P2C distributor solves many of the limitations that are inherent with the Heap distributor and
+is the default Balancer for Finagle clients. By employing an elegant (and surprising) mathematical
+phenomenon <a class="footnote-reference" href="#p2c" id="id4">[2]</a>, the algorithm randomly picks two nodes from the collection of endpoints and selects
+the least loaded of the two. By repeatedly using this strategy, we can expect a manageable upper bound on
+the maximum load of any server <a class="footnote-reference" href="#p2c-bounds" id="id5">[3]</a>. The default load metric for the P2C balancer is least
+loaded, however, because P2C is fully concurrent <a class="footnote-reference" href="#p2c-jmh" id="id6">[4]</a>, it allows us to efficiently implement
+weighted nodes <a class="footnote-reference" href="#weights-api" id="id7">[5]</a> or different load metrics with minimal per-request costs.</p>
+</div>
+<div class="section" id="experimental">
+<h4>Experimental<a class="headerlink" href="#experimental" title="Permalink to this headline">¶</a></h4>
+<p>The following balancer configurations were developed to target specific problems we encounter at
+Twitter. They are considered experimental, so they may change as we continue to understand their
+place in the client stack.</p>
+</div>
+<div class="section" id="p2c-peak-ewma">
+<h4>P2C + Peak Ewma<a class="headerlink" href="#p2c-peak-ewma" title="Permalink to this headline">¶</a></h4>
+<p>Backed by the P2C distributor, Peak EWMA uses a moving average over an endpoint&#8217;s round-trip time (RTT)
+that is highly sensitive to peaks. This average is then weighted by the number of outstanding requests,
+effectively increasing our resolution per-request. It is designed to react to slow endpoints more quickly than
+<cite>least loaded</cite> by penalizing them when they exhibit slow response times. This load metric operates under
+the assumption that a loaded endpoint takes time to recover and so it is generally safe for the
+advertised load to incorporate an endpoint&#8217;s history. However, this assumption breaks down in the
+presence of long polling clients.</p>
+</div>
+<div class="section" id="aperture-least-loaded">
+<h4>Aperture + Least Loaded<a class="headerlink" href="#aperture-least-loaded" title="Permalink to this headline">¶</a></h4>
+<p>All the previously mentioned configurations operate optimally under high load. That is, without
+sufficient concurrent load, the previous distributors can degrade to random selection. The Aperture
+distributor aims to remedy this among other things. By employing a simple feedback controller based
+on the client&#8217;s load, the distributor balances across a subset of servers to meet a specified
+target load band. The principle of hysteresis is applied to the aperture to avoid rapid fluctuations
+and dampen the effects of large load spikes.</p>
+<p>The benefits of Aperture are promising:</p>
+<ol class="arabic simple">
+<li>A client uses resources commensurate to offered load. In particular,
+it does not have to open sessions with every service in a large cluster.
+This is especially important when offered load and cluster capacity
+are mismatched.</li>
+<li>It balances over fewer, and thus warmer, services. This also means that
+clients pay the penalty of session establishment less frequently.</li>
+<li>It increases the efficacy of least-loaded balancing which, in order to
+work well, requires concurrent load.</li>
+</ol>
+</div>
+<div class="section" id="role-of-balancers-in-resiliency">
+<h4>Role of Balancers in Resiliency<a class="headerlink" href="#role-of-balancers-in-resiliency" title="Permalink to this headline">¶</a></h4>
+<p>The balancer&#8217;s primary goal is to attempt to optimize request latency. Coincidentally, to do this
+well, it also needs to properly qualify sessions. These two concerns are treated separately in the
+client stack. Finagle has dedicated modules which track failures and control the <cite>com.twitter.finagle.Status</cite>
+of an endpoint. The balancers selection process takes this status into account. However, without
+protocol support the qualification happens in-band with requests (i.e. it requires failed requests).
+We are exploring better (explicit) session qualification with protocol support (e.g. Mux).</p>
+<p>Additionally, clients must be resilient to instabilities in the service discovery system.
+Historically, Finagle has employed solutions like <cite>com.twitter.finagle.addr.StabilizingAddr</cite> and
+<cite>com.twitter.finagle.serverset2.Stabilizer</cite> to validate changes to the balancers endpoint collection.
+Since we have information about the availability of an endpoint in the balancer, it may represent
+a viable intersection to validate such changes. Balancers have a &#8220;probation&#8221; capability built-in
+behind a client parameter <a class="footnote-reference" href="#probation" id="id8">[6]</a>.</p>
+<p><a class="reference internal" href="Metrics.html#loadbalancer-stats"><em>Related stats</em></a></p>
+<table class="docutils footnote" frame="void" id="p2c" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>Michael Mitzenmacher. 2001. The Power of Two Choices in
+Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12, 10 (October 2001), 1094-1104.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="p2c-bounds" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[3]</a></td><td>The maximum load on any server is roughly bound by <cite>ln(ln(n))</cite> where n is the number
+of requests.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="p2c-jmh" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[4]</a></td><td><p class="first">Our microbenchmark exposes the stark differences:</p>
+<div class="last highlight-text"><div class="highlight"><pre>HeapBalancerBench.getAndPut                  1000  avgt   10  8686.479 ± 261.360  ns/op
+P2CBalancerBench.leastLoadedGetAndPut        1000  avgt   10  1692.388 ± 103.164  ns/op
+</pre></div>
+</div>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="weights-api" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[5]</a></td><td>Weights are built into all the balancers except for the HeapBalancer. The API exposed
+for this is in <cite>com.twitter.finagle.WeightedSocketAddress</cite>. The name resolver that translates
+logical destinations to <cite>com.twitter.finagle.Addr`s can wrap concrete address with a `Double</cite>
+which influences the balancer&#8217;s distributor during the selection process.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="probation" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[6]</a></td><td>See <cite>com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation</cite></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="session-qualification">
+<h3>Session Qualification<a class="headerlink" href="#session-qualification" title="Permalink to this headline">¶</a></h3>
+<p>The following modules aim to preemptively disable sessions that will likely fail requests.
+From the perspective of the load balancer, they act as circuit breakers which, when
+triggered, temporarily suspend the use of a particular endpoint.</p>
 <div class="section" id="failure-accrual">
-<h3>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h3>
+<h4>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h4>
 <p>The <tt class="docutils literal"><span class="pre">Failure</span> <span class="pre">Accrual</span></tt> module marks itself as unavailable based on the number of observed
 failures. The module remains unavailable for a predefined duration. Recall
 that the availability is propagated through the stack. Thus the load balancer
 will avoid using an endpoint where the failure accrual module is unavailable.
 The module is implemented by <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailureAccrualFactory.scala">FailureAccrualFactory</a>.</p>
 </div>
+<div class="section" id="fail-fast">
+<span id="client-fail-fast"></span><h4>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h4>
+<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> module
+attempts to reduce the number of requests dispatched to endpoints that are likely
+to fail. It works by marking downed hosts when a connection fails, and launching a
+background process that repeatedly attempts to reconnect with a given backoff schedule.
+During the time that a host is marked down, the factory is marked unavailable (and thus
+the load balancer above it will avoid its use). The factory becomes available
+again on success or when the back-off schedule runs out.</p>
+<p>See the FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><em>better understand</em></a> why clients
+might be seeing <tt class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></tt>&#8216;s.</p>
+<p><a class="reference internal" href="Metrics.html#fail-fast-stats"><em>Related stats</em></a></p>
+</div>
+</div>
 <div class="section" id="pooling">
 <h3>Pooling<a class="headerlink" href="#pooling" title="Permalink to this headline">¶</a></h3>
-<p id="watermark-pool">Finagle provides a generic pool that maintains a collection of
+<div class="section" id="watermark-pool">
+<span id="id9"></span><h4>Watermark Pool<a class="headerlink" href="#watermark-pool" title="Permalink to this headline">¶</a></h4>
+<p>Finagle provides a generic pool that maintains a collection of
 service instances. Each endpoint the client connects to has an independent
 pool with high and low watermarks. The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/WatermarkPool.scala">WatermarkPool</a> keeps
 persistent services up to the lower bound. It will keep making new services up
@@ -193,7 +330,10 @@ to upper bound if you checkout more than lower bound services, but when
 you release those services above the lower bound, it immediately tries
 to close them. This, however, creates a lot of connection churn if your
 application consistently requires more than lower bound connections.</p>
-<p id="caching-pool">As a result, there is a separate facility for caching, with some TTL,
+</div>
+<div class="section" id="caching-pool">
+<span id="id10"></span><h4>Caching Pool<a class="headerlink" href="#caching-pool" title="Permalink to this headline">¶</a></h4>
+<p>To reduce connection churn, there is a separate facility for caching, with some TTL,
 services above the lower bound. The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/pool/CachingPool.scala">CachingPool</a>
 caches <em>regardless</em> of whether there are more than lower-bound open services;
 it&#8217;s always caching up to (upper-bound - lower-bound) services. The cache reaches
@@ -205,18 +345,6 @@ queuing requests above the high watermark, and applying a TTL for
 services that are between [low, high].</p>
 <p><a class="reference internal" href="Metrics.html#pool-stats"><em>Related stats</em></a></p>
 </div>
-<div class="section" id="fail-fast">
-<span id="client-fail-fast"></span><h3>Fail Fast<a class="headerlink" href="#fail-fast" title="Permalink to this headline">¶</a></h3>
-<p>The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/FailFastFactory.scala">FailFast</a> module
-attempts to reduce the number of requests dispatched to endpoints that are likely
-to fail. It works by marking downed hosts when a connection fails, and launching a
-background process that repeatedly attempts to reconnect with a given backoff schedule.
-During the time that a host is marked down, the factory is marked unavailable (and thus
-the load balancer above it will avoid its use). The factory becomes available
-again on success or when the back-off schedule runs out.</p>
-<p>See the FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><em>better understand</em></a> why clients
-might be seeing <tt class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></tt>&#8216;s.</p>
-<p><a class="reference internal" href="Metrics.html#fail-fast-stats"><em>Related stats</em></a></p>
 </div>
 <div class="section" id="retries">
 <h3>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h3>
@@ -264,10 +392,25 @@ the modules inside a Finagle client. We&#8217;ve moved away from this model for 
 <li><a class="reference internal" href="#observability">Observability</a></li>
 <li><a class="reference internal" href="#timeouts-expiration">Timeouts &amp; Expiration</a></li>
 <li><a class="reference internal" href="#request-draining">Request Draining</a></li>
-<li><a class="reference internal" href="#load-balancer">Load Balancer</a></li>
+<li><a class="reference internal" href="#load-balancer">Load Balancer</a><ul>
+<li><a class="reference internal" href="#heap-least-loaded">Heap + Least Loaded</a></li>
+<li><a class="reference internal" href="#power-of-two-choices-p2c-least-loaded">Power of Two Choices (P2C) + Least Loaded</a></li>
+<li><a class="reference internal" href="#experimental">Experimental</a></li>
+<li><a class="reference internal" href="#p2c-peak-ewma">P2C + Peak Ewma</a></li>
+<li><a class="reference internal" href="#aperture-least-loaded">Aperture + Least Loaded</a></li>
+<li><a class="reference internal" href="#role-of-balancers-in-resiliency">Role of Balancers in Resiliency</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#session-qualification">Session Qualification</a><ul>
 <li><a class="reference internal" href="#failure-accrual">Failure Accrual</a></li>
-<li><a class="reference internal" href="#pooling">Pooling</a></li>
 <li><a class="reference internal" href="#fail-fast">Fail Fast</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pooling">Pooling</a><ul>
+<li><a class="reference internal" href="#watermark-pool">Watermark Pool</a></li>
+<li><a class="reference internal" href="#caching-pool">Caching Pool</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#retries">Retries</a></li>
 </ul>
 </li>

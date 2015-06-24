@@ -39,7 +39,9 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Constructors for various load balancers.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Constructor methods for various load balancers. The methods take balancer
+specific parameters and return a <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> that allows you
+to easily inject a balancer into the Finagle stack via client configuration.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
@@ -151,6 +153,40 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MaxEffort:Int"></a>
+      <a id="MaxEffort:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MaxEffort</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Default MaxEffort used in constructors below.</p>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#aperture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,timer:com.twitter.util.Timer,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a>
+      <a id="aperture(Duration,Double,Double,Int,Timer,Int,Rng):LoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">aperture</span><span class="params">(<span name="smoothWin">smoothWin: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.seconds</a></span></span></span>, <span name="lowLoad">lowLoad: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">0.5</span></span>, <span name="highLoad">highLoad: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="minAperture">minAperture: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The aperture load-band balancer balances load to the smallest
+subset (&quot;aperture&quot;) of services so that:</p><div class="fullcomment"><div class="comment cmt"><p>The aperture load-band balancer balances load to the smallest
+subset (&quot;aperture&quot;) of services so that:</p><ol class="decimal"><li>The concurrent load, measured over a window specified by
+    <code>smoothWin</code>, to each service stays within the load band, delimited
+    by <code>lowLoad</code> and <code>highLoad</code>.
+ 2. Services receive load proportional to the ratio of their
+    weights.</li></ol><p>Unavailable services are not counted--the aperture expands as
+needed to cover those that are available.
+</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -254,6 +290,23 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#heap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="heap(rng:scala.util.Random):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a>
+      <a id="heap(Random):LoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">heap</span><span class="params">(<span name="rng">rng: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.util.Random" class="extype" target="_top">Random</a> = <span class="symbol">new Random</span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">An efficient strictly least-loaded balancer that maintains
+an internal heap.</p><div class="fullcomment"><div class="comment cmt"><p>An efficient strictly least-loaded balancer that maintains
+an internal heap. Note, because weights are not supported by
+the HeapBalancer they are ignored when the balancer is constructed.
+</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -280,84 +333,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.Balancers#newAperture" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newAperture[Req,Rep](activity:com.twitter.util.Activity[Traversable[(com.twitter.finagle.ServiceFactory[Req,Rep],Double)]],smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,maxEffort:Int,rng:com.twitter.finagle.util.Rng,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="newAperture[Req,Rep](Activity[Traversable[(ServiceFactory[Req,Rep],Double)]],Duration,Double,Double,Int,Int,Rng,Timer,StatsReceiver,NoBrokersAvailableException):ServiceFactory[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newAperture</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="activity">activity: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Traversable">Traversable</span>[(<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newAperture.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newAperture.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a>)]]</span>, <span name="smoothWin">smoothWin: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.seconds</a></span></span></span>, <span name="lowLoad">lowLoad: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">0.5</span></span>, <span name="highLoad">highLoad: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="minAperture">minAperture: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">5</span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Rng.threadLocal</a></span></span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="emptyException">emptyException: <a href="../NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a> = <span class="symbol"><span class="name"><a href="../../../package.html">new NoBrokersAvailableException</a></span></span></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newAperture.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newAperture.Rep">Rep</span>]</span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.loadbalancer.Balancers#newHeap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newHeap[Req,Rep](factories:com.twitter.util.Activity[Set[com.twitter.finagle.ServiceFactory[Req,Rep]]],statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:Throwable,rng:scala.util.Random):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="newHeap[Req,Rep](Activity[Set[ServiceFactory[Req,Rep]]],StatsReceiver,Throwable,Random):ServiceFactory[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newHeap</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="factories">factories: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newHeap.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newHeap.Rep">Rep</span>]]]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="emptyException">emptyException: <span class="extype" name="scala.Throwable">Throwable</span> = <span class="symbol"><span class="name"><a href="../../../package.html">new NoBrokersAvailableException</a></span></span></span>, <span name="rng">rng: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.util.Random" class="extype" target="_top">Random</a> = <span class="symbol">new Random</span></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newHeap.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newHeap.Rep">Rep</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">An efficient strictly least-loaded balancer that maintains
-an internal heap.</p>
-    </li><li name="com.twitter.finagle.loadbalancer.Balancers#newP2C" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newP2C[Req,Rep](activity:com.twitter.util.Activity[Traversable[(com.twitter.finagle.ServiceFactory[Req,Rep],Double)]],maxEffort:Int,rng:com.twitter.finagle.util.Rng,statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="newP2C[Req,Rep](Activity[Traversable[(ServiceFactory[Req,Rep],Double)]],Int,Rng,StatsReceiver,NoBrokersAvailableException):ServiceFactory[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newP2C</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="activity">activity: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Traversable">Traversable</span>[(<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2C.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2C.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a>)]]</span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">5</span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Rng.threadLocal</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="emptyException">emptyException: <a href="../NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a> = <span class="symbol"><span class="name"><a href="../../../package.html">new NoBrokersAvailableException</a></span></span></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2C.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2C.Rep">Rep</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">An O(1), concurrent, weighted least-loaded fair load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>An O(1), concurrent, weighted least-loaded fair load balancer.
-This uses the ideas behind &quot;power of 2 choices&quot; [1] combined with
-O(1) biased coin flipping through the aliasing method, described
-in <a href="../util/Drv.html" class="extype" name="com.twitter.finagle.util.Drv">Drv</a>.
-</p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
-expend on a load balancing decision without reweighing.
-</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
-deterministic tests.
-</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>The stats receiver to which operational
-statistics are reported.</p><p>[1] Michael Mitzenmacher. 2001. The Power of Two Choices in
-Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
-10 (October 2001), 1094-1104.
-</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.Balancers#newP2CPeakEwma" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newP2CPeakEwma[Req,Rep](activity:com.twitter.util.Activity[Traversable[(com.twitter.finagle.ServiceFactory[Req,Rep],Double)]],decayTime:com.twitter.util.Duration,maxEffort:Int,rng:com.twitter.finagle.util.Rng,statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="newP2CPeakEwma[Req,Rep](Activity[Traversable[(ServiceFactory[Req,Rep],Double)]],Duration,Int,Rng,StatsReceiver,NoBrokersAvailableException):ServiceFactory[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newP2CPeakEwma</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="activity">activity: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Traversable">Traversable</span>[(<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2CPeakEwma.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2CPeakEwma.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a>)]]</span>, <span name="decayTime">decayTime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">5</span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Rng.threadLocal</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="emptyException">emptyException: <a href="../NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a> = <span class="symbol"><span class="name"><a href="../../../package.html">new NoBrokersAvailableException</a></span></span></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2CPeakEwma.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.Balancers.newP2CPeakEwma.Rep">Rep</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Like <a href="#newP2C[Req,Rep](activity:com.twitter.util.Activity[Traversable[(com.twitter.finagle.ServiceFactory[Req,Rep],Double)]],maxEffort:Int,rng:com.twitter.finagle.util.Rng,statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#newP2C">newP2C</a> but using the Peak EWMA load metric.</p><div class="fullcomment"><div class="comment cmt"><p>Like <a href="#newP2C[Req,Rep](activity:com.twitter.util.Activity[Traversable[(com.twitter.finagle.ServiceFactory[Req,Rep],Double)]],maxEffort:Int,rng:com.twitter.finagle.util.Rng,statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#newP2C">newP2C</a> but using the Peak EWMA load metric.</p><p>Peak EWMA is designed to converge quickly when encountering
-slow endpoints. It is quick to react to latency spikes, recovering
-only cautiously. Peak EWMA takes history into account, so that
-slow behavior is penalized relative to the supplied decay time.
-</p></div><dl class="paramcmts block"><dt class="param">decayTime</dt><dd class="cmt"><p>The window of latency observations.
-</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
-expend on a load balancing decision without reweighing.
-</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
-deterministic tests.
-</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>The stats receiver to which operational
-statistics are reported.</p><p>[1] Michael Mitzenmacher. 2001. The Power of Two Choices in
-Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
-10 (October 2001), 1094-1104.
-</p></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -384,6 +359,54 @@ Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#p2c" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a>
+      <a id="p2c(Int,Rng):LoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">p2c</span><span class="params">(<span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">An O(1), concurrent, weighted least-loaded fair load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>An O(1), concurrent, weighted least-loaded fair load balancer.
+This uses the ideas behind &quot;power of 2 choices&quot; [1] combined with
+O(1) biased coin flipping through the aliasing method, described
+in <a href="../util/Drv.html" class="extype" name="com.twitter.finagle.util.Drv">Drv</a>.
+</p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
+expend on a load balancing decision without reweighing.
+</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
+deterministic tests.</p><p>[1] Michael Mitzenmacher. 2001. The Power of Two Choices in
+Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
+10 (October 2001), 1094-1104.
+</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#p2cPeakEwma" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="p2cPeakEwma(decayTime:com.twitter.util.Duration,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a>
+      <a id="p2cPeakEwma(Duration,Int,Rng):LoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">p2cPeakEwma</span><span class="params">(<span name="decayTime">decayTime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">10.seconds</a></span></span></span>, <span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>, <span name="rng">rng: <a href="../util/Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Rng.threadLocal</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Like <a href="#p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#p2c">p2c</a> but using the Peak EWMA load metric.</p><div class="fullcomment"><div class="comment cmt"><p>Like <a href="#p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#p2c">p2c</a> but using the Peak EWMA load metric.</p><p>Peak EWMA uses a moving average over an endpoint's round-trip time (RTT) that is
+highly sensitive to peaks. This average is then weighted by the number of outstanding
+requests, effectively increasing our resolution per-request. It is designed to react
+to slow endpoints more quickly than least-loaded by penalizing them when they exhibit
+slow response times. This load metric operates under the assumption that a loaded
+endpoint takes time to recover and so it is generally safe for the advertised load
+to incorporate an endpoint's history. However, this assumption breaks down in the
+presence of long polling clients.
+</p></div><dl class="paramcmts block"><dt class="param">decayTime</dt><dd class="cmt"><p>The window of latency observations.
+</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
+expend on a load balancing decision without reweighing.
+</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
+deterministic tests.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

@@ -43,6 +43,9 @@
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.httpx.netty.HttpRequestProxy">HttpRequestProxy</span>, <a href="Message.html" class="extype" name="com.twitter.finagle.httpx.Message">Message</a>, <span class="extype" name="com.twitter.finagle.httpx.netty.HttpMessageProxy">HttpMessageProxy</span>, <span class="extype" name="scala.Proxy">Proxy</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a href="RequestProxy.html" class="extype" name="com.twitter.finagle.httpx.RequestProxy">RequestProxy</a></div>
         </div></div>
         
 
@@ -585,6 +588,24 @@ Codec, but this method allows you to override that.</p></div><dl class="attribut
       <p class="shortcomment cmt">Cookies.</p><div class="fullcomment"><div class="comment cmt"><p>Cookies. In a request, this uses the Cookie headers.
 In a response, it uses the Set-Cookie headers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.httpx.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.Request#ctx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ctx:com.twitter.finagle.httpx.Request.Schema.Record"></a>
+      <a id="ctx:Record"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ctx</span><span class="result">: <span class="extype" name="com.twitter.collection.RecordSchema.Record">Record</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Arbitrary user-defined context associated with this request object.</p><div class="fullcomment"><div class="comment cmt"><p>Arbitrary user-defined context associated with this request object.
+<a href="https://twitter.github.io/util/docs/index.html#com.twitter.collection.RecordSchema.Record" class="extype" target="_top">RecordSchema.Record</a> is
+used here, rather than <span class="extype" name="com.twitter.finagle.Context">Context</span> or similar
+out-of-band mechanisms, to make the connection between the request and its
+associated context explicit.
+</p></div></div>
     </li><li name="com.twitter.finagle.httpx.Message#date" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="date:Option[String]"></a>
       <a id="date:Option[String]"></a>

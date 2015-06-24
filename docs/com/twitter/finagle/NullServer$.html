@@ -44,7 +44,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
 <span class="kw">def</span> main() { server = Http.serve(...) }
 <span class="kw">def</span> exit() { server.close() }</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.CloseAwaitably" class="extype" target="_top">CloseAwaitably</a>, <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a>, <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Awaitable" class="extype" target="_top">Awaitable</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.CloseAwaitably" class="extype" target="_top">CloseAwaitably</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.CloseAwaitably0" class="extype" target="_top">CloseAwaitably0</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>], <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a>, <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Awaitable" class="extype" target="_top">Awaitable</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -62,7 +62,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.NullServer"><span>NullServer</span></li><li class="in" name="com.twitter.util.CloseAwaitably"><span>CloseAwaitably</span></li><li class="in" name="com.twitter.finagle.ListeningServer"><span>ListeningServer</span></li><li class="in" name="com.twitter.finagle.Group"><span>Group</span></li><li class="in" name="com.twitter.util.Awaitable"><span>Awaitable</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.NullServer"><span>NullServer</span></li><li class="in" name="com.twitter.util.CloseAwaitably"><span>CloseAwaitably</span></li><li class="in" name="com.twitter.util.CloseAwaitably0"><span>CloseAwaitably0</span></li><li class="in" name="com.twitter.finagle.ListeningServer"><span>ListeningServer</span></li><li class="in" name="com.twitter.finagle.Group"><span>Group</span></li><li class="in" name="com.twitter.util.Awaitable"><span>Awaitable</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -279,8 +279,8 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
-    </li><li name="com.twitter.util.CloseAwaitably#closeAwaitably" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="closeAwaitably(f:=&gt;com.twitter.util.Future[Unit]):com.twitter.util.Future[Unit]"></a>
+    </li><li name="com.twitter.util.CloseAwaitably0#closeAwaitably" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="closeAwaitably(f:=&gt;com.twitter.util.Future[U]):com.twitter.util.Future[U]"></a>
       <a id="closeAwaitably(⇒Future[Unit]):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -291,7 +291,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="name">closeAwaitably</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>CloseAwaitably</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>CloseAwaitably0</dd></dl></div>
     </li><li name="com.twitter.finagle.NullServer#closeServer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="closeServer(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a>
       <a id="closeServer(Time):Future[Unit]"></a>
@@ -406,7 +406,7 @@ element of the group, even for dynamic groups.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.util.CloseAwaitably#isReady" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.util.CloseAwaitably0#isReady" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isReady(implicitpermit:com.twitter.util.Awaitable.CanAwait):Boolean"></a>
       <a id="isReady(CanAwait):Boolean"></a>
       <h4 class="signature">
@@ -418,7 +418,7 @@ element of the group, even for dynamic groups.
         <span class="name">isReady</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably0 → Awaitable</dd></dl></div>
     </li><li name="com.twitter.finagle.Group#map" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="map[U](f:T=&gt;U):com.twitter.finagle.Group[U]"></a>
       <a id="map[U]((SocketAddress)⇒U):Group[U]"></a>
@@ -507,8 +507,8 @@ been updated.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.util.CloseAwaitably#ready" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ready(timeout:com.twitter.util.Duration)(implicitpermit:com.twitter.util.Awaitable.CanAwait):CloseAwaitably.this.type"></a>
+    </li><li name="com.twitter.util.CloseAwaitably0#ready" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ready(timeout:com.twitter.util.Duration)(implicitpermit:com.twitter.util.Awaitable.CanAwait):CloseAwaitably0.this.type"></a>
       <a id="ready(Duration)(CanAwait):NullServer.this.type"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -519,7 +519,7 @@ been updated.
         <span class="name">ready</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.NullServer">NullServer</a>.this.type</span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably0 → Awaitable</dd></dl></div>
     </li><li name="com.twitter.finagle.Group#ref" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ref:java.util.concurrent.atomic.AtomicReference[Set[T]]"></a>
       <a id="ref:AtomicReference[Set[SocketAddress]]"></a>
@@ -533,8 +533,8 @@ been updated.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a></dd></dl></div>
-    </li><li name="com.twitter.util.CloseAwaitably#result" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="result(timeout:com.twitter.util.Duration)(implicitpermit:com.twitter.util.Awaitable.CanAwait):Unit"></a>
+    </li><li name="com.twitter.util.CloseAwaitably0#result" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="result(timeout:com.twitter.util.Duration)(implicitpermit:com.twitter.util.Awaitable.CanAwait):U"></a>
       <a id="result(Duration)(CanAwait):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -545,7 +545,7 @@ been updated.
         <span class="name">result</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="permit">permit: <span class="extype" name="com.twitter.util.Awaitable.CanAwait">CanAwait</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably → Awaitable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CloseAwaitably0 → Awaitable</dd></dl></div>
     </li><li name="com.twitter.finagle.ListeningServer#set" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="set:com.twitter.util.Var[scala.collection.immutable.Set[java.net.SocketAddress]]"></a>
       <a id="set:Var[Set[SocketAddress]]"></a>
@@ -653,6 +653,8 @@ been updated.
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.util.CloseAwaitably">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.CloseAwaitably" class="extype" target="_top">CloseAwaitably</a></h3>
+            </div><div class="parent" name="com.twitter.util.CloseAwaitably0">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.CloseAwaitably0" class="extype" target="_top">CloseAwaitably0</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.ListeningServer">
               <h3>Inherited from <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></h3>
             </div><div class="parent" name="com.twitter.finagle.Group">

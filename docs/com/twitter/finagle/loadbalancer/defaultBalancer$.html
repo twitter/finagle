@@ -35,11 +35,22 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">defaultBalancer</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <span class="name deprecated" title="Deprecated: (Since version 2015-06-15) Use com.twitter.finagle.loadbalancer.Balancers per-client.">defaultBalancer</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>We expose the ability to configure balancers per-process via flags. However,
+this is generally not a good idea as Finagle processes usually contain many clients.
+This will likely go away in the future or be no-op and, therfore, should not be
+depended on. Instead, configure your balancers via the <code>configured</code> method on
+clients:</p><p>{{
+   val balancer = Balancers.aperture(...)
+   Protocol.configured(LoadBalancerFactory.Param(balancer))
+}}
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-06-15)</i> Use com.twitter.finagle.loadbalancer.Balancers per-client.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="java.lang.String">String</span>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>

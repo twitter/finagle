@@ -35,15 +35,14 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Endpoint</span><span class="params">(<span name="name">name: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="addr">addr: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="HostPort.html" class="extype" name="com.twitter.finagle.serverset2.HostPort">HostPort</a>]</span>, <span name="shard">shard: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>, <span name="status">status: <a href="Endpoint$$Status$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.serverset2.Endpoint.Status.Value">Endpoint.Status.Value</a></span>, <span name="memberId">memberId: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Entry.html" class="extype" name="com.twitter.finagle.serverset2.Entry">Entry</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Endpoint</span><span class="params">(<span name="names">names: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="shard">shard: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="status">status: <a href="Endpoint$$Status$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.serverset2.Endpoint.Status.Value">Endpoint.Status.Value</a></span>, <span name="memberId">memberId: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Entry.html" class="extype" name="com.twitter.finagle.serverset2.Entry">Entry</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Endpoints encode a destination announced via serversets.
-</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>The endpoint name. None describes a default service
-endpoint.
-</p></dd><dt class="param">addr</dt><dd class="cmt"><p>The address of the endpoint.
-</p></dd><dt class="param">shard</dt><dd class="cmt"><p>The shard id of the endpoint.
+</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>The host of the endpoint (or null if unset).
+</p></dd><dt class="param">port</dt><dd class="cmt"><p>The port of the endpoint (or Int.MinValue if unset).
+</p></dd><dt class="param">shard</dt><dd class="cmt"><p>The shard id of the endpoint (or Int.MinValue if unset).
 </p></dd><dt class="param">status</dt><dd class="cmt"><p>The endpoint's status.
 </p></dd><dt class="param">memberId</dt><dd class="cmt"><p>The endpoint's member id,
 used as a foreign key for endpoints.
@@ -88,7 +87,7 @@ used as a foreign key for endpoints.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.serverset2.Endpoint#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(name:Option[String],addr:Option[com.twitter.finagle.serverset2.HostPort],shard:Option[Int],status:com.twitter.finagle.serverset2.Endpoint.Status.Value,memberId:String):com.twitter.finagle.serverset2.Endpoint"></a>
+      <a id="&lt;init&gt;(names:Array[String],host:String,port:Int,shard:Int,status:com.twitter.finagle.serverset2.Endpoint.Status.Value,memberId:String):com.twitter.finagle.serverset2.Endpoint"></a>
       <a id="&lt;init&gt;:Endpoint"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -96,13 +95,12 @@ used as a foreign key for endpoints.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Endpoint</span><span class="params">(<span name="name">name: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="addr">addr: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="HostPort.html" class="extype" name="com.twitter.finagle.serverset2.HostPort">HostPort</a>]</span>, <span name="shard">shard: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>, <span name="status">status: <a href="Endpoint$$Status$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.serverset2.Endpoint.Status.Value">Endpoint.Status.Value</a></span>, <span name="memberId">memberId: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+        <span class="name">Endpoint</span><span class="params">(<span name="names">names: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="shard">shard: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="status">status: <a href="Endpoint$$Status$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.serverset2.Endpoint.Status.Value">Endpoint.Status.Value</a></span>, <span name="memberId">memberId: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
       </span>
       </h4>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>The endpoint name. None describes a default service
-endpoint.
-</p></dd><dt class="param">addr</dt><dd class="cmt"><p>The address of the endpoint.
-</p></dd><dt class="param">shard</dt><dd class="cmt"><p>The shard id of the endpoint.
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>The host of the endpoint (or null if unset).
+</p></dd><dt class="param">port</dt><dd class="cmt"><p>The port of the endpoint (or Int.MinValue if unset).
+</p></dd><dt class="param">shard</dt><dd class="cmt"><p>The shard id of the endpoint (or Int.MinValue if unset).
 </p></dd><dt class="param">status</dt><dd class="cmt"><p>The endpoint's status.
 </p></dd><dt class="param">memberId</dt><dd class="cmt"><p>The endpoint's member id,
 used as a foreign key for endpoints.
@@ -181,19 +179,6 @@ used as a foreign key for endpoints.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.serverset2.Endpoint#addr" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addr:Option[com.twitter.finagle.serverset2.HostPort]"></a>
-      <a id="addr:Option[HostPort]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">addr</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="HostPort.html" class="extype" name="com.twitter.finagle.serverset2.HostPort">HostPort</a>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">The address of the endpoint.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -239,6 +224,19 @@ used as a foreign key for endpoints.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.serverset2.Endpoint#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(that:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.serverset2.Endpoint">Endpoint</a> → Equals → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -271,6 +269,19 @@ used as a foreign key for endpoints.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.serverset2.Endpoint#host" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="host:String"></a>
+      <a id="host:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">host</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The host of the endpoint (or null if unset).</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -298,21 +309,19 @@ used as a foreign key for endpoints.
       </h4>
       <p class="shortcomment cmt">The endpoint's member id,
 used as a foreign key for endpoints.</p>
-    </li><li name="com.twitter.finagle.serverset2.Endpoint#name" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="name:Option[String]"></a>
-      <a id="name:Option[String]"></a>
+    </li><li name="com.twitter.finagle.serverset2.Endpoint#names" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="names:Array[String]"></a>
+      <a id="names:Array[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">name</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">names</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The endpoint name.</p><div class="fullcomment"><div class="comment cmt"><p>The endpoint name. None describes a default service
-endpoint.
-</p></div></div>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -352,19 +361,34 @@ endpoint.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.serverset2.Endpoint#shard" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="shard:Option[Int]"></a>
-      <a id="shard:Option[Int]"></a>
+    </li><li name="com.twitter.finagle.serverset2.Endpoint#port" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="port:Int"></a>
+      <a id="port:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">shard</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
+        <span class="name">port</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">The shard id of the endpoint.</p>
+      <p class="shortcomment cmt">The port of the endpoint (or Int.</p><div class="fullcomment"><div class="comment cmt"><p>The port of the endpoint (or Int.MinValue if unset).
+</p></div></div>
+    </li><li name="com.twitter.finagle.serverset2.Endpoint#shard" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shard:Int"></a>
+      <a id="shard:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shard</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">The shard id of the endpoint (or Int.</p><div class="fullcomment"><div class="comment cmt"><p>The shard id of the endpoint (or Int.MinValue if unset).
+</p></div></div>
     </li><li name="com.twitter.finagle.serverset2.Endpoint#status" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="status:com.twitter.finagle.serverset2.Endpoint.Status.Value"></a>
       <a id="status:Endpoint.Status.Value"></a>

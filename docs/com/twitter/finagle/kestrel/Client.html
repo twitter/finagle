@@ -132,15 +132,15 @@ responsibility of the caller to release those resources directly.
       <p class="shortcomment cmt">Flush a queue.</p><div class="fullcomment"><div class="comment cmt"><p>Flush a queue. Empties all items from the queue without deleting the journal.
 </p></div></div>
     </li><li name="com.twitter.finagle.kestrel.Client#get" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="get(queueName:String,waitUpTo:com.twitter.util.Duration):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="get(String,Duration):Future[Option[ChannelBuffer]]"></a>
+      <a id="get(queueName:String,waitUpTo:com.twitter.util.Duration):com.twitter.util.Future[Option[com.twitter.io.Buf]]"></a>
+      <a id="get(String,Duration):Future[Option[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="waitUpTo">waitUpTo: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">0.seconds</a></span></span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">get</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="waitUpTo">waitUpTo: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">0.seconds</a></span></span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Dequeue an item.</p><div class="fullcomment"><div class="comment cmt"><p>Dequeue an item.
@@ -169,15 +169,15 @@ that message to the kestrel server &amp; reading the next one.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A read handle.
 </p></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.Client#set" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="set(queueName:String,value:org.jboss.netty.buffer.ChannelBuffer,expiry:com.twitter.util.Time):com.twitter.util.Future[com.twitter.finagle.kestrel.protocol.Response]"></a>
-      <a id="set(String,ChannelBuffer,Time):Future[Response]"></a>
+      <a id="set(queueName:String,value:com.twitter.io.Buf,expiry:com.twitter.util.Time):com.twitter.util.Future[com.twitter.finagle.kestrel.protocol.Response]"></a>
+      <a id="set(String,Buf,Time):Future[Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Time.epoch</a></span></span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
+        <span class="name">set</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Time.epoch</a></span></span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Enqueue an item.</p><div class="fullcomment"><div class="comment cmt"><p>Enqueue an item.
@@ -186,15 +186,15 @@ if it isn't dequeued in time).  Time.epoch (0) means the item will never
 expire.
 </p></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.Client#write" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="write(queueName:String,offer:com.twitter.concurrent.Offer[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Throwable]"></a>
-      <a id="write(String,Offer[ChannelBuffer]):Future[Throwable]"></a>
+      <a id="write(queueName:String,offer:com.twitter.concurrent.Offer[com.twitter.io.Buf]):com.twitter.util.Future[Throwable]"></a>
+      <a id="write(String,Offer[Buf]):Future[Throwable]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="offer">offer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
+        <span class="name">write</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="offer">offer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Throwable">Throwable</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Write indefinitely to the given queue.</p><div class="fullcomment"><div class="comment cmt"><p>Write indefinitely to the given queue.  The given offer is

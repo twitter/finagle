@@ -585,18 +585,20 @@
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.memcachedx.protocol.text.AbstractDecoder#decodeLine" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="decodeLine(buffer:org.jboss.netty.buffer.ChannelBuffer,needsData:Seq[org.jboss.netty.buffer.ChannelBuffer]=&gt;Option[Int])(continue:Seq[org.jboss.netty.buffer.ChannelBuffer]=&gt;com.twitter.finagle.memcachedx.protocol.text.Decoding):com.twitter.finagle.memcachedx.protocol.text.Decoding"></a>
-      <a id="decodeLine(ChannelBuffer,(Seq[ChannelBuffer])⇒Option[Int])((Seq[ChannelBuffer])⇒Decoding):Decoding"></a>
+      <a id="decodeLine(buffer:org.jboss.netty.buffer.ChannelBuffer,needsData:Seq[org.jboss.netty.buffer.ChannelBuffer]=&gt;Int)(continue:Seq[org.jboss.netty.buffer.ChannelBuffer]=&gt;com.twitter.finagle.memcachedx.protocol.text.Decoding):com.twitter.finagle.memcachedx.protocol.text.Decoding"></a>
+      <a id="decodeLine(ChannelBuffer,(Seq[ChannelBuffer])⇒Int)((Seq[ChannelBuffer])⇒Decoding):Decoding"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decodeLine</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="needsData">needsData: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="params">(<span name="continue">continue: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="../Decoding.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.text.Decoding">Decoding</a></span>)</span><span class="result">: <a href="../Decoding.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.text.Decoding">Decoding</a></span>
+        <span class="name">decodeLine</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="needsData">needsData: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="params">(<span name="continue">continue: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="../Decoding.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.text.Decoding">Decoding</a></span>)</span><span class="result">: <a href="../Decoding.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.text.Decoding">Decoding</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="../AbstractDecoder.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.text.AbstractDecoder">AbstractDecoder</a></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">needsData</dt><dd class="cmt"><p>return the number of bytes needed, or -1 if no more bytes
+                 are necessary.
+</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="../AbstractDecoder.html" class="extype" name="com.twitter.finagle.memcachedx.protocol.text.AbstractDecoder">AbstractDecoder</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -954,7 +956,7 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.util.StateMachine#transition" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="transition[A&lt;:&lt;?&gt;](command:&lt;?&gt;)(f:&lt;?&gt;):A"></a>
+      <a id="transition[A](command:String)(f:PartialFunction[StateMachine.this.State,A]):A"></a>
       <a id="transition[A](String)(PartialFunction[State,A]):A"></a>
       <h4 class="signature">
       <span class="modifier_kind">

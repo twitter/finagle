@@ -35,7 +35,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Peek</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Peek</span><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -80,7 +80,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.kestrel.protocol.Peek#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(queueName:org.jboss.netty.buffer.ChannelBuffer,timeout:Option[com.twitter.util.Duration]):com.twitter.finagle.kestrel.protocol.Peek"></a>
+      <a id="&lt;init&gt;(queueName:com.twitter.io.Buf,timeout:Option[com.twitter.util.Duration]):com.twitter.finagle.kestrel.protocol.Peek"></a>
       <a id="&lt;init&gt;:Peek"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -88,7 +88,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Peek</span><span class="params">(<span name="queueName">queueName: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span>
+        <span class="name">Peek</span><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span>
       </span>
       </h4>
       
@@ -309,15 +309,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.protocol.Peek#queueName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="queueName:org.jboss.netty.buffer.ChannelBuffer"></a>
-      <a id="queueName:ChannelBuffer"></a>
+      <a id="queueName:com.twitter.io.Buf"></a>
+      <a id="queueName:Buf"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">queueName</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+        <span class="name">queueName</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.kestrel.protocol.Peek">Peek</a> → <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a></dd></dl></div>

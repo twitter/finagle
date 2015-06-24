@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <a href="BackupRequestFilter$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.exp">exp</a></p>
-        <h1>BackupRequestFilter</h1>
+        <h1><a href="BackupRequestFilter$.html" title="Go to companion">BackupRequestFilter</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -45,7 +45,7 @@ the filter's operating behavior:</p><ul><li>counter <code>timeouts</code> indica
    that timed out and subsequently caused a backup request to
    be issued;</li><li>counter <code>won</code> indicates the number of original requests that won,
    including those that didn't actually race with a backup;</li><li>counter <code>lost</code> indicates the number of original requests that lost
-   a race with their corresponding backup request, and finally</li><li>guage <code>cutoff_ms</code> indicates the current backup request cutoff value
+   a race with their corresponding backup request, and finally</li><li>gauge <code>cutoff_ms</code> indicates the current backup request cutoff value
    in milliseconds.</li></ul><p>[1]: Dean, J. and Barroso, L.A. (2013), The Tail at Scale,
 Communications of the ACM, Vol. 56 No. 2, Pages 74-80,
 http://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext
@@ -96,7 +96,7 @@ are idempotent).
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.exp.BackupRequestFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(quantile:Int,range:com.twitter.util.Duration,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,history:com.twitter.util.Duration):com.twitter.finagle.exp.BackupRequestFilter[Req,Rep]"></a>
+      <a id="&lt;init&gt;(quantile:Int,clipDuration:com.twitter.util.Duration,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,history:com.twitter.util.Duration):com.twitter.finagle.exp.BackupRequestFilter[Req,Rep]"></a>
       <a id="&lt;init&gt;:BackupRequestFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,7 +104,7 @@ are idempotent).
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BackupRequestFilter</span><span class="params">(<span name="quantile">quantile: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="range">range: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="history">history: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span>
+        <span class="name">BackupRequestFilter</span><span class="params">(<span name="quantile">quantile: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="clipDuration">clipDuration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="history">history: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span>
       </span>
       </h4>
       

@@ -89,7 +89,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">HeapBalancer</span><span class="params">(<span name="factories">factories: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Rep">Rep</span>]]]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="emptyException">emptyException: <span class="extype" name="scala.Throwable">Throwable</span> = <span class="defval" name="new com.twitter.finagle.NoBrokersAvailableException(finagle.this.NoBrokersAvailableException.&lt;init&gt;$default$1)">...</span></span>, <span name="rng">rng: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.util.Random" class="extype" target="_top">Random</a> = <span class="symbol">new scala.util.Random()</span></span>)</span>
+        <span class="name">HeapBalancer</span><span class="params">(<span name="factories">factories: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Rep">Rep</span>]]]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="emptyException">emptyException: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="rng">rng: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.util.Random" class="extype" target="_top">Random</a></span>)</span>
       </span>
       </h4>
       
@@ -409,7 +409,7 @@ only need to modify or operate on the underlying service.
       <a id="isAvailable:Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">

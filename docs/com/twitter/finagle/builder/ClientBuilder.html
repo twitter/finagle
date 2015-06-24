@@ -69,7 +69,7 @@ ClientBuilder.safeBuild(
 verifies the builder dynamically, resulting in a runtime error
 instead of a compiler error.</p><h3>Defaults</h3><p>The following defaults are applied to clients constructed via ClientBuilder,
 unless overridden with the corresponding method. These defaults were chosen
-carefully so as to work well for most use cases.</p><p>Commonly-configured options:</p><ul><li><code>connectTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>tcpConnectTimeout</code>: 1 second</li><li><code>requestTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>timeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionLimit</code>: <code>Int.MaxValue</code></li><li><code>hostConnectionCoresize</code>: 0</li><li><code>hostConnectionIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxWaiters</code>: <code>Int.MaxValue</code></li><li><code>failFast</code>: true</li><li><code>failureAccrualParams</code>, <code>failureAccrual</code>, <code>failureAccrualFactory</code>:
+carefully so as to work well for most use cases.</p><p>Commonly-configured options:</p><ul><li><code>connectTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>tcpConnectTimeout</code>: 1 second</li><li><code>requestTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>timeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionLimit</code>: <code>Int.MaxValue</code></li><li><code>hostConnectionCoresize</code>: 0</li><li><code>hostConnectionIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxWaiters</code>: <code>Int.MaxValue</code></li><li><code>failFast</code>: true</li><li><code>failureAccrualParams</code>, <code>failureAccrualFactory</code>:
    <code>numFailures</code> = 5, <code>markDeadFor</code> = 5 seconds</li></ul><p>Advanced options:</p><p><i>Before changing any of these, make sure that you know exactly how they will
 affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
@@ -533,9 +533,25 @@ which time the experimental option will go away.
       </span>
       </h4>
       <p class="shortcomment cmt">Marks a host dead on connection failure.</p><div class="fullcomment"><div class="comment cmt"><p>Marks a host dead on connection failure. The host remains dead
-until we succesfully connect. Intermediate connection attempts
+until we successfully connect. Intermediate connection attempts
 *are* respected, but host availability is turned off during the
 reconnection period.
+</p></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrualFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="failureAccrualFactory(factory:com.twitter.util.Timer=&gt;com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
+      <a id="failureAccrualFactory((Timer)⇒ServiceFactoryWrapper):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">failureAccrualFactory</span><span class="params">(<span name="factory">factory: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a>) ⇒ <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Completely replaces the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> from the underlying stack
+with the <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a> returned from the given function <code>factory</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Completely replaces the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> from the underlying stack
+with the <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a> returned from the given function <code>factory</code>.</p><p>To completely disable <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> use <code>noFailureAccrual</code>.
 </p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrualParams" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="failureAccrualParams(pair:(Int,com.twitter.util.Duration)):ClientBuilder.this.This"></a>
@@ -549,10 +565,10 @@ reconnection period.
         <span class="name">failureAccrualParams</span><span class="params">(<span name="pair">pair: (<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>)</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Use the given paramters for failure accrual.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given paramters for failure accrual.  The first parameter
+      <p class="shortcomment cmt">Use the given parameters for failure accrual.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given parameters for failure accrual.  The first parameter
 is the number of *successive* failures that are required to mark
-a host failed.  The second paramter specifies how long the host
-is dead for, once marked.
+a host failed.  The second parameter specifies how long the host
+is dead for, once marked.</p><p>To completely disable <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> use <code>noFailureAccrual</code>.
 </p></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -784,22 +800,7 @@ If this is defined concurrently with socksProxy, the order in which they are app
       </h4>
       <p class="shortcomment cmt">Apply TCP keepAlive (<code>SO_KEEPALIVE</code> socket option).</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#loadBalancer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="loadBalancer(loadBalancer:com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory):ClientBuilder.this.This"></a>
-      <a id="loadBalancer(WeightedLoadBalancerFactory):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">loadBalancer</span><span class="params">(<span name="loadBalancer">loadBalancer: <a href="../loadbalancer/WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Specify a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a load balancer.  The load balancer implements
-a strategy for choosing one from a set of hosts to service a request
-</p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#loadBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="loadBalancer(lbf:com.twitter.finagle.loadbalancer.LoadBalancerFactory):ClientBuilder.this.This"></a>
+      <a id="loadBalancer(loadBalancer:com.twitter.finagle.loadbalancer.LoadBalancerFactory):ClientBuilder.this.This"></a>
       <a id="loadBalancer(LoadBalancerFactory):This"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -807,10 +808,12 @@ a strategy for choosing one from a set of hosts to service a request
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">loadBalancer</span><span class="params">(<span name="lbf">lbf: <a href="../loadbalancer/LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">loadBalancer</span><span class="params">(<span name="loadBalancer">loadBalancer: <a href="../loadbalancer/LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Specify a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a load balancer.  The load balancer implements
+a strategy for choosing one from a set of hosts to service a request
+</p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#logger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="logger(logger:java.util.logging.Logger):ClientBuilder.this.This"></a>
       <a id="logger(Logger):This"></a>
@@ -864,6 +867,20 @@ a strategy for choosing one from a set of hosts to service a request
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#noFailureAccrual" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="noFailureAccrual:ClientBuilder.this.This"></a>
+      <a id="noFailureAccrual:This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">noFailureAccrual</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><p>To replace the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> use <code>failureAccrualFactory</code>.
+</p></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -1392,38 +1409,6 @@ completeness.</p>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.3.10)</i></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrual" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="failureAccrual(failureAccrual:com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
-      <a id="failureAccrual(ServiceFactoryWrapper):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.22.1) Use failureAccrualParams">failureAccrual</span><span class="params">(<span name="failureAccrual">failureAccrual: <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.22.1)</i> Use failureAccrualParams</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrualFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="failureAccrualFactory(factory:com.twitter.util.Timer=&gt;com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
-      <a id="failureAccrualFactory((Timer)⇒ServiceFactoryWrapper):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.22.1) Use failureAccrualParams">failureAccrualFactory</span><span class="params">(<span name="factory">factory: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a>) ⇒ <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.22.1)</i> Use failureAccrualParams</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#socksProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socksProxy(socksProxy:java.net.SocketAddress):ClientBuilder.this.This"></a>
       <a id="socksProxy(SocketAddress):This"></a>

@@ -556,6 +556,24 @@ Codec, but this method allows you to override that.</p></div><dl class="attribut
       <p class="shortcomment cmt">Cookies.</p><div class="fullcomment"><div class="comment cmt"><p>Cookies. In a request, this uses the Cookie headers.
 In a response, it uses the Set-Cookie headers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.httpx.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.httpx.Response#ctx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ctx:com.twitter.finagle.httpx.Response.Schema.Record"></a>
+      <a id="ctx:Record"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ctx</span><span class="result">: <span class="extype" name="com.twitter.collection.RecordSchema.Record">Record</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Arbitrary user-defined context associated with this response object.</p><div class="fullcomment"><div class="comment cmt"><p>Arbitrary user-defined context associated with this response object.
+<a href="https://twitter.github.io/util/docs/index.html#com.twitter.collection.RecordSchema.Record" class="extype" target="_top">RecordSchema.Record</a> is
+used here, rather than <span class="extype" name="com.twitter.finagle.Context">Context</span> or similar
+out-of-band mechanisms, to make the connection between the response and its
+associated context explicit.
+</p></div></div>
     </li><li name="com.twitter.finagle.httpx.Message#date" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="date:Option[String]"></a>
       <a id="date:Option[String]"></a>

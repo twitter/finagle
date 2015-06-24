@@ -39,12 +39,15 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A thin interface around a Balancer's contructor that allows Finagle to pass in
+context from the stack to the balancers at construction time.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> for a collection of available balancers.
+</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="HeapBalancerFactory$.html" class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancerFactory">HeapBalancerFactory</a></div>
+          <div class="subClasses hiddenContent"><a href="DefaultBalancerFactory$.html" class="extype" name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory">DefaultBalancerFactory</a></div>
         </div></div>
         
 
@@ -102,37 +105,30 @@
 
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory#newLoadBalancer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="newLoadBalancer[Req,Rep](factories:com.twitter.util.Activity[Set[com.twitter.finagle.ServiceFactory[Req,Rep]]],statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="newLoadBalancer[Req,Rep](Activity[Set[ServiceFactory[Req,Rep]]],StatsReceiver,NoBrokersAvailableException):ServiceFactory[Req,Rep]"></a>
+              <ol><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory#newBalancer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="newBalancer[Req,Rep](endpoints:com.twitter.util.Activity[Set[(com.twitter.finagle.ServiceFactory[Req,Rep],Double)]],statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
+      <a id="newBalancer[Req,Rep](Activity[Set[(ServiceFactory[Req,Rep],Double)]],StatsReceiver,NoBrokersAvailableException):ServiceFactory[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newLoadBalancer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="factories">factories: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Rep">Rep</span>]]]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="emptyException">emptyException: <a href="../NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Rep">Rep</span>]</span>
+        <span class="name">newBalancer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="endpoints">endpoints: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<span class="extype" name="scala.Predef.Set">Set</span>[(<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newBalancer.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a>)]]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="emptyException">emptyException: <a href="../NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newBalancer.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Asychronously build a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Asychronously build a load balancer.</p><p>The returned Future is not satisfied until the load balancer has observed a non-pending
-set of endpoints from the provided Activity.
-</p></div></div>
-    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory#newLoadBalancer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="newLoadBalancer[Req,Rep](group:com.twitter.finagle.Group[com.twitter.finagle.ServiceFactory[Req,Rep]],statsReceiver:com.twitter.finagle.stats.StatsReceiver,emptyException:com.twitter.finagle.NoBrokersAvailableException):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="newLoadBalancer[Req,Rep](Group[ServiceFactory[Req,Rep]],StatsReceiver,NoBrokersAvailableException):ServiceFactory[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.21.0) Use the newLoadbalancer that takes an Activity.">newLoadBalancer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="group">group: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Rep">Rep</span>]]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="emptyException">emptyException: <a href="../NoBrokersAvailableException.html" class="extype" name="com.twitter.finagle.NoBrokersAvailableException">NoBrokersAvailableException</a></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory.newLoadBalancer.Rep">Rep</span>]</span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Build a load balancer from a Group of endpoints.</p><div class="fullcomment"><div class="comment cmt"><p>Build a load balancer from a Group of endpoints.</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.21.0)</i> Use the newLoadbalancer that takes an Activity.</p></dd></dl></div>
+      <p class="shortcomment cmt">Returns a new balancer which is represented by a <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Returns a new balancer which is represented by a <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a>.
+</p></div><dl class="paramcmts block"><dt class="param">endpoints</dt><dd class="cmt"><p>The load balancer's collection is usually populated concurrently.
+So the interface to build a balancer is wrapped in an <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">com.twitter.util.Activity</a>
+which allows us to observe this process for changes. Note, the given weights are
+maintained relative to load assignments not QPS. For example, a weight of 2.0 means
+that the endpoint will receive twice the amount of load w.r.t the other endpoints
+in the balancer.
+</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>The StatsReceiver which balancers report stats to. See
+<span class="extype" name="com.twitter.finagle.loadbalancer.Balancer">com.twitter.finagle.loadbalancer.Balancer</span> to see which stats are exported
+across implementations.
+</p></dd><dt class="param">emptyException</dt><dd class="cmt"><p>The exception returned when a balancer's collection is empty.
+</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -384,19 +380,6 @@ set of endpoints from the provided Activity.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory#toWeighted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toWeighted:com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory"></a>
-      <a id="toWeighted:WeightedLoadBalancerFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toWeighted</span><span class="result">: <a href="WeightedLoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.WeightedLoadBalancerFactory">WeightedLoadBalancerFactory</a></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Coerce this LoadBalancerFactory to be a WeightedLoadBalancerFactory (that ignores weights).</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

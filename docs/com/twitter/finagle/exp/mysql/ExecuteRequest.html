@@ -24,18 +24,18 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../../lib/class_big.png" />
+        <a href="ExecuteRequest$.html" title="Go to companion"><img src="../../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.exp">exp</a>.<a href="package.html" class="extype" name="com.twitter.finagle.exp.mysql">mysql</a></p>
-        <h1>ExecuteRequest</h1>
+        <h1><a href="ExecuteRequest$.html" title="Go to companion">ExecuteRequest</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ExecuteRequest</span><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="params">params: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>] = <span class="defval" name="scala.`package`.IndexedSeq.empty[Nothing]">...</span></span>, <span name="hasNewParams">hasNewParams: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a> = <span class="symbol">0</span></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">ExecuteRequest</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a></span>
       </span>
       </h4>
       
@@ -44,7 +44,7 @@ a prepared statement.
 <a href="http://dev.mysql.com/doc/internals/en/com-stmt-execute.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-execute.html</a>
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a>, <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a>, <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -62,7 +62,7 @@ a prepared statement.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.exp.mysql.ExecuteRequest"><span>ExecuteRequest</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.exp.mysql.CommandRequest"><span>CommandRequest</span></li><li class="in" name="com.twitter.finagle.exp.mysql.Request"><span>Request</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.exp.mysql.ExecuteRequest"><span>ExecuteRequest</span></li><li class="in" name="com.twitter.finagle.exp.mysql.CommandRequest"><span>CommandRequest</span></li><li class="in" name="com.twitter.finagle.exp.mysql.Request"><span>Request</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -83,7 +83,7 @@ a prepared statement.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.exp.mysql.ExecuteRequest#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(stmtId:Int,params:IndexedSeq[Any],hasNewParams:Boolean,flags:Byte):com.twitter.finagle.exp.mysql.ExecuteRequest"></a>
+      <a id="&lt;init&gt;(stmtId:Int,params:IndexedSeq[com.twitter.finagle.exp.mysql.Parameter],hasNewParams:Boolean,flags:Byte):com.twitter.finagle.exp.mysql.ExecuteRequest"></a>
       <a id="&lt;init&gt;:ExecuteRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -91,7 +91,7 @@ a prepared statement.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ExecuteRequest</span><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="params">params: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>] = <span class="defval" name="scala.`package`.IndexedSeq.empty[Nothing]">...</span></span>, <span name="hasNewParams">hasNewParams: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a> = <span class="symbol">0</span></span>)</span>
+        <span class="name">ExecuteRequest</span><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="params">params: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Parameter.html" class="extype" name="com.twitter.finagle.exp.mysql.Parameter">Parameter</a>]</span>, <span name="hasNewParams">hasNewParams: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span>
       </span>
       </h4>
       
@@ -227,6 +227,19 @@ a prepared statement.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -285,6 +298,19 @@ a prepared statement.
       </span>
       </h4>
       
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -338,15 +364,15 @@ a prepared statement.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.exp.mysql.ExecuteRequest#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="params:IndexedSeq[Any]"></a>
-      <a id="params:IndexedSeq[Any]"></a>
+      <a id="params:IndexedSeq[com.twitter.finagle.exp.mysql.Parameter]"></a>
+      <a id="params:IndexedSeq[Parameter]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">params</span><span class="result">: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
+        <span class="name">params</span><span class="result">: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Parameter.html" class="extype" name="com.twitter.finagle.exp.mysql.Parameter">Parameter</a>]</span>
       </span>
       </h4>
       
@@ -402,6 +428,19 @@ a prepared statement.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.mysql.ExecuteRequest">ExecuteRequest</a> → <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a></dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -468,15 +507,7 @@ a prepared statement.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
-            </div><div class="parent" name="com.twitter.finagle.exp.mysql.CommandRequest">
+        <div class="parent" name="com.twitter.finagle.exp.mysql.CommandRequest">
               <h3>Inherited from <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a></h3>
             </div><div class="parent" name="com.twitter.finagle.exp.mysql.Request">
               <h3>Inherited from <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a></h3>

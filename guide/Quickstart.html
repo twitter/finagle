@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart &mdash; Finagle 6.25.0 documentation</title>
+    <title>Quickstart &mdash; Finagle 6.26.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.25.0',
+        VERSION:     '6.26.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.25.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
     <link rel="next" title="Concurrent Programming with Futures" href="Futures.html" />
     <link rel="prev" title="User’s guide" href="index.html" />
    
@@ -89,7 +89,7 @@ name = &quot;quickstart&quot;
 
 version = &quot;1.0&quot;
 
-libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;6.25.0&quot;
+libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-httpx&quot; % &quot;6.26.0&quot;
 </pre>
 <p>Any file in this directory will now be compiled by <cite>sbt</cite>. In order to simplify
 installation, we recommend that you use the bootstrap <cite>sbt</cite> script available
@@ -102,55 +102,54 @@ $ chmod u+rx code/sbt
 <div class="section" id="a-minimal-http-server">
 <h2>A minimal HTTP server<a class="headerlink" href="#a-minimal-http-server" title="Permalink to this headline">¶</a></h2>
 <p>We&#8217;ll need to import a few things into our namespace.</p>
-<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Http, Service}
+<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.httpx
 import com.twitter.util.{Await, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http._
 </pre></div>
 </div>
 <p><cite>Service</cite> is the interface used to represent a server or a client
-(<a class="reference internal" href="ServicesAndFilters.html"><em>about which more later</em></a>). <cite>Http</cite> is Finagle&#8217;s HTTP
-client and server. Finagle&#8217;s HTTP implementation uses <a class="reference external" href="http://netty.io/">Netty</a>
-underneath, so <cite>org.jboss.netty.handler.codec.http._</cite> imports the
-datatypes for HTTP (requests, responses, and so on).</p>
+(<a class="reference internal" href="ServicesAndFilters.html"><em>about which more later</em></a>). <cite>Httpx</cite> is Finagle&#8217;s HTTP
+client and server.</p>
 <p>Next, we&#8217;ll define a <cite>Service</cite> to serve our HTTP requests:</p>
-<div class="highlight-text"><div class="highlight"><pre>val service = new Service[HttpRequest, HttpResponse] {
-  def apply(req: HttpRequest): Future[HttpResponse] =
-    Future.value(new DefaultHttpResponse(
-      req.getProtocolVersion, HttpResponseStatus.OK))
+<div class="highlight-text"><div class="highlight"><pre>val service = new Service[httpx.Request, httpx.Response] {
+  def apply(req: httpx.Request): Future[httpx.Response] =
+    Future.value(
+      httpx.Response(req.version, httpx.Status.Ok)
+    )
 }
 </pre></div>
 </div>
-<p>Services are functions from a request type (<cite>HttpRequest</cite>)
-to a <cite>Future</cite> of a response type (<cite>HttpResponse</cite>). Put another
-way: given a <em>request</em>, we must promise a <em>response</em> some
+<p>Services are functions from a request type (<cite>com.twitter.finagle.httpx.Request</cite>)
+to a <cite>Future</cite> of a response type (<cite>com.twitter.finagle.httpx.Response</cite>).
+Put another way: given a <em>request</em>, we must promise a <em>response</em> some
 time in the future. In this case, we just return a trivial HTTP-200
 response immediately (through <cite>Future.value</cite>), using the same
 version of HTTP with which the request was dispatched.</p>
 <p>Now that we&#8217;ve defined our <cite>Service</cite>, we&#8217;ll need to export
 it. We use Finagle&#8217;s Http server for this:</p>
-<div class="highlight-text"><div class="highlight"><pre>val server = Http.serve(&quot;:8080&quot;, service)
+<div class="highlight-text"><div class="highlight"><pre>val server = Httpx.serve(&quot;:8080&quot;, service)
 Await.ready(server)
 </pre></div>
 </div>
 <p>The <cite>serve</cite> method takes a <em>bind target</em> (which port to expose the
 server) and the service itself. The server is responsible for
 listening for incoming connections, translating the HTTP wire protocol
-into <cite>HttpRequest</cite> objects, and translating our <cite>HttpResponse</cite> object
-back into its wire format, sending replies back to the client.</p>
+into <cite>com.twitter.finagle.httpx.Request</cite> objects, and translating
+our <cite>com.twitter.finagle.httpx.Response</cite> object back into its wire
+format, sending replies back to the client.</p>
 <p>The complete server:</p>
-<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Http, Service}
+<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.httpx
 import com.twitter.util.{Await, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http._
 
 object Server extends App {
-  val service = new Service[HttpRequest, HttpResponse] {
-    def apply(req: HttpRequest): Future[HttpResponse] =
-      Future.value(new DefaultHttpResponse(
-        req.getProtocolVersion, HttpResponseStatus.OK))
+  val service = new Service[httpx.Request, httpx.Response] {
+    def apply(req: httpx.Request): Future[httpx.Response] =
+      Future.value(
+        httpx.Response(req.version, httpx.Status.Ok)
+      )
   }
-  val server = Http.serve(&quot;:8080&quot;, service)
+  val server = Httpx.serve(&quot;:8080&quot;, service)
   Await.ready(server)
 }
 </pre></div>
@@ -171,44 +170,41 @@ $
 <h2>Using clients<a class="headerlink" href="#using-clients" title="Permalink to this headline">¶</a></h2>
 <p>In our server example, we define a <cite>Service</cite> to respond to requests.
 Clients work the other way around: we&#8217;re given a <cite>Service</cite> to <em>use</em>. Just as we
-exported services with the <cite>Http.serve</cite>, method, we can <em>import</em> them
-with a <cite>Http.newService</cite>, giving us an instance of
-<cite>Service[HttpRequest, HttpResponse]</cite>:</p>
-<div class="highlight-text"><div class="highlight"><pre>val client: Service[HttpRequest, HttpResponse] =
-  Http.newService(&quot;www.google.com:80&quot;)
+exported services with the <cite>Httpx.serve</cite>, method, we can <em>import</em> them
+with a <cite>Httpx.newService</cite>, giving us an instance of
+<cite>Service[httpx.Request, httpx.Response]</cite>:</p>
+<div class="highlight-text"><div class="highlight"><pre>val client: Service[httpx.Request, httpx.Response] = Httpx.newService(&quot;www.scala-lang.org:80&quot;)
 </pre></div>
 </div>
-<p><cite>client</cite> is a <cite>Service</cite> to which we can dispatch an <cite>HttpRequest</cite>
-and in return receive a <cite>Future[HttpResponse]</cite> — the promise of an
-<cite>HttpResponse</cite> (or an error) some time in the future. We furnish
+<p><cite>client</cite> is a <cite>Service</cite> to which we can dispatch an <cite>httpx.Request</cite>
+and in return receive a <cite>Future[httpx.Response]</cite> — the promise of an
+<cite>httpx.Response</cite> (or an error) some time in the future. We furnish
 <cite>newService</cite> with the <em>target</em> of the client: the host or set of hosts
 to which requests are dispatched.</p>
-<div class="highlight-text"><div class="highlight"><pre>val request =  new DefaultHttpRequest(
-  HttpVersion.HTTP_1_1, HttpMethod.GET, &quot;/&quot;)
-val response: Future[HttpResponse] = client(request)
+<div class="highlight-text"><div class="highlight"><pre>val request = httpx.Request(httpx.Method.Get, &quot;/&quot;)
+request.host = &quot;www.scala-lang.org&quot;
+val response: Future[httpx.Response] = client(request)
 </pre></div>
 </div>
-<p>Now that we have <cite>response</cite>, a <cite>Future[HttpResponse]</cite>, we can register
+<p>Now that we have <cite>response</cite>, a <cite>Future[httpx.Response]</cite>, we can register
 a callback to notify us when the result is ready:</p>
-<div class="highlight-text"><div class="highlight"><pre>response onSuccess { resp: HttpResponse =&gt;
+<div class="highlight-text"><div class="highlight"><pre>response.onSuccess { resp: httpx.Response =&gt;
   println(&quot;GET success: &quot; + resp)
 }
 Await.ready(response)
 </pre></div>
 </div>
 <p>Completing the client:</p>
-<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Http, Service}
+<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.httpx
 import com.twitter.util.{Await, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http._
 
 object Client extends App {
-  val client: Service[HttpRequest, HttpResponse] =
-    Http.newService(&quot;www.google.com:80&quot;)
-  val request =  new DefaultHttpRequest(
-    HttpVersion.HTTP_1_1, HttpMethod.GET, &quot;/&quot;)
-  val response: Future[HttpResponse] = client(request)
-  response onSuccess { resp: HttpResponse =&gt;
+  val client: Service[httpx.Request, httpx.Response] = Httpx.newService(&quot;www.scala-lang.org:80&quot;)
+  val request = httpx.Request(httpx.Method.Get, &quot;/&quot;)
+  request.host = &quot;www.scala-lang.org&quot;
+  val response: Future[httpx.Response] = client(request)
+  response.onSuccess { resp: httpx.Response =&gt;
     println(&quot;GET success: &quot; + resp)
   }
   Await.ready(response)
@@ -217,11 +213,7 @@ object Client extends App {
 </div>
 <p>which in turn is run by:</p>
 <div class="highlight-text"><div class="highlight"><pre>$ ./sbt &#39;run-main Client&#39;
-GET success: DefaultHttpResponse(chunked: false)
-HTTP/1.1 200 OK
-Date: Tue, 29 Jan 2013 23:28:11 GMT
-Expires: -1
-Cache-Control: private, max-age=0
+GET success: Response(&quot;Http11 Status(200)&quot;)
 ...
 </pre></div>
 </div>
@@ -231,18 +223,16 @@ Cache-Control: private, max-age=0
 <p>Now we&#8217;re ready to create an HTTP proxy! Notice the symmetry above:
 servers <em>provide</em> a <cite>Service</cite>, while a client <em>uses</em> it. Indeed, an HTTP
 proxy can be constructed by just replacing the service we defined with
-one that was imported with a <cite>Http.newService</cite>:</p>
-<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Http, Service}
-import com.twitter.util.{Await, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http._
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+one that was imported with a <cite>Httpx.newService</cite>:</p>
+<div class="highlight-text"><div class="highlight"><pre>import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.httpx.{Request, Response}
+import com.twitter.util.Await
 
 object Proxy extends App {
-  val client: Service[HttpRequest, HttpResponse] =
-    Http.newService(&quot;www.google.com:80&quot;)
+  val client: Service[Request, Response] =
+    Httpx.newService(&quot;www.google.com:80&quot;)
 
-  val server = Http.serve(&quot;:8080&quot;, client)
+  val server = Httpx.serve(&quot;:8080&quot;, client)
   Await.ready(server)
 }
 </pre></div>

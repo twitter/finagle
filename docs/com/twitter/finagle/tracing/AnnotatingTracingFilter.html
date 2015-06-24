@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <a href="AnnotatingTracingFilter$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.tracing">tracing</a></p>
-        <h1>AnnotatingTracingFilter</h1>
+        <h1><a href="AnnotatingTracingFilter$.html" title="Go to companion">AnnotatingTracingFilter</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -94,8 +94,8 @@ of a trace. Finagle-specific trace information should live here.
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.tracing.AnnotatingTracingFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(label:String,prefix:String,before:com.twitter.finagle.tracing.Annotation,after:com.twitter.finagle.tracing.Annotation,finagleVersion:()=&gt;String):com.twitter.finagle.tracing.AnnotatingTracingFilter[Req,Rep]"></a>
+    </li><li name="com.twitter.finagle.tracing.AnnotatingTracingFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(label:String,before:com.twitter.finagle.tracing.Annotation,after:com.twitter.finagle.tracing.Annotation,afterFailure:String=&gt;com.twitter.finagle.tracing.Annotation):com.twitter.finagle.tracing.AnnotatingTracingFilter[Req,Rep]"></a>
       <a id="&lt;init&gt;:AnnotatingTracingFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -103,13 +103,27 @@ of a trace. Finagle-specific trace information should live here.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">AnnotatingTracingFilter</span><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="prefix">prefix: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="before">before: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="after">after: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="finagleVersion">finagleVersion: () ⇒ <span class="extype" name="scala.Predef.String">String</span> = <span class="defval" name="(() =&gt; com.twitter.finagle.Init.finagleVersion)">...</span></span>)</span>
+        <span class="name">AnnotatingTracingFilter</span><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="before">before: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="after">after: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="afterFailure">afterFailure: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>)</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.tracing.AnnotatingTracingFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(label:String,prefix:String,before:com.twitter.finagle.tracing.Annotation,after:com.twitter.finagle.tracing.Annotation,afterFailure:String=&gt;com.twitter.finagle.tracing.Annotation,finagleVersion:()=&gt;String,traceMetaData:Boolean):com.twitter.finagle.tracing.AnnotatingTracingFilter[Req,Rep]"></a>
+      <a id="&lt;init&gt;:AnnotatingTracingFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">AnnotatingTracingFilter</span><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="prefix">prefix: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="before">before: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="after">after: <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="afterFailure">afterFailure: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a></span>, <span name="finagleVersion">finagleVersion: () ⇒ <span class="extype" name="scala.Predef.String">String</span> = <span class="defval" name="(() =&gt; com.twitter.finagle.Init.finagleVersion)">...</span></span>, <span name="traceMetaData">traceMetaData: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>)</span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">label</dt><dd class="cmt"><p>The given name of the service</p></dd><dt class="param">prefix</dt><dd class="cmt"><p>A prefix for <code>finagle.version</code> and <code>dtab.local</code>.
 <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">Annotation</a> keys.</p></dd><dt class="param">before</dt><dd class="cmt"><p>An <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">com.twitter.finagle.tracing.Annotation</a> to be recorded
 before the service is called</p></dd><dt class="param">after</dt><dd class="cmt"><p>An <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">com.twitter.finagle.tracing.Annotation</a> to be recorded
-after the service's <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> is satisfied.</p></dd><dt class="param">finagleVersion</dt><dd class="cmt"><p>A thunk that returns the version of finagle. Useful
+after the service's <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> is satisfied, regardless of success.</p></dd><dt class="param">afterFailure</dt><dd class="cmt"><p>Function from String to <a href="Annotation.html" class="extype" name="com.twitter.finagle.tracing.Annotation">com.twitter.finagle.tracing.Annotation</a> to be recorded
+if the service's <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> fails.</p></dd><dt class="param">finagleVersion</dt><dd class="cmt"><p>A thunk that returns the version of finagle. Useful
 for testing.
 </p></dd></dl></div>
     </li></ol>

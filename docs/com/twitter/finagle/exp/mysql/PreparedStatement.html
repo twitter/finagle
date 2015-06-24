@@ -87,15 +87,15 @@ with varying parameters.
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="com.twitter.finagle.exp.mysql.PreparedStatement#apply" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="apply(params:Any*):com.twitter.util.Future[com.twitter.finagle.exp.mysql.Result]"></a>
-      <a id="apply(Any*):Future[Result]"></a>
+      <a id="apply(params:com.twitter.finagle.exp.mysql.Parameter*):com.twitter.util.Future[com.twitter.finagle.exp.mysql.Result]"></a>
+      <a id="apply(Parameter*):Future[Result]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="params">params: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="params">params: <a href="Parameter.html" class="extype" name="com.twitter.finagle.exp.mysql.Parameter">Parameter</a>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Executes the prepared statement with the
@@ -326,15 +326,15 @@ given <code>params</code>.</p>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.exp.mysql.PreparedStatement#select" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="select[T](params:Any*)(f:com.twitter.finagle.exp.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]"></a>
-      <a id="select[T](Any*)((Row)⇒T):Future[Seq[T]]"></a>
+      <a id="select[T](params:com.twitter.finagle.exp.mysql.Parameter*)(f:com.twitter.finagle.exp.mysql.Row=&gt;T):com.twitter.util.Future[Seq[T]]"></a>
+      <a id="select[T](Parameter*)((Row)⇒T):Future[Seq[T]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">select</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="params">params: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>*</span>)</span><span class="params">(<span name="f">f: (<a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a>) ⇒ <span class="extype" name="com.twitter.finagle.exp.mysql.PreparedStatement.select.T">T</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.exp.mysql.PreparedStatement.select.T">T</span>]]</span>
+        <span class="name">select</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="params">params: <a href="Parameter.html" class="extype" name="com.twitter.finagle.exp.mysql.Parameter">Parameter</a>*</span>)</span><span class="params">(<span name="f">f: (<a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a>) ⇒ <span class="extype" name="com.twitter.finagle.exp.mysql.PreparedStatement.select.T">T</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.finagle.exp.mysql.PreparedStatement.select.T">T</span>]]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">Executes the prepared statement with the

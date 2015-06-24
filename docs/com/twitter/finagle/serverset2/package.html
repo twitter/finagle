@@ -67,7 +67,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="name">name: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="addr">addr: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="HostPort.html" class="extype" name="com.twitter.finagle.serverset2.HostPort">HostPort</a>]</span>, <span name="shard">shard: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>, <span name="status">status: <a href="Endpoint$$Status$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.serverset2.Endpoint.Status.Value">Endpoint.Status.Value</a></span>, <span name="memberId">memberId: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Entry.html" class="extype" name="com.twitter.finagle.serverset2.Entry">Entry</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Endpoint.html"><span class="name">Endpoint</span></a><span class="params">(<span name="names">names: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="shard">shard: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="status">status: <a href="Endpoint$$Status$.html#ValueextendsOrdered[Enumeration.this.Value]withSerializable" class="extmbr" name="com.twitter.finagle.serverset2.Endpoint.Status.Value">Endpoint.Status.Value</a></span>, <span name="memberId">memberId: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Entry.html" class="extype" name="com.twitter.finagle.serverset2.Entry">Entry</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">Endpoints encode a destination announced via serversets.</p>
@@ -84,19 +84,6 @@
       </span>
       </h4>
       <p class="comment cmt">Represents one logical serverset2 entry.</p>
-    </li><li name="com.twitter.finagle.serverset2.HostPort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HostPortextendsProductwithSerializable"></a>
-      <a id="HostPort:HostPort"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="HostPort.html"><span class="name">HostPort</span></a><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Represents an Endpoint's host address and port.</p>
     </li><li name="com.twitter.finagle.serverset2.Identity" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="IdentityextendsAnyRef"></a>
       <a id="Identity:Identity"></a>

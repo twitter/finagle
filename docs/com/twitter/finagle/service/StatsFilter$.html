@@ -79,7 +79,24 @@
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.service.StatsFilter.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParamextendsProductwithSerializable"></a>
+      <a id="Param:Param"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StatsFilter$$Param.html"><span class="name">Param</span></a><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Configures a <a href="#module[Req,Rep]:com.twitter.finagle.Stackable[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.service.StatsFilter#module">StatsFilter.module</a> to track latency using the
+given <span class="extype" name="TimeUnit">TimeUnit</span>.</p>
+    </li></ol>
+            </div>
 
         
 
@@ -151,18 +168,31 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.service.StatsFilter#DefaultExceptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DefaultExceptions:com.twitter.finagle.stats.CategorizingExceptionStatsHandler"></a>
-      <a id="DefaultExceptions:CategorizingExceptionStatsHandler"></a>
+      <a id="DefaultExceptions:com.twitter.finagle.stats.MultiCategorizingExceptionStatsHandler"></a>
+      <a id="DefaultExceptions:MultiCategorizingExceptionStatsHandler"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">DefaultExceptions</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.CategorizingExceptionStatsHandler" class="extype" target="_top">CategorizingExceptionStatsHandler</a></span>
+        <span class="name">DefaultExceptions</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.MultiCategorizingExceptionStatsHandler" class="extype" target="_top">MultiCategorizingExceptionStatsHandler</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Basic categorizer with all exceptions under 'failures'.</p>
+    </li><li name="com.twitter.finagle.service.StatsFilter.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Param"></a>
+      <a id="Param:Param"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StatsFilter$$Param$.html"><span class="name">Param</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -370,6 +400,19 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.StatsFilter#typeAgnostic" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="typeAgnostic(statsReceiver:com.twitter.finagle.stats.StatsReceiver,exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler):com.twitter.finagle.Filter.TypeAgnostic"></a>
+      <a id="typeAgnostic(StatsReceiver,ExceptionStatsHandler):TypeAgnostic"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">typeAgnostic</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>
+      </span>
+      </h4>
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
