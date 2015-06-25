@@ -23,6 +23,10 @@ import com.twitter.finagle.util.Showable
  * (e.g. `Http.newClient(/s/org/servicename)`). These APIs use `Resolver` under
  * the hood to resolve the destination names into the `Name` representation
  * of the appropriate cluster.
+ *
+ * As names are bound, a [[com.twitter.finagle.Namer Namer]] may elect
+ * to bind only a [[com.twitter.finagle.Name Name]] prefix, leaving an
+ * unbound residual name to be processed by a downstream Namer.
  */
 sealed trait Name
 
@@ -39,7 +43,11 @@ object Name {
    *
    * Equality of two Names is delegated to `id`. Two Bound instances
    * are equal whenever their `id`s are. `id` identifies the `addr`
-   * and not the `path`.
+   * and not the `path`.  If the `id` is a [[com.twitter.finagle.Name.Path
+   * Path]], it should only contain *bound*--not residual--path components.
+   *
+   * The `path` contains unbound residual path components that were not
+   * processed during name resolution.
    */
   class Bound private(
     val addr: Var[Addr],
