@@ -2,6 +2,8 @@
 
 ## Getting involved
 
+[![Join the chat at https://gitter.im/twitter/finagle](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 * Website: https://twitter.github.io/finagle/
 * Source: https://github.com/twitter/finagle/
 * Mailing List: [finaglers@googlegroups.com](https://groups.google.com/forum/#!forum/finaglers)
