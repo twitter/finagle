@@ -179,15 +179,10 @@ object Namer  {
         case Activity.Ok(t) => t
       }
       if (oks.isEmpty) {
-        seq.find {
-          case Activity.Failed(_) => true
-          case _ => false
-        } match {
-          case Some(Activity.Failed(t)) => Activity.Failed(t)
-          case _ => Activity.Pending
-        }
-      }
-      else {
+        seq.collectFirst {
+          case f@Activity.Failed(_) => f
+        }.getOrElse(Activity.Pending)
+      } else {
         Activity.Ok(Union.fromSeq(oks).simplified)
       }
     }
