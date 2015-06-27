@@ -2,6 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.finagle._
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
@@ -249,7 +250,7 @@ private[finagle] class BindingFactory[Req, Rep](
 
     val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (baseDtab, localDtab) =>
       val factory = new DynNameFactory(
-        (baseDtab ++ localDtab).bind(tree),
+        NameInterpreter.bind(baseDtab ++ localDtab, path),
         nameTreeCache)
 
       new ServiceFactoryProxy(factory) {

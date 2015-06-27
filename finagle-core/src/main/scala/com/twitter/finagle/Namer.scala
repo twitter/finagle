@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.util._
 import java.net.InetSocketAddress
 
@@ -13,6 +14,7 @@ import java.net.InetSocketAddress
  * and thus lookup results are represented by a [[com.twitter.util.Activity Activity]].
  */
 trait Namer { self =>
+  import Namer._
 
   /**
    * Translate a [[com.twitter.finagle.Path Path]] into a
@@ -32,13 +34,7 @@ trait Namer { self =>
    * Bind, then evaluate the given NameTree with this Namer. The result
    * is translated into a Var[Addr].
    */
-  def bindAndEval(tree: NameTree[Path]): Var[Addr] =
-    bind(tree).map(_.eval).run flatMap {
-      case Activity.Ok(None) => Var.value(Addr.Neg)
-      case Activity.Ok(Some(names)) => Name.all(names).addr
-      case Activity.Pending => Var.value(Addr.Pending)
-      case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
-    }
+  def bindAndEval(tree: NameTree[Path]): Var[Addr] = boundNameTreeToAddr(bind(tree))
 }
 
 private case class FailingNamer(exc: Throwable) extends Namer {
@@ -54,6 +50,14 @@ object Namer  {
       case NonFatal(exc) => FailingNamer(exc)
     }
   }
+
+  private def boundNameTreeToAddr(tree: Activity[NameTree[Name.Bound]]): Var[Addr] =
+    tree.map(_.eval).run.flatMap {
+      case Activity.Ok(None) => Var.value(Addr.Neg)
+      case Activity.Ok(Some(names)) => Name.all(names).addr
+      case Activity.Pending => Var.value(Addr.Pending)
+      case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
+    }
 
   /**
    * The global [[com.twitter.finagle.Namer Namer]]. It binds paths of the form
@@ -128,8 +132,7 @@ object Namer  {
    * Resolve a path to an address set (taking [[Dtab.local]] into account).
    */
   def resolve(path: Path): Var[Addr] = {
-    val dtab = Dtab.base ++ Dtab.local
-    dtab.bindAndEval(NameTree.Leaf(path))
+    boundNameTreeToAddr(NameInterpreter.bind(Dtab.base ++ Dtab.local, path))
   }
 
   /**
