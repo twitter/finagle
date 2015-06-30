@@ -7,6 +7,7 @@ import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import pl.project13.scala.sbt.JmhPlugin
 import sbtunidoc.Plugin.UnidocKeys._
 import sbtunidoc.Plugin.{ScalaUnidoc, unidocSettings}
+import scoverage.ScoverageSbtPlugin
 
 object Finagle extends Build {
   val branch = Process("git" :: "rev-parse" :: "--abbrev-ref" :: "HEAD" :: Nil).!!.trim
@@ -61,6 +62,13 @@ object Finagle extends Build {
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
     resolvers += "twitter-repo" at "http://maven.twttr.com",
+
+    ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := (
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 10)) => false
+        case _ => true
+      }
+    ),
 
     publishM2Configuration <<= (packagedArtifacts, checksums in publish, ivyLoggingLevel) map { (arts, cs, level) =>
       Classpaths.publishConfig(arts, None, resolverName = m2Repo.name, checksums = cs, logging = level)
