@@ -1,16 +1,13 @@
 package com.twitter.finagle.example.stream
 
 import com.twitter.concurrent.{Broker, Offer}
-import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.Service
-import com.twitter.finagle.stream.{Stream, StreamResponse}
-import com.twitter.io.Charsets
-import com.twitter.util.{Future, Timer, JavaTimer}
 import com.twitter.conversions.time._
+import com.twitter.finagle.Service
+import com.twitter.finagle.builder.{Server, ServerBuilder}
+import com.twitter.finagle.stream.{Stream, StreamRequest, StreamResponse}
+import com.twitter.io.Buf
+import com.twitter.util.{Future, Timer, JavaTimer}
 import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponseStatus}
 import scala.util.Random
 
 /**
@@ -19,10 +16,10 @@ import scala.util.Random
  */
 object StreamServer {
   // "tee" messages across all of the registered brokers.
-  val addBroker = new Broker[Broker[ChannelBuffer]]
-  val remBroker = new Broker[Broker[ChannelBuffer]]
-  val messages = new Broker[ChannelBuffer]
-  private[this] def tee(receivers: Set[Broker[ChannelBuffer]]) {
+  val addBroker = new Broker[Broker[Buf]]
+  val remBroker = new Broker[Broker[Buf]]
+  val messages = new Broker[Buf]
+  private[this] def tee(receivers: Set[Broker[Buf]]) {
     Offer.select(
       addBroker.recv { b => tee(receivers + b) },
       remBroker.recv { b => tee(receivers - b) },
@@ -36,7 +33,7 @@ object StreamServer {
 
   private[this] def produce(r: Random, t: Timer) {
     t.schedule(1.second.fromNow) {
-      val m = copiedBuffer(r.nextInt.toString + "\n", Charsets.Utf8)
+      val m = Buf.Utf8(r.nextInt.toString + "\n")
       messages.send(m) andThen produce(r, t)
     }
   }
@@ -46,13 +43,12 @@ object StreamServer {
   produce(new Random, new JavaTimer)
 
   def main(args: Array[String]) {
-    val myService = new Service[HttpRequest, StreamResponse] {
-      def apply(request: HttpRequest) = Future {
-        val subscriber = new Broker[ChannelBuffer]
+    val myService = new Service[StreamRequest, StreamResponse] {
+      def apply(request: StreamRequest) = Future {
+        val subscriber = new Broker[Buf]
         addBroker ! subscriber
         new StreamResponse {
-          val httpResponse = new DefaultHttpResponse(
-            request.getProtocolVersion, HttpResponseStatus.OK)
+          val info = StreamResponse.Info(request.version, StreamResponse.Status(200), Nil)
           def messages = subscriber.recv
           def error = new Broker[Throwable].recv
           def release() = {

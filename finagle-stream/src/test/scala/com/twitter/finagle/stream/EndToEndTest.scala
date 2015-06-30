@@ -4,25 +4,37 @@ import com.twitter.concurrent._
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.{Service, ServiceProxy, TooManyConcurrentRequestsException}
+import com.twitter.io.Buf
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import java.nio.charset.Charset
 import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ClientBootstrap
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.language.postfixOps
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite {
+  import Bijections._
+
+  type Request = Int
+  type StreamService = Service[Request, StreamResponse]
+
+  implicit val requestRequestType: RequestType[Request] =
+    new RequestType[Request] {
+      def canonize(req: Request) = StreamRequest(StreamRequest.Method.Get, "/")
+      def specialize(req: StreamRequest) = 1
+    }
+
+  val codec = new Stream[Request]
 
   case class MyStreamResponse(
-    httpResponse: HttpResponse,
-    messages: Offer[ChannelBuffer],
+    info: StreamResponse.Info,
+    messages: Offer[Buf],
     error: Offer[Throwable]
   ) extends StreamResponse {
 
@@ -30,40 +42,38 @@ class EndToEndTest extends FunSuite {
     def release() = released.updateIfEmpty(Return(()))
   }
 
-  class MyService(response: StreamResponse) extends Service[HttpRequest, StreamResponse] {
-    def apply(request: HttpRequest) = Future.value(response)
+  class MyService(response: StreamResponse) extends StreamService {
+    def apply(request: Request) = Future.value(response)
   }
 
   class WorkItContext(){
-    val httpRequest: DefaultHttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-    val httpResponse: DefaultHttpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-    val messages: Broker[ChannelBuffer] = new Broker[ChannelBuffer]
-    val error: Broker[Throwable] = new Broker[Throwable]
-
-    val serverRes = MyStreamResponse(httpResponse, messages.recv, error.recv)
+    val streamRequest = 1
+    val httpRequest = from(StreamRequest(StreamRequest.Method.Get, "/")): HttpRequest
+    val info = StreamResponse.Info(Version(1, 1), StreamResponse.Status(200), Nil)
+    val messages = new Broker[Buf]
+    val error = new Broker[Throwable]
+    val serverRes = MyStreamResponse(info, messages.recv, error.recv)
   }
 
-  def workIt(what: String)(mkClient: (MyStreamResponse) => (Service[HttpRequest, StreamResponse], SocketAddress)) {
+  def workIt(what: String)(mkClient: (MyStreamResponse) => (StreamService, SocketAddress)) {
     test("Streams %s: writes from the server arrive on the client's channel".format(what)) {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
-      val clientRes = Await.result(client(httpRequest), 1.second)
+      val clientRes = Await.result(client(streamRequest), 1.second)
       var result = ""
       val latch = new CountDownLatch(1)
       (clientRes.error?) ensure {
         Future { latch.countDown() }
       }
 
-      clientRes.messages foreach { channelBuffer =>
-        Future {
-          result += channelBuffer.toString(Charset.defaultCharset)
-        }
+      clientRes.messages.foreach { case Buf.Utf8(str) =>
+        result += str
       }
 
-      messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-      messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
-      messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
+      messages !! Buf.Utf8("1")
+      messages !! Buf.Utf8("2")
+      messages !! Buf.Utf8("3")
       error !! EOF
 
       latch.within(1.second)
@@ -75,18 +85,16 @@ class EndToEndTest extends FunSuite {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
-      val clientRes = Await.result(client(httpRequest), 1.second)
-      messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-      messages !! ChannelBuffers.wrappedBuffer("2".getBytes)
-      messages !! ChannelBuffers.wrappedBuffer("3".getBytes)
+      val clientRes = Await.result(client(streamRequest), 1.second)
+      messages !! Buf.Utf8("1")
+      messages !! Buf.Utf8("2")
+      messages !! Buf.Utf8("3")
 
       val latch = new CountDownLatch(3)
       var result = ""
-      clientRes.messages foreach { channelBuffer =>
-        Future {
-          result += channelBuffer.toString(Charset.defaultCharset)
-          latch.countDown()
-        }
+      clientRes.messages.foreach { case Buf.Utf8(str) =>
+        result += str
+        latch.countDown()
       }
 
       latch.within(1.second)
@@ -99,8 +107,8 @@ class EndToEndTest extends FunSuite {
       val c = new WorkItContext()
       import c._
       val (client, _) = mkClient(serverRes)
-      val clientRes = Await.result(client(httpRequest), 15.seconds)
-      assert(client(httpRequest).poll match {
+      val clientRes = Await.result(client(streamRequest), 15.seconds)
+      assert(client(streamRequest).poll match {
         case Some(Throw(_: TooManyConcurrentRequestsException)) => true
         case _ => false
       })
@@ -152,7 +160,7 @@ class EndToEndTest extends FunSuite {
         .awaitUninterruptibly()
         .isSuccess)
 
-      messages !! ChannelBuffers.wrappedBuffer("chunk1".getBytes)
+      messages !! Buf.Utf8("chunk1")
 
       assert(Await.result(recvd?, 1.second) match {
         case e: ChannelStateEvent =>
@@ -185,7 +193,7 @@ class EndToEndTest extends FunSuite {
         .isSuccess)
 
       // the streaming should continue
-      messages !! ChannelBuffers.wrappedBuffer("chunk2".getBytes)
+      messages !! Buf.Utf8("chunk2")
 
       assert(Await.result(recvd?, 1.second) match {
         case m: MessageEvent =>
@@ -226,7 +234,7 @@ class EndToEndTest extends FunSuite {
       import c._
       val (client, address) = mkClient(serverRes)
 
-      val clientRes = Await.result(client(httpRequest), 1.second)
+      val clientRes = Await.result(client(streamRequest), 1.second)
       var result = ""
       val latch = new CountDownLatch(1)
 
@@ -234,17 +242,15 @@ class EndToEndTest extends FunSuite {
         Future { latch.countDown() }
       }
 
-      clientRes.messages foreach { channelBuffer =>
-        Future {
-          result += channelBuffer.toString(Charset.defaultCharset)
-        }
+      clientRes.messages.foreach { case Buf.Utf8(str) =>
+        result += str
       }
 
       FuturePool.unboundedPool {
-        messages !! ChannelBuffers.wrappedBuffer("12".getBytes)
-        messages !! ChannelBuffers.wrappedBuffer("23".getBytes)
+        messages !! Buf.Utf8("12")
+        messages !! Buf.Utf8("23")
         error !! EOF
-        messages !! ChannelBuffers.wrappedBuffer("34".getBytes)
+        messages !! Buf.Utf8("34")
       }
 
       latch.within(1.second)
@@ -254,19 +260,19 @@ class EndToEndTest extends FunSuite {
 
   workIt("straight") { serverRes =>
     val server = ServerBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
       .build(new MyService(serverRes))
     val address = server.boundAddress
     val factory = ClientBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .hosts(Seq(address))
       .hostConnectionLimit(1)
       .buildFactory()
 
     val underlying = Await.result(factory())
-    val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
+    val client = new ServiceProxy[Request, StreamResponse](underlying) {
       override def close(deadline: Time) =
         Closable.all(underlying, server, factory).close(deadline)
     }
@@ -276,31 +282,31 @@ class EndToEndTest extends FunSuite {
 
   workIt("proxy") { serverRes =>
     val server = ServerBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("streamserver")
       .build(new MyService(serverRes))
 
     val serverClient = ClientBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .hosts(Seq(server.boundAddress))
       .hostConnectionLimit(1)
       .build()
 
     val proxy = ServerBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("streamproxy")
       .build(serverClient)
 
     val factory = ClientBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .hosts(Seq(proxy.boundAddress))
       .hostConnectionLimit(1)
       .buildFactory()
 
     val underlying = Await.result(factory())
-    val client = new ServiceProxy[HttpRequest, StreamResponse](underlying) {
+    val client = new ServiceProxy[Request, StreamResponse](underlying) {
       override def close(deadline: Time) =
         Closable.all(server, serverClient, proxy, factory).close(deadline)
     }
@@ -314,27 +320,27 @@ class EndToEndTest extends FunSuite {
     import c.{synchronized => _sync, _}
 
     val server = ServerBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
-      .build((new MyService(serverRes)) map { r: HttpRequest =>
+      .build((new MyService(serverRes)).map { r: Request =>
         synchronized { count += 1 }
         r
       })
     val client = ClientBuilder()
-      .codec(new Stream)
+      .codec(codec)
       .hosts(Seq(server.boundAddress))
       .hostConnectionLimit(1)
       .retries(2)
       .build()
 
-    val res = Await.result(client(httpRequest), 1.second)
+    val res = Await.result(client(streamRequest), 1.second)
     assert(count === 1)
-    val f2 = client(httpRequest)
+    val f2 = client(streamRequest)
     assert(f2.poll.isEmpty)  // because of the host connection limit
 
-    messages !! ChannelBuffers.wrappedBuffer("1".getBytes)
-    assert((res.messages??).toString(Charset.defaultCharset) === "1")
+    messages !! Buf.Utf8("1")
+    assert((res.messages??) === Buf.Utf8("1"))
     assert(count === 1)
     error !! EOF
     res.release()

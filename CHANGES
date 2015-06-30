@@ -22,6 +22,12 @@ Runtime Behavior Changes
     than waiting for all components to be Ok. This enables resilience of unions when part of the
     tree cannot be resolved. ``RB_ID=697114``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+  * finagle-stream: Introduce StreamRequest as a replacement for Netty's
+    HttpRequest, and converted the rest of the public API to not leak
+    other Netty types (notably ChannelBuffer is replaced by Buf). ``RB_ID=695896``
+
 6.26.0
 ~~~~~~~
 
