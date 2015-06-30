@@ -1,14 +1,17 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.http.{Response, Request, ReaderUtils}
+import com.twitter.finagle.http.filter.HttpNackFilter
+import com.twitter.finagle.http.{ReaderUtils, Request, Response}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.Dtab
-import com.twitter.io.{Reader, BufReader}
+import com.twitter.finagle.{Dtab, Failure}
+import com.twitter.io.BufReader
 import com.twitter.util.{Future, Promise, Return, Throw}
-import org.jboss.netty.handler.codec.http.{
-  HttpRequest, HttpResponse, HttpHeaders
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+
+private[http] object HttpClientDispatcher {
+  val NackFailure = Failure.rejected("The request was nacked by the server")
 }
 
 /**
@@ -22,6 +25,7 @@ class HttpClientDispatcher[Req <: HttpRequest](
 ) extends GenSerialClientDispatcher[Req, Response, Any, Any](trans) {
 
   import GenSerialClientDispatcher.wrapWriteException
+  import HttpClientDispatcher.NackFailure
   import ReaderUtils.{readChunk, streamChunks}
 
   // BUG: if there are multiple requests queued, this will close a connection
@@ -58,6 +62,10 @@ class HttpClientDispatcher[Req <: HttpRequest](
 
         // 2. Drain the Transport into Response body.
         trans.read() flatMap {
+          case res: HttpResponse if HttpNackFilter.isNack(res) =>
+            p.updateIfEmpty(Throw(NackFailure))
+            Future.Done
+
           case res: HttpResponse if !res.isChunked =>
             val response = new Response {
               final val httpResponse = res

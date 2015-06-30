@@ -4,7 +4,7 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
-import com.twitter.finagle.http.filter.DtabFilter
+import com.twitter.finagle.http.filter.{HttpNackFilter, DtabFilter}
 import com.twitter.finagle.http._
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.{Stats, ProtocolLibrary}
@@ -73,12 +73,15 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   }
 
   object Client {
-    val stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = StackClient.newStack
+    val stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] =
+      StackClient.newStack
+        .replace(
+          TraceInitializerFilter.role,
+          new HttpClientTraceInitializer[HttpRequest, HttpResponse])
   }
 
   case class Client(
-    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = Client.stack
-      .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[HttpRequest, HttpResponse]),
+    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = Client.stack,
     params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("http")
   ) extends StdStackClient[HttpRequest, HttpResponse, Client] {
     protected type In = Any
@@ -134,17 +137,26 @@ object Http extends Client[HttpRequest, HttpResponse] with HttpRichClient
   }
 
   val client = Client()
-  
+
   def newService(dest: Name, label: String): Service[HttpRequest, HttpResponse] =
     client.newService(dest, label)
 
   def newClient(dest: Name, label: String): ServiceFactory[HttpRequest, HttpResponse] =
     client.newClient(dest, label)
 
+  object Server {
+    val stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] =
+      StackServer.newStack
+        .replace(
+          TraceInitializerFilter.role,
+          new HttpServerTraceInitializer[HttpRequest, HttpResponse])
+        .replace(
+          StackServer.Role.preparer,
+          (next: ServiceFactory[HttpRequest, HttpResponse]) => (new HttpNackFilter).andThen(next))
+  }
 
   case class Server(
-    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = StackServer.newStack
-      .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[HttpRequest, HttpResponse]),
+    stack: Stack[ServiceFactory[HttpRequest, HttpResponse]] = Server.stack,
     params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("http")
   ) extends StdStackServer[HttpRequest, HttpResponse, Server] {
     protected type In = Any

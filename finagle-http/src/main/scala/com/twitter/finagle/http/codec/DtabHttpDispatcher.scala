@@ -1,9 +1,10 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.Dtab
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Throw, Future, Promise, Return}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 /**
@@ -21,6 +22,10 @@ private[finagle] class DtabHttpDispatcher(
     HttpDtab.write(Dtab.local, req)
     trans.write(req) rescue(wrapWriteException) flatMap { _ =>
       trans.read() flatMap {
+        case res: HttpResponse if HttpNackFilter.isNack(res) =>
+          p.updateIfEmpty(Throw(HttpClientDispatcher.NackFailure))
+          Future.Done
+
         case res: HttpResponse =>
           p.updateIfEmpty(Return(res))
           Future.Done

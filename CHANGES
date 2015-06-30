@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-http: Support nacks between Finagle Http clients and servers. When a server fails
+    with retryable exceptions (exceptions wrapped by `Failure.rejected`), it sends back a "Nack"
+    response, i.e. 503 Response code with a new "finagle-http-nack" header. This allows clients
+    to safely retry failed requests, and keep connections open. ``RB_ID=705948``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -8,7 +8,7 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.http.codec._
-import com.twitter.finagle.http.filter.DtabFilter
+import com.twitter.finagle.http.filter.{HttpNackFilter, DtabFilter}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.util.{Try, StorageUnit, Future, Closable}
@@ -156,7 +156,7 @@ case class Http(
       override def prepareConnFactory(
         underlying: ServiceFactory[HttpRequest, HttpResponse]
       ): ServiceFactory[HttpRequest, HttpResponse] =
-        DtabFilter.Netty andThen underlying
+        (new HttpNackFilter).andThen(DtabFilter.Netty).andThen(underlying)
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpServerTraceInitializer[HttpRequest, HttpResponse]
