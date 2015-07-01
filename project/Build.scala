@@ -525,9 +525,8 @@ object Finagle extends Build {
       "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
-    finagleCore, finagleHttp, finagleStream, finagleThrift,
-    finagleMemcachedX, finagleKestrel, finagleRedis, finagleMySQL,
-    finagleOstrich4, finagleStats)
+    finagleCore, finagleHttp, finagleThrift, finagleMemcachedX, finagleKestrel,
+    finagleRedis, finagleMySQL, finagleOstrich4, finagleStats)
 
   lazy val finagleBenchmark = Project(
     id = "finagle-benchmark",

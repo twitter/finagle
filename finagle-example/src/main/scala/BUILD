@@ -15,7 +15,6 @@ scala_library(name='scala',
     'finagle/finagle-ostrich4',
     'finagle/finagle-redis',
     'finagle/finagle-stats',
-    'finagle/finagle-stream',
     'finagle/finagle-thrift',
     'util/util-codec',
   ],
@@ -38,8 +37,6 @@ binary('memcached-ketama-stress', 'com.twitter.finagle.example.memcache.KetamaCl
 binary('memcached-stress', 'com.twitter.finagle.example.memcache.MemcacheStress')
 binary('mysql', 'com.twitter.finagle.example.mysql.Example')
 binary('redis-client', 'com.twitter.finagle.example.redis.RedisClient')
-binary('hosebird-client', 'com.twitter.finagle.example.stream.HosebirdClient')
-binary('stream-server', 'com.twitter.finagle.example.stream.StreamServer')
 binary('stress', 'com.twitter.finagle.example.stress.Stress')
 binary('thrift-client', 'com.twitter.finagle.example.thrift.ThriftClient')
 binary('thrift-server', 'com.twitter.finagle.example.thrift.ThriftServer')
