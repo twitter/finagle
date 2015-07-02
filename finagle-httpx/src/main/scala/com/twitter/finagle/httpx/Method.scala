@@ -2,9 +2,13 @@ package com.twitter.finagle.httpx
 
 import org.jboss.netty.handler.codec.http.HttpMethod
 
-sealed trait Method
+/**
+ * Represents the HTTP method.
+ *
+ * For Java-friendly enums, see [[com.twitter.finagle.httpx.Methods]].
+ */
+sealed abstract class Method
 
-/** Scala aliases for HttpMethod.  Java users should use Netty's HttpMethod. */
 object Method {
   case object Get extends Method
   case object Post extends Method

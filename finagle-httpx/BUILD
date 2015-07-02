@@ -2,7 +2,8 @@ maven_layout()
 
 target(name='finagle-httpx',
   dependencies=[
-    'finagle/finagle-httpx/src/main/scala'
+    'finagle/finagle-httpx/src/main/scala',
+    'finagle/finagle-httpx/src/main/java'
   ]
 )
 
