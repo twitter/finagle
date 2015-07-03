@@ -41,9 +41,7 @@ private[twitter] class StreamServerDispatcher[Req: RequestType](
   }
 
   protected def handle(rep: StreamResponse) = {
-    val httpRes = new DefaultHttpResponse(
-      HttpVersion.HTTP_1_1,
-      HttpResponseStatus.valueOf(rep.info.status.code))
+    val httpRes: HttpResponse = from(rep.info)
 
     httpRes.setChunked(
       httpRes.getProtocolVersion == HttpVersion.HTTP_1_1 &&

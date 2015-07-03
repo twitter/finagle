@@ -56,11 +56,7 @@ class StreamClientDispatcher[Req: RequestType](trans: Transport[Any, Any])
           }
 
           val res = new StreamResponse {
-            val info = new StreamResponse.Info(
-              fromNettyVersion(httpRes.getProtocolVersion),
-              StreamResponse.Status(httpRes.getStatus.getCode),
-              fromNettyHeaders(httpRes.headers)
-            )
+            val info = from(httpRes)
             def messages = out.recv
             def error = err.recv
             def release() = done.setDone()

@@ -50,6 +50,29 @@ private[stream] object Bijections {
         headers.iterator.asScala.map(e => Header(e.getKey, e.getValue)).toSeq
     }
 
+  // Response
+
+  implicit val fromNettyResponse: From[HttpResponse, StreamResponse.Info] =
+    new From[HttpResponse, StreamResponse.Info] {
+      def apply(res: HttpResponse) =
+        new StreamResponse.Info(
+          fromNettyVersion(res.getProtocolVersion),
+          StreamResponse.Status(res.getStatus.getCode),
+          fromNettyHeaders(res.headers)
+        )
+    }
+
+  implicit val toNettyResponse: From[StreamResponse.Info, HttpResponse] =
+    new From[StreamResponse.Info, HttpResponse] {
+      def apply(info: StreamResponse.Info) = {
+        val res = new DefaultHttpResponse(
+          toNettyVersion(info.version),
+          HttpResponseStatus.valueOf(info.status.code))
+        info.headers.foreach(h => res.headers.add(h.key, h.value))
+        res
+      }
+    }
+
   // Request
 
   implicit val fromNettyRequest: From[HttpRequest, StreamRequest] =

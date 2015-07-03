@@ -314,6 +314,39 @@ class EndToEndTest extends FunSuite {
     (client, proxy.boundAddress)
   }
 
+  test("Streams: headers") {
+    val s = Service.mk { (req: StreamRequest) =>
+      val errors = new Broker[Throwable]
+      errors ! EOF
+      Future.value(new StreamResponse {
+        val info = StreamResponse.Info(req.version, StreamResponse.Status(200), req.headers)
+        def messages = new Broker[Buf].recv
+        def error = errors.recv
+        def release() = errors !! EOF
+      })
+    }
+
+    val addr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+    val server = ServerBuilder()
+      .codec(Stream[StreamRequest]())
+      .bindTo(addr)
+      .name("s")
+      .build(s)
+
+    val client = ClientBuilder()
+      .codec(Stream[StreamRequest]())
+      .hosts(Seq(server.boundAddress))
+      .hostConnectionLimit(1)
+      .build()
+
+    val headers = Seq(Header("a", "b"), Header("c", "d"))
+    val req = StreamRequest(StreamRequest.Method.Get, "/", headers = headers)
+    val res = Await.result(client(req), 1.second)
+    assert(headers.forall(res.info.headers.contains), s"$headers not found in ${res.info.headers}")
+
+    Closable.all(client, server).close()
+  }
+
   test("Streams: delay release until complete response") {
     @volatile var count: Int = 0
     val c = new WorkItContext()
