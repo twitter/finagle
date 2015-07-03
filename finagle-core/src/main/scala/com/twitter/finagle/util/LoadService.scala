@@ -68,7 +68,13 @@ private object ClassPath {
     ents
   }
 
-  private[finagle] def browseUri(uri: URI, loader: ClassLoader, buf: mutable.Buffer[Info], history: mutable.Set[String] = mutable.Set[String]()) {
+  private[finagle] def browseUri(
+    uri: URI,
+    loader: ClassLoader,
+    buf: mutable.Buffer[Info],
+    history: mutable.Set[String] = mutable.Set[String]()
+  ): Unit = {
+
     if (uri.getScheme != "file")
       return
     val f = new File(uri)
