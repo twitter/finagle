@@ -68,17 +68,28 @@ private object ClassPath {
     ents
   }
 
-  private[finagle] def browseUri(uri: URI, loader: ClassLoader, buf: mutable.Buffer[Info]) {
+  private[finagle] def browseUri(
+    uri: URI,
+    loader: ClassLoader,
+    buf: mutable.Buffer[Info],
+    history: mutable.Set[String] = mutable.Set[String]()
+  ): Unit = {
+
     if (uri.getScheme != "file")
       return
     val f = new File(uri)
     if (!(f.exists() && f.canRead))
       return
+    val path = f.getCanonicalPath
+    if (history.contains(path))
+      return
+
+    history.add(path)
 
     if (f.isDirectory)
       browseDir(f, loader, "", buf)
     else
-      browseJar(f, loader, buf)
+      browseJar(f, loader, buf, history)
   }
 
   private def browseDir(
@@ -97,14 +108,14 @@ private object ClassPath {
       }
   }
 
-  private def browseJar(file: File, loader: ClassLoader, buf: mutable.Buffer[Info]) {
+  private def browseJar(file: File, loader: ClassLoader, buf: mutable.Buffer[Info], history: mutable.Set[String]) {
     val jarFile = try new JarFile(file) catch {
       case _: IOException => return  // not a Jar file
     }
 
     try {
       for (uri <- jarClasspath(file, jarFile.getManifest))
-        browseUri(uri, loader, buf)
+        browseUri(uri, loader, buf, history)
 
       for {
         e <- jarFile.entries.asScala
