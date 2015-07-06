@@ -22,6 +22,10 @@ Runtime Behavior Changes
     than waiting for all components to be Ok. This enables resilience of unions when part of the
     tree cannot be resolved. ``RB_ID=697114``
 
+  * finagle-thrift: Replace manually-compiled files with a scrooge-generated thrift target.
+    This changes the hashCode implementation of tracing-related structures: hashCode always returns 0
+    in the old implementation, and is calculated from structure fields in the new one. ``RB_ID=707520``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-stream: Introduce StreamRequest as a replacement for Netty's
