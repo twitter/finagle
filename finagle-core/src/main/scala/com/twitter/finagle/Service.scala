@@ -4,6 +4,7 @@ import java.net.SocketAddress
 import com.twitter.util.{Closable, Future, NonFatal, Time}
 
 object Service {
+
   /**
    * Wrap an underlying service such that any synchronously thrown exceptions are lifted into
    * Future.exception
