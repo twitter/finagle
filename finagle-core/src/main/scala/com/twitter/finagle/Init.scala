@@ -17,24 +17,32 @@ private[twitter] object Init {
   // Used to record Finagle versioning in trace info.
   private val unknownVersion = "?"
   private val _finagleVersion = new AtomicReference[String](unknownVersion)
+  private val _finagleBuildRevision = new AtomicReference[String](unknownVersion)
 
   def finagleVersion: String = _finagleVersion.get
 
+  def finagleBuildRevision: String = _finagleBuildRevision.get
+
   private def tryProps(path: String): Option[Properties] = {
     try {
-      val resource = getClass.getResource(path)
-      if (resource == null) {
-        log.log(Level.FINER, s"Finagle's build.properties not found: $path")
-        None
-      } else {
-        val p = new Properties
-        p.load(resource.openStream())
-        Some(p)
+      val resourceOpt = Option(getClass.getResourceAsStream(path))
+      resourceOpt match {
+        case None =>
+          log.log(Level.FINER, s"Finagle's build.properties not found: $path")
+          None
+        case Some(resource) =>
+          try {
+            val p = new Properties
+            p.load(resource)
+            Some(p)
+          } finally {
+            resource.close()
+          }
       }
     } catch {
       case NonFatal(exc) =>
         log.log(
-          Level.WARNING, s"Exception while loading finagle's build.properties: $path", exc)
+          Level.WARNING, s"Exception while loading Finagle's build.properties: $path", exc)
         None
     }
   }
@@ -57,10 +65,11 @@ private[twitter] object Init {
     val p = loadBuildProperties.getOrElse { new Properties() }
 
     _finagleVersion.set(p.getProperty("version", unknownVersion))
+    _finagleBuildRevision.set(p.getProperty("build_revision", unknownVersion))
 
     log.info("Finagle version %s (rev=%s) built at %s".format(
       finagleVersion,
-      p.getProperty("build_revision", "?"),
+      finagleBuildRevision,
       p.getProperty("build_name", "?")
     ))
   }
