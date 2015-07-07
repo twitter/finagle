@@ -12,6 +12,7 @@ private[twitter] object ClientRegistry extends StackRegistry {
 
   private[this] val sr = FinagleStatsReceiver.scope("clientregistry")
   private[this] val clientRegistrySize = sr.addGauge("size") { size }
+  private[this] val initialResolutionTime = sr.counter("initialresolution_ms")
 
   def registryName: String = "client"
 
@@ -50,7 +51,10 @@ private[twitter] object ClientRegistry extends StackRegistry {
       }
     }
 
-    Future.collect(fs.toSeq).map(_.toSet)
+    val start = Time.now
+    Future.collect(fs.toSeq).map(_.toSet).ensure {
+      initialResolutionTime.incr((Time.now - start).inMilliseconds.toInt)
+    }
   }
 }
 

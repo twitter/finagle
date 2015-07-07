@@ -28,6 +28,14 @@ visibility into this caching.
 The total time spent resolving Names is captured in the
 `namer/bind_latency_us` stat.
 
+Initial Resolution
+<<<<<<<<<<<<<<<<<<
+
+**initialresolution_ms**
+
+  A counter of the time spent waiting for client resolution via
+  `com.twitter.finagle.client.ClientRegistry.expAllRegisteredClientsResolved`
+
 Address Stabilization
 <<<<<<<<<<<<<<<<<<<<<
 
