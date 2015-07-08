@@ -553,6 +553,7 @@ object Finagle extends Build {
     finagleMemcachedX,
     finagleOstrich4,
     finagleStats,
+    finagleCommonsStats,
     finagleZipkin)
 
   lazy val finagleTesters = Project(
