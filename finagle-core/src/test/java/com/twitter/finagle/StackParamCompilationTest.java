@@ -59,7 +59,10 @@ public class StackParamCompilationTest {
           new Transporter.SocksProxy(
             SocksProxyFlags.socksProxy(),
             SocksProxyFlags.socksUsernameAndPassword()).mk())
-        .configured(new Transporter.HttpProxy(Option.<SocketAddress>empty()).mk())
+        .configured(
+          new Transporter.HttpProxy(
+            Option.<SocketAddress>empty(),
+            Option.<Transporter.Credentials>empty()).mk())
         .configured(
           new BindingFactory.BaseDtab(new Function0<Dtab>() {
               public Dtab apply() { return Dtab.empty(); }

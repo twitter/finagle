@@ -83,11 +83,18 @@ object Transporter {
    * $param a HttpProxy as the endpoint for a `Transporter`.
    * @see http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#9.9
    */
-  case class HttpProxy(sa: Option[SocketAddress]) {
+  case class HttpProxy(sa: Option[SocketAddress], credentials: Option[Credentials]) {
     def mk(): (HttpProxy, Stack.Param[HttpProxy]) =
       (this, HttpProxy.param)
+
+    def this(sa: Option[SocketAddress]) = this(sa, None)
   }
   object HttpProxy {
-    implicit val param = Stack.Param(HttpProxy(None))
+    implicit val param = Stack.Param(HttpProxy(None, None))
   }
+
+  /**
+   * This class wraps the username, password that we use for http proxy auth
+   */
+  case class Credentials(username: String, password: String)
 }

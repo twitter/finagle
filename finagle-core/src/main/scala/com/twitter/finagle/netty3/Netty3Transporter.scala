@@ -129,8 +129,8 @@ object Netty3Transporter {
     val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
     val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
     val Transporter.TLSHostname(tlsHostname) = params[Transporter.TLSHostname]
-    val Transporter.HttpProxy(httpProxy) = params[Transporter.HttpProxy]
-    val Transporter.SocksProxy(socksProxy, credentials) = params[Transporter.SocksProxy]
+    val Transporter.HttpProxy(httpProxy, httpProxyCredentials) = params[Transporter.HttpProxy]
+    val Transporter.SocksProxy(socksProxy, socksCredentials) = params[Transporter.SocksProxy]
     val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
     val Transport.TLSClientEngine(tls) = params[Transport.TLSClientEngine]
     val Transport.Liveness(readerTimeout, writerTimeout, keepAlive) = params[Transport.Liveness]
@@ -146,8 +146,9 @@ object Netty3Transporter {
       newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
       tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
       httpProxy = httpProxy,
+      httpProxyCredentials = httpProxyCredentials,
       socksProxy = socksProxy,
-      socksUsernameAndPassword = credentials,
+      socksUsernameAndPassword = socksCredentials,
       channelReaderTimeout = readerTimeout,
       channelWriterTimeout = writerTimeout,
       channelSnooper = snooper,
@@ -266,7 +267,8 @@ case class Netty3Transporter[In, Out](
   channelReaderTimeout: Duration = Duration.Top,
   channelWriterTimeout: Duration = Duration.Top,
   channelSnooper: Option[ChannelSnooper] = None,
-  channelOptions: Map[String, Object] = Netty3Transporter.defaultChannelOptions
+  channelOptions: Map[String, Object] = Netty3Transporter.defaultChannelOptions,
+  httpProxyCredentials: Option[Transporter.Credentials] = None
 ) extends ((SocketAddress, StatsReceiver) => Future[Transport[In, Out]]) {
   private[this] val statsHandlers = new IdentityHashMap[StatsReceiver, ChannelHandler]
 
@@ -354,7 +356,7 @@ case class Netty3Transporter[In, Out](
 
     (httpProxy, addr) match {
       case (Some(proxyAddr), inetAddr: InetSocketAddress) if !inetAddr.isUnresolved =>
-        HttpConnectHandler.addHandler(proxyAddr, inetAddr, pipeline)
+        HttpConnectHandler.addHandler(proxyAddr, inetAddr, pipeline, httpProxyCredentials)
       case _ =>
     }
 

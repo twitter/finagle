@@ -2,6 +2,7 @@ package com.twitter.finagle.builder
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient}
 import com.twitter.finagle.client.{StackBasedClient, Transporter}
 import com.twitter.finagle.factory.{BindingFactory, TimeoutFactory}
@@ -682,7 +683,13 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
    */
   def httpProxy(httpProxy: SocketAddress): This =
-    configured(Transporter.HttpProxy(Some(httpProxy)))
+    configured(params[Transporter.HttpProxy].copy(sa = Some(httpProxy)))
+
+  /**
+   * For the http proxy use these [[Credentials]] for authentication.
+   */
+  def httpProxyUsernameAndPassword(credentials: Credentials): This =
+    configured(params[Transporter.HttpProxy].copy(credentials = Some(credentials)))
 
   @deprecated("Use socksProxy(socksProxy: Option[SocketAddress])", "2014-12-02")
   def socksProxy(socksProxy: SocketAddress): This =
