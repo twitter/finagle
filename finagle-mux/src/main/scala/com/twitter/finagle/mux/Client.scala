@@ -267,8 +267,13 @@ private[twitter] class ClientDispatcher (
   loop() onFailure { case exc =>
     trans.close()
     val result = Throw(exc)
-    for ((tag, p) <- reqs)
-      p() = result
+    for (tag <- tags) {
+      /*
+       * unmap the `tag` here to prevent the associated promise from
+       * being fetched from the tag map again, and setting a value twice.
+       */
+      for (p <- reqs.unmap(tag)) p() = result
+    }
   }
 
   def ping(): Future[Unit] = {
