@@ -40,7 +40,7 @@ class HttpClientDispatcher(trans: Transport[Any, Any])
     HttpDtab.clear(req)
     HttpDtab.write(Dtab.local, req)
 
-    if (!req.isChunked && req.headers.contains(Fields.ContentLength)) {
+    if (!req.isChunked && !req.headers.contains(Fields.ContentLength)) {
       val len = req.getContent().readableBytes
       // Only set the content length if we are sure there is content. This
       // behavior complies with the specification that user agents should not

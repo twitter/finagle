@@ -73,6 +73,23 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       client.close()
     }
 
+    test(name + ": client sets content length") {
+      val service = new HttpService {
+        def apply(request: Request) = {
+          val response = Response()
+          val len = request.headerMap.get(Fields.ContentLength)
+          response.contentString = len.getOrElse("")
+          Future.value(response)
+        }
+      }
+      val body = "hello"
+      val client = connect(service)
+      val req = Request()
+      req.contentString = body
+      assert(Await.result(client(req)).contentString == body.length.toString)
+      client.close()
+    }
+
     test(name + ": echo") {
       val service = new HttpService {
         def apply(request: Request) = {
