@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.naming.DefaultInterpreter
 import com.twitter.util.NonFatal
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -76,11 +77,9 @@ class NameTreeTest extends FunSuite {
       /bar/foo => /foo/bar""")
 
     intercept[IllegalArgumentException] {
-      dtab.bind(NameTree.read("/foo/bar")).sample()
+      DefaultInterpreter.bind(dtab, Path.read("/foo/bar")).sample()
     }
   }
-
-
 
   test("NameTree.eval/simplified") {
     val cases = Seq[(String, Option[Set[String]])](

@@ -9,11 +9,11 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 @RunWith(classOf[JUnitRunner])
 class NameInterpreterTest extends FunSuite with BeforeAndAfter {
 
-  val dtab = Dtab.read("/=>/#/com.twitter.finagle.namer.global;/test=>/$/inet/some-host/1234")
+  val dtab = Dtab.read("/test=>/$/inet/some-host/1234")
   val name = Path.read("/test")
 
   after {
-    NameInterpreter.global = NameInterpreter.default
+    NameInterpreter.global = DefaultInterpreter
   }
 
   test("NameInterpreter uses dtab when interpreter is not set") {

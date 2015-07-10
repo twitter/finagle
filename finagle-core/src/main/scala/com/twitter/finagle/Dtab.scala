@@ -1,55 +1,45 @@
 package com.twitter.finagle
 
 import com.twitter.app.Flaggable
-import com.twitter.util.{Activity, Local, Var}
+import com.twitter.util.Local
 import java.io.PrintWriter
-import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicReference
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.Builder
-import scala.collection.mutable
 
 
 /**
- * A Dtab--short for delegation table--comprises a sequence
- * of delegation rules. Together, these describe how to bind a
- * path to an Addr.
+ * A Dtab--short for delegation table--comprises a sequence of
+ * delegation rules. Together, these describe how to bind a
+ * [[com.twitter.finagle.Path]] to a set of
+ * [[com.twitter.finagle.Addr]]. [[com.twitter.finagle.naming.DefaultInterpreter]]
+ * implements the default binding stategy.
  */
 case class Dtab(dentries0: IndexedSeq[Dentry])
-    extends IndexedSeq[Dentry] with Namer {
+  extends IndexedSeq[Dentry] {
+
   private lazy val dentries = dentries0.reverse
 
   def apply(i: Int): Dentry = dentries0(i)
   def length = dentries0.length
   override def isEmpty = length == 0
 
-  private[this] object NamerPath {
-    def unapply(path: Path): Option[(Namer, Path)] = path match {
-      case Path.Utf8("#", kind, rest@_*) => Some((Namer.namerOfKind(kind), Path.Utf8(rest: _*)))
-      case _ => None
-    }
-  }
-
-  private def lookup0(path: Path): NameTree[Path] = {
-    val matches = dentries collect {
-      case Dentry(prefix, dst) if path startsWith prefix =>
-        val suff = path drop prefix.size
-        dst map { pfx => pfx ++ suff }
+  /**
+   * Lookup the given `path` with this dtab.
+   */
+  def lookup(path: Path): NameTree[Name.Path] = {
+    val matches = dentries.collect {
+      case Dentry(prefix, dst) if path.startsWith(prefix) =>
+        val suff = path.drop(prefix.size)
+        dst.map { pfx => Name.Path(pfx ++ suff) }
     }
 
     matches.size match {
       case 0 => NameTree.Neg
-      case 1 => matches(0)
+      case 1 => matches.head
       case _ => NameTree.Alt(matches:_*)
     }
   }
-
-  def lookup(path: Path): Activity[NameTree[Name]] =
-    path match {
-      case NamerPath(namer, rest) => namer.lookup(rest)
-      case _ => Activity.value(lookup0(path) map { path => Name(path) })
-    }
 
   /**
    * Construct a new Dtab with the given delegation
@@ -113,7 +103,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
    * whose destination name trees have been simplified. The returned
    * Dtab is equivalent with respect to evaluation.
    *
-   * @todo dedup equivalent entries so that the only the last entry is retained
+   * @todo dedup equivalent entries so that only the last entry is retained
    * @todo collapse entries with common prefixes
    */
   def simplified: Dtab = Dtab({
@@ -130,10 +120,9 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
 }
 
 /**
- * Trait Dentry describes a delegation table entry.
- * It always has a prefix, describing the paths to
- * which the entry applies, and a bind method to
- * bind the given path.
+ * Trait Dentry describes a delegation table entry. `prefix` describes
+ * the paths that the entry applies to. `dst` describes the resulting
+ * tree for this prefix on lookup.
  */
 case class Dentry(prefix: Path, dst: NameTree[Path]) {
   def show = "%s=>%s".format(prefix.show, dst.show)
@@ -147,7 +136,7 @@ object Dentry {
    * dentry     ::= path '=>' tree
    * }}}
    *
-   * where the productions ``path`` and ``tree`` are from the grammar
+   * where the productions `path` and `tree` are from the grammar
    * documented in [[com.twitter.finagle.NameTree$ NameTree.read]].
    */
   def read(s: String): Dentry = NameTreeParsers.parseDentry(s)
@@ -190,10 +179,10 @@ object Dtab {
    * every request in this process. It is generally set at process
    * startup, and not changed thereafter.
    */
-  @volatile var base: Dtab = Dtab.read("/=>/#/com.twitter.finagle.namer.global")
+  @volatile var base: Dtab = empty
 
   /**
-   * Java API for ``base_=``
+   * Java API for `base_=`
    */
   def setBase(dtab: Dtab) { base = dtab }
 
@@ -203,14 +192,14 @@ object Dtab {
    * The local, or "per-request", delegation table applies to the
    * current [[com.twitter.util.Local Local]] scope which is usually
    * defined on a per-request basis. Finagle uses the Dtab
-   * ``Dtab.base ++ Dtab.local`` to bind
-   * [[com.twitter.finagle.Name.Path Paths]].
+   * `Dtab.base ++ Dtab.local` to bind [[com.twitter.finagle.Name.Path
+   * Paths]] via a [[com.twitter.finagle.naming.NameInterpreter]].
    *
    * Local's scope is dictated by [[com.twitter.util.Local Local]].
    *
    * The local dtab is serialized into outbound requests when
    * supported protocols are used. (Http, Thrift via TTwitter, Mux,
-   * and ThriftMux are among these.) The upshot is that ``local`` is
+   * and ThriftMux are among these.) The upshot is that `local` is
    * defined for the entire request graph, so that a local dtab
    * defined here will apply to downstream services as well.
    */
@@ -221,7 +210,7 @@ object Dtab {
   def local_=(dtab: Dtab) { l() = dtab }
 
   /**
-   * Java API for ``local_=``
+   * Java API for `local_=`
    */
   def setLocal(dtab: Dtab) { local = dtab }
 
@@ -237,7 +226,7 @@ object Dtab {
    * dtab       ::= dentry ';' dtab | dentry
    * }}}
    *
-   * where the production ``dentry`` is from the grammar documented in
+   * where the production `dentry` is from the grammar documented in
    * [[com.twitter.finagle.Dentry$ Dentry.read]]
    *
    */

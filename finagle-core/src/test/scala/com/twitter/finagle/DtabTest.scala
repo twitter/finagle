@@ -1,7 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.util.Activity
-import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -17,22 +15,6 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     else Some(left + "!=" + right)
   )
 
-  test("Lookup all prefixes in reverse order") {
-    val dtab = Dtab.read("/foo/bar=>/xxx;/foo=>/yyy")
-
-    assertEquiv(
-      dtab.lookup(Path.read("/foo/bar/baz")).sample(),
-      pathTree("/yyy/bar/baz | /xxx/baz"))
-  }
-
-  test("Expand names") {
-    val dtab = Dtab.read("/foo/bar => /xxx|/yyy&/zzz")
-
-    assertEquiv(
-      dtab.lookup(Path.read("/foo/bar/baz")).sample(),
-      pathTree("/xxx/baz | /yyy/baz & /zzz/baz"))
-  }
-
   test("d1 ++ d2") {
     val d1 = Dtab.read("/foo => /bar")
     val d2 = Dtab.read("/foo=>/biz;/biz=>/$/inet/0/8080;/bar=>/$/inet/0/9090")
@@ -43,17 +25,6 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
       /biz=>/$/inet/0/8080;
       /bar=>/$/inet/0/9090
     """))
-
-    def assertEval(dtab: Dtab, path: Path, expected: Name.Bound*) {
-      val dtab2 = Dtab.read("/=>/#/com.twitter.finagle.namer.global") ++ dtab
-      dtab2.bind(NameTree.Leaf(path)).sample().eval match {
-        case Some(actual) => assert(actual.map(_.addr.sample) === expected.map(_.addr.sample).toSet)
-        case _ => assert(false)
-      }
-    }
-
-    assertEval(d1 ++ d2, Path.read("/foo"), Name.bound(new InetSocketAddress(8080)))
-    assertEval(d2 ++ d1, Path.read("/foo"), Name.bound(new InetSocketAddress(9090)))
   }
 
   test("d1 ++ Dtab.empty") {
@@ -103,17 +74,5 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
           """)
       } catch { case _: IllegalArgumentException => Dtab.empty }
     assert(dtab.length === 2)
-  }
-
-  test("/# path loads Namer class, rewrite is ignored") {
-    assert(Dtab.read("/# => /foo").lookup(Path.read("/#/com.twitter.finagle.dtabtest.TestNamer")).sample()
-      === NameTree.Leaf(Name.Path(Path.read("/plugh/xyzzy"))))
-  }
-}
-
-package dtabtest {
-  class TestNamer extends Namer {
-    def lookup(path: Path) = Activity.value(NameTree.Leaf(Name.Path(Path.read("/plugh/xyzzy"))))
-    def enum(prefix: Path) = throw new UnsupportedOperationException
   }
 }

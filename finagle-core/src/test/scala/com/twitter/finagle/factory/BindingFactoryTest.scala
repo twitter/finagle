@@ -2,6 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -27,6 +28,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
   after {
     Dtab.base = saveBase
+    NameInterpreter.global = DefaultInterpreter
   }
 
   def anonNamer() = new Namer {
@@ -199,7 +201,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
     expectTrace(Seq(
       "namer.path" -> "/foo/bar",
-      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.dtab.base" -> "/test1010=>/$/inet/0/1010",
       "namer.tree" -> "/$/inet/0/1010",
       "namer.name" -> "/$/inet/0/1010"
     ))
@@ -208,16 +210,15 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   test("Trace on exception") (new Ctx {
     val exc = new RuntimeException
 
-    Dtab.base = new Dtab(Dtab.base) {
-      override def lookup(path: Path) =
-        Activity.exception(exc)
+    NameInterpreter.global = new NameInterpreter {
+      override def bind(dtab: Dtab, path: Path) = Activity.exception(exc)
     }
 
     assert(intercept[Failure](Await.result(factory())).isFlagged(Failure.Naming))
 
     expectTrace(Seq(
       "namer.path" -> "/foo/bar",
-      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.dtab.base" -> "/test1010=>/$/inet/0/1010",
       "namer.failure" -> "java.lang.RuntimeException"
     ))
   })
@@ -229,7 +230,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
     expectTrace(Seq(
       "namer.path" -> "/foo/bar",
-      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.dtab.base" -> "/test1010=>/$/inet/0/1010",
       "namer.tree" -> "~"
     ))
   })
@@ -258,7 +259,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
     expectTrace(Seq(
       "namer.path" -> "/foo/bar",
-      "namer.dtab.base" -> "/=>/#/com.twitter.finagle.namer.global;/test1010=>/$/inet/0/1010",
+      "namer.dtab.base" -> "/test1010=>/$/inet/0/1010",
       "namer.tree" -> "/$/inet/0/1010",
       "namer.name" -> "/$/inet/0/1010"
     ))

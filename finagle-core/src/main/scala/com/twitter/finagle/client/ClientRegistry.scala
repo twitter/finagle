@@ -72,12 +72,13 @@ private[finagle] object RegistryEntryLifecycle {
       next: Stack[ServiceFactory[Req, Rep]]
     ): Stack[ServiceFactory[Req, Rep]] = {
       val BindingFactory.Dest(dest) = params[BindingFactory.Dest]
+      val BindingFactory.BaseDtab(baseDtab) = params[BindingFactory.BaseDtab]
 
       // for the benefit of ClientRegistry.expAllRegisteredClientsResolved
       // which waits for these to become non-Pending
       val va = dest match {
         case Name.Bound(va) => va
-        case Name.Path(path) => Namer.resolve(path)
+        case Name.Path(path) => Namer.resolve(baseDtab(), path)
       }
 
       val shown = Showable.show(dest)

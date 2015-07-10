@@ -32,6 +32,11 @@ Breaking API Changes
     HttpRequest, and converted the rest of the public API to not leak
     other Netty types (notably ChannelBuffer is replaced by Buf). ``RB_ID=695896``
 
+  * finagle-core: Dtab does not implement the Namer interface anymore. Use
+    `c.t.f.naming.DefaultInterpreter` to bind a name via a Dtab. Support for Dtab entries starting
+    with /#/ has been removed. `c.t.f.Namer.bindAndEval` has been removed. Use
+    `c.t.f.Namer.resolve` instead. ``RB_ID=711681``
+
 6.26.0
 ~~~~~~~
 

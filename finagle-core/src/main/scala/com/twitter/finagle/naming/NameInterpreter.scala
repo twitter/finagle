@@ -17,17 +17,15 @@ trait NameInterpreter {
 
 object NameInterpreter extends NameInterpreter {
 
-  /** The default interpreter. Bind `path` using `dtab` as a namer. */
-  val default = new NameInterpreter {
-    override def bind(dtab: Dtab, path: Path) = dtab.bind(NameTree.Leaf(path))
-  }
-
   /**
    * The global interpreter that resolves all names in Finagle.
    *
    * Can be modified to provide a different mechanism for name resolution.
    */
-  @volatile var global: NameInterpreter = default
+  @volatile var global: NameInterpreter = DefaultInterpreter
+
+  /** Java API for setting the interpreter */
+  def setGlobal(nameInterpreter: NameInterpreter) = { global = nameInterpreter }
 
   override def bind(dtab: Dtab, tree: Path): Activity[NameTree[Name.Bound]] =
     global.bind(dtab, tree)

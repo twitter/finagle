@@ -4,6 +4,7 @@ import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
@@ -12,7 +13,7 @@ import com.twitter.util._
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
@@ -20,12 +21,17 @@ class StackClientTest extends FunSuite
   with StringClient
   with AssertionsForJUnit
   with Eventually
-  with IntegrationPatience {
+  with IntegrationPatience
+  with BeforeAndAfter {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver
     val client = stringClient
       .configured(param.Stats(sr))
+  }
+
+  after {
+    NameInterpreter.global = DefaultInterpreter
   }
 
   test("client stats are scoped to label")(new Ctx {
@@ -323,12 +329,17 @@ class StackClientTest extends FunSuite
     val addr1 = new InetSocketAddress(1729)
     val addr2 = new InetSocketAddress(1730)
 
-    // override name resolution to a Union of two addresses
-    val dtab = new Dtab(Dtab.base) {
-      override def lookup(path: Path): Activity[NameTree[Name]] =
+    val baseDtab = Dtab.read("/s=>/test")
+
+    // override name resolution to a Union of two addresses, and check
+    // that the base dtab is properly passed in
+    NameInterpreter.global = new NameInterpreter {
+      override def bind(dtab: Dtab, path: Path): Activity[NameTree[Name.Bound]] = {
+        assert(dtab === baseDtab)
         Activity.value(NameTree.Union(
           NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr1))),
           NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr2)))))
+      }
     }
 
     val stack = StackClient.newStack[Unit, Unit]
@@ -355,7 +366,7 @@ class StackClientTest extends FunSuite
       new FactoryToService(stack.make(Stack.Params.empty +
         FactoryToService.Enabled(true) +
         param.Stats(sr) +
-        BindingFactory.BaseDtab(() => dtab)))
+        BindingFactory.BaseDtab(() => baseDtab)))
 
     intercept[ChannelWriteException] {
       Await.result(service(()))
