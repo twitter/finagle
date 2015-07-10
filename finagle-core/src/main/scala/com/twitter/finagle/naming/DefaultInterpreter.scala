@@ -15,7 +15,7 @@ object DefaultInterpreter extends NameInterpreter {
   override def bind(dtab: Dtab, path: Path): Activity[NameTree[Name.Bound]] = {
     def lookup(path: Path): Activity[NameTree[Name]] =
       dtab.lookup(path) match {
-        case NameTree.Neg => Namer.global.bind(NameTree.Leaf(path))
+        case NameTree.Neg => Namer.global.lookup(path)
         case t => Activity.value(t)
       }
 
