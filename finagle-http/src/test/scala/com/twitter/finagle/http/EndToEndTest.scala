@@ -119,6 +119,26 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
       client.close()
     }
 
+    test(name + ": client sets content-length header") {
+      val service = new HttpService {
+        def apply(request: HttpRequest) = {
+          val response = Response()
+          Option(request.headers.get("Content-Length")).foreach(
+           response.contentString = _
+          )
+          Future.value(response)
+        }
+      }
+      val client = connect(service)
+      val body = "hello world"
+      val req = Request("/")
+      req.contentString = body
+      val res = Await.result(client(req))
+      val contentString = new String(res.getContent.array())
+      assert(contentString == body.length.toString)
+      client.close()
+    }
+
     test(name + ": (no) dtab") {
       val service = new HttpService {
         def apply(request: HttpRequest) = {
@@ -485,5 +505,4 @@ class EndToEndTest extends FunSuite with BeforeAndAfter with Eventually {
           Closable.all(client, server).close(deadline)
       }
   }
-
 }
