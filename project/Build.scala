@@ -208,7 +208,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-core",
     libraryDependencies ++= Seq(nettyLib, util("app"), util("core"), util("collection"),
-      util("hashing"), util("stats"), util("jvm"), util("logging"),
+      util("hashing"), util("stats"), util("jvm"), util("logging"), util("codec"),
       "com.twitter" % "jsr166e" % "1.0.0")
   ).dependsOn(finagleTest % "test")
 
