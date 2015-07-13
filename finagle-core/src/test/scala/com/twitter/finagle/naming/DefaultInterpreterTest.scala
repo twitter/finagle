@@ -7,6 +7,11 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
+class testnamer extends Namer {
+  override def lookup(path: Path) =
+    Activity.value(NameTree.Leaf(Name.Path(Path.read("/rewritten/by/test/namer"))))
+}
+
 @RunWith(classOf[JUnitRunner])
 class DefaultInterpreterTest extends FunSuite {
 
@@ -35,15 +40,27 @@ class DefaultInterpreterTest extends FunSuite {
     assertEval(d2 ++ d1, "/foo", Name.bound(new InetSocketAddress(9090)))
   }
 
+  test("recurse back to the dtab") {
+    val dtab = Dtab.read(
+      "/foo=>/$/com.twitter.finagle.naming.testnamer;/rewritten/by/test/namer=>/$/inet/0/7070"
+    )
+
+    assertEval(dtab, "/foo", Name.bound(new InetSocketAddress(7070)))
+  }
+
   test("full example") {
     val dtab = Dtab.read("""
       /foo => /bar;
-      /foo => 3 * /baz & 2 * /booz;
+      /foo => 3 * /baz & 2 * /booz & /$/com.twitter.finagle.naming.testnamer;
+      /rewritten/by/test/namer => /$/inet/0/7070;
       /baz => 3 * /$/inet/0/8080 & 2 * /$/inet/0/9090;
       /booz => ~
     """)
 
     assertEval(dtab, "/foo",
-      Name.bound(new InetSocketAddress(8080)), Name.bound(new InetSocketAddress(9090)))
+      Name.bound(new InetSocketAddress(8080)),
+      Name.bound(new InetSocketAddress(9090)),
+      Name.bound(new InetSocketAddress(7070))
+    )
   }
 }
