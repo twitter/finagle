@@ -148,7 +148,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }
@@ -161,7 +161,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }
@@ -174,7 +174,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }
@@ -187,7 +187,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }
