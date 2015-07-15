@@ -14,6 +14,7 @@ import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Stack, WriteException, CancelledConnectionException}
 import com.twitter.util.{Future, Promise, Duration, NonFatal, Stopwatch}
 import java.net.{InetSocketAddress, SocketAddress}
+import java.nio.channels.UnresolvedAddressException
 import java.util.IdentityHashMap
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
@@ -64,7 +65,10 @@ private[netty3] class ChannelConnector[In, Out](
           promise.setException(WriteException(new CancelledConnectionException))
         } else {
           failedConnectLatencyStat.add(latency)
-          promise.setException(WriteException(f.getCause))
+          promise.setException(f.getCause match {
+            case e: UnresolvedAddressException => e
+            case e => WriteException(e)
+          })
         }
       }
     })
