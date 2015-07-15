@@ -170,7 +170,7 @@ object AnnotatingTracingFilter {
 /**
  * Annotate the request with Server specific records (ServerRecv, ServerSend)
  */
-private[finagle] object ServerTracingFilter {
+object ServerTracingFilter {
   val role = Stack.Role("ServerTracingFilter")
 
   case class TracingFilter[Req, Rep](
@@ -198,7 +198,7 @@ private[finagle] object ServerTracingFilter {
 /**
  * Annotate the request with Client specific records (ClientSend, ClientRecv)
  */
-private[finagle] object ClientTracingFilter {
+object ClientTracingFilter {
   val role = Stack.Role("ClientTracingFilter")
 
   case class TracingFilter[Req, Rep](
