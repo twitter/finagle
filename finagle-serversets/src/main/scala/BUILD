@@ -19,7 +19,4 @@ scala_library(name='scala',
   resources=[
     'finagle/finagle-serversets/src/main/resources'
   ],
-  excludes=[
-    exclude('org.slf4j', name='slf4j-log4j12'),
-  ],
 )

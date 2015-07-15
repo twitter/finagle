@@ -22,5 +22,8 @@ scala_library(name='scala',
     'util/util-core',
     'util/util-hashing',
   ],
+  excludes=[
+    exclude('org.slf4j', name='slf4j-log4j12'),
+  ],
   sources=rglobs('*.scala')
 )

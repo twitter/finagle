@@ -15,6 +15,9 @@ scala_library(name='scala',
     'finagle/finagle-serversets',
     'util/util-core'
   ],
+  excludes=[
+    exclude('org.slf4j', name='slf4j-log4j12'),
+  ],
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-cacheresolver/src/main/resources'
