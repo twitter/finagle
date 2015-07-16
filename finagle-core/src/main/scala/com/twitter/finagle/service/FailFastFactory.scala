@@ -46,13 +46,14 @@ object FailFastFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[FailFastFactory]] when enabled.
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[FailFast, param.Stats, param.Timer, ServiceFactory[Req, Rep]] {
+    new Stack.Module4[FailFast, param.Stats, param.Timer, param.Label, ServiceFactory[Req, Rep]] {
       val role = FailFastFactory.role
       val description = "Backoff exponentially from hosts to which we cannot establish a connection"
       def make(
         failFast: FailFast,
         _stats: param.Stats,
         _timer: param.Timer,
+        _label: param.Label,
         next: ServiceFactory[Req, Rep]
       ) = {
         failFast match {
@@ -61,7 +62,8 @@ object FailFastFactory {
           case FailFast(true) =>
             val param.Stats(statsReceiver) = _stats
             val param.Timer(timer) = _timer
-            new FailFastFactory(next, statsReceiver.scope("failfast"), timer)
+            val param.Label(label) = _label
+            new FailFastFactory(next, statsReceiver.scope("failfast"), timer, label)
         }
       }
     }
@@ -84,13 +86,14 @@ private[finagle] class FailFastFactory[Req, Rep](
   self: ServiceFactory[Req, Rep],
   statsReceiver: StatsReceiver,
   timer: Timer,
+  label: String,
   backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs
 ) extends ServiceFactoryProxy(self) {
   import FailFastFactory._
 
   private[this] val failedFastExc = Future.exception {
     val url = "https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s"
-    new FailedFastException(s"Endpoint is marked down. For more details see: $url")
+    new FailedFastException(s"Endpoint $label is marked down. For more details see: $url")
   }
 
   private[this] val markedAvailableCounter = statsReceiver.counter("marked_available")

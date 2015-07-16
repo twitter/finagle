@@ -29,7 +29,8 @@ class FailFastFactoryTest extends FunSuite
     when(underlying.status).thenReturn(Status.Open)
     when(underlying.close(any[Time])).thenReturn(Future.Done)
     val stats = new InMemoryStatsReceiver
-    val failfast = new FailFastFactory(underlying, stats, timer, backoffs)
+    val label = "test"
+    val failfast = new FailFastFactory(underlying, stats, timer, label, backoffs)
 
     val p, q, r = new Promise[Service[Int, Int]]
     when(underlying()).thenReturn(p)
@@ -237,7 +238,7 @@ class FailFastFactoryTest extends FunSuite
       val ctx = newCtx()
       import ctx._
 
-      val failfast = new FailFastFactory(underlying, stats, timer, Stream.empty)
+      val failfast = new FailFastFactory(underlying, stats, timer, "test", Stream.empty)
       failfast()
     }
   }
