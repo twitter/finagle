@@ -548,13 +548,15 @@ object Finagle extends Build {
       "com.twitter.common" % "metrics-data-sample" % "0.0.1"
     )
   ).dependsOn(
+    finagleCommonsStats,
     finagleCore,
     finagleExp,
     finagleMemcachedX,
     finagleOstrich4,
     finagleStats,
-    finagleCommonsStats,
-    finagleZipkin)
+    finagleThriftMux,
+    finagleZipkin
+  )
 
   lazy val finagleTesters = Project(
     id = "finagle-testers",
