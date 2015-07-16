@@ -25,6 +25,7 @@ so little setup is needed: put the following into a file called `build.sbt` in
 a fresh directory:
 
 .. parsed-literal::
+
 	name = "quickstart"
 
 	version = "1.0"
@@ -49,6 +50,7 @@ A minimal HTTP server
 We'll need to import a few things into our namespace.
 
 .. includecode:: code/quickstart/Server.scala#imports
+   :language: scala
 
 `Service` is the interface used to represent a server or a client
 (:doc:`about which more later <ServicesAndFilters>`). `Httpx` is Finagle's HTTP
@@ -57,6 +59,7 @@ client and server.
 Next, we'll define a `Service` to serve our HTTP requests:
 
 .. includecode:: code/quickstart/Server.scala#service
+   :language: scala
 
 Services are functions from a request type (`com.twitter.finagle.httpx.Request`) 
 to a `Future` of a response type (`com.twitter.finagle.httpx.Response`). 
@@ -69,6 +72,7 @@ Now that we've defined our `Service`, we'll need to export
 it. We use Finagle's Http server for this:
 
 .. includecode:: code/quickstart/Server.scala#builder
+   :language: scala
 
 The `serve` method takes a *bind target* (which port to expose the
 server) and the service itself. The server is responsible for
@@ -80,6 +84,7 @@ format, sending replies back to the client.
 The complete server:
 
 .. includecode:: code/quickstart/Server.scala
+   :language: scala
 
 We're now ready to run it:
 
@@ -106,6 +111,7 @@ with a `Httpx.newService`, giving us an instance of
 `Service[httpx.Request, httpx.Response]`:
 
 .. includecode:: code/quickstart/Client.scala#builder
+   :language: scala
 
 `client` is a `Service` to which we can dispatch an `httpx.Request`
 and in return receive a `Future[httpx.Response]` — the promise of an
@@ -114,15 +120,18 @@ and in return receive a `Future[httpx.Response]` — the promise of an
 to which requests are dispatched.
 
 .. includecode:: code/quickstart/Client.scala#dispatch
+   :language: scala
 
 Now that we have `response`, a `Future[httpx.Response]`, we can register
 a callback to notify us when the result is ready:
 
 .. includecode:: code/quickstart/Client.scala#callback
+   :language: scala
 
 Completing the client:
 
 .. includecode:: code/quickstart/Client.scala
+   :language: scala
 
 which in turn is run by:
 
@@ -141,6 +150,7 @@ proxy can be constructed by just replacing the service we defined with
 one that was imported with a `Httpx.newService`:
 
 .. includecode:: code/quickstart/Proxy.scala
+   :language: scala
 
 And we can run it and dispatch requests to it:
 

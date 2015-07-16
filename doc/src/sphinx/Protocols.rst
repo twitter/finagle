@@ -55,12 +55,14 @@ following rich APIs [#]_:
 Serving the IDL:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServer.scala#thriftserverapi
+   :language: scala
 
 .. _finagle_thrift_client:
 
 and the symmetric remote dispatch:
 
 .. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftClient.scala#thriftclientapi
+   :language: scala
 
 Check out the `finagle-thrift` :api:`API <com.twitter.finagle.Thrift$>`
 for more info.
@@ -141,6 +143,7 @@ A client can be constructed using the
 :api:`Mysql <com.twitter.finagle.exp.Mysql$>` protocol object:
 
 .. includecode:: code/protocols/mysql.scala#client
+   :language: scala
 
 We configure the :api:`client's connection pool <com.twitter.finagle.client.DefaultPool>` to be
 compatible with our MySQL server. The constructor returns a Finagle :ref:`ServiceFactory <service_factory>`
@@ -148,21 +151,25 @@ from :api:`mysql.Request <com.twitter.finagle.exp.mysql.Request>` to :api:`mysql
 which we can use to query the db:
 
 .. includecode:: code/protocols/mysql.scala#query0
+   :language: scala
 
 A :api:`ResultSet <com.twitter.finagle.exp.mysql.ResultSet>` makes it easy to extract
 :api:`Values <com.twitter.finagle.exp.mysql.Value>` based on column names. For example, we can
 implement the above `processRow` as a pattern match on expected values:
 
 .. includecode:: code/protocols/mysql.scala#processRow
+   :language: scala
 
 The ServiceFactory API gives you more fine-grained control over the pool. This isn't always necessary
 - to simplify *finagle-mysql* offers a rich API that wraps the ServiceFactory returned from `newClient`:
 
 .. includecode:: code/protocols/mysql.scala#richClient
+   :language: scala
 
 and we can select:
 
 .. includecode:: code/protocols/mysql.scala#query1
+   :language: scala
 
 Note that `select` takes care of checking out the service and returning it to the pool. `select` and
 other useful methods are available on :api:`mysql.Client <com.twitter.finagle.exp.mysql.Client>` which is returned

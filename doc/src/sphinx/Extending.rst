@@ -7,8 +7,8 @@ protocol. We'll build a client capable of sending simple strings to a
 server, which in turn may reply with another.
 
 While we're going to dig a bit deeper here than in the rest of the
-user's guide—implementing even a simple protocol requires a deeper
-appreciation of Finagle's internals—the material presented here is not
+user's guide — implementing even a simple protocol requires a deeper
+appreciation of Finagle's internals — the material presented here is not
 necessary to understand how to use Finagle productively. However,
 expert users may find the material useful.
 
@@ -17,7 +17,7 @@ understand some of Finagle's core concepts (i.e. :doc:`Futures
 <Futures>`, :doc:`Services and Filters<ServicesAndFilters>`).
 
 The entire example is available, together with a self-contained script
-to launch sbt, in the Finagle git repository:
+to launch `sbt`, in the Finagle git repository:
 
 ::
 
@@ -96,7 +96,7 @@ Finagle represents the OSI transport layer as a typed stream that may
 be read from and written to asynchronously. The noteworthy methods in
 the interface are defined as such:
 
-::
+.. code-block:: scala
 
   trait Transport[In, Out] {
     def read(): Future[Out]
@@ -115,6 +115,7 @@ protocol we use a `Netty Channel Pipeline <http://netty.io/3.6/api/org/jboss/net
 Our server pipeline defines a UTF-8 text-based newline delimited protocol:
 
 .. includecode:: code/client-server-anatomy/Netty3.scala#serverpipeline
+   :language: scala
 
 Listener
 --------
@@ -126,11 +127,12 @@ translating our pipeline into a typed transport are defined by the
 We define a listener in our server implementation:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#serverlistener
+   :language: scala
 
 This implements the :src:`Listener <com/twitter/finagle/server/Listener.scala>`
 interface that exposes a `listen` method:
 
-::
+.. code-block:: scala
 
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit)
 
@@ -139,7 +141,7 @@ for each new connection established.
 
 For example, here is a simple echo server:
 
-::
+.. code-block:: scala
 
    val address = new java.net.InetSocketAddress("localhost", 8080)
    val listener = Netty3Listener(StringServerPipeline, StackServer.defaultParams)
@@ -172,6 +174,7 @@ closing a transport.
 We could translate our `serveTransport` function to use this facility:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#simplelisten
+   :language: scala
 
 A nice consequence of using a :ref:`Service <services>` to process
 data received over the transport is the ability to furnish our server with
@@ -197,10 +200,12 @@ The abstract type parameters `In` and `Out` are used when the type of
 processing is done in the `Dispatcher`.
 
 .. includecode:: code/client-server-anatomy/Echo.scala#server
+   :language: scala
 
 Finally, we make use of our service:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#serveruse
+   :language: scala
 
 
 Client Protocol
@@ -211,6 +216,7 @@ to frame our network traffic. Our client pipeline defines a
 UTF-8 newline delimited protocol:
 
 .. includecode:: code/client-server-anatomy/Netty3.scala#clientpipeline
+   :language: scala
 
 Transporter
 -----------
@@ -221,6 +227,7 @@ a :ref:`Transport <transport_interface>` to a peer—it establishes a session. O
 the use of other Transporters is fully supported.
 
 .. includecode:: code/client-server-anatomy/Echo.scala#transporter
+   :language: scala
 
 Client Dispatcher
 -----------------
@@ -246,10 +253,12 @@ Given a defined transporter and request dispatching strategy, we can compose the
 two and create a client:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#explicitbridge
+   :language: scala
 
 Finally, we can dispatch requests over our client,
 
 .. includecode:: code/client-server-anatomy/Echo.scala#basicclientexample
+   :language: scala
 
 Assuming we have a server willing to listen, we can expect a response:
 
@@ -266,11 +275,13 @@ behavior to make our client more robust using
 filters:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#filters
+   :language: scala
 
 Composing these filters [#]_ with our basic client demonstrates
 the composable components used throughout finagle.
 
 .. includecode:: code/client-server-anatomy/Echo.scala#robustclient
+   :language: scala
 
 This client is a good start, but we cannot dispatch concurrent requests
 to a single host, nor load balance over multiple hosts. A typical Finagle client
@@ -298,11 +309,12 @@ on :ref:`client modules <client_modules>` for more details.
 Putting together a `StdStackClient` is simple:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#client
+   :language: scala
 
 Armed with this new client, we can connect to a destination :src:`Name
 <com/twitter/finagle/Name.scala>`, representing multiple hosts:
 
-::
+.. code-block:: scala
 
   val dest = Resolver.eval(
     "localhost:8080,localhost:8081,localhost:8082")

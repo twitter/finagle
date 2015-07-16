@@ -3,7 +3,7 @@ Servers
 
 Finagle servers implement a simple :src:`interface: <com/twitter/finagle/Server.scala>`
 
-::
+.. code-block:: scala
 
   def serve(
     addr: SocketAddress,
@@ -15,7 +15,7 @@ to a `ListeningServer`. The handle allows for management of server resources. Th
 variants that allow for serving a simple `Service` as well. Typical usage takes the form
 ``Protocol.serve(...)``, for example:
 
-::
+.. code-block:: scala
 
   val server = Httpx.serve(":8080", myService)
   Await.ready(server) // waits until the server resources are released

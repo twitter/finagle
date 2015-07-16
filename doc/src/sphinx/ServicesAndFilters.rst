@@ -1,7 +1,7 @@
 Services & Filters
 ==================
 
-Services and filters consitute the core abstractions with which
+Services and filters constitute the core abstractions with which
 clients and servers are constructed with the Finagle network library.
 They are very simple, but also quite versatile. Most of Finagle's
 internals are structured around Services and Filters.
@@ -13,7 +13,7 @@ Services
 
 A service, at its heart, is a simple function:
 
-::
+.. code-block:: scala
 
 	trait Service[Req, Rep] extends (Req => Future[Rep])
 
@@ -26,17 +26,17 @@ of a service is used through a client; a server *implements* a `Service`.
 
 To use an HTTP client:
 
-::
+.. code-block:: scala
 
 	val httpService: Service[HttpRequest, HttpResponse] = ...
 
-	httpService(new DefaultHttpRequest(...)) onSuccess { res =>
+	httpService(new DefaultHttpRequest(...)).onSuccess { res =>
 	  println("received response "+res)
 	}
 
 or to provide an HTTP server:
 
-::
+.. code-block:: scala
 
 	val httpService = new Service[HttpRequest, HttpResponse] {
 	  def apply(req: HttpRequest) = ...
@@ -56,7 +56,7 @@ it with a timeout exception.
 
 Like services, filters are also simple functions:
 
-::
+.. code-block:: scala
 
 	abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 	  extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut])
@@ -75,13 +75,13 @@ In most common cases, `ReqIn` is equal to `ReqOut`, and `RepIn` is
 equal to `RepOut` — this is in fact sufficiently common to warrant its
 own alias:
 
-::
+.. code-block:: scala
 
 	trait SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
 
 This, then, is a complete definition of a timeout filter:
 
-::
+.. code-block:: scala
 
 	class TimeoutFilter[Req, Rep](timeout: Duration, timer: Timer)
 	    extends SimpleFilter[Req, Rep]
@@ -106,7 +106,7 @@ Composing filters and services
 Filters and services compose with the `andThen` method. For example
 to furnish a service with timeout behavior:
 
-::
+.. code-block:: scala
 
 	val service: Service[HttpRequest, HttpResponse] = ...
 	val timeoutFilter = new TimeoutFilter[HttpRequest, HttpResponse](...)
@@ -120,7 +120,7 @@ are first filtered through `timeoutFilter`.
 We can also compose filters with `andThen`, creating composite filters,
 so that
 
-::
+.. code-block:: scala
 
 	val timeoutFilter = new TimeoutFilter[..](..)
 	val retryFilter = new RetryFilter[..](..)
@@ -141,7 +141,7 @@ a `Service`. For example, a connection pool would need to play a significant rol
 in the `Service` acquisition phase. The `ServiceFactory` exists for this exact reason.
 It produces `Service`'s over which requests can be dispatched. Its definition:
 
-::
+.. code-block:: scala
 
 	abstract class ServiceFactory[-Req, +Rep]
 		extends (ClientConnection => Future[Service[Req, Rep]])

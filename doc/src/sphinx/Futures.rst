@@ -32,7 +32,7 @@ by Futures are:
 
 Note that these operations are all fallible: remote hosts could
 crash, computations might throw an exception, disks could fail, etc.
-etc. A `Future[T]`, then, occupies exactly one of three states:
+A `Future[T]`, then, occupies exactly one of three states:
 
 - Empty (pending)
 - Succeeded (with a result of type `T`)
@@ -42,19 +42,19 @@ While it is possible to directly query this state, this is rarely useful.
 Instead, a callback may be registered to receive the results once 
 they are made available:
 
-::
+.. code-block:: scala
 
 	val f: Future[Int]
-	f onSuccess { res =>
+	f.onSuccess { res =>
 	  println("The result is " + res)
 	}
 
 which will be invoked only on success. Callbacks may also be registered
 to account for failures:
 
-::
+.. code-block:: scala
 
-	f onFailure { cause: Throwable =>
+	f.onFailure { cause: Throwable =>
 	  println("f failed with " + cause)
 	}
 
@@ -82,14 +82,14 @@ methods — `fetchUrl` fetches the given URL, `findImageUrls` parses an HTML
 page to find image links — we can implement our Pinterest-style thumbnail
 extract like this:
 
-::
+.. code-block:: scala
 
 	def fetchUrl(url: String): Future[Array[Byte]]
 	def findImageUrls(bytes: Array[Byte]): Seq[String]
 
 	val url = "http://www.google.com"
 
-	val f: Future[Array[Byte]] = fetchUrl(url) flatMap { bytes =>
+	val f: Future[Array[Byte]] = fetchUrl(url).flatMap { bytes =>
 	  val images = findImageUrls(bytes)
 	  if (images.isEmpty)
 	    Future.exception(new Exception("no image"))
@@ -97,7 +97,7 @@ extract like this:
 	    fetchUrl(images(0))
 	}
 
-	f onSuccess { image =>
+	f.onSuccess { image =>
 	  println("Found image of size "+image.size)
 	}
 
@@ -121,16 +121,16 @@ It is also possible to compose Futures *concurrently*. We can extend
 our above example to demonstrate: let's fetch *all* the images.
 Concurrent composition is provided by `Future.collect`:
 
-::
+.. code-block:: scala
 
 	val collected: Future[Seq[Array[Byte]]] =
-	  fetchUrl(url) flatMap { bytes =>
-	    val fetches = findImageUrls(bytes) map { url => fetchUrl(url) }
+	  fetchUrl(url).flatMap { bytes =>
+	    val fetches = findImageUrls(bytes).map { url => fetchUrl(url) }
 	    Future.collect(fetches)
 	  }
 
 Here we have combined both concurrent and sequential composition:
-first we fetch the webpage, then we collect the results of fetching
+first we fetch the web page, then we collect the results of fetching
 all of the underlying images.
 
 As with sequential composition, concurrent composition propagates
@@ -153,22 +153,23 @@ are otherwise identical. It is often desirable to handle only a subset
 of possible exceptions. To accomodate for this `rescue` accepts 
 a `PartialFunction`, mapping a `Throwable` to a `Future`:
 
-::
+.. code-block:: scala
 
 	trait Future[A] {
 	  ..
 	  def rescue[B >: A](f: PartialFunction[Throwable, Future[B]]): Future[B]
 	  ..
+	}
 
 The following retries a request infinitely should it fail with a
 `TimeoutException`:
 
-::
+.. code-block:: scala
 
 	def fetchUrl(url: String): Future[HttpResponse]
 	
 	def fetchUrlWithRetry(url: String) = 
-	  fetchUrl(url) rescue {
+	  fetchUrl(url).rescue {
 	    case exc: TimeoutException => fetchUrlWithRetry(url)
 	  }
 

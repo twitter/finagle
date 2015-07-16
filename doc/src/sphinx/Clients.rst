@@ -6,7 +6,7 @@ Clients
 Finagle clients adheres to a simple :src:`interface <com/twitter/finagle/Client.scala>` for
 construction:
 
-::
+.. code-block:: scala
 
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep]
 
@@ -15,7 +15,7 @@ that produces a typed `Service` over which requests can be dispatched.
 There are variants of this constructor for stateless clients that create a simple
 `Service`, for example:
 
-::
+.. code-block:: scala
 
   def newService(dest: Name, label: String): Service[Req, Rep]
 
@@ -24,7 +24,7 @@ this interface on a Scala object named after the protocol implementation. This
 results in a uniform way to construct clients, ``Protocol.newClient(...)``. For
 example:
 
-::
+.. code-block:: scala
 
     Http.newClient(...)
     Memcached.newClient(...)
@@ -98,7 +98,7 @@ certain amount of idle time. The module is implemented by
 Finally, timeouts can be enforced outside of these modules on a per-request level using
 `Future#within` [#raise]_:
 
-::
+.. code-block:: scala
 
   val f = client(request)
   f.within(1.seconds) onSuccess { ... } onFailure { ... }
