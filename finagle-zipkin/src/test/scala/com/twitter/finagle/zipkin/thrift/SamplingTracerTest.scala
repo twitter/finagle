@@ -31,6 +31,7 @@ class SamplingTracerTest extends FunSuite
 
   test("sends sampled events to Sink") {
     val sink = mock[Sink]
+    when(sink.recording).thenReturn(true)
     val tracer = mock[Tracer]
     val samplingTracer = new SamplingTracer(tracer, 1f, sink)
     samplingTracer.record(record)

@@ -184,11 +184,13 @@ class MetricsStatsReceiver(
           val metricsCounter = registry.createCounter(format(names))
           def incr(delta: Int): Unit = {
             metricsCounter.add(delta)
-            if (Trace.hasId) {
-              sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta,
-                traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
-            } else {
-              sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta)
+            if (sink.recording) {
+              if (Trace.hasId) {
+                sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta,
+                  traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+              } else {
+                sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta)
+              }
             }
           }
         }
@@ -214,11 +216,13 @@ class MetricsStatsReceiver(
             if (doLog) log.info(s"Stat ${histogram.getName()} observed $value")
             val asLong = value.toLong
             histogram.add(asLong)
-            if (Trace.hasId) {
-              sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong,
-                traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
-            } else {
-              sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong)
+            if (sink.recording) {
+              if (Trace.hasId) {
+                sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong,
+                  traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+              } else {
+                sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong)
+              }
             }
           }
         }

@@ -197,11 +197,13 @@ class SamplingTracer(
   def record(record: Record) {
     if (sampler.sampleRecord(record)) {
       underlyingTracer.record(record)
-      if (Trace.hasId) {
-        sink.event(ZipkinTracer.Trace, objectVal = record.annotation,
-          traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
-      } else {
-        sink.event(ZipkinTracer.Trace, objectVal = record.annotation)
+      if (sink.recording) {
+        if (Trace.hasId) {
+          sink.event(ZipkinTracer.Trace, objectVal = record.annotation,
+            traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+        } else {
+          sink.event(ZipkinTracer.Trace, objectVal = record.annotation)
+        }
       }
     }
   }
