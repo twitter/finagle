@@ -24,6 +24,7 @@ import org.jboss.netty.channel.socket.nio.{NioSocketChannel, NioClientSocketChan
 import org.jboss.netty.channel.{ChannelFactory => NettyChannelFactory, _}
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /** Bridges a netty3 channel with a transport */
 private[netty3] class ChannelConnector[In, Out](
@@ -143,6 +144,16 @@ object Netty3Transporter {
       case _ => None
     }
 
+    val opts = new mutable.HashMap[String, Object]()
+    opts += "connectTimeoutMillis" -> ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
+    opts += "tcpNoDelay" -> java.lang.Boolean.TRUE
+    opts += "reuseAddress" -> java.lang.Boolean.TRUE
+    for (v <- keepAlive) opts += "keepAlive" -> (v: java.lang.Boolean)
+    for (s <- sendBufSize) opts += "sendBufferSize" -> (s: java.lang.Integer)
+    for (s <- recvBufSize) opts += "receiveBufferSize" -> (s: java.lang.Integer)
+    for (v <- params[Transporter.TrafficClass].value)
+      opts += "trafficClass" -> (v: java.lang.Integer)
+
     Netty3Transporter[In, Out](
       label,
       pipelineFactory,
@@ -156,16 +167,7 @@ object Netty3Transporter {
       channelReaderTimeout = readerTimeout,
       channelWriterTimeout = writerTimeout,
       channelSnooper = snooper,
-      channelOptions = {
-        val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
-        o += "connectTimeoutMillis" -> ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
-        o += "tcpNoDelay" -> java.lang.Boolean.TRUE
-        o += "reuseAddress" -> java.lang.Boolean.TRUE
-        for (v <- keepAlive) o += "keepAlive" -> (v: java.lang.Boolean)
-        for (s <- sendBufSize) o += "sendBufferSize" -> (s: java.lang.Integer)
-        for (s <- recvBufSize) o += "receiveBufferSize" -> (s: java.lang.Integer)
-        o.result()
-      }
+      channelOptions = opts.toMap
     )
   }
 
@@ -261,7 +263,7 @@ case class Netty3Transporter[In, Out](
   name: String,
   pipelineFactory: ChannelPipelineFactory,
   newChannel: ChannelPipeline => Channel =
-    Netty3Transporter.channelFactory.newChannel(_),
+    Netty3Transporter.channelFactory.newChannel,
   newTransport: Channel => Transport[In, Out] =
     (ch: Channel) => new ChannelTransport(ch).cast[In, Out],
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,

@@ -20,6 +20,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.{ReadTimeoutException, ReadTimeoutHandler}
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /**
  * Netty3 TLS configuration.
@@ -169,17 +170,25 @@ object Netty3Listener {
       case _ => None
     }
 
-    Netty3Listener[In, Out](label, pipeline, snooper, cf, bootstrapOptions = {
-      val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
-        o += "soLinger" -> (0: java.lang.Integer)
-        o += "reuseAddress" -> java.lang.Boolean.TRUE
-        o += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
-        for (v <- backlog) o += "backlog" -> (v: java.lang.Integer)
-        for (v <- sendBufSize) o += "child.sendBufferSize" -> (v: java.lang.Integer)
-        for (v <- recvBufSize) o += "child.receiveBufferSize" -> (v: java.lang.Integer)
-        for (v <- keepAlive) o += "child.keepAlive" -> (v: java.lang.Boolean)
-        o.result()
-      },
+    val opts = new mutable.HashMap[String, Object]()
+    opts += "soLinger" -> (0: java.lang.Integer)
+    opts += "reuseAddress" -> java.lang.Boolean.TRUE
+    opts += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
+    for (v <- backlog) opts += "backlog" -> (v: java.lang.Integer)
+    for (v <- sendBufSize) opts += "child.sendBufferSize" -> (v: java.lang.Integer)
+    for (v <- recvBufSize) opts += "child.receiveBufferSize" -> (v: java.lang.Integer)
+    for (v <- keepAlive) opts += "child.keepAlive" -> (v: java.lang.Boolean)
+    for (v <- params[Listener.TrafficClass].value) {
+      opts += "trafficClass" -> (v: java.lang.Integer)
+      opts += "child.trafficClass" -> (v: java.lang.Integer)
+    }
+
+    Netty3Listener[In, Out](
+      label,
+      pipeline,
+      snooper,
+      cf,
+      bootstrapOptions = opts.toMap,
       channelReadTimeout = readTimeout,
       channelWriteCompletionTimeout = writeTimeout,
       tlsConfig = engine.map(Netty3ListenerTLSConfig),

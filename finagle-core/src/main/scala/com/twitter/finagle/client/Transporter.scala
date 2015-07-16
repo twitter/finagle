@@ -97,4 +97,20 @@ object Transporter {
    * This class wraps the username, password that we use for http proxy auth
    */
   case class Credentials(username: String, password: String)
+
+  /**
+   * Configures the traffic class to be used by clients.
+   *
+   * @param value `None` indicates no class specified. When `Some`, is an opaque
+   * identifier and its meaning and interpretation are implementation specific.
+   * Currently used to configure [[java.net.StandardSocketOptions.IP_TOS]].
+   */
+  case class TrafficClass(value: Option[Int]) {
+    def mk(): (TrafficClass, Stack.Param[TrafficClass]) =
+      (this, TrafficClass.param)
+  }
+  object TrafficClass {
+    implicit val param = Stack.Param(TrafficClass(None))
+  }
+
 }

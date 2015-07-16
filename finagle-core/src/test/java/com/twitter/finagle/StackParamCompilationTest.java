@@ -3,6 +3,7 @@ package com.twitter.finagle;
 import java.net.SocketAddress;
 
 import scala.Option;
+import scala.Some;
 
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.client.DefaultPool;
@@ -82,6 +83,8 @@ public class StackParamCompilationTest {
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
         .configured(new Transport.Verbose(false).mk())
+        .configured(new Transporter.TrafficClass(new Some<Object>(1)).mk())
+        .configured(new Listener.TrafficClass(Option.empty()).mk())
         .configured(
           new Transport.TLSClientEngine(
             Option.<scala.Function1<SocketAddress, Engine>>empty()

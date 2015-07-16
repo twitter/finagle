@@ -803,6 +803,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def exceptionCategorizer(exceptionStatsHandler: stats.ExceptionStatsHandler): This =
     configured(ExceptionStatsHandler(exceptionStatsHandler))
 
+  /**
+   * Configures the traffic class.
+   *
+   * @see [[Transporter.TrafficClass]]
+   */
+  def trafficClass(value: Option[Int]): This =
+    configured(Transporter.TrafficClass(value))
+
   /*** BUILD ***/
 
   // This is only used for client alterations outside of the stack.

@@ -381,6 +381,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     configured(IdleConnectionFilter.Param(Some(thresholds)))
 
   /**
+   * Configures the traffic class.
+   *
+   * @see [[Listener.TrafficClass]]
+   */
+  def trafficClass(value: Option[Int]): This =
+    configured(Listener.TrafficClass(value))
+
+  /**
    * When true, the server is daemonized. As with java threads, a
    * process can only exit only when all remaining servers are daemonized.
    * False by default.
