@@ -58,10 +58,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       pingReq.flip()
       f
     }
-    
+
     val filter = new SimpleFilter[Message, Message] {
       def apply(req: Message, service: Service[Message, Message]): Future[Message] = req match {
-        case Message.Tdispatch(tag, _, _, _, _) if !canDispatch => 
+        case Message.Tdispatch(tag, _, _, _, _) if !canDispatch =>
           Future.value(Message.Rerr(tag, "Tdispatch not enabled"))
         case Message.Tping(tag) =>
           ping() before Future.value(Message.Rping(tag))
@@ -70,7 +70,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     }
 
     val server = new ServerDispatcher(
-      serverTransport, filter andThen Processor andThen service, 
+      serverTransport, filter andThen Processor andThen service,
       Lessor.nil, tracer, NullStatsReceiver)
   }
 

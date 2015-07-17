@@ -11,15 +11,17 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
 import javax.net.ssl.{SSLEngine, SSLSession}
 import java.net.SocketAddress
+import java.security.cert.Certificate
 import com.twitter.finagle.SslHandshakeException
 
 @RunWith(classOf[JUnitRunner])
 class SslConnectHandlerTest extends FunSuite with MockitoSugar {
 
-  class SslConnectHandlerHelper {
+  class SslHandlerHelper {
     val ctx = mock[ChannelHandlerContext]
     val sslHandler = mock[SslHandler]
     val session = mock[SSLSession]
+    when(session.getPeerCertificates) thenReturn Array.empty[Certificate]
     val engine = mock[SSLEngine]
     when(engine.getSession) thenReturn session
     when(sslHandler.getEngine) thenReturn engine
@@ -32,6 +34,41 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     val remoteAddress = mock[SocketAddress]
     when(channel.getRemoteAddress) thenReturn remoteAddress
 
+    val handshakeFuture = Channels.future(channel)
+    when(sslHandler.handshake()) thenReturn handshakeFuture
+  }
+
+  class SslListenerConnectionHandlerHelper extends SslHandlerHelper {
+    var shutdownCount = 0
+    def onShutdown() = shutdownCount += 1
+
+    val listenerHandler = new SslListenerConnectionHandler(sslHandler, onShutdown)
+    val event = new UpstreamChannelStateEvent(
+      channel, ChannelState.CONNECTED, remoteAddress)
+
+    listenerHandler.handleUpstream(ctx, event)
+  }
+
+  test("SslListenerConnectionHandler should call the shutdown callback on channel shutdown") {
+    val h = new SslListenerConnectionHandlerHelper
+    import h._
+
+    val event = new UpstreamChannelStateEvent(channel, ChannelState.OPEN, null)
+    listenerHandler.channelClosed(mock[ChannelHandlerContext], event)
+    assert(shutdownCount == 1)
+  }
+
+  test("SslListenerConnectionHandler should delay connection until the handshake is complete") {
+    val h = new SslListenerConnectionHandlerHelper
+    import h._
+
+    verify(sslHandler, times(1)).handshake()
+    verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
+    handshakeFuture.setSuccess()
+    verify(ctx, times(1)).sendUpstream(any[ChannelEvent])
+  }
+
+  class SslConnectHandlerHelper extends SslHandlerHelper {
     val verifier = mock[SSLSession => Option[Throwable]]
     when(verifier(any[SSLSession])) thenReturn None
 
@@ -51,7 +88,6 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
       assert(e.getState === ChannelState.OPEN)
       assert(e.getValue === java.lang.Boolean.FALSE)
     }
-
   }
 
   test("SslConnectHandler should upon connect wrap the downstream connect request") {
@@ -83,8 +119,6 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
 
   class helper2 extends SslConnectHandlerHelper {
     verify(sslHandler, times(0)).handshake()
-    val handshakeFuture = Channels.future(channel)
-    when(sslHandler.handshake()) thenReturn handshakeFuture
     ch.handleUpstream(ctx, new UpstreamChannelStateEvent(
       channel, ChannelState.CONNECTED, remoteAddress))
     assert(!connectFuture.isDone)
@@ -176,5 +210,4 @@ class SslConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(connectFuture.isDone)
     assert(connectFuture.getCause === exc)
   }
-
 }

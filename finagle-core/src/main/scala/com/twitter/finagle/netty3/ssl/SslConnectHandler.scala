@@ -1,17 +1,50 @@
 package com.twitter.finagle.netty3.ssl
 
 import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
-import com.twitter.finagle.{ChannelClosedException,
-  InconsistentStateException, SslHandshakeException, SslHostVerificationException}
+import com.twitter.finagle.netty3.{Cancelled, Error, Ok}
+import com.twitter.finagle.{ChannelClosedException, InconsistentStateException, SslHandshakeException, SslHostVerificationException}
 import com.twitter.util.Try
 import java.net.SocketAddress
 import java.security.cert.X509Certificate
 import java.util.concurrent.atomic.AtomicReference
-import javax.net.ssl.SSLSession
+import javax.net.ssl.{SSLException, SSLSession}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
 import sun.security.util.HostnameChecker
+
+/**
+ * Handle server-side SSL Connections:
+ *
+ * 1. by delaying the upstream connect until the SSL handshake
+ *    is complete (so that we don't send data through a connection
+ *    we may later deem invalid), and
+ * 2. invoking a shutdown callback on disconnect
+ */
+private[netty3] class SslListenerConnectionHandler(
+    sslHandler: SslHandler,
+    onShutdown: () => Unit = () => Unit)
+  extends SimpleChannelUpstreamHandler {
+
+  // delay propagating connection upstream until we've completed the handshake
+  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
+    sslHandler.handshake() {
+      case Ok(_) => super.channelConnected(ctx, e)
+      case _ => Channels.close(ctx.getChannel)
+    }
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): Unit = {
+    // remove the ssl handler so that it doesn't trap the disconnect
+    if (e.getCause.isInstanceOf[SSLException])
+      ctx.getPipeline.remove("ssl")
+    super.exceptionCaught(ctx, e)
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
+    onShutdown()
+    super.channelClosed(ctx, e)
+  }
+}
 
 /**
  * Handle client-side SSL connections:
@@ -38,7 +71,7 @@ class SslConnectHandler(
     fail(c, t)
   }
 
-  override def connectRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  override def connectRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     e match {
       case de: DownstreamChannelStateEvent =>
         if (!connectFuture.compareAndSet(null, e.getFuture)) {
@@ -71,8 +104,8 @@ class SslConnectHandler(
     }
   }
 
-  // we delay propagating connection upstream until we've completed the handshake.
-  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  // delay propagating connection upstream until we've completed the handshake
+  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     if (connectFuture.get eq null) {
       fail(ctx.getChannel, new InconsistentStateException(_))
       return

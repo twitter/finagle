@@ -2,7 +2,7 @@ package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
 import com.twitter.finagle.netty3.channel._
-import com.twitter.finagle.netty3.ssl.SslShutdownHandler
+import com.twitter.finagle.netty3.ssl.SslListenerConnectionHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.server.{Listener, ServerRegistry}
 import com.twitter.finagle.ssl.Engine
@@ -108,17 +108,25 @@ object Netty3Listener {
     // notification events. Renegotiation will be enabled for those Engines with
     // a true handlesRenegotiation value.
     handler.setEnableRenegotiation(engine.handlesRenegotiation)
-
     pipeline.addFirst("ssl", handler)
 
     // Netty's SslHandler does not provide SSLEngine implementations any hints that they
     // are no longer needed (namely, upon disconnection.) Since some engine implementations
     // make use of objects that are not managed by the JVM's memory manager, we need to
-    // know when memory can be released. The SslShutdownHandler will invoke the shutdown
-    // method on implementations that define shutdown(): Unit.
+    // know when memory can be released. This will invoke the shutdown method  on implementations
+    // that define shutdown(): Unit. The SslListenerConnectionHandler also ensures that the SSL
+    // handshake is complete before continuing.
+    def onShutdown(): Unit =
+      try {
+        val method = engine.getClass.getMethod("shutdown")
+        method.invoke(engine)
+      } catch {
+        case _: NoSuchMethodException =>
+      }
+
     pipeline.addFirst(
-      "sslShutdown",
-      new SslShutdownHandler(engine)
+      "sslConnect",
+      new SslListenerConnectionHandler(handler, onShutdown)
     )
   }
 
@@ -371,17 +379,16 @@ private[netty3] class ServerBridge[In, Out](
     case _ => Level.WARNING
   }
 
-  override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     val channel = e.getChannel
     channels.add(channel)
 
     val transport = new ChannelTransport(channel).cast[In, Out]
     serveTransport(transport)
-
     super.channelOpen(ctx, e)
   }
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): Unit = {
     val cause = e.getCause
 
     cause match {

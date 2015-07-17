@@ -2,20 +2,22 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.mux.Message.Treq
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.mux.Message.{RreqOk, Treq}
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.netty3.BufChannelBuffer
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing.NullTracer
-import com.twitter.finagle.transport.{Transport, QueueTransport}
-import com.twitter.finagle.{Path, Dtab, Service}
+import com.twitter.finagle.transport.{QueueTransport, Transport}
+import com.twitter.finagle.{Dtab, Path, Service}
+import com.twitter.io.Buf.Utf8
 import com.twitter.io.{Buf, Charsets}
-import com.twitter.logging.{Logger, BareFormatter, StringHandler, Level}
-import com.twitter.util.Throw
-import com.twitter.util.{Return, Future, Time, Duration, Promise}
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
+import java.security.cert.X509Certificate
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{never, verify, when}
 import org.mockito.Matchers.any
+import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
@@ -149,6 +151,9 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     when(trans.write(any[ChannelBuffer]))
       .thenReturn(Future.Done)
 
+    when(trans.peerCertificate)
+      .thenReturn(None)
+
     val dispatcher = ServerDispatcher.newRequestResponse(
       trans, svc, lessor, NullTracer, NullStatsReceiver)
     assert(dispatcher.npending() === 1)
@@ -254,10 +259,12 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     }
   }
 
-  class Server(svc: Service[Request, Response]) {
+  class Server(svc: Service[Request, Response], peerCert: Option[X509Certificate] = None) {
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val clientToServer = new AsyncQueue[ChannelBuffer]
-    val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+    val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer) {
+      override def peerCertificate = peerCert
+    }
     def ping() = Future.Done
 
     val server = ServerDispatcher.newRequestResponse(transport, svc)
@@ -297,5 +304,26 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       val Some(Return(rdrain)) = server.read().poll
       assert(decode(rdrain).isInstanceOf[RdispatchNack])
     }
+  }
+
+  test("propagates peer certificates") {
+    val mockCert = mock[X509Certificate]
+    val okResponse = Response(Utf8("ok"))
+    val failResponse = Response(Utf8("fail"))
+
+    val testService = new Service[Request, Response] {
+      override def apply(request: Request): Future[Response] = Future.value {
+        if (Contexts.local.get(Transport.peerCertCtx) == Some(mockCert)) okResponse else failResponse
+      }
+    }
+
+    val tag = 3
+    val server = new Server(testService, Some(mockCert))
+    val req = Message.encode(Treq(tag, None, BufChannelBuffer(Request.empty.body)))
+
+    server.request(req)
+    val Some(Return(res)) = server.read().poll
+
+    assert(Message.decode(res) == RreqOk(tag, BufChannelBuffer(okResponse.body)))
   }
 }

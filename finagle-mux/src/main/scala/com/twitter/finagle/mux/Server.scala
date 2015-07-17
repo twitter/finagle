@@ -4,15 +4,15 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.mux.lease.exp.{Lessor, Lessee, nackOnExpiredLease}
+import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.{AtomicReference, AtomicInteger}
+import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.annotation.tailrec
@@ -257,13 +257,19 @@ private[twitter] class ServerDispatcher(
       write(msg)
   }
 
+  private[this] def loop(): Unit =
+    Future.each(trans.read) { buf =>
+      val save = Local.save()
+      process(decode(buf))
+      Local.restore(save)
+    } ensure { hangup(Time.now) }
+
   Local.letClear {
     Trace.letTracer(tracer) {
-      Future.each(trans.read) { buf =>
-        val save = Local.save()
-        process(decode(buf))
-        Local.restore(save)
-      } ensure { hangup(Time.now) }
+      trans.peerCertificate match {
+        case None => loop()
+        case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) { loop() }
+      }
     }
   }
 
