@@ -340,9 +340,14 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       val parameters = Seq(implicitly[Stack.Param[Transporter.EndpointAddr]])
       def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
-        val endpointClient = copy1(params=prms)
-        val transporter = endpointClient.newTransporter()
-        Stack.Leaf(this, ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher)))
+        val factory = addr match {
+          case ServiceFactorySocketAddress(sf: ServiceFactory[Req, Rep]) => sf
+          case _ =>
+            val endpointClient = copy1(params=prms)
+            val transporter = endpointClient.newTransporter()
+            ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher))
+        }
+        Stack.Leaf(this, factory)
       }
     }
 
