@@ -399,7 +399,7 @@ class StackClientTest extends FunSuite
       client.configured[param.Label]((param.Label("foo"), param.Label.param))
   }
 
-  test("ServiceFactorySocketAddress bypasses transporter") {
+  test("StackClient binds to a local service via ServiceFactorySocketAddress") {
     val reverser = Service.mk[String, String] { in => Future.value(in.reverse) }
     val sf = ServiceFactory[String, String](() => Future.value(reverser))
     val sa = ServiceFactorySocketAddress[String, String](sf)
