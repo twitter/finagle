@@ -1,8 +1,7 @@
 package com.twitter.finagle.netty3.ssl
 
-import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.netty3.{Cancelled, Error, Ok}
-import com.twitter.finagle.{ChannelClosedException, InconsistentStateException, SslHandshakeException, SslHostVerificationException}
+import com.twitter.finagle.{ChannelClosedException, InconsistentStateException,
+  SslHandshakeException, SslHostVerificationException}
 import com.twitter.util.Try
 import java.net.SocketAddress
 import java.security.cert.X509Certificate
@@ -27,10 +26,14 @@ private[netty3] class SslListenerConnectionHandler(
 
   // delay propagating connection upstream until we've completed the handshake
   override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
-    sslHandler.handshake() {
-      case Ok(_) => super.channelConnected(ctx, e)
-      case _ => Channels.close(ctx.getChannel)
-    }
+    sslHandler.handshake().addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (f.isSuccess) {
+          SslListenerConnectionHandler.super.channelConnected(ctx, e)
+        } else {
+          Channels.close(ctx.getChannel)
+        }
+    })
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): Unit = {
@@ -81,7 +84,13 @@ class SslConnectHandler(
 
         // proxy cancellation
         val wrappedConnectFuture = Channels.future(de.getChannel, true)
-        de.getFuture onCancellation { wrappedConnectFuture.cancel() }
+        de.getFuture.addListener(new ChannelFutureListener {
+          override def operationComplete(f: ChannelFuture): Unit =
+            if (f.isCancelled) {
+              wrappedConnectFuture.cancel()
+            }
+        })
+
         // Proxy failures here so that if the connect fails, it is
         // propagated to the listener, not just on the channel.
         wrappedConnectFuture.addListener(new ChannelFutureListener {
@@ -112,26 +121,29 @@ class SslConnectHandler(
     }
 
     // proxy cancellations again.
-    connectFuture.get.onCancellation {
-      fail(ctx.getChannel, new ChannelClosedException(_))
-    }
-
-    sslHandler.handshake() {
-      case Ok(_) =>
-        sessionError(sslHandler.getEngine.getSession) match {
-          case Some(t) =>
-            fail(ctx.getChannel, t)
-          case None =>
-            connectFuture.get.setSuccess()
-            super.channelConnected(ctx, e)
+    connectFuture.get.addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (f.isCancelled) {
+          fail(ctx.getChannel, new ChannelClosedException(_))
         }
+    })
 
-      case Error(t) =>
-        fail(ctx.getChannel, new SslHandshakeException(t, _))
-
-      case Cancelled =>
-        fail(ctx.getChannel, new InconsistentStateException(_))
-    }
+    sslHandler.handshake().addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (f.isSuccess) {
+          sessionError(sslHandler.getEngine.getSession) match {
+            case Some(t) =>
+              fail(ctx.getChannel, t)
+            case None =>
+              connectFuture.get.setSuccess()
+              SslConnectHandler.super.channelConnected(ctx, e)
+          }
+        } else if (f.isCancelled) {
+          fail(ctx.getChannel, new InconsistentStateException(_))
+        } else {
+          fail(ctx.getChannel, new SslHandshakeException(f.getCause, _))
+        }
+    })
   }
 }
 
@@ -145,11 +157,11 @@ object SslConnectHandler {
    */
   def sessionHostnameVerifier(hostname: String)(session: SSLSession): Option[Throwable] = {
     val checker = HostnameChecker.getInstance(HostnameChecker.TYPE_TLS)
-    val isValid = session.getPeerCertificates.headOption map {
+    val isValid = session.getPeerCertificates.headOption.exists {
       case x509: X509Certificate =>
         Try { checker.`match`(hostname, x509) }.isReturn
       case _ => false
-     } getOrElse false
+    }
 
      if (isValid) None else {
        Some(new SslHostVerificationException(session.getPeerPrincipal.getName))

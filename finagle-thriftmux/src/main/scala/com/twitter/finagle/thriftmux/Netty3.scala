@@ -3,7 +3,6 @@ package com.twitter.finagle.thriftmux
 import com.twitter.finagle.{Path, Failure, mux, Dtab, ThriftMuxUtil}
 import com.twitter.finagle.mux.{BadMessageException, Message}
 import com.twitter.finagle.netty3.BufChannelBuffer
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.thrift.thrift.{
@@ -321,9 +320,12 @@ private[finagle] class PipelineFactory(
           // decrement on channel closure.
           downgradedConnects.incr()
           downgradedConnectionCount.incrementAndGet()
-          ctx.getChannel.getCloseFuture() onSuccessOrFailure {
-            downgradedConnectionCount.decrementAndGet()
-          }
+          ctx.getChannel.getCloseFuture.addListener(new ChannelFutureListener {
+            override def operationComplete(f: ChannelFuture): Unit =
+              if (!f.isCancelled) { // on success or failure
+                downgradedConnectionCount.decrementAndGet()
+              }
+          })
 
           // Add a ChannelHandler to serialize the requests since we may
           // deal with a client that pipelines requests
@@ -346,9 +348,12 @@ private[finagle] class PipelineFactory(
           // decrement on channel closure.
           thriftmuxConnects.incr()
           thriftMuxConnectionCount.incrementAndGet()
-          ctx.getChannel.getCloseFuture() onSuccessOrFailure {
-            thriftMuxConnectionCount.decrementAndGet()
-          }
+          ctx.getChannel.getCloseFuture.addListener(new ChannelFutureListener {
+            override def operationComplete(f: ChannelFuture): Unit =
+              if (!f.isCancelled) { // on success or failure
+                thriftMuxConnectionCount.decrementAndGet()
+              }
+          })
 
           pipeline.remove(this)
           super.messageReceived(ctx, e)

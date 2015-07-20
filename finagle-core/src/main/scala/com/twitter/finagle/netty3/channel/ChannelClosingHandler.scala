@@ -7,9 +7,8 @@ package com.twitter.finagle.netty3.channel
 
 import org.jboss.netty.channel.{
   SimpleChannelHandler, LifeCycleAwareChannelHandler,
-  ChannelHandlerContext, ChannelStateEvent, Channel}
+  ChannelHandlerContext, ChannelStateEvent, Channel, ChannelFutureListener, ChannelFuture}
 
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.LatentChannelFuture
 
 private[finagle] class ChannelClosingHandler
@@ -23,8 +22,18 @@ private[finagle] class ChannelClosingHandler
   private[this] def setChannel(ch: Channel) = synchronized {
     channel = ch
     channelCloseFuture.setChannel(ch)
-    if (awaitingClose)
-      channel.close() proxyTo channelCloseFuture
+    if (awaitingClose) {
+      channel.close().addListener(new ChannelFutureListener {
+        override def operationComplete(f: ChannelFuture): Unit =
+          if (f.isSuccess) {
+            channelCloseFuture.setSuccess()
+          } else if (f.isCancelled) {
+            channelCloseFuture.cancel()
+          } else {
+            channelCloseFuture.setFailure(f.getCause)
+          }
+        })
+    }
   }
 
   def close() = synchronized {

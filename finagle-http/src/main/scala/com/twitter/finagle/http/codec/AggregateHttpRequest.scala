@@ -5,8 +5,7 @@ package com.twitter.finagle.http.codec
  */
 
 
-import org.jboss.netty.channel.{
-  MessageEvent, Channels, ChannelHandlerContext}
+import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http.{
   HttpHeaders, HttpRequest,
   HttpChunk, DefaultHttpResponse,
@@ -14,7 +13,6 @@ import org.jboss.netty.handler.codec.http.{
 import org.jboss.netty.buffer.{
   ChannelBuffer, ChannelBuffers}
 
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.finagle.netty3.channel.LeftFoldUpstreamHandler
 
 
@@ -25,7 +23,12 @@ private[finagle] class HttpFailure(ctx: ChannelHandlerContext, status: HttpRespo
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status)
     val future = Channels.future(ctx.getChannel)
     Channels.write(ctx, future, response, ctx.getChannel.getRemoteAddress)
-    future onSuccessOrFailure { ctx.getChannel.close() }
+    future.addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (!f.isCancelled) { // on success or failure
+          ctx.getChannel.close()
+        }
+    })
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) =

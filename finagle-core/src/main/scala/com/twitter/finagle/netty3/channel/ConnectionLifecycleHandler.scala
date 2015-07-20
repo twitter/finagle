@@ -1,12 +1,8 @@
 package com.twitter.finagle.netty3.channel
 
-import org.jboss.netty.channel.{
-  SimpleChannelHandler, LifeCycleAwareChannelHandler,
-  ChannelHandlerContext, ChannelStateEvent}
+import org.jboss.netty.channel._
 
 import com.twitter.util.{Future, Promise, Return}
-
-import com.twitter.finagle.netty3.Conversions._
 
 private[finagle] trait ConnectionLifecycleHandler
   extends SimpleChannelHandler
@@ -15,9 +11,12 @@ private[finagle] trait ConnectionLifecycleHandler
   private[this] def channelDidConnect(ctx: ChannelHandlerContext) {
     val onClose = new Promise[Unit]
     channelConnected(ctx, onClose)
-    ctx.getChannel.getCloseFuture() onSuccessOrFailure {
-      onClose() = Return(())
-    }
+    ctx.getChannel.getCloseFuture.addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (!f.isCancelled) { // on success or failure
+          onClose.update(Return.Unit)
+        }
+    })
   }
 
   protected def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]): Unit
