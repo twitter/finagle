@@ -41,7 +41,7 @@ class ApacheWatcherTest extends FlatSpec
   }
 
   "ApacheWatcher" should "handle session events" in {
-    for (ks <- KeeperState.values) {
+    for (ks <- sessionEvents.keys) {
       val satisfied = watcher.state.changes.filter(_ == WatchState.SessionState(sessionEvents(ks))).toFuture
       watcher.process(new WatchedEvent(EventType.None, ks, path))
       assert(Await.result(satisfied) === WatchState.SessionState(sessionEvents(ks)))
@@ -49,7 +49,7 @@ class ApacheWatcherTest extends FlatSpec
   }
 
   "ApacheWatcher" should "handle and count node events" in {
-    for (ev <- EventType.values) {
+    for (ev <- nodeEvents.keys) {
       if (ev != EventType.None) {
         val determined = watcher.state.changes.filter(_ == WatchState.Determined(nodeEvents(ev))).toFuture
         watcher.process(new WatchedEvent(ev, KeeperState.SyncConnected, path))
