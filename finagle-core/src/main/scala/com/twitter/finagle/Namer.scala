@@ -247,8 +247,11 @@ abstract class AbstractNamer extends Namer
  *
  * Implementers with a 0-argument constructor may be named and
  * auto-loaded with `/$/pkg.cls` syntax.
+ *
+ * Note that this can't actually be accomplished in a type-safe manner
+ * since the naming step obscures the service's type to observers.
  */
-trait ServiceNamer[-Req, +Rep] extends Namer {
+trait ServiceNamer[Req, Rep] extends Namer {
 
   def lookupService(path: Path): Option[Service[Req, Rep]]
 
@@ -262,6 +265,8 @@ trait ServiceNamer[-Req, +Rep] extends Namer {
       Activity.value(NameTree.Leaf(name))
   }
 }
+
+
 
 package namer {
   final class global extends Namer {
