@@ -242,6 +242,32 @@ object Namer  {
  */
 abstract class AbstractNamer extends Namer
 
+/**
+ * Base-trait for Namers that bind to a local Service.
+ *
+ * Implementers with a 0-argument constructor may be named and
+ * auto-loaded with `/$/pkg.cls` syntax.
+ *
+ * Note that this can't actually be accomplished in a type-safe manner
+ * since the naming step obscures the service's type to observers.
+ */
+trait ServiceNamer[Req, Rep] extends Namer {
+
+  protected def lookupService(path: Path): Option[Service[Req, Rep]]
+
+  def lookup(path: Path): Activity[NameTree[Name]] = lookupService(path) match {
+    case None =>
+      Activity.value(NameTree.Neg)
+    case Some(svc) =>
+      val factory = ServiceFactory(() => Future.value(svc))
+      val addr = Addr.Bound(ServiceFactorySocketAddress(factory))
+      val name = Name.Bound(Var.value(addr), factory, path)
+      Activity.value(NameTree.Leaf(name))
+  }
+}
+
+
+
 package namer {
   final class global extends Namer {
     def lookup(path: Path) = Namer.global.lookup(path)

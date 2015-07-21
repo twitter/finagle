@@ -223,6 +223,9 @@ abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
   def self: ServiceFactory[Req, Rep] = _self
 }
 
+private[finagle] case class ServiceFactorySocketAddress[Req, Rep](factory: ServiceFactory[Req, Rep])
+  extends SocketAddress
+
 object FactoryToService {
   val role = Stack.Role("FactoryToService")
 

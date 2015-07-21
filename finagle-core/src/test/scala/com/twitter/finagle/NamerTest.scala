@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Return, Throw, Activity, Witness, Try}
+import com.twitter.util.{Await, Future, Return, Throw, Activity, Witness, Try}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -194,6 +194,53 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
       === NameTree.Leaf(Name.Path(Path.Utf8("bar"))))
   }
 
+  test("Namer.global: /$/{className} ServiceNamer") {
+    val dst = Path.read("/$/com.twitter.finagle.PathServiceNamer/foo")
+    Namer.global.lookup(dst).sample() match {
+      case NameTree.Leaf(bound: Name.Bound) =>
+        assert(bound.path == Path.Utf8("foo"))
+        bound.addr.sample() match {
+          case bound: Addr.Bound =>
+            assert(bound.addrs.size == 1)
+            bound.addrs.head match {
+              case ServiceFactorySocketAddress(sf: ServiceFactory[Path, Path]) =>
+                val svc = Await.result(sf())
+                val rsp = Await.result(svc(Path.Utf8("yodles")))
+                assert(rsp == Path.Utf8("foo", "yodles"))
+
+              case sa =>
+                fail(s"$sa not a ServiceFactorySocketAddress")
+            }
+        }
+      case nt =>
+        fail(s"$nt is not NameTree.Leaf")
+    }
+  }
+
+  test("Namer.global: /$/{className} ServiceNamer of incompatible type raises ClassCastException") {
+    val dst = Path.read("/$/com.twitter.finagle.PathServiceNamer/foo")
+    Namer.global.lookup(dst).sample() match {
+      case NameTree.Leaf(bound: Name.Bound) =>
+        assert(bound.path == Path.Utf8("foo"))
+        bound.addr.sample() match {
+          case bound: Addr.Bound =>
+            assert(bound.addrs.size == 1)
+            bound.addrs.head match {
+              case ServiceFactorySocketAddress(sf: ServiceFactory[Int, Int]) =>
+                val svc = Await.result(sf())
+                intercept [ClassCastException] {
+                  val rsp = Await.result(svc(3))
+                }
+
+              case sa =>
+                fail(s"$sa not a ServiceFactorySocketAddress")
+            }
+        }
+      case nt =>
+        fail(s"$nt is not NameTree.Leaf")
+    }
+  }
+
   test("Namer.global: negative resolution") {
     assert(Namer.global.lookup(Path.read("/foo/bar/bah/blah")).sample()
         === NameTree.Neg)
@@ -216,4 +263,11 @@ class TestNamer extends Namer {
         case Path.Utf8("foo") => NameTree.Leaf(Name.Path(Path.Utf8("bar")))
         case _ => NameTree.Neg
       })
+}
+
+class PathServiceNamer extends ServiceNamer[Path, Path] {
+  def lookupService(pfx: Path) = {
+    val svc = Service.mk[Path, Path] { req => Future.value(pfx ++ req) }
+    Some(svc)
+  }
 }
