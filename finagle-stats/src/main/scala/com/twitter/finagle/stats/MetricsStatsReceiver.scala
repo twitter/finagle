@@ -56,9 +56,19 @@ private object Json {
 // lifecycle, typically before Flags are loaded. By using a system
 // property you can avoid that brittleness.
 object debugLoggedStatNames extends GlobalFlag[Set[String]](
-    Set.empty,
-    "Comma separated stat names for logging observed values" +
-      " (set via a -D system property to avoid load ordering issues)")
+  Set.empty,
+  "Comma separated stat names for logging observed values" +
+    " (set via a -D system property to avoid load ordering issues)"
+)
+
+// It's possible to override the scope separator (the default value for `MetricsStatsReceiver` is
+// `"/"`), which is used to separate scopes defined by  `StatsReceiver`. This flag might be useful
+// while migrating from Commons Stats (i.e., `CommonsStatsReceiver`), which is configured to use
+// `"_"` as scope separor.
+object scopeSeparator extends GlobalFlag[String](
+  "/",
+  "Override the scope separator."
+)
 
 object MetricsStatsReceiver {
   val defaultRegistry = Metrics.root()
@@ -172,6 +182,10 @@ class MetricsStatsReceiver(
 
   private[this] val loggedStats: Set[String] = debugLoggedStatNames()
 
+  // Scope separator, a string value used to separate scopes defined by `StatsReceiver`.
+  private[this] val separator: String = scopeSeparator()
+  require(separator.length == 1, "Scope separator should be one symbol.")
+
   /**
    * Create and register a counter inside the underlying Metrics library
    */
@@ -243,7 +257,7 @@ class MetricsStatsReceiver(
     registry.unregister(format(names))
   }
 
-  private[this] def format(names: Seq[String]) = names.mkString("/")
+  private[this] def format(names: Seq[String]) = names.mkString(separator)
 }
 
 class MetricsExporter(val registry: Metrics)
