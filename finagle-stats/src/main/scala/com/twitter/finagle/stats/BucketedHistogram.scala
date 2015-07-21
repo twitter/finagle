@@ -60,40 +60,6 @@ private[twitter] object BucketedHistogram {
   def apply(): BucketedHistogram =
     new BucketedHistogram(DefaultLimits)
 
-  /**
-   * Creates a new [[stats.Histogram]] which is the combined values
-   * of the passed in histograms.
-   *
-   * ''Note:'' the thread-safety of the passed in histograms must be
-   * managed externally.
-   *
-   * @param histos all the histograms must have identical `limits`.
-   */
-  def merged(histos: Array[BucketedHistogram]): stats.Histogram = {
-    require(histos.length > 0)
-
-    // verify all their limits are the same
-    val limits = histos(0).limits
-    val allSameLimits = histos.forall { h =>
-      util.Arrays.equals(h.limits, limits)
-    }
-    require(allSameLimits)
-
-    val mergedHisto = new BucketedHistogram(limits)
-    histos.foreach { h =>
-      mergedHisto.num += h.num
-      if (h.num > 0) {
-        var i = 0
-        while (i < limits.length) {
-          val count = h.counts(i)
-          mergedHisto.counts(i) = mergedHisto.counts(i) + count
-          i += 1
-        }
-      }
-    }
-    mergedHisto
-  }
-
 }
 
 
@@ -136,7 +102,7 @@ private[twitter] object BucketedHistogram {
  * @see [[BucketedHistogram.apply()]] for creation.
  */
 private[stats] class BucketedHistogram(
-    private val limits: Array[Int])
+    limits: Array[Int])
   extends stats.Histogram
 {
   BucketedHistogram.assertLimits(limits)
@@ -144,10 +110,13 @@ private[stats] class BucketedHistogram(
   private[this] def countsLength: Int = limits.length + 1
 
   /** number of samples seen per corresponding bucket in `limits` */
-  private val counts = new Array[Int](countsLength)
+  private[this] val counts = new Array[Int](countsLength)
 
   /** total number of samples seen */
-  private var num = 0L
+  private[this] var num = 0L
+
+  /** total value of all samples seen */
+  private[this] var total = 0L
 
   /**
    * Note: only values between `0` and `Int.MaxValue`, inclusive, are recorded.
@@ -156,17 +125,16 @@ private[stats] class BucketedHistogram(
    */
   def add(value: Long): Unit = {
     val index = if (value >= Int.MaxValue) {
-      counts.length - 1
+      total += Int.MaxValue
+      countsLength - 1
     } else {
+      total += value
       val asInt = value.toInt
-      // recall that limits represent upper bounds, exclusive — so for exact matches in
-      // `limits` we take the next position (+1).
-      // for misses, we do the absolute value and then +1.
+      // recall that limits represent upper bounds, exclusive — so take the next position (+1).
       // we assume that no inputs can be larger than the largest value in the limits array.
-      val i = Math.abs(util.Arrays.binarySearch(limits, asInt) + 1)
-      if (i == Int.MinValue) 0 else i
+      Math.abs(util.Arrays.binarySearch(limits, asInt) + 1)
     }
-    counts(index) = counts(index) + 1
+    counts(index) += 1
     num += 1
   }
 
@@ -177,6 +145,7 @@ private[stats] class BucketedHistogram(
       i += 1
     }
     num = 0
+    total = 0
   }
 
   /**
@@ -206,16 +175,44 @@ private[stats] class BucketedHistogram(
     }
   }
 
-  private[this] def maximum: Long = {
-    if (counts(countsLength - 1) > 0) {
+  /**
+   * The maximum value seen by calls to [[add]].
+   *
+   * @return 0 if no values have been added.
+   *         The returned value will be within
+   *         [[BucketedHistogram.DefaultErrorPercent]] of the actual value.
+   */
+  def maximum: Long = {
+    if (num == 0) {
+      0L
+    } else if (counts(countsLength - 1) > 0) {
       Int.MaxValue
     } else {
       var i = countsLength - 2 // already checked the last, start 1 before
       while (i >= 0 && counts(i) == 0) {
         i -= 1
       }
-      if (i <= 0) 0
+      if (i == 0) 0
       else limitMidpoint(i)
+    }
+  }
+
+  /**
+   * The minimum value seen by calls to [[add]].
+   *
+   * @return 0 if no values have been added.
+   *         The returned value will be within
+   *         [[BucketedHistogram.DefaultErrorPercent]] of the actual value.
+   */
+  def minimum: Long = {
+    if (num == 0) {
+      0L
+    } else {
+      var i = 0
+      while (i < countsLength && counts(i) == 0) {
+        i += 1
+      }
+      limitMidpoint(i)
     }
   }
 
@@ -223,7 +220,7 @@ private[stats] class BucketedHistogram(
   private[this] def limitMidpoint(i: Int): Long = {
     i match {
       case 0 => 0
-      case _ if i >= countsLength => Int.MaxValue
+      case _ if i >= limits.length => Int.MaxValue
       case _ => (limits(i - 1).toLong + limits(i)) / 2
     }
   }
@@ -244,5 +241,24 @@ private[stats] class BucketedHistogram(
     }
     ps
   }
+
+  /**
+   * The total of all the values seen by calls to [[add]].
+   */
+  def sum: Long = total
+
+  /**
+   * The number of values [[add added]].
+   */
+  def count: Long = num
+
+  /**
+   * The average, or arithmetic mean, of all values seen
+   * by calls to [[add]].
+   *
+   * @return 0.0 if no values have been [[add added]].
+   */
+  def average: Double =
+    if (num == 0) 0.0 else total/num.toDouble
 
 }

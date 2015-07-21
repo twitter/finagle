@@ -3,7 +3,6 @@ package com.twitter.finagle.stats
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.google.common.annotations.VisibleForTesting
 import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
@@ -36,7 +35,6 @@ object useCounterDeltas extends GlobalFlag[Boolean](
 
 object JsonExporter {
 
-  @VisibleForTesting
   private[stats] def startOfNextMinute: Time =
     Time.fromSeconds(Time.now.inMinutes * 60) + 1.minute
 

@@ -22,6 +22,9 @@ Runtime Behavior Changes
     than waiting for all components to be Ok. This enables resilience of unions when part of the
     tree cannot be resolved. ``RB_ID=697114``
 
+  * finagle-stats: Standard of deviation is no longer calculated. It is exported as a constant 0.0
+    for "$statName.stddev". ``RB_ID=717647``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-stream: Introduce StreamRequest as a replacement for Netty's
