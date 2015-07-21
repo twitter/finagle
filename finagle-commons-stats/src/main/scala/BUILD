@@ -5,7 +5,7 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty/jvm/com/twitter/common:stats',
+    'science/src/java/com/twitter/common/stats:stats',
     'finagle/finagle-core',
     'util/util-registry',
     'util/util-stats',

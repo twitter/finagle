@@ -25,14 +25,11 @@ namespace rb FinagleThrift
 // these are the annotations we always expect to find in a span
 const string WIRE_SEND = "ws"
 const string WIRE_RECV = "wr"
-const string WIRE_RECV_ERROR = "Wire Receive Error"
 const string CLIENT_SEND = "cs"
 const string CLIENT_RECV = "cr"
-const string CLIENT_RECV_ERROR = "Client Receive Error"
 const string SERVER_SEND = "ss"
 const string SERVER_RECV = "sr"
 const string SERVER_ADDR = "sa"
-const string SERVER_SEND_ERROR = "Server Send Error";
 const string CLIENT_ADDR = "ca"
 const string CLIENT_SEND_FRAGMENT = "csf"
 const string CLIENT_RECV_FRAGMENT = "crf"

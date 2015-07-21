@@ -2,7 +2,6 @@ import sbt._
 import Keys._
 import Tests._
 import com.twitter.scrooge.ScroogeSBT
-import com.twitter.scrooge.ScroogeSBT.autoImport._
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import pl.project13.scala.sbt.JmhPlugin
@@ -27,11 +26,11 @@ object Finagle extends Build {
     "com.google.guava" % "guava" % "16.0.1"
   )
   val thriftLibs = Seq(
-    "org.apache.thrift" % "libthrift" % "0.5.0-1",
+    "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.19.0")
+    "com.twitter" %% "scrooge-core" % "3.17.0")
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -382,13 +381,10 @@ object Finagle extends Build {
     id = "finagle-thrift",
     base = file("finagle-thrift"),
     settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-thrift",
-    libraryDependencies ++=
-      scroogeLibs ++ Seq("silly" % "silly-thrift" % "0.5.0" % "test"),
-    scroogeLanguage in Compile := "java"
+    libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ thriftLibs
   ).dependsOn(finagleCore, finagleTest % "test")
 
   lazy val finagleCacheResolver = Project(
