@@ -116,6 +116,48 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
     executor.shutdown()
   }
 
+  test("LoadService shouldn't fail on self-referencing jar") {
+    import java.io._
+    import java.util.jar._
+    import Attributes.Name._
+    val jarFile = File.createTempFile("test", ".jar")
+    try {
+      val manifest = new Manifest
+      val attributes = manifest.getMainAttributes
+      attributes.put(MANIFEST_VERSION, "1.0")
+      attributes.put(CLASS_PATH, jarFile.getName)
+      val jos = new JarOutputStream(new FileOutputStream(jarFile), manifest)
+      jos.close
+      val loader = mock[ClassLoader]
+      val buf = mutable.Buffer.empty[ClassPath.Info]
+      ClassPath.browseUri(jarFile.toURI, loader, buf)
+    } finally {
+      jarFile.delete
+    }
+  }
+
+  test("LoadService shouldn't fail on circular referencing jar") {
+    import java.io._
+    import java.util.jar._
+    import Attributes.Name._
+    val jar1 = File.createTempFile("test", ".jar")
+    val jar2 = File.createTempFile("test", ".jar")
+    try {
+      val manifest = new Manifest
+      val attributes = manifest.getMainAttributes
+      attributes.put(MANIFEST_VERSION, "1.0")
+      attributes.put(CLASS_PATH, jar2.getName)
+      new JarOutputStream(new FileOutputStream(jar1), manifest).close
+      attributes.put(CLASS_PATH, jar1.getName)
+      new JarOutputStream(new FileOutputStream(jar2), manifest).close
+      val loader = mock[ClassLoader]
+      val buf = mutable.Buffer.empty[ClassPath.Info]
+      ClassPath.browseUri(jar1.toURI, loader, buf)
+    } finally {
+      jar1.delete
+      jar2.delete
+    }
+  }
 }
 
 class LoadServiceCallable extends Callable[Seq[Any]] {
