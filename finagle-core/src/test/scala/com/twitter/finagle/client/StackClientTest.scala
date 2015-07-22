@@ -1,5 +1,6 @@
 package com.twitter.finagle.client
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
@@ -396,5 +397,17 @@ class StackClientTest extends FunSuite
       client.configured(param.Label("foo"))
     val client3: StackClient[String, String] =
       client.configured[param.Label]((param.Label("foo"), param.Label.param))
+  }
+
+  test("StackClient binds to a local service via ServiceFactorySocketAddress") {
+    val reverser = Service.mk[String, String] { in => Future.value(in.reverse) }
+    val sf = ServiceFactory[String, String](() => Future.value(reverser))
+    val sa = ServiceFactorySocketAddress[String, String](sf)
+    val addr = Var.value(Addr.Bound(sa))
+    val name = Name.Bound(addr, new {})
+    val service = stringClient.newService(name, "sfsa-test")
+    val forward = "a man a plan a canal: panama"
+    val reversed = Await.result(service(forward), 1.second)
+    assert(reversed == forward.reverse)
   }
 }
