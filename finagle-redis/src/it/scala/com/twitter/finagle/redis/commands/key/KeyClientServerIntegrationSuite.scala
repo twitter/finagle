@@ -2,7 +2,6 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ClientError
-import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.finagle.redis.util.{StringToChannelBuffer}

@@ -1,6 +1,5 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.util.Await
