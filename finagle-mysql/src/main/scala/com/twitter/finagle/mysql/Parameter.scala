@@ -57,6 +57,7 @@ object Parameter {
     case v: Value => wrap(v)
     case v: java.sql.Timestamp => wrap(v)
     case v: java.sql.Date => wrap(v)
+    case null => Parameter.NullParameter
     case v =>
       // Unsupported type. Write the error to log, and write the type as null.
       // This allows us to safely skip writing the parameter without corrupting the buffer.
