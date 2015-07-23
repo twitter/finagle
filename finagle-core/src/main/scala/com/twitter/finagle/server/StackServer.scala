@@ -52,7 +52,6 @@ object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
-    stk.push(WireTracingFilter.serverModule)
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.serverModule)
@@ -70,6 +69,7 @@ object StackServer {
     // The TraceInitializerFilter must be pushed after most other modules so that
     // any Tracing produced by those modules is enclosed in the appropriate
     // span.
+    stk.push(WireTracingFilter.serverModule)
     stk.push(TraceInitializerFilter.serverModule)
     stk.push(MonitorFilter.module)
     stk.result
