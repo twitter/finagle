@@ -255,13 +255,12 @@ private[finagle] object WireTracingFilter {
     new Stack.Module0[ServiceFactory[Req, Rep]] {
       val role = WireTracingFilter.role
       val description = "Report wire recv/send events"
+      def make(next: ServiceFactory[Req, Rep]) = filter andThen next
       val filter = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
         Trace.record(Annotation.WireRecv)
         svc(req) onSuccess { _ =>
-          Trace.record(Annotation.WireRecv)
+          Trace.record(Annotation.WireSend)
         }
       }
-      def make(next: ServiceFactory[Req, Rep]) =
-        filter andThen next
     }
 }
