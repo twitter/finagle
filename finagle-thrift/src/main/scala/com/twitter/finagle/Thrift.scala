@@ -57,7 +57,10 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     with Server[Array[Byte], Array[Byte]] with ThriftRichServer {
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-  protected val defaultClientName = "thrift"
+
+  protected lazy val Label(defaultClientName) = client.params[Label]
+
+  override protected lazy val Stats(stats) = client.params[Stats]
 
   object param {
     case class ClientId(clientId: Option[thrift.ClientId])
@@ -133,12 +136,13 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected val defaultClientName = "thrift"
+    protected lazy val Label(defaultClientName) = params[Label]
 
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
 
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
+    override protected lazy val Stats(stats) = params[Stats]
 
     protected def newTransporter(): Transporter[In, Out] = {
       val pipeline =
@@ -247,3 +251,4 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     service: ServiceFactory[Array[Byte], Array[Byte]]
   ): ListeningServer = server.serve(addr, service)
 }
+

@@ -94,6 +94,11 @@ Breaking API Changes
     `FailureAccrualFactory` in the underlying stack. ``RB_ID=689076``
 
 
+New Features
+~~~~~~~~~~~~
+
+- finagle-thrift: Support for finagle Services per thrift method.
+
 6.25.0
 ------
 

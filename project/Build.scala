@@ -16,6 +16,8 @@ object Finagle extends Build {
   val libVersion = "6.26.0" + suffix
   val utilVersion = "6.25.0" + suffix
   val ostrichVersion = "9.9.0" + suffix
+  val scroogeVersion = "3.19.0" + suffix
+
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
@@ -30,7 +32,7 @@ object Finagle extends Build {
     "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % "3.17.0")
+    "com.twitter" %% "scrooge-core" % scroogeVersion)
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -384,7 +386,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thrift",
-    libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ thriftLibs
+    libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ scroogeLibs
   ).dependsOn(finagleCore, finagleTest % "test")
 
   lazy val finagleCacheResolver = Project(
