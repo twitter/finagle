@@ -243,11 +243,25 @@ private[finagle] object WireTracingFilter {
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
-      val role = ClientTracingFilter.role
+      val role = WireTracingFilter.role
       val description = "Report finagle information and wire send/recv events"
       def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
         val param.Label(label) = _label
         TracingFilter[Req, Rep](label) andThen next
       }
+    }
+
+  def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module0[ServiceFactory[Req, Rep]] {
+      val role = WireTracingFilter.role
+      val description = "Report wire recv/send events"
+      val filter = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
+        Trace.record(Annotation.WireRecv)
+        svc(req) onSuccess { _ =>
+          Trace.record(Annotation.WireRecv)
+        }
+      }
+      def make(next: ServiceFactory[Req, Rep]) =
+        filter andThen next
     }
 }
