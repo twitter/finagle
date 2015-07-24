@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.conversions.time._
-import com.twitter.util.{Time, MockTimer}
+import com.twitter.util.Time
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -11,18 +11,14 @@ class MetricsBucketedHistogramTest extends FunSuite {
 
   test("basics") {
     if (!sys.props.contains("SKIP_FLAKY")) {
-      val timer = new MockTimer()
-
       Time.withCurrentTimeFrozen { tc =>
         val ps = Array[Double](0.5, 0.9)
         val h = new MetricsBucketedHistogram(
           name = "h",
-          percentiles = ps,
-          timer = timer)
+          percentiles = ps)
 
         def roll(): Unit = {
           tc.advance(61.seconds)
-          timer.tick()
         }
 
         // add some data (A) to the 1st window
@@ -37,11 +33,8 @@ class MetricsBucketedHistogramTest extends FunSuite {
         assert(snap0.avg() == 0)
         assert(snap0.percentiles().map(_.getValue) === Array(0, 0))
 
-        // roll to window 2 (this should make data A visibile)
+        // roll to window 2 (this should make data A visibile after a call to snapshot)
         roll()
-
-        // add a data point (B) to window 2 (it will not be visible in the snapshot)
-        h.add(1000)
         val snap1 = h.snapshot()
         assert(snap1.min() == 1)
         assert(snap1.max() == 100)
@@ -49,6 +42,10 @@ class MetricsBucketedHistogramTest extends FunSuite {
         assert(snap1.sum() == 1.to(100).sum)
         assert(snap1.avg() == 50.5d)
         assert(snap1.percentiles().map(_.getValue) === Array(50, 90))
+
+        // add a data point (B) to window 2 (it will not be visible in the snapshot)
+        h.add(1000)
+        assert(h.snapshot().sum() == snap1.sum())
 
         // fill out this 2nd window (C) and roll the window, we should only see B and C
         1001L.to(10000L).foreach(h.add)
