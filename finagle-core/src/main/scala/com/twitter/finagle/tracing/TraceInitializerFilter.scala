@@ -241,7 +241,7 @@ private[finagle] object WireTracingFilter {
     finagleVersion,
     false)
 
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+  def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
       val role = WireTracingFilter.role
       val description = "Report finagle information and wire send/recv events"
