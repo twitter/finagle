@@ -44,6 +44,7 @@ object StackServer {
    * @see [[com.twitter.finagle.filter.ExceptionSourceFilter]]
    * @see [[com.twitter.finagle.filter.MkJvmFilter]]
    * @see [[com.twitter.finagle.tracing.ServerTracingFilter]]
+   * @see [[com.twitter.finagle.tracing.WireTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    * @see [[com.twitter.finagle.filter.MonitorFilter]]
    * @see [[com.twitter.finagle.filter.ServerStatsFilter]]
