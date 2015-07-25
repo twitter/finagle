@@ -118,8 +118,7 @@ private[twitter] object ThriftUtil {
         meth <- findMethod(proxy, "newClient",
           classOf[Service[_, _]], classOf[ClassTag[_]])
       } yield {
-        val manifest = ClassManifest.fromClass(swiftClass)
-          .asInstanceOf[ClassTag[Iface]]
+        val manifest = ClassTag(swiftClass).asInstanceOf[ClassTag[Iface]]
         meth.invoke(null, underlying, manifest).asInstanceOf[Iface]
       }
 
@@ -288,17 +287,17 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   /**
    * $clientUse
    */
-  def newIface[Iface: ClassManifest](dest: String): Iface = {
+  def newIface[Iface: ClassTag](dest: String): Iface = {
     val (n, l) = Resolver.evalLabeled(dest)
     newIface[Iface](n, l)
   }
 
-  def newIface[Iface: ClassManifest](dest: String, label: String): Iface = {
+  def newIface[Iface: ClassTag](dest: String, label: String): Iface = {
     val cls = implicitly[ClassTag[Iface]].runtimeClass
     newIface[Iface](Resolver.eval(dest), label, cls)
   }
 
-  def newIface[Iface: ClassManifest](dest: Name, label: String): Iface = {
+  def newIface[Iface: ClassTag](dest: Name, label: String): Iface = {
     val cls = implicitly[ClassTag[Iface]].runtimeClass
     newIface[Iface](dest, label, cls)
   }
@@ -307,7 +306,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   @deprecated("Use destination names via newIface(String) or newIface(Name)", "6.7.x")
-  def newIface[Iface: ClassManifest](group: Group[SocketAddress]): Iface = {
+  def newIface[Iface: ClassTag](group: Group[SocketAddress]): Iface = {
     val cls = implicitly[ClassTag[Iface]].runtimeClass
     newIface[Iface](group, cls)
   }

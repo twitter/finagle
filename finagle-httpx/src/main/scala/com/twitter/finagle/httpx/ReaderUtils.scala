@@ -15,7 +15,7 @@ private[httpx] object ReaderUtils {
       Future.None
 
     case chunk: HttpChunk =>
-      Future.value(Some(ChannelBufferBuf(chunk.getContent)))
+      Future.value(Some(ChannelBufferBuf.Owned(chunk.getContent.duplicate)))
 
     case invalid =>
       val exc = new IllegalArgumentException(

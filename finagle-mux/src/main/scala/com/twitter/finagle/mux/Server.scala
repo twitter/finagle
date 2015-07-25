@@ -366,7 +366,7 @@ private object Processor extends Filter[Message, Message, Request, Response] {
     val Tdispatch(tag, contexts, dst, dtab, bytes) = tdispatch
 
     val contextBufs = contexts map { case (k, v) =>
-      ChannelBufferBuf(k) -> ChannelBufferBuf(v)
+      ChannelBufferBuf.Owned(k.duplicate) -> ChannelBufferBuf.Owned(v.duplicate)
     }
     Contexts.broadcast.letUnmarshal(contextBufs) {
       if (dtab.length > 0)

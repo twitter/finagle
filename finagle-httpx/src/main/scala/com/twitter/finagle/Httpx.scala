@@ -26,9 +26,8 @@ trait HttpxRichClient { self: Client[Request, Response] =>
       val port = if (url.getPort < 0) url.getDefaultPort else url.getPort
       new InetSocketAddress(url.getHost, port)
     }
-    val group = Group[SocketAddress](addr)
     val req = httpx.RequestBuilder().url(url).buildGet()
-    val service = newClient(group).toService
+    val service = newService(Name.bound(addr), "")
     service(req) ensure {
       service.close()
     }
@@ -110,7 +109,7 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
       new HttpClientDispatcher(transport)
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
-      configured((Transport.TLSClientEngine(Some(cfg.newEngine))))
+      configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
         .configured(Transporter.TLSHostname(cfg.verifyHost))
         .transformed { stk => httpx.TlsFilter.module +: stk }
 

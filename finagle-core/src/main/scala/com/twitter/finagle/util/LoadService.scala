@@ -182,7 +182,7 @@ object LoadService {
 
   private val cache: mutable.Map[ClassLoader, Seq[ClassPath.Info]] = mutable.Map.empty
 
-  def apply[T: ClassManifest](): Seq[T] = synchronized {
+  def apply[T: ClassTag](): Seq[T] = synchronized {
     val iface = implicitly[ClassTag[T]].runtimeClass.asInstanceOf[Class[T]]
     val ifaceName = iface.getName
     val loader = iface.getClassLoader

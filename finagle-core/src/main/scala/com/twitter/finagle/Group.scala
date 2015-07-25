@@ -106,6 +106,7 @@ trait Group[T] { outer =>
  * name, but mostly this is to ship names under the cover of old
  * APIs. (And hopefully will be deprecated soon enough.)
  */
+@deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
 private[finagle] case class NameGroup(name: Name.Bound)
   extends Group[SocketAddress] {
     protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.addr map {
@@ -114,6 +115,7 @@ private[finagle] case class NameGroup(name: Name.Bound)
     }
   }
 
+@deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
 trait MutableGroup[T] extends Group[T] {
   def update(newMembers: Set[T])
 }
@@ -122,6 +124,7 @@ trait MutableGroup[T] extends Group[T] {
  * A mixin trait to assign a ``name`` to the group. This is used
  * to assign labels to groups that ascribe meaning to them.
  */
+@deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
 case class LabelledGroup[T](underlying: Group[T], name: String) extends Group[T] {
   protected[finagle] lazy val set: Var[Set[T]] = underlying.set
 }

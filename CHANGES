@@ -36,6 +36,9 @@ Breaking API Changes
     with /#/ has been removed. `c.t.f.Namer.bindAndEval` has been removed. Use
     `c.t.f.Namer.resolve` instead. ``RB_ID=711681``
 
+  * finagle: `LoadService` and `ThriftRichClient` migrated off of deprecated `ClassManifest`
+    to `ClassTag`. ``RB_ID=720455``
+
 6.26.0
 -------
 
