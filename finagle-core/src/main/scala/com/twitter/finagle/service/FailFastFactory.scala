@@ -34,12 +34,12 @@ object FailFastFactory {
    * For details on usage see the
    * [[https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s FAQ]]
    */
-  case class FailFast(onOrOff: Boolean) {
+  case class FailFast(enabled: Boolean) {
     def mk(): (FailFast, Stack.Param[FailFast]) =
       (this, FailFast.param)
   }
   object FailFast {
-    implicit val param = Stack.Param(FailFast(onOrOff = true))
+    implicit val param = Stack.Param(FailFast(enabled = true))
   }
 
   /**

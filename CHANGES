@@ -18,6 +18,8 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: FailFast parameter renamed from `onOrOff` to `enabled`. ``RB_ID=720781``
+
   * finagle-core: When evaluating NameTree unions, return components of the union in Ok state rather
     than waiting for all components to be Ok. This enables resilience of unions when part of the
     tree cannot be resolved. ``RB_ID=697114``

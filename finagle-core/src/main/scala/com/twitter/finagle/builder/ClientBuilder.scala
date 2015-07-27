@@ -772,8 +772,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     "No longer experimental: Use failFast()." +
     "The new default value is true, so replace .expFailFast(true) with nothing at all",
     "5.3.10")
-  def expFailFast(onOrOff: Boolean): This =
-    failFast(onOrOff)
+  def expFailFast(enabled: Boolean): This =
+    failFast(enabled)
 
   /**
    * Marks a host dead on connection failure. The host remains dead
@@ -781,8 +781,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * *are* respected, but host availability is turned off during the
    * reconnection period.
    */
-  def failFast(onOrOff: Boolean): This =
-    configured(FailFast(onOrOff))
+  def failFast(enabled: Boolean): This =
+    configured(FailFast(enabled))
 
   /**
    * When true, the client is daemonized. As with java threads, a
