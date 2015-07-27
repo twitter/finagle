@@ -1,7 +1,6 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.io.Buf
-import java.lang.UnsupportedOperationException
 import java.io.{InputStream, OutputStream}
 import java.nio.{ByteBuffer, ByteOrder, ReadOnlyBufferException}
 import java.nio.channels.{GatheringByteChannel, ScatteringByteChannel}
@@ -94,7 +93,10 @@ object BufChannelBuffer {
       cb
 
     case Buf.ByteArray.Owned(bytes, begin, end) =>
-      ChannelBuffers.wrappedBuffer(endianness, bytes).slice(begin, end-begin)
+      ChannelBuffers.wrappedBuffer(endianness, bytes, begin, end-begin)
+
+    case Buf.ByteBuffer.Owned(bb) =>
+      ChannelBuffers.wrappedBuffer(bb)
 
     case _ =>
       new BufChannelBuffer(buf, endianness)
