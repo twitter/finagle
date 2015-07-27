@@ -229,26 +229,26 @@ object ClientTracingFilter {
 private[finagle] object WireTracingFilter {
   val role = Stack.Role("WireTracingFilter")
 
-  case class TracingFilter[Req, Rep](
-    label: String,
-    finagleVersion: () => String = () => Init.finagleVersion
-  ) extends AnnotatingTracingFilter[Req, Rep](
-    label,
-    "clnt",
-    Annotation.WireSend,
-    Annotation.WireRecv,
-    Annotation.WireRecvError(_),
-    finagleVersion,
-    false)
-
   def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
       val role = WireTracingFilter.role
       val description = "Report finagle information and wire send/recv events"
       def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
         val param.Label(label) = _label
-        TracingFilter[Req, Rep](label) andThen next
+        Filter(label) andThen next
       }
+
+      case class Filter(
+        label: String,
+        finagleVersion: () => String = () => Init.finagleVersion
+      ) extends AnnotatingTracingFilter[Req, Rep](
+        label,
+        "clnt",
+        Annotation.WireSend,
+        Annotation.WireRecv,
+        Annotation.WireRecvError(_),
+        finagleVersion,
+        false)
     }
 
   def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
@@ -256,6 +256,7 @@ private[finagle] object WireTracingFilter {
       val role = WireTracingFilter.role
       val description = "Report wire recv/send events"
       def make(next: ServiceFactory[Req, Rep]) = filter andThen next
+
       val filter = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
         Trace.record(Annotation.WireRecv)
         svc(req) onSuccess { _ =>
