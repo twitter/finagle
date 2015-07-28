@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &mdash; Finagle 6.26.0 documentation</title>
+    <title>Protocols &mdash; Finagle 6.27.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.26.0',
+        VERSION:     '6.27.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
     <link rel="next" title="Extending Finagle" href="Extending.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -109,17 +109,17 @@ can generate source code in Scala or Java. Given the following IDL:</p>
 <p>Scrooge will generate code that can be used by <cite>finagle-thrift</cite> with the
 following rich APIs <a class="footnote-reference" href="#id2" id="id1">[1]</a>:</p>
 <p id="finagle-thrift-server">Serving the IDL:</p>
-<div class="highlight-text"><div class="highlight"><pre>val server = Thrift.serveIface(&quot;localhost:8080&quot;, new Hello[Future] {
-  def hi() = Future.value(&quot;hi&quot;)
-})
-Await.ready(server)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">serveIface</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Hello</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">hi</span><span class="o">()</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="s">&quot;hi&quot;</span><span class="o">)</span>
+<span class="o">})</span>
+<span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
 </pre></div>
 </div>
 <p id="finagle-thrift-client">and the symmetric remote dispatch:</p>
-<div class="highlight-text"><div class="highlight"><pre>val client = Thrift.newIface[Hello.FutureIface](&quot;localhost:8080&quot;)
-client.hi() onSuccess { response =&gt;
-  println(&quot;Received response: &quot; + response)
-}
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">newIface</span><span class="o">[</span><span class="kt">Hello.FutureIface</span><span class="o">](</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">hi</span><span class="o">()</span> <span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
+  <span class="n">println</span><span class="o">(</span><span class="s">&quot;Received response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">)</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>Check out the <cite>finagle-thrift</cite> <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$">API</a>
@@ -189,59 +189,59 @@ transactions while taking advantage of Finagle&#8217;s <a class="reference inter
 connection pooling. The implementation supports both the MySQL binary and string protocols.</p>
 <p>A client can be constructed using the
 <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.Mysql$">Mysql</a> protocol object:</p>
-<div class="highlight-text"><div class="highlight"><pre>val client = Mysql.client
-  .withCredentials(&quot;&lt;user&gt;&quot;, &quot;&lt;password&gt;&quot;)
-  .withDatabase(&quot;test&quot;)
-  .configured(DefaultPool.Param(
-    low = 0, high = 10,
-    idleTime = 5.minutes,
-    bufferSize = 0,
-    maxWaiters = Int.MaxValue))
-  .newClient(&quot;127.0.0.1:3306&quot;)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withDatabase</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">DefaultPool</span><span class="o">.</span><span class="nc">Param</span><span class="o">(</span>
+    <span class="n">low</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">high</span> <span class="k">=</span> <span class="mi">10</span><span class="o">,</span>
+    <span class="n">idleTime</span> <span class="k">=</span> <span class="mf">5.</span><span class="n">minutes</span><span class="o">,</span>
+    <span class="n">bufferSize</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span>
+    <span class="n">maxWaiters</span> <span class="k">=</span> <span class="nc">Int</span><span class="o">.</span><span class="nc">MaxValue</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">newClient</span><span class="o">(</span><span class="s">&quot;127.0.0.1:3306&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>We configure the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.DefaultPool">client&#8217;s connection pool</a> to be
 compatible with our MySQL server. The constructor returns a Finagle <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>
 from <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Request">mysql.Request</a> to <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Result">mysql.Result</a>
 which we can use to query the db:</p>
-<div class="highlight-text"><div class="highlight"><pre>val product = client().flatMap { service =&gt;
-  // `service` is checked out from the pool.
-  service(QueryRequest(&quot;SELECT 5*5 AS `product`&quot;)) map {
-    case rs: ResultSet =&gt; rs.rows.map(processRow)
-    case _ =&gt; Seq.empty
-  } ensure {
-    // put `service` back into the pool.
-    service.close()
-  }
-}
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">client</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">service</span> <span class="k">=&gt;</span>
+  <span class="c1">// `service` is checked out from the pool.</span>
+  <span class="n">service</span><span class="o">(</span><span class="nc">QueryRequest</span><span class="o">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="o">))</span> <span class="n">map</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="n">rs</span><span class="k">:</span> <span class="kt">ResultSet</span> <span class="o">=&gt;</span> <span class="n">rs</span><span class="o">.</span><span class="n">rows</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">processRow</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">Seq</span><span class="o">.</span><span class="n">empty</span>
+  <span class="o">}</span> <span class="n">ensure</span> <span class="o">{</span>
+    <span class="c1">// put `service` back into the pool.</span>
+    <span class="n">service</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>A <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.ResultSet">ResultSet</a> makes it easy to extract
 <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Value">Values</a> based on column names. For example, we can
 implement the above <cite>processRow</cite> as a pattern match on expected values:</p>
-<div class="highlight-text"><div class="highlight"><pre>def processRow(row: Row): Option[Long] =
-  row(&quot;product&quot;).flatMap {
-    case LongValue(l) =&gt; Some(l)
-    case IntValue(i) =&gt; Some(i.toLong)
-    case _ =&gt; None
-  }
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">processRow</span><span class="o">(</span><span class="n">row</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
+  <span class="n">row</span><span class="o">(</span><span class="s">&quot;product&quot;</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">LongValue</span><span class="o">(</span><span class="n">l</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Some</span><span class="o">(</span><span class="n">l</span><span class="o">)</span>
+    <span class="k">case</span> <span class="nc">IntValue</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">Some</span><span class="o">(</span><span class="n">i</span><span class="o">.</span><span class="n">toLong</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">None</span>
+  <span class="o">}</span>
 </pre></div>
 </div>
 <p>The ServiceFactory API gives you more fine-grained control over the pool. This isn&#8217;t always necessary
 - to simplify <em>finagle-mysql</em> offers a rich API that wraps the ServiceFactory returned from <cite>newClient</cite>:</p>
-<div class="highlight-text"><div class="highlight"><pre>val richClient = Mysql.client
-  .withCredentials(&quot;&lt;user&gt;&quot;, &quot;&lt;password&gt;&quot;)
-  .withDatabase(&quot;test&quot;)
-  .configured(DefaultPool.Param(
-    low = 0, high = 10,
-    idleTime = 5.minutes,
-    bufferSize = 0,
-    maxWaiters = Int.MaxValue))
-  .newRichClient(&quot;127.0.0.1:3306&quot;)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">richClient</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withDatabase</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">DefaultPool</span><span class="o">.</span><span class="nc">Param</span><span class="o">(</span>
+    <span class="n">low</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span> <span class="n">high</span> <span class="k">=</span> <span class="mi">10</span><span class="o">,</span>
+    <span class="n">idleTime</span> <span class="k">=</span> <span class="mf">5.</span><span class="n">minutes</span><span class="o">,</span>
+    <span class="n">bufferSize</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span>
+    <span class="n">maxWaiters</span> <span class="k">=</span> <span class="nc">Int</span><span class="o">.</span><span class="nc">MaxValue</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">newRichClient</span><span class="o">(</span><span class="s">&quot;127.0.0.1:3306&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>and we can select:</p>
-<div class="highlight-text"><div class="highlight"><pre>val product = richClient.select(&quot;SELECT 5*5 AS `product`&quot;)(processRow)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">richClient</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="s">&quot;SELECT 5*5 AS `product`&quot;</span><span class="o">)(</span><span class="n">processRow</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>Note that <cite>select</cite> takes care of checking out the service and returning it to the pool. <cite>select</cite> and

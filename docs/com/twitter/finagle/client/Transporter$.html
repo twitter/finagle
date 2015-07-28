@@ -95,6 +95,20 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
       </span>
       </h4>
       <p class="comment cmt">$param the connect timeout of a <code>Transporter</code>.</p>
+    </li><li name="com.twitter.finagle.client.Transporter.Credentials" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CredentialsextendsProductwithSerializable"></a>
+      <a id="Credentials:Credentials"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Transporter$$Credentials.html"><span class="name">Credentials</span></a><span class="params">(<span name="username">username: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="password">password: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">This class wraps the username, password that we use for http proxy auth
+</p>
     </li><li name="com.twitter.finagle.client.Transporter.EndpointAddr" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EndpointAddrextendsProductwithSerializable"></a>
       <a id="EndpointAddr:EndpointAddr"></a>
@@ -117,7 +131,7 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Transporter$$HttpProxy.html"><span class="name">HttpProxy</span></a><span class="params">(<span name="sa">sa: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Transporter$$HttpProxy.html"><span class="name">HttpProxy</span></a><span class="params">(<span name="sa">sa: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="credentials">credentials: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       <p class="comment cmt">$param a HttpProxy as the endpoint for a <code>Transporter</code>.</p>
@@ -147,6 +161,19 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
       </span>
       </h4>
       <p class="comment cmt">$param hostname verification, if TLS is enabled.</p>
+    </li><li name="com.twitter.finagle.client.Transporter.TrafficClass" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TrafficClassextendsProductwithSerializable"></a>
+      <a id="TrafficClass:TrafficClass"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Transporter$$TrafficClass.html"><span class="name">TrafficClass</span></a><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Configures the traffic class to be used by clients.</p>
     </li></ol>
             </div>
 
@@ -281,6 +308,19 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
       </span>
       <span class="symbol">
         <a href="Transporter$$TLSHostname$.html"><span class="name">TLSHostname</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.client.Transporter.TrafficClass" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TrafficClass"></a>
+      <a id="TrafficClass:TrafficClass"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Transporter$$TrafficClass$.html"><span class="name">TrafficClass</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       

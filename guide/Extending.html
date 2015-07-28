@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &mdash; Finagle 6.26.0 documentation</title>
+    <title>Extending Finagle &mdash; Finagle 6.27.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.26.0',
+        VERSION:     '6.27.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -73,14 +73,14 @@ a client and server for a simple newline-delimited, string-based
 protocol. We&#8217;ll build a client capable of sending simple strings to a
 server, which in turn may reply with another.</p>
 <p>While we&#8217;re going to dig a bit deeper here than in the rest of the
-user&#8217;s guide—implementing even a simple protocol requires a deeper
-appreciation of Finagle&#8217;s internals—the material presented here is not
+user&#8217;s guide — implementing even a simple protocol requires a deeper
+appreciation of Finagle&#8217;s internals — the material presented here is not
 necessary to understand how to use Finagle productively. However,
 expert users may find the material useful.</p>
 <p>If you haven&#8217;t yet, first read the <a class="reference internal" href="Quickstart.html"><em>quickstart</em></a> to
 understand some of Finagle&#8217;s core concepts (i.e. <a class="reference internal" href="Futures.html"><em>Futures</em></a>, <a class="reference internal" href="ServicesAndFilters.html"><em>Services and Filters</em></a>).</p>
 <p>The entire example is available, together with a self-contained script
-to launch sbt, in the Finagle git repository:</p>
+to launch <cite>sbt</cite>, in the Finagle git repository:</p>
 <div class="highlight-text"><div class="highlight"><pre>$ git clone https://github.com/twitter/finagle.git
 $ cd finagle/doc/src/sphinx/code/client-server-anatomy
 $ ./sbt run
@@ -143,11 +143,11 @@ we simply call <cite>stack.make(params)</cite>.</p>
 <p>Finagle represents the OSI transport layer as a typed stream that may
 be read from and written to asynchronously. The noteworthy methods in
 the interface are defined as such:</p>
-<div class="highlight-text"><div class="highlight"><pre>trait Transport[In, Out] {
-  def read(): Future[Out]
-  def write(req: In): Future[Unit]
-  ...
-}
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">trait</span> <span class="nc">Transport</span><span class="o">[</span><span class="kt">In</span>, <span class="kt">Out</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">read</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Out</span><span class="o">]</span>
+  <span class="k">def</span> <span class="n">write</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">In</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span>
+  <span class="o">...</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>Most Transports are implemented using <a class="reference external" href="http://netty.io">Netty</a>
@@ -158,15 +158,15 @@ for I/O multiplexing and protocol codecs.</p>
 <p>To frame data received over the network with respect to our
 protocol we use a <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">Netty Channel Pipeline</a>.
 Our server pipeline defines a UTF-8 text-based newline delimited protocol:</p>
-<div class="highlight-text"><div class="highlight"><pre>object StringServerPipeline extends ChannelPipelineFactory {
-  def getPipeline = {
-    val pipeline = Channels.pipeline()
-    pipeline.addLast(&quot;line&quot;, new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter: _*))
-    pipeline.addLast(&quot;stringDecoder&quot;, new StringDecoder(CharsetUtil.UTF_8))
-    pipeline.addLast(&quot;stringEncoder&quot;, new StringEncoder(CharsetUtil.UTF_8))
-    pipeline
-  }
-}
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">object</span> <span class="nc">StringServerPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;line&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">DelimiterBasedFrameDecoder</span><span class="o">(</span><span class="mi">100</span><span class="o">,</span> <span class="nc">Delimiters</span><span class="o">.</span><span class="n">lineDelimiter</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">))</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringDecoder&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringEncoder&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
+    <span class="n">pipeline</span>
+  <span class="o">}</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 </div>
@@ -176,23 +176,23 @@ Our server pipeline defines a UTF-8 text-based newline delimited protocol:</p>
 translating our pipeline into a typed transport are defined by the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Listener.scala">Netty3Listener</a>.</p>
 <p>We define a listener in our server implementation:</p>
-<div class="highlight-text"><div class="highlight"><pre>protected def newListener(): Listener[String, String] =
-  Netty3Listener(StringServerPipeline, params)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">protected</span> <span class="k">def</span> <span class="n">newListener</span><span class="o">()</span><span class="k">:</span> <span class="kt">Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+  <span class="nc">Netty3Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>This implements the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/server/Listener.scala">Listener</a>
 interface that exposes a <cite>listen</cite> method:</p>
-<div class="highlight-text"><div class="highlight"><pre>def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] =&gt; Unit)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">listen</span><span class="o">(</span><span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">)(</span><span class="n">serveTransport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">In</span>, <span class="kt">Out</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Unit</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>That is, given a socket address to bind and listen, <cite>serveTransport</cite> is dispatched
 for each new connection established.</p>
 <p>For example, here is a simple echo server:</p>
-<div class="highlight-text"><div class="highlight"><pre>val address = new java.net.InetSocketAddress(&quot;localhost&quot;, 8080)
-val listener = Netty3Listener(StringServerPipeline, StackServer.defaultParams)
-val echoServer = listener.listen(address) { transport =&gt;
-   transport.read() flatMap { transport.write(_) } ensure transport.close()
- }
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">address</span> <span class="k">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">listener</span> <span class="k">=</span> <span class="nc">Netty3Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">echoServer</span> <span class="k">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">listen</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span>
+   <span class="n">transport</span><span class="o">.</span><span class="n">read</span><span class="o">()</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">transport</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span> <span class="n">ensure</span> <span class="n">transport</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
+ <span class="o">}</span>
 </pre></div>
 </div>
 <p>We can now send requests over this socket and have them echoed back:</p>
@@ -214,14 +214,14 @@ is written back to the transport. Additionally, the
 server dispatcher drains existing requests before
 closing a transport.</p>
 <p>We could translate our <cite>serveTransport</cite> function to use this facility:</p>
-<div class="highlight-text"><div class="highlight"><pre>val service = new Service[String, String] {
-  def apply(request: String) = Future.value(request)
-}
-val serveTransport = (t: Transport[String, String]) =&gt;
-  new SerialServerDispatcher(t, service)
-val listener = Netty3Listener[String, String](
-  StringServerPipeline, StackServer.defaultParams)
-val server = listener.listen(address) { serveTransport(_) }
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="k">val</span> <span class="n">serveTransport</span> <span class="k">=</span> <span class="o">(</span><span class="n">t</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> <span class="k">=&gt;</span>
+  <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">listener</span> <span class="k">=</span> <span class="nc">Netty3Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
+  <span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">listen</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="o">{</span> <span class="n">serveTransport</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span>
 </pre></div>
 </div>
 <p>A nice consequence of using a <a class="reference internal" href="ServicesAndFilters.html#services"><em>Service</em></a> to process
@@ -243,34 +243,34 @@ and standard way to receive parameters and dependencies.</p>
 The abstract type parameters <cite>In</cite> and <cite>Out</cite> are used when the type of
 <cite>Listener</cite> differs from the type of <cite>Server</cite>. This is common when some protocol
 processing is done in the <cite>Dispatcher</cite>.</p>
-<div class="highlight-text"><div class="highlight"><pre>case class Server(
-  stack: Stack[ServiceFactory[String, String]] = StackServer.newStack,
-  params: Stack.Params = StackServer.defaultParams
-) extends StdStackServer[String, String, Server] {
-  protected type In = String
-  protected type Out = String
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">case</span> <span class="k">class</span> <span class="nc">Server</span><span class="o">(</span>
+  <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
+  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span>
+<span class="o">)</span> <span class="k">extends</span> <span class="nc">StdStackServer</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Server</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="kt">In</span> <span class="o">=</span> <span class="nc">String</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="kt">Out</span> <span class="o">=</span> <span class="nc">String</span>
 
-  protected def copy1(
-    stack: Stack[ServiceFactory[String, String]] = this.stack,
-    params: Stack.Params = this.params
-  ): Server = copy(stack, params)
+  <span class="k">protected</span> <span class="k">def</span> <span class="n">copy1</span><span class="o">(</span>
+    <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="k">this</span><span class="o">.</span><span class="n">stack</span><span class="o">,</span>
+    <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="n">params</span>
+  <span class="o">)</span><span class="k">:</span> <span class="kt">Server</span> <span class="o">=</span> <span class="n">copy</span><span class="o">(</span><span class="n">stack</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
-  protected def newListener(): Listener[String, String] =
-    Netty3Listener(StringServerPipeline, params)
+  <span class="k">protected</span> <span class="k">def</span> <span class="n">newListener</span><span class="o">()</span><span class="k">:</span> <span class="kt">Listener</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">Netty3Listener</span><span class="o">(</span><span class="nc">StringServerPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
-  protected def newDispatcher(
-      transport: Transport[String, String],
-      service: Service[String, String]) =
-    new SerialServerDispatcher(transport, service)
-}
+  <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
+      <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">],</span>
+      <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> <span class="k">=</span>
+    <span class="k">new</span> <span class="nc">SerialServerDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>Finally, we make use of our service:</p>
-<div class="highlight-text"><div class="highlight"><pre>val service = new Service[String, String] {
-  def apply(request: String) = Future.value(request)
-}
-val server = Echo.serve(&quot;:8080&quot;, service)
-Await.result(server)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Echo</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+<span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
 </pre></div>
 </div>
 </div>
@@ -279,25 +279,25 @@ Await.result(server)
 <p>Again, we&#8217;ll use a <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelPipeline.html">Netty Channel Pipeline</a>
 to frame our network traffic. Our client pipeline defines a
 UTF-8 newline delimited protocol:</p>
-<div class="highlight-text"><div class="highlight"><pre>object StringClientPipeline extends ChannelPipelineFactory {
-  def getPipeline = {
-    val pipeline = Channels.pipeline()
-    pipeline.addLast(&quot;stringEncode&quot;, new StringEncoder(CharsetUtil.UTF_8))
-    pipeline.addLast(&quot;stringDecode&quot;, new StringDecoder(CharsetUtil.UTF_8))
-    pipeline.addLast(&quot;line&quot;, new DelimEncoder(&#39;\n&#39;))
-    pipeline
-  }
-}
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">object</span> <span class="nc">StringClientPipeline</span> <span class="k">extends</span> <span class="nc">ChannelPipelineFactory</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">getPipeline</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">pipeline</span> <span class="k">=</span> <span class="nc">Channels</span><span class="o">.</span><span class="n">pipeline</span><span class="o">()</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringEncode&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringEncoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;stringDecode&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">StringDecoder</span><span class="o">(</span><span class="nc">CharsetUtil</span><span class="o">.</span><span class="nc">UTF_8</span><span class="o">))</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">addLast</span><span class="o">(</span><span class="s">&quot;line&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">DelimEncoder</span><span class="o">(</span><span class="sc">&#39;\n&#39;</span><span class="o">))</span>
+    <span class="n">pipeline</span>
+  <span class="o">}</span>
+<span class="o">}</span>
 
-class DelimEncoder(delim: Char) extends SimpleChannelHandler {
-  override def writeRequested(ctx: ChannelHandlerContext, evt: MessageEvent) = {
-    val newMessage = evt.getMessage match {
-      case m: String =&gt; m + delim
-      case m =&gt; m
-    }
-    Channels.write(ctx, evt.getFuture, newMessage, evt.getRemoteAddress)
-  }
-}
+<span class="k">class</span> <span class="nc">DelimEncoder</span><span class="o">(</span><span class="n">delim</span><span class="k">:</span> <span class="kt">Char</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">SimpleChannelHandler</span> <span class="o">{</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="n">writeRequested</span><span class="o">(</span><span class="n">ctx</span><span class="k">:</span> <span class="kt">ChannelHandlerContext</span><span class="o">,</span> <span class="n">evt</span><span class="k">:</span> <span class="kt">MessageEvent</span><span class="o">)</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">newMessage</span> <span class="k">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">getMessage</span> <span class="k">match</span> <span class="o">{</span>
+      <span class="k">case</span> <span class="n">m</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=&gt;</span> <span class="n">m</span> <span class="o">+</span> <span class="n">delim</span>
+      <span class="k">case</span> <span class="n">m</span> <span class="k">=&gt;</span> <span class="n">m</span>
+    <span class="o">}</span>
+    <span class="nc">Channels</span><span class="o">.</span><span class="n">write</span><span class="o">(</span><span class="n">ctx</span><span class="o">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">getFuture</span><span class="o">,</span> <span class="n">newMessage</span><span class="o">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">getRemoteAddress</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 </div>
@@ -307,8 +307,8 @@ class DelimEncoder(delim: Char) extends SimpleChannelHandler {
 a <a class="reference internal" href="#transport-interface"><em>Transport</em></a> to a peer—it establishes a session. Our client uses a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Transporter.scala">Netty3Transporter</a>, however
 the use of other Transporters is fully supported.</p>
-<div class="highlight-text"><div class="highlight"><pre>protected def newTransporter(): Transporter[String, String] =
-  Netty3Transporter(StringClientPipeline, params)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+  <span class="nc">Netty3Transporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 </pre></div>
 </div>
 </div>
@@ -335,25 +335,25 @@ defines a custom dispatcher.</td></tr>
 <h2>A Basic Client<a class="headerlink" href="#a-basic-client" title="Permalink to this headline">¶</a></h2>
 <p>Given a defined transporter and request dispatching strategy, we can compose the
 two and create a client:</p>
-<div class="highlight-text"><div class="highlight"><pre>val addr = new java.net.InetSocketAddress(&quot;localhost&quot;, 8080)
-val transporter = Netty3Transporter[String, String](
-  StringClientPipeline, StackClient.defaultParams)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">addr</span> <span class="k">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">transporter</span> <span class="k">=</span> <span class="nc">Netty3Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
+  <span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span><span class="o">)</span>
 
-val bridge: Future[Service[String, String]] =
-  transporter(addr) map { transport =&gt;
-    new SerialClientDispatcher(transport)
-  }
+<span class="k">val</span> <span class="n">bridge</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span>
+  <span class="n">transporter</span><span class="o">(</span><span class="n">addr</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="n">transport</span> <span class="k">=&gt;</span>
+    <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">)</span>
+  <span class="o">}</span>
 
-val client = new Service[String, String] {
-  def apply(req: String) = bridge flatMap { svc =&gt;
-    svc(req) ensure svc.close()
-  }
-}
+<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="n">bridge</span> <span class="n">flatMap</span> <span class="o">{</span> <span class="n">svc</span> <span class="k">=&gt;</span>
+    <span class="n">svc</span><span class="o">(</span><span class="n">req</span><span class="o">)</span> <span class="n">ensure</span> <span class="n">svc</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
+  <span class="o">}</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>Finally, we can dispatch requests over our client,</p>
-<div class="highlight-text"><div class="highlight"><pre>val result = client(&quot;hello&quot;)
-println(Await.result(result))
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">)</span>
+<span class="n">println</span><span class="o">(</span><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">result</span><span class="o">))</span>
 </pre></div>
 </div>
 <p>Assuming we have a server willing to listen, we can expect a response:</p>
@@ -367,28 +367,28 @@ println(Await.result(result))
 <p>Our client is a Service, so we can supply additional
 behavior to make our client more robust using
 filters:</p>
-<div class="highlight-text"><div class="highlight"><pre>val retry = new RetryingFilter[String, String](
-  retryPolicy = RetryPolicy.tries(3),
-  timer = DefaultTimer.twitter
-)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">retry</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">RetryingFilter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
+  <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">(</span><span class="mi">3</span><span class="o">),</span>
+  <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span>
+<span class="o">)</span>
 
-val timeout = new TimeoutFilter[String, String](
-  timeout = 3.seconds,
-  timer = DefaultTimer.twitter
-)
+<span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
+  <span class="n">timeout</span> <span class="k">=</span> <span class="mf">3.</span><span class="n">seconds</span><span class="o">,</span>
+  <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span>
+<span class="o">)</span>
 
-val maskCancel = new MaskCancelFilter[String, String]
+<span class="k">val</span> <span class="n">maskCancel</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MaskCancelFilter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
 </pre></div>
 </div>
 <p>Composing these filters <a class="footnote-reference" href="#id5" id="id4">[2]</a> with our basic client demonstrates
 the composable components used throughout finagle.</p>
-<div class="highlight-text"><div class="highlight"><pre>val newClient =
-  retry andThen
-  timeout andThen
-  maskCancel andThen client
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">newClient</span> <span class="k">=</span>
+  <span class="n">retry</span> <span class="n">andThen</span>
+  <span class="n">timeout</span> <span class="n">andThen</span>
+  <span class="n">maskCancel</span> <span class="n">andThen</span> <span class="n">client</span>
 
-val result = newClient(&quot;hello&quot;)
-println(Await.result(result))
+<span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">newClient</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">)</span>
+<span class="n">println</span><span class="o">(</span><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">result</span><span class="o">))</span>
 </pre></div>
 </div>
 <p>This client is a good start, but we cannot dispatch concurrent requests
@@ -417,32 +417,32 @@ features including
 and <a class="reference internal" href="Clients.html#watermark-pool"><em>connection pooling</em></a> per host. See the section
 on <a class="reference internal" href="Clients.html#client-modules"><em>client modules</em></a> for more details.</p>
 <p>Putting together a <cite>StdStackClient</cite> is simple:</p>
-<div class="highlight-text"><div class="highlight"><pre>case class Client(
-  stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-  params: Stack.Params = StackClient.defaultParams
-) extends StdStackClient[String, String, Client] {
-  protected type In = String
-  protected type Out = String
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">case</span> <span class="k">class</span> <span class="nc">Client</span><span class="o">(</span>
+  <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
+  <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span>
+<span class="o">)</span> <span class="k">extends</span> <span class="nc">StdStackClient</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">Client</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="kt">In</span> <span class="o">=</span> <span class="nc">String</span>
+  <span class="k">protected</span> <span class="k">type</span> <span class="kt">Out</span> <span class="o">=</span> <span class="nc">String</span>
 
-  protected def copy1(
-      stack: Stack[ServiceFactory[String, String]],
-      params: Stack.Params): Client =
-    copy(stack, params)
+  <span class="k">protected</span> <span class="k">def</span> <span class="n">copy1</span><span class="o">(</span>
+      <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]],</span>
+      <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span><span class="o">)</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=</span>
+    <span class="n">copy</span><span class="o">(</span><span class="n">stack</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
-  protected def newTransporter(): Transporter[String, String] =
-    Netty3Transporter(StringClientPipeline, params)
+  <span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">Netty3Transporter</span><span class="o">(</span><span class="nc">StringClientPipeline</span><span class="o">,</span> <span class="n">params</span><span class="o">)</span>
 
-  protected def newDispatcher(
-      transport: Transport[String, String]): Service[String, String] =
-    new SerialClientDispatcher(transport)
-}
+  <span class="k">protected</span> <span class="k">def</span> <span class="n">newDispatcher</span><span class="o">(</span>
+      <span class="n">transport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+    <span class="k">new</span> <span class="nc">SerialClientDispatcher</span><span class="o">(</span><span class="n">transport</span><span class="o">)</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>Armed with this new client, we can connect to a destination <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Name.scala">Name</a>, representing multiple hosts:</p>
-<div class="highlight-text"><div class="highlight"><pre>val dest = Resolver.eval(
-  &quot;localhost:8080,localhost:8081,localhost:8082&quot;)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">dest</span> <span class="k">=</span> <span class="nc">Resolver</span><span class="o">.</span><span class="n">eval</span><span class="o">(</span>
+  <span class="s">&quot;localhost:8080,localhost:8081,localhost:8082&quot;</span><span class="o">)</span>
 
-client.newClient(dest): ServiceFactory[String, String]
+<span class="n">client</span><span class="o">.</span><span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span>
 </pre></div>
 </div>
 <p>Requests sent to this client are load balanced across these

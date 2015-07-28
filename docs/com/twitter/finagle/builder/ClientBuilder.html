@@ -521,7 +521,7 @@ arithmetic.
 which time the experimental option will go away.
 </p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#failFast" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="failFast(onOrOff:Boolean):ClientBuilder.this.This"></a>
+      <a id="failFast(enabled:Boolean):ClientBuilder.this.This"></a>
       <a id="failFast(Boolean):This"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -529,7 +529,7 @@ which time the experimental option will go away.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">failFast</span><span class="params">(<span name="onOrOff">onOrOff: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">failFast</span><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Marks a host dead on connection failure.</p><div class="fullcomment"><div class="comment cmt"><p>Marks a host dead on connection failure. The host remains dead
@@ -773,6 +773,19 @@ string.
       <p class="shortcomment cmt">Make connections via the given HTTP proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given HTTP proxy.
 If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
 </p></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#httpProxyUsernameAndPassword" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="httpProxyUsernameAndPassword(credentials:com.twitter.finagle.client.Transporter.Credentials):ClientBuilder.this.This"></a>
+      <a id="httpProxyUsernameAndPassword(Credentials):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpProxyUsernameAndPassword</span><span class="params">(<span name="credentials">credentials: <a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">For the http proxy use these <span class="extype" name="Credentials">Credentials</span> for authentication.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -1240,6 +1253,21 @@ provided against the given hostname.
       <p class="shortcomment cmt">Specifies a tracer that receives trace events.</p><div class="fullcomment"><div class="comment cmt"><p>Specifies a tracer that receives trace events.
 See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.tracing">com.twitter.finagle.tracing</a> for details.
 </p></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#trafficClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="trafficClass(value:Option[Int]):ClientBuilder.this.This"></a>
+      <a id="trafficClass(Option[Int]):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">trafficClass</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Configures the traffic class.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the traffic class.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Transporter.TrafficClass">Transporter.TrafficClass</span>
+</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#unsafeBuild" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsafeBuild():com.twitter.finagle.Service[Req,Rep]"></a>
       <a id="unsafeBuild():Service[Req,Rep]"></a>
@@ -1394,7 +1422,7 @@ completeness.</p>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Use tcpConnectTimeout instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#expFailFast" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expFailFast(onOrOff:Boolean):ClientBuilder.this.This"></a>
+      <a id="expFailFast(enabled:Boolean):ClientBuilder.this.This"></a>
       <a id="expFailFast(Boolean):This"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1402,7 +1430,7 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.3.10)">expFailFast</span><span class="params">(<span name="onOrOff">onOrOff: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 5.3.10)">expFailFast</span><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>

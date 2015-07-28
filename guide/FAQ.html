@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.26.0 documentation</title>
+    <title>FAQ &mdash; Finagle 6.27.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.26.0',
+        VERSION:     '6.27.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
     <link rel="next" title="Finagle changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -83,13 +83,13 @@ from a downstream server it will cancel this pending request, and so on.</p>
 <p>Interrupts propagate between the Finagle Server and Client only if the
 Future returned from the Server is chained <a class="footnote-reference" href="#id2" id="id1">[1]</a> to the Client.</p>
 <p>A simplified code snippet that exemplifies the intra-process structure:</p>
-<div class="highlight-text"><div class="highlight"><pre>val client = Mysql.newService(...)
-val service: Service[Req, Rep] = new Service[Req, Rep] {
-  def apply(req: Req): Future[Rep] = {
-    client(...)
-  }
-}
-val server = Http.serve(..., service)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">newService</span><span class="o">(...)</span>
+<span class="k">val</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Req</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Rep</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="n">client</span><span class="o">(...)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(...,</span> <span class="n">service</span><span class="o">)</span>
 </pre></div>
 </div>
 <table class="docutils footnote" frame="void" id="id2" rules="none">
@@ -108,10 +108,10 @@ when a Finagle client receives the cancellation interrupt while a request is pen
 fails that request with this exception. A special case of this is when a request is in the process
 of establishing a session and is instead interrupted with a <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.CancelledConnectException">CancelledConnectException</a></p>
 <p>You can disable this behavior by using the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.filter.MaskCancelFilter">MaskCancelFilter</a>:</p>
-<div class="highlight-text"><div class="highlight"><pre>val service: Service[Req, Rep] = ...
-val masked = new MaskCancelFilter[Req, Rep]
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span> <span class="k">=</span> <span class="o">...</span>
+<span class="k">val</span> <span class="n">masked</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MaskCancelFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
 
-val maskedService = masked andThen service
+<span class="k">val</span> <span class="n">maskedService</span> <span class="k">=</span> <span class="n">masked</span> <span class="n">andThen</span> <span class="n">service</span>
 </pre></div>
 </div>
 <p>Note that most protocols do not natively support request cancellations
@@ -123,7 +123,7 @@ churn.</p>
 <div class="section" id="why-is-com-twitter-common-zookeeper-server-set-not-found">
 <h3>Why is com.twitter.common.zookeeper#server-set not found?<a class="headerlink" href="#why-is-com-twitter-common-zookeeper-server-set-not-found" title="Permalink to this headline">¶</a></h3>
 <p>Some of our libraries still aren&#8217;t published to maven central.  If you add</p>
-<div class="highlight-text"><div class="highlight"><pre>resolvers += &quot;twitter&quot; at &quot;http://maven.twttr.com&quot;
+<div class="highlight-scala"><div class="highlight"><pre><span class="n">resolvers</span> <span class="o">+=</span> <span class="s">&quot;twitter&quot;</span> <span class="n">at</span> <span class="s">&quot;http://maven.twttr.com&quot;</span>
 </pre></div>
 </div>
 <p>to your sbt configuration, it will be able to pick up the libraries which are
@@ -135,15 +135,15 @@ published externally, but not yet to maven central.</p>
 Where the old API used <tt class="docutils literal"><span class="pre">ServerBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> with Codecs, the new APIs use
 <tt class="docutils literal"><span class="pre">Proto.newClient</span></tt> <a class="footnote-reference" href="#id4" id="id3">[2]</a>.</p>
 <p>Old APIs:</p>
-<div class="highlight-text"><div class="highlight"><pre>val client = ClientBuilder()
-  .codec(Http)
-  .hosts(&quot;localhost:10000,localhost:10001,localhost:10003&quot;)
-  .hostConnectionLimit(1)
-  .build()
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">ClientBuilder</span><span class="o">()</span>
+  <span class="o">.</span><span class="n">codec</span><span class="o">(</span><span class="nc">Http</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">hosts</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001,localhost:10003&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">hostConnectionLimit</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">build</span><span class="o">()</span>
 </pre></div>
 </div>
 <p>New APIs:</p>
-<div class="highlight-text"><div class="highlight"><pre>val client = Http.newService(&quot;localhost:10000,localhost:10001&quot;)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>The new APIs make timeouts more explicit, but we think we have a pretty good reason
@@ -157,8 +157,8 @@ for changing the API this way.</p>
 default of 1 second.</p>
 <p>For application requirements, you can use a service normally and then use
 <cite>Future#raiseWithin</cite>.</p>
-<div class="highlight-text"><div class="highlight"><pre>val get: Future[HttpResponse] = Http.fetchUrl(&quot;http://twitter.com/&quot;)
-get.raiseWithin(1.ms)
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">get</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">HttpResponse</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">fetchUrl</span><span class="o">(</span><span class="s">&quot;http://twitter.com/&quot;</span><span class="o">)</span>
+<span class="n">get</span><span class="o">.</span><span class="n">raiseWithin</span><span class="o">(</span><span class="mf">1.</span><span class="n">ms</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>We found that having all of the extremely granular timeouts was making it harder
@@ -206,7 +206,7 @@ load balancer (for example an nginx server or a hardware load balancer).
 It is important to disable fail fast as the remote load balancer has
 the visibility into which endpoints are up.
 Disabling fail fast can be done with <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>:</p>
-<div class="highlight-text"><div class="highlight"><pre>clientBuilder.failFast(false)
+<div class="highlight-scala"><div class="highlight"><pre><span class="n">clientBuilder</span><span class="o">.</span><span class="n">failFast</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>Refer to the <a class="reference internal" href="Clients.html#client-fail-fast"><em>fail fast</em></a> section for further context.</p>

@@ -231,6 +231,22 @@ a logical name whose interpetation is subject to a
 on failure to scheme lookup. Since names are late bound,
 binding failures are deferred.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BaseResolver</dd></dl></div>
+    </li><li name="com.twitter.finagle.BaseResolver#evalLabeled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="evalLabeled(addr:String):(com.twitter.finagle.Name,String)"></a>
+      <a id="evalLabeled(String):(Name,String)"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">evalLabeled</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: (<a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a>, <span class="extype" name="scala.Predef.String">String</span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Parse and evaluate the argument into a (Name, label: String) tuple.</p><div class="fullcomment"><div class="comment cmt"><p>Parse and evaluate the argument into a (Name, label: String) tuple.
+Arguments are parsed with the same grammar as in <code>eval</code>. If a label is not
+provided (i.e. no &quot;label=&lt;addr&gt;&quot;), then the empty string is returned.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>BaseResolver</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>

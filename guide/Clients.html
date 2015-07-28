@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.26.0 documentation</title>
+    <title>Clients &mdash; Finagle 6.27.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.26.0',
+        VERSION:     '6.27.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
     <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -70,22 +70,22 @@
 <span id="finagle-clients"></span><h1>Clients<a class="headerlink" href="#clients" title="Permalink to this headline">¶</a></h1>
 <p>Finagle clients adheres to a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Client.scala">interface</a> for
 construction:</p>
-<div class="highlight-text"><div class="highlight"><pre>def newClient(dest: Name, label: String): ServiceFactory[Req, Rep]
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">newClient</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
 </pre></div>
 </div>
 <p>That is, given a logical destination and an identifier, return a function
 that produces a typed <cite>Service</cite> over which requests can be dispatched.
 There are variants of this constructor for stateless clients that create a simple
 <cite>Service</cite>, for example:</p>
-<div class="highlight-text"><div class="highlight"><pre>def newService(dest: Name, label: String): Service[Req, Rep]
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">newService</span><span class="o">(</span><span class="n">dest</span><span class="k">:</span> <span class="kt">Name</span><span class="o">,</span> <span class="n">label</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
 </pre></div>
 </div>
 <p>As of <a class="reference internal" href="changelog.html"><em>6.x</em></a>, client implementations are encouraged to expose
 this interface on a Scala object named after the protocol implementation. This
 results in a uniform way to construct clients, <tt class="docutils literal"><span class="pre">Protocol.newClient(...)</span></tt>. For
 example:</p>
-<div class="highlight-text"><div class="highlight"><pre>Http.newClient(...)
-Memcached.newClient(...)
+<div class="highlight-scala"><div class="highlight"><pre><span class="nc">Http</span><span class="o">.</span><span class="n">newClient</span><span class="o">(...)</span>
+<span class="nc">Memcached</span><span class="o">.</span><span class="n">newClient</span><span class="o">(...)</span>
 </pre></div>
 </div>
 <p>Clients can further furnish the resulting <cite>ServiceFactory</cite> with protocol
@@ -141,8 +141,8 @@ certain amount of idle time. The module is implemented by
 <p><a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><em>Related stats</em></a></p>
 <p>Finally, timeouts can be enforced outside of these modules on a per-request level using
 <cite>Future#within</cite> <a class="footnote-reference" href="#raise" id="id2">[1]</a>:</p>
-<div class="highlight-text"><div class="highlight"><pre>val f = client(request)
-f.within(1.seconds) onSuccess { ... } onFailure { ... }
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">f</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">within</span><span class="o">(</span><span class="mf">1.</span><span class="n">seconds</span><span class="o">)</span> <span class="n">onSuccess</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span> <span class="n">onFailure</span> <span class="o">{</span> <span class="o">...</span> <span class="o">}</span>
 </pre></div>
 </div>
 <table class="docutils footnote" frame="void" id="raise" rules="none">

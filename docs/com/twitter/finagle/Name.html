@@ -50,7 +50,9 @@ destination name into methods such as
 the <code>newClient</code> method of the appropriate protocol object
 (e.g. <code>Http.newClient(/s/org/servicename)</code>). These APIs use <code>Resolver</code> under
 the hood to resolve the destination names into the <code>Name</code> representation
-of the appropriate cluster.
+of the appropriate cluster.</p><p>As names are bound, a <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> may elect
+to bind only a <a href="" class="extype" name="com.twitter.finagle.Name">Name</a> prefix, leaving an
+unbound residual name to be processed by a downstream Namer.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>

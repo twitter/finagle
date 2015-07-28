@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Concurrent Programming with Futures &mdash; Finagle 6.26.0 documentation</title>
+    <title>Concurrent Programming with Futures &mdash; Finagle 6.27.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.26.0',
+        VERSION:     '6.27.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
     <link rel="next" title="Services &amp; Filters" href="ServicesAndFilters.html" />
     <link rel="prev" title="Quickstart" href="Quickstart.html" />
    
@@ -100,7 +100,7 @@ by Futures are:</p>
 </ul>
 <p>Note that these operations are all fallible: remote hosts could
 crash, computations might throw an exception, disks could fail, etc.
-etc. A <cite>Future[T]</cite>, then, occupies exactly one of three states:</p>
+A <cite>Future[T]</cite>, then, occupies exactly one of three states:</p>
 <ul class="simple">
 <li>Empty (pending)</li>
 <li>Succeeded (with a result of type <cite>T</cite>)</li>
@@ -109,17 +109,17 @@ etc. A <cite>Future[T]</cite>, then, occupies exactly one of three states:</p>
 <p>While it is possible to directly query this state, this is rarely useful.
 Instead, a callback may be registered to receive the results once
 they are made available:</p>
-<div class="highlight-text"><div class="highlight"><pre>val f: Future[Int]
-f onSuccess { res =&gt;
-  println(&quot;The result is &quot; + res)
-}
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span>
+<span class="n">f</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">res</span> <span class="k">=&gt;</span>
+  <span class="n">println</span><span class="o">(</span><span class="s">&quot;The result is &quot;</span> <span class="o">+</span> <span class="n">res</span><span class="o">)</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>which will be invoked only on success. Callbacks may also be registered
 to account for failures:</p>
-<div class="highlight-text"><div class="highlight"><pre>f onFailure { cause: Throwable =&gt;
-  println(&quot;f failed with &quot; + cause)
-}
+<div class="highlight-scala"><div class="highlight"><pre><span class="n">f</span><span class="o">.</span><span class="n">onFailure</span> <span class="o">{</span> <span class="n">cause</span><span class="k">:</span> <span class="kt">Throwable</span> <span class="o">=&gt;</span>
+  <span class="n">println</span><span class="o">(</span><span class="s">&quot;f failed with &quot;</span> <span class="o">+</span> <span class="n">cause</span><span class="o">)</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 </div>
@@ -144,22 +144,22 @@ representing the result of this composite operation. Given some helper
 methods —&nbsp;<cite>fetchUrl</cite> fetches the given URL, <cite>findImageUrls</cite> parses an HTML
 page to find image links —&nbsp;we can implement our Pinterest-style thumbnail
 extract like this:</p>
-<div class="highlight-text"><div class="highlight"><pre>def fetchUrl(url: String): Future[Array[Byte]]
-def findImageUrls(bytes: Array[Byte]): Seq[String]
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span>
+<span class="k">def</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">])</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span>
 
-val url = &quot;http://www.google.com&quot;
+<span class="k">val</span> <span class="n">url</span> <span class="k">=</span> <span class="s">&quot;http://www.google.com&quot;</span>
 
-val f: Future[Array[Byte]] = fetchUrl(url) flatMap { bytes =&gt;
-  val images = findImageUrls(bytes)
-  if (images.isEmpty)
-    Future.exception(new Exception(&quot;no image&quot;))
-  else
-    fetchUrl(images(0))
-}
+<span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]</span> <span class="k">=</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">bytes</span> <span class="k">=&gt;</span>
+  <span class="k">val</span> <span class="n">images</span> <span class="k">=</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="o">)</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">images</span><span class="o">.</span><span class="n">isEmpty</span><span class="o">)</span>
+    <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="k">new</span> <span class="nc">Exception</span><span class="o">(</span><span class="s">&quot;no image&quot;</span><span class="o">))</span>
+  <span class="k">else</span>
+    <span class="n">fetchUrl</span><span class="o">(</span><span class="n">images</span><span class="o">(</span><span class="mi">0</span><span class="o">))</span>
+<span class="o">}</span>
 
-f onSuccess { image =&gt;
-  println(&quot;Found image of size &quot;+image.size)
-}
+<span class="n">f</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">image</span> <span class="k">=&gt;</span>
+  <span class="n">println</span><span class="o">(</span><span class="s">&quot;Found image of size &quot;</span><span class="o">+</span><span class="n">image</span><span class="o">.</span><span class="n">size</span><span class="o">)</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p><cite>f</cite> represents the <em>composite</em> operation. It is the result of first
@@ -179,15 +179,15 @@ are much more versatile, however, as we&#8217;ll see.</p>
 <p>It is also possible to compose Futures <em>concurrently</em>. We can extend
 our above example to demonstrate: let&#8217;s fetch <em>all</em> the images.
 Concurrent composition is provided by <cite>Future.collect</cite>:</p>
-<div class="highlight-text"><div class="highlight"><pre>val collected: Future[Seq[Array[Byte]]] =
-  fetchUrl(url) flatMap { bytes =&gt;
-    val fetches = findImageUrls(bytes) map { url =&gt; fetchUrl(url) }
-    Future.collect(fetches)
-  }
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">collected</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Seq</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Byte</span><span class="o">]]]</span> <span class="k">=</span>
+  <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">bytes</span> <span class="k">=&gt;</span>
+    <span class="k">val</span> <span class="n">fetches</span> <span class="k">=</span> <span class="n">findImageUrls</span><span class="o">(</span><span class="n">bytes</span><span class="o">).</span><span class="n">map</span> <span class="o">{</span> <span class="n">url</span> <span class="k">=&gt;</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">)</span> <span class="o">}</span>
+    <span class="nc">Future</span><span class="o">.</span><span class="n">collect</span><span class="o">(</span><span class="n">fetches</span><span class="o">)</span>
+  <span class="o">}</span>
 </pre></div>
 </div>
 <p>Here we have combined both concurrent and sequential composition:
-first we fetch the webpage, then we collect the results of fetching
+first we fetch the web page, then we collect the results of fetching
 all of the underlying images.</p>
 <p>As with sequential composition, concurrent composition propagates
 failures: the future <cite>collected</cite> will fail if any of the underlying
@@ -206,20 +206,21 @@ operates over <em>values</em>, <cite>rescue</cite> operates over <em>exceptions<
 are otherwise identical. It is often desirable to handle only a subset
 of possible exceptions. To accomodate for this <cite>rescue</cite> accepts
 a <cite>PartialFunction</cite>, mapping a <cite>Throwable</cite> to a <cite>Future</cite>:</p>
-<div class="highlight-text"><div class="highlight"><pre>trait Future[A] {
-  ..
-  def rescue[B &gt;: A](f: PartialFunction[Throwable, Future[B]]): Future[B]
-  ..
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">trait</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="o">{</span>
+  <span class="o">..</span>
+  <span class="k">def</span> <span class="n">rescue</span><span class="o">[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">PartialFunction</span><span class="o">[</span><span class="kt">Throwable</span>, <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span>
+  <span class="o">..</span>
+<span class="o">}</span>
 </pre></div>
 </div>
 <p>The following retries a request infinitely should it fail with a
 <cite>TimeoutException</cite>:</p>
-<div class="highlight-text"><div class="highlight"><pre>def fetchUrl(url: String): Future[HttpResponse]
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">HttpResponse</span><span class="o">]</span>
 
-def fetchUrlWithRetry(url: String) =
-  fetchUrl(url) rescue {
-    case exc: TimeoutException =&gt; fetchUrlWithRetry(url)
-  }
+<span class="k">def</span> <span class="n">fetchUrlWithRetry</span><span class="o">(</span><span class="n">url</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span>
+  <span class="n">fetchUrl</span><span class="o">(</span><span class="n">url</span><span class="o">).</span><span class="n">rescue</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="n">exc</span><span class="k">:</span> <span class="kt">TimeoutException</span> <span class="o">=&gt;</span> <span class="n">fetchUrlWithRetry</span><span class="o">(</span><span class="n">url</span><span class="o">)</span>
+  <span class="o">}</span>
 </pre></div>
 </div>
 </div>

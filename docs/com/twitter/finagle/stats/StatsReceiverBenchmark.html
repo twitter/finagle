@@ -35,7 +35,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">StatsReceiverBenchmark</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">StatsReceiverBenchmark</span><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
       </h4>
       
@@ -44,7 +44,7 @@
               
         </dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -62,7 +62,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.stats.StatsReceiverBenchmark"><span>StatsReceiverBenchmark</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.stats.StatsReceiverBenchmark"><span>StatsReceiverBenchmark</span></li><li class="in" name="com.twitter.finagle.benchmark.StdBenchAnnotations"><span>StdBenchAnnotations</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -217,6 +217,22 @@
                 <span class="name">@Benchmark</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverBenchmark#addStatsCommons" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addStatsCommons(addState:com.twitter.finagle.stats.StatsReceiverBenchmark.AddState,state:com.twitter.finagle.stats.StatsReceiverBenchmark.StatState):Unit"></a>
+      <a id="addStatsCommons(AddState,StatState):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addStatsCommons</span><span class="params">(<span name="addState">addState: <a href="StatsReceiverBenchmark$$AddState.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverBenchmark.AddState">AddState</a></span>, <span name="state">state: <a href="StatsReceiverBenchmark$$StatState.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverBenchmark.StatState">StatState</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Benchmark</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -320,6 +336,54 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverBenchmark#incrMetricsCommons" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="incrMetricsCommons(state:com.twitter.finagle.stats.StatsReceiverBenchmark.CounterState):Unit"></a>
+      <a id="incrMetricsCommons(CounterState):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">incrMetricsCommons</span><span class="params">(<span name="state">state: <a href="StatsReceiverBenchmark$$CounterState.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverBenchmark.CounterState">CounterState</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Benchmark</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverBenchmark#incrOstrich" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="incrOstrich(state:com.twitter.finagle.stats.StatsReceiverBenchmark.CounterState):Unit"></a>
+      <a id="incrOstrich(CounterState):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">incrOstrich</span><span class="params">(<span name="state">state: <a href="StatsReceiverBenchmark$$CounterState.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverBenchmark.CounterState">CounterState</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Benchmark</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverBenchmark#incrStatsCommons" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="incrStatsCommons(state:com.twitter.finagle.stats.StatsReceiverBenchmark.CounterState):Unit"></a>
+      <a id="incrStatsCommons(CounterState):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">incrStatsCommons</span><span class="params">(<span name="state">state: <a href="StatsReceiverBenchmark$$CounterState.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverBenchmark.CounterState">CounterState</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Benchmark</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -468,6 +532,22 @@
                 <span class="name">@Benchmark</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverBenchmark#queryStatsCommons" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="queryStatsCommons(state:com.twitter.finagle.stats.StatsReceiverBenchmark.QueryState):Iterable[com.twitter.common.stats.Stat[_]]"></a>
+      <a id="queryStatsCommons(QueryState):Iterable[common.stats.Stat[_]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">queryStatsCommons</span><span class="params">(<span name="state">state: <a href="StatsReceiverBenchmark$$QueryState.html" class="extype" name="com.twitter.finagle.stats.StatsReceiverBenchmark.QueryState">QueryState</a></span>)</span><span class="result">: <span class="extype" name="java.lang.Iterable">Iterable</span>[<span class="extype" name="com.twitter.common.stats.Stat">common.stats.Stat</span>[_]]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Benchmark</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -560,7 +640,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.finagle.benchmark.StdBenchAnnotations">
+              <h3>Inherited from <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>

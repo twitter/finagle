@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &mdash; Finagle 6.26.0 documentation</title>
+    <title>Servers &mdash; Finagle 6.27.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.26.0',
+        VERSION:     '6.27.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -69,18 +69,18 @@
   <div class="section" id="servers">
 <h1>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h1>
 <p>Finagle servers implement a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Server.scala">interface:</a></p>
-<div class="highlight-text"><div class="highlight"><pre>def serve(
-  addr: SocketAddress,
-  factory: ServiceFactory[Req, Rep]
-): ListeningServer
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">serve</span><span class="o">(</span>
+  <span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">,</span>
+  <span class="n">factory</span><span class="k">:</span> <span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">]</span>
+<span class="o">)</span><span class="k">:</span> <span class="kt">ListeningServer</span>
 </pre></div>
 </div>
 <p>When given a <cite>SocketAddress</cite> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>, a server returns a handle
 to a <cite>ListeningServer</cite>. The handle allows for management of server resources. The interface comes with
 variants that allow for serving a simple <cite>Service</cite> as well. Typical usage takes the form
 <tt class="docutils literal"><span class="pre">Protocol.serve(...)</span></tt>, for example:</p>
-<div class="highlight-text"><div class="highlight"><pre>val server = Httpx.serve(&quot;:8080&quot;, myService)
-Await.ready(server) // waits until the server resources are released
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Httpx</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">myService</span><span class="o">)</span>
+<span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span> <span class="c1">// waits until the server resources are released</span>
 </pre></div>
 </div>
 <p>However, <cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined

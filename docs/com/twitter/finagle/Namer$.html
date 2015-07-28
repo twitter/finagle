@@ -163,6 +163,23 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Namer#bind" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bind(lookup:com.twitter.finagle.Path=&gt;com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name]],tree:com.twitter.finagle.NameTree[com.twitter.finagle.Path]):com.twitter.util.Activity[com.twitter.finagle.NameTree[com.twitter.finagle.Name.Bound]]"></a>
+      <a id="bind((Path)⇒Activity[NameTree[Name]],NameTree[Path]):Activity[NameTree[Bound]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bind</span><span class="params">(<span name="lookup">lookup: (<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a>]]</span>, <span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>[<a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a>]]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Bind the given tree by recursively following paths and looking them
+up with the provided <code>lookup</code> function.</p><div class="fullcomment"><div class="comment cmt"><p>Bind the given tree by recursively following paths and looking them
+up with the provided <code>lookup</code> function. A recursion depth of up to
+100 is allowed.
+</p></div></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -348,6 +365,19 @@ not exist or cannot be constructed.</p><p>The global namer also handles paths of
       </span>
       </h4>
       <p class="shortcomment cmt">Resolve a path to an address set (taking <a href="Dtab$.html#local:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#local">Dtab.local</a> into account).</p>
+    </li><li name="com.twitter.finagle.Namer#resolve" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="resolve(dtab:com.twitter.finagle.Dtab,path:com.twitter.finagle.Path):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
+      <a id="resolve(Dtab,Path):Var[Addr]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">resolve</span><span class="params">(<span name="dtab">dtab: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>, <span name="path">path: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Var" class="extype" target="_top">Var</a>[<a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Resolve a path to an address set (taking <code>dtab</code> into account).</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

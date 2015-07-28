@@ -207,8 +207,8 @@ filters and services. Probability is in [0,1] where 0 means no failures.</p></di
         <span class="name">andThen</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.failters.RejectFailter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.failters.RejectFailter.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.failters.RejectFailter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.failters.RejectFailter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Terminates a filter chain in a service.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a service. For example,</p><p>    myFilter.andThen(myService)
-</p></div><dl class="paramcmts block"><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+      <p class="shortcomment cmt">Terminates a filter chain in a service.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a service. For example,</p><pre>myFilter.andThen(myService)</pre></div><dl class="paramcmts block"><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen[Req2,Rep2](next:com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2]):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
       <a id="andThen[Req2,Rep2](Filter[Req,Rep,Req2,Rep2]):Filter[Req,Rep,Req2,Rep2]"></a>
@@ -221,9 +221,10 @@ filters and services. Probability is in [0,1] where 0 means no failures.</p></di
         <span class="name">andThen</span><span class="tparams">[<span name="Req2">Req2</span>, <span name="Rep2">Rep2</span>]</span><span class="params">(<span name="next">next: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.failters.RejectFailter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.failters.RejectFailter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.failters.RejectFailter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.failters.RejectFailter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Chains a series of filters together:</p><div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><p>   myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))</p><p><b>Note:</b> synchronously thrown exceptions in the underlying service are automatically
+      <p class="shortcomment cmt">Chains a series of filters together:</p><div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><pre>myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))</pre><p><b>Note:</b> synchronously thrown exceptions in the underlying service are automatically
 lifted into Future.exception.
-</p></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThenIf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThenIf[Req2&gt;:ReqOut,Rep2&lt;:RepIn](condAndFilter:(Boolean,com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2])):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
       <a id="andThenIf[Req2&gt;:Req,Rep2&lt;:Rep]((Boolean,Filter[Req,Rep,Req2,Rep2])):Filter[Req,Rep,Req2,Rep2]"></a>
@@ -239,7 +240,8 @@ lifted into Future.exception.
       <p class="shortcomment cmt">Conditionally propagates requests down the filter chain.</p><div class="fullcomment"><div class="comment cmt"><p>Conditionally propagates requests down the filter chain. This may
 useful if you are statically wiring together filter chains based
 on a configuration file, for instance.
-</p></div><dl class="paramcmts block"><dt class="param">condAndFilter</dt><dd class="cmt"><p>a tuple of boolean and filter.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">condAndFilter</dt><dd class="cmt"><p>a tuple of boolean and filter.
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.failters.RejectFailter#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(req:Req,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.util.Future[Rep]"></a>
       <a id="apply(Req,Service[Req,Rep]):Future[Rep]"></a>

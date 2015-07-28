@@ -25,7 +25,7 @@ Future returned from the Server is chained [#]_ to the Client.
 
 A simplified code snippet that exemplifies the intra-process structure:
 
-::
+.. code-block:: scala
 
   val client = Mysql.newService(...)
   val service: Service[Req, Rep] = new Service[Req, Rep] {
@@ -49,7 +49,7 @@ of establishing a session and is instead interrupted with a :API:`CancelledConne
 
 You can disable this behavior by using the :API:`MaskCancelFilter <com.twitter.finagle.filter.MaskCancelFilter>`:
 
-::
+.. code-block:: scala
 
 	val service: Service[Req, Rep] = ...
 	val masked = new MaskCancelFilter[Req, Rep]
@@ -67,7 +67,7 @@ Why is com.twitter.common.zookeeper#server-set not found?
 
 Some of our libraries still aren't published to maven central.  If you add
 
-::
+.. code-block:: scala
 
 	resolvers += "twitter" at "http://maven.twttr.com"
 
@@ -85,7 +85,7 @@ Where the old API used ``ServerBuilder``\/``ClientBuilder`` with Codecs, the new
 
 Old APIs:
 
-::
+.. code-block:: scala
 
 	val client = ClientBuilder()
 	  .codec(Http)
@@ -95,7 +95,7 @@ Old APIs:
 
 New APIs:
 
-::
+.. code-block:: scala
 
 	val client = Http.newService("localhost:10000,localhost:10001")
 
@@ -113,7 +113,7 @@ default of 1 second.
 For application requirements, you can use a service normally and then use
 `Future#raiseWithin`.
 
-::
+.. code-block:: scala
 
 	val get: Future[HttpResponse] = Http.fetchUrl("http://twitter.com/")
 	get.raiseWithin(1.ms)
@@ -166,7 +166,7 @@ It is important to disable fail fast as the remote load balancer has
 the visibility into which endpoints are up.
 Disabling fail fast can be done with ``ClientBuilder``:
 
-::
+.. code-block:: scala
 
   clientBuilder.failFast(false)
 

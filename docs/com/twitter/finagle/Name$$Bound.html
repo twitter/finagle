@@ -43,7 +43,10 @@
 Addr">com.twitter.finagle.Addr
 Addr</span> which carries a host list of internet addresses.</p><p>Equality of two Names is delegated to <code>id</code>. Two Bound instances
 are equal whenever their <code>id</code>s are. <code>id</code> identifies the <code>addr</code>
-and not the <code>path</code>.
+and not the <code>path</code>.  If the <code>id</code> is a <span class="extype" name="com.twitter.finagle.Name.Path
+Path">com.twitter.finagle.Name.Path
+Path</span>, it should only contain *bound*--not residual--path components.</p><p>The <code>path</code> contains unbound residual path components that were not
+processed during name resolution.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Proxy">Proxy</span>, <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>

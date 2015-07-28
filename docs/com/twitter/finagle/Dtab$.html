@@ -369,10 +369,11 @@ current <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util
 defined on a per-request basis.</p><div class="fullcomment"><div class="comment cmt"><p>The local, or &quot;per-request&quot;, delegation table applies to the
 current <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Local</a> scope which is usually
 defined on a per-request basis. Finagle uses the Dtab
-<code><code>Dtab.base ++ Dtab.local</code></code> to bind
-<a href="Name$$Path.html" class="extype" name="com.twitter.finagle.Name.Path">Paths</a>.</p><p>Local's scope is dictated by <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Local</a>.</p><p>The local dtab is serialized into outbound requests when
+<code>Dtab.base ++ Dtab.local</code> to bind <span class="extype" name="com.twitter.finagle.Name.Path
+Paths">com.twitter.finagle.Name.Path
+Paths</span> via a <a href="naming/NameInterpreter.html" class="extype" name="com.twitter.finagle.naming.NameInterpreter">com.twitter.finagle.naming.NameInterpreter</a>.</p><p>Local's scope is dictated by <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Local</a>.</p><p>The local dtab is serialized into outbound requests when
 supported protocols are used. (Http, Thrift via TTwitter, Mux,
-and ThriftMux are among these.) The upshot is that <code><code>local</code></code> is
+and ThriftMux are among these.) The upshot is that <code>local</code> is
 defined for the entire request graph, so that a local dtab
 defined here will apply to downstream services as well.
 </p></div></div>
@@ -453,7 +454,7 @@ defined here will apply to downstream services as well.
         <span class="name">read</span><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Parse a Dtab from string <code>s</code> with concrete syntax</p><div class="fullcomment"><div class="comment cmt"><p>Parse a Dtab from string <code>s</code> with concrete syntax</p><pre>dtab       ::= dentry <span class="lit">';'</span> dtab | dentry</pre><p>where the production <code><code>dentry</code></code> is from the grammar documented in
+      <p class="shortcomment cmt">Parse a Dtab from string <code>s</code> with concrete syntax</p><div class="fullcomment"><div class="comment cmt"><p>Parse a Dtab from string <code>s</code> with concrete syntax</p><pre>dtab       ::= dentry <span class="lit">';'</span> dtab | dentry</pre><p>where the production <code>dentry</code> is from the grammar documented in
 <a href="Dentry$.html" class="extype" name="com.twitter.finagle.Dentry">Dentry.read</a></p></div></div>
     </li><li name="com.twitter.finagle.Dtab#setBase" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setBase(dtab:com.twitter.finagle.Dtab):Unit"></a>
@@ -467,7 +468,7 @@ defined here will apply to downstream services as well.
         <span class="name">setBase</span><span class="params">(<span name="dtab">dtab: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Java API for <code><code>base_=</code></code>
+      <p class="shortcomment cmt">Java API for <code>base_=</code>
 </p>
     </li><li name="com.twitter.finagle.Dtab#setLocal" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setLocal(dtab:com.twitter.finagle.Dtab):Unit"></a>
@@ -481,7 +482,7 @@ defined here will apply to downstream services as well.
         <span class="name">setLocal</span><span class="params">(<span name="dtab">dtab: <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Java API for <code><code>local_=</code></code>
+      <p class="shortcomment cmt">Java API for <code>local_=</code>
 </p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>

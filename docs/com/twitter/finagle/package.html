@@ -480,7 +480,7 @@ factories in one (when available).</p>
       </h4>
       <p class="comment cmt">Trait Dentry describes a delegation table entry.</p>
     </li><li name="com.twitter.finagle.Dtab" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DtabextendsIndexedSeq[com.twitter.finagle.Dentry]withNamerwithProductwithSerializable"></a>
+      <a id="DtabextendsIndexedSeq[com.twitter.finagle.Dentry]withProductwithSerializable"></a>
       <a id="Dtab:Dtab"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -488,11 +488,11 @@ factories in one (when available).</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Dtab.html"><span class="name">Dtab</span></a><span class="params">(<span name="dentries0">dentries0: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>] with <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Dtab.html"><span class="name">Dtab</span></a><span class="params">(<span name="dentries0">dentries0: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
-      <p class="comment cmt">A Dtab--short for delegation table--comprises a sequence
-of delegation rules.</p>
+      <p class="comment cmt">A Dtab--short for delegation table--comprises a sequence of
+delegation rules.</p>
     </li><li name="com.twitter.finagle.DtabBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DtabBuilderextendsBuilder[com.twitter.finagle.Dentry,com.twitter.finagle.Dtab]"></a>
       <a id="DtabBuilder:DtabBuilder"></a>
@@ -561,7 +561,23 @@ connected have been marked as failed.</p>
         <a href="Filter.html"><span class="name">Filter</span></a><span class="tparams">[<span name="ReqIn">-ReqIn</span>, <span name="RepOut">+RepOut</span>, <span name="ReqOut">+ReqOut</span>, <span name="RepIn">-RepIn</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.Filter.ReqIn">ReqIn</span>, <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Filter.ReqOut">ReqOut</span>, <span class="extype" name="com.twitter.finagle.Filter.RepIn">RepIn</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.Filter.RepOut">RepOut</span>]</span>
       </span>
       </h4>
-      <p class="comment cmt">A Filter acts as a decorator/transformer of a service.</p>
+      <p class="comment cmt">A <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a> acts as a decorator/transformer of a <a href="Service.html" class="extype" name="com.twitter.finagle.Service">service</a>.</p>
+    </li><li name="com.twitter.finagle.FilterBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FilterBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="FilterBenchmark:FilterBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FilterBenchmark.html"><span class="name">FilterBenchmark</span></a><span class="result"> extends <a href="benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.GlobalRequestTimeoutException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GlobalRequestTimeoutExceptionextendsRequestTimeoutException"></a>
       <a id="GlobalRequestTimeoutException:GlobalRequestTimeoutException"></a>
@@ -642,19 +658,6 @@ some server.</p>
       </span>
       </h4>
       <p class="comment cmt">A resolver for Inet addresses.</p>
-    </li><li name="com.twitter.finagle.LabelledGroup" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="LabelledGroup[T]extendsGroup[T]withProductwithSerializable"></a>
-      <a id="LabelledGroup[T]:LabelledGroup[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="LabelledGroup.html"><span class="name">LabelledGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>]</span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A mixin trait to assign a <code><code>name</code></code> to the group.</p>
     </li><li name="com.twitter.finagle.ListeningServer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ListeningServerextendsClosablewithAwaitable[Unit]withGroup[java.net.SocketAddress]"></a>
       <a id="ListeningServer:ListeningServer"></a>
@@ -736,19 +739,6 @@ discovered for given <code>scheme</code>.</p>
       </h4>
       <p class="comment cmt">Indicates that multiple <a href="Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolvers</a> were
 discovered for given <code>scheme</code>.</p>
-    </li><li name="com.twitter.finagle.MutableGroup" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="MutableGroup[T]extendsGroup[T]"></a>
-      <a id="MutableGroup[T]:MutableGroup[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="MutableGroup.html"><span class="name">MutableGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.MutableGroup.T">T</span>]</span>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.Name" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="NameextendsAnyRef"></a>
       <a id="Name:Name"></a>
@@ -1074,6 +1064,19 @@ ServiceFactory.</p>
       </span>
       </h4>
       <p class="comment cmt">A ServiceFactoryWrapper adds behavior to an underlying ServiceFactory.</p>
+    </li><li name="com.twitter.finagle.ServiceNamer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ServiceNamer[Req,Rep]extendsNamer"></a>
+      <a id="ServiceNamer[Req,Rep]:ServiceNamer[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ServiceNamer.html"><span class="name">ServiceNamer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="Namer.html" class="extype" name="com.twitter.finagle.Namer">Namer</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Base-trait for Namers that bind to a local Service.</p>
     </li><li name="com.twitter.finagle.ServiceNotAvailableException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServiceNotAvailableExceptionextendsExceptionwithServiceException"></a>
       <a id="ServiceNotAvailableException:ServiceNotAvailableException"></a>
@@ -1139,7 +1142,7 @@ that is unavailable.</p>
         <a href="SimpleFilter.html"><span class="name">SimpleFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.SimpleFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.SimpleFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.SimpleFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.SimpleFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
-      
+      <p class="comment cmt">A <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a> where the request and reply types are the same.</p>
     </li><li name="com.twitter.finagle.SourcedException" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SourcedExceptionextendsException"></a>
       <a id="SourcedException:SourcedException"></a>
@@ -1500,6 +1503,35 @@ become available from a client's connection pool.</p>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.LabelledGroup" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LabelledGroup[T]extendsGroup[T]withProductwithSerializable"></a>
+      <a id="LabelledGroup[T]:LabelledGroup[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="LabelledGroup.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use com.twitter.finagle.Name to represent clusters instead">LabelledGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="underlying">underlying: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>]</span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.LabelledGroup.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A mixin trait to assign a <code><code>name</code></code> to the group.</p>
+    </li><li name="com.twitter.finagle.MutableGroup" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="MutableGroup[T]extendsGroup[T]"></a>
+      <a id="MutableGroup[T]:MutableGroup[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="MutableGroup.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use com.twitter.finagle.Name to represent clusters instead">MutableGroup</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="com.twitter.finagle.MutableGroup.T">T</span>]</span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.NotYetConnectedException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="NotYetConnectedExceptionextendsApiException"></a>
       <a id="NotYetConnectedException:NotYetConnectedException"></a>
@@ -1573,7 +1605,7 @@ become available from a client's connection pool.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxClientLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxClientLike</span></a><span class="result"> extends <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a></span>
+        <a href="ThriftMuxClientLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxClientLike</span></a><span class="result"> extends <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="ThriftMuxClientLike.html" class="extype" name="com.twitter.finagle.ThriftMuxClientLike">ThriftMuxClientLike</a>] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a></span>
       </span>
       </h4>
       <p class="comment cmt">A <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> for the Thrift protocol served over
@@ -1587,7 +1619,7 @@ become available from a client's connection pool.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMuxServerLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxServerLike</span></a><span class="result"> extends <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ThriftMuxServerLike.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use object ThriftMux">ThriftMuxServerLike</span></a><span class="result"> extends <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a> with (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4>
       <p class="comment cmt">A server for the Thrift protocol served over <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p>
@@ -2182,7 +2214,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Thrift$.html"><span class="name">Thrift</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
+        <a href="Thrift$.html"><span class="name">Thrift</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
       </span>
       </h4>
       <p class="comment cmt">Client and server for <a href="http://thrift.apache.org" target="_blank">Apache Thrift</a>.</p>
@@ -2195,7 +2227,7 @@ as binding and evaluation routines.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
+        <a href="ThriftMux$.html"><span class="name">ThriftMux</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichClient.html" class="extype" name="com.twitter.finagle.ThriftRichClient">ThriftRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]] with <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></span>
       </span>
       </h4>
       <p class="comment cmt">The <code>ThriftMux</code> object is both a <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> and a
@@ -2575,6 +2607,19 @@ as binding and evaluation routines.</p>
       </span>
       <span class="symbol">
         <a href="namer/package.html"><span class="name">namer</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.naming" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="naming"></a>
+      <a id="naming:naming"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="naming/package.html"><span class="name">naming</span></a>
       </span>
       </h4>
       

@@ -35,13 +35,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Stream</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
+        <span class="name">Stream</span><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -80,15 +80,15 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.stream.Stream#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;():com.twitter.finagle.stream.Stream"></a>
-      <a id="&lt;init&gt;:Stream"></a>
+      <a id="&lt;init&gt;()(implicitevidence$3:com.twitter.finagle.stream.RequestType[Req]):com.twitter.finagle.stream.Stream[Req]"></a>
+      <a id="&lt;init&gt;:Stream[Req]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Stream</span><span class="params">()</span>
+        <span class="name">Stream</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="package$$RequestType.html" class="extype" name="com.twitter.finagle.stream.RequestType">RequestType</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>]</span>)</span>
       </span>
       </h4>
       
@@ -99,27 +99,27 @@
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.CodecFactory.Client" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Client=com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]"></a>
-      <a id="Client:(ClientCodecConfig)⇒Codec[HttpRequest,StreamResponse]"></a>
+      <a id="Client:(ClientCodecConfig)⇒Codec[Req,StreamResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="result"> = (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
+        <span class="name">Client</span><span class="result"> = (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
     </li><li name="com.twitter.finagle.CodecFactory.Server" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Server=com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Req,Rep]"></a>
-      <a id="Server:(ServerCodecConfig)⇒Codec[HttpRequest,StreamResponse]"></a>
+      <a id="Server:(ServerCodecConfig)⇒Codec[Req,StreamResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">type</span>
       </span>
       <span class="symbol">
-        <span class="name">Server</span><span class="result"> = (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
+        <span class="name">Server</span><span class="result"> = (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
@@ -209,15 +209,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.stream.Stream#client" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="client:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[org.jboss.netty.handler.codec.http.HttpRequest,com.twitter.finagle.stream.StreamResponse]"></a>
-      <a id="client:(ClientCodecConfig)⇒Codec[HttpRequest,StreamResponse]"></a>
+      <a id="client:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req,com.twitter.finagle.stream.StreamResponse]"></a>
+      <a id="client:(ClientCodecConfig)⇒Codec[Req,StreamResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">client</span><span class="result">: (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
+        <span class="name">client</span><span class="result">: (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stream.Stream">Stream</a> → <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
@@ -378,15 +378,15 @@
       <p class="shortcomment cmt">A protocol library name to use for displaying which protocol library this client or server is using.</p><div class="fullcomment"><div class="comment cmt"><p>A protocol library name to use for displaying which protocol library this client or server is using.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stream.Stream">Stream</a> → <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
     </li><li name="com.twitter.finagle.stream.Stream#server" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="server:com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[org.jboss.netty.handler.codec.http.HttpRequest,com.twitter.finagle.stream.StreamResponse]"></a>
-      <a id="server:(ServerCodecConfig)⇒Codec[HttpRequest,StreamResponse]"></a>
+      <a id="server:com.twitter.finagle.ServerCodecConfig=&gt;com.twitter.finagle.Codec[Req,com.twitter.finagle.stream.StreamResponse]"></a>
+      <a id="server:(ServerCodecConfig)⇒Codec[Req,StreamResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">server</span><span class="result">: (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
+        <span class="name">server</span><span class="result">: (<a href="../ServerCodecConfig.html" class="extype" name="com.twitter.finagle.ServerCodecConfig">ServerCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stream.Stream">Stream</a> → <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a></dd></dl></div>
@@ -483,7 +483,7 @@
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.CodecFactory">
-              <h3>Inherited from <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</h3>
+              <h3>Inherited from <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

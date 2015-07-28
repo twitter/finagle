@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.26.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.27.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.26.0',
+        VERSION:     '6.27.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.26.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -195,6 +195,13 @@ created in the event that no idle <cite>ServiceFactory</cite>s are cached</dd>
 </dl>
 <p>The total time spent resolving Names is captured in the
 <cite>namer/bind_latency_us</cite> stat.</p>
+</div>
+<div class="section" id="initial-resolution">
+<h3>Initial Resolution<a class="headerlink" href="#initial-resolution" title="Permalink to this headline">¶</a></h3>
+<p><strong>initialresolution_ms</strong></p>
+<blockquote>
+<div>A counter of the time spent waiting for client resolution via
+<cite>com.twitter.finagle.client.ClientRegistry.expAllRegisteredClientsResolved</cite></div></blockquote>
 </div>
 <div class="section" id="address-stabilization">
 <h3>Address Stabilization<a class="headerlink" href="#address-stabilization" title="Permalink to this headline">¶</a></h3>
@@ -583,6 +590,7 @@ controlled by a dynamic budget.</p>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
 <li><a class="reference internal" href="#name-resolution">Name Resolution</a></li>
+<li><a class="reference internal" href="#initial-resolution">Initial Resolution</a></li>
 <li><a class="reference internal" href="#address-stabilization">Address Stabilization</a></li>
 <li><a class="reference internal" href="#zookeeper-diagnostics">ZooKeeper Diagnostics</a><ul>
 <li><a class="reference internal" href="#under-the-zk2-scope">Under the `zk2` scope</a></li>

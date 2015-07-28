@@ -493,7 +493,7 @@ with concrete syntax</p><pre>tree       ::= name
 
 name       ::= path | <span class="lit">'!'</span> | <span class="lit">'~'</span> | <span class="lit">'$'</span>
 
-weight     ::= [<span class="num">0</span>-<span class="num">9</span>]*\.?[<span class="num">0</span>-<span class="num">9</span>]+</pre><p>For example:</p><pre>/foo &amp; /bar | /baz | $</pre><p>parses in to the <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a></p><pre>Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)</pre><p>The production <code><code>path</code></code> is documented at <a href="Path$.html" class="extype" name="com.twitter.finagle.Path">Path.read</a>.
+weight     ::= [<span class="num">0</span>-<span class="num">9</span>]*\.?[<span class="num">0</span>-<span class="num">9</span>]+</pre><p>For example:</p><pre>/foo &amp; /bar | /baz | $</pre><p>parses in to the <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a></p><pre>Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)</pre><p>The production <code>path</code> is documented at <a href="Path$.html" class="extype" name="com.twitter.finagle.Path">Path.read</a>.
 </p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">IllegalArgumentException<p>when the string does not
 represent a valid name tree.
 </p></span></dd></dl></div>

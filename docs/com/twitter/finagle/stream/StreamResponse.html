@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/trait_big.png" />
+        <a href="StreamResponse$.html" title="Go to companion"><img src="../../../../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.stream">stream</a></p>
-        <h1>StreamResponse</h1>
+        <h1><a href="StreamResponse$.html" title="Go to companion">StreamResponse</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -39,7 +39,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -98,30 +98,30 @@
       <p class="shortcomment cmt">An offer for the error.</p><div class="fullcomment"><div class="comment cmt"><p>An offer for the error.  When this enables, the stream is closed
 (no more messages will be sent)
 </p></div></div>
-    </li><li name="com.twitter.finagle.stream.StreamResponse#httpResponse" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="httpResponse:org.jboss.netty.handler.codec.http.HttpResponse"></a>
-      <a id="httpResponse:HttpResponse"></a>
+    </li><li name="com.twitter.finagle.stream.StreamResponse#info" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="info:com.twitter.finagle.stream.StreamResponse.Info"></a>
+      <a id="info:Info"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">httpResponse</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span></span>
+        <span class="name">info</span><span class="result">: <a href="StreamResponse$$Info.html" class="extype" name="com.twitter.finagle.stream.StreamResponse.Info">Info</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">This represents the actual HTTP reply (response headers) for this
 response.</p>
     </li><li name="com.twitter.finagle.stream.StreamResponse#messages" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="messages:com.twitter.concurrent.Offer[org.jboss.netty.buffer.ChannelBuffer]"></a>
-      <a id="messages:Offer[ChannelBuffer]"></a>
+      <a id="messages:com.twitter.concurrent.Offer[com.twitter.io.Buf]"></a>
+      <a id="messages:Offer[Buf]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">messages</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>
+        <span class="name">messages</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">An Offer for the next message in the stream.</p>
@@ -312,20 +312,6 @@ abort further processing of the response.</p>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.stream.StreamResponse#inputStream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="inputStream:java.io.InputStream"></a>
-      <a id="inputStream:InputStream"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">inputStream</span><span class="result">: <span class="extype" name="java.io.InputStream">InputStream</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Rather than reacting to channel updates, you can read the content
-in a more traditional way via an InputStream.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>

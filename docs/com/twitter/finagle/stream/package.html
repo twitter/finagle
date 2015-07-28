@@ -86,16 +86,55 @@ exactly one stream. The session terminates together with the stream.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.stream.Stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StreamextendsCodecFactory[org.jboss.netty.handler.codec.http.HttpRequest,com.twitter.finagle.stream.StreamResponse]"></a>
-      <a id="Stream:Stream"></a>
+              <ol><li name="com.twitter.finagle.stream.Header" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeaderextendsAnyRef"></a>
+      <a id="Header:Header"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$Header.html"><span class="name">Header</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">HTTP header encoded as a string pair.</p>
+    </li><li name="com.twitter.finagle.stream.RequestType" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RequestType[Req]extendsAnyRef"></a>
+      <a id="RequestType[Req]:RequestType[Req]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$RequestType.html"><span class="name">RequestType</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.stream.Stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Stream[Req]extendsCodecFactory[Req,com.twitter.finagle.stream.StreamResponse]"></a>
+      <a id="Stream[Req]:Stream[Req]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Stream.html"><span class="name">Stream</span></a><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
+        <a href="Stream.html"><span class="name">Stream</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.stream.StreamRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamRequestextendsProductwithSerializable"></a>
+      <a id="StreamRequest:StreamRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamRequest.html"><span class="name">StreamRequest</span></a><span class="params">(<span name="method">method: <a href="StreamRequest$$Method.html" class="extype" name="com.twitter.finagle.stream.StreamRequest.Method">Method</a></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="version">version: <a href="package$$Version.html" class="extype" name="com.twitter.finagle.stream.Version">Version</a> = <span class="defval" name="stream.this.`package`.Version.apply(1, 1)">...</span></span>, <span name="headers">headers: <span class="extype" name="scala.Seq">Seq</span>[<a href="package$$Header.html" class="extype" name="com.twitter.finagle.stream.Header">Header</a>] = <span class="symbol">immutable.this.Nil</span></span>, <span name="body">body: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a> = <span class="symbol">com.twitter.io.Buf.Empty</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -112,6 +151,19 @@ exactly one stream. The session terminates together with the stream.
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.stream.Version" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VersionextendsProductwithSerializable"></a>
+      <a id="Version:Version"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$Version.html"><span class="name">Version</span></a><span class="params">(<span name="major">major: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="minor">minor: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Represents the HTTP version.</p>
     </li></ol>
             </div>
 
@@ -132,6 +184,19 @@ exactly one stream. The session terminates together with the stream.
       </span>
       </h4>
       <p class="comment cmt">Indicates that a stream has ended.</p>
+    </li><li name="com.twitter.finagle.stream.Header" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Header"></a>
+      <a id="Header:Header"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$Header$.html"><span class="name">Header</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.stream.Stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Stream"></a>
       <a id="Stream:Stream"></a>
@@ -142,6 +207,45 @@ exactly one stream. The session terminates together with the stream.
       </span>
       <span class="symbol">
         <a href="Stream$.html"><span class="name">Stream</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.stream.StreamRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamRequest"></a>
+      <a id="StreamRequest:StreamRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamRequest$.html"><span class="name">StreamRequest</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.stream.StreamResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamResponse"></a>
+      <a id="StreamResponse:StreamResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamResponse$.html"><span class="name">StreamResponse</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.stream.package#streamRequestType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="streamRequestType:com.twitter.finagle.stream.package.RequestType[com.twitter.finagle.stream.StreamRequest]"></a>
+      <a id="streamRequestType:RequestType[StreamRequest]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">streamRequestType</span><span class="result">: <a href="package$$RequestType.html" class="extype" name="com.twitter.finagle.stream.RequestType">RequestType</a>[<a href="StreamRequest.html" class="extype" name="com.twitter.finagle.stream.StreamRequest">StreamRequest</a>]</span>
       </span>
       </h4>
       

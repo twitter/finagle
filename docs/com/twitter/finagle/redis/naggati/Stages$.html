@@ -398,7 +398,7 @@ is passed to the next processing step. <code>getDelimiter</code> is called each 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readBytes</span><span class="params">(<span name="count">count: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="params">(<span name="process">process: (<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
+        <span class="name">readBytes</span><span class="params">(<span name="count">count: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="params">(<span name="process">process: (<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Read <code>count</code> bytes into a byte buffer and pass that buffer to the next step in processing.</p>
@@ -411,7 +411,7 @@ is passed to the next processing step. <code>getDelimiter</code> is called each 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readBytesDynamic</span><span class="params">(<span name="getCount">getCount: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="params">(<span name="process">process: (<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
+        <span class="name">readBytesDynamic</span><span class="params">(<span name="getCount">getCount: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="params">(<span name="process">process: (<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Read a certain number of bytes into a byte buffer and pass that buffer to the next step in
@@ -476,7 +476,7 @@ step.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readToDelimiter</span><span class="params">(<span name="delimiter">delimiter: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="params">(<span name="process">process: (<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
+        <span class="name">readToDelimiter</span><span class="params">(<span name="delimiter">delimiter: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="params">(<span name="process">process: (<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Read bytes until a delimiter is present, and pass a buffer containing the bytes up to and
@@ -490,7 +490,7 @@ including the delimiter to the next processing step.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">readToDelimiterDynamic</span><span class="params">(<span name="getDelimiter">getDelimiter: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="params">(<span name="process">process: (<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Array" class="extype" target="_top">Array</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
+        <span class="name">readToDelimiterDynamic</span><span class="params">(<span name="getDelimiter">getDelimiter: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="params">(<span name="process">process: (<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="NextStep.html" class="extype" name="com.twitter.finagle.redis.naggati.NextStep">NextStep</a></span>)</span><span class="result">: <a href="Stage.html" class="extype" name="com.twitter.finagle.redis.naggati.Stage">Stage</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Read bytes until a delimiter is present, and pass a buffer containing the bytes up to and
