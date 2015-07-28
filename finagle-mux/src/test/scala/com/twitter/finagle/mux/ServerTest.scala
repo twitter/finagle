@@ -3,13 +3,13 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.mux.Message.{RreqOk, Treq}
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
+import com.twitter.finagle.mux.Message.{RreqOk, Treq}
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.finagle.{Dtab, Path, Service}
+import com.twitter.finagle.{Dtab, Failure, Path, Service}
 import com.twitter.io.Buf.Utf8
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
@@ -25,7 +25,7 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
-  private class Ctx {
+  private class LeaseCtx {
     val clientToServer = new AsyncQueue[ChannelBuffer]
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
@@ -68,7 +68,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   }
 
   test("register/unregister with lessor") {
-    val ctx = new Ctx
+    val ctx = new LeaseCtx
     import ctx._
 
     verify(lessor).register(server)
@@ -78,7 +78,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   }
 
   test("propagate leases") {
-    val ctx = new Ctx
+    val ctx = new LeaseCtx
     import ctx._
 
     val m = serverToClient.poll()
@@ -89,7 +89,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   }
 
   test("nack on 0 leases") {
-    val ctx = new Ctx
+    val ctx = new LeaseCtx
     import ctx._
 
     nackOnExpiredLease.parse("true")
@@ -99,7 +99,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   }
 
   test("don't nack on > 0 leases") {
-    val ctx = new Ctx
+    val ctx = new LeaseCtx
     import ctx._
 
     nackOnExpiredLease.parse("true")
@@ -112,7 +112,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
   test("unnack again after a > 0 lease") {
     Time.withCurrentTimeFrozen { ctl =>
-      val ctx = new Ctx
+      val ctx = new LeaseCtx
       import ctx._
 
       nackOnExpiredLease.parse("true")
@@ -130,9 +130,6 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
   }
 
   test("does not leak pending on failures") {
-    val ctx = new Ctx
-    import ctx._
-
     val p = new Promise[Response]
     val svc = Service.mk[Request, Response](_ => p)
 
@@ -155,12 +152,31 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
       .thenReturn(None)
 
     val dispatcher = ServerDispatcher.newRequestResponse(
-      trans, svc, lessor, NullTracer, NullStatsReceiver)
+      trans, svc, Lessor.nil, NullTracer, NullStatsReceiver)
     assert(dispatcher.npending() === 1)
 
     p.updateIfEmpty(Throw(new RuntimeException("welp")))
 
     assert(dispatcher.npending() === 0)
+  }
+
+  test("nack on restartable failures") {
+    val svc = new Service[Request, Response] {
+      def apply(req: Request) = Future.exception(Failure.rejected("overloaded!"))
+    }
+
+    val clientToServer = new AsyncQueue[ChannelBuffer]
+    val serverToClient = new AsyncQueue[ChannelBuffer]
+    val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer)
+    val server = ServerDispatcher.newRequestResponse(
+      transport, svc, Lessor.nil, NullTracer, NullStatsReceiver)
+
+    clientToServer.offer(Message.encode(
+      Message.Tdispatch(0, Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER)))
+
+    val reply = serverToClient.poll()
+    assert(reply.isDefined)
+    assert(Message.decode(Await.result(reply)).isInstanceOf[Message.RdispatchNack])
   }
 
   test("drains properly before closing the socket") {

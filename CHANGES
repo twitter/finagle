@@ -37,6 +37,12 @@ Runtime Behavior Changes
     and intepreted proportional to offered load (however, they can still be though of,
     roughly, as multipliers for traffic). ``RB_ID=677416``
 
+  * The RequestSemaphoreFilter now sheds load by dropping the tail of the queue
+    and failing it with a `Failure.Restartable`. Previously, the filter had an unbounded
+    queue but now the default size is 0 (i.e. no queueing). The dropped requests are in
+    turn requeued by Finagle clients with protocol support (e.g. Http, ThriftMux).
+    ``RB_ID=696934``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-stream: Introduce StreamRequest as a replacement for Netty's
@@ -53,6 +59,9 @@ Breaking API Changes
 
   * finagle: `LoadService` and `ThriftRichClient` migrated off of deprecated `ClassManifest`
     to `ClassTag`. ``RB_ID=720455``
+
+  * finagle-core: `RequestSemaphoreFilter.Param` now accepts a [[com.twitter.concurrent.AsyncSemaphore]]
+    instead of an integer representing the max concurrency.
 
 6.26.0
 -------
@@ -110,7 +119,6 @@ Breaking API Changes
 
   * finagle-core: Add new method `noFailureAccrual` on `ClientBuilder` that completely disables
     `FailureAccrualFactory` in the underlying stack. ``RB_ID=689076``
-
 
 New Features
 ~~~~~~~~~~~~

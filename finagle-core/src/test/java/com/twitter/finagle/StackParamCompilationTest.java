@@ -5,6 +5,7 @@ import java.net.SocketAddress;
 import scala.Option;
 import scala.Some;
 
+import com.twitter.concurrent.AsyncSemaphore;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.client.DefaultPool;
 import com.twitter.finagle.client.StackClient;
@@ -70,7 +71,8 @@ public class StackParamCompilationTest {
           }).mk())
         .configured(new TimeoutFactory.Param(Duration.Top()).mk())
         .configured(new MaskCancelFilter.Param(false).mk())
-        .configured(new RequestSemaphoreFilter.Param(Integer.MAX_VALUE).mk())
+        .configured(new RequestSemaphoreFilter.Param(
+          new Some<AsyncSemaphore>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
         .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
         .configured(new Netty3Transporter.ChannelFactory(null).mk())
