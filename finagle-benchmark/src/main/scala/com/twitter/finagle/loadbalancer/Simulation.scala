@@ -95,20 +95,17 @@ private[finagle] class LatencyProfile(stopWatch: () => Duration) {
   }
 }
 
-trait Weighted { val weight: Double }
-
 /**
  * Creates a ServiceFactory that applies a latency profile to Services
  * it creates.
  */
 private[finagle] class LatencyFactory(sr: StatsReceiver) {
-  import Simulation.WeightedFactory
 
   def apply(
     name: Int,
     next: () => Duration,
     _weight: Double = 1.0
-  ): WeightedFactory = {
+  ): ServiceFactory[Unit, Unit] = {
     val service = new Service[Unit, Unit] {
       implicit val timer = DefaultTimer.twitter
       val load = new AtomicInteger(0)
@@ -131,8 +128,7 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
       }
     }
 
-    new ServiceFactory[Unit, Unit] with Weighted {
-      val weight = _weight
+    new ServiceFactory[Unit, Unit] {
       def apply(conn: ClientConnection) = Future.value(service)
       def close(deadline: Time) = Future.Done
       override def toString = name.toString
@@ -141,7 +137,6 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
 }
 
 private[finagle] object Simulation extends com.twitter.app.App {
-  type WeightedFactory = ServiceFactory[Unit, Unit] with Weighted
 
   val qps = flag("qps", 1250, "QPS at which to run the benchmark")
   val dur = flag("dur", 45.seconds, "Benchmark duration")
@@ -158,12 +153,12 @@ private[finagle] object Simulation extends com.twitter.app.App {
 
     val data = getClass.getClassLoader.getResource("resources/real_latencies.data")
     val dist = LatencyProfile.fromFile(data)
-    val stable: Set[WeightedFactory] =
+    val stable: Set[ServiceFactory[Unit, Unit]] =
       Seq.tabulate(nstable())(i => newFactory(i, dist)).toSet
 
     val underlying = Var(stable)
-    val activity: Activity[Set[(ServiceFactory[Unit, Unit], Double)]] =
-      Activity(underlying.map { facs => Activity.Ok(facs.map { f => (f, f.weight) }) })
+    val activity: Activity[Set[ServiceFactory[Unit, Unit]]] =
+      Activity(underlying.map { facs => Activity.Ok(facs) })
 
     val factory = bal() match {
       case "p2c" => Balancers.p2c().newBalancer(
@@ -194,8 +189,6 @@ private[finagle] object Simulation extends com.twitter.app.App {
     val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
     underlying() += newFactory(nstable()+1, coldStart(dist))
     underlying() += newFactory(nstable()+2, p.slowBy(2)(dist))
-    underlying() += newFactory(nstable()+3, dist, 2.0)
-    underlying() += newFactory(nstable()+4, dist, 2.0)
 
     var ms = 0
     while (stopWatch() < dur()) {

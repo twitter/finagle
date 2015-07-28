@@ -2,11 +2,30 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle._
+import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.factory.TrafficDistributor
 import com.twitter.finagle.stats._
 import com.twitter.util.{Activity, Var}
 import java.net.SocketAddress
 import java.util.logging.{Level, Logger}
-import scala.collection.mutable
+
+/**
+ * Allows duplicate SocketAddresses to be threaded through the
+ * load balancer while avoiding the cache.
+ */
+private object SocketAddresses {
+  trait Wrapped extends SocketAddress {
+    def underlying: SocketAddress
+  }
+
+  def unwrap(addr: SocketAddress): SocketAddress = {
+    addr match {
+      case sa: Wrapped => unwrap(sa.underlying)
+      case WeightedSocketAddress(s, _) => unwrap(s)
+      case _ => addr
+    }
+  }
+}
 
 object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
   "\tWhen enabled,the configured stats receiver will be used,\n" +
@@ -19,6 +38,10 @@ object LoadBalancerFactory {
 
   /**
    * A class eligible for configuring a client's load balancer probation setting.
+   * When enabled, the balancer treats removals as advisory and flags them. If a
+   * a flagged endpoint is also detected as unhealthy by Finagle's session
+   * qualifiers (e.g. fail-fast, failure accrual, etc) then the host is removed
+   * from the collection.
    */
   case class EnableProbation(enable: Boolean)
 
@@ -91,18 +114,156 @@ object LoadBalancerFactory {
    * in `LoadBalancerFactory.Dest`. Incoming requests are balanced using the load balancer
    * defined by the `LoadBalancerFactory.Param` parameter.
    */
+  private[finagle] trait StackModule[Req, Rep] extends Stack.Module[ServiceFactory[Req, Rep]] {
+    val role = LoadBalancerFactory.role
+    val parameters = Seq(
+      implicitly[Stack.Param[ErrorLabel]],
+      implicitly[Stack.Param[Dest]],
+      implicitly[Stack.Param[Param]],
+      implicitly[Stack.Param[HostStats]],
+      implicitly[Stack.Param[param.Stats]],
+      implicitly[Stack.Param[param.Logger]],
+      implicitly[Stack.Param[param.Monitor]],
+      implicitly[Stack.Param[param.Reporter]])
+
+    def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+      val ErrorLabel(errorLabel) = params[ErrorLabel]
+      val Dest(dest) = params[Dest]
+      val Param(loadBalancerFactory) = params[Param]
+      val EnableProbation(probationEnabled) = params[EnableProbation]
+
+      val param.Stats(statsReceiver) = params[param.Stats]
+      val param.Logger(log) = params[param.Logger]
+      val param.Label(label) = params[param.Label]
+      val param.Monitor(monitor) = params[param.Monitor]
+      val param.Reporter(reporter) = params[param.Reporter]
+
+      val rawStatsReceiver = statsReceiver match {
+        case sr: RollupStatsReceiver => sr.self
+        case sr => sr
+      }
+
+      // Determine which stats receiver to use based on `perHostStats`
+      // flag and the configured `HostStats` param. Report per-host stats
+      // only when the flag is set.
+      val hostStatsReceiver =
+        if (!perHostStats()) NullStatsReceiver
+        else params[LoadBalancerFactory.HostStats].hostStatsReceiver
+
+      // Creates a ServiceFactory from the `next` in the stack and ensures
+      // that `sockaddr` is an available param for `next`. Note, in the default
+      // client stack, `next` represents the endpoint stack which will result
+      // in a connection being established when materialized.
+      def newEndpoint(sockaddr: SocketAddress): ServiceFactory[Req, Rep] = {
+        val stats = if (hostStatsReceiver.isNull) statsReceiver else {
+          val scope = sockaddr match {
+            case WeightedInetSocketAddress(addr, _) =>
+              "%s:%d".format(addr.getHostName, addr.getPort)
+            case other => other.toString
+          }
+          val host = hostStatsReceiver.scope(label).scope(scope)
+          BroadcastStatsReceiver(Seq(host, statsReceiver))
+        }
+
+        val composite = reporter(label, Some(sockaddr)) andThen monitor
+
+        val underlying = next.make(params +
+            Transporter.EndpointAddr(SocketAddresses.unwrap(sockaddr)) +
+            param.Stats(stats) +
+            param.Monitor(composite))
+
+        new ServiceFactoryProxy(underlying) {
+          override def toString = sockaddr.toString
+        }
+      }
+
+      val balancerStats = rawStatsReceiver.scope("loadbalancer")
+      val balancerExc = new NoBrokersAvailableException(errorLabel)
+      def newBalancer(endpoints: Activity[Set[ServiceFactory[Req, Rep]]]) =
+        loadBalancerFactory.newBalancer(endpoints, balancerStats, balancerExc)
+
+      val destActivity: Activity[Set[SocketAddress]] = Activity(dest.map {
+        case Addr.Bound(set, _) =>
+          Activity.Ok(set)
+        case Addr.Neg =>
+          log.info(s"$label: name resolution is negative")
+          Activity.Ok(Set.empty)
+        case Addr.Failed(e) =>
+           log.log(Level.INFO, s"$label: name resolution failed", e)
+           Activity.Failed(e)
+        case Addr.Pending =>
+          if (log.isLoggable(Level.FINE)) {
+            log.fine(s"$label: name resolution is pending")
+          }
+          Activity.Pending
+      })
+
+      // Instead of simply creating a newBalancer here, we defer to the
+      // traffic distributor to interpret `WeightedSocketAddresses`.
+      Stack.Leaf(role, new TrafficDistributor[Req, Rep](
+        dest = destActivity,
+        newEndpoint = newEndpoint,
+        newBalancer = newBalancer,
+        eagerEviction = !probationEnabled,
+        statsReceiver = balancerStats
+      ))
+    }
+  }
+
   private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new BalancerStackModule[Req, Rep] {
-      val description = "Balance requests across multiple endpoints"
-      val parameters = Seq(
-        implicitly[Stack.Param[ErrorLabel]],
-        implicitly[Stack.Param[Dest]],
-        implicitly[Stack.Param[LoadBalancerFactory.Param]],
-        implicitly[Stack.Param[LoadBalancerFactory.HostStats]],
-        implicitly[Stack.Param[param.Stats]],
-        implicitly[Stack.Param[param.Logger]],
-        implicitly[Stack.Param[param.Monitor]],
-        implicitly[Stack.Param[param.Reporter]])
+    new StackModule[Req, Rep] {
+      val description = "Balances requests across a collection of endpoints."
+    }
+}
+
+/**
+ * A load balancer that balances among multiple connections,
+ * useful for managing concurrency in pipelining protocols.
+ *
+ * Each endpoint can open multiple connections. For N endpoints,
+ * each opens M connections, load balancer balances among N*M
+ * options. Thus, it increases concurrency of each endpoint.
+ */
+object ConcurrentLoadBalancerFactory {
+  import LoadBalancerFactory._
+
+  private case class ReplicatedSocketAddress(underlying: SocketAddress, i: Int)
+    extends SocketAddresses.Wrapped
+
+  private def replicate(num: Int): SocketAddress => Set[SocketAddress] = {
+    case sa: SocketAddresses.Wrapped => Set(sa)
+    case sa =>
+      val (base, w) = WeightedSocketAddress.extract(sa)
+      for (i: Int <- (0 until num).toSet) yield
+        WeightedSocketAddress(ReplicatedSocketAddress(base, i), w)
+  }
+
+  /**
+   * A class eligible for configuring the number of connections
+   * a single endpoint has.
+   */
+  case class Param(numConnections: Int) {
+    def mk(): (Param, Stack.Param[Param]) = (this, Param.param)
+  }
+  object Param {
+    implicit val param = Stack.Param(Param(4))
+  }
+
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new StackModule[Req, Rep] {
+      val description = "Balance requests across multiple connections on a single " +
+        "endpoint, used for pipelining protocols"
+
+      override def make(params: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
+        val Param(numConnections) = params[Param]
+        val Dest(dest) = params[Dest]
+        val newDest = dest.map {
+          case bound@Addr.Bound(set, meta) =>
+            bound.copy(addrs = set.flatMap(replicate(numConnections)))
+          case addr => addr
+        }
+        super.make(params + Dest(newDest), next)
+      }
     }
 }
 
@@ -118,10 +279,7 @@ abstract class LoadBalancerFactory {
    *
    * @param endpoints The load balancer's collection is usually populated concurrently.
    * So the interface to build a balancer is wrapped in an [[com.twitter.util.Activity]]
-   * which allows us to observe this process for changes. Note, the given weights are
-   * maintained relative to load assignments not QPS. For example, a weight of 2.0 means
-   * that the endpoint will receive twice the amount of load w.r.t the other endpoints
-   * in the balancer.
+   * which allows us to observe this process for changes.
    *
    * @param statsReceiver The StatsReceiver which balancers report stats to. See
    * [[com.twitter.finagle.loadbalancer.Balancer]] to see which stats are exported
@@ -130,7 +288,7 @@ abstract class LoadBalancerFactory {
    * @param emptyException The exception returned when a balancer's collection is empty.
    */
   def newBalancer[Req, Rep](
-    endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+    endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep]
@@ -175,7 +333,7 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
     }
 
   def newBalancer[Req, Rep](
-    endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+    endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
     statsReceiver: StatsReceiver,
     emptyException: NoBrokersAvailableException
   ): ServiceFactory[Req, Rep] = {

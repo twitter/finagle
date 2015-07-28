@@ -29,9 +29,7 @@ private[loadbalancer] trait P2CSuite {
   }
 
   trait P2CServiceFactory extends ServiceFactory[Unit, Int] {
-    val weight: Double
-    def normMeanLoad: Double
-    def tup: (ServiceFactory[Unit, Int], Double) = (this, weight)
+    def meanLoad: Double
   }
 
   val noBrokers = new NoBrokersAvailableException
@@ -41,7 +39,7 @@ private[loadbalancer] trait P2CSuite {
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime
   ): ServiceFactory[Unit, Int] = new P2CBalancer(
-    Activity(fs map { fs => Activity.Ok(fs.map(_.tup)) }),
+    Activity(fs.map(Activity.Ok(_))),
     maxEffort = 5,
     rng = Rng(12345L),
     statsReceiver = sr,
@@ -49,10 +47,10 @@ private[loadbalancer] trait P2CSuite {
   )
 
   def assertEven(fs: Traversable[P2CServiceFactory]) {
-    val nml = fs.head.normMeanLoad
+    val ml = fs.head.meanLoad
     for (f <- fs) {
-      assert(math.abs(f.normMeanLoad - nml) < ε,
-        "nml=%f; f.nml=%f; ε=%f".format(nml, f.normMeanLoad, ε))
+      assert(math.abs(f.meanLoad - ml) < ε,
+        "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, ε))
     }
   }
 }
@@ -61,15 +59,14 @@ private[loadbalancer] trait P2CSuite {
 class P2CBalancerTest extends FunSuite with App with P2CSuite {
   flag.parseArgs(Array("-com.twitter.finagle.loadbalancer.exp.loadMetric=leastReq"))
 
-  case class LoadedFactory(which: Int, weight: Double) extends P2CServiceFactory {
+  case class LoadedFactory(which: Int) extends P2CServiceFactory {
     var stat: Status = Status.Open
     var load = 0
     var sum = 0
     var count = 0
 
     // This isn't quite the right notion of mean load, but it's good enough.
-    def meanLoad = if (count == 0) 0.0 else sum.toDouble/count.toDouble
-    def normMeanLoad = if (weight == 0) meanLoad else meanLoad/weight
+    def meanLoad: Double = if (count == 0) 0.0 else sum.toDouble/count.toDouble
 
     def apply(conn: ClientConnection) = {
       load += 1
@@ -100,25 +97,10 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     def removes = r.counters.getOrElse(Seq("removes"), 0)
     def load = r.gauges.getOrElse(Seq("load"), zero)()
     def available = r.gauges.getOrElse(Seq("available"), zero)()
-    def meanweight = r.gauges.getOrElse(Seq("meanweight"), zero)()
   }
 
-  test("Balances evenly when weights=i") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, i + 1) }
-    val bal = newBal(Var.value(init))
-    for (_ <- 0 until R) bal()
-    assertEven(init)
-  }
-
-  test("Balances evenly when weights=1") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
-    val bal = newBal(Var.value(init))
-    for (_ <- 0 until R) bal()
-    assertEven(init)
-  }
-
-  test("Balances evenly when weights=0") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 0) }
+  test("Balances evenly") {
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
     val bal = newBal(Var.value(init))
     for (_ <- 0 until R) bal()
     assertEven(init)
@@ -126,7 +108,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
 
   test("Balance evenly when load varies") {
     val rng = Rng(12345L)
-    val init = Vector.tabulate(N) { i => LoadedFactory(i, i+1) }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     var pending = Set[Service[Unit, Int]]()
     val bal = newBal(Var.value(init))
 
@@ -148,21 +130,21 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Dynamically incorporates updates") {
-    val init = Vector.tabulate(N) { i => LoadedFactory(i, 1) }
+    val init = Vector.tabulate(N) { i => LoadedFactory(i) }
     val vec = Var(init)
     val bal = newBal(vec)
 
     for (_ <- 0 until R) bal()
     assertEven(vec())
 
-    val fN1 = LoadedFactory(N+1, 2)
+    val fN1 = LoadedFactory(N+1)
     vec() :+= fN1
 
-    for (_ <- 0 until R*2) bal()
+    for (_ <- 0 until R) bal()
     assertEven(vec())
 
     // Spot check!
-    assert(math.abs(init(0).load*2 - fN1.load) < ε)
+    assert(math.abs(init(0).load - fN1.load) < ε)
 
     val init0Load = init(0).load
     vec() = vec() drop 1
@@ -172,7 +154,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Skip downed nodes; revive them") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
     val bal = newBal(Var.value(init))
 
     var byIndex = new mutable.HashMap[Int, mutable.Set[Closable]]
@@ -217,7 +199,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     val exc = intercept[NoBrokersAvailableException] { Await.result(bal()) }
     assert(exc eq noBrokers)
 
-    vec() :+= new LoadedFactory(0, 1)
+    vec() :+= new LoadedFactory(0)
     for (_ <- 0 until R) Await.result(bal())
     assert(vec().head.load === R)
 
@@ -226,7 +208,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Balance all-downed nodes.") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
     val bal = newBal(Var.value(init))
 
     for (_ <- 0 until R) bal()
@@ -259,25 +241,22 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     assert(stats.adds === 0)
     assert(stats.removes === 0)
     assert(stats.available === 0)
-    assert(stats.meanweight === 0)
 
-    vec() +:= new LoadedFactory(0, 1)
+    vec() +:= new LoadedFactory(0)
 
     assert(stats.load === 0)
     assert(stats.size === 1)
     assert(stats.adds === 1)
     assert(stats.removes === 0)
     assert(stats.available === 1)
-    assert(stats.meanweight === 1)
 
-    vec() +:= new LoadedFactory(1, 2)
+    vec() +:= new LoadedFactory(1)
 
     assert(stats.load === 0)
     assert(stats.size === 2)
     assert(stats.adds === 2)
     assert(stats.removes === 0)
     assert(stats.available === 2)
-    assert(stats.meanweight === 1.5)
 
     vec()(0).stat = Status.Closed
     assert(stats.available === 1)
@@ -292,7 +271,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   }
 
   test("Closes") {
-    val init = Vector.tabulate(N) { i => new LoadedFactory(i, 1) }
+    val init = Vector.tabulate(N) { i => new LoadedFactory(i) }
     val bal = newBal(Var.value(init))
     // Give it some traffic.
     for (_ <- 0 until R) bal()
@@ -309,7 +288,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     sr: StatsReceiver = NullStatsReceiver,
     clock: (() => Long) = System.nanoTime
   ): ServiceFactory[Unit, Int] = new P2CBalancerPeakEwma(
-    Activity(fs map { fs => Activity.Ok(fs.map(_.tup)) }),
+    Activity(fs.map(Activity.Ok(_))),
     maxEffort = 5,
     decayTime = 150.nanoseconds,
     rng = Rng(12345L),
@@ -343,7 +322,6 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     var load = 0
     var sum = 0
     def meanLoad = if (load == 0) 0.0 else sum.toDouble/load.toDouble
-    def normMeanLoad = meanLoad
     def apply(conn: ClientConnection) = {
       load += 1
       sum += load

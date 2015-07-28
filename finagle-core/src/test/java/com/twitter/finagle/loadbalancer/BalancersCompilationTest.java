@@ -1,6 +1,5 @@
 package com.twitter.finagle.loadbalancer;
 
-import scala.Tuple2;
 import scala.collection.immutable.HashSet;
 import scala.collection.immutable.Set;
 
@@ -18,8 +17,8 @@ import com.twitter.util.Duration;
 public class BalancersCompilationTest {
   private final StatsReceiver sr = NullStatsReceiver.get();
 
-  private final Set<Tuple2<ServiceFactory<String, String>, Object>> set =
-    new HashSet<Tuple2<ServiceFactory<String, String>, Object>>();
+  private final Set<ServiceFactory<String, String>> set =
+    new HashSet<ServiceFactory<String, String>>();
 
   private final NoBrokersAvailableException noBrokers =
     new NoBrokersAvailableException("test");

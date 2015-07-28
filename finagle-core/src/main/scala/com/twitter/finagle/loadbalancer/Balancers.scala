@@ -37,7 +37,7 @@ object Balancers {
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
@@ -73,7 +73,7 @@ object Balancers {
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
@@ -90,12 +90,11 @@ object Balancers {
   def heap(rng: Random = new Random): LoadBalancerFactory =
     new LoadBalancerFactory {
       def newBalancer[Req, Rep](
-        endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+        endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
         sr: StatsReceiver,
         exc: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
-        val unweighted = endpoints.map { set => set.map { case (f, _) => f } }
-        new HeapBalancer(unweighted, sr, exc, rng) {
+        new HeapBalancer(endpoints, sr, exc, rng) {
           private[this] val gauge = sr.addGauge("heap")(1)
         }
       }
@@ -124,7 +123,7 @@ object Balancers {
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {

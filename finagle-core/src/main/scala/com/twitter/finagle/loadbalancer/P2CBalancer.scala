@@ -36,7 +36,7 @@ import scala.collection.immutable
  * 10 (October 2001), 1094-1104.
  */
 private class P2CBalancer[Req, Rep](
-    protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
+    protected val activity: Activity[Traversable[ServiceFactory[Req, Rep]]],
     protected val maxEffort: Int,
     protected val rng: Rng,
     protected val statsReceiver: StatsReceiver,
@@ -74,7 +74,7 @@ private class P2CBalancer[Req, Rep](
  * 10 (October 2001), 1094-1104.
  */
 private class P2CBalancerPeakEwma[Req, Rep](
-    protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
+    protected val activity: Activity[Traversable[ServiceFactory[Req, Rep]]],
     protected val decayTime: Duration,
     protected val maxEffort: Int,
     protected val rng: Rng,
@@ -85,12 +85,7 @@ private class P2CBalancerPeakEwma[Req, Rep](
   with P2C[Req, Rep]
   with Updating[Req, Rep]
 
-private object PeakEwma {
-  private val log = Logger.getLogger("com.twitter.finagle.loadbalancer.loadMetric")
-}
-
 private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
-  import PeakEwma.log
 
   protected def rng: Rng
 
@@ -148,18 +143,14 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
       val rtt = math.max(nanoTime()-ts, 0)
       pending -= 1
       observe(rtt)
-      if (log.isLoggable(Level.FINEST)) {
-        log.finest(f"[$name] clock=${stamp-epoch}%d, rtt=$rtt%d, cost=$cost%f, pending=$pending%d")
-      }
     }
   }
 
-  protected case class Node(factory: ServiceFactory[Req, Rep], weight: Double, metric: Metric, token: Int)
+  protected case class Node(factory: ServiceFactory[Req, Rep], metric: Metric, token: Int)
       extends ServiceFactoryProxy[Req, Rep](factory)
       with NodeT {
     type This = Node
 
-    def newWeight(weight: Double) = copy(weight=weight)
     def load = metric.get()
     def pending = metric.rate()
 
@@ -181,11 +172,12 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
 
-  protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver): Node =
-    Node(factory, weight, new Metric(statsReceiver, factory.toString), rng.nextInt())
+  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver): Node =
+    Node(factory, new Metric(statsReceiver, factory.toString), rng.nextInt())
 
   protected def failingNode(cause: Throwable) = Node(
-    new FailingFactory(cause), 0.0,
+    new FailingFactory(cause),
     new Metric(NullStatsReceiver, "failing"),
-    0)
+    0
+  )
 }

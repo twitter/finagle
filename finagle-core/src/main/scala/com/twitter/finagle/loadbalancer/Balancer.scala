@@ -3,7 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, Counter}
-import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater}
+import com.twitter.finagle.util.{OnReady, Rng, Updater}
 import com.twitter.util.{Activity, Future, Promise, Time, Closable, Return, Throw}
 import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.tailrec
@@ -20,7 +20,7 @@ import scala.collection.mutable
  * a balancer (a Distributor) separately.
  */
 private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
-  /** 
+  /**
    * The maximum number of balancing tries (yielding unavailable
    * factories) until we give up.
    */
@@ -45,7 +45,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
    */
   protected trait NodeT extends ServiceFactory[Req, Rep] {
     type This
-    
+
     /**
      * The current load, in units of the active metric.
      */
@@ -57,45 +57,37 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
     def pending: Int
 
     /**
-     * This node's weight.
-     */
-    def weight: Double
-    
-    /**
      * A token is a random integer identifying the node.
      * It persists through node updates.
      */
     def token: Int
 
     /**
-     * Nondestructively update this node with the supplied weight.
-     */  
-    def newWeight(weight: Double): This
-    
-    /**
      * The underlying service factory.
      */
     def factory: ServiceFactory[Req, Rep]
   }
-  
+
   /**
    * The type of Node. Mixed in.
    */
   protected type Node <: AnyRef with NodeT { type This = Node }
-  
+
   /**
    * Create a new node representing the given factory, with the given
    * weight. Report node-related stats to the given StatsReceiver.
    */
-  protected def newNode(factory: ServiceFactory[Req, Rep], 
-    weight: Double, statsReceiver: StatsReceiver): Node
-  
+  protected def newNode(
+    factory: ServiceFactory[Req, Rep],
+    statsReceiver: StatsReceiver
+  ): Node
+
   /**
    * Create a node whose sole purpose it is to endlessly fail
    * with the given cause.
    */
   protected def failingNode(cause: Throwable): Node
-  
+
   /**
    * The base type of the load balancer distributor. Distributors are
    * updated nondestructively, but, as with nodes, may share some
@@ -103,39 +95,39 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
   */
   protected trait DistributorT {
     type This
-    
+
     /**
      * The vector of nodes over which we are currently balancing.
      */
     def vector: Vector[Node]
-    
+
     /**
      * Pick the next node. This is the main load balancer.
      */
     def pick(): Node
-    
+
     /**
      * True if this distributor needs to be rebuilt. (For example, it
      * may need to be updated with current availabilities.)
      */
     def needsRebuild: Boolean
-    
+
     /**
      * Rebuild this distributor.
      */
     def rebuild(): This
-    
+
     /**
      * Rebuild this distributor with a new vector.
      */
     def rebuild(vector: Vector[Node]): This
   }
-  
+
   /**
    * The type of Distributor. Mixed in.
    */
   protected type Distributor <: DistributorT { type This = Distributor }
-  
+
   /**
    * Create an initial distributor.
    */
@@ -149,7 +141,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
   private[this] val nodeStatus: Node => Status = _.factory.status
 
   @volatile protected var dist: Distributor = initDistributor()
-  
+
   protected def rebuild() {
     updater(Rebuild(dist))
   }
@@ -167,10 +159,6 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
     statsReceiver.addGauge("load") {
       dist.vector.map(_.pending).sum
     },
-    statsReceiver.addGauge("meanweight") {
-      if (dist.vector.size == 0) 0
-      else (dist.vector.map(_.weight).sum / dist.vector.size).toFloat
-    },
     statsReceiver.addGauge("size") { dist.vector.size })
 
   private[this] val adds = statsReceiver.counter("adds")
@@ -178,7 +166,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
   protected sealed trait Update
   protected case class NewList(
-    newList: Traversable[(ServiceFactory[Req, Rep], Double)]) extends Update
+    newList: Traversable[ServiceFactory[Req, Rep]]) extends Update
   protected case class Rebuild(cur: Distributor) extends Update
   protected case class Invoke(fn: Distributor => Unit) extends Update
 
@@ -199,7 +187,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
     def handle(u: Update) = u match {
       case NewList(newList) =>
-        val newFactories = (newList map { case (f, _) => f }).toSet
+        val newFactories = newList.toSet
         val (transfer, closed) = dist.vector partition (newFactories contains _.factory)
 
         for (node <- closed)
@@ -209,10 +197,8 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
         // we could demand that 'n' proxies hashCode, equals (i.e. is a Proxy)
         val transferNodes = transfer.map(n => n.factory -> n).toMap
         val newNodes = newList map {
-          case (f, w) if transferNodes contains f =>
-            transferNodes(f).newWeight(w)
-          case (f, w) =>
-            newNode(f, w, statsReceiver.scope(f.toString))
+          case f if transferNodes.contains(f) => transferNodes(f)
+          case f => newNode(f, statsReceiver.scope(f.toString))
         }
 
         dist = dist.rebuild(newNodes.toVector)
@@ -220,7 +206,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
       case Rebuild(_dist) if _dist == dist =>
         dist = dist.rebuild()
- 
+
       case Rebuild(_stale) =>
 
       case Invoke(fn) =>
@@ -233,7 +219,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
    * may run asynchronously, is completed, the load balancer balances
    * across these factories and no others.
    */
-  def update(factories: Traversable[(ServiceFactory[Req, Rep], Double)]): Unit =
+  def update(factories: Traversable[ServiceFactory[Req, Rep]]): Unit =
     updater(NewList(factories))
 
   /**
@@ -283,7 +269,7 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
   /**
    * An activity representing the active set of ServiceFactories.
    */
-  protected def activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]]
+  protected def activity: Activity[Traversable[ServiceFactory[Req, Rep]]]
 
   /*
    * Subscribe to the Activity and dynamically update the load
@@ -291,7 +277,7 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
    *
    * The observation is terminated when the Balancer is closed.
    */
-  private[this] val observation = activity.run.changes respond {
+  private[this] val observation = activity.states respond {
     case Activity.Pending =>
 
     case Activity.Ok(newList) =>
@@ -299,7 +285,7 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
       ready.setDone()
 
     case Activity.Failed(_) =>
-      // On resolution failure, consider the 
+      // On resolution failure, consider the
       // load balancer ready (to serve errors).
       ready.setDone()
   }
@@ -318,13 +304,12 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
 private trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
   protected def rng: Rng
 
-  protected case class Node(factory: ServiceFactory[Req, Rep], weight: Double, counter: AtomicInteger, token: Int)
-    extends ServiceFactoryProxy[Req, Rep](factory) 
+  protected case class Node(factory: ServiceFactory[Req, Rep], counter: AtomicInteger, token: Int)
+    extends ServiceFactoryProxy[Req, Rep](factory)
     with NodeT {
 
     type This = Node
 
-    def newWeight(weight: Double) = copy(weight=weight)
     def load = counter.get
     def pending = counter.get
 
@@ -333,7 +318,7 @@ private trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
       super.apply(conn) transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time) = 
+            override def close(deadline: Time) =
               super.close(deadline) ensure {
                 counter.decrementAndGet()
               }
@@ -346,11 +331,11 @@ private trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
 
-  protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver) = 
-    Node(factory, weight, new AtomicInteger(0), rng.nextInt())
+  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) =
+    Node(factory, new AtomicInteger(0), rng.nextInt())
 
   private[this] val failingLoad = new AtomicInteger(0)
-  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), 0D, failingLoad, 0)
+  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), failingLoad, 0)
 }
 
 /**
@@ -369,70 +354,43 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
    */
   protected def rng: Rng
 
-  private[this] val nodeUp: Node => Boolean =
-    { node => node.status == Status.Open }
-
-  protected case class Distributor(vector: Vector[Node]) extends DistributorT {
+  protected class Distributor(val vector: Vector[Node]) extends DistributorT {
     type This = Distributor
 
-    private[this] val weights = new Array[Double](vector.size)
-    
-    // Build weights, 
-    private[this] val unavailable = {
-      val downbuild = new immutable.VectorBuilder[Node]()
-      for (i <- vector.indices) {
-        if (vector(i).factory.status == Status.Open) {
-          weights(i) = vector(i).weight
-        } else {
-          weights(i) = 0
-          downbuild += vector(i)
-        }
-      }
-
-      downbuild.result()
+    private[this] val nodeUp: Node => Boolean = { node =>
+      node.status == Status.Open
     }
 
-    private[this] val drv = 
-      if (weights.isEmpty) Drv(Vector.empty)
-      else Drv.fromWeights(weights)
+    private[this] val (up, down) = vector.partition(nodeUp)
 
-    def needsRebuild = unavailable.nonEmpty && unavailable.exists(nodeUp)
-
-    def rebuild() = copy()
-    
-    def rebuild(vector: Vector[Node]) = copy(vector=vector)
+    def needsRebuild: Boolean = down.nonEmpty && down.exists(nodeUp)
+    def rebuild(): This = new Distributor(vector)
+    def rebuild(vec: Vector[Node]): This = new Distributor(vec)
 
     def pick(): Node = {
       if (vector.isEmpty)
         return failingNode(emptyException)
 
-      if (vector.size == 1)
-        return vector(0)
+      // if all nodes are down, we might as well try to send requests somewhere
+      // as our view of the world may be out of date.
+      val (size, vec) = if (up.isEmpty) (down.size, down) else (up.size, up)
 
-      // TODO: determine whether we want to pick according to
-      // discretized weights. that is, for fractional load/weight,
-      // should we flip another coin according to the implied ratio?
-      val a = vector(drv(rng))
-      var b = a
-      var i = 0
-      // Try to pick b, b != a, up to 10 times. This is mostly to
-      // account for pathological cases where there is only one
-      // realistically pickable element in the vector (e.g. where
-      // other weights are 0 or close to 0).
-      do {
-        b = vector(drv(rng))
-        i += 1
-      } while (a == b && i < 10)
-  
-      if (a.weight == 0.0) {
-        // This only happens when all weights are 0.
+      if (size == 1) vec.head else {
+        val a = vec(rng.nextInt(size))
+        var b = a
+
+        // Try to pick b, b != a, up to 10 times.
+        var i = 10
+        do {
+          b = vec(rng.nextInt(size))
+          i -= 1
+        } while (a == b && i > 0)
+
         if (a.load < b.load) a else b
-      } else {
-        if (a.load/a.weight < b.load/b.weight) a else b
       }
     }
   }
-  
-  protected def initDistributor() = Distributor(Vector.empty)
+
+  protected def initDistributor() = new Distributor(Vector.empty)
 }
 

@@ -46,7 +46,7 @@ import java.util.logging.Logger
  *     concurrency.
  */
 private class ApertureLoadBandBalancer[Req, Rep](
-    protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
+    protected val activity: Activity[Traversable[ServiceFactory[Req, Rep]]],
     protected val smoothWin: Duration,
     protected val lowLoad: Double,
     protected val highLoad: Double,
@@ -99,8 +99,9 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
    */
   protected def minAperture: Int
 
-  private[this] val nodeUp: Node => Boolean =
-    { node => node.status == Status.Open && node.weight > 0 }
+  private[this] val nodeUp: Node => Boolean = { node =>
+    node.status == Status.Open
+  }
 
   private[this] val gauge = statsReceiver.addGauge("aperture") { aperture }
 
@@ -120,10 +121,11 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
         (ZeroRing, RingWidth, RingWidth)
       } else {
         val N = up.size
-        val weights = up.map(_.weight)
+        val weights = up.map(Function.const(1.0))
         // We know `sum` can never be zero because
         // up nodes have a non-zero weight.
         val sum = weights.sum
+        // TODO: Remove weights from Ring implementation.
         val ring = Ring.fromWeights(weights, RingWidth)
         val unit = (RingWidth/sum).toInt
         val max = RingWidth/unit
@@ -171,7 +173,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       if (a.status != Status.Open || b.status != Status.Open)
         sawDown = true
 
-      if (a.load/a.weight < b.load/b.weight) a else b
+      if (a.load < b.load) a else b
     }
 
     def needsRebuild: Boolean =
@@ -282,13 +284,11 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
 
   protected case class Node(
       factory: ServiceFactory[Req, Rep],
-      weight: Double,
       counter: AtomicInteger, token: Int)
     extends ServiceFactoryProxy[Req, Rep](factory)
     with NodeT {
     type This = Node
 
-    def newWeight(weight: Double) = copy(weight=weight)
     def load = counter.get
     def pending = counter.get
 
@@ -310,9 +310,10 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
     }
   }
 
-  protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver) =
-    Node(factory, weight, new AtomicInteger(0), rng.nextInt())
+  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) =
+    Node(factory, new AtomicInteger(0), rng.nextInt())
 
   private[this] val failingLoad = new AtomicInteger(0)
-  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), 0D, failingLoad, 0)
+  protected def failingNode(cause: Throwable) = Node(
+    new FailingFactory(cause), failingLoad, 0)
 }

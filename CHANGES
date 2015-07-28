@@ -30,6 +30,13 @@ Runtime Behavior Changes
   * finagle-stats: Standard of deviation is no longer calculated. It is exported as a constant 0.0
     for "$statName.stddev". ``RB_ID=717647``
 
+  * finagle-core: Weights are no longer supported by the load balancers. They are moved
+    one level above and interpreted by a new module, the `TrafficDistributor`. This
+    frees the balancers to have non-linear load metrics. It also changes the semantics
+    of weights. They are now normalized by size of endpoints that share the same weight
+    and intepreted proportional to offered load (however, they can still be though of,
+    roughly, as multipliers for traffic). ``RB_ID=677416``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-stream: Introduce StreamRequest as a replacement for Netty's
@@ -40,6 +47,9 @@ Breaking API Changes
     `c.t.f.naming.DefaultInterpreter` to bind a name via a Dtab. Support for Dtab entries starting
     with /#/ has been removed. `c.t.f.Namer.bindAndEval` has been removed. Use
     `c.t.f.Namer.resolve` instead. ``RB_ID=711681``
+
+  * finagle-core: LoadBalancerFactory no longer takes endpoints with weights as
+    per the decoupling mentioned in runtime changes.
 
   * finagle: `LoadService` and `ThriftRichClient` migrated off of deprecated `ClassManifest`
     to `ClassTag`. ``RB_ID=720455``

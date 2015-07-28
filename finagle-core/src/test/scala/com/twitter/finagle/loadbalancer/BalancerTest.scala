@@ -47,12 +47,11 @@ private class BalancerTest extends FunSuite
       }
     }
 
-    class Node(val factory: ServiceFactory[Unit, Unit], val weight: Double) extends NodeT {
+    class Node(val factory: ServiceFactory[Unit, Unit]) extends NodeT {
       type This = Node
       def load: Double = ???
       def pending: Int = ???
       def token: Int = ???
-      def newWeight(weight: Double): This = new Node(factory, weight)
       def close(deadline: Time): Future[Unit] = TestBalancer.this.synchronized {
         factory.close()
         Future.Done
@@ -60,9 +59,10 @@ private class BalancerTest extends FunSuite
       def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = ???
     }
 
-    protected def newNode(factory: ServiceFactory[Unit, Unit],
-      weight: Double, statsReceiver: StatsReceiver): Node =
-      new Node(factory, weight)
+    protected def newNode(
+      factory: ServiceFactory[Unit, Unit],
+      statsReceiver: StatsReceiver
+    ): Node = new Node(factory)
 
     protected def failingNode(cause: Throwable): Node = ???
 
@@ -84,13 +84,8 @@ private class BalancerTest extends FunSuite
 
   val genStatus = Gen.oneOf(Status.Open, Status.Busy, Status.Closed)
   val genSvcFac = genStatus.map(newFac)
-  val genLoadedNode =
-    for {
-      fac  <- genSvcFac
-      load <- Gen.chooseNum(Int.MinValue, Int.MaxValue).map(_.toDouble)
-    } yield fac -> load
-
-  val genNodes = Gen.containerOf[List,(ServiceFactory[Unit,Unit],Double)](genLoadedNode)
+  val genLoadedNode = for(fac  <- genSvcFac) yield fac
+  val genNodes = Gen.containerOf[List, ServiceFactory[Unit,Unit]](genLoadedNode)
 
   test("status: balancer with no nodes is Closed") {
     val bal = new TestBalancer
@@ -102,7 +97,7 @@ private class BalancerTest extends FunSuite
     forAll(genNodes) { loadedNodes =>
       val bal = new TestBalancer
       bal.update(loadedNodes)
-      val best = Status.bestOf[ServiceFactory[Unit,Unit]](loadedNodes.map(_._1), _.status)
+      val best = Status.bestOf[ServiceFactory[Unit,Unit]](loadedNodes, _.status)
       assert(bal.status === best)
     }
   }
@@ -111,17 +106,17 @@ private class BalancerTest extends FunSuite
     val bal = new TestBalancer
     val f1, f2 = newFac(Status.Closed)
     val f3 = newFac(Status.Open)
-    bal.update(Seq(f1->1, f2->1, f3->1))
+    bal.update(Seq(f1, f2, f3))
 
     assert(bal.status === Status.Open)
 
     // all closed
-    bal.update(Seq(f1->1, f2->1))
+    bal.update(Seq(f1, f2))
     assert(bal.status === Status.Closed)
 
     // one busy, remainder closed
     val busy = newFac(Status.Busy)
-    bal.update(Seq(f1->1, f2->1, busy->1))
+    bal.update(Seq(f1, f2, busy))
     assert(bal.status === Status.Busy)
   }
 
@@ -131,23 +126,18 @@ private class BalancerTest extends FunSuite
     val f1, f2, f3 = newFac()
 
     assert(bal.nodes.isEmpty)
-    bal.update(Seq(f1->1, f2->1, f3->1))
+    bal.update(Seq(f1, f2, f3))
     assert(bal.factories === Set(f1, f2, f3))
 
     for (f <- Seq(f1, f2, f3))
       assert(f.ncloses === 0)
 
-    bal.update(Seq(f1->1, f3->1))
+    bal.update(Seq(f1, f3))
 
     assert(bal.factories === Set(f1, f3))
     assert(f1.ncloses === 0)
     assert(f2.ncloses === 1)
     assert(f3.ncloses === 0)
-
-    // Updates weights.
-    bal.update(Seq(f1->1, f3->2))
-    assert(bal.nodeOf(f1).weight === 1)
-    assert(bal.nodeOf(f3).weight === 2)
   }
 
   if (!sys.props.contains("SKIP_FLAKY")) // CSL-1685
@@ -178,10 +168,10 @@ private class BalancerTest extends FunSuite
     thread("updater2") {
       waitForBeat(1)
       bal._rebuild()
-      bal.update(Seq(f1->1))
-      bal.update(Seq(f2->1))
+      bal.update(Seq(f1))
+      bal.update(Seq(f2))
       bal._rebuild()
-      bal.update(Seq(f3->1))
+      bal.update(Seq(f3))
       bal._rebuild()
       assert(beat === 1)
       waitForBeat(2)

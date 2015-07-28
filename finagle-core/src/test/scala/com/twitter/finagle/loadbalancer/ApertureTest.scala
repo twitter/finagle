@@ -79,8 +79,8 @@ private trait ApertureTesting {
 
     def apply(i: Int) = factories.getOrElseUpdate(i, new Factory(i))
 
-    def range(n: Int): Traversable[(ServiceFactory[Unit, Unit], Double)] =
-      Traversable.tabulate(n) { i => (apply(i) -> 1) }
+    def range(n: Int): Traversable[ServiceFactory[Unit, Unit]] =
+      Traversable.tabulate(n) { i => apply(i) }
   }
 
 }
@@ -151,28 +151,6 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     counts.clear()
     bal.applyn(100)
     assert(counts.nonzero === keys2)
-  }
-
-  test("Distributes according to weights") {
-    val counts = new Counts
-    val bal = new Bal
-
-    bal.update(Traversable(
-      counts(0) -> 2,
-      counts(1) -> 1,
-      counts(2) -> 2,
-      counts(3) -> 1
-    ))
-
-    assert(bal.unitsx === 6)
-
-    bal.adjustx(5)
-    bal.applyn(N)
-
-    assert(counts(0).n.toDouble/N === 0.333 +- 0.05)
-    assert(counts(1).n.toDouble/N === 0.166 +- 0.05)
-    assert(counts(2).n.toDouble/N === 0.333 +- 0.05)
-    assert(counts(3).n.toDouble/N === 0.166 +- 0.05)
   }
 
   test("Empty vectors") {
