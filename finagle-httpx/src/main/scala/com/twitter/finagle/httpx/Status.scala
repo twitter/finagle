@@ -1,6 +1,31 @@
 package com.twitter.finagle.httpx
 
-case class Status(code: Int)
+/**
+ * Represents an HTTP status code.
+ *
+ * The set of commonly known HTTP status codes have an associated reason phrase
+ * (see `reasons`). We don't provide a way to set the reason phrase because:
+ *
+ * - it simplifies construction (users only supply the code)
+ * - it avoids the need to validate user-defined reason phrases
+ * - it omits the possibility of statuses with duplicate reason phrases
+ *
+ * The only downside is that we lose the ability to create custom statuses with
+ * "vanity" reason phrases, but this should be tolerable.
+ */
+case class Status(code: Int) {
+  def reason: String =
+    Status.reasons.get(this) match {
+      case Some(reason) => reason
+      case _ if code < 100 => "Unknown Status"
+      case _ if code < 200 => "Informational"
+      case _ if code < 300 => "Successful"
+      case _ if code < 400 => "Redirection"
+      case _ if code < 500 => "Client Error"
+      case _ if code < 600 => "Server Error"
+      case _ => "Unknown Status"
+    }
+}
 
 object Status {
   val Continue = Status(100)
@@ -60,63 +85,125 @@ object Status {
   val NotExtended = Status(510)
   val NetworkAuthenticationRequired = Status(511)
 
-  def fromCode(n: Int) = n match {
-    case 100 => Continue
-    case 101 => SwitchingProtocols
-    case 102 => Processing
-    case 200 => Ok
-    case 201 => Created
-    case 202 => Accepted
-    case 203 => NonAuthoritativeInformation
-    case 204 => NoContent
-    case 205 => ResetContent
-    case 206 => PartialContent
-    case 207 => MultiStatus
-    case 300 => MultipleChoices
-    case 301 => MovedPermanently
-    case 302 => Found
-    case 303 => SeeOther
-    case 304 => NotModified
-    case 305 => UseProxy
-    case 307 => TemporaryRedirect
-    case 400 => BadRequest
-    case 401 => Unauthorized
-    case 402 => PaymentRequired
-    case 403 => Forbidden
-    case 404 => NotFound
-    case 405 => MethodNotAllowed
-    case 406 => NotAcceptable
-    case 407 => ProxyAuthenticationRequired
-    case 408 => RequestTimeout
-    case 409 => Conflict
-    case 410 => Gone
-    case 411 => LengthRequired
-    case 412 => PreconditionFailed
-    case 413 => RequestEntityTooLarge
-    case 414 => RequestURITooLong
-    case 415 => UnsupportedMediaType
-    case 416 => RequestedRangeNotSatisfiable
-    case 417 => ExpectationFailed
-    case 420 => EnhanceYourCalm
-    case 422 => UnprocessableEntity
-    case 423 => Locked
-    case 424 => FailedDependency
-    case 425 => UnorderedCollection
-    case 426 => UpgradeRequired
-    case 428 => PreconditionRequired
-    case 429 => TooManyRequests
-    case 431 => RequestHeaderFieldsTooLarge
-    case 499 => ClientClosedRequest
-    case 500 => InternalServerError
-    case 501 => NotImplemented
-    case 502 => BadGateway
-    case 503 => ServiceUnavailable
-    case 504 => GatewayTimeout
-    case 505 => HttpVersionNotSupported
-    case 506 => VariantAlsoNegotiates
-    case 507 => InsufficientStorage
-    case 510 => NotExtended
-    case 511 => NetworkAuthenticationRequired
-    case _ => Status(n)
-  }
+  def fromCode(code: Int): Status =
+    statuses.getOrElse(code, Status(code))
+
+  private val statuses: Map[Int, Status] = Map(
+    100 -> Continue,
+    101 -> SwitchingProtocols,
+    102 -> Processing,
+    200 -> Ok,
+    201 -> Created,
+    202 -> Accepted,
+    203 -> NonAuthoritativeInformation,
+    204 -> NoContent,
+    205 -> ResetContent,
+    206 -> PartialContent,
+    207 -> MultiStatus,
+    300 -> MultipleChoices,
+    301 -> MovedPermanently,
+    302 -> Found,
+    303 -> SeeOther,
+    304 -> NotModified,
+    305 -> UseProxy,
+    307 -> TemporaryRedirect,
+    400 -> BadRequest,
+    401 -> Unauthorized,
+    402 -> PaymentRequired,
+    403 -> Forbidden,
+    404 -> NotFound,
+    405 -> MethodNotAllowed,
+    406 -> NotAcceptable,
+    407 -> ProxyAuthenticationRequired,
+    408 -> RequestTimeout,
+    409 -> Conflict,
+    410 -> Gone,
+    411 -> LengthRequired,
+    412 -> PreconditionFailed,
+    413 -> RequestEntityTooLarge,
+    414 -> RequestURITooLong,
+    415 -> UnsupportedMediaType,
+    416 -> RequestedRangeNotSatisfiable,
+    417 -> ExpectationFailed,
+    420 -> EnhanceYourCalm,
+    422 -> UnprocessableEntity,
+    423 -> Locked,
+    424 -> FailedDependency,
+    425 -> UnorderedCollection,
+    426 -> UpgradeRequired,
+    428 -> PreconditionRequired,
+    429 -> TooManyRequests,
+    431 -> RequestHeaderFieldsTooLarge,
+    499 -> ClientClosedRequest,
+    500 -> InternalServerError,
+    501 -> NotImplemented,
+    502 -> BadGateway,
+    503 -> ServiceUnavailable,
+    504 -> GatewayTimeout,
+    505 -> HttpVersionNotSupported,
+    506 -> VariantAlsoNegotiates,
+    507 -> InsufficientStorage,
+    510 -> NotExtended,
+    511 -> NetworkAuthenticationRequired
+  )
+
+  // See note in Status.
+  private val reasons: Map[Status, String] = Map(
+    Continue -> "Continue",
+    SwitchingProtocols -> "Switching Protocols",
+    Processing -> "Processing",
+    Ok -> "OK",
+    Created -> "Created",
+    Accepted -> "Accepted",
+    NonAuthoritativeInformation -> "Non-Authoritative Information",
+    NoContent -> "No Content",
+    ResetContent -> "Reset Content",
+    PartialContent -> "Partial Content",
+    MultiStatus -> "Multi-Status",
+    MultipleChoices -> "Multiple Choices",
+    MovedPermanently -> "Moved Permanently",
+    Found -> "Found",
+    SeeOther -> "See Other",
+    NotModified -> "Not Modified",
+    UseProxy -> "Use Proxy",
+    TemporaryRedirect -> "Temporary Redirect",
+    BadRequest -> "Bad Request",
+    Unauthorized -> "Unauthorized",
+    PaymentRequired -> "Payment Required",
+    Forbidden -> "Forbidden",
+    NotFound -> "Not Found",
+    MethodNotAllowed -> "Method Not Allowed",
+    NotAcceptable -> "Not Acceptable",
+    ProxyAuthenticationRequired -> "Proxy Authentication Required",
+    RequestTimeout -> "Request Timeout",
+    Conflict -> "Conflict",
+    Gone -> "Gone",
+    LengthRequired -> "Length Required",
+    PreconditionFailed -> "Precondition Failed",
+    RequestEntityTooLarge -> "Request Entity Too Large",
+    RequestURITooLong -> "Request-URI Too Long",
+    UnsupportedMediaType -> "Unsupported Media Type",
+    RequestedRangeNotSatisfiable -> "Requested Range Not Satisfiable",
+    ExpectationFailed -> "Expectation Failed",
+    EnhanceYourCalm -> "Enhance Your Calm",
+    UnprocessableEntity -> "Unprocessable Entity",
+    Locked -> "Locked",
+    FailedDependency -> "Failed Dependency",
+    UnorderedCollection -> "Unordered Collection",
+    UpgradeRequired -> "Upgrade Required",
+    PreconditionRequired -> "Precondition Required",
+    TooManyRequests -> "Too Many Requests",
+    RequestHeaderFieldsTooLarge -> "Request Header Fields Too Large",
+    ClientClosedRequest -> "Client Closed Request",
+    InternalServerError -> "Internal Server Error",
+    NotImplemented -> "Not Implemented",
+    BadGateway -> "Bad Gateway",
+    ServiceUnavailable -> "Service Unavailable",
+    GatewayTimeout -> "Gateway Timeout",
+    HttpVersionNotSupported -> "HTTP Version Not Supported",
+    VariantAlsoNegotiates -> "Variant Also Negotiates",
+    InsufficientStorage -> "Insufficient Storage",
+    NotExtended -> "Not Extended",
+    NetworkAuthenticationRequired -> "Network Authentication Required"
+  )
 }
