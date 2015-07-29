@@ -7,21 +7,31 @@ import org.jboss.netty.handler.codec.http.HttpMethod
  *
  * For Java-friendly enums, see [[com.twitter.finagle.httpx.Methods]].
  */
-sealed abstract class Method
+sealed abstract class Method(name: String) {
+  override def toString: String = name
+}
 
 object Method {
-  case object Get extends Method
-  case object Post extends Method
-  case object Put extends Method
-  case object Head extends Method
-  case object Patch extends Method
-  case object Delete extends Method
-  case object Trace extends Method
-  case object Connect extends Method
-  case object Options extends Method
+  case object Get extends Method("GET")
+  case object Post extends Method("POST")
+  case object Put extends Method("PUT")
+  case object Head extends Method("HEAD")
+  case object Patch extends Method("PATCH")
+  case object Delete extends Method("DELETE")
+  case object Trace extends Method("TRACE")
+  case object Connect extends Method("CONNECT")
+  case object Options extends Method("OPTIONS")
 
-  private case class Custom(name: String) extends Method
+  private case class Custom(name: String) extends Method(name)
 
+  /**
+   * Construct a Method.
+   *
+   * Note: We are conservative here and ignore the case of `name` for the
+   * common method types. This makes it impossible to construct a GET method,
+   * for example, accidentally with the wrong case. For other names, not part
+   * of the common methods, we observe the case.
+   */
   def apply(name: String): Method = name.toUpperCase match {
     case "GET" => Get
     case "POST" => Post
@@ -32,7 +42,7 @@ object Method {
     case "TRACE" => Trace
     case "CONNECT" => Connect
     case "OPTIONS" => Options
-    case method => Custom(method)
+    case method => Custom(name)
   }
 
   def unapply(method: Method): Option[String] = method match {
