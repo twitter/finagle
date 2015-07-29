@@ -7,6 +7,39 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Weights are no longer supported by the load balancers. They are moved
+    one level above and interpreted by a new module, the `TrafficDistributor`. This
+    frees the balancers to have non-linear load metrics. It also changes the semantics
+    of weights. They are now normalized by size of endpoints that share the same weight
+    and interpreted proportional to offered load (however, they can still be though of,
+    roughly, as multipliers for traffic). ``RB_ID=677416``
+
+
+  * The RequestSemaphoreFilter now sheds load by dropping the tail of the queue
+    and failing it with a `Failure.Restartable`. Previously, the filter had an unbounded
+    queue but now the default size is 0 (i.e. no queueing). The dropped requests are in
+    turn requeued by Finagle clients with protocol support (e.g. Http, ThriftMux).
+    ``RB_ID=696934``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.jsr166y` has been replaced with Java 7 API. finagle: Replace JSR166y
+    with Java 7 API. ``RB_ID=720903``
+
+  * finagle-core: `LoadBalancerFactory` no longer takes endpoints with weights as
+    per the decoupling mentioned in runtime changes. ``RB_ID=677416``
+
+  * finagle-core: `RequestSemaphoreFilter.Param` now accepts a `com.twitter.concurrent.AsyncSemaphore`
+    instead of an integer representing the max concurrency. ``RB_ID=696934``
+
 6.27.0
 ------
 
@@ -30,19 +63,6 @@ Runtime Behavior Changes
   * finagle-stats: Standard of deviation is no longer calculated. It is exported as a constant 0.0
     for "$statName.stddev". ``RB_ID=717647``
 
-  * finagle-core: Weights are no longer supported by the load balancers. They are moved
-    one level above and interpreted by a new module, the `TrafficDistributor`. This
-    frees the balancers to have non-linear load metrics. It also changes the semantics
-    of weights. They are now normalized by size of endpoints that share the same weight
-    and intepreted proportional to offered load (however, they can still be though of,
-    roughly, as multipliers for traffic). ``RB_ID=677416``
-
-  * The RequestSemaphoreFilter now sheds load by dropping the tail of the queue
-    and failing it with a `Failure.Restartable`. Previously, the filter had an unbounded
-    queue but now the default size is 0 (i.e. no queueing). The dropped requests are in
-    turn requeued by Finagle clients with protocol support (e.g. Http, ThriftMux).
-    ``RB_ID=696934``
-
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-stream: Introduce StreamRequest as a replacement for Netty's
@@ -54,14 +74,8 @@ Breaking API Changes
     with /#/ has been removed. `c.t.f.Namer.bindAndEval` has been removed. Use
     `c.t.f.Namer.resolve` instead. ``RB_ID=711681``
 
-  * finagle-core: LoadBalancerFactory no longer takes endpoints with weights as
-    per the decoupling mentioned in runtime changes.
-
   * finagle: `LoadService` and `ThriftRichClient` migrated off of deprecated `ClassManifest`
     to `ClassTag`. ``RB_ID=720455``
-
-  * finagle-core: `RequestSemaphoreFilter.Param` now accepts a [[com.twitter.concurrent.AsyncSemaphore]]
-    instead of an integer representing the max concurrency.
 
 6.26.0
 -------
