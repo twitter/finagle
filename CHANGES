@@ -40,6 +40,9 @@ Breaking API Changes
   * finagle-core: `RequestSemaphoreFilter.Param` now accepts a `com.twitter.concurrent.AsyncSemaphore`
     instead of an integer representing the max concurrency. ``RB_ID=696934``
 
+  * finagle-httpx: `Method` no longer has an extractor. To access the name of
+    custom methods, use `toString`. ``RB_ID=722913``
+
 6.27.0
 ------
 

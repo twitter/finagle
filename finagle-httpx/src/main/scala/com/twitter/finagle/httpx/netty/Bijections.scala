@@ -39,36 +39,14 @@ object Bijections {
     import HttpMethod._
     import Method._
 
-    def apply(m: Method) = m match {
-      case Get => GET
-      case Post => POST
-      case Put => PUT
-      case Head => HEAD
-      case Patch => PATCH
-      case Delete => DELETE
-      case Trace => TRACE
-      case Connect => CONNECT
-      case Options => OPTIONS
-      case Method(name) => new HttpMethod(name)
-    }
+    def apply(m: Method): HttpMethod = HttpMethod.valueOf(m.toString)
   }
 
   implicit val methodFromNetty = new Injection[HttpMethod, Method] {
     import HttpMethod._
     import Method._
 
-    def apply(m: HttpMethod) = m match {
-      case GET => Get
-      case POST => Post
-      case PUT => Put
-      case HEAD => Head
-      case PATCH => Patch
-      case DELETE => Delete
-      case TRACE => Trace
-      case CONNECT => Connect
-      case OPTIONS => Options
-      case method => Method(method.getName)
-    }
+    def apply(m: HttpMethod): Method = Method(m.getName)
   }
 
   // Status

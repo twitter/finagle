@@ -1,7 +1,5 @@
 package com.twitter.finagle.httpx
 
-import org.jboss.netty.handler.codec.http.HttpMethod
-
 /**
  * Represents the HTTP method.
  *
@@ -43,10 +41,5 @@ object Method {
     case "CONNECT" => Connect
     case "OPTIONS" => Options
     case method => Custom(name)
-  }
-
-  def unapply(method: Method): Option[String] = method match {
-    case Custom(name) => Some(name)
-    case _ => None
   }
 }
