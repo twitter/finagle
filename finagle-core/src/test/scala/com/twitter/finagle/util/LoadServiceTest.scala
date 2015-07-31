@@ -1,6 +1,7 @@
 package com.twitter.finagle.util
 
 import com.google.common.io.ByteStreams
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle.{Announcement, Announcer, Resolver}
 import com.twitter.util.Future
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
@@ -15,7 +16,6 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.collection.mutable
 import scala.util.Random
-import com.twitter.app.GlobalFlag
 
 trait LoadServiceRandomInterface
 
