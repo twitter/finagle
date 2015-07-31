@@ -8,6 +8,13 @@ package com.twitter.finagle.httpx
 sealed abstract class Version
 
 object Version {
-  case object Http10 extends Version
-  case object Http11 extends Version
+  /** HTTP 1.0 */
+  case object Http10 extends Version {
+    override def toString: String = "HTTP/1.0"
+  }
+
+  /** HTTP 1.1 */
+  case object Http11 extends Version {
+    override def toString: String = "HTTP/1.1"
+  }
 }
