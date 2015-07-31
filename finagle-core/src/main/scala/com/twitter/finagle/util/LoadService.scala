@@ -27,9 +27,7 @@ private object ClassPath {
     "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
 
-  private[util] def ignoredPackages =
-    if (ignoredPaths.isDefined) defaultIgnoredPackages ++ ignoredPaths()
-    else defaultIgnoredPackages
+  private[util] def ignoredPackages = defaultIgnoredPackages ++ ignoredPaths()
 
   /**
    * Information about a classpath entry.
