@@ -27,7 +27,7 @@ private object ClassPath {
     "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
 
-  private[util] def ignoredPackages = defaultIgnoredPackages ++ ignoredPaths()
+  private[util] def ignoredPackages = defaultIgnoredPackages ++ loadServiceIgnoredPaths()
 
   /**
    * Information about a classpath entry.
@@ -177,7 +177,7 @@ private object ClassPath {
   }
 }
 
-object ignoredPaths extends GlobalFlag(Seq.empty[String],
+object loadServiceIgnoredPaths extends GlobalFlag(Seq.empty[String],
     "Additional packages to be excluded from recursive directory scan")
 
 /**

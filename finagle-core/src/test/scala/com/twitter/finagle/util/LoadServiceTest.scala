@@ -161,7 +161,7 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
   }
 
   test("LoadService should ignore packages according to ignoredPaths GlobalFlag") {
-    ignoredPaths.let(Seq("foo/", "/bar")){
+    loadServiceIgnoredPaths.let(Seq("foo/", "/bar")){
       assert(ClassPath.ignoredPackages.takeRight(2) == Seq("foo/", "/bar"))
     }
   }
