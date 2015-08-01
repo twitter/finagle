@@ -1,5 +1,6 @@
 package com.twitter.finagle.util
 
+import com.twitter.app.GlobalFlag
 import com.twitter.logging.Level
 import com.twitter.util.NonFatal
 import com.twitter.util.registry.GlobalRegistry
@@ -22,9 +23,11 @@ import scala.reflect.ClassTag
  */
 private object ClassPath {
 
-  private val ignoredPackages = Seq(
+  private val defaultIgnoredPackages = Seq(
     "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
+
+  private[util] def ignoredPackages = defaultIgnoredPackages ++ loadServiceIgnoredPaths()
 
   /**
    * Information about a classpath entry.
@@ -174,6 +177,9 @@ private object ClassPath {
   }
 }
 
+object loadServiceIgnoredPaths extends GlobalFlag(Seq.empty[String],
+    "Additional packages to be excluded from recursive directory scan")
+
 /**
  * Load a singleton class in the manner of [[java.util.ServiceLoader]]. It is
  * more resilient to varying Java packaging configurations than ServiceLoader.
@@ -184,6 +190,7 @@ object LoadService {
 
   def apply[T: ClassTag](): Seq[T] = synchronized {
     val iface = implicitly[ClassTag[T]].runtimeClass.asInstanceOf[Class[T]]
+
     val ifaceName = iface.getName
     val loader = iface.getClassLoader
 
@@ -228,3 +235,4 @@ object LoadService {
     result
   }
 }
+

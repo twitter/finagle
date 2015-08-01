@@ -1,6 +1,7 @@
 package com.twitter.finagle.util
 
 import com.google.common.io.ByteStreams
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle.{Announcement, Announcer, Resolver}
 import com.twitter.util.Future
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
@@ -158,6 +159,12 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
       jar2.delete
     }
   }
+
+  test("LoadService should ignore packages according to ignoredPaths GlobalFlag") {
+    loadServiceIgnoredPaths.let(Seq("foo/", "/bar")){
+      assert(ClassPath.ignoredPackages.takeRight(2) == Seq("foo/", "/bar"))
+    }
+  }
 }
 
 class LoadServiceCallable extends Callable[Seq[Any]] {
@@ -199,3 +206,4 @@ class FooAnnouncer extends Announcer {
 
   override def announce(addr: InetSocketAddress, name: String): Future[Announcement] = null
 }
+
