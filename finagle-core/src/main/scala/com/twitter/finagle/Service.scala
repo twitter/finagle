@@ -115,12 +115,6 @@ abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   def apply(request: Req) = self(request)
   override def close(deadline: Time) = self.close(deadline)
 
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceProxy.status]] and [[ServiceProxy.isAvailable]] must be
-   * overridden together, pending CSL-1336.
-   */
   override def status = self.status
 
   override def toString = self.toString
@@ -204,12 +198,6 @@ trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Prox
   def apply(conn: ClientConnection) = self(conn)
   def close(deadline: Time) = self.close(deadline)
 
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceFactoryProxy.status]] and [[ServiceFactoryProxy.isAvailable]] must
-   * be overridden together, pending CSL-1336.
-   */
   override def status = self.status
 }
 

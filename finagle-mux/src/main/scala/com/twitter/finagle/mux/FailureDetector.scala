@@ -1,10 +1,13 @@
 package com.twitter.finagle.mux
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Status
 import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.util.{DefaultTimer, Ema}
+import com.twitter.finagle.util._
+import com.twitter.logging.Logger
 import com.twitter.util._
-import com.twitter.conversions.time._
+import java.util.ArrayDeque
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Failure detectors attempt to gauge the liveness of a peer,
@@ -27,96 +30,160 @@ private object NullFailureDetector extends FailureDetector {
 /**
  * The threshold failure detector uses session pings to gauge the health
  * of a peer. It sends ping messages periodically and records their RTTs.
- * These RTTs are averaged over a number of observations.
  *
  * The session is marked [[Status.Busy]] until the first successful ping
  * response has been received.
  *
  * If a ping has been sent and has been outstanding for a time greater
- * than the threshold multiplied by the current exponential moving
- * average, the session is marked as [[Status.Busy]]. It is marked
+ * than the threshold multiplied by max ping latency over a number of
+ * observations, the session is marked as [[Status.Busy]]. It is marked
  * [[Status.Open]] when the ping message returns.
  *
  * If `closeThreshold` is positive and no ping responses has been received
- * during a window of `closeThreshold * ema.last`, then the `close`
+ * during a window of `closeThreshold` * max ping latency, then the `close`
  * function is called.
  *
  * This scheme is pretty conservative, but it requires fairly little a priori
  * knowledge: the parameters are used only to tune its sensitivity to
  * history and to bound its failure detection time. The time to detection
- * is bounded by the ping period plus the threshold multiplied by the
- * average ping RTT.
+ * is bounded by the ping period plus the threshold multiplied by max ping
+ * RTT over a history.
+ *
+ * Another concern is the ''cost'' of pinging. In large-scale settings, where
+ * each server may have thousands of clients, and each client thousands of
+ * sessions, the cost of sending even trivially small messages can be significant.
+ * In degenerate cases, pinging could consume the majority of a server process's
+ * time. Thus our defaults are conservative, even if it means our detection latency
+ * increases.
  */
 private class ThresholdFailureDetector(
     ping: () => Future[Unit],
     close: () => Future[Unit],
-    minPeriod: Duration = 100.milliseconds,
+    minPeriod: Duration = 5.seconds,
     threshold: Double = 2,
-    windowSize: Int = 5,
+    windowSize: Int = 100,
     closeThreshold: Int = -1,
     nanoTime: () => Long = System.nanoTime,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     implicit val timer: Timer = DefaultTimer.twitter)
   extends FailureDetector {
-  private[this] val ema = new Ema(windowSize)
-  // The logical clock for EMA measurements. This is accessed
-  // by one logical thread, and does not need to be protected.
-  private[this] var emaTime = 0L
+  require(windowSize > 0)
+  private[this] val log = Logger.get("failureDetector")
 
-  // The timestamp of the last ping, in nanoseconds.
-  @volatile private[this] var timestamp: Long = 0L
-
+  private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()
   private[this] val pingLatencyStat = statsReceiver.stat("ping_latency_us")
   private[this] val closeCounter = statsReceiver.counter("close")
   private[this] val pingCounter = statsReceiver.counter("ping")
   private[this] val busyCounter = statsReceiver.counter("marked_busy")
-  private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()
+  private[this] val revivalCounter = statsReceiver.counter("revivals")
+
+  private[this] val maxPingNs: WindowedMax = new WindowedMax(windowSize)
+  // The timestamp of the last ping, in nanoseconds.
+  @volatile private[this] var timestampNs: Long = 0L
+
+  // start as busy, and become open after receiving the first ping response
+  private[this] val state: AtomicReference[Status] = new AtomicReference(Status.Busy)
+
+  def status: Status = state.get
+
+  private[this] def markBusy(): Unit = {
+    if (state.compareAndSet(Status.Open, Status.Busy)) {
+      busyCounter.incr()
+    }
+  }
+
+  private[this] def markOpen(): Unit = {
+    if (state.compareAndSet(Status.Busy, Status.Open)) {
+      revivalCounter.incr()
+    }
+  }
 
   private[this] def loop(): Future[Unit] = {
     pingCounter.incr()
-    timestamp = nanoTime()
-    val hardTimeout =
-      if (closeThreshold > 0)
-        if (ema.last > 0) (closeThreshold * ema.last).toInt.nanoseconds
-        else minPeriod * threshold * 16 // Arbitrary timeout used for the first ping
-      else Duration.Top
+    timestampNs = nanoTime()
+    val p = ping()
 
-    ping().within(hardTimeout) transform {
-      case Return(_) =>
-        val rtt = nanoTime() - timestamp
-        pingLatencyStat.add(rtt.toFloat/1000)
-        timestamp = 0L
-        emaTime += 1
-        ema.update(emaTime, rtt)
-        Future.sleep(minPeriod - rtt.nanoseconds) before loop()
-      case Throw(_: TimeoutException) =>
+    val max = maxPingNs.get
+    val busyTimeout = (threshold * max).toLong.nanoseconds
+    val closeTimeout: Duration =
+      if (closeThreshold <= 0) Duration.Top else {
+        if (max == Long.MinValue) minPeriod * 12 // Arbitrary timeout used for the first ping
+        else (closeThreshold * max).nanoseconds
+      }
+
+    p.within(busyTimeout).onFailure {
+      case _: TimeoutException => markBusy()
+      case _ =>
+    }
+
+    p.within(closeTimeout).onFailure {
+      case _: TimeoutException =>
         closeCounter.incr()
         close()
+      case _ =>
+    }
+
+    p.transform {
+      case Return(_) =>
+        val rtt = nanoTime() - timestampNs
+        pingLatencyStat.add(rtt.toFloat/1000)
+        maxPingNs.add(rtt)
+        markOpen()
+        Future.sleep(minPeriod - rtt.nanoseconds) before loop()
       case Throw(ex) =>
+        markBusy()
         failureHandler.record(statsReceiver, ex)
         Future.exception(ex)
     }
   }
-
-  /**
-   * The number of nanoseconds pending on the current ping;
-   * 0 if no ping is outstanding.
-   */
-  private[this] def pendingNs(): Long =
-    timestamp match {
-      case 0 => 0
-      case t => nanoTime() - t
-    }
 
   // Note that we assume that the underlying ping() mechanism will
   // simply fail when the accrual detector is no longer required. If
   // ping can fail in other ways, we may fail to do accrual (and indeed
   // be forever stuck).
   loop()
+}
 
-  def status: Status =
-    if (ema.isEmpty || pendingNs() > threshold * ema.last) {
-      busyCounter.incr()
-      Status.Busy
-    } else Status.Open
+private object WindowedMax {
+  private case class AgedLong(v: Long, age: Int)
+}
+
+/**
+ * Maintains maximum value over a history.
+ *
+ * Build based on Deque. New elements are inserted from the tail.
+ * Smaller elements from the tail (if any) are removed before a new
+ * insertion. This guarantees the max element can always be fetched
+ * from the head of deque.
+ *
+ * Each element is inserted and removed once from deque, providing
+ * O(n) for insertion, and O(1) for fetching max.
+ *
+ * @param window the number of history values to keep
+ */
+private class WindowedMax(window: Int) {
+  import WindowedMax._
+  require(window > 0)
+
+  private[this] val values: ArrayDeque[AgedLong] = new ArrayDeque[AgedLong](window)
+  private[this] var currAge: Int = -1
+
+  def add(v: Long): Unit = synchronized {
+    currAge += 1
+    // remove aged element from head
+    if (!values.isEmpty && currAge - values.peekFirst.age >= window) {
+      values.pollFirst()
+    }
+
+    while (!values.isEmpty && v > values.getLast.v) {
+      values.pollLast()
+    }
+
+    values.addLast(AgedLong(v, currAge))
+  }
+
+  def get: Long = synchronized {
+    if (values.isEmpty) Long.MinValue
+    else values.peekFirst.v
+  }
 }

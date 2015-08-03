@@ -11,7 +11,7 @@ import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExc
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.{Future, NonFatal}
+import com.twitter.util.{Closable, Future, NonFatal}
 import java.net.SocketAddress
 import org.apache.thrift.TException
 import org.apache.thrift.protocol.TProtocolFactory
@@ -248,7 +248,7 @@ object ThriftMux
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[mux.Request, mux.Response]
-    ) = {
+    ): Closable = {
       val param.Tracer(tracer) = params[param.Tracer]
       mux.ServerDispatcher.newRequestResponse(
         transport, service, 

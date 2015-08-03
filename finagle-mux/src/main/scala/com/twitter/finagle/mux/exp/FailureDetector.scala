@@ -49,12 +49,19 @@ object FailureDetector {
 
   /**
    * Indicated to use the [[com.twitter.finagle.mux.ThresholdFailureDetector]]
-   * configured with these values when creating a new detector
+   * configured with these values when creating a new detector.
+   *
+   * The default `windowSize` and `threshold` are chosen from examining a
+   * representative ping distribution in a Twitter data center. With long tail
+   * distribution, we want a reasonably large window size to capture long RTTs
+   * in the history. A small threshold makes the detection sensitive to potential
+   * failures. There can be a low rate of false positive, which is fine in most
+   * production cases with cluster redundancy.
    */
   case class ThresholdConfig(
-      minPeriod: Duration = 100.milliseconds,
+      minPeriod: Duration = 5.seconds,
       threshold: Double = 2,
-      windowSize: Int = 5,
+      windowSize: Int = 100,
       closeThreshold: Int = -1)
     extends Config
 

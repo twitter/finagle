@@ -359,7 +359,7 @@ private[twitter] class ServerDispatcher(
  * (This arrangement permits interpositioning other filters to modify ping
  * or dispatch behavior, e.g., for testing.)
  */
-private object Processor extends Filter[Message, Message, Request, Response] {
+private[finagle] object Processor extends Filter[Message, Message, Request, Response] {
   import Message._
 
   private[this] def dispatch(tdispatch: Tdispatch, service: Service[Request, Response]): Future[Message] = {
