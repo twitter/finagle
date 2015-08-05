@@ -373,7 +373,9 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
 
       // if all nodes are down, we might as well try to send requests somewhere
       // as our view of the world may be out of date.
-      val (size, vec) = if (up.isEmpty) (down.size, down) else (up.size, up)
+      val upIsEmpty = up.isEmpty
+      val size = if (upIsEmpty) down.size else up.size
+      val vec = if (upIsEmpty) down else up
 
       if (size == 1) vec.head else {
         val a = vec(rng.nextInt(size))

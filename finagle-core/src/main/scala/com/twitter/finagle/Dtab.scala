@@ -22,7 +22,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
 
   def apply(i: Int): Dentry = dentries0(i)
   def length = dentries0.length
-  override def isEmpty = length == 0
+  override def isEmpty = dentries0.isEmpty
 
   /**
    * Lookup the given `path` with this dtab.

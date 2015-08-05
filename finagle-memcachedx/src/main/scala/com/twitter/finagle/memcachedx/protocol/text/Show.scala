@@ -3,10 +3,12 @@ package com.twitter.finagle.memcachedx.protocol.text
 import com.twitter.finagle.memcachedx.protocol._
 import com.twitter.io.Buf
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
 
+/**
+ * Used by the server.
+ */
 class ResponseToEncoding extends OneToOneEncoder {
   private[this] val ZERO          = Buf.Utf8("0")
   private[this] val VALUE         = Buf.Utf8("VALUE")
@@ -27,9 +29,8 @@ class ResponseToEncoding extends OneToOneEncoder {
     case Number(value)  => Tokens(Seq(Buf.Utf8(value.toString)))
     case Error(cause)   =>
       val formatted: Seq[Array[Byte]] = ExceptionHandler.format(cause)
-      Tokens(formatted.map { Buf.ByteArray(_) })
+      Tokens(formatted.map { Buf.ByteArray.Owned(_) })
     case InfoLines(lines) =>
-      val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
       val statLines = lines map { line =>
         val key = line.key
         val values = line.values
@@ -37,7 +38,6 @@ class ResponseToEncoding extends OneToOneEncoder {
       }
       StatLines(statLines)
     case Values(values) =>
-      val buffer = ChannelBuffers.dynamicBuffer(100 * values.size)
       val tokensWithData = values map {
         case Value(key, value, casUnique, Some(flags)) =>
           TokensWithData(Seq(VALUE, key, flags), value, casUnique)
@@ -48,6 +48,9 @@ class ResponseToEncoding extends OneToOneEncoder {
   }
 }
 
+/**
+ * Used by the client.
+ */
 class CommandToEncoding extends OneToOneEncoder {
   private[this] val GET           = Buf.Utf8("get")
   private[this] val GETS          = Buf.Utf8("gets")
@@ -68,34 +71,39 @@ class CommandToEncoding extends OneToOneEncoder {
   private[this] val QUIT          = Buf.Utf8("quit")
   private[this] val STATS         = Buf.Utf8("stats")
 
+  private[this] val ZeroBuf = Buf.Utf8("0")
+
+  private[this] def intToUtf8(i: Int): Buf =
+    if (i == 0) ZeroBuf else Buf.Utf8(i.toString)
+
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = message match {
     case Add(key, flags, expiry, value) =>
-      TokensWithData(Seq(ADD, key, Buf.Utf8(flags.toString), Buf.Utf8(expiry.inSeconds.toString)), value)
+      TokensWithData(Seq(ADD, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Set(key, flags, expiry, value) =>
-      TokensWithData(Seq(SET, key, Buf.Utf8(flags.toString), Buf.Utf8(expiry.inSeconds.toString)), value)
+      TokensWithData(Seq(SET, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Replace(key, flags, expiry, value) =>
-      TokensWithData(Seq(REPLACE, key, Buf.Utf8(flags.toString), Buf.Utf8(expiry.inSeconds.toString)), value)
+      TokensWithData(Seq(REPLACE, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Append(key, flags, expiry, value) =>
-      TokensWithData(Seq(APPEND, key, Buf.Utf8(flags.toString), Buf.Utf8(expiry.inSeconds.toString)), value)
+      TokensWithData(Seq(APPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Prepend(key, flags, expiry, value) =>
-      TokensWithData(Seq(PREPEND, key, Buf.Utf8(flags.toString), Buf.Utf8(expiry.inSeconds.toString)), value)
+      TokensWithData(Seq(PREPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Cas(key, flags, expiry, value, casUnique) =>
-      TokensWithData(Seq(CAS, key, Buf.Utf8(flags.toString), Buf.Utf8(expiry.inSeconds.toString)), value, Some(casUnique))
+      TokensWithData(Seq(CAS, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(casUnique))
     case Get(keys) =>
-      Tokens(Seq(GET) ++ keys)
+      Tokens(GET +: keys)
     case Gets(keys) =>
-      Tokens(Seq(GETS) ++ keys)
+      Tokens(GETS +: keys)
     case Getv(keys) =>
-      Tokens(Seq(GETV) ++ keys)
+      Tokens(GETV +: keys)
     case Upsert(key, flags, expiry, value, version) =>
-      TokensWithData(Seq(UPSERT, key, Buf.Utf8(flags.toString), Buf.Utf8(expiry.inSeconds.toString)), value, Some(version))
+      TokensWithData(Seq(UPSERT, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(version))
     case Incr(key, amount) =>
       Tokens(Seq(INCR, key, Buf.Utf8(amount.toString)))
     case Decr(key, amount) =>
       Tokens(Seq(DECR, key, Buf.Utf8(amount.toString)))
     case Delete(key) =>
       Tokens(Seq(DELETE, key))
-    case Stats(args) => Tokens(Seq(STATS) ++ args)
+    case Stats(args) => Tokens(STATS +: args)
     case Quit() =>
       Tokens(Seq(QUIT))
   }

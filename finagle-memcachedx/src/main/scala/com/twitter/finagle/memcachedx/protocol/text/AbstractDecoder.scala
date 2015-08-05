@@ -35,7 +35,7 @@ abstract class AbstractDecoder extends FrameDecoder {
   }
 
   /**
-   * @param needsData return the number of bytes needed, or -1 if no more bytes
+   * @param needsData return the number of bytes needed, or `null` if no more bytes
    *                  are necessary.
    */
   protected def decodeLine(
@@ -45,7 +45,7 @@ abstract class AbstractDecoder extends FrameDecoder {
   ): Decoding = {
     val frameLength = buffer.bytesBefore(FindCRLF)
     if (frameLength < 0) {
-      needMoreData
+      null
     } else {
       val frame = buffer.slice(buffer.readerIndex, frameLength)
       buffer.skipBytes(frameLength + DelimiterLength)
@@ -57,7 +57,7 @@ abstract class AbstractDecoder extends FrameDecoder {
         continue(tokens)
       } else {
         awaitData(tokens, bytesNeeded)
-        needMoreData
+        null
       }
     }
   }
@@ -68,10 +68,10 @@ abstract class AbstractDecoder extends FrameDecoder {
   )(continue: ChannelBuffer => Decoding
   ): Decoding = {
     if (buffer.readableBytes < (bytesNeeded + DelimiterLength))
-      needMoreData
+      null
     else {
-      val lastTwoBytesInFrame = buffer.slice(bytesNeeded + buffer.readerIndex, DelimiterLength)
-      if (!lastTwoBytesInFrame.equals(Delimiter)) throw new ClientError("Missing delimiter")
+      if (!FindCRLF.find(buffer, bytesNeeded + buffer.readerIndex))
+        throw new ClientError("Missing delimiter")
 
       val data = buffer.slice(buffer.readerIndex, bytesNeeded)
       buffer.skipBytes(bytesNeeded + DelimiterLength)
@@ -81,8 +81,6 @@ abstract class AbstractDecoder extends FrameDecoder {
       continue(ChannelBuffers.copiedBuffer(data))
     }
   }
-
-  private[this] val needMoreData = null
 
   protected[memcachedx] def start(): Unit
   protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int): Unit

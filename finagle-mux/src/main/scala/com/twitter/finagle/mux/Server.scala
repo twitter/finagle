@@ -10,6 +10,7 @@ import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
@@ -362,40 +363,41 @@ private[twitter] class ServerDispatcher(
 private[finagle] object Processor extends Filter[Message, Message, Request, Response] {
   import Message._
 
-  private[this] def dispatch(tdispatch: Tdispatch, service: Service[Request, Response]): Future[Message] = {
-    val Tdispatch(tag, contexts, dst, dtab, bytes) = tdispatch
+  private[this] val ContextsToBufs: ((ChannelBuffer, ChannelBuffer)) => ((Buf, Buf)) = {
+    case (k, v) =>
+      (ChannelBufferBuf.Owned(k.duplicate), ChannelBufferBuf.Owned(v.duplicate))
+  }
 
-    val contextBufs = contexts map { case (k, v) =>
-      ChannelBufferBuf.Owned(k.duplicate) -> ChannelBufferBuf.Owned(v.duplicate)
-    }
+  private[this] def dispatch(tdispatch: Tdispatch, service: Service[Request, Response]): Future[Message] = {
+    val contextBufs = tdispatch.contexts.map(ContextsToBufs)
+
     Contexts.broadcast.letUnmarshal(contextBufs) {
-      if (dtab.length > 0)
-        Dtab.local ++= dtab
-      service(Request(dst, ChannelBufferBuf.Owned(bytes))) transform {
+      if (tdispatch.dtab.nonEmpty)
+        Dtab.local ++= tdispatch.dtab
+      service(Request(tdispatch.dst, ChannelBufferBuf.Owned(tdispatch.req))).transform {
         case Return(rep) =>
-          Future.value(RdispatchOk(tag, Nil, BufChannelBuffer(rep.body)))
+          Future.value(RdispatchOk(tdispatch.tag, Nil, BufChannelBuffer(rep.body)))
 
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-          Future.value(RdispatchNack(tag, Nil))
+          Future.value(RdispatchNack(tdispatch.tag, Nil))
 
         case Throw(exc) =>
-          Future.value(RdispatchError(tag, Nil, exc.toString))
+          Future.value(RdispatchError(tdispatch.tag, Nil, exc.toString))
       }
     }
   }
 
   private[this] def dispatch(treq: Treq, service: Service[Request, Response]): Future[Message] = {
-    val Treq(tag, traceId, bytes) = treq
-    Trace.letIdOption(traceId) {
-      service(Request(Path.empty, ChannelBufferBuf.Owned(bytes))) transform {
+    Trace.letIdOption(treq.traceId) {
+      service(Request(Path.empty, ChannelBufferBuf.Owned(treq.req))).transform {
         case Return(rep) =>
-          Future.value(RreqOk(tag, BufChannelBuffer(rep.body)))
+          Future.value(RreqOk(treq.tag, BufChannelBuffer(rep.body)))
 
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-          Future.value(RreqNack(tag))
+          Future.value(RreqNack(treq.tag))
 
         case Throw(exc) =>
-          Future.value(RreqError(tag, exc.toString))
+          Future.value(RreqError(treq.tag, exc.toString))
       }
     }
   }
