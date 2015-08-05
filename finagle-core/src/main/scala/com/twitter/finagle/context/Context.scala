@@ -33,6 +33,12 @@ trait Context {
     def get[A](key: Key[A]): Option[A]
 
     /**
+     * Retrieve the current definition of a key if it is defined.
+     * If it is not defined, `orElse` is evaluated and returned.
+     */
+    def getOrElse[A](key: Key[A], orElse: () => A): A
+
+    /**
      * Tells whether `key` is defined in this environment.
      */
     def contains[A](key: Key[A]): Boolean
@@ -56,6 +62,7 @@ trait Context {
   object Empty extends Env {
     def apply[A](key: Key[A]) = throw new NoSuchElementException
     def get[A](key: Key[A]) = None
+    def getOrElse[A](key: Key[A], orElse: () => A): A = orElse()
     def contains[A](key: Key[A]) = false
     override def toString = "<empty com.twitter.finagle.context.Env>"
   }
@@ -73,6 +80,10 @@ trait Context {
       if (key == this.key) Some(value.asInstanceOf[B])
       else next.get(key)
 
+    def getOrElse[B](key: Key[B], orElse: () => B): B =
+      if (key == this.key) value.asInstanceOf[B]
+      else next.getOrElse(key, orElse)
+
     def contains[B](key: Key[B]): Boolean =
       key == this.key || next.contains(key)
 
@@ -81,7 +92,7 @@ trait Context {
 
   /**
    * An environment without `key`. Lookups for other keys
-   * are forwarded to `next.
+   * are forwarded to `next`.
    */
   case class Cleared[A](next: Env, key: Key[A]) extends Env {
     def apply[B](key: Key[B]) =
@@ -91,6 +102,10 @@ trait Context {
     def get[B](key: Key[B])  =
       if (key == this.key) None
       else next.get(key)
+
+    def getOrElse[B](key: Key[B], orElse: () => B): B =
+      if (key == this.key) orElse()
+      else next.getOrElse(key, orElse)
 
     def contains[B](key: Key[B]) =
       key != this.key && next.contains(key)
@@ -109,6 +124,9 @@ trait Context {
     def get[A](key: Key[A])  =
       if (left.contains(key)) left.get(key)
       else right.get(key)
+
+    def getOrElse[A](key: Key[A], orElse: () => A): A =
+      left.getOrElse(key, () => right.getOrElse(key, orElse))
 
     def contains[A](key: Key[A]) =
       left.contains(key) || right.contains(key)
@@ -137,6 +155,13 @@ trait Context {
    * if it is defined in the current request-local context.
    */
   def get[A](key: Key[A]): Option[A] = env.get(key)
+
+  /**
+   * Retrieve the current definition of a key if it is defined.
+   * If it is not defined, `orElse` is evaluated and returned.
+   */
+  def getOrElse[A](key: Key[A], orElse: () => A): A =
+    env.getOrElse(key, orElse)
 
   /**
    * Tells whether `key` is defined in the current request-local
@@ -229,6 +254,7 @@ final class MarshalledContext extends Context {
 
     def apply[A](key: Key[A]): A = env(key).apply(key)
     def get[A](key: Key[A]): Option[A] = env(key).get(key)
+    def getOrElse[A](key: Key[A], orElse: () => A): A = env(key).getOrElse(key, orElse)
     def contains[A](key: Key[A]): Boolean = env(key).contains(key)
 
     override def toString =

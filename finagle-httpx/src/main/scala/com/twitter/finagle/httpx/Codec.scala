@@ -257,19 +257,20 @@ private object TraceInfo {
   }
 
   def setClientRequestHeaders(request: Request): Unit = {
-    Header.All foreach { request.headers.remove(_) }
+    Header.All.foreach { request.headers.remove(_) }
 
-    request.headers.add(Header.TraceId, Trace.id.traceId.toString)
-    request.headers.add(Header.SpanId, Trace.id.spanId.toString)
+    val traceId = Trace.id
+    request.headers.add(Header.TraceId, traceId.traceId.toString)
+    request.headers.add(Header.SpanId, traceId.spanId.toString)
     // no parent id set means this is the root span
-    Trace.id._parentId foreach { id =>
+    traceId._parentId.foreach { id =>
       request.headers.add(Header.ParentSpanId, id.toString)
     }
     // three states of sampled, yes, no or none (let the server decide)
-    Trace.id.sampled foreach { sampled =>
+    traceId.sampled.foreach { sampled =>
       request.headers.add(Header.Sampled, sampled.toString)
     }
-    request.headers.add(Header.Flags, Trace.id.flags.toLong)
+    request.headers.add(Header.Flags, traceId.flags.toLong)
     traceRpc(request)
   }
 

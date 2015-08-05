@@ -200,8 +200,9 @@ class MetricsStatsReceiver(
             metricsCounter.add(delta)
             if (sink.recording) {
               if (Trace.hasId) {
+                val traceId = Trace.id
                 sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta,
-                  traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+                  traceIdVal = traceId.traceId.self, spanIdVal = traceId.spanId.self)
               } else {
                 sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta)
               }
@@ -232,8 +233,9 @@ class MetricsStatsReceiver(
             histogram.add(asLong)
             if (sink.recording) {
               if (Trace.hasId) {
+                val traceId = Trace.id
                 sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong,
-                  traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+                  traceIdVal = traceId.traceId.self, spanIdVal = traceId.spanId.self)
               } else {
                 sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong)
               }

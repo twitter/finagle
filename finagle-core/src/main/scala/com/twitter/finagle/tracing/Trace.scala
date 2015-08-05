@@ -1,5 +1,16 @@
 package com.twitter.finagle.tracing
 
+import com.twitter.app.GlobalFlag
+import com.twitter.finagle.Init
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.util.ByteArrays
+import com.twitter.io.Buf
+import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw, Time, Try}
+import java.net.InetSocketAddress
+import scala.util.Random
+
+object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
+
 /**
  * This is a tracing system similar to Dapper:
  *
@@ -11,20 +22,7 @@ package com.twitter.finagle.tracing
  * It is meant to be independent of whatever underlying RPC mechanism
  * is being used, and it is up to the underlying codec to implement
  * the transport.
- */
-
-import com.twitter.finagle.Init
-import com.twitter.util.{Future, Duration, Time, Local, Stopwatch, Try, Throw, Return}
-import java.net.InetSocketAddress
-import scala.util.Random
-import com.twitter.app.GlobalFlag
-import com.twitter.finagle.context.Contexts
-import com.twitter.io.Buf
-import com.twitter.finagle.util.ByteArrays
-
-object debugTrace extends GlobalFlag(false, "Print all traces to the console.")
-
-/**
+ *
  * `Trace` maintains the state of the tracing stack
  * The current `TraceId` has a terminal flag, indicating whether it
  * can be overridden with a different `TraceId`. Setting the current
@@ -44,11 +42,14 @@ object Trace {
     val empty = TraceCtx(false, Nil)
   }
 
-  private val traceCtx = new Contexts.local.Key[TraceCtx]
+  private[this] val traceCtx = new Contexts.local.Key[TraceCtx]
 
-  private val someTrue = Some(true)
+  private[this] val someTrue = Some(true)
+  private[this] val someFalse = Some(false)
 
-  private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId]("com.twitter.finagle.tracing.TraceContext") {
+  private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId](
+    "com.twitter.finagle.tracing.TraceContext"
+  ) {
     private val local = new ThreadLocal[Array[Byte]] {
       override def initialValue() = new Array[Byte](32)
     }
@@ -74,7 +75,7 @@ object Trace {
 
       val flags = Flags(flags64)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
-        Some(flags.isFlagSet(Flags.Sampled))
+        if (flags.isFlagSet(Flags.Sampled)) someTrue else someFalse
       } else None
 
       val traceId = TraceId(
@@ -88,26 +89,28 @@ object Trace {
     }
   }
 
-  private val rng = new Random
-  private val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
-  @volatile private var tracingEnabled = true
+  private[this] val rng = new Random
+  private[this] val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
+  @volatile private[this] var tracingEnabled = true
 
-  private def ctx: TraceCtx = Contexts.local.get(traceCtx) match {
-    case Some(ctx) => ctx
-    case None => TraceCtx.empty
-  }
+  private[this] val EmptyTraceCtxFn = () => TraceCtx.empty
+
+  private def ctx: TraceCtx =
+    Contexts.local.getOrElse(traceCtx, EmptyTraceCtxFn)
 
   /**
    * True if there is an identifier for the current trace.
    */
   def hasId: Boolean = Contexts.broadcast.contains(idCtx)
 
+  private[this] val defaultIdFn: () => TraceId = () => defaultId
+
   /**
    * Get the current trace identifier.  If no identifiers have been
    * pushed, a default one is provided.
    */
   def id: TraceId =
-    if (hasId) Contexts.broadcast(idCtx) else defaultId
+    Contexts.broadcast.getOrElse(idCtx, defaultIdFn)
 
   /**
    * Get the current identifier, if it exists.
@@ -128,23 +131,23 @@ object Trace {
   /**
    * Turn trace recording on.
    */
-  def enable() = tracingEnabled = true
+  def enable(): Unit = tracingEnabled = true
 
   /**
    * Turn trace recording off.
    */
-  def disable() = tracingEnabled = false
+  def disable(): Unit = tracingEnabled = false
 
   /**
    * Create a derived id from the current TraceId.
    */
   def nextId: TraceId = {
     val currentId = idOption
-    TraceId(currentId map { _.traceId },
-      currentId map { _.spanId },
+    TraceId(currentId.map(_.traceId),
+      currentId.map(_.spanId),
       SpanId(rng.nextLong()),
-      currentId map { _.sampled } getOrElse None,
-      currentId map { _.flags} getOrElse Flags())
+      currentId.map(_.sampled).getOrElse(None),
+      currentId.map(_.flags).getOrElse(Flags()))
   }
 
   /**
@@ -235,7 +238,7 @@ object Trace {
       Trace.recordBinary("finagle.version", Init.finagleVersion)
       Trace.recordServiceName(service)
       Trace.recordRpc(rpc)
-      hostOpt map { Trace.recordServerAddr(_) }
+      hostOpt.map { Trace.recordServerAddr(_) }
       Trace.record(Annotation.ServerRecv())
       try f finally {
         Trace.record(Annotation.ServerSend())
@@ -258,7 +261,7 @@ object Trace {
   /**
    * Record a raw record without checking if it's sampled/enabled/etc.
    */
-  private[this] def uncheckedRecord(rec: Record) {
+  private[this] def uncheckedRecord(rec: Record): Unit = {
     tracers.distinct.foreach { t: Tracer => t.record(rec) }
   }
 
@@ -266,7 +269,7 @@ object Trace {
    * Record a raw ''Record''.  This will record to a _unique_ set of
    * tracers in the stack.
    */
-  def record(rec: => Record) {
+  def record(rec: => Record): Unit = {
     if (debugTrace())
       System.err.println(rec)
     if (isActivelyTracing)
@@ -301,58 +304,58 @@ object Trace {
    /*
     * Convenience methods that construct records of different kinds.
     */
-  def record(ann: Annotation) {
+  def record(ann: Annotation): Unit = {
     if (debugTrace())
       System.err.println(Record(id, Time.now, ann, None))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, None))
    }
 
-  def record(ann: Annotation, duration: Duration) {
+  def record(ann: Annotation, duration: Duration): Unit = {
     if (debugTrace())
       System.err.println(Record(id, Time.now, ann, Some(duration)))
     if (isActivelyTracing)
       uncheckedRecord(Record(id, Time.now, ann, Some(duration)))
   }
 
-  def record(message: String) {
+  def record(message: String): Unit = {
     record(Annotation.Message(message))
   }
 
-  def record(message: String, duration: Duration) {
+  def record(message: String, duration: Duration): Unit = {
     record(Annotation.Message(message), duration)
   }
 
   @deprecated("Use recordRpc and recordServiceName", "6.13.x")
-  def recordRpcname(service: String, rpc: String) {
+  def recordRpcname(service: String, rpc: String): Unit = {
     record(Annotation.Rpcname(service, rpc))
   }
 
-  def recordServiceName(serviceName: String) {
+  def recordServiceName(serviceName: String): Unit = {
     record(Annotation.ServiceName(serviceName))
   }
 
-  def recordRpc(name: String) {
+  def recordRpc(name: String): Unit = {
     record(Annotation.Rpc(name))
   }
 
-  def recordClientAddr(ia: InetSocketAddress) {
+  def recordClientAddr(ia: InetSocketAddress): Unit = {
     record(Annotation.ClientAddr(ia))
   }
 
-  def recordServerAddr(ia: InetSocketAddress) {
+  def recordServerAddr(ia: InetSocketAddress): Unit = {
     record(Annotation.ServerAddr(ia))
   }
 
-  def recordLocalAddr(ia: InetSocketAddress) {
+  def recordLocalAddr(ia: InetSocketAddress): Unit = {
     record(Annotation.LocalAddr(ia))
   }
 
-  def recordBinary(key: String, value: Any) {
+  def recordBinary(key: String, value: Any): Unit = {
     record(Annotation.BinaryAnnotation(key, value))
   }
 
-  def recordBinaries(annotations: Map[String, Any]) {
+  def recordBinaries(annotations: Map[String, Any]): Unit = {
     if (isActivelyTracing) {
       for ((key, value) <- annotations) {
         recordBinary(key, value)

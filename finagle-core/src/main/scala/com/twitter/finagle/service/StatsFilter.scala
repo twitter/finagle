@@ -56,6 +56,10 @@ object StatsFilter {
     override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
       new StatsFilter[Req, Rep](statsReceiver, exceptionStatsHandler)
   }
+
+  /** Used as a sentinel with reference equality to indicate the absence of a deadline */
+  private val NoDeadline = Deadline(Time.Undefined, Time.Undefined)
+  private val NoDeadlineFn = () => NoDeadline
 }
 
 /**
@@ -81,6 +85,8 @@ class StatsFilter[Req, Rep](
     timeUnit: TimeUnit)
   extends SimpleFilter[Req, Rep]
 {
+  import StatsFilter._
+
   def this(statsReceiver: StatsReceiver, exceptionStatsHandler: ExceptionStatsHandler) =
     this(statsReceiver, exceptionStatsHandler, TimeUnit.MILLISECONDS)
 
@@ -109,12 +115,11 @@ class StatsFilter[Req, Rep](
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val elapsed = Stopwatch.start()
 
-    Contexts.broadcast.get(Deadline) match {
-      case None =>
-      case Some(Deadline(timestamp, deadline)) =>
-        val now = Time.now
-        transitTimeStat.add(((now-timestamp) max Duration.Zero).inUnit(timeUnit))
-        budgetTimeStat.add(((deadline-now) max Duration.Zero).inUnit(timeUnit))
+    val dl = Contexts.broadcast.getOrElse(Deadline, NoDeadlineFn)
+    if (dl ne NoDeadline) {
+      val now = Time.now
+      transitTimeStat.add(((now-dl.timestamp) max Duration.Zero).inUnit(timeUnit))
+      budgetTimeStat.add(((dl.deadline-now) max Duration.Zero).inUnit(timeUnit))
     }
 
     outstandingRequestCount.increment()
