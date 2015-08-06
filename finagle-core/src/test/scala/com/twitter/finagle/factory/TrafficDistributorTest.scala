@@ -3,9 +3,7 @@ package com.twitter.finagle.factory
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.loadbalancer.Balancers
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Function => _, _}
@@ -322,11 +320,16 @@ class TrafficDistributorTest extends FunSuite {
       assert(sr.counters(Seq("test", "connects")) == 1)
       // each WC gets a new balancer which adds the addr
       assert(sr.counters(Seq("test", "loadbalancer", "adds")) == i)
+      assert(sr.counters(Seq("test", "loadbalancer", "removes")) == i - 1)
+      assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == i)
       assert(sr.counters.get(Seq("test", "closes")) == None)
     }
 
     va() = Addr.Bound(Set.empty[SocketAddress])
     assert(sr.counters(Seq("test", "closes")) == 1)
+    assert(sr.counters(Seq("test", "loadbalancer", "adds")) == 10)
+    assert(sr.counters(Seq("test", "loadbalancer", "removes")) == 10)
+    assert(sr.gauges(Seq("test", "loadbalancer", "size"))() == 0)
   })
 
   test("close a client") (new StringClient with StringServer {

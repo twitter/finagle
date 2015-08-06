@@ -2,13 +2,11 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, Counter}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{OnReady, Rng, Updater}
 import com.twitter.util.{Activity, Future, Promise, Time, Closable, Return, Throw}
 import java.util.concurrent.atomic.AtomicInteger
 import scala.annotation.tailrec
-import scala.collection.immutable
-import scala.collection.mutable
 
 /**
  * Basic functionality for a load balancer. Balancer takes care of
@@ -255,8 +253,11 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
     f
   }
 
-  def close(deadline: Time) =
+  def close(deadline: Time) = {
+    for (gauge <- gauges) gauge.remove()
+    removes.incr(dist.vector.size)
     Closable.all(dist.vector:_*).close(deadline)
+  }
 }
 
 /**

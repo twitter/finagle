@@ -74,8 +74,9 @@ private[finagle] object TrafficDistributor {
     extends ServiceFactory[Req, Rep] {
 
     private[this] val meanWeight = statsReceiver.addGauge("meanweight") {
-      if (classes.isEmpty) 0.0F
-      else (classes.map(_.weight).sum / classes.size.toFloat).toFloat
+      val size = classes.map(_.size).sum
+      if (size != 0) classes.map { c => c.weight * c.size }.sum.toFloat / size
+      else 0.0F
     }
 
     private[this] val (balancers, drv): (IndexedSeq[ServiceFactory[Req, Rep]], Drv) = {
@@ -89,8 +90,10 @@ private[finagle] object TrafficDistributor {
     def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
       balancers(drv(rng))(conn)
 
-    def close(deadline: Time): Future[Unit] =
+    def close(deadline: Time): Future[Unit] = {
+      meanWeight.remove()
       Closable.all(balancers: _*).close(deadline)
+    }
 
     override def status = Status.worstOf[ServiceFactory[Req, Rep]](balancers, _.status)
     override def toString = s"Distributor($classes)"
@@ -240,7 +243,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
     }
   }
 
-  private[this] val weightClasses = partition(weightEndpoints(dest.run.changes))
+  private[this] val weightClasses = partition(weightEndpoints(dest.states))
   private[this] val pending = new Promise[ServiceFactory[Req, Rep]]
   private[this] val init: ServiceFactory[Req, Rep] = new DelayedFactory(pending)
 
