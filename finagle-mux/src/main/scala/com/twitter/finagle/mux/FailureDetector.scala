@@ -1,13 +1,13 @@
 package com.twitter.finagle.mux
 
+import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
-import com.twitter.finagle.Status
-import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.util._
-import com.twitter.logging.Logger
-import com.twitter.util._
-import java.util.ArrayDeque
-import java.util.concurrent.atomic.AtomicReference
+import com.twitter.finagle.{Status, Stack}
+import com.twitter.finagle.mux._
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.util.parsers.{double, duration, int, list}
+import com.twitter.util.{Duration, Future}
+import java.util.logging.Logger
 
 /**
  * Failure detectors attempt to gauge the liveness of a peer,
@@ -28,162 +28,129 @@ private object NullFailureDetector extends FailureDetector {
 }
 
 /**
- * The threshold failure detector uses session pings to gauge the health
- * of a peer. It sends ping messages periodically and records their RTTs.
- *
- * The session is marked [[Status.Busy]] until the first successful ping
- * response has been received.
- *
- * If a ping has been sent and has been outstanding for a time greater
- * than the threshold multiplied by max ping latency over a number of
- * observations, the session is marked as [[Status.Busy]]. It is marked
- * [[Status.Open]] when the ping message returns.
- *
- * If `closeThreshold` is positive and no ping responses has been received
- * during a window of `closeThreshold` * max ping latency, then the `close`
- * function is called.
- *
- * This scheme is pretty conservative, but it requires fairly little a priori
- * knowledge: the parameters are used only to tune its sensitivity to
- * history and to bound its failure detection time. The time to detection
- * is bounded by the ping period plus the threshold multiplied by max ping
- * RTT over a history.
- *
- * Another concern is the ''cost'' of pinging. In large-scale settings, where
- * each server may have thousands of clients, and each client thousands of
- * sessions, the cost of sending even trivially small messages can be significant.
- * In degenerate cases, pinging could consume the majority of a server process's
- * time. Thus our defaults are conservative, even if it means our detection latency
- * increases.
+ * GlobalFlag to configure FailureDetection used only in the
+ * absence of any app-specified config. This is the default (legacy)
+ * behavior.
  */
-private class ThresholdFailureDetector(
-    ping: () => Future[Unit],
-    close: () => Future[Unit],
-    minPeriod: Duration = 5.seconds,
-    threshold: Double = 2,
-    windowSize: Int = 100,
-    closeThreshold: Int = -1,
-    nanoTime: () => Long = System.nanoTime,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    implicit val timer: Timer = DefaultTimer.twitter)
-  extends FailureDetector {
-  require(windowSize > 0)
-  private[this] val log = Logger.get("failureDetector")
+object sessionFailureDetector extends GlobalFlag(
+  "none",
+  "The failure detector used to determine session liveness " +
+      "[none|threshold:minPeriod:threshold:win:closeThreshold]")
 
-  private[this] val failureHandler = new MultiCategorizingExceptionStatsHandler()
-  private[this] val pingLatencyStat = statsReceiver.stat("ping_latency_us")
-  private[this] val closeCounter = statsReceiver.counter("close")
-  private[this] val pingCounter = statsReceiver.counter("ping")
-  private[this] val busyCounter = statsReceiver.counter("marked_busy")
-  private[this] val revivalCounter = statsReceiver.counter("revivals")
-
-  private[this] val maxPingNs: WindowedMax = new WindowedMax(windowSize)
-  // The timestamp of the last ping, in nanoseconds.
-  @volatile private[this] var timestampNs: Long = 0L
-
-  // start as busy, and become open after receiving the first ping response
-  private[this] val state: AtomicReference[Status] = new AtomicReference(Status.Busy)
-
-  def status: Status = state.get
-
-  private[this] def markBusy(): Unit = {
-    if (state.compareAndSet(Status.Open, Status.Busy)) {
-      busyCounter.incr()
-    }
-  }
-
-  private[this] def markOpen(): Unit = {
-    if (state.compareAndSet(Status.Busy, Status.Open)) {
-      revivalCounter.incr()
-    }
-  }
-
-  private[this] def loop(): Future[Unit] = {
-    pingCounter.incr()
-    timestampNs = nanoTime()
-    val p = ping()
-
-    val max = maxPingNs.get
-    val busyTimeout = (threshold * max).toLong.nanoseconds
-    val closeTimeout: Duration =
-      if (closeThreshold <= 0) Duration.Top else {
-        if (max == Long.MinValue) minPeriod * 12 // Arbitrary timeout used for the first ping
-        else (closeThreshold * max).nanoseconds
-      }
-
-    p.within(busyTimeout).onFailure {
-      case _: TimeoutException => markBusy()
-      case _ =>
-    }
-
-    p.within(closeTimeout).onFailure {
-      case _: TimeoutException =>
-        closeCounter.incr()
-        close()
-      case _ =>
-    }
-
-    p.transform {
-      case Return(_) =>
-        val rtt = nanoTime() - timestampNs
-        pingLatencyStat.add(rtt.toFloat/1000)
-        maxPingNs.add(rtt)
-        markOpen()
-        Future.sleep(minPeriod - rtt.nanoseconds) before loop()
-      case Throw(ex) =>
-        markBusy()
-        failureHandler.record(statsReceiver, ex)
-        Future.exception(ex)
-    }
-  }
-
-  // Note that we assume that the underlying ping() mechanism will
-  // simply fail when the accrual detector is no longer required. If
-  // ping can fail in other ways, we may fail to do accrual (and indeed
-  // be forever stuck).
-  loop()
-}
-
-private object WindowedMax {
-  private case class AgedLong(v: Long, age: Int)
-}
 
 /**
- * Maintains maximum value over a history.
- *
- * Build based on Deque. New elements are inserted from the tail.
- * Smaller elements from the tail (if any) are removed before a new
- * insertion. This guarantees the max element can always be fetched
- * from the head of deque.
- *
- * Each element is inserted and removed once from deque, providing
- * O(n) for insertion, and O(1) for fetching max.
- *
- * @param window the number of history values to keep
+ * Companion object capable of creating a FailureDetector based on parameterized config.
  */
-private class WindowedMax(window: Int) {
-  import WindowedMax._
-  require(window > 0)
+object FailureDetector {
+  /**
+   * Base type used to identify and configure the [[FailureDetector]].
+   */
+  sealed trait Config
 
-  private[this] val values: ArrayDeque[AgedLong] = new ArrayDeque[AgedLong](window)
-  private[this] var currAge: Int = -1
+  /**
+   * Default config type which tells the [[FailureDetector]] to extract
+   * config values from the sessionFailureDetector GlobalFlag.
+   */
+  case object GlobalFlagConfig extends Config
 
-  def add(v: Long): Unit = synchronized {
-    currAge += 1
-    // remove aged element from head
-    if (!values.isEmpty && currAge - values.peekFirst.age >= window) {
-      values.pollFirst()
-    }
+  /**
+   * Indicated to use the [[com.twitter.finagle.mux.NullFailureDetector]] when creating a new detector
+   */
+  case object NullConfig extends Config
 
-    while (!values.isEmpty && v > values.getLast.v) {
-      values.pollLast()
-    }
+  /**
+   * Indicated to use the [[com.twitter.finagle.mux.ThresholdFailureDetector]]
+   * configured with these values when creating a new detector.
+   *
+   * The default `windowSize` and `threshold` are chosen from examining a
+   * representative ping distribution in a Twitter data center. With long tail
+   * distribution, we want a reasonably large window size to capture long RTTs
+   * in the history. A small threshold makes the detection sensitive to potential
+   * failures. There can be a low rate of false positive, which is fine in most
+   * production cases with cluster redundancy.
+   */
+  case class ThresholdConfig(
+      minPeriod: Duration = 5.seconds,
+      threshold: Double = 2,
+      windowSize: Int = 100,
+      closeThreshold: Int = -1)
+    extends Config
 
-    values.addLast(AgedLong(v, currAge))
+  /**
+   * Helper class for configuring a [[FailureDetector]] within a
+   * [[com.twitter.finagle.Stackable]] client
+   */
+  case class Param(param: Config) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
   }
 
-  def get: Long = synchronized {
-    if (values.isEmpty) Long.MinValue
-    else values.peekFirst.v
+  case object Param {
+    // by default, tell the builder to parse the GlobalFlag value
+    // (legacy behavior) By default the flag is 'none'
+    implicit val param = Stack.Param(Param(GlobalFlagConfig))
+  }
+
+  private[this] val log = Logger.getLogger(getClass.getName)
+
+  /**
+   * Instantiate a new FailureDetector based on the config type
+   */
+  def apply(
+    config: Config,
+    ping: () => Future[Unit],
+    close: () => Future[Unit],
+    statsReceiver: StatsReceiver
+  ): FailureDetector = {
+    config match {
+      case NullConfig => NullFailureDetector
+
+      case cfg: ThresholdConfig =>
+        new ThresholdFailureDetector(ping, close, cfg.minPeriod, cfg.threshold,
+          cfg.windowSize, cfg.closeThreshold, statsReceiver = statsReceiver)
+
+      case GlobalFlagConfig =>
+        parseConfigFromFlags(ping, close, statsReceiver = statsReceiver)
+    }
+  }
+
+  /**
+   * Fallback behavior: parse the sessionFailureDetector global flag and
+   * instantiate the proper config.
+   */
+  private def parseConfigFromFlags(
+    ping: () => Future[Unit],
+    close: () => Future[Unit],
+    nanoTime: () => Long = System.nanoTime,
+    statsReceiver: StatsReceiver = NullStatsReceiver
+  ): FailureDetector = {
+    sessionFailureDetector() match {
+      case list("threshold", duration(min), double(threshold), int(win), int(closeThreshold)) =>
+        new ThresholdFailureDetector(
+          ping, close, min, threshold, win, closeThreshold, nanoTime, statsReceiver)
+
+      case list("threshold", duration(min), double(threshold), int(win)) =>
+        new ThresholdFailureDetector(
+          ping, close, min, threshold, win, nanoTime = nanoTime, statsReceiver = statsReceiver)
+
+      case list("threshold", duration(min), double(threshold)) =>
+        new ThresholdFailureDetector(
+          ping, close, min, threshold, nanoTime = nanoTime, statsReceiver = statsReceiver)
+
+      case list("threshold", duration(min)) =>
+        new ThresholdFailureDetector(
+          ping, close, min, nanoTime = nanoTime, statsReceiver = statsReceiver)
+
+      case list("threshold") =>
+        new ThresholdFailureDetector(
+          ping, close, nanoTime = nanoTime, statsReceiver = statsReceiver)
+
+      case list("none") =>
+        NullFailureDetector
+
+      case list(_*) =>
+        log.warning(s"unknown failure detector ${sessionFailureDetector()} specified")
+        NullFailureDetector
+    }
   }
 }

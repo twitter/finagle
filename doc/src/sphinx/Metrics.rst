@@ -63,6 +63,16 @@ finagle handles services where it can't make a connection.
 
 .. include:: metrics/FailFast.rst
 
+Failure Accrual
+---------------
+
+.. _failure_accrual_stats:
+
+The client stats under the `failure_accrual` scope track how `FailureAccrualFactory`
+manages failures.
+
+.. include: metrics/FailureAccrual.rst
+
 Idle Apoptosis
 --------------
 
@@ -103,7 +113,7 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 .. include:: metrics/Transport.rst
 
 Requeues
------
+--------
 
 .. _requeues:
 
@@ -119,4 +129,14 @@ Mux
 
 These stats pertain to :ref:`Mux <mux>`.
 
-.. include:: metrics/Mux.rst 
+.. include:: metrics/Mux.rst
+
+Threshold Failure Detector
+--------------------------
+
+.. _failure_detector:
+
+The client metrics under the `mux/failuredetector` scope track the behavior of out-of-band ping
+based failure detection. They only apply to the mux protocol.
+
+.. include:: metrics/FailureDetector.rst

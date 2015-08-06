@@ -2,7 +2,6 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.mux.exp.FailureDetector
 import com.twitter.finagle.{Path, Status, Failure}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}

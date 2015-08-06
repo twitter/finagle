@@ -2,15 +2,14 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.mux.exp.{sessionFailureDetector, FailureDetector}
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Filter, SimpleFilter, Service, Status, Path, Failure}
+import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, Promise, Return, Throw, Time, TimeControl}
+import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
@@ -21,7 +20,7 @@ import org.mockito.stubbing.Answer
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{OneInstancePerTest, FunSuite, Tag}
+import org.scalatest.{FunSuite, OneInstancePerTest, Tag}
 
 private object TestContext {
   val testContext = new Contexts.broadcast.Key[Buf]("com.twitter.finagle.mux.MuxContext") {
@@ -37,7 +36,6 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   with AssertionsForJUnit
   with Eventually
   with IntegrationPatience {
-  import TestContext._
   val tracer = new BufferingTracer
 
   class Ctx {

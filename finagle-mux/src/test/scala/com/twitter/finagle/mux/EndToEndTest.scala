@@ -4,7 +4,6 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.mux.Message._
-import com.twitter.finagle.mux.exp.FailureDetector
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}

@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
-import com.twitter.finagle.mux.exp.FailureDetector
+import com.twitter.finagle.mux.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.ProtocolLibrary

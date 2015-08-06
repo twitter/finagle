@@ -1,5 +1,5 @@
-FailureAccrual
-<<<<<<<<<<<<<<<
+FailureAccrualFactory
+<<<<<<<<<<<<<<<<<<<<<
 
 **removals**
   a count of how many times any host has been removed due to failure

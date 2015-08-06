@@ -43,6 +43,9 @@ Breaking API Changes
   * finagle-httpx: `Method` no longer has an extractor. To access the name of
     custom methods, use `toString`. ``RB_ID=722913``
 
+  * finagle-mux: `c.t.f.mux.exp.FailureDetector` and `c.t.f.mux.exp.sessionFailureDetector` are
+    moved out of exp package into mux package. ``RB_ID=725350``
+
 6.27.0
 ------
 
