@@ -25,6 +25,9 @@ private[serverset2] object ServiceDiscoverer {
       val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
       ent -> w
     }
+
+  private type Cache =
+    (ZkSession, (String => Activity[Seq[Entry]]), (String => Activity[Option[Vector]]))
 }
 
 /**
@@ -64,8 +67,12 @@ private[serverset2] class ServiceDiscoverer(
     }
 
   private[this] val actZkSession =
-    Activity(varZkSession.map { zkSession =>
-      Activity.Ok(zkSession, entriesOfNode(zkSession), vectorOfNode(zkSession))
+    // We use Var.async here to ensure that caches are shared among all
+    // observers of actZkSession.
+    Activity(Var.async[Activity.State[Cache]](Activity.Pending) { u =>
+      varZkSession.changes.respond { zkSession =>
+        u() = Activity.Ok((zkSession, entriesOfNode(zkSession), vectorOfNode(zkSession)))
+      }
     })
 
   private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
@@ -98,20 +105,13 @@ private[serverset2] class ServiceDiscoverer(
    * Look up the weighted ServerSet entries for a given path.
    */
   def apply(path: String): Activity[Seq[(Entry, Double)]] = {
-    val es = entriesOf(path).run
-    val vs = vectorsOf(path).run
+    val es = entriesOf(path)
+    val vs = vectorsOf(path)
 
-    val raw = (es join vs) map {
-      case (Activity.Pending, _) => Activity.Pending
-      case (f@Activity.Failed(_), _) => f
-      case (Activity.Ok(ents), Activity.Ok(vecs)) =>
-        Activity.Ok(ServiceDiscoverer.zipWithWeights(ents, vecs))
-      case (Activity.Ok(ents), _) =>
-        Activity.Ok(ents map (_ -> 1D))
-    }
+    val raw = es.join(vs).map { case (ents, vecs) => zipWithWeights(ents, vecs) }
 
     // Squash duplicate updates
-    val dedupe = raw.changes.sliding(2) collect {
+    val dedupe = raw.states.sliding(2).collect {
       case Seq(current) => current
       case Seq(last, next) if last != next => next
     }

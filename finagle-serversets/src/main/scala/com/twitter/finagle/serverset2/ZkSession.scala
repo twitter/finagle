@@ -210,9 +210,11 @@ private[serverset2] object ZkSession {
    * observation of the returned `Var[ZkSession]` is closed.
    */
   def retrying(
-    backoff: Duration,
-    newZkSession: () => ZkSession
-  )(implicit timer: Timer): Var[ZkSession] = Var.async(nil) { u =>
+      backoff: Duration,
+      newZkSession: () => ZkSession
+  )(implicit timer: Timer): Var[ZkSession] = {
+    val v = Var(ZkSession.nil)
+
     @volatile var closing = false
     @volatile var zkSession: ZkSession = ZkSession.nil
 
@@ -226,7 +228,7 @@ private[serverset2] object ZkSession {
       zkSession.state.changes.filter {
         _ == WatchState.SessionState(SessionState.SyncConnected)
       }.toFuture.unit before zkSession.addAuthInfo("digest", Buf.Utf8(authInfo)) onSuccess { _ =>
-        u() = zkSession
+        v() = zkSession
       }
 
       // Kick off a delayed reconnection on session expiration.
@@ -241,5 +243,6 @@ private[serverset2] object ZkSession {
       closing = true
       zkSession.close()
     }
+    v
   }
 }

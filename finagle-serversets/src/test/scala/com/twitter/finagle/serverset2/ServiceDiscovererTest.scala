@@ -1,5 +1,10 @@
 package com.twitter.finagle.serverset2
 
+import com.twitter.finagle.serverset2.ZkOp.{GetData, GetChildrenWatch, ExistsWatch}
+import com.twitter.finagle.serverset2.client.{Node, Data, WatchState, Watched}
+import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.io.Buf
+import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
@@ -24,5 +29,32 @@ class ServiceDiscovererTest extends FunSuite {
       ep(port2) -> 2.8,
       ep(3) -> 3.1,
       ep(4) -> 1.0))
+  }
+
+  test("New observation do not cause reads; entries are cached") {
+    implicit val timer = new MockTimer
+    val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
+    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver)
+
+    val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
+    val f2 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
+
+    val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+    val ewwatchv = Var[WatchState](WatchState.Pending)
+    ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
+
+    val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+    gw.res() = Return(Watched(Node.Children(Seq("member_1"), null), Var.value(WatchState.Pending)))
+
+    assert(!f1.isDefined)
+    assert(!f2.isDefined)
+
+    val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+    gd.res() = Return(Node.Data(None, null))
+
+    // ensure that we are hitting the cache: even though we called
+    // GetData only once, the two observations are fulfilled.
+    assert(f1.isDefined)
+    assert(f2.isDefined)
   }
 }
