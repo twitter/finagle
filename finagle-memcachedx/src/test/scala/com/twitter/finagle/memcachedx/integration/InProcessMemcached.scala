@@ -4,7 +4,7 @@ import _root_.java.net.SocketAddress
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import com.twitter.finagle.memcachedx.protocol.text.Memcached
 import com.twitter.finagle.memcachedx.util.AtomicMap
-import com.twitter.finagle.memcachedx.{InterpreterService, Interpreter, Entry}
+import com.twitter.finagle.memcachedx.{Entry, Interpreter, InterpreterService}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, SynchronizedLruMap}
 
@@ -23,9 +23,9 @@ class InProcessMemcached(address: SocketAddress) {
 
   private[this] val serverSpec =
     ServerBuilder()
-        .name("finagle")
-        .codec(Memcached())
-        .bindTo(address)
+      .name("finagle")
+      .codec(Memcached())
+      .bindTo(address)
 
   private[this] var server: Option[BuiltServer] = None
 

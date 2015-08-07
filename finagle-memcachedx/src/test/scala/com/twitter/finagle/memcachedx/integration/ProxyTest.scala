@@ -1,29 +1,27 @@
 package com.twitter.finagle.memcachedx.integration
 
-import java.net.{InetAddress, InetSocketAddress}
-
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
-
 import com.twitter.conversions.time._
-import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
+import com.twitter.finagle.builder.{ClientBuilder, Server => MServer, ServerBuilder}
 import com.twitter.finagle.memcachedx.Client
 import com.twitter.finagle.memcachedx.protocol.text.Memcached
 import com.twitter.finagle.memcachedx.protocol.{Command, Response}
 import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.io.Buf
 import com.twitter.util.Await
+import java.net.{InetAddress, InetSocketAddress}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ProxyTest extends FunSuite with BeforeAndAfter {
 
   type MemcacheService = Service[Command, Response]
   /**
-    * Note: This integration test requires a real Memcached server to run.
-    */
+   * Note: This integration test requires a real Memcached server to run.
+   */
   var externalClient: Client = null
-  var server: Server = null
+  var server: MServer = null
   var serverAddress: InetSocketAddress = null
   var proxyService: MemcacheService = null
   var proxyClient: MemcacheService = null
@@ -60,7 +58,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       server.close(0.seconds)
       proxyService.close()
       proxyClient.close()
-      testServer map { _.stop() }
+      testServer.map(_.stop())
     }
   }
 

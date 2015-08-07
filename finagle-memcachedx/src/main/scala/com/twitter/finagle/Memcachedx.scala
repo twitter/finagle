@@ -9,7 +9,7 @@ import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatche
 import com.twitter.finagle.memcachedx.protocol.text.{
   MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
 import com.twitter.finagle.memcachedx.protocol.{Command, Response, RetrievalCommand, Values}
-import com.twitter.finagle.memcachedx.{Client => MClient, Server => MServer, _}
+import com.twitter.finagle.memcachedx.{Client => MClient, _}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._

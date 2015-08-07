@@ -1,17 +1,16 @@
 package com.twitter.finagle.memcachedx.unit
 
-import scala.collection.mutable
-
+import com.google.common.hash.Hashing
+import com.twitter.conversions.time._
+import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcachedx.util.AtomicMap
+import com.twitter.finagle.memcachedx.{Entry, Interpreter}
+import com.twitter.io.Buf
+import com.twitter.util.Time
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-
-import com.twitter.conversions.time._
-import com.twitter.finagle.memcachedx.{Entry, Interpreter}
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.util.AtomicMap
-import com.twitter.io.Buf
-import com.twitter.util.Time
+import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 class InterpreterTest extends FunSuite {
@@ -19,14 +18,32 @@ class InterpreterTest extends FunSuite {
   val map = mutable.Map[Buf, Entry]()
   val atomicMap = new AtomicMap(Seq(map))
   val interpreter = new Interpreter(atomicMap)
-        
+
   test("correctly perform the GET & SET commands") {
-    val key   = Buf.Utf8("foo")
+    val key = Buf.Utf8("foo")
     val value = Buf.Utf8("bar")
     interpreter(Delete(key))
     interpreter(Set(key, 0, Time.epoch, value))
 
     assert(interpreter(Get(Seq(key))) === Values(Seq(Value(key, value))))
+  }
+
+  test("correctly perform the GETS & CAS commands") {
+    val key = Buf.Utf8("key")
+    val value1 = Buf.Utf8("value1")
+    val value2 = Buf.Utf8("value2")
+    val value3 = Buf.Utf8("value3")
+    interpreter(Set(key, 0, Time.epoch, value1))
+    assert(interpreter(Get(Seq(key))) === Values(Seq(Value(key, value1))))
+    val hashValue1 = interpreter(Gets(Seq(key)))
+      .asInstanceOf[Values]
+      .values
+      .last
+      .casUnique
+    assert(interpreter(Gets(Seq(key))) === Values(Seq(Value(key, value1, hashValue1))))
+
+    assert(interpreter(Cas(key, 0, Time.epoch, value2, hashValue1.get)) == Stored())
+    assert(interpreter(Cas(key, 0, Time.epoch, value3, hashValue1.get)) == NotStored())
   }
 
   test("correctly perform the QUIT command") {
@@ -41,10 +58,10 @@ class InterpreterTest extends FunSuite {
 
     Time.withTimeAt(now) { control =>
       interpreter(Set(key, 0, now + 10.seconds, value)) // set with an expiry...
-        interpreter(Set(noExpiry, 0, Time.epoch, value)) // set without an expiry...
-        atomicMap.lock(key) { data =>
-          assert(data.contains(key) === true)
-        }
+      interpreter(Set(noExpiry, 0, Time.epoch, value)) // set without an expiry...
+      atomicMap.lock(key) { data =>
+        assert(data.contains(key) === true)
+      }
 
       info("verify we can retrieve it up until the expiry")
       control.advance(9.seconds)
@@ -65,5 +82,4 @@ class InterpreterTest extends FunSuite {
       assert(interpreter(Get(Seq(noExpiry))) === Values(Seq(Value(noExpiry, value))))
     }
   }
-
 }

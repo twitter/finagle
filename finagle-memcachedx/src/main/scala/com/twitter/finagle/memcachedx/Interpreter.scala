@@ -1,15 +1,17 @@
 package com.twitter.finagle.memcachedx
 
-import com.twitter.finagle.memcachedx.protocol._
+import com.google.common.hash.Hashing
 import com.twitter.finagle.Service
-import com.twitter.finagle.memcachedx.util.{ParserUtils, AtomicMap}
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcachedx.util.{AtomicMap, ParserUtils}
+import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
 
 /**
- * Evalutes a given Memcached operation and returns the result.
+ * Evaluates a given Memcached operation and returns the result.
  */
 class Interpreter(map: AtomicMap[Buf, Entry]) {
+
   import ParserUtils._
 
   def apply(command: Command): Response = {
@@ -58,6 +60,23 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
               NotStored()
           }
         }
+      case Cas(key, flags, expiry, value, casUnique) =>
+        map.lock(key) { data =>
+          val existing = data.get(key)
+          existing match {
+            case Some(entry) if entry.valid =>
+              val currentValue = entry.value
+              val hash = hash64(currentValue)
+              if (casUnique.equals(hash)) {
+                data(key) = Entry(value, expiry)
+                Stored()
+              } else {
+                NotStored()
+              }
+            case _ =>
+              NotStored()
+          }
+        }
       case Prepend(key, flags, expiry, value) =>
         map.lock(key) { data =>
           val existing = data.get(key)
@@ -74,7 +93,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
         }
       case Get(keys) =>
         Values(
-          keys flatMap { key =>
+          keys.flatMap { key =>
             map.lock(key) { data =>
               data.get(key) filter { entry =>
                 if (!entry.valid)
@@ -86,6 +105,8 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
             }
           }
         )
+      case Gets(keys) =>
+        getByKeys(keys)
       case Delete(key) =>
         map.lock(key) { data =>
           if (data.remove(key).isDefined)
@@ -124,6 +145,34 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
       case Quit() =>
         NoOp()
     }
+  }
+
+  private def getByKeys(keys: Seq[Buf]): Values = {
+    Values(
+      keys.flatMap { key =>
+        map.lock(key) { data =>
+          data.get(key).filter { entry =>
+            entry.valid
+          }.map { entry =>
+            val value = entry.value
+            Value(key, value, Some(hash64(value)))
+          }
+        }
+      }
+    )
+  }
+
+  /*
+  * Using non-cryptographic goodFastHash Hashing Algorithm
+  * for we only care about speed for testing.
+  */
+  private[this] def hash64(value: Buf): Buf = {
+    val hash = Hashing.goodFastHash(64)
+      .newHasher(value.length)
+      .putBytes(Buf.ByteArray.Owned.extract(value))
+      .hash()
+      .asBytes()
+    Buf.ByteArray.Owned(hash)
   }
 }
 
