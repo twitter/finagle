@@ -28,7 +28,6 @@ private[stats] sealed trait StatsFormatter {
       results += histoName(name, labelAverage) -> snapshot.avg
       results += histoName(name, labelMin) -> snapshot.min
       results += histoName(name, labelMax) -> snapshot.max
-      results += histoName(name, "stddev") -> snapshot.stddev
 
       for (p <- snapshot.percentiles) {
         val percentileName = histoName(name, labelPercentile(p.getQuantile))

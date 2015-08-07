@@ -22,11 +22,14 @@ Runtime Behavior Changes
     roughly, as multipliers for traffic). ``RB_ID=677416``
 
 
-  * The RequestSemaphoreFilter now sheds load by dropping the tail of the queue
+  * finagle-core: The RequestSemaphoreFilter now sheds load by dropping the tail of the queue
     and failing it with a `Failure.Restartable`. Previously, the filter had an unbounded
     queue but now the default size is 0 (i.e. no queueing). The dropped requests are in
     turn requeued by Finagle clients with protocol support (e.g. Http, ThriftMux).
     ``RB_ID=696934``
+
+  * finagle-stats: Standard deviation ("$statName.stddev") is no longer exported.
+    ``RB_ID=726309`` (follow up to ``RB_ID=717647``)
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
