@@ -49,7 +49,8 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
   private[this] val inetResolver = InetResolver(statsReceiver)
   private[this] val sessionTimeout = 10.seconds
-  private[this] val epoch = Stabilizer.epochs(sessionTimeout*4)
+  private[this] val removalEpoch = Stabilizer.epochs(sessionTimeout*4)
+  private[this] val batchEpoch = Stabilizer.epochs(5.seconds)
   private[this] val nsets = new AtomicInteger(0)
 
   // Cache of ServiceDiscoverer instances.
@@ -122,9 +123,10 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
           else inetResolver.bindWeightedHostPortsToAddr(subseq)
       }
 
-      // The stabilizer ensures that we qualify removals by putting
-      // them in a limbo state for at least one epoch.
-      val stabilized = Stabilizer(va, epoch)
+      // The stabilizer ensures that we qualify changes by putting
+      // removes in a limbo state for at least one removalEpoch, and emitting
+      // at most one update per batchEopch.
+      val stabilized = Stabilizer(va, removalEpoch, batchEpoch)
 
       // Finally we output `State`s, which are always nonpending
       // address coupled with statistics from the stabilization
