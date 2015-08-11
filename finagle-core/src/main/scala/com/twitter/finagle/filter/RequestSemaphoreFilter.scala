@@ -36,9 +36,9 @@ object RequestSemaphoreFilter {
               // We capture the gauges inside of here so their
               // (reference) lifetime is tied to that of the filter
               // itself.
-              val max = sem.numInitialPermits
+              // val max = sem.numInitialPermits
               val guages = Seq(
-                sr.addGauge("request_concurrency") { max - sem.numPermitsAvailable },
+               // sr.addGauge("request_concurrency") { max - sem.numPermitsAvailable },
                 sr.addGauge("request_queue_size") { sem.numWaiters }
               )
             }
