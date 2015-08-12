@@ -35,7 +35,7 @@ abstract class AbstractDecoder extends FrameDecoder {
   }
 
   /**
-   * @param needsData return the number of bytes needed, or `null` if no more bytes
+   * @param needsData return the number of bytes needed, or `-1` if no more bytes
    *                  are necessary.
    */
   protected def decodeLine(
