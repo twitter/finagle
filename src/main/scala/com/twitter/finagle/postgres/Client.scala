@@ -224,7 +224,7 @@ object Client {
       .hosts(host)
       .hostConnectionLimit(hostConnectionLimit)
       .retries(numRetries)
-      .failFast(onOrOff = true)
+      .failFast(enabled = true)
       .buildFactory()
 
     new Client(factory, id)
