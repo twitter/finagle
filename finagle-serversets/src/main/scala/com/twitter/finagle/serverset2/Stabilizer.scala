@@ -121,8 +121,8 @@ private[serverset2] object Stabilizer {
       else last
     }
 
-   // Trigger at most one change to state per batchEpoch
-    val init = States(Some(Addr.Pending), Addr.Pending, None, Time.now)
+    // Trigger at most one change to state per batchEpoch
+    val init = States(Some(Addr.Pending), Addr.Pending, None, Time.Zero)
     val batchedUpdates =
       (addrs select batchEpoch.event).foldLeft(init) { case (st, ev) =>
         val now = Time.now

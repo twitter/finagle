@@ -219,4 +219,12 @@ class StabilizerTest extends FunSuite {
       assertBatchStabilized(Addr.Bound(sa1, sa2, sa3))
     }
   })
+
+  test("First update does not wait for epoch to turn") (new Ctx {
+    Time.withCurrentTimeFrozen { timeControl =>
+      timeControl.advance(1.seconds)
+      va() = Addr.Bound(sa1)
+      assertBatchStabilized(Addr.Bound(sa1))
+    }
+  })
 }
