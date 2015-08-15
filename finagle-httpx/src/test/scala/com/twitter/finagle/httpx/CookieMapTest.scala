@@ -99,6 +99,16 @@ class CookieMapTest extends FunSuite {
     assert(request.headers.get("Cookie") === "name=value2; $Domain=bar; name=value; $Domain=foo")
   }
 
+  test("parse header with two cookies with the same name") {
+    val request = Request()
+    request.headers.set("Cookie", "name=value2; name=value;")
+
+    val cookie = new Cookie("name", "value")
+    val cookie2 = new Cookie("name", "value2")
+
+    assert(request.cookies.values.toSet === Set(cookie, cookie2))
+  }
+
   test("remove cookie") {
     val request = Request()
     request.headers.add("Cookie", "name=value")
