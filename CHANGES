@@ -31,6 +31,11 @@ Runtime Behavior Changes
   * finagle-stats: Standard deviation ("$statName.stddev") is no longer exported.
     ``RB_ID=726309`` (follow up to ``RB_ID=717647``)
 
+  * finagle-serversets: `namer/bind_latency_us` stat now counts only
+    time in name resolution, not service acquisition.
+    `namer/{dtabcache,namecache,nametreecache}/misstime_ms` stats are
+    no longer exported. ``RB_ID=730309``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

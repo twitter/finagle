@@ -16,12 +16,16 @@ import scala.collection.immutable
  */
 private class DynNameFactory[Req, Rep](
     name: Activity[NameTree[Name.Bound]],
-    cache: ServiceFactoryCache[NameTree[Name.Bound], Req, Rep])
+    cache: ServiceFactoryCache[NameTree[Name.Bound], Req, Rep],
+    statsReceiver: StatsReceiver = NullStatsReceiver)
   extends ServiceFactory[Req, Rep] {
 
+  val latencyStat = statsReceiver.stat("bind_latency_us")
+
   private sealed trait State
-  private case class Pending(q: immutable.Queue[(ClientConnection, Promise[Service[Req, Rep]])])
-    extends State
+  private case class Pending(
+    q: immutable.Queue[(ClientConnection, Promise[Service[Req, Rep]], Stopwatch.Elapsed)]
+  ) extends State
   private case class Named(name: NameTree[Name.Bound]) extends State
   private case class Failed(exc: Throwable) extends State
   private case class Closed() extends State
@@ -39,7 +43,10 @@ private class DynNameFactory[Req, Rep](
       state match {
         case Pending(q) =>
           state = Named(name)
-          for ((conn, p) <- q) p.become(apply(conn))
+          for ((conn, p, elapsed) <- q) {
+            latencyStat.add(elapsed().inMicroseconds)
+            p.become(apply(conn))
+          }
         case Failed(_) | Named(_) =>
           state = Named(name)
         case Closed() =>
@@ -49,9 +56,10 @@ private class DynNameFactory[Req, Rep](
     case Activity.Failed(exc) => synchronized {
       state match {
         case Pending(q) =>
-          // wrap the exception in a Failure.Naming, so that it can
-          // be identified for tracing
-          for ((_, p) <- q) p.setException(Failure.adapt(exc, Failure.Naming))
+          for ((_, p, elapsed) <- q) {
+            latencyStat.add(elapsed().inMicroseconds)
+            p.setException(Failure.adapt(exc, Failure.Naming))
+          }
           state = Failed(exc)
         case Failed(_) =>
           // if already failed, just update the exception; the promises
@@ -66,16 +74,21 @@ private class DynNameFactory[Req, Rep](
 
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     state match {
-      case Named(name) => cache(name, conn)
+      case Named(name) =>
+        Trace.record("namer.success")
+        cache(name, conn)
 
-      // wrap the exception in a Failure.Naming, so that it can
-      // be identified for tracing
-      case Failed(exc) => Future.exception(Failure.adapt(exc, Failure.Naming))
+      case Failed(exc) =>
+        Trace.recordBinary("namer.failure", exc.getClass.getName)
+        Future.exception(Failure.adapt(exc, Failure.Naming))
 
-      // don't trace these, since they're not a namer failure
-      case Closed() => Future.exception(new ServiceClosedException)
+      case Closed() =>
+        Trace.record("namer.closed")
+        // don't trace these, since they're not a namer failure
+        Future.exception(new ServiceClosedException)
 
-      case Pending(_) => applySync(conn)
+      case Pending(_) =>
+        applySync(conn)
     }
   }
 
@@ -83,12 +96,14 @@ private class DynNameFactory[Req, Rep](
     state match {
       case Pending(q) =>
         val p = new Promise[Service[Req, Rep]]
-        val el = (conn, p)
+        val elapsed = Stopwatch.start()
+        val el = (conn, p, elapsed)
         p setInterruptHandler { case exc =>
           synchronized {
             state match {
               case Pending(q) if q contains el =>
                 state = Pending(q filter (_ != el))
+                latencyStat.add(elapsed().inMicroseconds)
                 p.setException(new CancelledConnectionException(exc))
               case _ =>
             }
@@ -110,8 +125,10 @@ private class DynNameFactory[Req, Rep](
     prev match {
       case Pending(q) =>
         val exc = new ServiceClosedException
-        for ((_, p) <- q)
+        for ((_, p, elapsed) <- q) {
+          latencyStat.add(elapsed().inMicroseconds)
           p.setException(exc)
+        }
       case _ =>
     }
     sub.close(deadline)
@@ -215,8 +232,7 @@ private[finagle] class BindingFactory[Req, Rep](
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxNameCacheSize: Int = 8,
     maxNameTreeCacheSize: Int = 8,
-    maxNamerCacheSize: Int = 4,
-    record: (String, String) => Unit = Trace.recordBinary)
+    maxNamerCacheSize: Int = 4)
   extends ServiceFactory[Req, Rep] {
 
   private[this] val tree = NameTree.Leaf(path)
@@ -226,7 +242,7 @@ private[finagle] class BindingFactory[Req, Rep](
       bound => new ServiceFactoryProxy(newFactory(bound)) {
         private val boundShow = Showable.show(bound)
         override def apply(conn: ClientConnection) = {
-          record("namer.name", boundShow)
+          Trace.recordBinary("namer.name", boundShow)
           super.apply(conn)
         }
       },
@@ -238,7 +254,7 @@ private[finagle] class BindingFactory[Req, Rep](
       tree => new ServiceFactoryProxy(NameTreeFactory(path, tree, nameCache)) {
         private val treeShow = tree.show
         override def apply(conn: ClientConnection) = {
-          record("namer.tree", treeShow)
+          Trace.recordBinary("namer.tree", treeShow)
           super.apply(conn)
         }
       },
@@ -246,34 +262,25 @@ private[finagle] class BindingFactory[Req, Rep](
       maxNameTreeCacheSize)
 
   private[this] val dtabCache = {
-    val latencyStat = statsReceiver.stat("bind_latency_us")
-
     val newFactory: ((Dtab, Dtab)) => ServiceFactory[Req, Rep] = { case (baseDtab, localDtab) =>
       val factory = new DynNameFactory(
         NameInterpreter.bind(baseDtab ++ localDtab, path),
-        nameTreeCache)
+        nameTreeCache,
+        statsReceiver = statsReceiver)
 
       new ServiceFactoryProxy(factory) {
         private val pathShow = path.show
         private val baseDtabShow = baseDtab.show
         override def apply(conn: ClientConnection) = {
-          val elapsed = Stopwatch.start()
-          record("namer.path", pathShow)
-          record("namer.dtab.base", baseDtabShow)
+          Trace.recordBinary("namer.path", pathShow)
+          Trace.recordBinary("namer.dtab.base", baseDtabShow)
           // dtab.local is annotated on the client & server tracers.
 
           super.apply(conn) rescue {
-            // DynNameFactory wraps naming exceptions for tracing
-            case f@Failure(maybeExc) if f.isFlagged(Failure.Naming) =>
-              record("namer.failure", maybeExc.getOrElse(f.show).getClass.getName)
-              Future.exception(f)
-
             // we don't have the dtabs handy at the point we throw
             // the exception; fill them in on the way out
             case e: NoBrokersAvailableException =>
               Future.exception(new NoBrokersAvailableException(e.name, baseDtab, localDtab))
-          } respond { _ =>
-            latencyStat.add(elapsed().inMicroseconds)
           }
         }
       }

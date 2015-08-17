@@ -11,10 +11,6 @@ visibility into this caching.
 **misses**
   A counter of the number of cache misses
 
-**misstime_ms**
-  A histogram of the latency, in milliseconds, of invocation of
-  `Service`\s created on misses
-
 **evicts**
   A counter of the number of cache evictions
 

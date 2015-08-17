@@ -79,7 +79,6 @@ private class ServiceFactoryCache[Key, Req, Rep](
   private[this] val nidle = statsReceiver.addGauge("idle") {
     cache count { case (_, f) => f.idleFor > Duration.Zero }
   }
-  private[this] val misstime = statsReceiver.stat("misstime_ms")
 
   /*
    * This returns a Service rather than a ServiceFactory to avoid
@@ -114,8 +113,6 @@ private class ServiceFactoryCache[Key, Req, Rep](
       }
     }
 
-    val watch = Stopwatch.start()
-
     val svc = try {
       nmiss.incr()
 
@@ -140,17 +137,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
       writeLock.unlock()
     }
 
-    Trace.record(s"Interpreter cache miss with key $key")
-
-    svc.respond {
-      case Return(_) =>
-        val d = watch()
-        // generalize message
-        Trace.record(s"Interpreter resolved: $d", d)
-        misstime.add(d.inMilliseconds)
-      case Throw(error) =>
-        Trace.record(s"Interpreter failed to resolve (${error.getClass().getName()}: ${error.getMessage()}). Aborting request.")
-    }
+    svc
   }
 
   private[this] def oneshot(factory: ServiceFactory[Req, Rep], conn: ClientConnection)
