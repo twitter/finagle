@@ -79,12 +79,14 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    * }}}
    * @param service a service that takes the output request type and the input response type.
    */
-  def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] =
+  def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] = {
+    val svc = Service.rescue(service)
     new Service[ReqIn, RepOut] {
-      def apply(request: ReqIn) = Filter.this.apply(request, Service.rescue(service))
+      def apply(request: ReqIn) = Filter.this.apply(request, svc)
       override def close(deadline: Time) = service.close(deadline)
       override def status = service.status
     }
+  }
 
   def andThen(f: ReqOut => Future[RepIn]): ReqIn => Future[RepOut] = {
     val service = Service.mk(f)
