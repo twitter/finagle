@@ -142,12 +142,13 @@ object Trace {
    * Create a derived id from the current TraceId.
    */
   def nextId: TraceId = {
-    val currentId = idOption
-    TraceId(currentId.map(_.traceId),
-      currentId.map(_.spanId),
-      SpanId(rng.nextLong()),
-      currentId.map(_.sampled).getOrElse(None),
-      currentId.map(_.flags).getOrElse(Flags()))
+    val spanId = SpanId(rng.nextLong())
+    idOption match {
+      case Some(id) =>
+        TraceId(Some(id.traceId), Some(id.spanId), spanId, id.sampled, id.flags)
+      case None =>
+        TraceId(None, None, spanId, None, Flags())
+    }
   }
 
   /**

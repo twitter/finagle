@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.service.{DelayedFactory, FailingFactory, ServiceFactoryRef}
 import com.twitter.finagle.ServiceFactoryProxy
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{Drv, Rng, OnReady}
+import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
 import java.net.SocketAddress
 
@@ -95,7 +95,10 @@ private[finagle] object TrafficDistributor {
       Closable.all(balancers: _*).close(deadline)
     }
 
-    override def status = Status.worstOf[ServiceFactory[Req, Rep]](balancers, _.status)
+    private[this] val svcFactoryStatus: ServiceFactory[Req, Rep] => Status =
+      sf => sf.status
+
+    override def status = Status.worstOf[ServiceFactory[Req, Rep]](balancers, svcFactoryStatus)
     override def toString = s"Distributor($classes)"
   }
 }

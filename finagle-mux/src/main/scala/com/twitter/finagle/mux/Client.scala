@@ -318,8 +318,10 @@ private[twitter] class ClientDispatcher (
     val p = new Promise[Response]
     val couldDispatch = canDispatch
 
-    val tag = reqs.map(p) getOrElse {
-      return Future.exception(WriteException(new Exception("Exhausted tags")))
+    val tag = reqs.map(p) match {
+      case Some(t) => t
+      case None =>
+        return Future.exception(WriteException(new Exception("Exhausted tags")))
     }
 
     val msg =
