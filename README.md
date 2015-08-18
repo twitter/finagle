@@ -39,6 +39,7 @@ The following are a few of the companies that are using Finagle:
 * [SoundCloud](https://soundcloud.com/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
+* [ING Bank](https://ing.nl)
 
 For a more complete list, please see
 [our adopter page](https://github.com/twitter/finagle/blob/master/ADOPTERS.md).
