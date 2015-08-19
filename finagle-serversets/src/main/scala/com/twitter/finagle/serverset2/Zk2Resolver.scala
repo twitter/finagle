@@ -104,7 +104,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va: Var[Addr] = serverSetOf(discoverer, path).flatMap {
+      val va: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
@@ -190,7 +190,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
    * Construct a Var[Addr] from the components of a ServerSet path.
    */
   private[twitter] def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] =
-    addrOf_(mkDiscoverer(hosts), path, endpoint)
+    addrOf_((mkDiscoverer(hosts), path, endpoint))
 
   /**
    * Bind a string into a variable address using the zk2 scheme.

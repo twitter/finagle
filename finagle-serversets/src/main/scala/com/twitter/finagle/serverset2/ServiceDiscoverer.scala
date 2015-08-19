@@ -111,11 +111,6 @@ private[serverset2] class ServiceDiscoverer(
     val raw = es.join(vs).map { case (ents, vecs) => zipWithWeights(ents, vecs) }
 
     // Squash duplicate updates
-    val dedupe = raw.states.sliding(2).collect {
-      case Seq(current) => current
-      case Seq(last, next) if last != next => next
-    }
-
-    Activity(Var(Activity.Pending, dedupe))
+    Activity(Var(Activity.Pending, raw.states.dedup))
   }
 }

@@ -115,7 +115,7 @@ private[serverset2] object Stabilizer {
         }
     }
 
-    val addrs = states map { case State(limbo, active, last) =>
+    val addrs = states.map { case State(limbo, active, last) =>
       val all = merge(limbo, active)
       if (all.nonEmpty) Addr.Bound(all)
       else last
