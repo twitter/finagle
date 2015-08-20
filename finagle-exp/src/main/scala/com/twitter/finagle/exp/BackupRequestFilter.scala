@@ -1,13 +1,17 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.WindowedAdder
-import com.twitter.finagle.{BackupRequestLost, Service, SimpleFilter}
+import com.twitter.finagle.{Failure, BackupRequestLost, Service, SimpleFilter}
 import com.twitter.util.{Duration, Future, Return, Throw, Timer}
 import java.util.concurrent.atomic.AtomicInteger
 
 object BackupRequestFilter {
+  /**
+   * Throwable used when the backup request timer is aborted.
+   */
+  private[exp] val cancelEx = Failure("backup countdown cancelled")
 
   /**
    * Default for calculating now in milliseconds.
@@ -117,7 +121,6 @@ class BackupRequestFilter[Req, Rep] private[exp](
 
   @volatile
   private[this] var cachedCutoffMs = 0L
-
   private[this] val count = new AtomicInteger()
 
   /**
@@ -141,39 +144,53 @@ class BackupRequestFilter[Req, Rep] private[exp](
     cachedCutoffMs
   }
 
-  def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+  private[this] def record(f: Future[Rep], successCounter: Counter): Future[Rep] = {
     val start = nowMs()
-    val orig = service(req)
-    val howlong = cutoffMs()
-    if (howlong == 0)
+    f.onSuccess { _ =>
+      successCounter.incr()
+      histo.add(nowMs() - start)
+    }
+  }
+
+  def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+    val orig = record(service(req), won)
+    val howLong = cutoffMs()
+
+    if (howLong == 0)
       return orig
 
-    val backup =
-      Future.sleep(Duration.fromMilliseconds(howlong))(timer).before {
-        timeouts.incr()
-        service(req)
-      }
+    val backupCountdown = Future.sleep(Duration.fromMilliseconds(howLong))(timer)
+    val backupTriggers = Array(orig, backupCountdown)
 
-    val reps = Array(orig, backup)
-    Future.selectIndex(reps).flatMap { first =>
-      val winner = reps(first)
-      val other = if (first == 0) backup else orig
-
-      winner.transform {
-        case rep@Return(_) =>
-          if (other eq orig) lost.incr() else {
-            won.incr()
-            // Currently we use only latency data only from the
-            // first request, since that is simplest.
-            histo.add(nowMs() - start)
+    Future.selectIndex(backupTriggers).flatMap { firstIndex =>
+      val first = backupTriggers(firstIndex)
+      if (first eq orig) {
+        // If the orig request is successful before the backup timer has fired,
+        // return the response. At this point we can can cancel the backup countdown
+        // because it has either fired or we will dispatch a backup immediately.
+        backupCountdown.raise(BackupRequestFilter.cancelEx)
+        orig.transform {
+          case r @ Return(v) => Future.const(r)
+          case Throw(_) => record(service(req), lost)
+        }
+      } else {
+        // If we've waited long enough to fire the backup normally, do so and
+        // pass on the first successful result we get back.
+        val backup = record(service(req), lost)
+        val reps = Array(orig, backup)
+        Future.selectIndex(reps).flatMap { firstIndex =>
+          val first = reps(firstIndex)
+          val other = reps((firstIndex+1)%2)
+          first.transform {
+            case r @ Return(v) =>
+              if (first eq backup) orig.raise(BackupRequestLost)
+              Future.const(r)
+            case Throw(_) =>
+              other
           }
-
-          other.raise(BackupRequestLost)
-          Future.const(rep)
-        case Throw(_) =>
-          // TODO: trigger backup immediately on failure
-          other
+        }
       }
     }
   }
+
 }

@@ -442,8 +442,8 @@ class CodecException(description: String) extends Exception(description)
 class ChannelBufferUsageException(description: String) extends Exception(description)
 
 /**
- * An exception that is raised on backup requests that are discarded because
- * their corresponding initial requests succeeded in time. See
+ * An exception that is raised on requests that are discarded because
+ * their corresponding backup requests succeeded first. See
  * [[com.twitter.finagle.exp.BackupRequestFilter]] for details.
  */
 object BackupRequestLost extends Exception with NoStacktrace
