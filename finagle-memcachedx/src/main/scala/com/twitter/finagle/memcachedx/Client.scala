@@ -78,9 +78,10 @@ case class GetResult private[memcachedx](
   misses: immutable.Set[String] = immutable.Set.empty,
   failures: Map[String, Throwable] = Map.empty
 ) {
-  lazy val values = hits.mapValues { _.value }
+  lazy val values: Map[String, Buf] = hits.mapValues { _.value }
 
-  def ++(o: GetResult) = GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
+  def ++(o: GetResult): GetResult =
+    GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
 }
 
 case class GetsResult(getResult: GetResult) {
@@ -93,18 +94,21 @@ case class GetsResult(getResult: GetResult) {
 }
 
 object GetResult {
+
+  private[memcachedx] val Empty: GetResult = GetResult()
+
   /**
    * Equivalent to results.reduceLeft { _ ++ _ }, but written to be more efficient.
    */
   private[memcachedx] def merged(results: Seq[GetResult]): GetResult = {
     results match {
-      case Nil => GetResult()
+      case Nil => Empty
       case Seq(single) => single
       case Seq(a, b) => a ++ b
       case _ =>
-        val hits = new mutable.HashMap[String, Value]
-        val misses = new mutable.HashSet[String]
-        val failures = new mutable.HashMap[String, Throwable]
+        val hits = immutable.Map.newBuilder[String, Value]
+        val misses = immutable.Set.newBuilder[String]
+        val failures = immutable.Map.newBuilder[String, Throwable]
 
         for (result <- results) {
           hits ++= result.hits
@@ -112,7 +116,7 @@ object GetResult {
           failures ++= result.failures
         }
 
-        GetResult(hits.toMap, misses.toSet, failures.toMap)
+        GetResult(hits.result(), misses.result(), failures.result())
     }
   }
 
@@ -398,7 +402,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
           val Buf.Utf8(keyStr) = value.key
           (keyStr, value)
         }(breakOut)
-        val misses = keys -- hits.keySet
+        val misses = util.NotFound(keys, hits.keySet)
         GetResult(hits, misses)
       case Error(e) => throw e
       case other    =>
@@ -592,7 +596,7 @@ trait PartitionedClient extends Client {
         _.getResult(_)
       }.map { GetResult.merged(_) }
     } else {
-      Future.value(GetResult())
+      Future.value(GetResult.Empty)
     }
   }
 
@@ -602,7 +606,7 @@ trait PartitionedClient extends Client {
          _.getsResult(_)
       }.map { GetResult.merged(_) }
     } else {
-      Future.value(GetsResult(GetResult()))
+      Future.value(GetsResult(GetResult.Empty))
     }
   }
 

@@ -1,12 +1,10 @@
 package com.twitter.finagle.memcachedx.protocol.text.client
 
+import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcachedx.protocol.text.{StatLines, TokensWithData, ValueLines, Tokens}
+import com.twitter.io.Buf
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
-
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.io.Buf
-
-import text.{StatLines, TokensWithData, ValueLines, Tokens}
 
 object AbstractDecodingToResponse {
   private[finagle] val STORED        = Buf.Utf8("STORED")
@@ -41,12 +39,12 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
 
   protected def parseResponse(tokens: Seq[Buf]) = {
     tokens.headOption match {
-      case None               => NoOp()
-      case Some(NOT_FOUND)    => NotFound()
-      case Some(STORED)       => Stored()
-      case Some(NOT_STORED)   => NotStored()
-      case Some(EXISTS)       => Exists()
-      case Some(DELETED)      => Deleted()
+      case None               => Response.NoOp
+      case Some(NOT_FOUND)    => Response.NotFound
+      case Some(STORED)       => Response.Stored
+      case Some(NOT_STORED)   => Response.NotStored
+      case Some(EXISTS)       => Response.Exists
+      case Some(DELETED)      => Response.Deleted
       case Some(ERROR)        => Error(new NonexistentCommand(parseErrorMessage(tokens)))
       case Some(CLIENT_ERROR) => Error(new ClientError(parseErrorMessage(tokens)))
       case Some(SERVER_ERROR) => Error(new ServerError(parseErrorMessage(tokens)))

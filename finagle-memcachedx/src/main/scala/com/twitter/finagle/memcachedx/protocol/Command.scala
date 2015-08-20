@@ -1,9 +1,44 @@
 package com.twitter.finagle.memcachedx.protocol
 
 import com.twitter.finagle.memcachedx.util.Bufs
-import com.twitter.finagle.memcachedx.util.Bufs.RichBuf
 import com.twitter.io.Buf
 import com.twitter.util.Time
+
+private object KeyValidation {
+  private val MaxKeyLength = 250
+
+  private def tooLong(key: Buf): Boolean = key.length > MaxKeyLength
+
+  /** Return -1 if no invalid bytes */
+  private def invalidByteIndex(key: Buf): Int = {
+    val bs = Buf.ByteArray.Owned.extract(key)
+    var i = 0
+    while (i < bs.length) {
+      if (Bufs.INVALID_KEY_CHARACTERS.contains(bs(i)))
+        return i
+      i += 1
+    }
+    -1
+  }
+
+  private val KeyCheck: Buf => Unit =
+    key => {
+      if (key == null)
+        throw new IllegalArgumentException("Invalid keys: key cannot be null")
+
+      if (tooLong(key))
+        throw new IllegalArgumentException(
+          "Invalid keys: key cannot be longer than %d bytes (%d)".format(MaxKeyLength, key.length))
+
+      val index = invalidByteIndex(key)
+      if (index != -1) {
+        val ch = Buf.ByteArray.Owned.extract(key)(index)
+        throw new IllegalArgumentException(
+          "Invalid keys: key cannot have whitespace or control characters: '0x%d'".format(ch))
+      }
+    }
+
+}
 
 /**
  * This trait contains cache command key validation logic.
@@ -13,34 +48,18 @@ import com.twitter.util.Time
  * All cache commands accepting key/keys should mixin this trait.
  */
 trait KeyValidation {
-  private val MAXKEYLENGTH = 250
+  import KeyValidation._
+
   def keys: Seq[Buf]
 
   {
     // Validating keys
-    if (keys == null)
+    val ks = keys
+    if (ks == null)
       throw new IllegalArgumentException("Invalid keys: cannot have null for keys")
 
-    keys foreach { key =>
-      if (key == null)
-        throw new IllegalArgumentException("Invalid keys: key cannot be null")
-
-      if (tooLong(key))
-        throw new IllegalArgumentException(
-          "Invalid keys: key cannot be longer than %d bytes (%d)".format(MAXKEYLENGTH, key.length))
-
-      val index = invalidByteIndex(key)
-      if (index != -1)
-        throw new IllegalArgumentException(
-          "Invalid keys: key cannot have whitespace or control characters: '0x%d'".format(key(index)))
-    }
+    ks.foreach(KeyCheck)
   }
-
-  private[this] def tooLong(key: Buf): Boolean = key.length > MAXKEYLENGTH
-
-  /** Return -1 if no invalid bytes */
-  private[this] def invalidByteIndex(key: Buf): Int =
-    key.indexWhere(Bufs.INVALID_KEY_CHARACTERS.contains(_))
 
   def badKey(key: Buf): Boolean = {
     if (key == null) true else {

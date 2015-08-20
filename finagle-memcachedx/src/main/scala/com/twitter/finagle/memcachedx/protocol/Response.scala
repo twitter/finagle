@@ -22,3 +22,12 @@ case class Value(
     value: Buf,
     casUnique: Option[Buf] = None,
     flags: Option[Buf] = None)
+
+private[protocol] object Response {
+  val NotFound = new NotFound()
+  val Stored = new Stored()
+  val NotStored = new NotStored()
+  val Exists = new Exists()
+  val Deleted = new Deleted()
+  val NoOp = new NoOp()
+}
