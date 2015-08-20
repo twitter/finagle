@@ -17,6 +17,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
 * [Hopper](https://www.hopper.com/)
+* [ING Bank](https://ing.nl)
 * [JusBrasil](http://www.jusbrasil.com.br)
 * [Magine TV](https://magine.com/)
 * [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
@@ -56,7 +57,6 @@ URLs if possible) and [submit a pull request][1]!
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
 * [wasted.io](http://wasted.io/)
-* [ING Bank](https://ing.nl)
 
 [0]: https://twitter.com/finagle
 [1]: https://github.com/twitter/finagle/blob/master/CONTRIBUTING.md
