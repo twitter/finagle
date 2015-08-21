@@ -48,6 +48,18 @@ class MapHeaderMapTest extends FunSuite {
     assert(map.iterator.toList.sorted === List(("a" -> "1"), ("a" -> "3"), ("b" -> "2")))
   }
 
+  test("set") {
+    val map = MapHeaderMap()
+    map.set("a", "1")
+    assert(map.get("a") === Some("1"))
+    map.set("b", "2")
+    map.set("a", "3")
+
+    assert(map.get("a") === Some("3"))
+    assert(map.getAll("a").toList === List("3"))
+    assert(map.iterator.toList.sorted === List(("a" -> "3"), ("b" -> "2")))
+  }
+
   test("-=") {
     val map = MapHeaderMap("a" -> "1", "b" -> "2", "a" -> "3")
     map -= "a"

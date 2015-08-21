@@ -1,7 +1,6 @@
 package com.twitter.finagle.httpx.netty
 
 import com.twitter.finagle.httpx.{Status, Version, Method, Request, Response}
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.http.{
   HttpVersion, HttpResponseStatus, HttpMethod, HttpRequest, HttpResponse

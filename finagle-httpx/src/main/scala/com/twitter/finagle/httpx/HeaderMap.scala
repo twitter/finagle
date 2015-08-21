@@ -24,6 +24,11 @@ abstract class HeaderMap
   /** Add a header but don't replace existing header(s). */
   def add(k: String, v: String): HeaderMap
 
+  /**
+   * Set a header. If an entry already exists, it is replaced.
+   */
+  def set(k: String, v: String): HeaderMap
+
   override def empty: HeaderMap = new MapHeaderMap(mutable.Map.empty)
 }
 
@@ -36,6 +41,12 @@ class MapHeaderMap(underlying: mutable.Map[String, Seq[String]]) extends HeaderM
 
   def add(k: String, v: String): MapHeaderMap = {
     underlying(k) = underlying.getOrElse(k, Nil) :+ v
+    this
+  }
+
+  def set(key: String, value: String): MapHeaderMap = {
+    underlying.retain { case (a, _) => !a.equalsIgnoreCase(key) }
+    underlying(key) = Seq(value)
     this
   }
 
@@ -119,6 +130,11 @@ private[finagle] class MessageHeaderMap(httpMessage: HttpMessageProxy) extends H
 
   def getAll(key: String): Iterable[String] =
     httpMessage.headers.getAll(key).asScala
+
+  def set(k: String, v: String) = {
+    httpMessage.headers.set(k,v)
+    this
+  }
 
   def add(k: String, v: String): MessageHeaderMap = {
     httpMessage.headers.add(k, v)

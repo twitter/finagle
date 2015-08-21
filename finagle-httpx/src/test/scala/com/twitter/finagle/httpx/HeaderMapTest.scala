@@ -15,6 +15,16 @@ class HeaderMapTest extends FunSuite {
     assert(request.headerMap.get("missing") === None)
   }
 
+  test("set") {
+    val request = Request()
+    request.headers.set("key", "initial value")
+    assert(request.headerMap.get("key") === Some("initial value"))
+
+    request.headers.set("key", "replacement value")
+    assert(request.headerMap.get("key") === Some("replacement value"))
+    assert(request.headerMap.getAll("key").toList === List("replacement value"))
+  }
+
   test("getAll") {
     val request = Request()
     request.headers.add("Cookie", "1")

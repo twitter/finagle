@@ -50,6 +50,12 @@ abstract class Response extends Message with HttpResponseProxy {
 }
 
 object Response {
+  /**
+   * Utility class to make it possible to mock/spy a Response.
+   */
+  class Ok extends Response {
+    val httpResponse = apply.httpResponse
+  }
 
   /**
    * [[com.twitter.collection.RecordSchema RecordSchema]] declaration, used
