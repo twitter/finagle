@@ -109,7 +109,11 @@ case class HandshakeResponse(
 ) extends Request {
   import Capability._
   override val seq: Short = 1
-  lazy val hashPassword = encryptPassword(password.getOrElse(""), salt)
+
+  lazy val hashPassword = password match {
+    case Some(p) => encryptPassword(p, salt)
+    case None => Array[Byte]()
+  }
 
   def toPacket = {
     val fixedBodySize = 34
