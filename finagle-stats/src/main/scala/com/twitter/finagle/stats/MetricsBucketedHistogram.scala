@@ -16,26 +16,25 @@ import java.util.concurrent.atomic.AtomicReference
 private[stats] class MetricsBucketedHistogram(
     name: String,
     percentiles: Array[Double] = Histogram.DEFAULT_QUANTILES,
-    latchPeriod: Duration = 1.minute)
+    latchPeriod: Duration = MetricsBucketedHistogram.DefaultLatchPeriod)
   extends HistogramInterface
 {
   assert(name.length > 0)
 
   private[this] val nextSnapAfter = new AtomicReference(Time.Undefined)
 
-  // thread-safety provided via synchronization on `this`
-  private[this] val a = BucketedHistogram()
-  private[this] val b = BucketedHistogram()
-  private[this] var current = a
+  // thread-safety provided via synchronization on `current`
+  private[this] val current = BucketedHistogram()
+  private[this] val snap = new MetricsBucketedHistogram.MutableSnapshot(percentiles)
 
   def getName: String = name
 
-  def clear(): Unit = synchronized {
-    a.clear()
-    b.clear()
+  def clear(): Unit = current.synchronized {
+    current.clear()
+    snap.clear()
   }
 
-  def add(value: Long): Unit = synchronized {
+  def add(value: Long): Unit = current.synchronized {
     current.add(value)
   }
 
@@ -49,33 +48,29 @@ private[stats] class MetricsBucketedHistogram(
       nextSnapAfter.compareAndSet(Time.Undefined, JsonExporter.startOfNextMinute)
     }
 
-    synchronized {
-      val prev =
-        // we give 1 second of wiggle room so that a slightly early request
-        // will still trigger a roll.
-        if (Time.now < nextSnapAfter.get - 1.second) {
-          // not yet time to roll, so keep reading from previous
-          if (current eq a) b else a
-        } else {
-          // time to roll to the next histogram, clearing it out before allowing usage.
-          nextSnapAfter.set(nextSnapAfter.get + latchPeriod)
-          val (prev, next) = if (current eq a) (a, b) else (b, a)
-          next.clear()
-          current = next
-          prev
-        }
-
-      // need to capture these variables from `prev` while we have a lock.
-      val _count = prev.count
-      val _sum = prev.sum
-      val _max = prev.maximum
-      val _min = prev.minimum
-      val _avg = prev.average
-      val quantiles = prev.getQuantiles(percentiles)
-      val ps = percentiles.zip(quantiles).map { case (p, q) =>
-        new Percentile(p, q)
+    current.synchronized {
+      // we give 1 second of wiggle room so that a slightly early request
+      // will still trigger a roll.
+      if (Time.now >= nextSnapAfter.get - 1.second) {
+        // time to recompute the snapshot, clearing it out before allowing usage.
+        nextSnapAfter.set(nextSnapAfter.get + latchPeriod)
+        snap.recomputeFrom(current)
+        current.clear()
       }
+
       new Snapshot {
+        // need to capture these variables from `snap` while we have a lock.
+        val _count = snap.count
+        val _sum = snap.sum
+        val _max = snap.max
+        val _min = snap.min
+        val _avg = snap.avg
+        val ps = new Array[Percentile](MetricsBucketedHistogram.this.percentiles.length)
+        var i = 0
+        while (i < ps.length) {
+          ps(i) = new Percentile(MetricsBucketedHistogram.this.percentiles(i), snap.quantiles(i))
+          i += 1
+        }
         override def count(): Long = _count
         override def max(): Long = _max
         override def percentiles(): Array[Percentile] = ps
@@ -92,6 +87,48 @@ private[stats] class MetricsBucketedHistogram(
           s"Snapshot(count=${_count}, max=${_max}, min=${_min}, avg=${_avg}, sum=${_sum}, %s=${_ps})"
         }
       }
+    }
+  }
+
+}
+
+private object MetricsBucketedHistogram {
+
+  private val DefaultLatchPeriod = 1.minute
+
+  /**
+   * A mutable struct used to store the most recent calculation
+   * of snapshot. By reusing a single instance per Stat allows us to
+   * avoid creating objects with medium length lifetimes that would
+   * need to exist from one stat collection to the next.
+   *
+   * NOT THREAD SAFE, and thread-safety must be provided
+   * by the MetricsBucketedHistogram that owns a given instance.
+   */
+  private final class MutableSnapshot(percentiles: Array[Double]) {
+    var count = 0L
+    var sum = 0L
+    var max = 0L
+    var min = 0L
+    var avg = 0.0
+    var quantiles = new Array[Long](percentiles.length)
+
+    def recomputeFrom(histo: BucketedHistogram): Unit = {
+      count = histo.count
+      sum = histo.sum
+      max = histo.maximum
+      min = histo.minimum
+      avg = histo.average
+      quantiles = histo.getQuantiles(percentiles)
+    }
+
+    def clear(): Unit = {
+      count = 0L
+      sum = 0L
+      max = 0L
+      min = 0L
+      avg = 0.0
+      java.util.Arrays.fill(quantiles, 0L)
     }
   }
 
