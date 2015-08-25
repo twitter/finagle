@@ -289,7 +289,7 @@ private class SyncInetResolver extends InetResolver {
         Var.value(init)
     }
   }
-  
+
   /**
    * This implementation is pretty dumb. It does not deal with TTLs. But that's ok;
    * this is used in very narrow circumstances and will anyhow be removed shortly.
@@ -410,6 +410,8 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
    * Eval throws exceptions upon failure to parse the name, or
    * on failure to scheme lookup. Since names are late bound,
    * binding failures are deferred.
+   *
+   * @see [[Resolvers.eval]] for Java support
    */
   def eval(name: String): Name =
     if (name startsWith "/") Name(name)
@@ -434,6 +436,8 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
    * Parse and evaluate the argument into a (Name, label: String) tuple.
    * Arguments are parsed with the same grammar as in `eval`. If a label is not
    * provided (i.e. no "label=<addr>"), then the empty string is returned.
+   *
+   * @see [[Resolvers.evalLabeled]] for Java support
    */
   def evalLabeled(addr: String): (Name, String) = {
     val (label, rest) = lex(addr) match {
@@ -445,4 +449,28 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
   }
 }
 
+/**
+ * The default [[Resolver]] used by Finagle.
+ *
+ * @see [[Resolvers]] for Java support.
+ */
 object Resolver extends BaseResolver(() => LoadService[Resolver]())
+
+/**
+ * Java APIs for [[Resolver]].
+ */
+object Resolvers {
+
+  /**
+   * @see [[Resolver.eval]]
+   */
+  def eval(name: String): Name =
+    Resolver.eval(name)
+
+  /**
+   * @see [[Resolver.evalLabeled]]
+   */
+  def evalLabeled(addr: String): (Name, String) =
+    Resolver.evalLabeled(addr)
+
+}
