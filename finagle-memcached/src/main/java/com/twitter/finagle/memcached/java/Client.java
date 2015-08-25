@@ -1,11 +1,11 @@
-package com.twitter.finagle.memcachedx.java;
+package com.twitter.finagle.memcached.java;
 
 import java.util.List;
 import java.util.Map;
 
 import com.twitter.finagle.Service;
-import com.twitter.finagle.memcachedx.protocol.Command;
-import com.twitter.finagle.memcachedx.protocol.Response;
+import com.twitter.finagle.memcached.protocol.Command;
+import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.io.Buf;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
@@ -21,9 +21,9 @@ public abstract class Client {
    * @return a Client.
    */
   public static Client newInstance(Service<Command, Response> finagleClient) {
-    com.twitter.finagle.memcachedx.Client schmemcachedClient =
-      com.twitter.finagle.memcachedx.Client$.MODULE$.apply(finagleClient);
-    return new com.twitter.finagle.memcachedx.java.ClientBase(schmemcachedClient);
+    com.twitter.finagle.memcached.Client schmemcachedClient =
+      com.twitter.finagle.memcached.Client$.MODULE$.apply(finagleClient);
+    return new com.twitter.finagle.memcached.java.ClientBase(schmemcachedClient);
   }
 
   /**

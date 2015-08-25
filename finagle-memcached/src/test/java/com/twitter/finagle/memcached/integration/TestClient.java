@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration;
+package com.twitter.finagle.memcached.integration;
 
 import scala.Option;
 
@@ -8,11 +8,11 @@ import org.junit.Test;
 
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.memcachedx.java.Client;
-import com.twitter.finagle.memcachedx.java.ClientBase;
-import com.twitter.finagle.memcachedx.protocol.Command;
-import com.twitter.finagle.memcachedx.protocol.Response;
-import com.twitter.finagle.memcachedx.protocol.text.Memcached;
+import com.twitter.finagle.memcached.java.Client;
+import com.twitter.finagle.memcached.java.ClientBase;
+import com.twitter.finagle.memcached.protocol.Command;
+import com.twitter.finagle.memcached.protocol.Response;
+import com.twitter.finagle.memcached.protocol.text.Memcached;
 import com.twitter.io.Buf;
 import com.twitter.util.Await;
 

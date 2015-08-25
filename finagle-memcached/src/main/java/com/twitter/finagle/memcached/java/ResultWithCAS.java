@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.java;
+package com.twitter.finagle.memcached.java;
 
 import com.twitter.io.Buf;
 
