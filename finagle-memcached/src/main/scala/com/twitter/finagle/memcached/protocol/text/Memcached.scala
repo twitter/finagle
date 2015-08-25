@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.protocol.text
+package com.twitter.finagle.memcached.protocol.text
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
@@ -11,8 +11,8 @@ import server.DecodingToCommand
 import server.{Decoder => ServerDecoder}
 
 import com.twitter.finagle._
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf

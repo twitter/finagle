@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.replication
+package com.twitter.finagle.memcached.replication
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
@@ -9,9 +9,9 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
 import com.twitter.finagle.cacheresolver.CacheNode
 import com.twitter.finagle.Group
-import com.twitter.finagle.memcachedx._
-import com.twitter.finagle.memcachedx.protocol.Value
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.protocol.Value
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util._
@@ -91,7 +91,7 @@ class BaseReplicationClient(clients: Seq[Client], statsReceiver: StatsReceiver =
    *
    * TODO: introducing BackupRequestFilter to shorten the waiting period for secondary requests
    */
-  private[memcachedx] def getResult(keys: Iterable[String], useRandomOrder: Boolean): Future[GetResult] = {
+  private[memcached] def getResult(keys: Iterable[String], useRandomOrder: Boolean): Future[GetResult] = {
     val clientsInOrder = if (useRandomOrder) Random.shuffle(clients) else clients
 
     def loopGet(clients: Seq[Client], currentRes: GetResult): Future[GetResult] = clients match {

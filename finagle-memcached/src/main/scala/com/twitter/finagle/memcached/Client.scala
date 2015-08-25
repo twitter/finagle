@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx
+package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{InetSocketAddress, SocketAddress}
@@ -7,8 +7,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
-import com.twitter.finagle.memcachedx.protocol.{text, _}
-import com.twitter.finagle.memcachedx.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
+import com.twitter.finagle.memcached.protocol.{text, _}
+import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
 import com.twitter.finagle.service.{FailedService, FailureAccrualFactory}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
@@ -73,7 +73,7 @@ object Client {
   }
 }
 
-case class GetResult private[memcachedx](
+case class GetResult private[memcached](
   hits: Map[String, Value] = Map.empty,
   misses: immutable.Set[String] = immutable.Set.empty,
   failures: Map[String, Throwable] = Map.empty
@@ -96,7 +96,7 @@ object GetResult {
   /**
    * Equivalent to results.reduceLeft { _ ++ _ }, but written to be more efficient.
    */
-  private[memcachedx] def merged(results: Seq[GetResult]): GetResult = {
+  private[memcached] def merged(results: Seq[GetResult]): GetResult = {
     results match {
       case Nil => GetResult()
       case Seq(single) => single
@@ -116,7 +116,7 @@ object GetResult {
     }
   }
 
-  private[memcachedx] def merged(results: Seq[GetsResult]): GetsResult = {
+  private[memcached] def merged(results: Seq[GetsResult]): GetsResult = {
     val unwrapped = results.map { _.getResult }
     GetsResult(merged(unwrapped))
   }
@@ -576,7 +576,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
  * the key value.  Subclasses implement clientOf to choose the Client.
  */
 trait PartitionedClient extends Client {
-  protected[memcachedx] def clientOf(key: String): Client
+  protected[memcached] def clientOf(key: String): Client
 
   private[this] def withKeysGroupedByClient[A](
     keys: Iterable[String])(f: (Client, Iterable[String]) => Future[A]
@@ -645,10 +645,10 @@ abstract class KetamaClientKey {
   def identifier: String
 }
 object KetamaClientKey {
-  private[memcachedx] case class HostPortBasedKey(host: String, port: Int, weight: Int) extends KetamaClientKey {
+  private[memcached] case class HostPortBasedKey(host: String, port: Int, weight: Int) extends KetamaClientKey {
     val identifier = if (port == 11211) host else host + ":" + port
   }
-  private[memcachedx] case class CustomKey(identifier: String) extends KetamaClientKey
+  private[memcached] case class CustomKey(identifier: String) extends KetamaClientKey
 
   def apply(host: String, port: Int, weight: Int): KetamaClientKey =
     HostPortBasedKey(host, port, weight)
@@ -943,7 +943,7 @@ class KetamaClient private[finagle](
     oldLibMemcachedVersionComplianceMode)
 
 // deprecated, in favor of `c.t.f.memcached.Memcached`, 2015-02-22
-case class KetamaClientBuilder private[memcachedx] (
+case class KetamaClientBuilder private[memcached] (
   _group: Group[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
@@ -1081,7 +1081,7 @@ object KetamaClientBuilder {
  * Ruby memcache-client (MemCache) compatible client.
  */
 class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
-  protected[memcachedx] def clientOf(key: String) = {
+  protected[memcached] def clientOf(key: String) = {
     val bytes = key.getBytes(Charsets.Utf8)
     val hash = (KeyHasher.CRC32_ITU.hashKey(bytes) >> 16) & 0x7fff
     val index = hash % clients.size
@@ -1131,7 +1131,7 @@ case class RubyMemCacheClientBuilder(
  */
 class PHPMemCacheClient(clients: Array[Client], keyHasher: KeyHasher)
   extends PartitionedClient {
-  protected[memcachedx] def clientOf(key: String) = {
+  protected[memcached] def clientOf(key: String) = {
     // See mmc_hash() in memcache_standard_hash.c
     val hash = (keyHasher.hashKey(key.getBytes) >> 16) & 0x7fff
     val index = hash % clients.size

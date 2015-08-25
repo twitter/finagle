@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.ServerSet.EndpointStatus

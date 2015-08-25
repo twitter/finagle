@@ -1,10 +1,10 @@
-package com.twitter.finagle.memcachedx.protocol.text
+package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.io.Buf
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import org.jboss.netty.channel._
 
 class ResponseToEncoding extends OneToOneEncoder {

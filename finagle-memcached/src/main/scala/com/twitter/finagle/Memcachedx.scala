@@ -6,10 +6,10 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.cacheresolver.CacheNodeGroup
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
-import com.twitter.finagle.memcachedx.protocol.text.{
+import com.twitter.finagle.memcached.protocol.text.{
   MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
-import com.twitter.finagle.memcachedx.protocol.{Command, Response, RetrievalCommand, Values}
-import com.twitter.finagle.memcachedx.{Client => MClient, Server => MServer, _}
+import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
+import com.twitter.finagle.memcached.{Client => MClient, Server => MServer, _}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
@@ -60,10 +60,10 @@ private[finagle] object MemcachedxTraceInitializer {
 }
 
 trait MemcachedxRichClient { self: Client[Command, Response] =>
-  def newRichClient(group: Group[SocketAddress]): memcachedx.Client = memcachedx.Client(newClient(group).toService)
-  def newRichClient(group: String): memcachedx.Client = memcachedx.Client(newClient(group).toService)
-  def newTwemcacheClient(group: Group[SocketAddress]) = memcachedx.TwemcacheClient(newClient(group).toService)
-  def newTwemcacheClient(group: String) = memcachedx.TwemcacheClient(newClient(group).toService)
+  def newRichClient(group: Group[SocketAddress]): memcached.Client = memcached.Client(newClient(group).toService)
+  def newRichClient(group: String): memcached.Client = memcached.Client(newClient(group).toService)
+  def newTwemcacheClient(group: Group[SocketAddress]) = memcached.TwemcacheClient(newClient(group).toService)
+  def newTwemcacheClient(group: String) = memcached.TwemcacheClient(newClient(group).toService)
 }
 
 trait MemcachedxKetamaClient {
@@ -71,7 +71,7 @@ trait MemcachedxKetamaClient {
 
   def newKetamaClient(
     dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
-  ): memcachedx.Client = {
+  ): memcached.Client = {
     val Name.Bound(va) = Resolver.eval(dest)
     val g = Group.fromVarAddr(va)
     newKetamaClient(g, keyHasher, ejectFailedHost)
@@ -81,7 +81,7 @@ trait MemcachedxKetamaClient {
     group: Group[SocketAddress],
     keyHasher: KeyHasher,
     ejectFailedHost: Boolean
-  ): memcachedx.Client = {
+  ): memcached.Client = {
     new KetamaClient(
       initialServices       = CacheNodeGroup(group),
       keyHasher             = keyHasher,
@@ -94,7 +94,7 @@ trait MemcachedxKetamaClient {
 
   def newTwemcacheKetamaClient(
     dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
-  ): memcachedx.TwemcacheClient = {
+  ): memcached.TwemcacheClient = {
     val Name.Bound(va) = Resolver.eval(dest)
     val g = Group.fromVarAddr(va)
     newTwemcacheKetamaClient(g, keyHasher, ejectFailedHost)
@@ -104,7 +104,7 @@ trait MemcachedxKetamaClient {
     group: Group[SocketAddress],
     keyHasher: KeyHasher,
     ejectFailedHost: Boolean
-  ): memcachedx.TwemcacheClient = {
+  ): memcached.TwemcacheClient = {
     new KetamaClient(
       initialServices       = CacheNodeGroup(group),
       keyHasher             = keyHasher,

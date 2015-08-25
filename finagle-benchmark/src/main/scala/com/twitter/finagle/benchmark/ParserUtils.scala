@@ -4,8 +4,8 @@ import com.google.caliper.SimpleBenchmark
 import scala.util.Random
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import com.google.common.base.Charsets
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
-import com.twitter.finagle.memcachedx.util.ParserUtils
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.util.ParserUtils
 
 // From $BIRDCAGE_HOME run:
 // ./pants bench finagle/finagle-benchmark: --bench-target=com.twitter.finagle.benchmark.ParserUtils --bench-memory

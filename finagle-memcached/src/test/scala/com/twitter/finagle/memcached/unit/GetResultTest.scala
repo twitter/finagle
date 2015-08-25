@@ -1,7 +1,7 @@
-package com.twitter.finagle.memcachedx.unit
+package com.twitter.finagle.memcached.unit
 
-import com.twitter.finagle.memcachedx._
-import com.twitter.finagle.memcachedx.protocol.Value
+import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.protocol.Value
 import scala.collection.immutable
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

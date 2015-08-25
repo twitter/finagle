@@ -1,9 +1,9 @@
-package com.twitter.finagle.memcachedx
+package com.twitter.finagle.memcached
 
 import _root_.java.net.SocketAddress
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
-import com.twitter.finagle.memcachedx.protocol.text
-import com.twitter.finagle.memcachedx.util.AtomicMap
+import com.twitter.finagle.memcached.protocol.text
+import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.io.Buf
 import com.twitter.util.{Await, SynchronizedLruMap}
 

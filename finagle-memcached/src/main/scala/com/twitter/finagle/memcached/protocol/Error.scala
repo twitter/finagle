@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.protocol
+package com.twitter.finagle.memcached.protocol
 
 /**
  * Indicates that a request failed because an attempt was made to decode a

@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import _root_.java.lang.{Boolean => JBoolean}
 
@@ -7,9 +7,9 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcachedx.Client
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
+import com.twitter.finagle.memcached.Client
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util.Await

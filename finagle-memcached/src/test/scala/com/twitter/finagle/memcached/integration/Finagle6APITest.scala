@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import _root_.java.io.ByteArrayOutputStream
 import _root_.java.lang.{Boolean => JBoolean}
@@ -7,8 +7,8 @@ import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.finagle.MemcachedxClient
 import com.twitter.finagle.cacheresolver.CachePoolConfig
-import com.twitter.finagle.memcachedx.PartitionedClient
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.PartitionedClient
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.Await

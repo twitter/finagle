@@ -1,11 +1,11 @@
-package com.twitter.finagle.memcachedx.unit
+package com.twitter.finagle.memcached.unit
 
 import _root_.java.net.InetSocketAddress
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
-import com.twitter.finagle.memcachedx._
+import com.twitter.finagle.memcached._
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._

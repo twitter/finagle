@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.util
+package com.twitter.finagle.memcached.util
 
 import scala.collection.mutable
 

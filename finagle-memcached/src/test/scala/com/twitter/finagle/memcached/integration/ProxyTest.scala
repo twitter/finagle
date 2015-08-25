@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import java.net.{InetAddress, InetSocketAddress}
 
@@ -8,9 +8,9 @@ import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
-import com.twitter.finagle.memcachedx.Client
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
-import com.twitter.finagle.memcachedx.protocol.{Command, Response}
+import com.twitter.finagle.memcached.Client
+import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.io.Buf
 import com.twitter.util.Await

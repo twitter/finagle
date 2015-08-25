@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import collection.JavaConversions._
 import com.twitter.conversions.time._
@@ -20,7 +20,7 @@ trait TestMemcachedServer {
   def stop(): Unit
 }
 
-private[memcachedx] object InternalMemcached {
+private[memcached] object InternalMemcached {
   def start(address: Option[InetSocketAddress]): Option[TestMemcachedServer] = {
     try {
       val server = new InProcessMemcached(
@@ -36,7 +36,7 @@ private[memcachedx] object InternalMemcached {
   }
 }
 
-private[memcachedx] object ExternalMemcached { self =>
+private[memcached] object ExternalMemcached { self =>
   class MemcachedBinaryNotFound extends Exception
   private[this] var processes: List[Process] = List()
   private[this] val forbiddenPorts = 11000.until(11900)

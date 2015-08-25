@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx
+package com.twitter.finagle.memcached
 
 import _root_.java.net.InetSocketAddress
 
@@ -11,7 +11,7 @@ import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Tra
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.loadbalancer.Balancers
 import com.twitter.finagle.loadbalancer.{ConcurrentLoadBalancerFactory, LoadBalancerFactory}
-import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.pool.SingletonPool
@@ -45,7 +45,7 @@ object Memcached {
       FailureAccrualFactory.Param(100, () => 1.second) +
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
-      ProtocolLibrary("memcachedx")
+      ProtocolLibrary("memcached")
 }
 
 /**
@@ -190,7 +190,7 @@ case class Memcached(
     nodeHealthBroker: Broker[NodeHealth],
     label: String,
     mkClient: MkClient
-  ): Group[(KetamaClientKey, KetamaNode[com.twitter.finagle.memcachedx.Client])] =
+  ): Group[(KetamaClientKey, KetamaNode[com.twitter.finagle.memcached.Client])] =
     initialServices.map { node =>
       val key = node.key match {
         case Some(id) => KetamaClientKey(id)
@@ -219,7 +219,7 @@ case class Memcached(
   def newClient(
     name: Name,
     mkClient: MkClient = newClient
-  ): memcachedx.Client = {
+  ): memcached.Client = {
     val va = name match {
       // memcache only support Bounded names. TRFC-162
       case Name.Bound(va) => va

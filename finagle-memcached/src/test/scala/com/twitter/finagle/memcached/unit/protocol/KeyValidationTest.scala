@@ -1,11 +1,11 @@
-package com.twitter.finagle.memcachedx.unit.protocol
+package com.twitter.finagle.memcached.unit.protocol
 
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import com.twitter.finagle.memcachedx.protocol.KeyValidation
+import com.twitter.finagle.memcached.protocol.KeyValidation
 import com.twitter.io.{Buf, Charsets}
 
 @RunWith(classOf[JUnitRunner])

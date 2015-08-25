@@ -1,10 +1,10 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import _root_.java.net.SocketAddress
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
-import com.twitter.finagle.memcachedx.util.AtomicMap
-import com.twitter.finagle.memcachedx.{InterpreterService, Interpreter, Entry}
+import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.util.AtomicMap
+import com.twitter.finagle.memcached.{InterpreterService, Interpreter, Entry}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, SynchronizedLruMap}
 

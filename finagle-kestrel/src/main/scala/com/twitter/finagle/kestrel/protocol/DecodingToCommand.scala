@@ -1,9 +1,9 @@
 package com.twitter.finagle.kestrel.protocol
 
-import com.twitter.finagle.memcachedx.protocol.{ClientError, NonexistentCommand}
+import com.twitter.finagle.memcached.protocol.{ClientError, NonexistentCommand}
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcachedx.protocol.text.server.AbstractDecodingToCommand
-import com.twitter.finagle.memcachedx.util.Bufs.RichBuf
+import com.twitter.finagle.memcached.protocol.text.server.AbstractDecodingToCommand
+import com.twitter.finagle.memcached.util.Bufs.RichBuf
 import com.twitter.io.Buf
 
 private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Command] {

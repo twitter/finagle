@@ -1,8 +1,8 @@
-package com.twitter.finagle.memcachedx
+package com.twitter.finagle.memcached
 
-import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.Service
-import com.twitter.finagle.memcachedx.util.{ParserUtils, AtomicMap}
+import com.twitter.finagle.memcached.util.{ParserUtils, AtomicMap}
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Future, Time}
 

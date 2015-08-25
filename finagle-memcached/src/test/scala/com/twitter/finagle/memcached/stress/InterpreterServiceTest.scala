@@ -1,10 +1,10 @@
-package com.twitter.finagle.memcachedx.stress
+package com.twitter.finagle.memcached.stress
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcachedx.integration.InProcessMemcached
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
+import com.twitter.finagle.memcached.integration.InProcessMemcached
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Time}
 import java.net.{InetAddress, InetSocketAddress}

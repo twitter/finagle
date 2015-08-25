@@ -1,6 +1,6 @@
-package com.twitter.finagle.memcachedx
+package com.twitter.finagle.memcached
 
-import com.twitter.finagle.memcachedx.protocol.{ClientError, Value}
+import com.twitter.finagle.memcached.protocol.{ClientError, Value}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
 import scala.collection.mutable

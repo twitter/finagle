@@ -1,9 +1,9 @@
-package com.twitter.finagle.memcachedx.unit.protocol.text.server
+package com.twitter.finagle.memcached.unit.protocol.text.server
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcachedx.protocol.text.server.DecodingToCommand
-import com.twitter.finagle.memcachedx.protocol.text.{Tokens, TokensWithData}
-import com.twitter.finagle.memcachedx.protocol.{Set, Stats}
+import com.twitter.finagle.memcached.protocol.text.server.DecodingToCommand
+import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
+import com.twitter.finagle.memcached.protocol.{Set, Stats}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Time}
 import org.junit.runner.RunWith

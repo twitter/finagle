@@ -1,13 +1,13 @@
-package com.twitter.finagle.memcachedx.unit.protocol.text.client
+package com.twitter.finagle.memcached.unit.protocol.text.client
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import com.twitter.finagle.memcachedx.protocol
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.protocol.text.client.DecodingToResponse
-import com.twitter.finagle.memcachedx.protocol.text.{StatLines, Tokens}
+import com.twitter.finagle.memcached.protocol
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
+import com.twitter.finagle.memcached.protocol.text.{StatLines, Tokens}
 import com.twitter.io.Buf
 
 @RunWith(classOf[JUnitRunner])

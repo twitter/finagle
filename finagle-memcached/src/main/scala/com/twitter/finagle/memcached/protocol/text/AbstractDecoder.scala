@@ -1,7 +1,7 @@
-package com.twitter.finagle.memcachedx.protocol.text
+package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcachedx.protocol.ClientError
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.protocol.ClientError
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.io.Charsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBufferIndexFinder, ChannelBuffers}
 import org.jboss.netty.channel._
@@ -84,6 +84,6 @@ abstract class AbstractDecoder extends FrameDecoder {
 
   private[this] val needMoreData = null
 
-  protected[memcachedx] def start(): Unit
-  protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int): Unit
+  protected[memcached] def start(): Unit
+  protected[memcached] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int): Unit
 }

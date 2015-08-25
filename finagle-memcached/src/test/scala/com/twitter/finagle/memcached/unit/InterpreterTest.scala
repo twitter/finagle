@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.unit
+package com.twitter.finagle.memcached.unit
 
 import scala.collection.mutable
 
@@ -7,9 +7,9 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcachedx.{Entry, Interpreter}
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.util.AtomicMap
+import com.twitter.finagle.memcached.{Entry, Interpreter}
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.io.Buf
 import com.twitter.util.Time
 

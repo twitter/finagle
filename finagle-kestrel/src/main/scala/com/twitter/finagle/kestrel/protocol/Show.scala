@@ -3,7 +3,7 @@ package com.twitter.finagle.kestrel.protocol
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 
-import com.twitter.finagle.memcachedx.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
+import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
 import com.twitter.io.Buf
 import com.twitter.util.{Time, Duration}
 

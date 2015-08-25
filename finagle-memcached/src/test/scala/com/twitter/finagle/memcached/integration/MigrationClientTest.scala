@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import com.twitter.common.io.FileUtils._
 import com.twitter.common.quantity.{Amount, Time}
@@ -6,8 +6,8 @@ import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils
 import com.twitter.conversions.time._
 import com.twitter.finagle.MemcachedxClient
 import com.twitter.finagle.cacheresolver.CachePoolConfig
-import com.twitter.finagle.memcachedx.migration._
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.migration._
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.io.Buf
 import com.twitter.util._

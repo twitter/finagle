@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.unit.util
+package com.twitter.finagle.memcached.unit.util
 
 import scala.util.Random
 
@@ -6,7 +6,7 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import com.twitter.finagle.memcachedx.util.ParserUtils
+import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.{Buf, Charsets}
 
 @RunWith(classOf[JUnitRunner])

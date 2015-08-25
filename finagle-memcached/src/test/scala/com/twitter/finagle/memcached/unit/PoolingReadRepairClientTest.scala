@@ -1,6 +1,6 @@
-package com.twitter.finagle.memcachedx.unit
+package com.twitter.finagle.memcached.unit
 
-import com.twitter.finagle.memcachedx._
+import com.twitter.finagle.memcached._
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

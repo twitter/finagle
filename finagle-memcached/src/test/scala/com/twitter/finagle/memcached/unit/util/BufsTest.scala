@@ -1,10 +1,10 @@
-package com.twitter.finagle.memcachedx.unit.util
+package com.twitter.finagle.memcached.unit.util
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-import com.twitter.finagle.memcachedx.util.Bufs.RichBuf
+import com.twitter.finagle.memcached.util.Bufs.RichBuf
 import com.twitter.io.Buf
 
 @RunWith(classOf[JUnitRunner])

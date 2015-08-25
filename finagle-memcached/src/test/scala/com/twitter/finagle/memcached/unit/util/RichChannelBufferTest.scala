@@ -1,6 +1,6 @@
-package com.twitter.finagle.memcachedx.unit.util
+package com.twitter.finagle.memcached.unit.util
 
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils
+import com.twitter.finagle.memcached.util.ChannelBufferUtils
 import com.twitter.io.Charsets
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import org.junit.runner.RunWith

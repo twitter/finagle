@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.util
+package com.twitter.finagle.memcached.util
 
 import collection.mutable.ArrayBuffer
 import com.google.common.base.Strings

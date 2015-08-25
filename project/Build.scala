@@ -403,12 +403,12 @@ object Finagle extends Build {
   ).dependsOn(finagleCore, finagleServersets)
 
   lazy val finagleMemcachedX = Project(
-    id = "finagle-memcachedx",
-    base = file("finagle-memcachedx"),
+    id = "finagle-memcached",
+    base = file("finagle-memcached"),
     settings = Project.defaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-memcachedx",
+    name := "finagle-memcached",
     libraryDependencies ++= Seq(
       util("hashing"),
       util("zk-test") % "test",

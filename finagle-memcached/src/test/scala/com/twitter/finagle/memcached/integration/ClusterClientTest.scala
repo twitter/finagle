@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import _root_.java.io.ByteArrayOutputStream
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
@@ -10,8 +10,8 @@ import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, Cluster}
 import com.twitter.finagle.cacheresolver.{CachePoolConfig, CacheNode, CachePoolCluster}
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
-import com.twitter.finagle.memcachedx.{Client, KetamaClientBuilder, PartitionedClient}
+import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.{Client, KetamaClientBuilder, PartitionedClient}
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.finagle.{Name, Resolver}
 import com.twitter.io.Buf

@@ -1,9 +1,9 @@
-package com.twitter.finagle.memcachedx.protocol.text.client
+package com.twitter.finagle.memcached.protocol.text.client
 
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 
-import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.io.Buf
 
 import text.{StatLines, TokensWithData, ValueLines, Tokens}
@@ -37,7 +37,7 @@ abstract class AbstractDecodingToResponse[R <: AnyRef] extends OneToOneDecoder {
 
 class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   import AbstractDecodingToResponse._
-  import com.twitter.finagle.memcachedx.util.Bufs.RichBuf
+  import com.twitter.finagle.memcached.util.Bufs.RichBuf
 
   protected def parseResponse(tokens: Seq[Buf]) = {
     tokens.headOption match {

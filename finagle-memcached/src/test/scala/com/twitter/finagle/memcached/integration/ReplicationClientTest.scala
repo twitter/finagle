@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
@@ -6,9 +6,9 @@ import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.cacheresolver.{CachePoolCluster, CachePoolConfig}
-import com.twitter.finagle.memcachedx.KetamaClientBuilder
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
-import com.twitter.finagle.memcachedx.replication._
+import com.twitter.finagle.memcached.KetamaClientBuilder
+import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.finagle.{Group, WriteException}
 import com.twitter.io.Buf

@@ -1,9 +1,9 @@
-package com.twitter.finagle.memcachedx.unit
+package com.twitter.finagle.memcached.unit
 
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.memcachedx._
+import com.twitter.finagle.memcached._
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Future, MockTimer, Time}
 import org.junit.runner.RunWith

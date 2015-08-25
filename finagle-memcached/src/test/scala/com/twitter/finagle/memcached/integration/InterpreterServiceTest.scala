@@ -1,10 +1,10 @@
-package com.twitter.finagle.memcachedx.integration
+package com.twitter.finagle.memcached.integration
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.io.Buf
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Time}

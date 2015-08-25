@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.protocol.text.server
+package com.twitter.finagle.memcached.protocol.text.server
 
 import scala.Function.tupled
 
@@ -6,9 +6,9 @@ import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.util.Bufs.RichBuf
-import com.twitter.finagle.memcachedx.util.ParserUtils
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.util.Bufs.RichBuf
+import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import com.twitter.util.Time
 

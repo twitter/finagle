@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.util
+package com.twitter.finagle.memcached.util
 
 import com.twitter.io.Buf
 import java.util.regex.Pattern

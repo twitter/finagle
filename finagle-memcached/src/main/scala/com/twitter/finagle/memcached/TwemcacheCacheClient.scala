@@ -1,9 +1,9 @@
-package com.twitter.finagle.memcachedx
+package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean}
-import com.twitter.finagle.memcachedx.protocol._
-import com.twitter.finagle.memcachedx.protocol.Stored
-import com.twitter.finagle.memcachedx.protocol.Exists
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.protocol.Stored
+import com.twitter.finagle.memcached.protocol.Exists
 import com.twitter.finagle.Service
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
@@ -95,7 +95,7 @@ trait TwemcachePartitionedClient extends TwemcacheClient { self: PartitionedClie
 
   // For now we requires the ParitionedClient must be delgating TwemcacheClient.
   // Refactory is on the way to re-archytect the partitioned client
-  protected[memcachedx] def twemcacheClientOf(key: String): TwemcacheClient = clientOf(key).asInstanceOf[TwemcacheClient]
+  protected[memcached] def twemcacheClientOf(key: String): TwemcacheClient = clientOf(key).asInstanceOf[TwemcacheClient]
 
   def getvResult(keys: Iterable[String]) = {
     if (keys.nonEmpty) {

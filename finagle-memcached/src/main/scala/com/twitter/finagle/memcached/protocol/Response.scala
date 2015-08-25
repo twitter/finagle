@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.protocol
+package com.twitter.finagle.memcached.protocol
 
 import com.twitter.io.Buf
 

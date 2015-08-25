@@ -1,8 +1,8 @@
-package com.twitter.finagle.memcachedx.unit
+package com.twitter.finagle.memcached.unit
 
 import com.twitter.io.Buf
-import com.twitter.finagle.memcachedx._
-import com.twitter.finagle.memcachedx.protocol._
+import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.Service
 import com.twitter.util.{ Await, Future }
 import org.junit.runner.RunWith

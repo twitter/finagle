@@ -1,11 +1,11 @@
-package com.twitter.finagle.memcachedx.migration
+package com.twitter.finagle.memcached.migration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.common.zookeeper.ZooKeeperClient
 import com.twitter.finagle.MemcachedxClient
 import com.twitter.finagle.cacheresolver.ZookeeperStateMonitor
-import com.twitter.finagle.memcachedx._
+import com.twitter.finagle.memcached._
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.zookeeper.DefaultZkClientFactory
 import com.twitter.io.Buf
@@ -14,7 +14,7 @@ import com.twitter.util.{Future, Time}
 /**
  * migration config data
  */
-private[memcachedx] object MigrationConstants {
+private[memcached] object MigrationConstants {
   case class MigrationConfig(
       state: String,
       readRepairBack: Boolean,

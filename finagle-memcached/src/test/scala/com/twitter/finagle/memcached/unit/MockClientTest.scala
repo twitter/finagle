@@ -1,7 +1,7 @@
-package com.twitter.finagle.memcachedx.unit
+package com.twitter.finagle.memcached.unit
 
-import com.twitter.finagle.memcachedx.MockClient
-import com.twitter.finagle.memcachedx.protocol.ClientError
+import com.twitter.finagle.memcached.MockClient
+import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

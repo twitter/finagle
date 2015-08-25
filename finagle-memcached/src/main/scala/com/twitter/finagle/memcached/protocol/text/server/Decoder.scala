@@ -1,9 +1,9 @@
-package com.twitter.finagle.memcachedx.protocol.text.server
+package com.twitter.finagle.memcached.protocol.text.server
 
-import com.twitter.finagle.memcachedx.protocol.ClientError
-import com.twitter.finagle.memcachedx.protocol.text._
-import com.twitter.finagle.memcachedx.util.ChannelBufferUtils._
-import com.twitter.finagle.memcachedx.util.ParserUtils
+import com.twitter.finagle.memcached.protocol.ClientError
+import com.twitter.finagle.memcached.protocol.text._
+import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.ChannelBuffer
@@ -14,7 +14,7 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
   case class AwaitingCommand() extends State
   case class AwaitingData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) extends State
 
-  final protected[memcachedx] def start() {
+  final protected[memcached] def start() {
     state = AwaitingCommand()
   }
 
@@ -35,7 +35,7 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
     }
   }
 
-  final protected[memcachedx] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) {
+  final protected[memcached] def awaitData(tokens: Seq[ChannelBuffer], bytesNeeded: Int) {
     state = AwaitingData(tokens, bytesNeeded)
   }
 

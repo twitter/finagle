@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.protocol.text
+package com.twitter.finagle.memcached.protocol.text
 
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}

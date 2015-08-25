@@ -1,7 +1,7 @@
-package com.twitter.finagle.memcachedx.protocol
+package com.twitter.finagle.memcached.protocol
 
-import com.twitter.finagle.memcachedx.util.Bufs
-import com.twitter.finagle.memcachedx.util.Bufs.RichBuf
+import com.twitter.finagle.memcached.util.Bufs
+import com.twitter.finagle.memcached.util.Bufs.RichBuf
 import com.twitter.io.Buf
 import com.twitter.util.Time
 
