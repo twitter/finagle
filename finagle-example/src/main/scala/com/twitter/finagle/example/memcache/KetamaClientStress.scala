@@ -4,11 +4,11 @@ import com.twitter.app.Flag
 import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
-import com.twitter.finagle.memcachedx
+import com.twitter.finagle.memcached
 import com.twitter.finagle.cacheresolver.{CacheNode, CachePoolCluster}
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
-import com.twitter.finagle.memcachedx.replication._
-import com.twitter.finagle.memcachedx.PartitionedClient
+import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.replication._
+import com.twitter.finagle.memcached.PartitionedClient
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
@@ -104,7 +104,7 @@ object KetamaClientStress extends App {
     }
 
     if (replicaPool == null) {
-      val ketamaClient = memcachedx.KetamaClientBuilder()
+      val ketamaClient = memcached.KetamaClientBuilder()
           .clientBuilder(builder)
           .cachePoolCluster(primaryPool)
           .failureAccrualParams(Int.MaxValue, Duration.Top)

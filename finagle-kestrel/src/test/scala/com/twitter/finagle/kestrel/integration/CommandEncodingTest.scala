@@ -5,7 +5,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import com.twitter.finagle.kestrel.protocol._
-import com.twitter.finagle.memcachedx.protocol.text.{Decoding, Tokens, TokensWithData}
+import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData}
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Time}
 
