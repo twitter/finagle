@@ -144,6 +144,28 @@ object SpnegoAuthenticator {
         tokenOut
       }
 
+      protected def createGSSContext(): GSSContext =
+        manager.createContext(
+          serverPrincipal,
+          mechanism,
+          manager.createCredential(
+            selfPrincipal.orNull,
+            lifetime,
+            mechanism,
+            GSSCredential.INITIATE_ONLY
+          ),
+          lifetime
+        )
+    }
+
+    class JAASServerSource(val loginContext: String) extends ServerSource with JAAS {
+      def accept(context: GSSContext, negotiation: Token): Future[Negotiated] = pool {
+        val token = context.acceptSecContext(negotiation, 0, negotiation.length)
+        val established = if (context.isEstablished) Some(context) else None
+        val wwwAuthenticate = AuthHeader(Option(token))
+        Negotiated(established, wwwAuthenticate)
+      }
+
       protected def createGSSContext(): GSSContext = {
         val cred = manager.createCredential(
           selfPrincipal.orNull,
@@ -160,25 +182,6 @@ object SpnegoAuthenticator {
         )
         manager.createContext(cred)
       }
-    }
-
-    class JAASServerSource(val loginContext: String) extends ServerSource with JAAS {
-      def accept(context: GSSContext, negotiation: Token): Future[Negotiated] = pool {
-        val token = context.acceptSecContext(negotiation, 0, negotiation.length)
-        val established = if (context.isEstablished) Some(context) else None
-        val wwwAuthenticate = AuthHeader(Option(token))
-        Negotiated(established, wwwAuthenticate)
-      }
-
-      protected def createGSSContext(): GSSContext =
-        manager.createContext(
-          manager.createCredential(
-            selfPrincipal.orNull,
-            lifetime,
-            mechanism,
-            GSSCredential.ACCEPT_ONLY
-          )
-        )
     }
   }
 
