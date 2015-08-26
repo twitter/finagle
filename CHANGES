@@ -21,7 +21,6 @@ Runtime Behavior Changes
     and interpreted proportional to offered load (however, they can still be though of,
     roughly, as multipliers for traffic). ``RB_ID=677416``
 
-
   * finagle-core: The RequestSemaphoreFilter now sheds load by dropping the tail of the queue
     and failing it with a `Failure.Restartable`. Previously, the filter had an unbounded
     queue but now the default size is 0 (i.e. no queueing). The dropped requests are in
@@ -47,6 +46,9 @@ Breaking API Changes
 
   * finagle-core: `RequestSemaphoreFilter.Param` now accepts a `com.twitter.concurrent.AsyncSemaphore`
     instead of an integer representing the max concurrency. ``RB_ID=696934``
+
+  * finagle-core: removed `c.t.f.asyncDns` flag and `c.t.f.SyncInetResolver`; DNS resolution is
+    now always asynchronous. ``RB_ID=734427``
 
   * finagle-httpx: `Method` no longer has an extractor. To access the name of
     custom methods, use `toString`. ``RB_ID=722913``

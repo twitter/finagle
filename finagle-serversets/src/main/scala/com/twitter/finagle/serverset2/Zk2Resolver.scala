@@ -47,7 +47,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
   private[this] implicit val injectTimer = DefaultTimer.twitter
 
-  private[this] val inetResolver = InetResolver(statsReceiver)
+  private[this] val inetResolver = new InetResolver(statsReceiver)
   private[this] val sessionTimeout = 10.seconds
   private[this] val removalEpoch = Stabilizer.epochs(sessionTimeout*4)
   private[this] val batchEpoch = Stabilizer.epochs(5.seconds)
