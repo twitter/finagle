@@ -29,7 +29,7 @@ object Finagle extends Build {
   )
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % "0.5.0" intransitive(),
-    "org.slf4j"   % "slf4j-nop" % "1.5.8" % "provided"
+    "org.slf4j"   % "slf4j-api" % "1.7.7" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
     "com.twitter" %% "scrooge-core" % scroogeVersion)
@@ -55,7 +55,7 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    crossScalaVersions := Seq("2.10.5", "2.11.6"),
+    crossScalaVersions := Seq("2.10.5", "2.11.7"),
     scalaVersion := "2.10.5",
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",
@@ -63,7 +63,7 @@ object Finagle extends Build {
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
-    resolvers += "twitter-repo" at "http://maven.twttr.com",
+    resolvers += "twitter-repo" at "https://maven.twttr.com",
 
     ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := (
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -89,10 +89,7 @@ object Finagle extends Build {
 
     scalacOptions ++= Seq("-encoding", "utf8"),
     scalacOptions += "-deprecation",
-    scalacOptions <++= scalaVersion.map {
-      case "2.10" | "2.10.4" => Seq("-language:_")
-      case _ => Seq.empty[String]
-    },
+    scalacOptions += "-language:_",
     javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
     javacOptions in doc := Seq("-source", "1.7"),
 
@@ -153,8 +150,8 @@ object Finagle extends Build {
   val jmockSettings = Seq(
     libraryDependencies ++= Seq(
       "org.jmock" % "jmock" % "2.4.0" % "test",
-      "cglib" % "cglib" % "2.1_3" % "test",
-      "asm" % "asm" % "1.5.3" % "test",
+      "cglib" % "cglib" % "2.2.2" % "test",
+      "asm" % "asm" % "3.3.1" % "test",
       "org.objenesis" % "objenesis" % "1.1" % "test",
       "org.hamcrest" % "hamcrest-all" % "1.1" % "test"
     )
@@ -235,7 +232,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "metrics" % "0.0.36",
+      "com.twitter.common" % "metrics" % "0.0.37",
       util("events"),
       util("logging"),
       util("registry"),
@@ -278,7 +275,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-commons-stats",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "stats" % "0.0.113",
+      "com.twitter.common" % "stats" % "0.0.114",
       util("registry"),
       util("stats")
     )
@@ -397,7 +394,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-cacheresolver",
     libraryDependencies ++= Seq(
-      "com.twitter.common" % "zookeeper-testing" % "0.0.51" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.53" % "test"
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleServersets)
@@ -413,7 +410,7 @@ object Finagle extends Build {
       util("hashing"),
       util("zk-test") % "test",
       "com.google.guava" % "guava" % "16.0.1",
-      "com.twitter.common" % "zookeeper-testing" % "0.0.51" % "test"
+      "com.twitter.common" % "zookeeper-testing" % "0.0.53" % "test"
     ),
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCacheResolver, finagleCore, finagleServersets)
@@ -451,7 +448,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-mux",
-    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.57")
+    libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.58")
   ).dependsOn(finagleCore)
 
   lazy val finagleThriftMux = Project(
@@ -521,10 +518,9 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-example",
-    crossScalaVersions ~= { versions => versions filter (_ != "2.11.4") },
     libraryDependencies ++= Seq(
       util("codec"),
-      "org.slf4j" %  "slf4j-nop" % "1.5.8" % "provided"
+      "org.slf4j" %  "slf4j-nop" % "1.7.7" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
     finagleCore, finagleHttp, finagleThrift, finagleMemcached, finagleKestrel,

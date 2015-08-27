@@ -69,7 +69,7 @@ Some of our libraries still aren't published to maven central.  If you add
 
 .. code-block:: scala
 
-	resolvers += "twitter" at "http://maven.twttr.com"
+	resolvers += "twitter" at "https://maven.twttr.com"
 
 to your sbt configuration, it will be able to pick up the libraries which are
 published externally, but not yet to maven central.
