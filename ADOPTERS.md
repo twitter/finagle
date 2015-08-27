@@ -11,6 +11,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Chartboost](https://www.chartboost.com/)
 * [Crimson Hexagon](http://www.crimsonhexagon.com/)
 * [DICE](http://dice.se/)
+* [Despegar](http://www.despegar.com)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)
 * [Green Man Gaming](http://www.greenmangaming.com/)
