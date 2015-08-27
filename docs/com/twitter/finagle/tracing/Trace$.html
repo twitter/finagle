@@ -39,7 +39,12 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p><code>Trace</code> maintains the state of the tracing stack
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>This is a tracing system similar to Dapper:</p><p>  “Dapper, a Large-Scale Distributed Systems Tracing Infrastructure”,
+  Benjamin H. Sigelman, Luiz André Barroso, Mike Burrows, Pat
+  Stephenson, Manoj Plakal, Donald Beaver, Saul Jaspan, Chandan
+  Shanbhag, 2010.</p><p>It is meant to be independent of whatever underlying RPC mechanism
+is being used, and it is up to the underlying codec to implement
+the transport.</p><p><code>Trace</code> maintains the state of the tracing stack
 The current <code>TraceId</code> has a terminal flag, indicating whether it
 can be overridden with a different <code>TraceId</code>. Setting the current
 <code>TraceId</code> as terminal forces all future annotations to share that

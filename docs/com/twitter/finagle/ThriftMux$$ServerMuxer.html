@@ -353,15 +353,15 @@ case class.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMux.ServerMuxer#newDispatcher" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.mux.ServerDispatcher"></a>
-      <a id="newDispatcher(Transport[In,Out],Service[Request,Response]):ServerDispatcher"></a>
+      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[ServerMuxer.this.In,ServerMuxer.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.util.Closable"></a>
+      <a id="newDispatcher(Transport[In,Out],Service[Request,Response]):Closable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.mux.ServerDispatcher">ServerDispatcher</span></span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.In">In</a>, <a href="#Out=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.ThriftMux.ServerMuxer.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Defines a dispatcher, a function which binds a transport to a

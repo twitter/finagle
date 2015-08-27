@@ -587,7 +587,7 @@ considers only valid non cancelled requests.
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#maxConcurrentRequests" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#maxConcurrentRequests" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="maxConcurrentRequests(max:Int):ServerBuilder.this.This"></a>
       <a id="maxConcurrentRequests(Int):This"></a>
       <h4 class="signature">
@@ -599,7 +599,14 @@ considers only valid non cancelled requests.
         <span class="name">maxConcurrentRequests</span><span class="params">(<span name="max">max: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Configures the maximum concurrent requests that are admitted
+by the server at any given time.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the maximum concurrent requests that are admitted
+by the server at any given time. If the server receives a
+burst of traffic that exceeds this limit, the burst is rejected
+with a <code>Failure.Rejected</code> exception. Note, this failure signals
+a graceful rejection which is transmitted to clients by certain
+protocols in Finagle (e.g. Http, ThriftMux).
+</p></div></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#monitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="monitor(mFactory:(String,java.net.SocketAddress)=&gt;com.twitter.util.Monitor):ServerBuilder.this.This"></a>
       <a id="monitor((String,SocketAddress)⇒Monitor):This"></a>

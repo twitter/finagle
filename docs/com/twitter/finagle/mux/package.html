@@ -185,6 +185,19 @@ used by servers to implement features like garbage collection avoidance.</p></di
       </span>
       </h4>
       <p class="comment cmt">Indicates that a client requested that a given request be discarded.</p>
+    </li><li name="com.twitter.finagle.mux.FailureDetectors" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FailureDetectorsextendsObject"></a>
+      <a id="FailureDetectors:FailureDetectors"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FailureDetectors.html"><span class="name">FailureDetectors</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.mux.Request" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestextendsAnyRef"></a>
       <a id="Request:Request"></a>
@@ -245,7 +258,20 @@ request.</p>
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.mux.Request" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.mux.FailureDetector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FailureDetector"></a>
+      <a id="FailureDetector:FailureDetector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="FailureDetector$.html"><span class="name">FailureDetector</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Companion object capable of creating a FailureDetector based on parameterized config.</p>
+    </li><li name="com.twitter.finagle.mux.Request" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Request"></a>
       <a id="Request:Request"></a>
       <h4 class="signature">
@@ -297,19 +323,6 @@ request.</p>
       </span>
       </h4>
       <p class="comment cmt">For java compatibility</p>
-    </li><li name="com.twitter.finagle.mux.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="exp"></a>
-      <a id="exp:exp"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="exp/package.html"><span class="name">exp</span></a>
-      </span>
-      </h4>
-      
     </li><li name="com.twitter.finagle.mux.gracefulShutdownEnabled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="gracefulShutdownEnabled"></a>
       <a id="gracefulShutdownEnabled:gracefulShutdownEnabled"></a>
@@ -336,6 +349,20 @@ request.</p>
       </span>
       </h4>
       
+    </li><li name="com.twitter.finagle.mux.sessionFailureDetector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sessionFailureDetector"></a>
+      <a id="sessionFailureDetector:sessionFailureDetector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="sessionFailureDetector$.html"><span class="name">sessionFailureDetector</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">GlobalFlag to configure FailureDetection used only in the
+absence of any app-specified config.</p>
     </li><li name="com.twitter.finagle.mux.stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stats"></a>
       <a id="stats:stats"></a>

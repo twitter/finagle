@@ -267,7 +267,7 @@
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.httpx.Method#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.httpx.Method#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(name:String):com.twitter.finagle.httpx.Method"></a>
       <a id="apply(String):Method"></a>
       <h4 class="signature">
@@ -279,7 +279,11 @@
         <span class="name">apply</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Method.html" class="extype" name="com.twitter.finagle.httpx.Method">Method</a></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Construct a Method.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Method.</p><p>Note: We are conservative here and ignore the case of <code>name</code> for the
+common method types. This makes it impossible to construct a GET method,
+for example, accidentally with the wrong case. For other names, not part
+of the common methods, we observe the case.
+</p></div></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -461,19 +465,6 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.httpx.Method#unapply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="unapply(method:com.twitter.finagle.httpx.Method):Option[String]"></a>
-      <a id="unapply(Method):Option[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">unapply</span><span class="params">(<span name="method">method: <a href="Method.html" class="extype" name="com.twitter.finagle.httpx.Method">Method</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

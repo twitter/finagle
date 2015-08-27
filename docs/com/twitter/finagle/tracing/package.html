@@ -208,6 +208,24 @@ server addr.</p>
                 <span class="name">@BenchmarkMode</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.TraceBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TraceBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="TraceBenchmark:TraceBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TraceBenchmark.html"><span class="name">TraceBenchmark</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@OperationsPerInvocation</span><span class="args">()</span>
+              
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.TraceId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TraceIdextendsProductwithSerializable"></a>
       <a id="TraceId:TraceId"></a>
@@ -451,9 +469,7 @@ server addr.</p>
         <a href="Trace$.html"><span class="name">Trace</span></a>
       </span>
       </h4>
-      <p class="comment cmt"><code>Trace</code> maintains the state of the tracing stack
-The current <code>TraceId</code> has a terminal flag, indicating whether it
-can be overridden with a different <code>TraceId</code>.</p>
+      <p class="comment cmt">This is a tracing system similar to Dapper:</p>
     </li><li name="com.twitter.finagle.tracing.TraceId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TraceId"></a>
       <a id="TraceId:TraceId"></a>

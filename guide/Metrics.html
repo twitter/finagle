@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.27.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.28.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.27.0',
+        VERSION:     '6.28.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.27.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.28.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -182,9 +182,6 @@ visibility into this caching.</p>
 <dl class="docutils">
 <dt><strong>misses</strong></dt>
 <dd>A counter of the number of cache misses</dd>
-<dt><strong>misstime_ms</strong></dt>
-<dd>A histogram of the latency, in milliseconds, of invocation of
-<cite>Service</cite>s created on misses</dd>
 <dt><strong>evicts</strong></dt>
 <dd>A counter of the number of cache evictions</dd>
 <dt><strong>idle</strong></dt>
@@ -354,13 +351,18 @@ finagle handles services where it can&#8217;t make a connection.</p>
 <h3>FailFastFactory<a class="headerlink" href="#failfastfactory" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>marked_dead</strong></dt>
-<dd>a counter of how many times the FailFastFactory has been marked dead</dd>
+<dd>a counter of how many times the <cite>FailFastFactory</cite> has been marked dead</dd>
 <dt><strong>unhealthy_for_ms</strong></dt>
-<dd>a gauge of how long the FailFastFactory has been retrying for this failure</dd>
+<dd>a gauge of how long the <cite>FailFastFactory</cite> has been retrying for this failure</dd>
 <dt><strong>unhealthy_num_tries</strong></dt>
-<dd>a gauge of the number of times the FailFastFactory has retried for this failure</dd>
+<dd>a gauge of the number of times the <cite>FailFastFactory</cite> has retried for this failure</dd>
 </dl>
 </div>
+</div>
+<div class="section" id="failure-accrual">
+<h2>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h2>
+<p id="failure-accrual-stats">The client stats under the <cite>failure_accrual</cite> scope track how <cite>FailureAccrualFactory</cite>
+manages failures.</p>
 </div>
 <div class="section" id="idle-apoptosis">
 <h2>Idle Apoptosis<a class="headerlink" href="#idle-apoptosis" title="Permalink to this headline">¶</a></h2>
@@ -554,6 +556,26 @@ controlled by a dynamic budget.</p>
 <dd>the number of times sessions have been abruptly terminated by the server</dd>
 </dl>
 </div>
+<div class="section" id="threshold-failure-detector">
+<h2>Threshold Failure Detector<a class="headerlink" href="#threshold-failure-detector" title="Permalink to this headline">¶</a></h2>
+<p id="failure-detector">The client metrics under the <cite>mux/failuredetector</cite> scope track the behavior of out-of-band ping
+based failure detection. They only apply to the mux protocol.</p>
+<div class="section" id="thresholdfailuredetector">
+<h3>ThresholdFailureDetector<a class="headerlink" href="#thresholdfailuredetector" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>ping</strong></dt>
+<dd>a counter of the number of pings sent to remote peers</dd>
+<dt><strong>ping_latency_us</strong></dt>
+<dd>a stat of round trip ping latencies in microseconds</dd>
+<dt><strong>marked_busy</strong></dt>
+<dd>a counter of the number of times the endpoints are marked busy</dd>
+<dt><strong>revivals</strong></dt>
+<dd>a counter of the number of times the endpoints revive</dd>
+<dt><strong>close</strong></dt>
+<dd>a counter of the number of endpoints that are closed</dd>
+</dl>
+</div>
+</div>
 </div>
 
 
@@ -608,6 +630,7 @@ controlled by a dynamic budget.</p>
 <li><a class="reference internal" href="#failfastfactory">FailFastFactory</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#failure-accrual">Failure Accrual</a></li>
 <li><a class="reference internal" href="#idle-apoptosis">Idle Apoptosis</a><ul>
 <li><a class="reference internal" href="#expiringservice">ExpiringService</a></li>
 </ul>
@@ -635,6 +658,10 @@ controlled by a dynamic budget.</p>
 </li>
 <li><a class="reference internal" href="#requeues">Requeues</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
+<li><a class="reference internal" href="#threshold-failure-detector">Threshold Failure Detector</a><ul>
+<li><a class="reference internal" href="#thresholdfailuredetector">ThresholdFailureDetector</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
