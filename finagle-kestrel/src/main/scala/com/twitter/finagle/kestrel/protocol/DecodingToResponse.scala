@@ -1,7 +1,7 @@
 package com.twitter.finagle.kestrel.protocol
 
-import com.twitter.finagle.memcachedx.protocol.text.{Tokens, TokensWithData}
-import com.twitter.finagle.memcachedx.protocol.text.client.AbstractDecodingToResponse
+import com.twitter.finagle.memcached.protocol.text.{Tokens, TokensWithData}
+import com.twitter.finagle.memcached.protocol.text.client.AbstractDecodingToResponse
 import com.twitter.io.Buf
 
 private[kestrel] class DecodingToResponse extends AbstractDecodingToResponse[Response] {

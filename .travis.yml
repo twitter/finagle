@@ -28,7 +28,7 @@ before_script:
 
 script:
   # don't test these projects because they don't pass on travis-ci
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcachedx/test:compile
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
   # run conditionally because they don't pass with openjdks
   - if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-native/test; fi

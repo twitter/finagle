@@ -1,4 +1,4 @@
-package com.twitter.finagle.memcachedx.util
+package com.twitter.finagle.memcached.util
 
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import org.openjdk.jmh.annotations._

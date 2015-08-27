@@ -7,7 +7,7 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core',
     'finagle/finagle-kestrel',
-    'finagle/finagle-memcachedx',
+    'finagle/finagle-memcached',
     'util/util-core'
   ],
   sources=rglobs('*.scala')

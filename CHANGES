@@ -27,6 +27,8 @@ Runtime Behavior Changes
     turn requeued by Finagle clients with protocol support (e.g. Http, ThriftMux).
     ``RB_ID=696934``
 
+  * finagle-memcachedx: Renamed to finagle-memcached.
+
   * finagle-stats: Standard deviation ("$statName.stddev") is no longer exported.
     ``RB_ID=726309`` (follow up to ``RB_ID=717647``)
 

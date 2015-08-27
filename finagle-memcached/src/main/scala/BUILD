@@ -1,0 +1,26 @@
+scala_library(name='scala',
+  provides = scala_artifact(
+    org = 'com.twitter',
+    name = 'finagle-memcached',
+    repo = artifactory,
+  ),
+  dependencies=[
+    '3rdparty/jvm/com/fasterxml/jackson/core:jackson-core',
+    '3rdparty/jvm/com/fasterxml/jackson/core:jackson-databind',
+    '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
+    '3rdparty/jvm/com/google/guava',
+    'science/src/java/com/twitter/common/zookeeper:client',
+    'science/src/java/com/twitter/common/zookeeper:server-set',
+    'science/src/java/com/twitter/common/io:io',
+    'science/src/java/com/twitter/common/quantity:quantity',
+    '3rdparty/jvm/org/apache/zookeeper',
+    '3rdparty/jvm/com/google/code/gson',
+    '3rdparty/jvm/io/netty',
+    'finagle/finagle-cacheresolver',
+    'finagle/finagle-core',
+    'finagle/finagle-serversets',
+    'util/util-core',
+    'util/util-hashing',
+  ],
+  sources=rglobs('*.scala')
+)
