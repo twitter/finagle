@@ -75,29 +75,29 @@ object ServerConfig {
   }
 
   // params specific to ServerBuilder
-  case class BindTo(addr: SocketAddress) {
+  private[builder] case class BindTo(addr: SocketAddress) {
     def mk(): (BindTo, Stack.Param[BindTo]) =
       (this, BindTo.param)
   }
-  object BindTo {
+  private[builder] object BindTo {
     implicit val param = Stack.Param(BindTo(new SocketAddress {
       override val toString = "unknown"
     }))
   }
 
-  case class MonitorFactory(mFactory: (String, SocketAddress) => util.Monitor) {
+  private[builder] case class MonitorFactory(mFactory: (String, SocketAddress) => util.Monitor) {
     def mk(): (MonitorFactory, Stack.Param[MonitorFactory]) =
       (this, MonitorFactory.param)
   }
-  object MonitorFactory {
+  private[builder] object MonitorFactory {
     implicit val param = Stack.Param(MonitorFactory((_, _) => NullMonitor))
   }
 
-  case class Daemonize(onOrOff: Boolean) {
+  private[builder] case class Daemonize(onOrOff: Boolean) {
     def mk(): (Daemonize, Stack.Param[Daemonize]) =
       (this, Daemonize.param)
   }
-  object Daemonize {
+  private[builder] object Daemonize {
     implicit val param = Stack.Param(Daemonize(false))
   }
 }
