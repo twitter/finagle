@@ -11,6 +11,9 @@ object InetSocketAddressUtil {
   type HostPort = (String, Int)
   type WeightedHostPort = (String, Int, Double)
 
+  private[finagle] val unconnected =
+    new SocketAddress { override def toString = "unconnected" }
+
   private[this] val dnsConcurrency = 100
   private[this] val dnsCond = new AsyncSemaphore(dnsConcurrency)
 

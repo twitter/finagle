@@ -1,7 +1,8 @@
 package com.twitter.finagle
 
-import java.net.SocketAddress
+import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.util.{Closable, Future, NonFatal, Time}
+import java.net.SocketAddress
 
 object Service {
 
@@ -96,8 +97,6 @@ trait ClientConnection extends Closable {
 
 object ClientConnection {
   val nil: ClientConnection = new ClientConnection {
-    private[this] val unconnected =
-      new SocketAddress { override def toString = "unconnected" }
     def remoteAddress = unconnected
     def localAddress = unconnected
     def close(deadline: Time) = Future.Done

@@ -2,19 +2,29 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.util.DefaultLogger
+import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
+import com.twitter.logging.Level
 import com.twitter.util.{Duration, Time, Timer, TimerTask, Try}
+import java.util.logging.Logger
+import java.net.SocketAddress
 import scala.util.Random
+
 
 object FailureAccrualFactory {
   private[finagle] def wrapper(
     statsReceiver: StatsReceiver,
     numFailures: Int,
-    markDeadFor: () => Duration
+    markDeadFor: () => Duration,
+    label: String,
+    logger: Logger,
+    endpoint: SocketAddress
   )(timer: Timer): ServiceFactoryWrapper = {
     new ServiceFactoryWrapper {
       def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
-        new FailureAccrualFactory(factory, numFailures, markDeadFor, timer, statsReceiver.scope("failure_accrual"))
+        new FailureAccrualFactory(factory, numFailures, markDeadFor, timer, statsReceiver.scope("failure_accrual"), label, logger, endpoint)
     }
   }
 
@@ -107,7 +117,13 @@ object FailureAccrualFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.service.FailureAccrualFactory]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[param.Stats, FailureAccrualFactory.Param, param.Timer, ServiceFactory[Req, Rep]] {
+    new Stack.Module6[param.Stats,
+      FailureAccrualFactory.Param,
+      param.Timer,
+      param.Label,
+      param.Logger,
+      Transporter.EndpointAddr,
+      ServiceFactory[Req, Rep]] {
       val role = FailureAccrualFactory.role
       val description = "Backoff from hosts that we cannot successfully make requests to"
 
@@ -115,12 +131,18 @@ object FailureAccrualFactory {
         _stats: param.Stats,
         _param: FailureAccrualFactory.Param,
         _timer: param.Timer,
+        _label: param.Label,
+        _logger: param.Logger,
+        _endpoint: Transporter.EndpointAddr,
         next: ServiceFactory[Req, Rep]
       ) = _param match {
         case Param.Configured(n, d) =>
           val param.Timer(timer) = _timer
           val param.Stats(statsReceiver) = _stats
-          wrapper(statsReceiver, n, d)(timer) andThen next
+          val param.Label(label) = _label
+          val param.Logger(logger) = _logger
+          val Transporter.EndpointAddr(endpoint) = _endpoint
+          wrapper(statsReceiver, n, d, label, logger, endpoint)(timer) andThen next
 
         case Param.Replaced(f) =>
           val param.Timer(timer) = _timer
@@ -142,12 +164,15 @@ object FailureAccrualFactory {
  * TODO: treat different failures differently (eg. connect failures
  * vs. not), enable different backoff strategies.
  */
-class FailureAccrualFactory[Req, Rep](
+class FailureAccrualFactory[Req, Rep] private[finagle](
   underlying: ServiceFactory[Req, Rep],
   numFailures: Int,
   markDeadFor: () => Duration,
   timer: Timer,
-  statsReceiver: StatsReceiver
+  statsReceiver: StatsReceiver,
+  label: String = "",
+  logger: Logger = DefaultLogger,
+  endpoint: SocketAddress = unconnected
 ) extends ServiceFactory[Req, Rep] {
   import FailureAccrualFactory.{State, Alive, Dead}
 
@@ -156,8 +181,11 @@ class FailureAccrualFactory[Req, Rep](
     numFailures: Int,
     markDeadFor: Duration,
     timer: Timer,
-    statsReceiver: StatsReceiver
-  ) = this(underlying, numFailures, () => markDeadFor, timer, statsReceiver)
+    statsReceiver: StatsReceiver,
+    label: String,
+    logger: Logger,
+    endpoint: SocketAddress
+  ) = this(underlying, numFailures, () => markDeadFor, timer, statsReceiver, label, logger, endpoint)
 
   private[this] var failureCount = 0
   @volatile private[this] var state: State = Alive
@@ -183,6 +211,9 @@ class FailureAccrualFactory[Req, Rep](
         state = Dead
         val timerTask = timer.schedule(markDeadFor().fromNow) { revive() }
         reviveTimerTask = Some(timerTask)
+
+        if (logger.isLoggable(Level.DEBUG))
+          logger.log(Level.DEBUG, s"""FailureAccrualFactory marking connection to "$label" as dead. Remote Address: ${endpoint.toString}""")
     }
   }
 
@@ -235,5 +266,6 @@ class FailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
     numFailures: Int,
     markDeadFor: Duration,
-    timer: Timer) = this(underlying, numFailures, markDeadFor, timer, NullStatsReceiver)
+    timer: Timer,
+    label: String) = this(underlying, numFailures, () => markDeadFor, timer, NullStatsReceiver, label)
 }

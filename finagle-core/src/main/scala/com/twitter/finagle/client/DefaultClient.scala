@@ -11,13 +11,14 @@ import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsR
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{
-  DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+  DefaultLogger, DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.util.{Duration, Monitor, Timer, Var}
 import java.net.{SocketAddress, InetSocketAddress}
 
 object DefaultClient {
   private def defaultFailureAccrual(sr: StatsReceiver): ServiceFactoryWrapper =
-    FailureAccrualFactory.wrapper(sr, 5, () => 5.seconds)(DefaultTimer.twitter)
+    FailureAccrualFactory.wrapper(sr, 5, () => 5.seconds, "DefaultClient", DefaultLogger, unconnected)(DefaultTimer.twitter)
 
   /** marker trait for uninitialized failure accrual */
   private[finagle] trait UninitializedFailureAccrual

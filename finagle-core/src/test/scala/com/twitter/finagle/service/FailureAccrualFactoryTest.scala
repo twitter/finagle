@@ -32,7 +32,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
     val timer = new MockTimer
     val factory = new FailureAccrualFactory[Int, Int](
-      underlying, 3, 10.seconds, timer, statsReceiver)
+      underlying, 3, () => 10.seconds, timer, statsReceiver, "test")
     val service = Await.result(factory())
     verify(underlying)()
   }
@@ -100,12 +100,12 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       assert(!service.isAvailable)
     }
   }
-  
+
   test("a failing factory should be busy; done when revived") {
     Time.withCurrentTimeFrozen { tc =>
       val h = new Helper
       import h._
-      
+
       assert(factory.status === Status.Open)
       intercept[Exception] {
         Await.result(service(123))
@@ -117,12 +117,12 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
-      
+
       assert(factory.status == Status.Busy)
 
       tc.advance(10.seconds)
       timer.tick()
-      
+
       assert(factory.status === Status.Open)
     }
   }
@@ -201,7 +201,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     when(underlying()) thenReturn Future.value(underlyingService)
 
     val factory = new FailureAccrualFactory[Int, Int](
-      underlying, 3, 10.seconds, new MockTimer, statsReceiver)
+      underlying, 3, () => 10.seconds, new MockTimer, statsReceiver, "test")
     val service = Await.result(factory())
     verify(underlying)()
   }
@@ -226,7 +226,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
     // This propagates to the service as well.
     assert(!service.isAvailable)
-    
+
     when(underlying.status) thenReturn Status.Busy
 
     assert(service.status === Status.Busy)
@@ -240,7 +240,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val exc = new Exception("i broked :-(")
     when(underlying()) thenReturn Future.exception(exc)
     val factory = new FailureAccrualFactory[Int, Int](
-      underlying, 3, 10.seconds, new MockTimer, statsReceiver)
+      underlying, 3, () => 10.seconds, new MockTimer, statsReceiver, "test")
   }
 
   test("a broken factory should fail after the given number of tries") {
@@ -269,8 +269,9 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       underlying: ServiceFactory[Int, Int],
       numFailures: Int,
       markDeadFor: Duration,
-      timer: Timer
-      ) extends FailureAccrualFactory[Int, Int](underlying, numFailures, markDeadFor, timer, NullStatsReceiver) {
+      timer: Timer,
+      label: String
+    ) extends FailureAccrualFactory[Int, Int](underlying, numFailures, () => markDeadFor, timer, NullStatsReceiver, label) {
       override def isSuccess(response: Try[Int]): Boolean = {
         response match {
           case Throw(_) => false
@@ -291,7 +292,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
     val timer = new MockTimer
     val factory = new CustomizedFailureAccrualFactory(
-      underlying, 3, 10.seconds, timer)
+      underlying, 3, 10.seconds, timer, "test")
     val service = Await.result(factory())
     verify(underlying)()
   }
