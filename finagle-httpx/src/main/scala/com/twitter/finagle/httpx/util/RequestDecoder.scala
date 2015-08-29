@@ -19,4 +19,19 @@ private[twitter] object RequestDecoder {
       case _ => None
     }.toMap
   }
+
+  /**
+   * Helper for decoding request bodies. This decoder only handles attributes
+   * and will fail on chunked requests.
+   *
+   * Note: Potentially mutates the request.
+   */
+  def decodePairs(request: Request): Seq[(String, String)] = {
+    require(!request.isChunked)
+    val decoder = new HttpPostRequestDecoder(request.httpRequest)
+    decoder.getBodyHttpDatas.asScala.flatMap {
+      case attr: Attribute => Some(attr.getName -> attr.getValue)
+      case _ => None
+    }
+  }
 }
