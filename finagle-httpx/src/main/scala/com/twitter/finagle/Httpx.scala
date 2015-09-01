@@ -165,6 +165,9 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
     protected type In = Any
     protected type Out = Any
 
+    // This override allows java callers to use this method, working around https://issues.scala-lang.org/browse/SI-8905
+    override def configured[P](psp: (P, Stack.Param[P])): StackServer[Request, Response] = super.configured[P](psp)
+
     protected def newListener(): Listener[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
       val httpPipeline =
