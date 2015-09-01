@@ -35,6 +35,7 @@ our way.
 The following are a few of the companies that are using Finagle:
 
 * [Foursquare](https://foursquare.com/)
+* [ING Bank](https://ing.nl)
 * [Pinterest](https://www.pinterest.com/)
 * [SoundCloud](https://soundcloud.com/)
 * [Tumblr](https://www.tumblr.com/)
