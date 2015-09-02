@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `InetResolver.bind` will now succeed if any hostname resolution
+    succeeds. Previous behavior required that all hosts are successfully resolved.
+    ``RB_ID=737748``
+
+
 6.28.0
 ~~~~~~~
 

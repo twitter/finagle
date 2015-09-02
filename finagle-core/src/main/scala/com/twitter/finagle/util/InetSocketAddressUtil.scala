@@ -1,10 +1,10 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.WeightedSocketAddress
-import com.twitter.util.{Future, FuturePool, Return, Throw}
 import com.twitter.concurrent.AsyncSemaphore
+import com.twitter.finagle.WeightedSocketAddress
+import com.twitter.util.{Try, Future, FuturePool, Return, Throw}
 import com.google.common.cache.{Cache => GCache}
-import java.net.{SocketAddress, UnknownHostException, InetAddress, InetSocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
 
 object InetSocketAddressUtil {
 
@@ -16,6 +16,7 @@ object InetSocketAddressUtil {
 
   private[this] val dnsConcurrency = 100
   private[this] val dnsCond = new AsyncSemaphore(dnsConcurrency)
+  private[this] val NoHostException = new IllegalArgumentException("No hosts to resolve")
 
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
@@ -80,7 +81,7 @@ object InetSocketAddressUtil {
     weightedHostPorts: Seq[WeightedHostPort],
     cache: GCache[String, Seq[InetAddress]]
   ): Future[Seq[SocketAddress]] = {
-    Future.collect(weightedHostPorts map {
+    Future.collectToTry(weightedHostPorts map {
       case (host, port, weight) =>
         val addrs: Future[Seq[InetAddress]] = cache.getIfPresent(host) match {
           case null =>
@@ -96,8 +97,23 @@ object InetSocketAddressUtil {
         addrs map { as: Seq[InetAddress] =>
           as map { a => WeightedSocketAddress(new InetSocketAddress(a, port), weight) }
         }
+    }).flatMap { seq: Seq[Try[Seq[WeightedSocketAddress]]] =>
+
+      // Consider any result a success. Ignore partial failures.
+      val results = seq.collect {
+        case Return(subset) => subset
+      }.flatten
+
+      if (results.nonEmpty) {
+        Future.value(results)
+      } else {
+        // No results. Consider the first exception as the failure reason.
+        // Otherwise, return an empty set.
+        seq.collectFirst {
+          case Throw(e) => Future.exception(e)
+        }.getOrElse(Future.value(Seq[WeightedSocketAddress]()))
       }
-    ) map { _.flatten }
+    }
   }
 
   /**

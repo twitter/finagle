@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.Await
 import java.net.InetSocketAddress
@@ -28,15 +29,37 @@ class InetResolverTest extends FunSuite {
     }
   }
 
-  test("successful resolution") {
-    val addr = resolver.bind("localhost:80") // name resolution only, not bound
+  test("partial resolution success") {
+    val addr = resolver.bind("bad_host_name:100, localhost:80")
     val f = addr.changes.filter(_ != Addr.Pending).toFuture
-    Await.result(f) match {
+    Await.result(f, 10.seconds) match {
       case Addr.Bound(b, meta) if meta.isEmpty =>
-        assert(b === Set(WeightedSocketAddress(new InetSocketAddress("localhost", 80), 1L)))
+        assert(b.contains(WeightedSocketAddress(new InetSocketAddress("localhost", 80), 1L)))
       case _ => fail()
     }
     assert(statsReceiver.counter("inet", "dns", "successes")() > 0)
     assert(statsReceiver.stat("inet", "dns", "lookup_ms")().size > 0)
   }
+
+  test("empty host list returns an empty set") {
+    val addr = resolver.bind("")
+    val f = addr.changes.filter(_ != Addr.Pending).toFuture
+    Await.result(f) match {
+      case Addr.Bound(b, meta) if b.isEmpty =>
+      case _ => fail()
+    }
+  }
+
+  test("successful resolution") {
+    val addr = resolver.bind("localhost:80") // name resolution only, not bound
+    val f = addr.changes.filter(_ != Addr.Pending).toFuture
+    Await.result(f) match {
+      case Addr.Bound(b, meta) if meta.isEmpty =>
+        assert(b.contains(WeightedSocketAddress(new InetSocketAddress("localhost", 80), 1L)))
+      case _ => fail()
+    }
+    assert(statsReceiver.counter("inet", "dns", "successes")() > 0)
+    assert(statsReceiver.stat("inet", "dns", "lookup_ms")().size > 0)
+  }
+
 }
