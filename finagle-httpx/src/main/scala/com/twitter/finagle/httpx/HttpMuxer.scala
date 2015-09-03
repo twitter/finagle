@@ -1,9 +1,8 @@
 package com.twitter.finagle.httpx
 
 import com.twitter.finagle.util.LoadService
-import com.twitter.finagle.{Filter, Service}
+import com.twitter.finagle.Service
 import com.twitter.util.Future
-import java.net.URI
 import java.util.logging.Logger
 
 /**
@@ -79,24 +78,27 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Resp
 }
 
 /**
- * Singleton default multiplex service
+ * Singleton default multiplex service.
+ *
+ * @see [[HttpMuxers]] for Java compatibility APIs.
  */
 object HttpMuxer extends Service[Request, Response] {
   @volatile private[this] var underlying = new HttpMuxer()
+
   override def apply(request: Request): Future[Response] =
     underlying(request)
 
   /**
    * add handlers to mutate dispatching strategies.
    */
-  def addHandler(pattern: String, service: Service[Request, Response]) = synchronized {
+  def addHandler(pattern: String, service: Service[Request, Response]): Unit = synchronized {
     underlying = underlying.withHandler(pattern, service)
   }
 
-  def addRichHandler(pattern: String, service: Service[Request, Response]) =
+  def addRichHandler(pattern: String, service: Service[Request, Response]): Unit =
     addHandler(pattern, service)
 
-  def patterns = underlying.patterns
+  def patterns: Seq[String] = underlying.patterns
 
   private[this] val log = Logger.getLogger(getClass.getName)
 
@@ -107,9 +109,22 @@ object HttpMuxer extends Service[Request, Response] {
 }
 
 /**
+ * Java compatibility APIs for [[HttpMuxer]].
+ */
+object HttpMuxers {
+
+  /** See [[HttpMuxer.apply]] */
+  def apply(request: Request): Future[Response] = HttpMuxer(request)
+
+  /** See [[HttpMuxer.patterns]] */
+  def patterns: Seq[String] = HttpMuxer.patterns
+
+}
+
+/**
  * Trait HttpMuxHandler is used for service-loading HTTP handlers.
  */
 trait HttpMuxHandler extends Service[Request, Response] {
-  /** The pattern on to bind this handler to */
+  /** The pattern that this handler gets bound to */
   val pattern: String
 }

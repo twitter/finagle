@@ -26,9 +26,15 @@ object Service {
 
   /**
    * A service with a constant reply. Always available; never closable.
+   *
+   * @see [[constant]] for a Java compatible API.
    */
   def const[Rep](rep: Future[Rep]): Service[Any, Rep] =
     new service.ConstantService(rep)
+
+  /** Java compatible API for [[const]] as `const` is a reserved word in Java */
+  def constant[Rep](rep: Future[Rep]): Service[Any, Rep] =
+    Service.const(rep)
 }
 
 /**

@@ -1,8 +1,5 @@
 package com.twitter.finagle.httpx
 
-/**
- * This puts it all together: The HTTP codec itself.
- */
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.httpx.codec._
@@ -192,6 +189,12 @@ object Http {
 }
 
 object HttpTracing {
+
+  /**
+   * HTTP headers used for tracing.
+   *
+   * See [[headers()]] for Java compatibility.
+   */
   object Header {
     val TraceId = "X-B3-TraceId"
     val SpanId = "X-B3-SpanId"
@@ -202,6 +205,9 @@ object HttpTracing {
     val All = Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
     val Required = Seq(TraceId, SpanId)
   }
+
+  /** Java compatibility API for [[Header]]. */
+  def headers(): Header.type = Header
 
   /**
    * Remove any parameters from url.
