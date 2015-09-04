@@ -5,7 +5,9 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, InetResolver, Resolver}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Activity, Closable, Future, Memoize, Var, Witness}
+import com.twitter.util.{Activity, Closable, Future, FuturePool, Memoize, Var, Witness}
+import java.net.InetAddress
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
@@ -47,7 +49,24 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
 
   private[this] implicit val injectTimer = DefaultTimer.twitter
 
-  private[this] val inetResolver = new InetResolver(statsReceiver)
+  private[this] val inetResolver = new InetResolver(statsReceiver, None) {
+    /*
+     * Hostname lookups are cached indefinitely for performance; we
+     * assume that changes to ZK serversets are made by re-registering
+     * a host rather than changing its IP address.
+     */
+    val cache = new ConcurrentHashMap[String, Seq[InetAddress]]()
+
+    override def resolveHost(host: String): Future[Seq[InetAddress]] = {
+      cache.get(host) match {
+        case null =>
+          super.resolveHost(host)
+            .onSuccess { cache.put(host, _) }
+        case cached => Future.value(cached)
+      }
+    }
+  }
+
   private[this] val sessionTimeout = 10.seconds
   private[this] val removalEpoch = Stabilizer.epochs(sessionTimeout*4)
   private[this] val batchEpoch = Stabilizer.epochs(5.seconds)

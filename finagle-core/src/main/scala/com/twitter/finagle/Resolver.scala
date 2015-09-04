@@ -1,11 +1,11 @@
 package com.twitter.finagle
 
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
 import com.twitter.util._
-import com.google.common.cache.{Cache, CacheBuilder}
-import java.net.{InetAddress, SocketAddress, UnknownHostException}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
 import java.security.{PrivilegedAction, Security}
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.logging.{Level, Logger}
@@ -85,88 +85,87 @@ abstract class AbstractResolver extends Resolver
 
 /**
  * Resolver for inet scheme.
- *
- * The Var is refreshed after each TTL timeout, set from "networkaddress.cache.ttl",
- * a Java Security Property. If "networkaddress.cache.ttl" is not set or set to
- * a non-positive value, the Var is static and no future resolution is attempted.
  */
 object InetResolver {
   def apply(): Resolver = apply(DefaultStatsReceiver)
   def apply(statsReceiver: StatsReceiver): Resolver =
-    new InetResolver(statsReceiver.scope("inet").scope("dns"))
+    new InetResolver(statsReceiver, Some(5.seconds))
 }
 
-private[finagle] class InetResolver(statsReceiver: StatsReceiver) extends Resolver {
+private[finagle] class InetResolver(
+  unscopedStatsReceiver: StatsReceiver,
+  pollIntervalOpt: Option[Duration]
+) extends Resolver {
   import InetSocketAddressUtil._
 
-  private[this] val CACHE_SIZE = 16000L
+  type WeightedHostPort = (String, Int, Double)
 
   val scheme = "inet"
+  private[this] val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
   private[this] val latencyStat = statsReceiver.stat("lookup_ms")
   private[this] val successes = statsReceiver.counter("successes")
   private[this] val failures = statsReceiver.counter("failures")
+  private[this] val dnsLookupFailures = statsReceiver.counter("dns_lookup_failures")
   private val log = Logger.getLogger(getClass.getName)
-  private val ttlOption = {
-    val t = Try(Option(java.security.AccessController.doPrivileged(
-      new PrivilegedAction[String] {
-        override def run(): String = Security.getProperty("networkaddress.cache.ttl")
-      }
-    )) map { s => s.toInt })
-
-    t match {
-      case Return(Some(value)) =>
-        if (value <= 0) {
-          log.log(Level.INFO,
-            "networkaddress.cache.ttl is set as non-positive value, DNS cache refresh turned off")
-          None
-        } else {
-          val duration = value.seconds
-          log.log(Level.CONFIG, "networkaddress.cache.ttl found to be %s".format(duration) +
-            " will refresh DNS every %s.".format(duration))
-          Some(duration)
-        }
-      case Return(None) =>
-        log.log(Level.INFO, "networkaddress.cache.ttl is not set, DNS cache refresh turned off")
-        None
-      case Throw(exc: NumberFormatException) =>
-        log.log(Level.WARNING,
-          "networkaddress.cache.ttl is set as non-number, DNS cache refresh turned off", exc)
-        None
-      case Throw(exc) =>
-        log.log(Level.WARNING, "Unexpected Exception is thrown when getting " +
-          "networkaddress.cache.ttl, DNS cache refresh turned off", exc)
-        None
-    }
-  }
   private val timer = DefaultTimer.twitter
 
-  private[this] val addressCacheBuilder =
-    CacheBuilder.newBuilder().maximumSize(CACHE_SIZE)
-  private[this] val addressCache: Cache[String, Seq[InetAddress]] = ttlOption match {
-    case Some(t) => addressCacheBuilder.expireAfterWrite(t.inSeconds, SECONDS).build()
-    case None => addressCacheBuilder.build()
+  /*
+   * Resolve hostnames asynchronously and concurrently.
+   */
+  private[this] val dnsCond = new AsyncSemaphore(100)
+  protected def resolveHost(host: String): Future[Seq[InetAddress]] = {
+    dnsCond.acquire().flatMap { permit =>
+      FuturePool.unboundedPool(InetAddress.getAllByName(host).toSeq)
+        .onFailure{ e =>
+          log.warning(s"Failed to resolve $host. Error $e")
+          dnsLookupFailures.incr()
+        }
+        .ensure { permit.release() }
+    }
   }
 
   def bindWeightedHostPortsToAddr(hosts: Seq[WeightedHostPort]): Var[Addr] = {
     def toAddr(whp: Seq[WeightedHostPort]): Future[Addr] = {
       val elapsed = Stopwatch.start()
-      resolveWeightedHostPorts(whp, addressCache) map { addrs: Seq[SocketAddress] =>
-        Addr.Bound(addrs.toSet)
-      } onSuccess { _ =>
-        successes.incr()
-        latencyStat.add(elapsed().inMilliseconds)
-      } onFailure { _ =>
-        failures.incr()
-      } rescue {
-        case exc: UnknownHostException => Future.value(Addr.Neg: Addr)
-        case NonFatal(exc) => Future.value(Addr.Failed(exc): Addr)
+      Future.collectToTry(whp.map {
+        case (host, port, weight) =>
+          resolveHost(host).map { inetAddrs =>
+            inetAddrs.map { inetAddr =>
+              WeightedSocketAddress(new InetSocketAddress(inetAddr, port), weight): SocketAddress
+            }
+          }
+      }).flatMap { seq: Seq[Try[Seq[SocketAddress]]] =>
+          // Filter out all successes. If there was at least 1 success, consider
+          // the entire operation a success
+        val results = seq.collect {
+          case Return(subset) => subset
+        }.flatten
+
+        // Consider any result a success. Ignore partial failures.
+        if (results.nonEmpty) {
+          successes.incr()
+          latencyStat.add(elapsed().inMilliseconds)
+          Future.value(Addr.Bound(results.toSet))
+        } else {
+          // Either no hosts or resolution failed for every host
+          failures.incr()
+          log.warning("Resolution failed for all hosts")
+
+          seq.collectFirst {
+            case Throw(e) => e
+          } match {
+            case Some(_: UnknownHostException) => Future.value(Addr.Neg)
+            case Some(e) => Future.value(Addr.Failed(e))
+            case None => Future.value(Addr.Bound(Set[SocketAddress]()))
+          }
+        }
       }
     }
 
     Var.async(Addr.Pending: Addr) { u =>
       toAddr(hosts) onSuccess { u() = _ }
-      ttlOption match {
-        case Some(ttl) =>
+      pollIntervalOpt match {
+        case Some(pollInterval) =>
           val updater = new Updater[Unit] {
             val one = Seq(())
             // Just perform one update at a time.
@@ -176,8 +175,8 @@ private[finagle] class InetResolver(statsReceiver: StatsReceiver) extends Resolv
               u() = Await.result(toAddr(hosts))
             }
           }
-          timer.schedule(ttl.fromNow, ttl) {
-            FuturePool.unboundedPool(updater())
+          timer.schedule(pollInterval.fromNow, pollInterval) {
+            FuturePool.unboundedPool(updater(()))
           }
         case None =>
           Closable.nop

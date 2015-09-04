@@ -1,22 +1,13 @@
 package com.twitter.finagle.util
 
-import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.finagle.WeightedSocketAddress
-import com.twitter.util.{Try, Future, FuturePool, Return, Throw}
-import com.google.common.cache.{Cache => GCache}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
 
 object InetSocketAddressUtil {
 
   type HostPort = (String, Int)
-  type WeightedHostPort = (String, Int, Double)
 
   private[finagle] val unconnected =
     new SocketAddress { override def toString = "unconnected" }
-
-  private[this] val dnsConcurrency = 100
-  private[this] val dnsCond = new AsyncSemaphore(dnsConcurrency)
-  private[this] val NoHostException = new IllegalArgumentException("No hosts to resolve")
 
   /** converts 0.0.0.0 -> public ip in bound ip */
   def toPublic(bound: SocketAddress): SocketAddress = {
@@ -67,54 +58,6 @@ object InetSocketAddressUtil {
         new InetSocketAddress(addr, port)
       }).toSeq
     }
-
-  /**
-   * Resolves host:port:weight triples into a Future[Seq[SocketAddress]. For example,
-   *
-   *     InetSocketAddressUtil.resolveWeightedHostPorts(Seq(("127.0.0.1", 11211, 1))) =>
-   *     Future.value(Seq(WeightedSocketAddress.Impl("127.0.0.1", 11211, 1)))
-   *
-   * @param weightedHostPorts a sequence of host port weight triples
-   * @param cache a cache from Strings to InetAddresses
-   */
-  private[finagle] def resolveWeightedHostPorts(
-    weightedHostPorts: Seq[WeightedHostPort],
-    cache: GCache[String, Seq[InetAddress]]
-  ): Future[Seq[SocketAddress]] = {
-    Future.collectToTry(weightedHostPorts map {
-      case (host, port, weight) =>
-        val addrs: Future[Seq[InetAddress]] = cache.getIfPresent(host) match {
-          case null =>
-            dnsCond.acquire() flatMap { permit =>
-              FuturePool.unboundedPool(InetAddress.getAllByName(host).toSeq) onSuccess {
-                cache.put(host, _)
-              } ensure {
-                permit.release()
-              }
-            }
-          case cached => Future.value(cached)
-        }
-        addrs map { as: Seq[InetAddress] =>
-          as map { a => WeightedSocketAddress(new InetSocketAddress(a, port), weight) }
-        }
-    }).flatMap { seq: Seq[Try[Seq[WeightedSocketAddress]]] =>
-
-      // Consider any result a success. Ignore partial failures.
-      val results = seq.collect {
-        case Return(subset) => subset
-      }.flatten
-
-      if (results.nonEmpty) {
-        Future.value(results)
-      } else {
-        // No results. Consider the first exception as the failure reason.
-        // Otherwise, return an empty set.
-        seq.collectFirst {
-          case Throw(e) => Future.exception(e)
-        }.getOrElse(Future.value(Seq[WeightedSocketAddress]()))
-      }
-    }
-  }
 
   /**
    * Parses a comma or space-delimited string of hostname and port pairs. For example,

@@ -2,8 +2,8 @@ package com.twitter.finagle
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.Await
-import java.net.InetSocketAddress
+import com.twitter.util.{Future, Await}
+import java.net.{UnknownHostException, InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -11,7 +11,13 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class InetResolverTest extends FunSuite {
   val statsReceiver = new InMemoryStatsReceiver
-  val resolver = InetResolver(statsReceiver)
+
+  val resolver = new InetResolver(statsReceiver, None) {
+    override def resolveHost(host: String): Future[Seq[InetAddress]] = {
+      if (host.equals("localhost")) super.resolveHost(host)
+      else Future.exception(new UnknownHostException())
+    }
+  }
 
   test("host not found") {
     val addr = resolver.bind("no_TLDs_for_old_humans:80")

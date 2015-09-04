@@ -1,8 +1,5 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.WeightedSocketAddress
-import com.twitter.util.Await
-import com.google.common.cache.{Cache => GCache, CacheBuilder}
 import java.net.{InetAddress, InetSocketAddress, UnknownHostException}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -14,7 +11,6 @@ class InetSocketAddressUtilTest extends FunSuite {
   val port2 = 53 // ditto
   val weight1: Double = 0.5
   val weight2: Double = 0.25
-  val cache: GCache[String, Seq[InetAddress]] = CacheBuilder.newBuilder().build()
 
   test("toPublic") {
     try {
@@ -70,24 +66,5 @@ class InetSocketAddressUtilTest extends FunSuite {
       Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
 
     assert(InetSocketAddressUtil.parseHosts(":" + port1) === Seq(new InetSocketAddress("0.0.0.0", port1)))
-  }
-
-  test("resolveWeightedHostPorts") {
-    assert(Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(Seq(), cache)).isEmpty)
-    intercept[UnknownHostException] {
-      Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(Seq(("gobble-d-gook", port1, weight1)), cache))
-    }
-    assert(cache.getIfPresent(("gobble-d-gook", port1, weight1)) === null)
-
-    assert(Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(Seq(("127.0.0.1", port1, weight1)), cache)) ===
-      Seq(WeightedSocketAddress(new InetSocketAddress("127.0.0.1", port1), weight1)))
-    assert(cache.getIfPresent(("127.0.0.1")) ===
-      Seq(InetAddress.getByName("127.0.0.1")))
-    assert(Await.result(InetSocketAddressUtil.resolveWeightedHostPorts(
-      Seq(("127.0.0.1", port1, weight1), ("127.0.0.1", port2, weight2)), cache)) ===
-      Seq(
-        WeightedSocketAddress(new InetSocketAddress("127.0.0.1", port1), weight1),
-        WeightedSocketAddress(new InetSocketAddress("127.0.0.1", port2), weight2)))
-    assert(cache.size === 1)
   }
 }

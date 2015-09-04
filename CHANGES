@@ -14,13 +14,19 @@ Runtime Behavior Changes
     succeeds. Previous behavior required that all hosts are successfully resolved.
     ``RB_ID=737748``
 
+  * finagle-core: DNS lookups in InetResolver are no longer cached
+    within Finagle according to `networkaddress.cache.ttl`; we rely
+    instead on however caching is configured in the JVM and OS. ``RB_ID=735006``
+
+  * finagle-serversets: DNS lookups in Zk2Resolver are no longer
+    cached within Finagle according to `networkaddress.cache.ttl`;
+    instead they are cached indefinitely. ``RB_ID=735006``
 
 6.28.0
-~~~~~~~
+------
 
 New Features
 ~~~~~~~~~~~~
-
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
