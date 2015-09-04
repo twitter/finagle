@@ -7,7 +7,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.httpx.{RequestParamMap, Response, Request, MediaType}
+import com.twitter.finagle.httpx.{MediaType, RequestParamMap, Response, Request, Status}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
@@ -127,7 +127,14 @@ class JsonExporter(
     filtered: Boolean,
     counterDeltasOn: Boolean = false
   ): String = {
-    val gauges = registry.sampleGauges().asScala
+    val gauges = try registry.sampleGauges().asScala catch {
+      case NonFatal(e) =>
+        // because gauges run arbitrary user code, we want to protect ourselves here.
+        // while the underlying registry should protect against individual misbehaving
+        // gauges, an extra level of belt-and-suspenders seemed worthwhile.
+        log.error(e, "exception while collecting gauges")
+        Map.empty[String, Number]
+    }
     val histos = registry.sampleHistograms().asScala
     val counters = if (counterDeltasOn && useCounterDeltas()) {
       getOrRegisterLatchedStats().deltas

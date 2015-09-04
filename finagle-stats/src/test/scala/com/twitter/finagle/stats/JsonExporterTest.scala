@@ -1,6 +1,6 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.Metrics
+import com.twitter.common.metrics.{AbstractGauge, Metrics}
 import com.twitter.conversions.time._
 import com.twitter.finagle.httpx.{RequestParamMap, MediaType, Request}
 import com.twitter.util.{Time, MockTimer, Await}
@@ -209,6 +209,18 @@ class JsonExporterTest
       val res = Await.result(exporter(req)).contentString
       assert(res.contains(""""anHisto.max":555"""))
     }
+  }
+
+  test("deadly gauge") {
+    val registry = Metrics.createDetached()
+    val g = new AbstractGauge[java.lang.Double]("boom") {
+      def read: java.lang.Double = throw new RuntimeException("loolool")
+    }
+    val sr = registry.registerGauge(g)
+
+    val exporter = new JsonExporter(registry)
+    val json = exporter.json(pretty = true, filtered = false)
+    assert(!json.contains("boom"), json)
   }
 
 }
