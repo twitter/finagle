@@ -402,13 +402,27 @@ class StackClientTest extends FunSuite
 
   test("StackClient binds to a local service via ServiceFactorySocketAddress") {
     val reverser = Service.mk[String, String] { in => Future.value(in.reverse) }
-    val sf = ServiceFactory[String, String](() => Future.value(reverser))
-    val sa = ServiceFactorySocketAddress[String, String](sf)
-    val addr = Var.value(Addr.Bound(sa))
-    val name = Name.Bound(addr, new {})
+    val sf = ServiceFactory(() => Future.value(reverser))
+    val sa = ServiceFactorySocketAddress(sf)
+    val name = Name.bound(sa)
     val service = stringClient.newService(name, "sfsa-test")
     val forward = "a man a plan a canal: panama"
     val reversed = Await.result(service(forward), 1.second)
     assert(reversed == forward.reverse)
+  }
+
+  test("filtered composes filters atop the stack") {
+    val echoServer = Service.mk[String, String] { in => Future.value(in) }
+    val sf = ServiceFactory(() => Future.value(echoServer))
+    val sa = ServiceFactorySocketAddress(sf)
+    val name = Name.bound(sa)
+
+    val reverseFilter = new SimpleFilter[String, String] {
+      def apply(str: String, svc: Service[String, String]) =
+        svc(str.reverse)
+    }
+
+    val svc = stringClient.filtered(reverseFilter).newRichClient(name, "test_client")
+    assert(Await.result(svc.ping(), 1.second) == "ping".reverse)
   }
 }

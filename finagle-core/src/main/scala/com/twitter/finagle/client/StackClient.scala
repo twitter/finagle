@@ -18,7 +18,7 @@ object StackClient {
   /**
    * Canonical Roles for each Client-related Stack modules.
    */
-  object Role extends Stack.Role("StackClient"){
+  object Role extends Stack.Role("StackClient") {
     val pool = Stack.Role("Pool")
     val requestDraining = Stack.Role("RequestDraining")
     val prepFactory = Stack.Role("PrepFactory")
@@ -320,6 +320,19 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    */
   def withParams(params: Stack.Params): This =
     copy1(params = params)
+
+  /**
+   * Prepends `filter` to the top of the client. That is, after materializing
+   * the client (newClient/newService) `filter` will be the first element which
+   * requests flow through. This is a familiar chaining combinator for filters and
+   * is particularly useful for `StdStackClient` implementations that don't expose
+   * services but instead wrap the resulting service with a rich API.
+   */
+  def filtered(filter: Filter[Req, Rep, Req, Rep]): This = {
+    val role = Stack.Role(filter.getClass.getSimpleName)
+    val stackable = Filter.canStackFromFac.toStackable(role, filter)
+    withStack(stackable +: stack)
+  }
 
   /**
    * A copy constructor in lieu of defining StackClient as a
