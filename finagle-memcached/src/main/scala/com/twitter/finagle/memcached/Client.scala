@@ -4,6 +4,7 @@ import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
+import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
@@ -658,6 +659,11 @@ object KetamaClientKey {
     HostPortBasedKey(host, port, weight)
 
   def apply(id: String) = CustomKey(id)
+
+  def fromCacheNode(node: CacheNode): KetamaClientKey = node.key match {
+    case Some(id) => KetamaClientKey(id)
+    case None => KetamaClientKey(node.host, node.port, node.weight)
+  }
 }
 
 private[finagle] sealed trait NodeEvent
@@ -667,7 +673,55 @@ private[finagle] case class NodeRevived(key: KetamaClientKey) extends NodeHealth
 
 class FailureAccrualException(message: String) extends RequestException(message, cause = null)
 
-class KetamaFailureAccrualFactory[Req, Rep](
+private[finagle] object KetamaFailureAccrualFactory {
+  /**
+   * Configures a stackable KetamaFailureAccrual factory with the given
+   * `key` and `healthBroker`. The rest of the context is extracted from
+   * Stack.Params.
+   */
+  def module[Req, Rep](
+    key: KetamaClientKey,
+    healthBroker: Broker[NodeHealth]
+  ): Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module4[
+      FailureAccrualFactory.Param,
+      Memcached.param.EjectFailedHost,
+      finagle.param.Timer,
+      finagle.param.Stats,
+      ServiceFactory[Req, Rep]] {
+      import FailureAccrualFactory.Param
+      val role = FailureAccrualFactory.role
+      val description = "Memcached ketama failure accrual"
+
+      def make(
+        failureAccrual: Param,
+        _ejectFailedHost: Memcached.param.EjectFailedHost,
+        _timer: finagle.param.Timer,
+        _stats: finagle.param.Stats,
+        next: ServiceFactory[Req, Rep]
+      ) = failureAccrual match {
+          case Param.Configured(numFailures, markDeadFor) =>
+            val Memcached.param.EjectFailedHost(ejectFailedHost) = _ejectFailedHost
+            val finagle.param.Timer(timer) = _timer
+            val finagle.param.Stats(stats) = _stats
+            new KetamaFailureAccrualFactory[Req, Rep](next, numFailures, markDeadFor,
+              timer, key, healthBroker, ejectFailedHost, stats)
+
+          case Param.Replaced(f) =>
+            val param.Timer(timer) = _timer
+            f(timer) andThen next
+
+          case Param.Disabled => next
+        }
+    }
+}
+
+/**
+ * A FailureAccrual module that can additionally communicate `NodeHealth` via
+ * `healthBroker`. The broker is shared between the `KetamaPartitionedClient` and
+ * allows for unhealthy nodes to be ejected from the ring if ejectFailedHost is true.
+ */
+private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
     numFailures: Int,
     markDeadFor: () => Duration,
@@ -758,20 +812,48 @@ class KetamaFailureAccrualFactory[Req, Rep](
     }
 }
 
-abstract class KetamaPartitionedClient private[finagle](
-    ketamaNodeGrp: Group[(KetamaClientKey, KetamaNode[Client])],
-    nodeHealthBroker: Broker[NodeHealth],
-    statsReceiver: StatsReceiver,
-    keyHasher: KeyHasher = KeyHasher.byName("ketama"),
-    numReps: Int = KetamaClient.DefaultNumReps,
+private[finagle] object KetamaPartitionedClient {
+  val DefaultNumReps = 160
+
+  val shardNotAvailableDistributor: Distributor[Client] = {
+    val failedService = new FailedService(new ShardNotAvailableException)
+    new SingletonDistributor(TwemcacheClient(failedService): Client)
+  }
+}
+
+/**
+ * A partitioned client which implements consistent hashing across `cacheNodeGroup`.
+ * The group is dynamic and the hash ring is rebuilt upon observed changes to
+ * the group. It's also possible to communicate node health to this client by wiring
+ * in a `nodeHealthBroker`. Unhealthy nodes are removed from the hash ring.
+ *
+ * TODO: This partitioning scheme should be moved inside the finagle stack
+ * so that we can support non-bound names.
+ */
+private[finagle] class KetamaPartitionedClient(
+    cacheNodeGroup: Group[CacheNode],
+    newService: CacheNode => Service[Command, Response],
+    nodeHealthBroker: Broker[NodeHealth] = new Broker[NodeHealth],
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    keyHasher: KeyHasher = KeyHasher.KETAMA,
+    numReps: Int = KetamaPartitionedClient.DefaultNumReps,
     oldLibMemcachedVersionComplianceMode: Boolean = false)
-    extends PartitionedClient
-{
+  extends PartitionedClient {
+  import KetamaPartitionedClient._
+
   private object NodeState extends Enumeration {
     type t = this.Value
     val Live, Ejected = Value
   }
+
   private case class Node(node: KetamaNode[Client], var state: NodeState.Value)
+
+  private[this] val ketamaNodeGrp: Group[(KetamaClientKey, KetamaNode[Client])] =
+    cacheNodeGroup.map { node =>
+      val key = KetamaClientKey.fromCacheNode(node)
+      val underlying = TwemcacheClient(newService(node))
+      key -> KetamaNode(key.identifier, node.weight, underlying)
+    }
 
   @volatile private[this] var ketamaNodeSnap = ketamaNodeGrp()
   @volatile private[this] var nodes = mutable.Map[KetamaClientKey, Node]() ++ {
@@ -797,7 +879,7 @@ abstract class KetamaPartitionedClient private[finagle](
   private[this] val keyRingRedistributeCount = statsReceiver.counter("redistributes")
 
   private[this] def buildDistributor(nodes: Seq[KetamaNode[Client]]) = synchronized {
-    if (nodes.isEmpty) KetamaClient.shardNotAvailableDistributor
+    if (nodes.isEmpty) shardNotAvailableDistributor
     else new KetamaDistributor(nodes, numReps, oldLibMemcachedVersionComplianceMode)
   }
 
@@ -901,60 +983,18 @@ abstract class KetamaPartitionedClient private[finagle](
 }
 
 object KetamaClient {
-  val DefaultNumReps = 160
-  val shardNotAvailableDistributor = {
-    val failedService = new FailedService(new ShardNotAvailableException)
-    new SingletonDistributor(TwemcacheClient(failedService): Client)
-  }
-
-  private def mkGrp(
-      initialServices: Group[CacheNode],
-      failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
-      nodeHealthBroker: Broker[NodeHealth],
-      legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, () => Duration)) => Service[Command, Response]]
-      ): Group[(KetamaClientKey, KetamaNode[Client])] =
-    initialServices.map { node =>
-      val key = node.key match {
-        case Some(id) => KetamaClientKey(id)
-        case None => KetamaClientKey(node.host, node.port, node.weight)
-      }
-      val faClient: Client = legacyFAClientBuilder.map { builder =>
-        TwemcacheClient(builder(node, key, nodeHealthBroker, failureAccrualParams))
-      } getOrElse MemcachedFailureAccrualClient(
-        key, nodeHealthBroker, failureAccrualParams
-      ).newTwemcacheClient(node.host+":"+node.port)
-
-      key -> KetamaNode(key.identifier, node.weight, faClient)
-    }
+  val DefaultNumReps = KetamaPartitionedClient.DefaultNumReps
 }
 
-class KetamaClient private[finagle](
-    initialServices: Group[CacheNode],
-    keyHasher: KeyHasher,
-    numReps: Int,
-    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
-    legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, () => Duration)) => Service[Command, Response]],
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    oldLibMemcachedVersionComplianceMode: Boolean = false,
-    nodeHealthBroker: Broker[NodeHealth] = new Broker[NodeHealth])
-  extends KetamaPartitionedClient(
-    KetamaClient.mkGrp(
-      initialServices, failureAccrualParams, nodeHealthBroker, legacyFAClientBuilder),
-    nodeHealthBroker,
-    statsReceiver,
-    keyHasher,
-    numReps,
-    oldLibMemcachedVersionComplianceMode)
-
-// deprecated, in favor of `c.t.f.memcached.Memcached`, 2015-02-22
-case class KetamaClientBuilder private[memcached] (
+@deprecated(message = "Use the `com.twitter.finagle.Memcached builder", since = "2015-02-22")
+case class KetamaClientBuilder private[memcached](
   _group: Group[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
   _ejectFailedHost: Boolean = true,
   oldLibMemcachedVersionComplianceMode: Boolean = false,
-  numReps: Int = KetamaClient.DefaultNumReps
+  numReps: Int = KetamaPartitionedClient.DefaultNumReps
 ) {
 
   def dest(
@@ -1021,57 +1061,39 @@ case class KetamaClientBuilder private[memcached] (
     copy(_ejectFailedHost = eject)
 
   def build(): Client = {
-    val builder =
+    val stackBasedClient =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
         .codec(text.Memcached())
+        .underlying
 
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
-    val statsReceiver = builder.statsReceiver.scope("memcached_client")
+    val (numFailures, markDeadFor) = _failureAccrualParams
 
-    def legacyFAClientBuilder(
-      node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, () => Duration)
-    ) = {
-      builder.hosts(new InetSocketAddress(node.host, node.port))
-          .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost))
-          .build()
-    }
+    val label = stackBasedClient.params[finagle.param.Label].label
+    val stats = stackBasedClient.params[finagle.param.Stats]
+      .statsReceiver.scope(label).scope("memcached_client")
 
-    def filter(
-      key: KetamaClientKey,
-      broker: Broker[NodeHealth],
-      faParams: (Int, () => Duration),
-      ejectFailedHost: Boolean
-    )(timer: Timer) = {
-      val (_numFailures, _markDeadFor) = faParams
-      new ServiceFactoryWrapper {
-        def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
-          new KetamaFailureAccrualFactory(
-            factory, _numFailures, _markDeadFor, timer, key, broker, ejectFailedHost, statsReceiver)
-        }
-    }
+    val healthBroker = new Broker[NodeHealth]
 
-    new KetamaClient(
-      initialServices       = _group,
-      keyHasher             = keyHasher,
-      numReps               = numReps,
-      failureAccrualParams  = _failureAccrualParams,
-      legacyFAClientBuilder = Some(legacyFAClientBuilder(_, _, _, _)),
-      statsReceiver         = statsReceiver,
-      oldLibMemcachedVersionComplianceMode = oldLibMemcachedVersionComplianceMode)
-  }
+    def newService(node: CacheNode) = stackBasedClient
+      .configured(Memcached.param.EjectFailedHost(_ejectFailedHost))
+      .configured(FailureAccrualFactory.Param(numFailures, markDeadFor))
+      .configured(FactoryToService.Enabled(true))
+      .transformed(new Stack.Transformer {
+        val key = KetamaClientKey.fromCacheNode(node)
+        def apply[Command, Response](stk: Stack[ServiceFactory[Command, Response]]) =
+          stk.replace(FailureAccrualFactory.role,
+            KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
+      }).newClient(s"${node.host}:${node.port}").toService
 
-  private[this] def filter(
-    key: KetamaClientKey,
-    broker: Broker[NodeHealth],
-    faParams: (Int, () => Duration),
-    ejectFailedHost: Boolean
-  )(timer: Timer) = {
-    val (_numFailures, _markDeadFor) = faParams
-    new ServiceFactoryWrapper {
-      def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
-        new KetamaFailureAccrualFactory(
-          factory, _numFailures, _markDeadFor, timer, key, broker, ejectFailedHost)
-    }
+    new KetamaPartitionedClient(
+      _group,
+      newService,
+      healthBroker,
+      stats,
+      keyHasher,
+      numReps,
+      oldLibMemcachedVersionComplianceMode)
   }
 }
 
@@ -1079,7 +1101,6 @@ object KetamaClientBuilder {
   def apply(): KetamaClientBuilder = KetamaClientBuilder(Group.empty, Some("ketama"), None)
   def get() = apply()
 }
-
 
 /**
  * Ruby memcache-client (MemCache) compatible client.

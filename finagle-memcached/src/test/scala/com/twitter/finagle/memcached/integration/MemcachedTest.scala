@@ -2,9 +2,9 @@ package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Name
-import com.twitter.finagle.memcached.param.EjectFailedHost
 import com.twitter.finagle.memcached.protocol.ClientError
-import com.twitter.finagle.memcached.{Client, Memcached, PartitionedClient}
+import com.twitter.finagle.Memcached
+import com.twitter.finagle.memcached.{Client, PartitionedClient}
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
@@ -24,9 +24,8 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     server1 = TestMemcachedServer.start()
     server2 = TestMemcachedServer.start()
     if (server1.isDefined && server2.isDefined) {
-      client =
-        Memcached("memcache")
-          .newClient(Name.bound(server1.get.address, server2.get.address))
+      val n = Name.bound(server1.get.address, server2.get.address)
+      client = Memcached.client.newRichClient(n, "test_client")
     }
   }
 
@@ -41,7 +40,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       cancel()
     }
   }
-  
+
   test("set & get") {
     Await.result(client.delete("foo"))
     assert(Await.result(client.get("foo")) == None)
@@ -95,7 +94,6 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       assert(res.get == Buf.Utf8("z"))
     }
   }
-
 
   test("append & prepend") {
     Await.result(client.set("foo", Buf.Utf8("bar")))
@@ -166,11 +164,11 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   }
 
   test("re-hash when a bad host is ejected") {
-    client =
-      Memcached("memcache")
-        .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
-        .configured(EjectFailedHost(true))
-        .newClient(Name.bound(server1.get.address, server2.get.address))
+    val n = Name.bound(server1.get.address, server2.get.address)
+    client = Memcached.client
+      .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
+      .configured(Memcached.param.EjectFailedHost(true))
+      .newRichClient(n, "test_client")
     val partitionedClient = client.asInstanceOf[PartitionedClient]
 
     // set values

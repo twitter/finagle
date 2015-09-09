@@ -282,6 +282,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   ): ClientBuilder[Req, Rep, HasCluster1, HasCodec1, HasHostConnectionLimit1] =
     copy(client.configured(param))
 
+  // Used in deprecated KetamaClientBuilder, remove when we drop it in
+  // favor of the finagle.Memcached protocol object.
+  private[finagle] def underlying: StackBasedClient[Req, Rep] = client
+
   def params: Stack.Params = client.params
 
   /**

@@ -5,7 +5,7 @@ import _root_.java.lang.{Boolean => JBoolean}
 import com.twitter.common.application.ShutdownRegistry.ShutdownRegistryImpl
 import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
-import com.twitter.finagle.MemcachedClient
+import com.twitter.finagle.Memcached
 import com.twitter.finagle.cacheresolver.CachePoolConfig
 import com.twitter.finagle.memcached.PartitionedClient
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
@@ -85,7 +85,7 @@ class Finagle6APITest extends FunSuite with BeforeAndAfter {
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
     test("with unmanaged regular zk serverset") {
-      val client = MemcachedClient.newKetamaClient(
+      val client = Memcached.client.newTwemcacheClient(
         "zk!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
 
       // Wait for group to contain members
@@ -110,7 +110,7 @@ class Finagle6APITest extends FunSuite with BeforeAndAfter {
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
     test("with managed cache pool") {
-      val client = MemcachedClient.newKetamaClient(
+      val client = Memcached.client.newTwemcacheClient(
         "twcache!localhost:"+zookeeperServerPort+"!"+zkPath).asInstanceOf[PartitionedClient]
 
       // Wait for group to contain members
@@ -140,7 +140,7 @@ class Finagle6APITest extends FunSuite with BeforeAndAfter {
     }
 
   test("with static servers list") {
-    val client = MemcachedClient.newKetamaClient(
+    val client = Memcached.client.newRichClient(
       "twcache!localhost:%d,localhost:%d".format(testServers(0).address.getPort, testServers(1).address.getPort))
 
     Await.result(client.delete("foo"))

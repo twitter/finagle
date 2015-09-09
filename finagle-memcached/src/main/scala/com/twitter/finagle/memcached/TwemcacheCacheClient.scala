@@ -89,7 +89,7 @@ object TwemcacheClient {
 
 /**
  * Twemcache commands implemenation for a partitioned client.
- * This trait can only be mixed into a ParitioneedClient that is delegating twemcache compatible clients.
+ * This trait can only be mixed into a ParitionedClient that is delegating twemcache compatible clients.
  */
 trait TwemcachePartitionedClient extends TwemcacheClient { self: PartitionedClient =>
 

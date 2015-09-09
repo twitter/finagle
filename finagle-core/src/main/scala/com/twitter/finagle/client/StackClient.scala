@@ -279,7 +279,14 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     extends StackClient[Req, Rep] { self =>
 
+  /**
+   * The type we write into the transport.
+   */
   protected type In
+
+  /**
+   * The type we read out of the transport.
+   */
   protected type Out
 
   /**

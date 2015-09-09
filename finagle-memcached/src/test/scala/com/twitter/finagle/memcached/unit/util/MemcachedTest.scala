@@ -1,10 +1,9 @@
 package com.twitter.finagle.memcached.unit
 
-import _root_.java.net.InetSocketAddress
-import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
+import com.twitter.finagle.Memcached
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
@@ -20,36 +19,31 @@ import org.scalatest.mock.MockitoSugar
 @RunWith(classOf[JUnitRunner])
 class MemcachedTest extends FunSuite with MockitoSugar {
   test("Memcached.Client has expected stack and params") {
-    val broker = new Broker[NodeHealth]
-    val key = KetamaClientKey("localhost:12345")
-    val client =
-      Memcached("memcache")
-        .configured(FailureAccrualFactory.Param(20, () => 1.seconds))
-        .configured(Transporter.ConnectTimeout(100.milliseconds))
-        .configured(TimeoutFilter.Param(200.milliseconds))
-        .configured(TimeoutFactory.Param(200.milliseconds))
-        .configured(param.EjectFailedHost(false))
-        .Client(key, broker)
+    val client = Memcached.client
+      .configured(FailureAccrualFactory.Param(20, () => 1.seconds))
+      .configured(Transporter.ConnectTimeout(100.milliseconds))
+      .configured(TimeoutFilter.Param(200.milliseconds))
+      .configured(TimeoutFactory.Param(200.milliseconds))
+      .configured(Memcached.param.EjectFailedHost(false))
 
     val stack = client.stack
-    assert(stack.contains(Stack.Role("KetamaFailureAccrual")))
+    assert(stack.contains(FailureAccrualFactory.role))
     assert(stack.contains(SingletonPool.role))
-    
+
     val params = client.params
     val FailureAccrualFactory.Param.Configured(numFailures, markDeadFor) = params[FailureAccrualFactory.Param]
     assert(numFailures == 20)
     assert(markDeadFor() == 1.seconds)
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
-    assert(params[param.EjectFailedHost] == param.EjectFailedHost(false))
+    assert(params[Memcached.param.EjectFailedHost] == Memcached.param.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))
   }
 
-  test("Memcache.newClient enables FactoryToService") {
+  test("Memcache.newPartitionedClient enables FactoryToService") {
     val st = new InMemoryStatsReceiver
-    val client =
-      Memcached("memcache")
-        .configured(Stats(st))
-        .newClient(Name.bound(new InetSocketAddress("127.0.0.1", 12345)))
+    val client = Memcached.client
+      .configured(Stats(st))
+      .newRichClient("memcache=127.0.0.1:12345")
 
     val numberRequests = 10
     Time.withCurrentTimeFrozen { _ =>

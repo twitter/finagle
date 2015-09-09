@@ -1,26 +1,33 @@
 package com.twitter.finagle
 
-import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle.cacheresolver.CacheNodeGroup
-import com.twitter.finagle.client._
+import com.twitter.finagle
+import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
+import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
-import com.twitter.finagle.memcached.protocol.text.{
-  MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
+import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
+import com.twitter.finagle.memcached.protocol.text.{MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
-import com.twitter.finagle.memcached.{Client => MClient, _}
-import com.twitter.finagle.netty3._
+import com.twitter.finagle.memcached.{Client => _, _}
+import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.pool.SingletonPool
-import com.twitter.finagle.server._
+import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
+import com.twitter.finagle.service.{FailFastFactory, FailureAccrualFactory}
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.hashing.KeyHasher
+import com.twitter.hashing
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, Future}
+import com.twitter.util.{Closable, Duration, Future}
+import java.net.SocketAddress
 import scala.collection.mutable
 
+/**
+ * Defines a [[Tracer]] that understands the finagle-memcached request type.
+ * This is installed as the `ClientTracingFilter` in the default stack.
+ */
 private[finagle] object MemcachedTraceInitializer {
   object Module extends Stack.Module1[param.Tracer, ServiceFactory[Command, Response]] {
     val role = TraceInitializerFilter.role
@@ -59,132 +66,222 @@ private[finagle] object MemcachedTraceInitializer {
   }
 }
 
-trait MemcachedRichClient { self: Client[Command, Response] =>
-  def newRichClient(group: Group[SocketAddress]): memcached.Client = memcached.Client(newClient(group).toService)
-  def newRichClient(group: String): memcached.Client = memcached.Client(newClient(group).toService)
-  def newTwemcacheClient(group: Group[SocketAddress]) = memcached.TwemcacheClient(newClient(group).toService)
-  def newTwemcacheClient(group: String) = memcached.TwemcacheClient(newClient(group).toService)
-}
+/**
+ * Factory methods to build a finagle-memcached client.
+ *
+ * @define partitioned
+ *
+ * Constructs a memcached.Client that dispatches requests over `dest`. When
+ * `dest` resolves to multiple hosts, the hosts are hashed across a ring with
+ * key affinity. The key hashing algorithm can be configured via the `withKeyHasher`
+ * method on `Memcached.client`. Failing hosts can be ejected from the
+ * hash ring if `withEjectFailedHost` is set to true. Note, the current
+ * implementation only supports bound [[com.twitter.finagle.Name Names]].
+ *
+ * @define label
+ *
+ * Argument `label` is used to assign a label to this client.
+ * The label is used to scope stats, etc.
+ */
+trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
+  /** $partitioned $label */
+  def newRichClient(dest: Name, label: String): memcached.Client =
+    newTwemcacheClient(dest, label)
 
-trait MemcachedKetamaClient {
-  // TODO: make everything use varaddrs directly.
-
-  def newKetamaClient(
-    dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
-  ): memcached.Client = {
-    val Name.Bound(va) = Resolver.eval(dest)
-    val g = Group.fromVarAddr(va)
-    newKetamaClient(g, keyHasher, ejectFailedHost)
+  /** $partitioned */
+  def newRichClient(dest: String): memcached.Client = {
+    val (n, l) = Resolver.evalLabeled(dest)
+    newTwemcacheClient(n, l)
   }
 
-  def newKetamaClient(
-    group: Group[SocketAddress],
-    keyHasher: KeyHasher,
-    ejectFailedHost: Boolean
-  ): memcached.Client = {
-    new KetamaClient(
-      initialServices       = CacheNodeGroup(group),
-      keyHasher             = keyHasher,
-      numReps               = KetamaClient.DefaultNumReps,
-      failureAccrualParams  = faParams(ejectFailedHost),
-      legacyFAClientBuilder = None,
-      statsReceiver         = ClientStatsReceiver.scope("memcached_client")
-    )
-  }
+  /** $partitioned $label */
+  def newTwemcacheClient(dest: Name, label: String): TwemcacheClient
 
-  def newTwemcacheKetamaClient(
-    dest: String, keyHasher: KeyHasher = KeyHasher.KETAMA, ejectFailedHost: Boolean = true
-  ): memcached.TwemcacheClient = {
-    val Name.Bound(va) = Resolver.eval(dest)
-    val g = Group.fromVarAddr(va)
-    newTwemcacheKetamaClient(g, keyHasher, ejectFailedHost)
-  }
-
-  def newTwemcacheKetamaClient(
-    group: Group[SocketAddress],
-    keyHasher: KeyHasher,
-    ejectFailedHost: Boolean
-  ): memcached.TwemcacheClient = {
-    new KetamaClient(
-      initialServices       = CacheNodeGroup(group),
-      keyHasher             = keyHasher,
-      numReps               = KetamaClient.DefaultNumReps,
-      failureAccrualParams  = faParams(ejectFailedHost),
-      legacyFAClientBuilder = None,
-      statsReceiver         = ClientStatsReceiver.scope("twemcache_client")
-    ) with TwemcachePartitionedClient
-  }
-
-  private def faParams(ejectFailedHost: Boolean) = {
-    if (ejectFailedHost) MemcachedFailureAccrualClient.DefaultFailureAccrualParams
-    else (Int.MaxValue, () => Duration.Zero)
+  /** $partitioned */
+  def newTwemcacheClient(dest: String): TwemcacheClient = {
+    val (n, l) = Resolver.evalLabeled(dest)
+    newTwemcacheClient(n, l)
   }
 }
 
-object MemcachedTransporter extends Netty3Transporter[Command, Response](
-  "memcached", MemcachedClientPipelineFactory)
+/**
+ * Stack based Memcached client.
+ *
+ * For example, a default client can be built through:
+ * @example {{{
+ *   val client = Memcached.newRichClient(dest)
+ * }}}
+ *
+ * If you want to provide more finely tuned configurations:
+ * @example {{{
+ *   val client =
+ *     Memcached.client
+ *       .withEjectFailedHost(true)
+ *       // tcp connection timeout
+ *       .configured(Transporter.ConnectTimeout(100.milliseconds))
+ *       // single request timeout
+ *       .configured(TimeoutFilter.Param(requestTimeout))
+ *       // the acquisition timeout of a connection
+ *       .configured(TimeoutFactory.Param(serviceTimeout))
+ *       .newRichClient(dest, "memcached_client")
+ * }}}
+ */
+object Memcached extends finagle.Client[Command, Response]
+  with finagle.Server[Command, Response] {
 
-// deprecated, in favor of `c.t.f.memcached.Memcached`, 2015-02-22
-object MemcachedClient extends DefaultClient[Command, Response](
-  name = "memcached",
-  endpointer = Bridge[Command, Response, Command, Response](
-    MemcachedTransporter, new PipeliningDispatcher(_)),
-  pool = (sr: StatsReceiver) => new SingletonPool(_, sr),
-  newTraceInitializer = MemcachedTraceInitializer.Module
-) with MemcachedRichClient with MemcachedKetamaClient
+  /**
+   * Memcached specific stack params.
+   */
+  object param {
+    case class EjectFailedHost(v: Boolean) {
+      def mk(): (EjectFailedHost, Stack.Param[EjectFailedHost]) =
+        (this, EjectFailedHost.param)
+    }
 
-private[finagle] object MemcachedFailureAccrualClient {
-  val DefaultFailureAccrualParams = (5, () => 30.seconds)
+    object EjectFailedHost {
+      implicit val param = Stack.Param(EjectFailedHost(false))
+    }
 
-  def apply(
-      key: KetamaClientKey,
-      broker: Broker[NodeHealth],
-      failureAccrualParams: (Int, () => Duration) = DefaultFailureAccrualParams
-  ): Client[Command, Response] with MemcachedRichClient = {
-    new MemcachedFailureAccrualClient(key, broker, failureAccrualParams)
+    case class KeyHasher(hasher: hashing.KeyHasher) {
+      def mk(): (KeyHasher, Stack.Param[KeyHasher]) =
+        (this, KeyHasher.param)
+    }
+
+    object KeyHasher {
+      implicit val param = Stack.Param(KeyHasher(hashing.KeyHasher.KETAMA))
+    }
   }
-}
-private[finagle] class MemcachedFailureAccrualClient(
-  key: KetamaClientKey,
-  broker: Broker[NodeHealth],
-  failureAccrualParams: (Int, () => Duration),
-    statsReceiver: StatsReceiver = ClientStatsReceiver
-) extends DefaultClient[Command, Response](
-  name = "memcached",
-  endpointer = Bridge[Command, Response, Command, Response](
-    MemcachedTransporter, new PipeliningDispatcher(_)),
-  pool = (sr: StatsReceiver) => new SingletonPool(_, sr),
-  failureAccrual = {
-    new KetamaFailureAccrualFactory(
-      _,
-      numFailures     = failureAccrualParams._1,
-      markDeadFor     = failureAccrualParams._2,
-      timer           = DefaultTimer.twitter,
-      key             = key,
-      healthBroker    = broker,
-      // set ejection to be true by default.
-      // This is ok, since ejections is triggered only when failureAccrual
-      // is enabled. With `DefaultFailureAccrualParams`, ejections will never
-      // be triggered.
-      ejectFailedHost = true,
-      statsReceiver   = statsReceiver)
-  },
-  newTraceInitializer = MemcachedTraceInitializer.Module
-) with MemcachedRichClient
 
-object MemcachedListener extends Netty3Listener[Response, Command](
-  "memcached", MemcachedServerPipelineFactory)
-object MemcachedServer extends DefaultServer[Command, Response, Response, Command](
-  "memcached", MemcachedListener, new SerialServerDispatcher(_, _)
-)
+  object Client {
+    /**
+     * Default stack parameters used for memcached client. We change the
+     * load balancer to `p2cPeakEwma` as we have experience improved tail
+     * latencies when coupled with the pipelining dispatcher.
+     */
+    val defaultParams: Stack.Params = StackClient.defaultParams +
+      FailureAccrualFactory.Param(100, () => 1.second) +
+      FailFastFactory.FailFast(false) +
+      LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
+      finagle.param.ProtocolLibrary("memcached")
 
-object Memcached extends Client[Command, Response] with MemcachedRichClient with MemcachedKetamaClient with Server[Command, Response] {
+    /**
+     * A default client stack which supports the pipelined memcached client.
+     * The `ConcurrentLoadBalancerFactory` load balances over a small set of
+     * duplicate endpoints to eliminate head of line blocking. Each endpoint
+     * has a single pipelined connection.
+     */
+    def newStack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
+      .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Response])
+      .replace(DefaultPool.Role, SingletonPool.module[Command, Response])
+      .replace(ClientTracingFilter.role, MemcachedTraceInitializer.Module)
+  }
+
+  case class Client(
+      stack: Stack[ServiceFactory[Command, Response]] = Client.newStack,
+      params: Stack.Params = Client.defaultParams)
+    extends StdStackClient[Command, Response, Client]
+    with MemcachedRichClient {
+
+    protected def copy1(
+      stack: Stack[ServiceFactory[Command, Response]] = this.stack,
+      params: Stack.Params = this.params
+    ): Client = copy(stack, params)
+
+    protected type In = Command
+    protected type Out = Response
+
+    protected def newTransporter(): Transporter[In, Out] =
+      Netty3Transporter(MemcachedClientPipelineFactory, params)
+
+    protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
+      new PipeliningDispatcher(transport)
+
+    def newTwemcacheClient(dest: Name, label: String) = {
+      // Memcache only support Name.Bound names (TRFC-162).
+      // See KetamaPartitionedClient for more details.
+      val va = dest match {
+        case Name.Bound(va) => va
+        case _ => throw new IllegalArgumentException("Memcached client only supports Bound Names")
+      }
+
+      val finagle.param.Stats(sr) = params[finagle.param.Stats]
+      val finagle.param.Timer(timer) = params[finagle.param.Timer]
+      val param.KeyHasher(hasher) = params[param.KeyHasher]
+
+      val healthBroker = new Broker[NodeHealth]
+
+      def newService(node: CacheNode): Service[Command, Response] = {
+        val key = KetamaClientKey.fromCacheNode(node)
+        val stk = stack.replace(FailureAccrualFactory.role,
+          KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
+        withStack(stk).newService(s"${node.host}:${node.port}", label)
+      }
+
+      val group = CacheNodeGroup(Group.fromVarAddr(va))
+      new KetamaPartitionedClient(group, newService, healthBroker, sr, hasher)
+        with TwemcachePartitionedClient
+    }
+
+    /**
+     * Whether to eject cache host from the Ketama ring based on failure accrual.
+     * By default, this is off. When turning on, keep the following caveat in
+     * mind: ejection is based on local failure accrual, so your cluster may
+     * get different views of the same cache host. With cache updates, this can
+     * introduce inconsistency in cache data. In many cases, it's better to eject
+     * cache host from a separate mechanism that's based on a global view.
+     */
+    def withEjectFailedHost(eject: Boolean): Client =
+      configured(param.EjectFailedHost(eject))
+
+    /**
+     * Defines the hash function to use for partitioned clients when
+     * mapping keys to partitions.
+     */
+    def withKeyHasher(hasher: hashing.KeyHasher): Client =
+      configured(param.KeyHasher(hasher))
+  }
+
+  val client = Client()
+
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
-    MemcachedClient.newClient(dest, label)
-    
+    client.newClient(dest, label)
+
   def newService(dest: Name, label: String): Service[Command, Response] =
-    MemcachedClient.newService(dest, label)
+    client.newService(dest, label)
+
+  object Server {
+    /**
+     * Default stack parameters used for memcached server.
+     */
+    val defaultParams: Stack.Params = StackServer.defaultParams +
+      finagle.param.ProtocolLibrary("memcached")
+  }
+
+  case class Server(
+    stack: Stack[ServiceFactory[Command, Response]] = StackServer.newStack,
+    params: Stack.Params = Server.defaultParams
+  ) extends StdStackServer[Command, Response, Server] {
+
+    protected def copy1(
+      stack: Stack[ServiceFactory[Command, Response]] = this.stack,
+      params: Stack.Params = this.params
+    ): Server = copy(stack, params)
+
+    protected type In = Response
+    protected type Out = Command
+
+    protected def newListener(): Listener[In, Out] = {
+      Netty3Listener("memcached", MemcachedServerPipelineFactory)
+    }
+
+    protected def newDispatcher(
+      transport: Transport[In, Out],
+      service: Service[Command, Response]
+    ): Closable = new SerialServerDispatcher(transport, service)
+  }
+
+  val server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
-    MemcachedServer.serve(addr, service)
+    server.serve(addr, service)
 }
