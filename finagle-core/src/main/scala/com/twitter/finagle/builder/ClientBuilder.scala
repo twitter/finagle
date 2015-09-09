@@ -107,48 +107,50 @@ object ClientConfig {
   def nilClient[Req, Rep]: StackBasedClient[Req, Rep] = NilClient[Req, Rep]()
 
   // params specific to ClientBuilder
-  case class DestName(name: Name) {
+  private[builder] case class DestName(name: Name) {
     def mk(): (DestName, Stack.Param[DestName]) =
       (this, DestName.param)
   }
-  object DestName {
+  private[builder] object DestName {
     implicit val param = Stack.Param(DestName(Name.empty))
   }
 
-  case class GlobalTimeout(timeout: Duration) {
+  private[builder] case class GlobalTimeout(timeout: Duration) {
     def mk(): (GlobalTimeout, Stack.Param[GlobalTimeout]) =
       (this, GlobalTimeout.param)
   }
-  object GlobalTimeout {
+  private[builder] object GlobalTimeout {
     implicit val param = Stack.Param(GlobalTimeout(Duration.Top))
   }
 
-  case class Retries(policy: RetryPolicy[Try[Nothing]]) {
+  // private[twitter] for historical use, but should be private[builder]
+  // and may become so in the future.
+  private[twitter] case class Retries(policy: RetryPolicy[Try[Nothing]]) {
     def mk(): (Retries, Stack.Param[Retries]) =
       (this, Retries.param)
   }
-  object Retries {
+  private[twitter] object Retries {
     implicit val param = Stack.Param(Retries(RetryPolicy.Never))
   }
 
-  case class Daemonize(onOrOff: Boolean) {
+  private[builder] case class Daemonize(onOrOff: Boolean) {
     def mk(): (Daemonize, Stack.Param[Daemonize]) =
       (this, Daemonize.param)
   }
-  object Daemonize {
+  private[builder] object Daemonize {
     implicit val param = Stack.Param(Daemonize(true))
   }
 
-  case class MonitorFactory(mFactory: String => util.Monitor) {
+  private[builder] case class MonitorFactory(mFactory: String => util.Monitor) {
     def mk(): (MonitorFactory, Stack.Param[MonitorFactory]) =
       (this, MonitorFactory.param)
   }
-  object MonitorFactory {
+  private[builder] object MonitorFactory {
     implicit val param = Stack.Param(MonitorFactory(_ => NullMonitor))
   }
 
   // historical defaults for ClientBuilder
-  val DefaultParams = Stack.Params.empty +
+  private[builder] val DefaultParams = Stack.Params.empty +
     param.Stats(NullStatsReceiver) +
     param.Label(DefaultName) +
     DefaultPool.Param(low = 1, high = Int.MaxValue,

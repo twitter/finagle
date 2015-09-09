@@ -79,6 +79,11 @@ Breaking API Changes
   * finagle-core: removed `c.t.f.asyncDns` flag and `c.t.f.SyncInetResolver`; DNS resolution is
     now always asynchronous. ``RB_ID=734427``
 
+  * finagle-core: `ClientBuilder.ClientConfig.DefaultParams`, `ClientBuilder.ClientConfig.DestName`,
+    `ClientBuilder.ClientConfig.GlobalTimeout`, `ClientBuilder.ClientConfig.Daemonize`, and
+    `ClientBuilder.ClientConfig.MonitorFactory` are now private to `com.twitter.finagle.builder`.
+    `ClientBuilder.ClientConfig.Retries` is now private to `com.twitter`. ``RB_ID=727245``
+
   * finagle-httpx: `Method` no longer has an extractor. To access the name of
     custom methods, use `toString`. ``RB_ID=722913``
 
