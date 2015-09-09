@@ -229,7 +229,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
         if (framed) thrift.ThriftServerFramedPipelineFactory
         else thrift.ThriftServerBufferedPipelineFactory(protocolFactory)
 
-      Netty3Listener("thrift", pipeline)
+      Netty3Listener(pipeline,
+        if (params.contains[Label]) params else params + Label("thrift"))
     }
 
     protected def newDispatcher(
