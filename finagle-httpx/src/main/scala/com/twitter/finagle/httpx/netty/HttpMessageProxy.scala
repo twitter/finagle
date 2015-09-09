@@ -2,8 +2,6 @@ package com.twitter.finagle.httpx.netty
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage, HttpVersion}
-import java.lang.{Iterable => JIterable}
-import java.util.{List => JList, Map => JMap, Set => JSet}
 
 
 /** Proxy for HttpMessage.  Used by Request and Response. */

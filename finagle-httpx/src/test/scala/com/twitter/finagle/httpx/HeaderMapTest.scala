@@ -1,11 +1,16 @@
 package com.twitter.finagle.httpx
 
+import java.util.Date
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class HeaderMapTest extends FunSuite {
+
+  private[this] val date = new Date(1441322139353L)
+  private[this] val formattedDate = "Thu, 03 Sep 2015 23:15:39 GMT"
+
   test("get") {
     val request = Request()
     request.headers.add("Host", "api.twitter.com")
@@ -23,6 +28,9 @@ class HeaderMapTest extends FunSuite {
     request.headers.set("key", "replacement value")
     assert(request.headerMap.get("key") === Some("replacement value"))
     assert(request.headerMap.getAll("key").toList === List("replacement value"))
+
+    request.headerMap.set("date", date)
+    assert(request.headerMap.getAll("date").toSeq == Seq(formattedDate))
   }
 
   test("getAll") {
@@ -68,6 +76,9 @@ class HeaderMapTest extends FunSuite {
 
     request.headerMap.add("Cookie", "2")
     assert(request.headerMap.getAll("Cookie").toList.sorted === List("1", "2"))
+
+    request.headerMap.add("date", date)
+    assert(request.headerMap.getAll("date").toSeq == Seq(formattedDate))
   }
 
   test("+=") {
@@ -76,6 +87,9 @@ class HeaderMapTest extends FunSuite {
 
     request.headerMap += "Cookie" -> "2"
     assert(request.headerMap.getAll("Cookie").toList.sorted === List("2"))
+
+    request.headerMap += "date" -> date
+    assert(request.headerMap.getAll("date").toSeq == Seq(formattedDate))
   }
 
   test("-=") {
