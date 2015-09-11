@@ -3,6 +3,7 @@ package com.twitter.finagle.serverset2
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{Stat, StatsReceiver}
 import com.twitter.io.Buf
+import com.twitter.logging.Logger
 import com.twitter.util.{Activity, Memoize, Stopwatch, Var}
 import java.nio.charset.Charset
 
@@ -47,12 +48,16 @@ private[serverset2] class ServiceDiscoverer(
   private[this] val zkEntriesParseStat = statsReceiver.scope("entries").stat("parse_ms")
   private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
   private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
+  private[this] val logger = Logger(getClass)
 
   def entriesOfNode(zkSession: ZkSession) =
     Memoize { path: String =>
       Activity.future(
         zkSession.immutableDataOf(path) map {
-          case Some(Buf.Utf8(data)) => Entry.parseJson(path, data)
+          case Some(Buf.Utf8(data)) =>
+            val results = Entry.parseJson(path, data)
+            logger.debug(s"$path retrieved ${results.length} entries")
+            results
           case None => Seq()
         })
     }
@@ -61,7 +66,11 @@ private[serverset2] class ServiceDiscoverer(
     Memoize { path: String =>
       Activity.future(
         zkSession.immutableDataOf(path) map {
-          case Some(Buf.Utf8(data)) => Vector.parseJson(data)
+          case Some(Buf.Utf8(data)) =>
+            val results = Vector.parseJson(data)
+            val vec = results.getOrElse(Vector(Nil)).vector
+            logger.debug(s"$path retrieved ${vec.length} vector entries")
+            results
           case None => None
         })
     }
