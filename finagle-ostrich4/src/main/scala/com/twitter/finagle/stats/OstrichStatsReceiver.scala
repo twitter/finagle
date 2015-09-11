@@ -11,6 +11,8 @@ class OstrichStatsReceiver(
   // To avoid breaking the Java API:
   def this(repr: StatsCollection) = this(repr, "/")
 
+  override def toString: String = "OstrichStatsReceiver"
+
   override protected[this] def registerGauge(name: Seq[String], f: => Float) {
     repr.addGauge(variableName(name)) { f.toDouble }
   }

@@ -186,6 +186,8 @@ class MetricsStatsReceiver(
   private[this] val separator: String = scopeSeparator()
   require(separator.length == 1, "Scope separator should be one symbol.")
 
+  override def toString: String = "MetricsStatsReceiver"
+
   /**
    * Create and register a counter inside the underlying Metrics library
    */
