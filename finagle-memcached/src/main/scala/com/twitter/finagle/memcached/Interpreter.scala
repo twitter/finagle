@@ -13,6 +13,7 @@ import com.twitter.util.{Future, Time}
 class Interpreter(map: AtomicMap[Buf, Entry]) {
 
   import ParserUtils._
+  import Interpreter._
 
   def apply(command: Command): Response = {
     command match {
@@ -162,11 +163,14 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
     )
   }
 
+}
+
+private[memcached] object Interpreter {
   /*
   * Using non-cryptographic goodFastHash Hashing Algorithm
   * for we only care about speed for testing.
   */
-  private[this] def hash64(value: Buf): Buf = {
+  private[memcached] def hash64(value: Buf): Buf = {
     val hash = Hashing.goodFastHash(64)
       .newHasher(value.length)
       .putBytes(Buf.ByteArray.Owned.extract(value))
