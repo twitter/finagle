@@ -308,7 +308,7 @@ services that are between [low, high].
 Retries
 ~~~~~~~
 
-Finagle provides a configurable :src:`RetryingFilter <com/twitter/finagle/service/RetryingFilter.scala>`.
+Finagle provides a configurable :src:`RetryExceptionsFilter <com/twitter/finagle/service/RetryingFilter.scala>`.
 The filter can be configured either to retry a specific number of times or to adhere to a back-off strategy.
 By default, the RetryingFilter *does not assume your RPC service is idempotent*. Retries occur only when they
 are known to be safe. That is, when Finagle can guarantee the request was never delivered to the

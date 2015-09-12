@@ -138,7 +138,7 @@ class NoBrokersAvailableException(
     s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
 }
 
-@deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
+@deprecated("no longer used by com.twitter.finagle.service.RetryExceptionsFilter", "7.0.0")
 class RetryFailureException(cause: Throwable) extends RequestException(cause)
 
 /**
@@ -180,7 +180,7 @@ class CancelledConnectionException(cause: Throwable) extends RequestException(ca
   def this() = this(null)
 }
 
-@deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
+@deprecated("no longer used by com.twitter.finagle.service.RetryFilter", "7.0.0")
 class ReplyCastException extends RequestException
 
 /**

@@ -913,9 +913,9 @@ private object ClientBuilderClient {
   import ClientConfig._
   import com.twitter.finagle.param._
 
-  private class RetryingFilterModule[Req, Rep]
+  private class RetryFilterModule[Req, Rep]
       extends Stack.Module3[Stats, Retries, Timer, ServiceFactory[Req, Rep]] {
-    override val role = new Stack.Role("ClientBuilder RetryingFilter")
+    override val role = new Stack.Role("ClientBuilder RetryFilter")
     override val description = "Application-configured retries"
 
     override def make(
@@ -930,7 +930,7 @@ private object ClientBuilderClient {
 
       if (policy eq RetryPolicy.Never) next
       else {
-        val retries = new RetryingFilter[Req, Rep](policy, timer, statsReceiver)
+        val retries = new RetryExceptionsFilter[Req, Rep](policy, timer, statsReceiver)
         retries andThen next
       }
     }
@@ -1034,7 +1034,7 @@ private object ClientBuilderClient {
           def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]) =
             stack
               .insertBefore(Requeues.role, new StatsFilterModule[Req, Rep])
-              .insertBefore(Requeues.role, new RetryingFilterModule[Req, Rep])
+              .insertBefore(Requeues.role, new RetryFilterModule[Req, Rep])
               .prepend(new GlobalTimeoutModule[Req, Rep])
               .prepend(new ExceptionSourceFilterModule[Req, Rep])
         })

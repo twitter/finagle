@@ -10,10 +10,10 @@ import com.twitter.util.Try;
 /**
  * Just a compilation test for Java.
  */
-class RetryingFilterCompilationTest {
+class RetryFilterCompilationTest {
 
   @Test
-  public void testRetryingFilter() {
+  public void testRetryFilter() {
     RetryPolicy.backoffJava(
       Backoff.toJava(Backoff.constant(Duration.fromSeconds(0))),
       RetryPolicy.TimeoutAndWriteExceptionsOnly()

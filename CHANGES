@@ -7,6 +7,25 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+  * finagle-core: Provides a `RetryFilter` which takes a
+    `RetryPolicy[(Req, Try[Rep])]` and allows you to retry on both "successful"
+    requests, such as HTTP 500s, as well as failed requests. The `Req`
+    parameterization facilitates using the request to determine if retrying is
+    safe (i.e. the request is idempotent).
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `RetryingFilter`, which takes a RetryPolicy[Try[Nothing]]` and
+    is invoked only on exceptions, has been renamed to `RetryExceptionsFilter`.
+    `RetryExceptionsFilter` is a subclass of `RetryFilter`, which takes a
+    `RetryPolicy[(Req, Try[Rep])]` and allows you to retry on both "successful"
+    requests, such as HTTP 500s, as well as failed requests. The `Req`
+    parameterization facilitates using the request to determine if retrying is
+    safe (i.e. the request is idempotent).
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
