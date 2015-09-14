@@ -120,29 +120,42 @@
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.echo$args" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="echo$argsextendsThriftStructwithProduct1[String]withSerializable"></a>
-      <a id="echo$args:echo$args"></a>
+    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.MethodIface" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MethodIfaceextendsHello[com.twitter.util.Future]"></a>
+      <a id="MethodIface:MethodIface"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Hello$$echo$args.html"><span class="name">echo$args</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product1" class="extype" target="_top">Product1</a>[<span class="extype" name="scala.Predef.String">String</span>] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+        <a href="Hello$$MethodIface.html"><span class="name">MethodIface</span></a><span class="result"> extends <a href="Hello.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello">Hello</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>]</span>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.echo$result" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="echo$resultextendsThriftStructwithProduct1[Option[String]]withSerializable"></a>
-      <a id="echo$result:echo$result"></a>
+    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.ServiceIface" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServiceIfaceextendsHello.__ServiceIfacewithProductwithSerializable"></a>
+      <a id="ServiceIface:ServiceIface"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Hello$$echo$result.html"><span class="name">echo$result</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product1" class="extype" target="_top">Product1</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]] with <span class="extype" name="java.io.Serializable">Serializable</span></span>
+        <a href="Hello$$ServiceIface.html"><span class="name">ServiceIface</span></a><span class="params">(<span name="echo">echo: <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="Hello$$Echo$$Args.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.Echo.Args">Args</a>, <a href="Hello$$Echo$$Result.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.Echo.Result">Result</a>]</span>)</span><span class="result"> extends <a href="Hello$$__ServiceIface.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.__ServiceIface">__ServiceIface</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.__ServiceIface" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="__ServiceIfaceextendsAnyRef"></a>
+      <a id="__ServiceIface:__ServiceIface"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Hello$$__ServiceIface.html"><span class="name">__ServiceIface</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
@@ -218,6 +231,45 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.Echo" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Echo"></a>
+      <a id="Echo:Echo"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Hello$$Echo$.html"><span class="name">Echo</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftMethod">ThriftMethod</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.MethodIfaceBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MethodIfaceBuilder"></a>
+      <a id="MethodIfaceBuilder:MethodIfaceBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Hello$$MethodIfaceBuilder$.html"><span class="name">MethodIfaceBuilder</span></a><span class="result"> extends <a href="../../thrift/MethodIfaceBuilder.html" class="extype" name="com.twitter.finagle.thrift.MethodIfaceBuilder">MethodIfaceBuilder</a>[<a href="Hello$$ServiceIface.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.ServiceIface">ServiceIface</a>, <a href="Hello.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello">Hello</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>]]</span>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.ServiceIfaceBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServiceIfaceBuilder"></a>
+      <a id="ServiceIfaceBuilder:ServiceIfaceBuilder"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Hello$$ServiceIfaceBuilder$.html"><span class="name">ServiceIfaceBuilder</span></a><span class="result"> extends <a href="../../thrift/ServiceIfaceBuilder.html" class="extype" name="com.twitter.finagle.thrift.ServiceIfaceBuilder">ServiceIfaceBuilder</a>[<a href="Hello$$ServiceIface.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.ServiceIface">ServiceIface</a>]</span>
+      </span>
+      </h4>
+      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -250,32 +302,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.echo$args" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="echo$args"></a>
-      <a id="echo$args:echo$args"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Hello$$echo$args$.html"><span class="name">echo$args</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="Hello$$echo$args.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.echo$args">echo$args</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.benchmark.thriftscala.Hello.echo$result" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="echo$result"></a>
-      <a id="echo$result:echo$result"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Hello$$echo$result$.html"><span class="name">echo$result</span></a><span class="result"> extends <span class="extype" name="com.twitter.scrooge.ThriftStructCodec3">ThriftStructCodec3</span>[<a href="Hello$$echo$result.html" class="extype" name="com.twitter.finagle.benchmark.thriftscala.Hello.echo$result">echo$result</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>

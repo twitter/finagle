@@ -109,7 +109,8 @@
         <span class="name">In</span><span class="result"> = <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Httpx.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
+      <p class="shortcomment cmt">The type we write into the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we write into the transport.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Httpx.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Httpx.Client.Out" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Out=Any"></a>
       <a id="Out:Out"></a>
@@ -122,7 +123,8 @@
         <span class="name">Out</span><span class="result"> = <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>
       </span>
       </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Httpx.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
+      <p class="shortcomment cmt">The type we read out of the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we read out of the transport.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Httpx.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -299,6 +301,24 @@ when applied.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.client.StdStackClient#filtered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filtered(filter:com.twitter.finagle.Filter[Req,Rep,Req,Rep]):This"></a>
+      <a id="filtered(Filter[Request,Response,Request,Response]):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filtered</span><span class="params">(<span name="filter">filter: <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>, <a href="httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Httpx.Client">Client</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Prepends <code>filter</code> to the top of the client.</p><div class="fullcomment"><div class="comment cmt"><p>Prepends <code>filter</code> to the top of the client. That is, after materializing
+the client (newClient/newService) <code>filter</code> will be the first element which
+requests flow through. This is a familiar chaining combinator for filters and
+is particularly useful for <code>StdStackClient</code> implementations that don't expose
+services but instead wrap the resulting service with a rich API.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>

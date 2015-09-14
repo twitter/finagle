@@ -35,13 +35,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">AppService</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
+        <span class="name">AppService</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -168,14 +168,14 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.Function1#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen[A](g:R=&gt;A):T1=&gt;A"></a>
-      <a id="andThen[A]((Future[HttpResponse])⇒A):(HttpRequest)⇒A"></a>
+      <a id="andThen[A]((Future[Response])⇒A):(Request)⇒A"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
+        <span class="name">andThen</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>)</span><span class="result">: (<a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>) ⇒ <span class="extype" name="scala.Function1.andThen.A">A</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -183,15 +183,15 @@
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.topo.AppService#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(req:org.jboss.netty.handler.codec.http.HttpRequest):com.twitter.util.Future[org.jboss.netty.handler.codec.http.DefaultHttpResponse]"></a>
-      <a id="apply(HttpRequest):Future[DefaultHttpResponse]"></a>
+      <a id="apply(req:com.twitter.finagle.httpx.Request):com.twitter.util.Future[com.twitter.finagle.httpx.Response]"></a>
+      <a id="apply(Request):Future[Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="req">req: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.DefaultHttpResponse">DefaultHttpResponse</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="req">req: <a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">This is the method to override/implement to create your own Service.</p><div class="fullcomment"><div class="comment cmt"><p>This is the method to override/implement to create your own Service.
@@ -269,14 +269,14 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li name="scala.Function1#compose" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="compose[A](g:A=&gt;T1):A=&gt;R"></a>
-      <a id="compose[A]((A)⇒HttpRequest):(A)⇒Future[HttpResponse]"></a>
+      <a id="compose[A]((A)⇒Request):(A)⇒Future[Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
+        <span class="name">compose</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="g">g: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>)</span><span class="result">: (<span class="extype" name="scala.Function1.compose.A">A</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function1</dd><dt>Annotations</dt><dd>
@@ -385,14 +385,14 @@ with a reasonable likelihood of success).
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Service#map" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="map[Req1](f:Req1=&gt;Req):com.twitter.finagle.Service[Req1,Rep]"></a>
-      <a id="map[Req1]((Req1)⇒HttpRequest):Service[Req1,HttpResponse]"></a>
+      <a id="map[Req1]((Req1)⇒Request):Service[Req1,Response]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">map</span><span class="tparams">[<span name="Req1">Req1</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>) ⇒ <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
+        <span class="name">map</span><span class="tparams">[<span name="Req1">Req1</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>) ⇒ <a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Service.map.Req1">Req1</span>, <a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
@@ -563,11 +563,11 @@ undefined if apply() is called after resources are relinquished.
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.Service">
-              <h3>Inherited from <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</h3>
+              <h3>Inherited from <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>, <a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</h3>
             </div><div class="parent" name="com.twitter.util.Closable">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></h3>
             </div><div class="parent" name="scala.Function1">
-              <h3>Inherited from (<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</h3>
+              <h3>Inherited from (<a href="../httpx/Request.html" class="extype" name="com.twitter.finagle.httpx.Request">Request</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../httpx/Response.html" class="extype" name="com.twitter.finagle.httpx.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

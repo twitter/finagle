@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &mdash; Finagle 6.28.0 documentation</title>
+    <title>Protocols &mdash; Finagle 6.28.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.28.0',
+        VERSION:     '6.28.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.28.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.28.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="Extending Finagle" href="Extending.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -64,7 +64,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="protocols">
 <h1>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h1>
@@ -101,41 +101,100 @@ uses the Thrift framed codec and the binary protocol for serialization.</p>
 <p>At Twitter, we use our open-source Thrift code-generator called
 <a class="reference external" href="http://twitter.github.io/scrooge/">Scrooge</a>. Scrooge is written in Scala and
 can generate source code in Scala or Java. Given the following IDL:</p>
-<div class="highlight-text"><div class="highlight"><pre>service Hello {
-  string hi();
+<div class="highlight-text"><div class="highlight"><pre>service LoggerService {
+  string log(1: string message, 2: i32 logLevel) throws (1: WriteException writeEx);
+  i32 getLogSize() throws (1: ReadException readEx);
 }
 </pre></div>
 </div>
 <p>Scrooge will generate code that can be used by <cite>finagle-thrift</cite> with the
-following rich APIs <a class="footnote-reference" href="#id2" id="id1">[1]</a>:</p>
+following rich APIs:</p>
 <p id="finagle-thrift-server">Serving the IDL:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">serveIface</span><span class="o">(</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Hello</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">hi</span><span class="o">()</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="s">&quot;hi&quot;</span><span class="o">)</span>
-<span class="o">})</span>
-<span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">serveIface</span><span class="o">(</span>
+  <span class="s">&quot;localhost:1234&quot;</span><span class="o">,</span>
+  <span class="k">new</span> <span class="nc">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="n">log</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">logLevel</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+      <span class="n">println</span><span class="o">(</span><span class="s">s&quot;[</span><span class="si">$logLevel</span><span class="s">] Server received: &#39;</span><span class="si">$message</span><span class="s">&#39;&quot;</span><span class="o">)</span>
+      <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="s">s&quot;You&#39;ve sent: (&#39;</span><span class="si">$message</span><span class="s">&#39;, </span><span class="si">$logLevel</span><span class="s">)&quot;</span><span class="o">)</span>
+    <span class="o">}</span>
+
+    <span class="k">var</span> <span class="n">counter</span> <span class="k">=</span> <span class="mi">0</span>
+    <span class="c1">// getLogSize throws ReadExceptions every other request.</span>
+    <span class="k">def</span> <span class="n">getLogSize</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+      <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">counter</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize ReadException&quot;</span><span class="o">)</span>
+        <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="k">new</span> <span class="nc">ReadException</span><span class="o">())</span>
+      <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize Success&quot;</span><span class="o">)</span>
+        <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">})</span>
 </pre></div>
 </div>
-<p id="finagle-thrift-client">and the symmetric remote dispatch:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">newIface</span><span class="o">[</span><span class="kt">Hello.FutureIface</span><span class="o">](</span><span class="s">&quot;localhost:8080&quot;</span><span class="o">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">hi</span><span class="o">()</span> <span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
-  <span class="n">println</span><span class="o">(</span><span class="s">&quot;Received response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">)</span>
+<p id="finagle-thrift-client">Construct a client:</p>
+<div class="highlight-text"><div class="highlight"><pre>val clientServiceIface: LoggerService.ServiceIface =
+  Thrift.newServiceIface[LoggerService.ServiceIface](&quot;localhost:1234&quot;)
+</pre></div>
+</div>
+<p>A ServiceIface is a collection of Services, one for each Thrift method. Call the log method:</p>
+<div class="highlight-text"><div class="highlight"><pre>val result: Future[Log.Result] = clientServiceIface.log(Log.Args(&quot;hello&quot;, 1))
+</pre></div>
+</div>
+<p>Thrift services can be combined with <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Filter$">Filters</a>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">uppercaseFilter</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.Result</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Log.Args</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Log.Args</span>, <span class="kt">Log.Result</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Log.Result</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">uppercaseRequest</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">message</span> <span class="k">=</span> <span class="n">req</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">toUpperCase</span><span class="o">)</span>
+    <span class="n">service</span><span class="o">(</span><span class="n">uppercaseRequest</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">timeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">duration</span><span class="k">:</span> <span class="kt">Duration</span><span class="o">)</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">exc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">IndividualRequestTimeoutException</span><span class="o">(</span><span class="n">duration</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">timer</span> <span class="k">=</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span>
+  <span class="k">new</span> <span class="nc">TimeoutFilter</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Rep</span><span class="o">](</span><span class="n">duration</span><span class="o">,</span> <span class="n">exc</span><span class="o">,</span> <span class="n">timer</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="k">val</span> <span class="n">filteredLog</span> <span class="k">=</span> <span class="n">timeoutFilter</span><span class="o">(</span><span class="mf">2.</span><span class="n">seconds</span><span class="o">)</span> <span class="n">andThen</span> <span class="n">uppercaseFilter</span> <span class="n">andThen</span> <span class="n">clientServiceIface</span><span class="o">.</span><span class="n">log</span>
+
+<span class="n">filteredLog</span><span class="o">(</span><span class="nc">Log</span><span class="o">.</span><span class="nc">Args</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">))</span>
+<span class="c1">// [2] Server received: &#39;HELLO&#39;</span>
+</pre></div>
+</div>
+<p>Here&#8217;s an example of a retry policy that retries on Thrift exceptions:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">retryPolicy</span> <span class="k">=</span> <span class="nc">RetryPolicy</span><span class="o">.</span><span class="n">tries</span><span class="o">[</span><span class="kt">Try</span><span class="o">[</span><span class="kt">GetLogSize.Result</span><span class="o">]](</span><span class="mi">3</span><span class="o">,</span>
+<span class="o">{</span>
+  <span class="k">case</span> <span class="nc">Throw</span><span class="o">(</span><span class="n">ex</span><span class="k">:</span> <span class="kt">ReadException</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="kc">true</span>
+<span class="o">})</span>
+
+<span class="k">val</span> <span class="n">retriedGetLogSize</span> <span class="k">=</span>
+  <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">(</span><span class="n">retryPolicy</span><span class="o">,</span> <span class="nc">DefaultTimer</span><span class="o">.</span><span class="n">twitter</span><span class="o">)</span> <span class="n">andThen</span>
+    <span class="nc">ThriftServiceIface</span><span class="o">.</span><span class="n">resultFilter</span><span class="o">(</span><span class="nc">GetLogSize</span><span class="o">)</span> <span class="n">andThen</span>
+    <span class="n">clientServiceIface</span><span class="o">.</span><span class="n">getLogSize</span>
+
+<span class="n">retriedGetLogSize</span><span class="o">(</span><span class="nc">GetLogSize</span><span class="o">.</span><span class="nc">Args</span><span class="o">())</span>
+</pre></div>
+</div>
+<p>Another way to construct Thrift clients is using the method interface:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">LoggerService.FutureIface</span> <span class="o">=</span> <span class="nc">Thrift</span><span class="o">.</span><span class="n">newIface</span><span class="o">[</span><span class="kt">LoggerService.FutureIface</span><span class="o">](</span><span class="s">&quot;localhost:1234&quot;</span><span class="o">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;message&quot;</span><span class="o">,</span> <span class="mi">4</span><span class="o">)</span> <span class="n">onSuccess</span> <span class="o">{</span> <span class="n">response</span> <span class="k">=&gt;</span>
+  <span class="n">println</span><span class="o">(</span><span class="s">&quot;Client received response: &quot;</span> <span class="o">+</span> <span class="n">response</span><span class="o">)</span>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Check out the <cite>finagle-thrift</cite> <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$">API</a>
+<p>To convert the Service interface to the method interface use <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$">Thrift.newMethodIface</a>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">filteredMethodIface</span><span class="k">:</span> <span class="kt">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="k">=</span>
+  <span class="nc">Thrift</span><span class="o">.</span><span class="n">newMethodIface</span><span class="o">(</span><span class="n">clientServiceIface</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">log</span> <span class="k">=</span> <span class="n">filteredLog</span><span class="o">))</span>
+<span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">filteredMethodIface</span><span class="o">.</span><span class="n">log</span><span class="o">(</span><span class="s">&quot;ping&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="n">println</span><span class="o">))</span>
+</pre></div>
+</div>
+<p>The complete example is at <a class="reference external" href="https://github.com/twitter/finagle/blob/develop/finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala">ThriftServiceIfaceExample.scala</a>.
+Check out the <cite>finagle-thrift</cite> <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Thrift$">API</a>
 for more info.</p>
-<table class="docutils footnote" frame="void" id="id2" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>This API makes it difficult to wrap endpoints in Finagle
-filters. We&#8217;re still experimenting with how to make the <cite>Service</cite>
-abstraction fit more cleanly into a world with IDLs.</td></tr>
-</tbody>
-</table>
 </div>
 </div>
 <div class="section" id="mux">
-<span id="id3"></span><h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
 <p><strong>What is Mux?</strong></p>
 <p>At its core, Mux is a generic RPC multiplexing protocol. Although its primary
 implementation is as a Finagle﻿ subproject, Mux is not Finagle-specific. In the
@@ -255,7 +314,7 @@ from the call to <cite>newRichClient</cite>.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

@@ -91,7 +91,7 @@ new instances.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Immutable</span><span class="params">(<span name="headItem">headItem: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>] = <span class="symbol">None</span></span>, <span name="items">items: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="bytes">bytes: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="journalBytes">journalBytes: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="age">age: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="waiters">waiters: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="openTransactions">openTransactions: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span>
+        <span class="name">Immutable</span><span class="params">(<span name="headItem">headItem: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>] = <span class="symbol">_root_.scala.None</span></span>, <span name="items">items: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="bytes">bytes: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="journalBytes">journalBytes: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="age">age: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="waiters">waiters: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="openTransactions">openTransactions: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span>
       </span>
       </h4>
       
@@ -441,7 +441,7 @@ new instances.
       </span>
       </h4>
       <p class="shortcomment cmt">Gets a field value encoded as a binary blob using TCompactProtocol.</p><div class="fullcomment"><div class="comment cmt"><p>Gets a field value encoded as a binary blob using TCompactProtocol.  If the specified field
-is present in the passthrough map, that value is returend.  Otherwise, if the specified field
+is present in the passthrough map, that value is returned.  Otherwise, if the specified field
 is known and not optional and set to None, then the field is serialized and returned.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="QueueInfo.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo">QueueInfo</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo#getFieldBlobs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -709,7 +709,7 @@ _passthroughFields.
       </span>
       </h4>
       <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
-known, it is reverted to its default value; if the field is unknown, it is subtracked
+known, it is reverted to its default value; if the field is unknown, it is removed
 from the passthroughFields map, if present.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="QueueInfo.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo">QueueInfo</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo#unsetHeadItem" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -725,7 +725,7 @@ from the passthroughFields map, if present.
       </span>
       </h4>
       <p class="shortcomment cmt">If the specified field is optional, it is set to None.</p><div class="fullcomment"><div class="comment cmt"><p>If the specified field is optional, it is set to None.  Otherwise, if the field is
-known, it is reverted to its default value; if the field is unknown, it is subtracked
+known, it is reverted to its default value; if the field is unknown, it is removed
 from the passthroughFields map, if present.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="QueueInfo.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo">QueueInfo</a></dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo#unsetItems" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">

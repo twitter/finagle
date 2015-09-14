@@ -39,12 +39,12 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.MemcachedRichClient">MemcachedRichClient</a> with <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Factory methods to build a finagle-memcached client.</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.MemcachedRichClient">MemcachedRichClient</a> with <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a>, <a href="MemcachedClient$.html" class="extype" name="com.twitter.finagle.MemcachedClient">MemcachedClient</a></div>
+          <div class="subClasses hiddenContent"><a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a></div>
         </div></div>
         
 
@@ -84,10 +84,32 @@
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="com.twitter.finagle.MemcachedRichClient#newTwemcacheClient" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="newTwemcacheClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.memcached.TwemcacheClient"></a>
+      <a id="newTwemcacheClient(Name,String):TwemcacheClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newTwemcacheClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="memcached/TwemcacheClient.html" class="extype" name="com.twitter.finagle.memcached.TwemcacheClient">TwemcacheClient</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Constructs a memcached.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a memcached.Client that dispatches requests over <code>dest</code>. When
+<code>dest</code> resolves to multiple hosts, the hosts are hashed across a ring with
+key affinity. The key hashing algorithm can be configured via the <code>withKeyHasher</code>
+method on <code>Memcached.client</code>. Failing hosts can be ejected from the
+hash ring if <code>withEjectFailedHost</code> is set to true. Note, the current
+implementation only supports bound <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Names</a>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to scope stats, etc.</p></div></div>
+    </li></ol>
+            </div>
 
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
@@ -282,8 +304,8 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.MemcachedRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newRichClient(group:String):com.twitter.finagle.memcached.Client"></a>
+    </li><li name="com.twitter.finagle.MemcachedRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newRichClient(dest:String):com.twitter.finagle.memcached.Client"></a>
       <a id="newRichClient(String):memcached.Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -291,25 +313,37 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="group">group: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="memcached/Client.html" class="extype" name="com.twitter.finagle.memcached.Client">memcached.Client</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="memcached/Client.html" class="extype" name="com.twitter.finagle.memcached.Client">memcached.Client</a></span>
       </span>
       </h4>
-      
-    </li><li name="com.twitter.finagle.MemcachedRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newRichClient(group:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.memcached.Client"></a>
-      <a id="newRichClient(Group[SocketAddress]):memcached.Client"></a>
+      <p class="shortcomment cmt">Constructs a memcached.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a memcached.Client that dispatches requests over <code>dest</code>. When
+<code>dest</code> resolves to multiple hosts, the hosts are hashed across a ring with
+key affinity. The key hashing algorithm can be configured via the <code>withKeyHasher</code>
+method on <code>Memcached.client</code>. Failing hosts can be ejected from the
+hash ring if <code>withEjectFailedHost</code> is set to true. Note, the current
+implementation only supports bound <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Names</a>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.MemcachedRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.memcached.Client"></a>
+      <a id="newRichClient(Name,String):memcached.Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newRichClient</span><span class="params">(<span name="group">group: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="memcached/Client.html" class="extype" name="com.twitter.finagle.memcached.Client">memcached.Client</a></span>
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="memcached/Client.html" class="extype" name="com.twitter.finagle.memcached.Client">memcached.Client</a></span>
       </span>
       </h4>
-      
-    </li><li name="com.twitter.finagle.MemcachedRichClient#newTwemcacheClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newTwemcacheClient(group:String):com.twitter.finagle.memcached.TwemcacheClient"></a>
+      <p class="shortcomment cmt">Constructs a memcached.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a memcached.Client that dispatches requests over <code>dest</code>. When
+<code>dest</code> resolves to multiple hosts, the hosts are hashed across a ring with
+key affinity. The key hashing algorithm can be configured via the <code>withKeyHasher</code>
+method on <code>Memcached.client</code>. Failing hosts can be ejected from the
+hash ring if <code>withEjectFailedHost</code> is set to true. Note, the current
+implementation only supports bound <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Names</a>.</p><p>Argument <code>label</code> is used to assign a label to this client.
+The label is used to scope stats, etc.</p></div></div>
+    </li><li name="com.twitter.finagle.MemcachedRichClient#newTwemcacheClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newTwemcacheClient(dest:String):com.twitter.finagle.memcached.TwemcacheClient"></a>
       <a id="newTwemcacheClient(String):TwemcacheClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -317,23 +351,16 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newTwemcacheClient</span><span class="params">(<span name="group">group: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="memcached/TwemcacheClient.html" class="extype" name="com.twitter.finagle.memcached.TwemcacheClient">TwemcacheClient</a></span>
+        <span class="name">newTwemcacheClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="memcached/TwemcacheClient.html" class="extype" name="com.twitter.finagle.memcached.TwemcacheClient">TwemcacheClient</a></span>
       </span>
       </h4>
-      
-    </li><li name="com.twitter.finagle.MemcachedRichClient#newTwemcacheClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="newTwemcacheClient(group:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.memcached.TwemcacheClient"></a>
-      <a id="newTwemcacheClient(Group[SocketAddress]):TwemcacheClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">newTwemcacheClient</span><span class="params">(<span name="group">group: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="memcached/TwemcacheClient.html" class="extype" name="com.twitter.finagle.memcached.TwemcacheClient">TwemcacheClient</a></span>
-      </span>
-      </h4>
-      
+      <p class="shortcomment cmt">Constructs a memcached.</p><div class="fullcomment"><div class="comment cmt"><p>Constructs a memcached.Client that dispatches requests over <code>dest</code>. When
+<code>dest</code> resolves to multiple hosts, the hosts are hashed across a ring with
+key affinity. The key hashing algorithm can be configured via the <code>withKeyHasher</code>
+method on <code>Memcached.client</code>. Failing hosts can be ejected from the
+hash ring if <code>withEjectFailedHost</code> is set to true. Note, the current
+implementation only supports bound <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Names</a>.
+</p></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>

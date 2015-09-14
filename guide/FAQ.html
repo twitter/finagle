@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.28.0 documentation</title>
+    <title>FAQ &mdash; Finagle 6.28.0-SNAPSHOT documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.28.0',
+        VERSION:     '6.28.0-SNAPSHOT',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.28.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.28.0-SNAPSHOT documentation" href="index.html" />
     <link rel="next" title="Finagle changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -64,7 +64,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="faq">
 <h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
@@ -79,7 +79,7 @@ client may have timed the request out, for example. Interrupts on
 futures propagate, and so if that server is in turn waiting for a response
 from a downstream server it will cancel this pending request, and so on.</p>
 <p>The topology, visually:</p>
-<p><tt class="docutils literal"><span class="pre">Upstream</span> <span class="pre">---&gt;</span> <span class="pre">(Finagle</span> <span class="pre">Server</span> <span class="pre">-&gt;</span> <span class="pre">Finagle</span> <span class="pre">Client)</span> <span class="pre">---&gt;</span> <span class="pre">Downstream</span></tt></p>
+<p><code class="docutils literal"><span class="pre">Upstream</span> <span class="pre">---&gt;</span> <span class="pre">(Finagle</span> <span class="pre">Server</span> <span class="pre">-&gt;</span> <span class="pre">Finagle</span> <span class="pre">Client)</span> <span class="pre">---&gt;</span> <span class="pre">Downstream</span></code></p>
 <p>Interrupts propagate between the Finagle Server and Client only if the
 Future returned from the Server is chained <a class="footnote-reference" href="#id2" id="id1">[1]</a> to the Client.</p>
 <p>A simplified code snippet that exemplifies the intra-process structure:</p>
@@ -131,9 +131,9 @@ published externally, but not yet to maven central.</p>
 </div>
 <div class="section" id="how-do-i-configure-clients-and-servers-with-finagle-6-apis">
 <span id="configuring-finagle6"></span><h3>How do I configure clients and servers with Finagle 6 APIs?<a class="headerlink" href="#how-do-i-configure-clients-and-servers-with-finagle-6-apis" title="Permalink to this headline">¶</a></h3>
-<p>As of <a class="reference internal" href="changelog.html"><em>6.x</em></a>, We introduced a new, preferred API for constructing Finagle <tt class="docutils literal"><span class="pre">Client</span></tt>s and <tt class="docutils literal"><span class="pre">Server</span></tt>s.
-Where the old API used <tt class="docutils literal"><span class="pre">ServerBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> with Codecs, the new APIs use
-<tt class="docutils literal"><span class="pre">Proto.newClient</span></tt> <a class="footnote-reference" href="#id4" id="id3">[2]</a>.</p>
+<p>As of <a class="reference internal" href="changelog.html"><em>6.x</em></a>, We introduced a new, preferred API for constructing Finagle <code class="docutils literal"><span class="pre">Client</span></code>s and <code class="docutils literal"><span class="pre">Server</span></code>s.
+Where the old API used <code class="docutils literal"><span class="pre">ServerBuilder</span></code>/<code class="docutils literal"><span class="pre">ClientBuilder</span></code> with Codecs, the new APIs use
+<code class="docutils literal"><span class="pre">Proto.newClient</span></code> <a class="footnote-reference" href="#id4" id="id3">[2]</a>.</p>
 <p>Old APIs:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">ClientBuilder</span><span class="o">()</span>
   <span class="o">.</span><span class="n">codec</span><span class="o">(</span><span class="nc">Http</span><span class="o">)</span>
@@ -200,12 +200,12 @@ factory generally shields clients from downed hosts, sometimes clients will see
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">FailedFastExceptions</a>.
 A common cause is when all endpoints in the load balancer&#8217;s pool are
 marked down as fail fast, then the load balancer will pass requests through, resulting in a
-<tt class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></tt>.</p>
+<code class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></code>.</p>
 <p>A related issue is when the load balancer&#8217;s pool is a single endpoint that is itself a
 load balancer (for example an nginx server or a hardware load balancer).
 It is important to disable fail fast as the remote load balancer has
 the visibility into which endpoints are up.
-Disabling fail fast can be done with <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>:</p>
+Disabling fail fast can be done with <code class="docutils literal"><span class="pre">ClientBuilder</span></code>:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="n">clientBuilder</span><span class="o">.</span><span class="n">failFast</span><span class="o">(</span><span class="kc">false</span><span class="o">)</span>
 </pre></div>
 </div>
@@ -232,36 +232,36 @@ consequence, traditional forms of connection-pooling are no longer required. Thu
 Mux employs <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.SingletonPool">com.twitter.finagle.pool.SingletonPool</a>,
 which exposes new stats:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">connects</span></tt>, <tt class="docutils literal"><span class="pre">connections</span></tt>, and <tt class="docutils literal"><span class="pre">closechans</span></tt> stats should drop, since
+<li><code class="docutils literal"><span class="pre">connects</span></code>, <code class="docutils literal"><span class="pre">connections</span></code>, and <code class="docutils literal"><span class="pre">closechans</span></code> stats should drop, since
 there will be less channel opening and closing.</li>
-<li><tt class="docutils literal"><span class="pre">connection_duration</span></tt>, <tt class="docutils literal"><span class="pre">connection_received_bytes</span></tt>, and
-<tt class="docutils literal"><span class="pre">connection_sent_bytes</span></tt> stats should increase, since connections become more
+<li><code class="docutils literal"><span class="pre">connection_duration</span></code>, <code class="docutils literal"><span class="pre">connection_received_bytes</span></code>, and
+<code class="docutils literal"><span class="pre">connection_sent_bytes</span></code> stats should increase, since connections become more
 long-lived.</li>
-<li><tt class="docutils literal"><span class="pre">connect_latency_ms</span></tt> and <tt class="docutils literal"><span class="pre">failed_connect_latency_ms</span></tt> stats may become
+<li><code class="docutils literal"><span class="pre">connect_latency_ms</span></code> and <code class="docutils literal"><span class="pre">failed_connect_latency_ms</span></code> stats may become
 erratic because their sampling will become more sparse.</li>
-<li><tt class="docutils literal"><span class="pre">pool_cached</span></tt>, <tt class="docutils literal"><span class="pre">pool_waiters</span></tt>, <tt class="docutils literal"><span class="pre">pool_num_waited</span></tt>, <tt class="docutils literal"><span class="pre">pool_size</span></tt> stats all
+<li><code class="docutils literal"><span class="pre">pool_cached</span></code>, <code class="docutils literal"><span class="pre">pool_waiters</span></code>, <code class="docutils literal"><span class="pre">pool_num_waited</span></code>, <code class="docutils literal"><span class="pre">pool_size</span></code> stats all
 pertain to connection pool implementations not used by Mux, so they disappear
 from stats output.</li>
 </ul>
 <p><em>ClientBuilder configuration</em></p>
 <p>Certain <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>
 settings related to connection pooling become obsolete:
-<tt class="docutils literal"><span class="pre">hostConnectionCoresize</span></tt>, <tt class="docutils literal"><span class="pre">hostConnectionLimit</span></tt>, <tt class="docutils literal"><span class="pre">hostConnectionIdleTime</span></tt>,
-<tt class="docutils literal"><span class="pre">hostConnectionMaxWaiters</span></tt>, <tt class="docutils literal"><span class="pre">hostConnectionMaxIdleTime</span></tt>,
-<tt class="docutils literal"><span class="pre">hostConnectionMaxLifeTime</span></tt>, and <tt class="docutils literal"><span class="pre">hostConnectionBufferSize</span></tt></p>
+<code class="docutils literal"><span class="pre">hostConnectionCoresize</span></code>, <code class="docutils literal"><span class="pre">hostConnectionLimit</span></code>, <code class="docutils literal"><span class="pre">hostConnectionIdleTime</span></code>,
+<code class="docutils literal"><span class="pre">hostConnectionMaxWaiters</span></code>, <code class="docutils literal"><span class="pre">hostConnectionMaxIdleTime</span></code>,
+<code class="docutils literal"><span class="pre">hostConnectionMaxLifeTime</span></code>, and <code class="docutils literal"><span class="pre">hostConnectionBufferSize</span></code></p>
 <p><em>Server Connection Stats</em></p>
 <p>The server-side connection model changes as well. Expect the following stats to
 be impacted:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">connects</span></tt>, <tt class="docutils literal"><span class="pre">connections</span></tt>, and <tt class="docutils literal"><span class="pre">closechans</span></tt> stats should drop.</li>
-<li><tt class="docutils literal"><span class="pre">connection_duration</span></tt>, <tt class="docutils literal"><span class="pre">connection_received_bytes</span></tt>, and
-<tt class="docutils literal"><span class="pre">connection_sent_bytes</span></tt> should increase.</li>
-<li>Obsolete stats: <tt class="docutils literal"><span class="pre">idle/idle</span></tt>, <tt class="docutils literal"><span class="pre">idle/refused</span></tt>, and <tt class="docutils literal"><span class="pre">idle/closed</span></tt></li>
+<li><code class="docutils literal"><span class="pre">connects</span></code>, <code class="docutils literal"><span class="pre">connections</span></code>, and <code class="docutils literal"><span class="pre">closechans</span></code> stats should drop.</li>
+<li><code class="docutils literal"><span class="pre">connection_duration</span></code>, <code class="docutils literal"><span class="pre">connection_received_bytes</span></code>, and
+<code class="docutils literal"><span class="pre">connection_sent_bytes</span></code> should increase.</li>
+<li>Obsolete stats: <code class="docutils literal"><span class="pre">idle/idle</span></code>, <code class="docutils literal"><span class="pre">idle/refused</span></code>, and <code class="docutils literal"><span class="pre">idle/closed</span></code></li>
 </ul>
 <p><em>ServerBuilder configuration</em>
 Certain <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a>
-connection management settings become obsolete: <tt class="docutils literal"><span class="pre">openConnectionsThresholds</span></tt>,
-<tt class="docutils literal"><span class="pre">hostConnectionMaxIdleTime</span></tt>, and <tt class="docutils literal"><span class="pre">hostConnectionMaxLifeTime</span></tt>.</p>
+connection management settings become obsolete: <code class="docutils literal"><span class="pre">openConnectionsThresholds</span></code>,
+<code class="docutils literal"><span class="pre">hostConnectionMaxIdleTime</span></code>, and <code class="docutils literal"><span class="pre">hostConnectionMaxLifeTime</span></code>.</p>
 </div>
 <div class="section" id="what-is-thriftmux">
 <h3>What is ThriftMux?<a class="headerlink" href="#what-is-thriftmux" title="Permalink to this headline">¶</a></h3>
@@ -275,7 +275,7 @@ is an implementation of the Thrift protocol built on top of Mux.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

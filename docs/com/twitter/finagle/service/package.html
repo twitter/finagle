@@ -193,6 +193,34 @@ whether or not to apply the subsequent <a href="../Service.html" class="extype" 
       </h4>
       <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that accepts or refuses requests based on a
 rate limiting strategy.</p>
+    </li><li name="com.twitter.finagle.service.RetryExceptionsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RetryExceptionsFilter[Req,Rep]extendsRetryFilter[Req,Rep]"></a>
+      <a id="RetryExceptionsFilter[Req,Rep]:RetryExceptionsFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RetryExceptionsFilter.html"><span class="name">RetryExceptionsFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="RetryFilter.html" class="extype" name="com.twitter.finagle.service.RetryFilter">RetryFilter</a>[<span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p>
+    </li><li name="com.twitter.finagle.service.RetryFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RetryFilter[Req,Rep]extendsFilter[Req,Rep,Req,Rep]"></a>
+      <a id="RetryFilter[Req,Rep]:RetryFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RetryFilter.html"><span class="name">RetryFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.service.RetryFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.service.RetryFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4>
+      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p>
     </li><li name="com.twitter.finagle.service.RetryPolicy" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RetryPolicy[-A]extendsA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]"></a>
       <a id="RetryPolicy[-A]:RetryPolicy[A]"></a>
@@ -206,20 +234,6 @@ rate limiting strategy.</p>
       </span>
       </h4>
       <p class="comment cmt">A function defining retry behavior for a given value type <code>A</code>.</p>
-    </li><li name="com.twitter.finagle.service.RetryingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RetryingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
-      <a id="RetryingFilter[Req,Rep]:RetryingFilter[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="RetryingFilter.html"><span class="name">RetryingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.service.RetryingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryingFilter.Rep">Rep</span>]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinatess retries of subsequent
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p>
     </li><li name="com.twitter.finagle.service.ShardingService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ShardingService[Req,Rep]extendsService[Req,Rep]"></a>
       <a id="ShardingService[Req,Rep]:ShardingService[Req,Rep]"></a>
@@ -384,6 +398,32 @@ rate limiting strategy.</p>
       </span>
       </h4>
       <p class="comment cmt">A static <span class="extype" name="com.twitter.finagle.FailedService">com.twitter.finagle.FailedService</span> object.</p>
+    </li><li name="com.twitter.finagle.service.RetryExceptionsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RetryExceptionsFilter"></a>
+      <a id="RetryExceptionsFilter:RetryExceptionsFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RetryExceptionsFilter$.html"><span class="name">RetryExceptionsFilter</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="com.twitter.finagle.service.RetryFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RetryFilter"></a>
+      <a id="RetryFilter:RetryFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RetryFilter$.html"><span class="name">RetryFilter</span></a>
+      </span>
+      </h4>
+      
     </li><li name="com.twitter.finagle.service.RetryPolicy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryPolicy"></a>
       <a id="RetryPolicy:RetryPolicy"></a>
@@ -394,19 +434,6 @@ rate limiting strategy.</p>
       </span>
       <span class="symbol">
         <a href="RetryPolicy$.html"><span class="name">RetryPolicy</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a></span>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.service.RetryingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="RetryingFilter"></a>
-      <a id="RetryingFilter:RetryingFilter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="RetryingFilter$.html"><span class="name">RetryingFilter</span></a>
       </span>
       </h4>
       

@@ -82,7 +82,23 @@
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.exception.thriftscala.ResultCode.EnumUnknownResultCode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EnumUnknownResultCodeextendsResultCodewithProductwithSerializable"></a>
+      <a id="EnumUnknownResultCode:EnumUnknownResultCode"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ResultCode$$EnumUnknownResultCode.html"><span class="name">EnumUnknownResultCode</span></a><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="ResultCode.html" class="extype" name="com.twitter.finagle.exception.thriftscala.ResultCode">ResultCode</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
 
         
 
@@ -298,6 +314,23 @@ Returns None if the value is not found
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.exception.thriftscala.ResultCode#getOrUnknown" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getOrUnknown(value:Int):com.twitter.finagle.exception.thriftscala.ResultCode"></a>
+      <a id="getOrUnknown(Int):ResultCode"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getOrUnknown</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="ResultCode.html" class="extype" name="com.twitter.finagle.exception.thriftscala.ResultCode">ResultCode</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Find the enum by its integer value, as defined in the Thrift IDL.</p><div class="fullcomment"><div class="comment cmt"><p>Find the enum by its integer value, as defined in the Thrift IDL.
+returns an EnumUnknownResultCode(value) if the value is not found.
+In particular this allows ignoring new values added to an enum
+in the IDL on the producer side when the consumer was not updated.
+</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>

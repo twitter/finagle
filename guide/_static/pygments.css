@@ -48,6 +48,7 @@
 .highlight .nv { color: #000000 } /* Name.Variable */
 .highlight .ow { color: #004461; font-weight: bold } /* Operator.Word */
 .highlight .w { color: #f8f8f8; text-decoration: underline } /* Text.Whitespace */
+.highlight .mb { color: #990000 } /* Literal.Number.Bin */
 .highlight .mf { color: #990000 } /* Literal.Number.Float */
 .highlight .mh { color: #990000 } /* Literal.Number.Hex */
 .highlight .mi { color: #990000 } /* Literal.Number.Integer */

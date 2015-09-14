@@ -4,7 +4,7 @@
  *
  * Sphinx JavaScript utilities for all documentation.
  *
- * :copyright: Copyright 2007-2013 by the Sphinx team, see AUTHORS.
+ * :copyright: Copyright 2007-2014 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
  */
@@ -91,6 +91,30 @@ jQuery.fn.highlightText = function(text, className) {
   });
 };
 
+/*
+ * backward compatibility for jQuery.browser
+ * This will be supported until firefox bug is fixed.
+ */
+if (!jQuery.browser) {
+  jQuery.uaMatch = function(ua) {
+    ua = ua.toLowerCase();
+
+    var match = /(chrome)[ \/]([\w.]+)/.exec(ua) ||
+      /(webkit)[ \/]([\w.]+)/.exec(ua) ||
+      /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) ||
+      /(msie) ([\w.]+)/.exec(ua) ||
+      ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) ||
+      [];
+
+    return {
+      browser: match[ 1 ] || "",
+      version: match[ 2 ] || "0"
+    };
+  };
+  jQuery.browser = {};
+  jQuery.browser[jQuery.uaMatch(navigator.userAgent).browser] = true;
+}
+
 /**
  * Small JavaScript module for the documentation.
  */
@@ -152,6 +176,7 @@ var Documentation = {
 
   /**
    * workaround a firefox stupidity
+   * see: https://bugzilla.mozilla.org/show_bug.cgi?id=645075
    */
   fixFirefoxAnchorBug : function() {
     if (document.location.hash && $.browser.mozilla)
@@ -168,6 +193,9 @@ var Documentation = {
     var terms = (params.highlight) ? params.highlight[0].split(/\s+/) : [];
     if (terms.length) {
       var body = $('div.body');
+      if (!body.length) {
+        body = $('body');
+      }
       window.setTimeout(function() {
         $.each(terms, function() {
           body.highlightText(this.toLowerCase(), 'highlighted');
