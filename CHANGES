@@ -41,12 +41,19 @@ Runtime Behavior Changes
     cached within Finagle according to `networkaddress.cache.ttl`;
     instead they are cached indefinitely. ``RB_ID=735006``
 
+  * finagle-redis: c.t.f.Redis now uses a pipelined dispatcher along with
+    a concurrent load balancer to help eliminate head-of-line blocking.
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
  * finagle-memcached: Unified stack-based construction APIs and cleanup internal
    constructors. In particular, `KetamaClient` was removed and `KetamaPartitionClient`
    and `KetamaFailureAccrualFactory` are now sealed inside Finagle. See
    [[com.twitter.finagle.Memcached]] for how to construct a finagle-memcached client.
+
+ * finagle-redis: Port the c.t.f.Redis protocol object to the StackClient API.
+   A redis client can now be constructed and configured like the rest of the
+   finagle subprojects.
 
 6.28.0
 ------

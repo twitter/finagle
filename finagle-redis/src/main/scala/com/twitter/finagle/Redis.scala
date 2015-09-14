@@ -2,15 +2,15 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.PipeliningDispatcher
+import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.transport.Transport
 import java.net.SocketAddress
 
 trait RedisRichClient { self: Client[Command, Reply] =>
-  @deprecated("Use destination names via newRichClient(String) or newRichClinet(Name)", "6.7.x")
-  def newRichClient(group: Group[SocketAddress]): redis.Client = redis.Client(newClient(group).toService)
 
   def newRichClient(dest: String): redis.Client =
      redis.Client(newService(dest))
@@ -19,17 +19,55 @@ trait RedisRichClient { self: Client[Command, Reply] =>
     redis.Client(newService(dest, label))
 }
 
-object RedisTransporter extends Netty3Transporter[Command, Reply]("redis", redis.RedisClientPipelineFactory)
+object Redis extends Client[Command, Reply] {
 
-object RedisClient extends DefaultClient[Command, Reply](
-  name = "redis",
-  endpointer = Bridge[Command, Reply, Command, Reply](RedisTransporter, new PipeliningDispatcher(_)),
-  pool = (sr: StatsReceiver) => new SingletonPool(_, sr)
-) with RedisRichClient
+  object Client {
+    /**
+     * Default stack parameters used for redis client. We change the
+     * load balancer to `p2cPeakEwma` as it has proven to work well with
+     * other pipelined clients (e.g. memcached).
+     */
+    val defaultParams: Stack.Params = StackClient.defaultParams +
+      LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
+      param.ProtocolLibrary("redis")
 
-object Redis extends Client[Command, Reply] with RedisRichClient {
+    /**
+     * A default client stack which supports the pipelined redis client.
+     * The `ConcurrentLoadBalancerFactory` load balances over a small set of
+     * duplicate endpoints to eliminate head of line blocking. Each endpoint
+     * has a single pipelined connection.
+     */
+    def newStack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
+      .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Reply])
+      .replace(DefaultPool.Role, SingletonPool.module[Command, Reply])
+  }
+
+  case class Client(
+      stack: Stack[ServiceFactory[Command, Reply]] = Client.newStack,
+      params: Stack.Params = Client.defaultParams)
+    extends StdStackClient[Command, Reply, Client]
+    with RedisRichClient {
+
+    protected def copy1(
+      stack: Stack[ServiceFactory[Command, Reply]] = this.stack,
+      params: Stack.Params = this.params
+    ): Client = copy(stack, params)
+
+    protected type In = Command
+    protected type Out = Reply
+
+    protected def newTransporter(): Transporter[In, Out] =
+      Netty3Transporter(redis.RedisClientPipelineFactory, params)
+
+    protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
+      new PipeliningDispatcher(transport)
+  }
+
+  val client = Client()
+
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
-    RedisClient.newClient(dest, label)
+    client.newClient(dest, label)
+
   def newService(dest: Name, label: String): Service[Command, Reply] =
-    RedisClient.newService(dest, label)
+    client.newService(dest, label)
 }
