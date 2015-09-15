@@ -108,7 +108,7 @@ class CookieMap(message: Message)
 
   /**
    * Adds the given ''cookie'' (which is a tuple of cookie ''name''
-   * and ''Cookie'' itself) into this map. If there is already cookies
+   * and ''Cookie'' itself) into this map. If there are already cookies
    * with the given ''name'' in the map, they will be removed.
    *
    * @param cookie the tuple representing ''name'' and ''Cookie''
@@ -121,7 +121,7 @@ class CookieMap(message: Message)
   }
 
   /**
-   * Adds the given  ''cookie'' into this map. If there is already cookies
+   * Adds the given  ''cookie'' into this map. If there are already cookies
    * with the given ''name'' in the map, they will be removed.
    *
    * @param cookie the ''Cookie'' to add
@@ -144,7 +144,7 @@ class CookieMap(message: Message)
   /**
    * Adds the given ''cookie'' with ''name'' into this map. Existing cookies
    * with this name but different domain/path will be kept. If there is already
-   * identical cookie (different value but name/path/domain is the same) in the
+   * an identical cookie (different value but name/path/domain is the same) in the
    * map, it will be replaced within a new version.
    *
    * @param name the cookie name to add
@@ -157,7 +157,7 @@ class CookieMap(message: Message)
 
   /**
    * Adds the given ''cookie'' into this map. Existing cookies with this name
-   * but different domain/path will be kept. If there is already identical
+   * but different domain/path will be kept. If there is already an identical
    * cookie (different value but name/path/domain is the same) in the map,
    * it will be replaced within a new version.
    *
