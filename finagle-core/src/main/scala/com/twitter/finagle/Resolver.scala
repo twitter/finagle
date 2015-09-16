@@ -6,9 +6,7 @@ import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
-import java.security.{PrivilegedAction, Security}
-import java.util.concurrent.TimeUnit.SECONDS
-import java.util.logging.{Level, Logger}
+import java.util.logging.Logger
 
 /**
  * Indicates that a [[com.twitter.finagle.Resolver]] was not found for the
@@ -225,7 +223,7 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
       .groupBy(_.scheme)
       .filter { case (_, rs) => rs.size > 1 }
 
-    if (dups.size > 0) throw new MultipleResolversPerSchemeException(dups)
+    if (dups.nonEmpty) throw new MultipleResolversPerSchemeException(dups)
 
     for (r <- resolvers)
       log.info("Resolver[%s] = %s(%s)".format(r.scheme, r.getClass.getName, r))
@@ -272,7 +270,7 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
    *
    * Names resolved by this mechanism are also a
    * [[com.twitter.finagle.LabelledGroup]]. By default, this name is
-   * simply the `addr` string, but it can be overriden by prefixing
+   * simply the `addr` string, but it can be overridden by prefixing
    * a name separated by an equals sign from the rest of the addr.
    * For example, the addr "www=inet!google.com:80" resolves
    * "google.com:80" with the inet resolver, but the returned group's
@@ -295,8 +293,8 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
    * The scheme is looked up from registered Resolvers, and the
    * argument is passed in.
    *
-   * When `name` begins with the character '/' it is intepreted to be
-   * a logical name whose interpetation is subject to a
+   * When `name` begins with the character '/' it is interpreted to be
+   * a logical name whose interpretation is subject to a
    * [[com.twitter.finagle.Dtab Dtab]].
    *
    * Eval throws exceptions upon failure to parse the name, or

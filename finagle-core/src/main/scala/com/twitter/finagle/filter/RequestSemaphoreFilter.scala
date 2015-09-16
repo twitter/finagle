@@ -3,7 +3,6 @@ package com.twitter.finagle.filter
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle._
 import com.twitter.util.{Future, Throw, Return}
-import java.util.concurrent.RejectedExecutionException
 
 object RequestSemaphoreFilter {
   val role = Stack.Role("RequestConcurrencyLimit")
@@ -37,7 +36,7 @@ object RequestSemaphoreFilter {
               // (reference) lifetime is tied to that of the filter
               // itself.
               val max = sem.numInitialPermits
-              val guages = Seq(
+              val gauges = Seq(
                 sr.addGauge("request_concurrency") { max - sem.numPermitsAvailable },
                 sr.addGauge("request_queue_size") { sem.numWaiters }
               )
