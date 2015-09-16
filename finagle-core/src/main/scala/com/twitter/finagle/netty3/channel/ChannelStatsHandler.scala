@@ -2,9 +2,7 @@ package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Future, Monitor, Stopwatch, Time}
-import java.net.{PortUnreachableException, ConnectException}
 import java.io.IOException
-import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer

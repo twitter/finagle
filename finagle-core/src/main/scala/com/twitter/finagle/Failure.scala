@@ -172,13 +172,13 @@ object Failure {
   /**
    * Create a new failure with the given cause and flags.
    */
-  def apply(cause: Throwable, flags: Long): Failure =
+  def apply(cause: Throwable, flags: Long, logLevel: Level = Level.WARNING): Failure =
     if (cause == null)
-      new Failure("unknown", None, flags)
+      new Failure("unknown", None, flags, logLevel = logLevel)
     else if (cause.getMessage == null)
-      new Failure(cause.getClass.getName, Some(cause), flags)
+      new Failure(cause.getClass.getName, Some(cause), flags, logLevel = logLevel)
     else 
-      new Failure(cause.getMessage, Some(cause), flags)
+      new Failure(cause.getMessage, Some(cause), flags, logLevel = logLevel)
 
   /**
    * Create a new failure with the given cause; no flags.
@@ -262,12 +262,12 @@ object Failure {
   /**
    * Create a new [[Restartable]] failure with the given message.
    */
-  def rejected(why: String): Failure = Failure(why, Failure.Restartable)
+  def rejected(why: String): Failure = new Failure(why, None, Failure.Restartable, logLevel = Level.DEBUG)
 
   /**
    * Create a new [[Restartable]] failure with the given cause.
    */
-  def rejected(cause: Throwable): Failure = Failure(cause, Failure.Restartable)
+  def rejected(cause: Throwable): Failure = Failure(cause, Failure.Restartable, logLevel = Level.DEBUG)
 
   /**
    * A default [[Restartable]] failure.
