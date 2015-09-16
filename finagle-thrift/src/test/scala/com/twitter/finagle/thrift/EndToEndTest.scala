@@ -311,7 +311,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val server = mkThriftTlsServer(sr)
     val client = mkThriftTlsClient(server)
 
-    Await.result(client.someway, Duration.fromSeconds(2))
+    Await.result(client.multiply(1,42), Duration.fromSeconds(2))
 
     assert(sr.counters(Seq("success")) === 1)
 
