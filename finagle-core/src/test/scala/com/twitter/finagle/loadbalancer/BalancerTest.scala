@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -17,11 +17,13 @@ private class BalancerTest extends FunSuite
   with IntegrationPatience
   with GeneratorDrivenPropertyChecks {
 
-  private class TestBalancer extends Balancer[Unit, Unit] {
+  private class TestBalancer(
+      protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)
+    extends Balancer[Unit, Unit] {
     def maxEffort: Int = ???
     def emptyException: Throwable = ???
 
-    protected def statsReceiver: StatsReceiver = NullStatsReceiver
+    def stats: InMemoryStatsReceiver = statsReceiver
 
     def nodes: Vector[Node] = dist.vector
     def factories: Set[ServiceFactory[Unit, Unit]] = nodes.map(_.factory).toSet
@@ -125,19 +127,36 @@ private class BalancerTest extends FunSuite
     val bal = new TestBalancer
     val f1, f2, f3 = newFac()
 
+    val adds = bal.stats.counter("adds")
+    val rems = bal.stats.counter("removes")
+    val size = bal.stats.gauges(Seq("size"))
     assert(bal.nodes.isEmpty)
+    assert(size() == 0)
+    assert(adds() == 0)
+    assert(rems() == 0)
+
     bal.update(Seq(f1, f2, f3))
     assert(bal.factories === Set(f1, f2, f3))
-
+    assert(size() == 3)
+    assert(adds() == 3)
+    assert(rems() == 0)
     for (f <- Seq(f1, f2, f3))
       assert(f.ncloses === 0)
 
     bal.update(Seq(f1, f3))
-
+    assert(size() == 2)
+    assert(adds() == 3)
+    assert(rems() == 1)
     assert(bal.factories === Set(f1, f3))
     assert(f1.ncloses === 0)
     assert(f2.ncloses === 1)
     assert(f3.ncloses === 0)
+
+    bal.update(Seq(f1, f2, f3))
+    assert(bal.factories === Set(f1, f2, f3))
+    assert(size() == 3)
+    assert(adds() == 4)
+    assert(rems() == 1)
   }
 
   if (!sys.props.contains("SKIP_FLAKY")) // CSL-1685

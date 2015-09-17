@@ -134,13 +134,13 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
   /**
    * Balancer status is the best of its constituent nodes.
    */
-  override def status = Status.bestOf(dist.vector, nodeStatus)
+  override def status: Status = Status.bestOf(dist.vector, nodeStatus)
 
   private[this] val nodeStatus: Node => Status = _.factory.status
 
   @volatile protected var dist: Distributor = initDistributor()
 
-  protected def rebuild() {
+  protected def rebuild(): Unit = {
     updater(Rebuild(dist))
   }
 
@@ -164,7 +164,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
   protected sealed trait Update
   protected case class NewList(
-    newList: Traversable[ServiceFactory[Req, Rep]]) extends Update
+    svcFactories: Traversable[ServiceFactory[Req, Rep]]) extends Update
   protected case class Rebuild(cur: Distributor) extends Update
   protected case class Invoke(fn: Distributor => Unit) extends Update
 
@@ -183,10 +183,12 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
       update ++ types.getOrElse(classOf[Invoke], Nil).reverse
     }
 
-    def handle(u: Update) = u match {
-      case NewList(newList) =>
-        val newFactories = newList.toSet
-        val (transfer, closed) = dist.vector partition (newFactories contains _.factory)
+    def handle(u: Update): Unit = u match {
+      case NewList(svcFactories) =>
+        val newFactories = svcFactories.toSet
+        val (transfer, closed) = dist.vector.partition { node =>
+          newFactories.contains(node.factory)
+        }
 
         for (node <- closed)
           node.close()
@@ -194,13 +196,16 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
         // we could demand that 'n' proxies hashCode, equals (i.e. is a Proxy)
         val transferNodes = transfer.map(n => n.factory -> n).toMap
-        val newNodes = newList map {
+        var numNew = 0
+        val newNodes = svcFactories.map {
           case f if transferNodes.contains(f) => transferNodes(f)
-          case f => newNode(f, statsReceiver.scope(f.toString))
+          case f =>
+            numNew += 1
+            newNode(f, statsReceiver.scope(f.toString))
         }
 
         dist = dist.rebuild(newNodes.toVector)
-        adds.incr(newList.size - transfer.size)
+        adds.incr(numNew)
 
       case Rebuild(_dist) if _dist == dist =>
         dist = dist.rebuild()
@@ -224,7 +229,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
    * Invoke `fn` on the current distributor. This is done through the updater
    * and is serialized with distributor updates and other invocations.
    */
-  protected def invoke(fn: Distributor => Unit) {
+  protected def invoke(fn: Distributor => Unit): Unit = {
     updater(Invoke(fn))
   }
 
@@ -253,7 +258,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
     f
   }
 
-  def close(deadline: Time) = {
+  def close(deadline: Time): Future[Unit] = {
     for (gauge <- gauges) gauge.remove()
     removes.incr(dist.vector.size)
     Closable.all(dist.vector:_*).close(deadline)
@@ -278,7 +283,7 @@ private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
    *
    * The observation is terminated when the Balancer is closed.
    */
-  private[this] val observation = activity.states respond {
+  private[this] val observation = activity.states.respond {
     case Activity.Pending =>
 
     case Activity.Ok(newList) =>

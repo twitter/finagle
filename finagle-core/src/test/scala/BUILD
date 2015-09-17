@@ -6,6 +6,7 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-test',
     'finagle/finagle-core',
+    'util/util-stats',
   ],
   sources=rglobs('*.scala'),
   resources=[

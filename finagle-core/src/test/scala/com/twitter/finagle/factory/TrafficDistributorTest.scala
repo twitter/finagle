@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.server.StringServer
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util.{Function => _, _}
 import java.net.SocketAddress
@@ -209,7 +209,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(newBalancerCalls == 0)
     val expected = newAddrs.map(_.addr).map(SocketAddrFactory) +
       SocketAddrFactory(TestAddr(existingWeight.toInt))
-    assert(balancers.filter { _.endpoints.sample() == expected }.size == 1)
+    assert(balancers.count { _.endpoints.sample() == expected } == 1)
 
     // change weight class for an existing endpoint
     resetCounters()
@@ -219,9 +219,9 @@ class TrafficDistributorTest extends FunSuite {
     dest() = Activity.Ok(updatedSet)
     assert(newBalancerCalls == 1)
     assert(newEndpointCalls == 0)
-    assert(balancers.filter {
+    assert(balancers.count {
       _.endpoints.sample() == updated.map(_.addr).map(SocketAddrFactory)
-    }.size == 1)
+    } == 1)
   })
 
   test("respect lazy eviction") (new Ctx {
@@ -299,11 +299,36 @@ class TrafficDistributorTest extends FunSuite {
     assert(exc == intercept[Exception] { Await.result(dist()) })
   })
 
+  // todo: move this to util-stats?
+  private class CumulativeGaugeInMemoryStatsReceiver
+    extends StatsReceiverWithCumulativeGauges
+  {
+    private[this] val underlying = new InMemoryStatsReceiver()
+    override val repr: AnyRef = this
+    override def counter(name: String*): ReadableCounter = underlying.counter(name: _*)
+    override def stat(name: String*): ReadableStat = underlying.stat(name: _*)
+
+    protected[this] def registerGauge(name: Seq[String], f: => Float): Unit =
+      underlying.addGauge(name: _*)(f)
+
+    protected[this] def deregisterGauge(name: Seq[String]): Unit =
+      underlying.gauges -= name
+
+    def counters: Map[Seq[String], Int] = underlying.counters.toMap
+
+    def stats: Map[Seq[String], Seq[Float]] = underlying.stats.toMap
+
+    def gauges: Map[Seq[String], () => Float] = underlying.gauges.toMap
+
+    def numGauges(name: Seq[String]): Int =
+      numUnderlying(name: _*)
+  }
+
   test("increment weights on a shard") (new StringClient with StringServer {
     val server = stringServer.serve(":*", Service.mk { r: String =>
       Future.value(r.reverse)
     })
-    val sr = new InMemoryStatsReceiver
+    val sr = new CumulativeGaugeInMemoryStatsReceiver()
     val va = Var[Addr](Addr.Bound(Set(server.boundAddress)))
     val client = stringClient
       .configured(param.Stats(sr))
@@ -313,7 +338,7 @@ class TrafficDistributorTest extends FunSuite {
     // step this socket address through weight classes. Previous weight
     // classes are closed during each step. This is similar to how we
     // redline a shard.
-    for (i <- 1 to 10) {
+    for (i <- 1 to 10) withClue(s"for i=$i:") {
       va() = Addr.Bound(WeightedSocketAddress(server.boundAddress, i.toDouble))
       assert(Await.result(client("hello")) == "hello".reverse)
       assert(sr.counters(Seq("test", "requests")) == i)
@@ -322,7 +347,8 @@ class TrafficDistributorTest extends FunSuite {
       assert(sr.counters(Seq("test", "loadbalancer", "adds")) == i)
       assert(sr.counters(Seq("test", "loadbalancer", "removes")) == i - 1)
       assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == i)
-      assert(sr.counters.get(Seq("test", "closes")) == None)
+      assert(sr.numGauges(Seq("test", "loadbalancer", "meanweight")) == 1)
+      assert(sr.counters.get(Seq("test", "closes")).isEmpty)
     }
 
     va() = Addr.Bound(Set.empty[SocketAddress])
@@ -330,6 +356,9 @@ class TrafficDistributorTest extends FunSuite {
     assert(sr.counters(Seq("test", "loadbalancer", "adds")) == 10)
     assert(sr.counters(Seq("test", "loadbalancer", "removes")) == 10)
     assert(sr.gauges(Seq("test", "loadbalancer", "size"))() == 0)
+    assert(sr.numGauges(Seq("test", "loadbalancer", "size")) == 1)
+    assert(sr.gauges(Seq("test", "loadbalancer", "meanweight"))() == 0)
+    assert(sr.numGauges(Seq("test", "loadbalancer", "meanweight")) == 1)
   })
 
   test("close a client") (new StringClient with StringServer {

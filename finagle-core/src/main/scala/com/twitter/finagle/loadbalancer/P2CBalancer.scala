@@ -1,17 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.app.GlobalFlag
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater}
+import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.TimeUnit
-import java.util.logging.{Logger, Level}
-import scala.annotation.tailrec
-import scala.collection.immutable
 
 /**
  * An O(1), concurrent, weighted least-loaded fair load balancer.
@@ -19,7 +12,7 @@ import scala.collection.immutable
  * O(1) biased coin flipping through the aliasing method, described
  * in [[com.twitter.finagle.util.Drv Drv]].
  *
- * @param underlying An activity that updates with the set of
+ * @param activity An activity that updates with the set of
  * (node, weight) pairs over which we distribute load.
  *
  * @param maxEffort the maximum amount of "effort" we're willing to
@@ -55,7 +48,7 @@ private class P2CBalancer[Req, Rep](
  * only cautiously. Peak EWMA takes history into account, so that
  * slow behavior is penalized relative to the supplied decay time.
  *
- * @param underlying An activity that updates with the set of
+ * @param activity An activity that updates with the set of
  * (node, weight) pairs over which we distribute load.
  *
  * @param decayTime The window of latency observations.

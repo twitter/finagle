@@ -69,15 +69,8 @@ private[finagle] object TrafficDistributor {
    */
   private class Distributor[Req, Rep](
       classes: Iterable[WeightClass[Req, Rep]],
-      rng: Rng = Rng.threadLocal,
-      statsReceiver: StatsReceiver = NullStatsReceiver)
+      rng: Rng = Rng.threadLocal)
     extends ServiceFactory[Req, Rep] {
-
-    private[this] val meanWeight = statsReceiver.addGauge("meanweight") {
-      val size = classes.map(_.size).sum
-      if (size != 0) classes.map { c => c.weight * c.size }.sum.toFloat / size
-      else 0.0F
-    }
 
     private[this] val (balancers, drv): (IndexedSeq[ServiceFactory[Req, Rep]], Drv) = {
       val tupled = classes.map {
@@ -91,7 +84,6 @@ private[finagle] object TrafficDistributor {
       balancers(drv(rng))(conn)
 
     def close(deadline: Time): Future[Unit] = {
-      meanWeight.remove()
       Closable.all(balancers: _*).close(deadline)
     }
 
@@ -250,25 +242,40 @@ private[finagle] class TrafficDistributor[Req, Rep](
   private[this] val pending = new Promise[ServiceFactory[Req, Rep]]
   private[this] val init: ServiceFactory[Req, Rep] = new DelayedFactory(pending)
 
+  @volatile
+  private[this] var meanWeight = 0.0f
+
+  private[this] val meanWeightGauge = statsReceiver.addGauge("meanweight") { meanWeight }
+
+  private[this] def updateMeanWeight(classes: Iterable[WeightClass[Req, Rep]]): Unit = {
+    val size = classes.map(_.size).sum
+    meanWeight =
+      if (size != 0) classes.map { c => c.weight * c.size }.sum.toFloat / size
+      else 0.0F
+  }
+
   // Translate the stream of weightClasses into a stream of underlying
   // ServiceFactories that can service requests.
   private[this] val underlying: Event[ServiceFactory[Req, Rep]] =
     weightClasses.foldLeft(init) {
-      case (_, Activity.Ok(bals)) if bals.isEmpty =>
+      case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
         // Defer the handling of an empty destination set to `newBalancer`
         val emptyBal = newBalancer(Activity(Var(Activity.Ok(Set.empty))))
+        updateMeanWeight(wcs)
         pending.updateIfEmpty(Return(emptyBal))
         emptyBal
-      case (_, Activity.Ok(bals)) =>
-        val dist = new Distributor(bals, rng, statsReceiver)
+      case (_, Activity.Ok(wcs)) =>
+        val dist = new Distributor(wcs, rng)
+        updateMeanWeight(wcs)
         pending.updateIfEmpty(Return(dist))
         dist
       case (_, Activity.Failed(e)) =>
+        updateMeanWeight(Iterable.empty)
         val failing = new FailingFactory[Req, Rep](e)
         pending.updateIfEmpty(Return(failing))
         failing
       case (staleState, Activity.Pending) =>
-        // This could create a new `DelayedFactory, however, after an
+        // This could create a new `DelayedFactory`, however, after an
         // initial resolution, we prefer a stale set instead of queueing
         // for resolution. That is, it's okay to serve requests on an
         // outdated set.
@@ -282,6 +289,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
 
   def close(deadline: Time): Future[Unit] = {
     outerClose.setDone()
+    meanWeightGauge.remove()
     Closable.all(obs, ref).close(deadline)
   }
 
