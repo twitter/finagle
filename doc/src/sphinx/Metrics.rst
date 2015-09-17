@@ -33,6 +33,15 @@ having trouble making services.
 
 .. include:: metrics/Construction.rst
 
+Finagle
+-------
+
+.. _finagle_stats:
+
+These metrics track various Finagle internals.
+
+.. include:: metrics/Finagle.rst
+
 Service Discovery
 -----------------
 
@@ -118,7 +127,7 @@ Requeues
 .. _requeues:
 
 These metrics show requeues (automatic retries) by the Finagle Stack. The number of retries are
-controlled by a dynamic budget. 
+controlled by a dynamic budget.
 
 .. include:: metrics/Requeues.rst
 

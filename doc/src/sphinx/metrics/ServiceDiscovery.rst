@@ -27,7 +27,7 @@ The total time spent resolving Names is captured in the
 Initial Resolution
 <<<<<<<<<<<<<<<<<<
 
-**initialresolution_ms**
+**finagle/clientregistry/initialresolution_ms**
 
   A counter of the time spent waiting for client resolution via
   `com.twitter.finagle.client.ClientRegistry.expAllRegisteredClientsResolved`
