@@ -17,7 +17,7 @@ final class Failure private[finagle](
   protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
   val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace,
   val logLevel: Level = Level.WARNING
-) extends Exception(why, cause.getOrElse(null)) with NoStacktrace {
+) extends Exception(why, cause.orNull) with NoStacktrace {
   import Failure._
 
   require(!isFlagged(Wrapped) || cause.isDefined)
