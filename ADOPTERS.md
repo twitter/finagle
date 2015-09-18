@@ -8,6 +8,7 @@ URLs if possible) and [submit a pull request][1]!
 
 * [Attendify](https://attendify.com)
 * [Box](https://www.box.com/)
+* [Buoyant](http://buoyant.io/)
 * [Chartboost](https://www.chartboost.com/)
 * [Crimson Hexagon](http://www.crimsonhexagon.com/)
 * [Despegar](http://www.despegar.com/)
