@@ -58,7 +58,7 @@ private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
  * performance: one-shots could be created constantly for a hot cache
  * key, but should work well when there are a few hot keys.
  */
-private class ServiceFactoryCache[Key, Req, Rep](
+private[finagle] class ServiceFactoryCache[Key, Req, Rep](
     newFactory: Key => ServiceFactory[Req, Rep],
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxCacheSize: Int = 8)
