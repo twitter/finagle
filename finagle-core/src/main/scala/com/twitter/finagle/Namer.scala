@@ -45,14 +45,6 @@ object Namer  {
     }
   }
 
-  private def boundNameTreeToAddr(tree: Activity[NameTree[Name.Bound]]): Var[Addr] =
-    tree.map(_.eval).run.flatMap {
-      case Activity.Ok(None) => Var.value(Addr.Neg)
-      case Activity.Ok(Some(names)) => Name.all(names).addr
-      case Activity.Pending => Var.value(Addr.Pending)
-      case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
-    }
-
   /**
    * The global [[com.twitter.finagle.Namer Namer]]. It binds paths of the form
    *

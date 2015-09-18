@@ -26,6 +26,8 @@ Breaking API Changes
     parameterization facilitates using the request to determine if retrying is
     safe (i.e. the request is idempotent).
 
+  * finagle-core: Name.all is now private to `com.twitter.finagle`.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

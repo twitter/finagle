@@ -142,13 +142,9 @@ object Name {
   def apply(path: String): Name =
     Name.Path(com.twitter.finagle.Path.read(path))
 
-  /**
-   * Create a name representing the union of the passed-in
-   * names.
-   *
-   * Metadata is not preserved on bound addresses.
-   */
-  def all(names: Set[Name.Bound]): Name.Bound =
+  // Create a name representing the union of the passed-in names.
+  // Metadata is not preserved on bound addresses.
+  private[finagle] def all(names: Set[Name.Bound]): Name.Bound =
     if (names.isEmpty) empty
     else if (names.size == 1) names.head
     else {
@@ -170,11 +166,4 @@ object Name {
       val id = names map { case bound@Name.Bound(_) => bound.id }
       Name.Bound(va, id)
     }
-
-  // A temporary bridge API to wait for some other changes to land.
-  // Do not use.
-  def DONOTUSE_nameToGroup(name: Name): Group[SocketAddress] = {
-    val bound@Name.Bound(_) = name
-    NameGroup(bound)
-  }
 }
