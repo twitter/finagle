@@ -64,16 +64,21 @@ object Response {
    */
   val Schema: RecordSchema = new RecordSchema
 
-  /** Decode a Response from a String */
+  /** Decode a [[Response]] from a String */
   def decodeString(s: String): Response = {
+    decodeBytes(s.getBytes(Charsets.UTF_8))
+  }
+
+  /** Decode a [[Response]] from a byte array */
+  def decodeBytes(b: Array[Byte]): Response = {
     val decoder = new DecoderEmbedder(
       new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
-    decoder.offer(ChannelBuffers.wrappedBuffer(s.getBytes(Charsets.UTF_8)))
+    decoder.offer(ChannelBuffers.wrappedBuffer(b))
     val res = decoder.poll().asInstanceOf[HttpResponse]
     assert(res ne null)
     Response(res)
   }
-
+  
   /** Create Response. */
   def apply(): Response =
     apply(Version.Http11, Status.Ok)
