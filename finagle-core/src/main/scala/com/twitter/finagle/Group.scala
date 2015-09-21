@@ -1,10 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
-import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Closable, Future, Duration, Timer, Var}
+import com.twitter.util._
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
 
@@ -46,7 +43,7 @@ trait Group[T] { outer =>
   // identity to repeated calls to Group.members
   final protected[finagle] lazy val ref = {
     val r = new AtomicReference[Set[T]]()
-    set.observeTo(r)
+    set.changes.register(Witness(r))
     r
   }
 

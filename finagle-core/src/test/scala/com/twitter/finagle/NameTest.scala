@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.Var
+import com.twitter.util.{Witness, Var}
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -13,7 +13,7 @@ class NameTest extends FunSuite {
     val n = Name.fromGroup(g)
 
     var addr: Addr = Addr.Pending
-    n.addr observe { addr = _ }
+    n.addr.changes.register(Witness({ addr = _ }))
     assert(addr === Addr.Pending)
     val set = Set(new SocketAddress {}, new SocketAddress {})
     g() = set

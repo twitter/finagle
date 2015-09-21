@@ -78,7 +78,7 @@ object Name {
     /**
      * Create a singleton address, equal only to itself.
      */
-    def singleton(addr: Var[Addr]): Name.Bound = Name.Bound(addr, new{})
+    def singleton(addr: Var[Addr]): Name.Bound = Name.Bound(addr, new Object())
   }
 
   // So that we can print NameTree[Name]
