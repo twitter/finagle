@@ -308,7 +308,7 @@ private[thrift] class RawZipkinTracer(
    */
   protected def annotate(record: Record, value: String) {
     spanMap.update(record.traceId) { span =>
-      span.addAnnotation(ZipkinAnnotation(record.timestamp, value, span.endpoint, record.duration))
+      span.addAnnotation(ZipkinAnnotation(record.timestamp, value, span.endpoint))
     }
   }
 }
