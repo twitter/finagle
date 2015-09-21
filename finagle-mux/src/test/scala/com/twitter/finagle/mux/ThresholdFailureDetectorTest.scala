@@ -209,4 +209,36 @@ class ThresholdFailureDetectorTest extends FunSuite
     assert(sr.counters(Seq("failures")) == 1)
     assert(sr.counters(Seq("marked_busy")) == 1)
   }
+
+  testt("darkmode does not change status") { tc =>
+    def nanoTime() = Time.now.inNanoseconds
+    val timer = new MockTimer
+    val sr = new InMemoryStatsReceiver
+    val n = new AtomicInteger(0)
+
+    def ping() = {
+      if (n.getAndIncrement() > 0) Future.exception(new Exception("test"))
+      else Future.Done
+    }
+
+    val d = new ThresholdFailureDetector(
+      () => ping(),
+      () => Future.Done,
+      minPeriod = 10.milliseconds,
+      threshold = 2,
+      windowSize = 5,
+      closeThreshold = -1,
+      nanoTime = nanoTime,
+      darkMode = true,
+      timer = timer,
+      statsReceiver = sr
+    )
+
+    // one successful ping, then fail
+    tc.advance(10.milliseconds)
+    timer.tick()
+
+    assert(d.status == Status.Open)
+    assert(sr.counters(Seq("marked_busy")) == 1)
+  }
 }

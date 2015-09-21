@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Status
 import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
-import com.twitter.logging.Logger
 import com.twitter.util._
 import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicReference
@@ -46,6 +45,7 @@ private class ThresholdFailureDetector(
     windowSize: Int = 100,
     closeThreshold: Int = -1,
     nanoTime: () => Long = System.nanoTime,
+    darkMode: Boolean = false,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     implicit val timer: Timer = DefaultTimer.twitter)
   extends FailureDetector {
@@ -64,7 +64,10 @@ private class ThresholdFailureDetector(
   // start as busy, and become open after receiving the first ping response
   private[this] val state: AtomicReference[Status] = new AtomicReference(Status.Busy)
 
-  def status: Status = state.get
+
+  def status: Status =
+    if (darkMode) Status.Open
+    else state.get
 
   private[this] def markBusy(): Unit = {
     if (state.compareAndSet(Status.Open, Status.Busy)) {

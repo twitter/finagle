@@ -54,9 +54,21 @@ object FailureDetector {
   case object GlobalFlagConfig extends Config
 
   /**
-   * Indicated to use the [[com.twitter.finagle.mux.NullFailureDetector]] when creating a new detector
+   * Indicated to use the [[com.twitter.finagle.mux.NullFailureDetector]]
+   * when creating a new detector
    */
   case object NullConfig extends Config
+
+  /**
+   * Indicated to use the default ping frequency and mark busy threshold;
+   * but it just exports stats instead of actually marking an endpoint as busy.
+   */
+  case class DarkModeConfig(
+      minPeriod: Duration = 5.seconds,
+      threshold: Double = 2,
+      windowSize: Int = 100,
+      closeThreshold: Int = -1)
+    extends Config
 
   /**
    * Indicated to use the [[com.twitter.finagle.mux.ThresholdFailureDetector]]
@@ -86,9 +98,9 @@ object FailureDetector {
   }
 
   case object Param {
-    // by default, tell the builder to parse the GlobalFlag value
-    // (legacy behavior) By default the flag is 'none'
-    implicit val param = Stack.Param(Param(GlobalFlagConfig))
+    // by default, use `DarkModeConfig` to just send pings.
+    // This is an intermediate step to use `ThresholdConfig()`.
+    implicit val param = Stack.Param(Param(DarkModeConfig()))
   }
 
   private[this] val log = Logger.getLogger(getClass.getName)
@@ -105,9 +117,13 @@ object FailureDetector {
     config match {
       case NullConfig => NullFailureDetector
 
+      case cfg: DarkModeConfig =>
+        new ThresholdFailureDetector(ping, close, cfg.minPeriod, cfg.threshold,
+          cfg.windowSize, cfg.closeThreshold, darkMode = true, statsReceiver = statsReceiver)
+
       case cfg: ThresholdConfig =>
         new ThresholdFailureDetector(ping, close, cfg.minPeriod, cfg.threshold,
-          cfg.windowSize, cfg.closeThreshold, statsReceiver = statsReceiver)
+          cfg.windowSize, cfg.closeThreshold, darkMode = false, statsReceiver = statsReceiver)
 
       case GlobalFlagConfig =>
         parseConfigFromFlags(ping, close, statsReceiver = statsReceiver)
@@ -127,7 +143,7 @@ object FailureDetector {
     sessionFailureDetector() match {
       case list("threshold", duration(min), double(threshold), int(win), int(closeThreshold)) =>
         new ThresholdFailureDetector(
-          ping, close, min, threshold, win, closeThreshold, nanoTime, statsReceiver)
+          ping, close, min, threshold, win, closeThreshold, nanoTime, false, statsReceiver)
 
       case list("threshold", duration(min), double(threshold), int(win)) =>
         new ThresholdFailureDetector(

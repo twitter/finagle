@@ -13,11 +13,6 @@ class FailureDetectorTest extends FunSuite
   def close = () => Future.Done
   val statsReceiver = NullStatsReceiver
 
-  test("default settings") {
-    val FailureDetector.Param(failDetectorConfig) = FailureDetector.Param.param.default
-    assert(NullFailureDetector == FailureDetector(failDetectorConfig, ping, close, statsReceiver))
-  }
-
   test("default settings with flag override") {
     sessionFailureDetector.let("threshold") {
       val FailureDetector.Param(failDetectorConfig) = FailureDetector.Param.param.default
@@ -48,6 +43,6 @@ class FailureDetectorTest extends FunSuite
   }
 
   test("explicit threshold used") {
-    assert(FailureDetector(new FailureDetector.ThresholdConfig, ping, close, statsReceiver).isInstanceOf[ThresholdFailureDetector])
+    assert(FailureDetector(FailureDetector.ThresholdConfig(), ping, close, statsReceiver).isInstanceOf[ThresholdFailureDetector])
   }
 }
