@@ -41,6 +41,7 @@ The following are a few of the companies that are using Finagle:
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
 
+
 For a more complete list, please see
 [our adopter page](https://github.com/twitter/finagle/blob/master/ADOPTERS.md).
 If your organization is using Finagle, consider adding a link there and sending
