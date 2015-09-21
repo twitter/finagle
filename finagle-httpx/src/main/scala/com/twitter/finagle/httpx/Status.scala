@@ -12,6 +12,8 @@ package com.twitter.finagle.httpx
  *
  * The only downside is that we lose the ability to create custom statuses with
  * "vanity" reason phrases, but this should be tolerable.
+ *
+ * For Java-friendly enums, see [[com.twitter.finagle.httpx.Statuses]].
  */
 case class Status(code: Int) {
   def reason: String =
