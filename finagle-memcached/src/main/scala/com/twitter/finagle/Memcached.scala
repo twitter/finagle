@@ -9,6 +9,7 @@ import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Tra
 import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
+import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.text.{MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
@@ -197,9 +198,13 @@ object Memcached extends finagle.Client[Command, Response]
       new PipeliningDispatcher(transport)
 
     def newTwemcacheClient(dest: Name, label: String) = {
+      val _dest = if (LocalMemcached.enabled) {
+        Resolver.eval("localhost:" + LocalMemcached.port)
+      } else dest
+
       // Memcache only support Name.Bound names (TRFC-162).
       // See KetamaPartitionedClient for more details.
-      val va = dest match {
+      val va = _dest match {
         case Name.Bound(va) => va
         case _ => throw new IllegalArgumentException("Memcached client only supports Bound Names")
       }

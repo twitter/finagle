@@ -8,6 +8,7 @@ import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
+import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.{text, _}
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
 import com.twitter.finagle.service.{FailedService, FailureAccrualFactory}
@@ -996,12 +997,28 @@ case class KetamaClientBuilder private[memcached](
   oldLibMemcachedVersionComplianceMode: Boolean = false,
   numReps: Int = KetamaPartitionedClient.DefaultNumReps
 ) {
+  private lazy val localMemcachedName = Resolver.eval("localhost:" + LocalMemcached.port)
+
+  private def withLocalMemcached = {
+    val Name.Bound(va) = localMemcachedName
+    copy(
+      _group = CacheNodeGroup(
+        Group.fromVarAddr(va),
+        useOnlyResolvedAddress = false
+      )
+    )
+  }
 
   def dest(
     name: Name,
     useOnlyResolvedAddress: Boolean = false
   ): KetamaClientBuilder = {
-    val Name.Bound(va) = name
+    val Name.Bound(va) = if (LocalMemcached.enabled) {
+      localMemcachedName
+    } else {
+      name
+    }
+
     copy(
       _group = CacheNodeGroup(
         Group.fromVarAddr(va),
@@ -1011,11 +1028,17 @@ case class KetamaClientBuilder private[memcached](
   }
 
   def dest(name: String): KetamaClientBuilder =
-    dest(Resolver.eval(name))
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else dest(Resolver.eval(name))
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def group(group: Group[CacheNode]): KetamaClientBuilder = {
-    copy(_group = group)
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else {
+      copy(_group = group)
+    }
   }
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
@@ -1025,13 +1048,22 @@ case class KetamaClientBuilder private[memcached](
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
-    copy(_group = Group.fromCluster(cluster))
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else {
+      copy(_group = Group.fromCluster(cluster))
+    }
   }
 
-  def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_group = Group(nodes.map {
-      case (host, port, weight) => new CacheNode(host, port, weight)
-    }:_*))
+  def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder = {
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else {
+      copy(_group = Group(nodes.map {
+        case (host, port, weight) => new CacheNode(host, port, weight)
+      }: _*))
+    }
+  }
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
     group(CacheNodeGroup(hostPortWeights))
@@ -1067,6 +1099,7 @@ case class KetamaClientBuilder private[memcached](
         .underlying
 
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
+
     val (numFailures, markDeadFor) = _failureAccrualParams
 
     val label = stackBasedClient.params[finagle.param.Label].label
