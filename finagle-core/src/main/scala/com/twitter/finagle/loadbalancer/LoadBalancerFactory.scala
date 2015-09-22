@@ -186,11 +186,11 @@ object LoadBalancerFactory {
         case Addr.Bound(set, _) =>
           Activity.Ok(set)
         case Addr.Neg =>
-          log.info(s"$label: name resolution is negative")
+          log.info(s"$label: name resolution is negative (local dtab: ${Dtab.local})")
           Activity.Ok(Set.empty)
         case Addr.Failed(e) =>
-           log.log(Level.INFO, s"$label: name resolution failed", e)
-           Activity.Failed(e)
+          log.log(Level.INFO, s"$label: name resolution failed  (local dtab: ${Dtab.local})", e)
+          Activity.Failed(e)
         case Addr.Pending =>
           if (log.isLoggable(Level.FINE)) {
             log.fine(s"$label: name resolution is pending")
