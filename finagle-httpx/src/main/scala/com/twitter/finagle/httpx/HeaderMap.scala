@@ -4,6 +4,7 @@ import com.twitter.finagle.httpx.netty.HttpMessageProxy
 import com.twitter.util.TwitterDateFormat
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, TimeZone}
+import scala.annotation.varargs
 import scala.collection.mutable
 import scala.collection.JavaConverters._
 
@@ -167,7 +168,8 @@ private[finagle] class MessageHeaderMap(httpMessage: HttpMessageProxy) extends H
 
 object HeaderMap {
 
-  /** Create HeaderMap from header list.  Convenience method for testing. */
+  /** Create HeaderMap from header list. */
+  @varargs
   def apply(headers: Tuple2[String, String]*): HeaderMap =
     MapHeaderMap(headers: _*)
 
