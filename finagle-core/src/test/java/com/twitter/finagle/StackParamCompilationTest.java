@@ -92,6 +92,11 @@ public class StackParamCompilationTest {
             Option.<scala.Function1<SocketAddress, Engine>>empty()
           ).mk())
         .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
+
+    StackClient<String, String> client1 =
+        new ClientBuilder()
+        .failFast(true)
+        .<String, String>stackClientOfCodec(null);
   }
 
   void testModule1() {

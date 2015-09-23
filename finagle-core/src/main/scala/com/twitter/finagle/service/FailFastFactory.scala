@@ -19,11 +19,10 @@ object FailFastFactory {
       since: Time,
       task: TimerTask,
       ntries: Int,
-      backoffs: Stream[Duration],
-      until: Promise[Unit])
-    extends State {
-    val status = Status.Busy
-  }
+      backoffs: Stream[Duration])
+    extends State
+
+  private val url = "https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s"
 
   private object Observation extends Enumeration {
     type t = Value
@@ -51,7 +50,8 @@ object FailFastFactory {
    * Creates a [[com.twitter.finagle.Stackable]] [[FailFastFactory]] when enabled.
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module6[FailFast,
+    new Stack.Module6[
+      FailFast,
       param.Stats,
       param.Timer,
       param.Label,
@@ -99,20 +99,19 @@ object FailFastFactory {
  * is able to establish a connection.
  */
 private[finagle] class FailFastFactory[Req, Rep](
-  self: ServiceFactory[Req, Rep],
-  statsReceiver: StatsReceiver,
-  timer: Timer,
-  label: String,
-  logger: Logger = DefaultLogger,
-  endpoint: SocketAddress = unconnected,
-  backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs
-) extends ServiceFactoryProxy(self) {
+    underlying: ServiceFactory[Req, Rep],
+    statsReceiver: StatsReceiver,
+    timer: Timer,
+    label: String,
+    logger: Logger = DefaultLogger,
+    endpoint: SocketAddress = unconnected,
+    backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs)
+  extends ServiceFactoryProxy(underlying) {
   import FailFastFactory._
 
-  val url = "https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s"
-  val exc = new FailedFastException(s"Endpoint $label is marked down. For more details see: $url")
+  private[this] val exc = new FailedFastException(s"Endpoint $label is marked down. For more details see: $url")
 
-  private val futureExc = Future.exception(exc)
+  private[this] val futureExc = Future.exception(exc)
 
   private[this] val markedAvailableCounter = statsReceiver.counter("marked_available")
   private[this] val markedDeadCounter = statsReceiver.counter("marked_dead")
@@ -146,11 +145,10 @@ private[finagle] class FailFastFactory[Req, Rep](
 
     def handle(o: Observation.t) = o match {
       case Observation.Success if state != Ok =>
-        val Retrying(_, task, _, _, done) = state
+        val Retrying(_, task, _, _) = state
         task.cancel()
         markedAvailableCounter.incr()
         state = Ok
-        done.setDone()
 
       case Observation.Fail if state == Ok =>
         val (wait, rest) = getBackoffs() match {
@@ -164,63 +162,62 @@ private[finagle] class FailFastFactory[Req, Rep](
         if (logger.isLoggable(Level.DEBUG))
           logger.log(Level.DEBUG, s"""FailFastFactory marking connection to "$label" as dead. Remote Address: ${endpoint.toString}""")
 
-        state = Retrying(now, task, 0, rest, new Promise[Unit])
-
-      case Observation.TimeoutFail if state != Ok =>
-        state match {
-          case Retrying(_, _, _, Stream.Empty, done) =>
-            // Backoff schedule exhausted. Optimistically become available in
-            // order to continue trying.
-            state = Ok
-            done.setDone()
-
-          case Retrying(since, _, ntries, wait #:: rest, done) =>
-            val task = timer.schedule(Time.now + wait) { this.apply(Observation.Timeout) }
-            state = Retrying(since, task, ntries+1, rest, done)
-
-          case Ok => assert(false)
-        }
+        state = Retrying(now, task, 0, rest)
 
       case Observation.Timeout if state != Ok =>
-        self(ClientConnection.nil) respond {
+        underlying(ClientConnection.nil).respond {
           case Throw(exc) => this.apply(Observation.TimeoutFail)
           case Return(service) =>
             this.apply(Observation.Success)
             service.close()
         }
 
+      case Observation.TimeoutFail if state != Ok =>
+        state match {
+          case Retrying(_, _, _, Stream.Empty) =>
+            // Backoff schedule exhausted. Optimistically become available in
+            // order to continue trying.
+            state = Ok
+
+          case Retrying(since, _, ntries, wait #:: rest) =>
+            val task = timer.schedule(Time.now + wait) { this.apply(Observation.Timeout) }
+            state = Retrying(since, task, ntries+1, rest)
+
+          case Ok => assert(false)
+        }
+
       case Observation.Close =>
         val oldState = state
         state = Ok
         oldState match {
-          case Retrying(_, task, _, _, done) =>
-            done.setDone()
+          case Retrying(_, task, _, _) =>
             task.cancel()
           case _ =>
         }
 
       case _ => ()
+
     }
   }
 
-  override def apply(conn: ClientConnection) =
+  override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (state != Ok) futureExc else {
-      self(conn) respond {
+      underlying(conn).respond {
         case Throw(_) => update(Observation.Fail)
         case Return(_) if state != Ok => update(Observation.Success)
         case _ =>
       }
     }
-
+  }
   override def status = state match {
-    case Ok => self.status
-    case r: Retrying => r.status
+    case Ok => underlying.status
+    case _: Retrying => Status.Busy
   }
 
-  override val toString = "fail_fast_%s".format(self.toString)
+  override val toString = "fail_fast_%s".format(underlying.toString)
 
-  override def close(deadline: Time) = {
+  override def close(deadline: Time): Future[Unit] = {
     update(Observation.Close)
-    self.close(deadline)
+    underlying.close(deadline)
   }
 }
