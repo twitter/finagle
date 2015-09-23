@@ -1,4 +1,5 @@
 resolvers += Classpaths.sbtPluginReleases
+resolvers += "twitter-repo" at "https://maven.twttr.com"
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "0.8.1")
 addSbtPlugin("com.twitter" %% "scrooge-sbt-plugin" % "3.20.0")
