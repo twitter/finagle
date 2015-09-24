@@ -130,20 +130,20 @@ private class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Tim
    * given path, under the given prefix. Note that paths returned are
    * absolute.
    */
-  def globOf(pattern: String): Activity[Seq[String]] = {
+  def globOf(pattern: String): Activity[Set[String]] = {
     val slash = pattern.lastIndexOf('/')
     if (slash < 0)
       return Activity.exception(new IllegalArgumentException("Invalid pattern"))
 
     val (path, prefix) = ZooKeeperReader.patToPathAndPrefix(pattern)
     existsOf(path) flatMap {
-      case None => Activity.value(Seq.empty)
+      case None => Activity.value(Set.empty)
       case Some(_) =>
         getChildrenWatchOp(path) transform {
           case Activity.Pending => Activity.pending
           case Activity.Ok(Node.Children(children, _)) =>
-            Activity.value(children.filter(_.startsWith(prefix)).map(path + "/" + _))
-          case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Seq.empty)
+            Activity.value(children.withFilter(_.startsWith(prefix)).map(path + "/" + _).toSet)
+          case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Set.empty)
           case Activity.Failed(exc) =>
             logger.error(s"GetChildrenWatch to ($path, $prefix) failed with exception $exc")
             Activity.exception(exc)

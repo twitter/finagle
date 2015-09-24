@@ -1,11 +1,12 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{Stat, StatsReceiver}
+import com.twitter.finagle.stats.{Gauge, Stat, StatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
-import com.twitter.util.{Activity, Memoize, Stopwatch, Var}
+import com.twitter.util.{Activity, Future, Memoize, Stopwatch, Var}
 import java.nio.charset.Charset
+import scala.collection.concurrent.{TrieMap => ConcurrentTrieMap}
 
 private[serverset2] object ServiceDiscoverer {
 
@@ -21,14 +22,12 @@ private[serverset2] object ServiceDiscoverer {
    * Each entry in `ents` is paired with the product of all weights for that
    * entry in `vecs`.
    */
-  def zipWithWeights(ents: Seq[Entry], vecs: Set[Vector]): Seq[(Entry, Double)] =
+  def zipWithWeights(ents: Seq[Entry], vecs: Set[Vector]): Seq[(Entry, Double)] = {
     ents map { ent =>
       val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
       ent -> w
     }
-
-  private type Cache =
-    (ZkSession, (String => Activity[Seq[Entry]]), (String => Activity[Option[Vector]]))
+  }
 }
 
 /**
@@ -50,37 +49,27 @@ private[serverset2] class ServiceDiscoverer(
   private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
   private[this] val logger = Logger(getClass)
 
-  def entriesOfNode(zkSession: ZkSession) =
-    Memoize { path: String =>
-      Activity.future(
-        zkSession.immutableDataOf(path) map {
-          case Some(Buf.Utf8(data)) =>
-            val results = Entry.parseJson(path, data)
-            logger.debug(s"$path retrieved ${results.length} entries")
-            results
-          case None => Seq()
-        })
-    }
+  private[this] var gauges: Seq[Gauge] = Seq.empty
 
-  def vectorOfNode(zkSession: ZkSession) =
-    Memoize { path: String =>
-      Activity.future(
-        zkSession.immutableDataOf(path) map {
-          case Some(Buf.Utf8(data)) =>
-            val results = Vector.parseJson(data)
-            val vec = results.getOrElse(Vector(Nil)).vector
-            logger.debug(s"$path retrieved ${vec.length} vector entries")
-            results
-          case None => None
-        })
+  // visible for testing.
+  private[serverset2] val entriesOfCluster = Memoize { clusterPath: String =>
+    val entries = new ConcurrentTrieMap[String, Seq[Entry]]
+    synchronized {
+      gauges = gauges :+ statsReceiver.addGauge("numberOfEntryNodes") { entries.size }
     }
+    entries
+  }
+
+  private[serverset2] val vectorsOfCluster = Memoize { clusterPath: String =>
+    new ConcurrentTrieMap[String, Seq[Vector]]
+  }
 
   private[this] val actZkSession =
     // We use Var.async here to ensure that caches are shared among all
     // observers of actZkSession.
-    Activity(Var.async[Activity.State[Cache]](Activity.Pending) { u =>
-      varZkSession.changes.respond { zkSession =>
-        u() = Activity.Ok((zkSession, entriesOfNode(zkSession), vectorOfNode(zkSession)))
+    Activity(Var.async[Activity.State[ZkSession]](Activity.Pending) { u =>
+      varZkSession.changes.dedup.respond { zkSession =>
+        u() = Activity.Ok(zkSession)
       }
     })
 
@@ -92,23 +81,74 @@ private[serverset2] class ServiceDiscoverer(
     }
   }
 
-  private[this] def entriesOf(path: String): Activity[Seq[Entry]] =
-    actZkSession flatMap { case (zkSession, entriesOfNode, _) =>
-      zkSession.globOf(path + EndpointGlob) flatMap { paths =>
-        timedOf(zkEntriesReadStat) {
-          Activity.collect(paths.map(entriesOfNode)).map(_.flatten)
-        }
-      }
+  private[this] def entriesFromEntryPath(zkSession: ZkSession, path: String) = {
+    zkSession.immutableDataOf(path) map {
+      case Some(Buf.Utf8(data)) =>
+        val results = Entry.parseJson(path, data)
+        logger.debug(s"$path retrieved ${results.length} entries")
+        results
+      case None => Seq()
     }
+  }
 
-  private[this] def vectorsOf(path: String): Activity[Set[Vector]] =
-    actZkSession flatMap { case (zkSession, _, vectorOfNode) =>
-      zkSession.globOf(path + VectorGlob) flatMap { paths =>
-        timedOf(zkVectorsReadStat) {
-          Activity.collect(paths.map(vectorOfNode)).map(_.flatten.toSet)
+  private[this] def vectorFromVectorPath(zkSession: ZkSession, path: String) = {
+    zkSession.immutableDataOf(path) map {
+      case Some(Buf.Utf8(data)) =>
+        val results = Vector.parseJson(data)
+        val vec = results.getOrElse(Vector(Nil))
+        logger.debug(s"$path retrieved ${vec.vector.length} vector entries")
+        Seq(vec)
+      case None => Seq()
+    }
+  }
+
+  /**
+   * Activity to keep a hydrated list of Entrys or Vectors for a given ZK path.
+   * Maintains it's own cache of entries for this path/type, and deals with
+   * cache removal.
+   */
+  private[this] def entitiesOf[Entity](
+    path: String,
+    getCache: String => ConcurrentTrieMap[String, Seq[Entity]],
+    glob: String,
+    entitiesFromPath: (ZkSession, String) => Future[Seq[Entity]]
+  ): Activity[Seq[Entity]] = {
+    // This cache caches full zk path -> parsed json data for members and vectors. This assumes
+    // that this data is immutable, and that new entries never re-use paths. This is true so long
+    // as we (1) use ephermeral/sequential nodes for instances, and (2) the parent nodes of these
+    // members/vectors are not deleted and recreated.
+    val cache = getCache(path)
+    actZkSession flatMap { case zkSession =>
+      zkSession.globOf(path + glob).flatMap { paths =>
+        timedOf(zkEntriesReadStat) {
+          Activity.future(
+            // Fetch data for any nodes (member_ or vector_ paths) surfaced by globOf
+            // that were not already cached
+            Future.collect( (paths &~ cache.keys.toSet).toSeq.map { pathToAdd =>
+                entitiesFromPath(zkSession, pathToAdd) map { entities =>
+                  (pathToAdd, entities)
+                }
+              }
+            ) map { entitiesToAdd =>
+              // Add new entries to cache
+              cache ++= entitiesToAdd
+              // Remove any cached entries not surfaced by globOf from our cache
+              cache --= (cache.keys.toSet &~ paths)
+              cache.values.flatten.toSeq
+            }
+          )
         }
       }
     }
+  }
+
+  private[this] val entriesOf = Memoize { path: String =>
+    entitiesOf(path, entriesOfCluster, EndpointGlob, entriesFromEntryPath)
+  }
+
+  private[this] val vectorsOf = Memoize { path: String =>
+    entitiesOf(path, vectorsOfCluster, VectorGlob, vectorFromVectorPath)
+  }
 
   /**
    * Look up the weighted ServerSet entries for a given path.
@@ -117,7 +157,7 @@ private[serverset2] class ServiceDiscoverer(
     val es = entriesOf(path)
     val vs = vectorsOf(path)
 
-    val raw = es.join(vs).map { case (ents, vecs) => zipWithWeights(ents, vecs) }
+    val raw = es.join(vs).map { case (ents, vecs) => zipWithWeights(ents, vecs.toSet) }
 
     // Squash duplicate updates
     Activity(Var(Activity.Pending, raw.states.dedup))

@@ -137,7 +137,7 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
     val zk = new ZkSession(watchedZk)
 
     val v = zk.globOf("/foo/bar/")
-    val ref = new AtomicReference[Activity.State[Seq[String]]]
+    val ref = new AtomicReference[Activity.State[Set[String]]]
     v.states.register(Witness(ref))
     assert(ref.get === Activity.Pending)
 
@@ -145,23 +145,23 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
     val ewwatchv = Var[WatchState](WatchState.Pending)
     ew.res() = Return(Watched(None, ewwatchv))
     assert(watchedZk.value.opq === Seq(ExistsWatch("/foo/bar")))
-    assert(ref.get === Activity.Ok(Seq.empty))
+    assert(ref.get === Activity.Ok(Set.empty))
 
     ewwatchv() = WatchState.Determined(NodeEvent.ChildrenChanged)
     val Seq(`ew`, ew2@ExistsWatch("/foo/bar")) = watchedZk.value.opq
-    assert(ref.get === Activity.Ok(Seq.empty))
+    assert(ref.get === Activity.Ok(Set.empty))
     val ew2watchv = Var[WatchState](WatchState.Pending)
     ew2.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ew2watchv))
     val Seq(`ew`, `ew2`, gw@GetChildrenWatch("/foo/bar")) = watchedZk.value.opq
     assert(ref.get === Activity.Pending)
     gw.res() = Return(Watched(Node.Children(Seq("a", "b", "c"), null), Var.value(WatchState.Pending)))
-    assert(ref.get === Activity.Ok(Seq("/foo/bar/a", "/foo/bar/b", "/foo/bar/c")))
+    assert(ref.get === Activity.Ok(Set("/foo/bar/a", "/foo/bar/b", "/foo/bar/c")))
     assert(watchedZk.value.opq === Seq(ew, ew2, gw))
 
     ew2watchv() = WatchState.Determined(NodeEvent.ChildrenChanged)
     val Seq(`ew`, `ew2`, `gw`, ew3@ExistsWatch("/foo/bar")) = watchedZk.value.opq
     ew3.res() = Return(Watched(None, Var.value(WatchState.Pending)))
-    assert(ref.get === Activity.Ok(Seq.empty))
+    assert(ref.get === Activity.Ok(Set.empty))
   }}
 
   test("factory authenticates and closes on expiry") { Time.withCurrentTimeFrozen { tc =>
