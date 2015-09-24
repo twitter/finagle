@@ -151,6 +151,15 @@ object Memcached extends finagle.Client[Command, Response]
     object KeyHasher {
       implicit val param = Stack.Param(KeyHasher(hashing.KeyHasher.KETAMA))
     }
+
+    case class NumReps(reps: Int) {
+      def mk(): (NumReps, Stack.Param[NumReps]) =
+        (this, NumReps.param)
+    }
+
+    object NumReps {
+      implicit val param = Stack.Param(NumReps(KetamaPartitionedClient.DefaultNumReps))
+    }
   }
 
   object Client {
@@ -212,6 +221,7 @@ object Memcached extends finagle.Client[Command, Response]
       val finagle.param.Stats(sr) = params[finagle.param.Stats]
       val finagle.param.Timer(timer) = params[finagle.param.Timer]
       val param.KeyHasher(hasher) = params[param.KeyHasher]
+      val param.NumReps(numReps) = params[param.NumReps]
 
       val healthBroker = new Broker[NodeHealth]
 
@@ -223,7 +233,7 @@ object Memcached extends finagle.Client[Command, Response]
       }
 
       val group = CacheNodeGroup(Group.fromVarAddr(va))
-      new KetamaPartitionedClient(group, newService, healthBroker, sr, hasher)
+      new KetamaPartitionedClient(group, newService, healthBroker, sr, hasher, numReps)
         with TwemcachePartitionedClient
     }
 
@@ -244,6 +254,15 @@ object Memcached extends finagle.Client[Command, Response]
      */
     def withKeyHasher(hasher: hashing.KeyHasher): Client =
       configured(param.KeyHasher(hasher))
+
+    /**
+     * Duplicate each node across the hash ring according to `reps`.
+     *
+     * @see [[com.twitter.finagle.memcached.KetamaDistributor]] for more
+     * details.
+     */
+    def withNumReps(reps: Int): Client =
+      configured(param.NumReps(reps))
   }
 
   val client = Client()
