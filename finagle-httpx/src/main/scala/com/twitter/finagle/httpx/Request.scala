@@ -9,6 +9,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
+import scala.annotation.varargs
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
@@ -204,6 +205,7 @@ object Request {
    *
    * @params params a list of key-value pairs representing the query string.
    */
+  @varargs
   def apply(params: Tuple2[String, String]*): Request =
     apply("/", params:_*)
 
