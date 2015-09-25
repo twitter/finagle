@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{Gauge, Stat, StatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
-import com.twitter.util.{Activity, Future, Memoize, Stopwatch, Var}
+import com.twitter.util._
 import java.nio.charset.Charset
 import scala.collection.concurrent.{TrieMap => ConcurrentTrieMap}
 
@@ -124,12 +124,12 @@ private[serverset2] class ServiceDiscoverer(
           Activity.future(
             // Fetch data for any nodes (member_ or vector_ paths) surfaced by globOf
             // that were not already cached
-            Future.collect( (paths &~ cache.keys.toSet).toSeq.map { pathToAdd =>
+            Future.collectToTry( (paths &~ cache.keys.toSet).toSeq.map { pathToAdd =>
                 entitiesFromPath(zkSession, pathToAdd) map { entities =>
                   (pathToAdd, entities)
                 }
               }
-            ) map { entitiesToAdd =>
+            ).map(tries => tries.collect { case Return(e) => e }).map { entitiesToAdd =>
               // Add new entries to cache
               cache ++= entitiesToAdd
               // Remove any cached entries not surfaced by globOf from our cache
