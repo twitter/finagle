@@ -1,6 +1,8 @@
 scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/com/google/caliper',
+    '3rdparty/jvm/org/apache/curator:curator-framework',
+    '3rdparty/jvm/org/apache/curator:curator-test',
     '3rdparty/jvm/org/openjdk/jmh:jmh-core',
     '3rdparty/jvm/org/scala-lang:scala-library',
     'finagle/finagle-benchmark/src/main/thrift:thrift-scala',
@@ -9,9 +11,11 @@ scala_library(name='scala',
     'finagle/finagle-exp',
     'finagle/finagle-memcached',
     'finagle/finagle-ostrich4',
+    'finagle/finagle-serversets',
     'finagle/finagle-stats',
     'finagle/finagle-thriftmux',
     'finagle/finagle-zipkin',
+    'util/util-app',
   ],
   sources=rglobs('*.scala')
 )
@@ -32,5 +36,11 @@ jvm_binary(
 jvm_binary(
   name='hello-server',
   main='com.twitter.finagle.thrift.HelloServer',
+  dependencies=[':scala']
+)
+
+jvm_binary(
+  name='serverset-service',
+  main='com.twitter.finagle.serverset2.LocalServerSetService',
   dependencies=[':scala']
 )

@@ -2,10 +2,11 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
+import com.twitter.finagle.serverset2.Stabilizer.Epoch
 import com.twitter.finagle.{Addr, InetResolver, Resolver}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Activity, Closable, Future, FuturePool, Memoize, Var, Witness}
+import com.twitter.util._
 import java.net.InetAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -39,11 +40,22 @@ private[serverset2] object Zk2Resolver {
  *
  * Resolution is achieved by looking up registered ServerSet paths within a
  * service discovery ZooKeeper cluster. See `Zk2Resolver.bind` for details.
+ *
+ * @param statsReceiver: maintains stats and gauges used in resolution
+ * @param removalWindow: how long a member stays in limbo before it is removed from a ServerSet
+ * @param batchWindow: how long do we batch up change notifications before finalizing a ServerSet
  */
-class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
+class Zk2Resolver(
+    statsReceiver: StatsReceiver,
+    removalWindow: Duration,
+    batchWindow: Duration)
+  extends Resolver {
   import Zk2Resolver._
 
-  def this() = this(DefaultStatsReceiver.scope("zk2"))
+  def this() = this(DefaultStatsReceiver.scope("zk2"), 40.seconds, 5.seconds)
+
+  def this(statsReceiver: StatsReceiver) =
+    this(statsReceiver, 40.seconds, 5.seconds)
 
   val scheme = "zk2"
 
@@ -68,8 +80,8 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
   }
 
   private[this] val sessionTimeout = 10.seconds
-  private[this] val removalEpoch = Stabilizer.epochs(sessionTimeout*4)
-  private[this] val batchEpoch = Stabilizer.epochs(5.seconds)
+  private[this] val removalEpoch = Stabilizer.epochs(removalWindow)
+  private[this] val batchEpoch = Stabilizer.epochs(batchWindow)
   private[this] val nsets = new AtomicInteger(0)
 
   // Cache of ServiceDiscoverer instances.

@@ -539,7 +539,9 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"),
       "com.google.caliper" % "caliper" % "0.5-rc1",
-      "com.twitter.common" % "metrics-data-sample" % "0.0.1"
+      "com.twitter.common" % "metrics-data-sample" % "0.0.1",
+      "org.apache.curator" % "curator-test" % "2.8.0",
+      "org.apache.curator" % "curator-framework" % "2.8.0"
     )
   ).dependsOn(
     finagleCommonsStats,
