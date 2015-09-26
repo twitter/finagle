@@ -174,7 +174,7 @@ object Finagle extends Build {
     finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
     // Protocols
-    finagleHttp, finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
+    finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
     finagleSpdy, finagleRedis,
@@ -319,20 +319,6 @@ object Finagle extends Build {
 
   // Protocol support
 
-  lazy val finagleHttp = Project(
-    id = "finagle-http",
-    base = file("finagle-http"),
-    settings = Project.defaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-http",
-    libraryDependencies ++= Seq(
-      util("codec"), util("logging"),
-      "commons-lang" % "commons-lang" % "2.6",
-      "com.google.guava" % "guava" % "16.0.1"
-    )
-  ).dependsOn(finagleCore)
-
   // see https://finagle.github.io/blog/2014/10/20/upgrading-finagle-to-netty-4/
   // for an explanation of the role of transitional -x packages in the netty4 migration.
   lazy val finagleHttpX = Project(
@@ -356,7 +342,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-httpx-compat"
-  ).dependsOn(finagleCore, finagleHttp, finagleHttpX)
+  ).dependsOn(finagleCore, finagleHttpX)
 
   lazy val finagleNative = Project(
     id = "finagle-native",
@@ -498,7 +484,7 @@ object Finagle extends Build {
     name := "finagle-stress",
     libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
     libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
-  ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleHttp, finagleThriftMux)
+  ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleThriftMux)
 
   lazy val finagleMdns = Project(
     id = "finagle-mdns",
@@ -523,7 +509,7 @@ object Finagle extends Build {
       "org.slf4j" %  "slf4j-nop" % "1.7.7" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
-    finagleCore, finagleHttp, finagleThrift, finagleMemcached, finagleKestrel,
+    finagleCore, finagleThrift, finagleMemcached, finagleKestrel,
     finagleRedis, finagleMySQL, finagleOstrich4, finagleStats)
 
   lazy val finagleBenchmark = Project(

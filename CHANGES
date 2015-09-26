@@ -7,6 +7,11 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-http: Deprecated in favor of finagle-httpx and now removed.
+
 New Features
 ~~~~~~~~~~~~
 

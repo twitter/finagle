@@ -11,6 +11,7 @@ import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
 import scala.annotation.varargs
 import scala.beans.BeanProperty
+import scala.annotation.varargs
 import scala.collection.JavaConverters._
 
 import Bijections._
