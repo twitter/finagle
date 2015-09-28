@@ -7,6 +7,9 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+6.29.0
+~~~~~~
+
 Deprecations
 ~~~~~~~~~~~~
 
@@ -15,7 +18,7 @@ Deprecations
 New Features
 ~~~~~~~~~~~~
 
-   * finagle-core: Provides a `RetryFilter` which takes a
+  * finagle-core: Provides a `RetryFilter` which takes a
     `RetryPolicy[(Req, Try[Rep])]` and allows you to retry on both "successful"
     requests, such as HTTP 500s, as well as failed requests. The `Req`
     parameterization facilitates using the request to determine if retrying is
@@ -23,19 +26,6 @@ New Features
 
   * finagle-httpx: Experimental support `multipart/form-data` (file uploads)
     decoding via `c.t.f.httpx.exp.Multipart`. ``RB_ID=730102``
-
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
-
-  * finagle-core: `RetryingFilter`, which takes a RetryPolicy[Try[Nothing]]` and
-    is invoked only on exceptions, has been renamed to `RetryExceptionsFilter`.
-    `RetryExceptionsFilter` is a subclass of `RetryFilter`, which takes a
-    `RetryPolicy[(Req, Try[Rep])]` and allows you to retry on both "successful"
-    requests, such as HTTP 500s, as well as failed requests. The `Req`
-    parameterization facilitates using the request to determine if retrying is
-    safe (i.e. the request is idempotent).
-
-  * finagle-core: Name.all is now private to `com.twitter.finagle`.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,14 +48,24 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: `RetryingFilter`, which takes a RetryPolicy[Try[Nothing]]` and
+    is invoked only on exceptions, has been renamed to `RetryExceptionsFilter`.
+    `RetryExceptionsFilter` is a subclass of `RetryFilter`, which takes a
+    `RetryPolicy[(Req, Try[Rep])]` and allows you to retry on both "successful"
+    requests, such as HTTP 500s, as well as failed requests. The `Req`
+    parameterization facilitates using the request to determine if retrying is
+    safe (i.e. the request is idempotent).
+
+  * finagle-core: Name.all is now private to `com.twitter.finagle`.
+
   * finagle-memcached: Unified stack-based construction APIs and cleanup internal
     constructors. In particular, `KetamaClient` was removed and `KetamaPartitionClient`
     and `KetamaFailureAccrualFactory` are now sealed inside Finagle. See
     [[com.twitter.finagle.Memcached]] for how to construct a finagle-memcached client.
 
- * finagle-redis: Port the c.t.f.Redis protocol object to the StackClient API.
-   A redis client can now be constructed and configured like the rest of the
-   finagle subprojects.
+  * finagle-redis: Port the c.t.f.Redis protocol object to the StackClient API.
+    A redis client can now be constructed and configured like the rest of the
+    finagle subprojects.
 
 6.28.0
 ------
