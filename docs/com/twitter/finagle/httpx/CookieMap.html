@@ -340,7 +340,7 @@ the <i>message</i>
         <span title="gt4s: $plus$eq" class="name">+=</span><span class="params">(<span name="cookie">cookie: <a href="Cookie.html" class="extype" name="com.twitter.finagle.httpx.Cookie">Cookie</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.httpx.CookieMap">CookieMap</a></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Adds the given  <i>cookie</i> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given  <i>cookie</i> into this map. If there is already cookies
+      <p class="shortcomment cmt">Adds the given  <i>cookie</i> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given  <i>cookie</i> into this map. If there are already cookies
 with the given <i>name</i> in the map, they will be removed.
 </p></div><dl class="paramcmts block"><dt class="param">cookie</dt><dd class="cmt"><p>the <i>Cookie</i> to add
 </p></dd></dl></div>
@@ -358,7 +358,7 @@ with the given <i>name</i> in the map, they will be removed.
       </h4>
       <p class="shortcomment cmt">Adds the given <i>cookie</i> (which is a tuple of cookie <i>name</i>
 and <i>Cookie</i> itself) into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <i>cookie</i> (which is a tuple of cookie <i>name</i>
-and <i>Cookie</i> itself) into this map. If there is already cookies
+and <i>Cookie</i> itself) into this map. If there are already cookies
 with the given <i>name</i> in the map, they will be removed.
 </p></div><dl class="paramcmts block"><dt class="param">cookie</dt><dd class="cmt"><p>the tuple representing <i>name</i> and <i>Cookie</i>
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.httpx.CookieMap">CookieMap</a> → MapLike → Builder → Growable</dd></dl></div>
@@ -529,7 +529,7 @@ with the given <i>name</i> in the map, they will be removed.
       </span>
       </h4>
       <p class="shortcomment cmt">Adds the given <i>cookie</i> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <i>cookie</i> into this map. Existing cookies with this name
-but different domain/path will be kept. If there is already identical
+but different domain/path will be kept. If there is already an identical
 cookie (different value but name/path/domain is the same) in the map,
 it will be replaced within a new version.
 </p></div><dl class="paramcmts block"><dt class="param">cookie</dt><dd class="cmt"><p>the <i>Cookie</i> to add
@@ -548,7 +548,7 @@ it will be replaced within a new version.
       </h4>
       <p class="shortcomment cmt">Adds the given <i>cookie</i> with <i>name</i> into this map.</p><div class="fullcomment"><div class="comment cmt"><p>Adds the given <i>cookie</i> with <i>name</i> into this map. Existing cookies
 with this name but different domain/path will be kept. If there is already
-identical cookie (different value but name/path/domain is the same) in the
+an identical cookie (different value but name/path/domain is the same) in the
 map, it will be replaced within a new version.
 </p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>the cookie name to add</p></dd><dt class="param">cookie</dt><dd class="cmt"><p>the <i>Cookie</i> to add
 </p></dd></dl></div>

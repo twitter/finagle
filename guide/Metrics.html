@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.28.0-SNAPSHOT documentation</title>
+    <title>Metrics &mdash; Finagle 6.29.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.28.0-SNAPSHOT',
+        VERSION:     '6.29.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.28.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.29.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -64,7 +64,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="metrics">
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
@@ -168,6 +168,27 @@ primarily to decide whether a host is available to make new connections to in th
 </dl>
 </div>
 </div>
+<div class="section" id="finagle">
+<h2>Finagle<a class="headerlink" href="#finagle" title="Permalink to this headline">¶</a></h2>
+<p id="finagle-stats">These metrics track various Finagle internals.</p>
+<div class="section" id="timer">
+<h3>Timer<a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>finagle/timer/pending_tasks</strong></dt>
+<dd>a stat of the number of pending tasks to run for <tt class="docutils literal"><span class="pre">DefaultTimer.twitter</span></tt></dd>
+<dt><strong>finagle/timer/deviation_ms</strong></dt>
+<dd>a stat of the deviation in milliseconds of tasks scheduled on
+<tt class="docutils literal"><span class="pre">DefaultTimer.twitter</span></tt> from their expected time.</dd>
+</dl>
+</div>
+<div class="section" id="clientregistry">
+<h3>ClientRegistry<a class="headerlink" href="#clientregistry" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>finagle/clientregistry/size</strong></dt>
+<dd>a gauge of the current number of clients in the <tt class="docutils literal"><span class="pre">ClientRegistry</span></tt></dd>
+</dl>
+</div>
+</div>
 <div class="section" id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
 <p id="id1">These metrics track the state of name resolution and service discovery.</p>
@@ -195,7 +216,7 @@ created in the event that no idle <cite>ServiceFactory</cite>s are cached</dd>
 </div>
 <div class="section" id="initial-resolution">
 <h3>Initial Resolution<a class="headerlink" href="#initial-resolution" title="Permalink to this headline">¶</a></h3>
-<p><strong>initialresolution_ms</strong></p>
+<p><strong>finagle/clientregistry/initialresolution_ms</strong></p>
 <blockquote>
 <div>A counter of the time spent waiting for client resolution via
 <cite>com.twitter.finagle.client.ClientRegistry.expAllRegisteredClientsResolved</cite></div></blockquote>
@@ -582,7 +603,7 @@ based failure detection. They only apply to the mux protocol.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -608,6 +629,11 @@ based failure detection. They only apply to the mux protocol.</p>
 <li><a class="reference internal" href="#construction">Construction</a><ul>
 <li><a class="reference internal" href="#clientbuilder">ClientBuilder</a></li>
 <li><a class="reference internal" href="#statsservicefactory">StatsServiceFactory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#finagle">Finagle</a><ul>
+<li><a class="reference internal" href="#timer">Timer</a></li>
+<li><a class="reference internal" href="#clientregistry">ClientRegistry</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>

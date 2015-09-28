@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.28.0-SNAPSHOT documentation</title>
+    <title>Clients &mdash; Finagle 6.29.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.28.0-SNAPSHOT',
+        VERSION:     '6.29.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.28.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.29.0 documentation" href="index.html" />
     <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -64,7 +64,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="clients">
 <span id="finagle-clients"></span><h1>Clients<a class="headerlink" href="#clients" title="Permalink to this headline">¶</a></h1>
@@ -82,14 +82,14 @@ There are variants of this constructor for stateless clients that create a simpl
 </div>
 <p>As of <a class="reference internal" href="changelog.html"><em>6.x</em></a>, client implementations are encouraged to expose
 this interface on a Scala object named after the protocol implementation. This
-results in a uniform way to construct clients, <code class="docutils literal"><span class="pre">Protocol.newClient(...)</span></code>. For
+results in a uniform way to construct clients, <tt class="docutils literal"><span class="pre">Protocol.newClient(...)</span></tt>. For
 example:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="nc">Http</span><span class="o">.</span><span class="n">newClient</span><span class="o">(...)</span>
 <span class="nc">Memcached</span><span class="o">.</span><span class="n">newClient</span><span class="o">(...)</span>
 </pre></div>
 </div>
 <p>Clients can further furnish the resulting <cite>ServiceFactory</cite> with protocol
-specific API&#8217;s. A common pattern is to expose a <code class="docutils literal"><span class="pre">newRichClient</span></code> method that
+specific API&#8217;s. A common pattern is to expose a <tt class="docutils literal"><span class="pre">newRichClient</span></tt> method that
 does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><em>Thrift</em></a> for more details.</p>
@@ -102,9 +102,9 @@ stacks: the <cite>client stack</cite> manages <cite>name</cite> resolution and b
 across multiple endpoints, the <cite>endpoint stack</cite> provides session qualification
 and connection pooling, and the <cite>connection stack</cite> provides connection life-cycle
 management and implements the wire protocol.</p>
-<div class="figure" id="id11">
-<img src="_images/clientstack.svg" /><p class="caption"><span class="caption-text">Fig. 1: A visual representation of each module in a default Finagle client
-that is configured with three endpoints and connections.</span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
+<div class="figure">
+<img src="_images/clientstack.svg" /><p class="caption">Fig. 1: A visual representation of each module in a default Finagle client
+that is configured with three endpoints and connections.</p>
 </div>
 <div class="section" id="module-composition">
 <h3>Module Composition<a class="headerlink" href="#module-composition" title="Permalink to this headline">¶</a></h3>
@@ -117,7 +117,7 @@ this is how failure management modules mark entire endpoints as unavailable.</p>
 </div>
 <div class="section" id="observability">
 <h3>Observability<a class="headerlink" href="#observability" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal"><span class="pre">Observe</span></code>, <code class="docutils literal"><span class="pre">Monitor</span></code>, and <code class="docutils literal"><span class="pre">Trace</span></code> modules export useful information about the internals and
+<p>The <tt class="docutils literal"><span class="pre">Observe</span></tt>, <tt class="docutils literal"><span class="pre">Monitor</span></tt>, and <tt class="docutils literal"><span class="pre">Trace</span></tt> modules export useful information about the internals and
 behavior of a Finagle client. Client metrics are exported using a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/stats/StatsReceiver.scala">StatsReceiver</a>
 (See the <a class="reference internal" href="Metrics.html#public-stats"><em>metrics</em></a> section for more details). Generic exception handling can
 be installed via the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">MonitorFilter</a>.
@@ -126,16 +126,16 @@ Finally, clients have built-in support for <a class="reference external" href="h
 <div class="section" id="timeouts-expiration">
 <h3>Timeouts &amp; Expiration<a class="headerlink" href="#timeouts-expiration" title="Permalink to this headline">¶</a></h3>
 <p>Finagle provides timeout facilities with fine granularity:</p>
-<p>The <code class="docutils literal"><span class="pre">Service</span> <span class="pre">Timeout</span></code> module defines a timeout for service acquisition. That is,
+<p>The <tt class="docutils literal"><span class="pre">Service</span> <span class="pre">Timeout</span></tt> module defines a timeout for service acquisition. That is,
 it defines the maximum time allotted to a request to wait for an available service. Requests
 that exceed this timeout are failed with a <cite>ServiceTimeoutException</cite>. This module
 is implemented by the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/factory/TimeoutFactory.scala">TimeoutFactory</a></p>
-<p>The <code class="docutils literal"><span class="pre">Request</span> <span class="pre">Timeout</span></code> module is a filter and thus gives an upper bound on the amount of
+<p>The <tt class="docutils literal"><span class="pre">Request</span> <span class="pre">Timeout</span></tt> module is a filter and thus gives an upper bound on the amount of
 time allowed for a request to be outstanding. An important implementation detail of the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> is that it attempts
 to cancel the request when a timeout is triggered. With most protocols, if the request has
 already been dispatched, the only way to cancel the request is to terminate the connection.</p>
-<p>The <code class="docutils literal"><span class="pre">Expiration</span></code> module is attached at the connection level and expires a service after a
+<p>The <tt class="docutils literal"><span class="pre">Expiration</span></tt> module is attached at the connection level and expires a service after a
 certain amount of idle time. The module is implemented by
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/ExpiringService.scala">ExpiringService</a>.</p>
 <p><a class="reference internal" href="Metrics.html#idle-apoptosis-stats"><em>Related stats</em></a></p>
@@ -161,7 +161,7 @@ cancellation).</td></tr>
 </div>
 <div class="section" id="request-draining">
 <h3>Request Draining<a class="headerlink" href="#request-draining" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal"><span class="pre">Drain</span></code> module guarantees that the client delays closure until all
+<p>The <tt class="docutils literal"><span class="pre">Drain</span></tt> module guarantees that the client delays closure until all
 outstanding requests have been completed. It wraps each produced service with
 a <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RefcountedService.scala">RefCountedService</a>.</p>
 </div>
@@ -298,7 +298,7 @@ From the perspective of the load balancer, they act as circuit breakers which, w
 triggered, temporarily suspend the use of a particular endpoint.</p>
 <div class="section" id="failure-accrual">
 <h4>Failure Accrual<a class="headerlink" href="#failure-accrual" title="Permalink to this headline">¶</a></h4>
-<p>The <code class="docutils literal"><span class="pre">Failure</span> <span class="pre">Accrual</span></code> module marks itself as unavailable based on the number of observed
+<p>The <tt class="docutils literal"><span class="pre">Failure</span> <span class="pre">Accrual</span></tt> module marks itself as unavailable based on the number of observed
 failures. The module remains unavailable for a predefined duration. Recall
 that the availability is propagated through the stack. Thus the load balancer
 will avoid using an endpoint where the failure accrual module is unavailable.
@@ -314,7 +314,7 @@ During the time that a host is marked down, the factory is marked unavailable (a
 the load balancer above it will avoid its use). The factory becomes available
 again on success or when the back-off schedule runs out.</p>
 <p>See the FAQ to <a class="reference internal" href="FAQ.html#faq-failedfastexception"><em>better understand</em></a> why clients
-might be seeing <code class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></code>&#8216;s.</p>
+might be seeing <tt class="docutils literal"><span class="pre">com.twitter.finagle.FailedFastException</span></tt>&#8216;s.</p>
 <p><a class="reference internal" href="Metrics.html#fail-fast-stats"><em>Related stats</em></a></p>
 </div>
 </div>
@@ -371,7 +371,7 @@ the modules inside a Finagle client. We&#8217;ve moved away from this model for 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

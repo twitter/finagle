@@ -47,7 +47,7 @@ allowing the implementor to furnish custom dispatchers &amp; handlers.
           <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="../http/codec/HttpServerDispatcher.html" class="extype" name="com.twitter.finagle.http.codec.HttpServerDispatcher">HttpServerDispatcher</a>, <a href="../httpx/codec/HttpServerDispatcher.html" class="extype" name="com.twitter.finagle.httpx.codec.HttpServerDispatcher">HttpServerDispatcher</a>, <a href="SerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher">SerialServerDispatcher</a></div>
+          <div class="subClasses hiddenContent"><a href="../httpx/codec/HttpServerDispatcher.html" class="extype" name="com.twitter.finagle.httpx.codec.HttpServerDispatcher">HttpServerDispatcher</a>, <a href="SerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher">SerialServerDispatcher</a></div>
         </div></div>
         
 
@@ -123,7 +123,7 @@ is complete.</p><p>For non-streaming requests, <code>eos.setDone()</code> should
 since the entire request is present. For streaming requests,
 <code>eos.setDone()</code> must be called at the end of stream (in HTTP, this is on
 receipt of last chunk). Refer to the implementation in
-<a href="../http/codec/HttpServerDispatcher.html" class="extype" name="com.twitter.finagle.http.codec.HttpServerDispatcher">com.twitter.finagle.http.codec.HttpServerDispatcher</a>.
+<a href="../httpx/codec/HttpServerDispatcher.html" class="extype" name="com.twitter.finagle.httpx.codec.HttpServerDispatcher">com.twitter.finagle.httpx.codec.HttpServerDispatcher</a>.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.dispatch.GenSerialServerDispatcher#handle" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="handle(rep:Rep):com.twitter.util.Future[Unit]"></a>

@@ -95,6 +95,20 @@
       </span>
       </h4>
       <p class="comment cmt">Base type used to identify and configure the <span class="extype" name="FailureDetector">FailureDetector</span>.</p>
+    </li><li name="com.twitter.finagle.mux.FailureDetector.DarkModeConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DarkModeConfigextendsFailureDetector.ConfigwithProductwithSerializable"></a>
+      <a id="DarkModeConfig:DarkModeConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="FailureDetector$$DarkModeConfig.html"><span class="name">DarkModeConfig</span></a><span class="params">(<span name="minPeriod">minPeriod: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="defval" name="com.twitter.conversions.time.intToTimeableNumber(5).seconds">...</span></span>, <span name="threshold">threshold: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="windowSize">windowSize: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">100</span></span>, <span name="closeThreshold">closeThreshold: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">-1</span></span>)</span><span class="result"> extends <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Indicated to use the default ping frequency and mark busy threshold;
+but it just exports stats instead of actually marking an endpoint as busy.</p>
     </li><li name="com.twitter.finagle.mux.FailureDetector.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ParamextendsProductwithSerializable"></a>
       <a id="Param:Param"></a>
@@ -222,7 +236,8 @@ config values from the sessionFailureDetector GlobalFlag.</p>
         <a href="FailureDetector$$NullConfig$.html"><span class="name">NullConfig</span></a><span class="result"> extends <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
-      <p class="comment cmt">Indicated to use the <span class="extype" name="com.twitter.finagle.mux.NullFailureDetector">com.twitter.finagle.mux.NullFailureDetector</span> when creating a new detector
+      <p class="comment cmt">Indicated to use the <span class="extype" name="com.twitter.finagle.mux.NullFailureDetector">com.twitter.finagle.mux.NullFailureDetector</span>
+when creating a new detector
 </p>
     </li><li name="com.twitter.finagle.mux.FailureDetector.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Param"></a>

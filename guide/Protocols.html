@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &mdash; Finagle 6.28.0-SNAPSHOT documentation</title>
+    <title>Protocols &mdash; Finagle 6.29.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.28.0-SNAPSHOT',
+        VERSION:     '6.29.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.28.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.29.0 documentation" href="index.html" />
     <link rel="next" title="Extending Finagle" href="Extending.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -64,7 +64,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="protocols">
 <h1>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h1>
@@ -114,8 +114,8 @@ following rich APIs:</p>
   <span class="s">&quot;localhost:1234&quot;</span><span class="o">,</span>
   <span class="k">new</span> <span class="nc">LoggerService</span><span class="o">[</span><span class="kt">Future</span><span class="o">]</span> <span class="o">{</span>
     <span class="k">def</span> <span class="n">log</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">logLevel</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
-      <span class="n">println</span><span class="o">(</span><span class="s">s&quot;[</span><span class="si">$logLevel</span><span class="s">] Server received: &#39;</span><span class="si">$message</span><span class="s">&#39;&quot;</span><span class="o">)</span>
-      <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="s">s&quot;You&#39;ve sent: (&#39;</span><span class="si">$message</span><span class="s">&#39;, </span><span class="si">$logLevel</span><span class="s">)&quot;</span><span class="o">)</span>
+      <span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;[$logLevel] Server received: &#39;$message&#39;&quot;</span><span class="o">)</span>
+      <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;You&#39;ve sent: (&#39;$message&#39;, $logLevel)&quot;</span><span class="o">)</span>
     <span class="o">}</span>
 
     <span class="k">var</span> <span class="n">counter</span> <span class="k">=</span> <span class="mi">0</span>
@@ -123,10 +123,10 @@ following rich APIs:</p>
     <span class="k">def</span> <span class="n">getLogSize</span><span class="o">()</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
       <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
       <span class="k">if</span> <span class="o">(</span><span class="n">counter</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize ReadException&quot;</span><span class="o">)</span>
+        <span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;Server: getLogSize ReadException&quot;</span><span class="o">)</span>
         <span class="nc">Future</span><span class="o">.</span><span class="n">exception</span><span class="o">(</span><span class="k">new</span> <span class="nc">ReadException</span><span class="o">())</span>
       <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-        <span class="n">println</span><span class="o">(</span><span class="s">s&quot;Server: getLogSize Success&quot;</span><span class="o">)</span>
+        <span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">&quot;Server: getLogSize Success&quot;</span><span class="o">)</span>
         <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
       <span class="o">}</span>
     <span class="o">}</span>
@@ -314,7 +314,7 @@ from the call to <cite>newRichClient</cite>.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

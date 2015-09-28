@@ -227,8 +227,8 @@ a simple grammar: a scheme is followed by a bang, followed
 by an argument:
 	name := scheme ! arg
 The scheme is looked up from registered Resolvers, and the
-argument is passed in.</p><p>When <code>name</code> begins with the character '/' it is intepreted to be
-a logical name whose interpetation is subject to a
+argument is passed in.</p><p>When <code>name</code> begins with the character '/' it is interpreted to be
+a logical name whose interpretation is subject to a
 <a href="Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a>.</p><p>Eval throws exceptions upon failure to parse the name, or
 on failure to scheme lookup. Since names are late bound,
 binding failures are deferred.
@@ -473,7 +473,7 @@ an exclamation mark (&quot;bang&quot;). For example: inet!twitter.com:80
 resolves the name &quot;twitter.com:80&quot; using the &quot;inet&quot; resolver. If no
 resolver name is present, the inet resolver is used.</p><p>Names resolved by this mechanism are also a
 <a href="LabelledGroup.html" class="extype" name="com.twitter.finagle.LabelledGroup">com.twitter.finagle.LabelledGroup</a>. By default, this name is
-simply the <code>addr</code> string, but it can be overriden by prefixing
+simply the <code>addr</code> string, but it can be overridden by prefixing
 a name separated by an equals sign from the rest of the addr.
 For example, the addr &quot;www=inet!google.com:80&quot; resolves
 &quot;google.com:80&quot; with the inet resolver, but the returned group's

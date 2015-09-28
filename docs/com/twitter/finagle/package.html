@@ -44,7 +44,7 @@ Clients make use of <a href="Service.html" class="extype" name="com.twitter.fina
 servers implement them.</p><p>Finagle contains a number of protocol implementations; each of these
 implement <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> and/or
 <a href="Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a>. For example, finagle's HTTP implementation,
-<a href="Http$.html" class="extype" name="com.twitter.finagle.Http">com.twitter.finagle.Http</a> (in package <code>finagle-http</code>), exposes both.</p><p>Thus a simple HTTP server is built like this:</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Service}
+<span class="extype" name="com.twitter.finagle.Http">com.twitter.finagle.Http</span> (in package <code>finagle-http</code>), exposes both.</p><p>Thus a simple HTTP server is built like this:</p><pre><span class="kw">import</span> com.twitter.finagle.{Httpx, Service}
 <span class="kw">import</span> org.jboss.netty.handler.codec.http.{
   HttpRequest, HttpResponse, DefaultHttpResponse}
 <span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpVersion._
@@ -592,19 +592,6 @@ connected have been marked as failed.</p>
       </h4>
       <p class="comment cmt">Indicates that a request timed out, where &quot;request&quot; comprises a full RPC
 from the perspective of the application.</p>
-    </li><li name="com.twitter.finagle.HttpRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="HttpRichClientextendsAnyRef"></a>
-      <a id="HttpRichClient:HttpRichClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpRichClient.html"><span class="name">HttpRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">A rich client with a *very* basic URL fetcher.</p>
     </li><li name="com.twitter.finagle.HttpxRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="HttpxRichClientextendsAnyRef"></a>
       <a id="HttpxRichClient:HttpxRichClient"></a>
@@ -1813,19 +1800,6 @@ their corresponding backup requests succeeded first.</p>
       </span>
       </h4>
       
-    </li><li name="com.twitter.finagle.Http" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Http"></a>
-      <a id="Http:Http"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Http$.html"><span class="name">Http</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <a href="HttpRichClient.html" class="extype" name="com.twitter.finagle.HttpRichClient">HttpRichClient</a> with <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
-      </span>
-      </h4>
-      <p class="comment cmt">Http protocol support, including client and server.</p>
     </li><li name="com.twitter.finagle.Httpx" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Httpx"></a>
       <a id="Httpx:Httpx"></a>
@@ -2360,19 +2334,6 @@ as binding and evaluation routines.</p>
       </span>
       <span class="symbol">
         <a href="group/package.html"><span class="name">group</span></a>
-      </span>
-      </h4>
-      
-    </li><li name="com.twitter.finagle.http" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="http"></a>
-      <a id="http:http"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="http/package.html"><span class="name">http</span></a>
       </span>
       </h4>
       

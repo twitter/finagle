@@ -292,15 +292,15 @@ it returns a new failure with the given flags.
       </h4>
       <p class="shortcomment cmt">Create a new failure with the given cause; no flags.</p>
     </li><li name="com.twitter.finagle.Failure#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(cause:Throwable,flags:Long):com.twitter.finagle.Failure"></a>
-      <a id="apply(Throwable,Long):Failure"></a>
+      <a id="apply(cause:Throwable,flags:Long,logLevel:com.twitter.logging.Level):com.twitter.finagle.Failure"></a>
+      <a id="apply(Throwable,Long,Level):Failure"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
+        <span class="name">apply</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="logLevel">logLevel: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.Level" class="extype" target="_top">Level</a> = <span class="symbol"><span class="name"><a href="../../package.html">Level.WARNING</a></span></span></span>)</span><span class="result">: <a href="Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Create a new failure with the given cause and flags.</p>

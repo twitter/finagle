@@ -754,6 +754,22 @@ cache host from a separate mechanism that's based on a global view.
       </h4>
       <p class="shortcomment cmt">Defines the hash function to use for partitioned clients when
 mapping keys to partitions.</p>
+    </li><li name="com.twitter.finagle.Memcached.Client#withNumReps" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withNumReps(reps:Int):com.twitter.finagle.Memcached.Client"></a>
+      <a id="withNumReps(Int):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withNumReps</span><span class="params">(<span name="reps">reps: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Duplicate each node across the hash ring according to <code>reps</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Duplicate each node across the hash ring according to <code>reps</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="com.twitter.finagle.memcached.KetamaDistributor">com.twitter.finagle.memcached.KetamaDistributor</span> for more
+details.
+</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#withParams" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withParams(params:com.twitter.finagle.Stack.Params):This"></a>
       <a id="withParams(Params):Client"></a>
