@@ -7,7 +7,7 @@ FINAGLE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 if [ "$FINAGLE_BRANCH" != "master" ]; then
   FINAGLE_DIR=$(pwd)
-   # TODO try to use ./sbt of each project instead of scrooge's sbt
+   # TODO try to use ./sbt of each project instead of finagle's sbt
   FINAGLE_SBT=$FINAGLE_DIR/sbt
   FINAGLE_TMP_DIR=$(mktemp -d -t ostrich.XXXXXXXXXX.tmp)
   # util
@@ -20,6 +20,12 @@ if [ "$FINAGLE_BRANCH" != "master" ]; then
   git clone https://github.com/twitter/ostrich.git --branch develop
   cd ostrich
   $FINAGLE_SBT ++$TRAVIS_SCALA_VERSION publishLocal
+  # scrooge-core. Finagle depends on scrooge-core, the rest of scrooge depends on finagle.
+  cd $FINAGLE_TMP_DIR
+  git clone https://github.com/twitter/scrooge.git --branch develop
+  cd scrooge
+  $FINAGLE_SBT ++$TRAVIS_SCALA_VERSION scrooge-core/publishLocal
+
   # clean up
   cd $FINAGLE_DIR
   rm -rf $FINAGLE_TMP_DIR
