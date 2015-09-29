@@ -67,8 +67,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
           existing match {
             case Some(entry) if entry.valid =>
               val currentValue = entry.value
-              val hash = hash64(currentValue)
-              if (casUnique.equals(hash)) {
+              if (casUnique.equals(generateCasUnique(currentValue))) {
                 data(key) = Entry(value, expiry)
                 Stored()
               } else {
@@ -156,7 +155,7 @@ class Interpreter(map: AtomicMap[Buf, Entry]) {
             entry.valid
           }.map { entry =>
             val value = entry.value
-            Value(key, value, Some(hash64(value)))
+            Value(key, value, Some(generateCasUnique(value)))
           }
         }
       }
@@ -169,14 +168,20 @@ private[memcached] object Interpreter {
   /*
   * Using non-cryptographic goodFastHash Hashing Algorithm
   * for we only care about speed for testing.
+  *
+  * The real memcached uses uint64_t for cas tokens,
+  * so we convert the hash to a String
+  * representation of an unsigned Long so it can be
+  * used as a cas token.
   */
-  private[memcached] def hash64(value: Buf): Buf = {
-    val hash = Hashing.goodFastHash(64)
+  private[memcached] def generateCasUnique(value: Buf): Buf = {
+    val hashAsUnsignedLong = Hashing.goodFastHash(32)
       .newHasher(value.length)
       .putBytes(Buf.ByteArray.Owned.extract(value))
       .hash()
-      .asBytes()
-    Buf.ByteArray.Owned(hash)
+      .padToLong
+      .abs
+    Buf.Utf8(hashAsUnsignedLong.toString)
   }
 }
 
