@@ -177,8 +177,24 @@ private object ClassPath {
   }
 }
 
-object loadServiceIgnoredPaths extends GlobalFlag(Seq.empty[String],
+object loadServiceIgnoredPaths extends GlobalFlag[Seq[String]](
+    Seq.empty[String],
     "Additional packages to be excluded from recursive directory scan")
+
+/**
+ * A deny list of implementations to ignore. Keys are the fully qualified class names.
+ * Any other implementations that are found via `LoadService.apply` are eligible to be used.
+ *
+ * As an example, here's how to filter out `OstrichStatsReceiver` and `CommonsStatsReceiver`:
+ *
+ * {{{
+ * -com.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.CommonsStatsReceiver
+ * }}}
+ */
+object loadServiceDenied extends GlobalFlag[Set[String]](
+    Set.empty,
+    "A deny list of implementations to ignore. Keys are the fully qualified class names. " +
+      "Any other implementations that are found via `LoadService.apply` are eligible to be used.")
 
 /**
  * Load a singleton class in the manner of [[java.util.ServiceLoader]]. It is
@@ -190,9 +206,10 @@ object LoadService {
 
   def apply[T: ClassTag](): Seq[T] = synchronized {
     val iface = implicitly[ClassTag[T]].runtimeClass.asInstanceOf[Class[T]]
-
     val ifaceName = iface.getName
     val loader = iface.getClassLoader
+
+    val denied: Set[String] = loadServiceDenied()
 
     val classNames = for {
       info <- cache.getOrElseUpdate(loader, ClassPath.browse(loader))
@@ -206,31 +223,40 @@ object LoadService {
     } yield line
 
     val buffer = mutable.ListBuffer.empty[String]
-    val result = (classNames ++ classNamesFromResources).distinct.flatMap { className =>
-      val cls = Class.forName(className)
-      if (!(iface isAssignableFrom cls))
-        throw new ServiceConfigurationError(s"$className not a subclass of $ifaceName")
-
-      DefaultLogger.log(
-        Level.DEBUG,
-        s"LoadService: loaded instance of class $className for requested service $ifaceName"
-      )
-
-      try {
-        val instance = cls.newInstance().asInstanceOf[T]
-        buffer += className
-        Some(instance)
-      } catch {
-        case NonFatal(ex) =>
-          DefaultLogger.log(
-            Level.FATAL,
-            s"LoadService: failed to instantiate '$className' for the requested "
-              + s"service '$ifaceName'",
-            ex
-          )
-          None
+    val result = (classNames ++ classNamesFromResources)
+      .distinct
+      .filterNot { className =>
+        val isDenied = denied.contains(className)
+        if (isDenied)
+          DefaultLogger.info(s"LoadService: skipped $className due to deny list flag")
+        isDenied
       }
-    }
+      .flatMap { className =>
+        val cls = Class.forName(className)
+        if (!iface.isAssignableFrom(cls))
+          throw new ServiceConfigurationError(s"$className not a subclass of $ifaceName")
+
+        DefaultLogger.log(
+          Level.DEBUG,
+          s"LoadService: loaded instance of class $className for requested service $ifaceName"
+        )
+
+        try {
+          val instance = cls.newInstance().asInstanceOf[T]
+          buffer += className
+          Some(instance)
+        } catch {
+          case NonFatal(ex) =>
+            DefaultLogger.log(
+              Level.FATAL,
+              s"LoadService: failed to instantiate '$className' for the requested "
+                + s"service '$ifaceName'",
+              ex
+            )
+            None
+        }
+      }
+
     GlobalRegistry.get.put(Seq("loadservice", ifaceName), buffer.mkString(","))
     result
   }

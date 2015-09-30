@@ -1,7 +1,6 @@
 package com.twitter.finagle.util
 
 import com.google.common.io.ByteStreams
-import com.twitter.app.GlobalFlag
 import com.twitter.finagle.{Announcement, Announcer, Resolver}
 import com.twitter.util.Future
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
@@ -17,6 +16,9 @@ import org.scalatest.mock.MockitoSugar
 import scala.collection.mutable
 import scala.util.Random
 
+// These traits correspond to files in:
+// finagle-core/src/test/resources/META-INF/services
+
 trait LoadServiceRandomInterface
 
 class LoadServiceRandomInterfaceImpl extends LoadServiceRandomInterface
@@ -28,6 +30,11 @@ class LoadServiceFailingClass extends LoadServiceMaybeInterface {
 }
 
 class LoadServiceGoodClass extends LoadServiceMaybeInterface
+
+trait LoadServiceMultipleImpls
+class LoadServiceMultipleImpls1 extends LoadServiceMultipleImpls
+class LoadServiceMultipleImpls2 extends LoadServiceMultipleImpls
+class LoadServiceMultipleImpls3 extends LoadServiceMultipleImpls
 
 
 @RunWith(classOf[JUnitRunner])
@@ -161,10 +168,23 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
   }
 
   test("LoadService should ignore packages according to ignoredPaths GlobalFlag") {
-    loadServiceIgnoredPaths.let(Seq("foo/", "/bar")){
+    loadServiceIgnoredPaths.let(Seq("foo/", "/bar")) {
       assert(ClassPath.ignoredPackages.takeRight(2) == Seq("foo/", "/bar"))
     }
   }
+
+  test("LoadService should respect Denied if provided") {
+    val denied1and2 = Set(
+      "com.twitter.finagle.util.LoadServiceMultipleImpls1",
+      "com.twitter.finagle.util.LoadServiceMultipleImpls2"
+    )
+    loadServiceDenied.let(denied1and2) {
+      val loaded = LoadService[LoadServiceMultipleImpls]()
+      assert(1 == loaded.size)
+      assert(classOf[LoadServiceMultipleImpls3] == loaded.head.getClass)
+    }
+  }
+
 }
 
 class LoadServiceCallable extends Callable[Seq[Any]] {
