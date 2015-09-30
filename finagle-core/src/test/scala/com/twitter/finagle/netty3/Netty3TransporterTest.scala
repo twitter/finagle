@@ -84,12 +84,15 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
       assert(pl === pipeline) // mainly just checking that we don't NPE anymore
     }
 
-    it("expose UnresolvedAddressException") {
-      val transporter =
-        Netty3Transporter[Int, Int]("name", Channels.pipelineFactory(Channels.pipeline()))
-      val addr = InetSocketAddressUtil.parseHosts("localhost/127.0.0.1:1234")
-      intercept[UnresolvedAddressException] {
-        Await.result(transporter(addr.head, new InMemoryStatsReceiver))
+    // CSL-2175
+    if (!sys.props.contains("SKIP_FLAKY")) {
+      it("expose UnresolvedAddressException") {
+        val transporter =
+          Netty3Transporter[Int, Int]("name", Channels.pipelineFactory(Channels.pipeline()))
+        val addr = InetSocketAddressUtil.parseHosts("localhost/127.0.0.1:1234")
+        intercept[UnresolvedAddressException] {
+          Await.result(transporter(addr.head, new InMemoryStatsReceiver))
+        }
       }
     }
 

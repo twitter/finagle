@@ -16,9 +16,13 @@ class NameInterpreterTest extends FunSuite with BeforeAndAfter {
     NameInterpreter.global = DefaultInterpreter
   }
 
-  test("NameInterpreter uses dtab when interpreter is not set") {
-    assert(NameInterpreter.bind(dtab, name).sample() ===
-        NameTree.Leaf(Path.read("/$/inet/some-host/1234")))
+
+  // CSL-2175
+  if (!sys.props.contains("SKIP_FLAKY")) {
+    test("NameInterpreter uses dtab when interpreter is not set") {
+      assert(NameInterpreter.bind(dtab, name).sample() ===
+          NameTree.Leaf(Path.read("/$/inet/some-host/1234")))
+    }
   }
 
   test("NameInterpreter uses it when interpreter is set") {
