@@ -23,22 +23,15 @@ object Redis extends Client[Command, Reply] {
 
   object Client {
     /**
-     * Default stack parameters used for redis client. We change the
-     * load balancer to `p2cPeakEwma` as it has proven to work well with
-     * other pipelined clients (e.g. memcached).
+     * Default stack parameters used for redis client.
      */
     val defaultParams: Stack.Params = StackClient.defaultParams +
-      LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
       param.ProtocolLibrary("redis")
 
     /**
      * A default client stack which supports the pipelined redis client.
-     * The `ConcurrentLoadBalancerFactory` load balances over a small set of
-     * duplicate endpoints to eliminate head of line blocking. Each endpoint
-     * has a single pipelined connection.
      */
     def newStack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
-      .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Reply])
       .replace(DefaultPool.Role, SingletonPool.module[Command, Reply])
   }
 
