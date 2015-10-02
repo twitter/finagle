@@ -90,7 +90,7 @@ object Netty3Transporter {
   )
 
   val channelFactory: NettyChannelFactory = new NioClientSocketChannelFactory(
-    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer) {
+    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer.netty) {
     override def releaseExternalResources() = ()  // no-op; unreleasable
   }
 
@@ -311,7 +311,7 @@ case class Netty3Transporter[In, Out](
 
       pipeline.addFirst("idleReactor", new IdleChannelHandler(statsReceiver))
       pipeline.addFirst("idleDetector",
-        new IdleStateHandler(DefaultTimer, rms, wms, 0, TimeUnit.MILLISECONDS))
+        new IdleStateHandler(DefaultTimer.netty, rms, wms, 0, TimeUnit.MILLISECONDS))
     }
 
     for (Netty3TransporterTLSConfig(newEngine, verifyHost) <- tlsConfig) {

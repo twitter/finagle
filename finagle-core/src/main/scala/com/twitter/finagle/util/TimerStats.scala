@@ -6,7 +6,7 @@ import com.twitter.util.{Try, Time, Duration}
 import java.lang.reflect.Field
 import java.util
 import java.util.concurrent.TimeUnit
-import org.jboss.netty.util.{HashedWheelTimer, Timeout, TimerTask}
+import org.jboss.netty.{util => netty}
 
 private[util] object TimerStats {
 
@@ -20,7 +20,7 @@ private[util] object TimerStats {
    * @param statsReceiver typically scoped to "/finagle/timer/"
    */
   def deviation(
-    hwt: HashedWheelTimer,
+    hwt: netty.HashedWheelTimer,
     tickDuration: Duration,
     statsReceiver: StatsReceiver
   ): Unit = {
@@ -32,8 +32,8 @@ private[util] object TimerStats {
     var nextAtMillis =
       Time.now.inMilliseconds + tickDuration.inMilliseconds
 
-    val timerTask = new TimerTask {
-      override def run(timeout: Timeout): Unit = {
+    val timerTask = new netty.TimerTask {
+      override def run(timeout: netty.Timeout): Unit = {
         val nowMillis = Time.now.inMilliseconds
         val deltaMillis = nowMillis - nextAtMillis
         nextAtMillis = nowMillis + tickDuration.inMilliseconds
@@ -52,7 +52,7 @@ private[util] object TimerStats {
    * @param statsReceiver typically scoped to "/finagle/timer/"
    */
   def hashedWheelTimerInternals(
-    hwt: HashedWheelTimer,
+    hwt: netty.HashedWheelTimer,
     nextRunAt: () => Duration,
     statsReceiver: StatsReceiver
   ): Unit = {
@@ -61,14 +61,14 @@ private[util] object TimerStats {
     // this represents HashedWheelTimer's pending queue of tasks
     // that have yet to be scheduled into a bucket
     val queuedTimeouts: Try[util.Queue[_]] = Try {
-      val timeoutsField = classOf[HashedWheelTimer].getDeclaredField("timeouts")
+      val timeoutsField = classOf[netty.HashedWheelTimer].getDeclaredField("timeouts")
       timeoutsField.setAccessible(true)
       timeoutsField.get(hwt).asInstanceOf[util.Queue[_]]
     }
 
     // an `Array[HashedWheelBucket]`, which is a private class.
     val buckets: Try[Array[Object]] = Try {
-      val wheelField = classOf[HashedWheelTimer].getDeclaredField("wheel")
+      val wheelField = classOf[netty.HashedWheelTimer].getDeclaredField("wheel")
       wheelField.setAccessible(true)
       wheelField.get(hwt).asInstanceOf[Array[Object]]
     }
@@ -105,8 +105,8 @@ private[util] object TimerStats {
         bs.map(bucketTimeouts).sum
       }
 
-    val timerTask = new TimerTask {
-      override def run(timeout: Timeout): Unit = {
+    val timerTask = new netty.TimerTask {
+      override def run(timeout: netty.Timeout): Unit = {
         val startAt = System.nanoTime()
         for {
           qTimeouts <- queuedTimeouts

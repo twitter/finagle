@@ -76,7 +76,7 @@ public class StackParamCompilationTest {
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
         .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
         .configured(new Netty3Transporter.ChannelFactory(null).mk())
-        .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get()).mk())
+        .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get().netty()).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
         .configured(new FailFastFactory.FailFast(true).mk())

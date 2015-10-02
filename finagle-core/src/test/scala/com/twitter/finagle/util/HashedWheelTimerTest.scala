@@ -17,7 +17,7 @@ import org.mockito.invocation.InvocationOnMock
 
 @RunWith(classOf[JUnitRunner])
 class TimerTest extends FunSuite with MockitoSugar {
-  test("TimerFromNettyTimer should Support cancelling recurring tasks") {
+  test("HashedWheelTimer should Support cancelling recurring tasks") {
     val timer = mock[nu.Timer]
     val nstop = new AtomicInteger(0)
     @volatile var running = true
@@ -31,7 +31,7 @@ class TimerTest extends FunSuite with MockitoSugar {
       }
     }
 
-    val t = new TimerFromNettyTimer(timer)
+    val t = new HashedWheelTimer(timer)
 
     val taskCaptor = ArgumentCaptor.forClass(classOf[nu.TimerTask])
     val firstTimeout = mock[nu.Timeout]

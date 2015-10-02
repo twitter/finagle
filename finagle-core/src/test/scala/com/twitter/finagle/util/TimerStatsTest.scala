@@ -4,7 +4,7 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{ReadableStat, InMemoryStatsReceiver}
 import java.util.concurrent.TimeUnit
-import org.jboss.netty.util.{TimerTask, HashedWheelTimer}
+import org.jboss.netty.{util => netty}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -20,7 +20,7 @@ class TimerStatsTest extends FunSuite
 
   test("deviation") {
     val tickDuration = 10.milliseconds
-    val hwt = new HashedWheelTimer(
+    val hwt = new netty.HashedWheelTimer(
       new NamedPoolThreadFactory(getClass.getSimpleName),
       tickDuration.inMillis, TimeUnit.MILLISECONDS)
     val sr = new InMemoryStatsReceiver()
@@ -38,7 +38,7 @@ class TimerStatsTest extends FunSuite
 
   test("hashedWheelTimerInternals") {
     val tickDuration = 10.milliseconds
-    val hwt = new HashedWheelTimer(
+    val hwt = new netty.HashedWheelTimer(
       new NamedPoolThreadFactory(getClass.getSimpleName),
       tickDuration.inMillis, TimeUnit.MILLISECONDS)
     val sr = new InMemoryStatsReceiver()
@@ -51,7 +51,7 @@ class TimerStatsTest extends FunSuite
     // schedule some tasks, but they won't run for 10 minutes
     // to ensure they are queued up when the monitoring task runs
     for (_ <- 0.until(nTasks))
-      hwt.newTimeout(mock[TimerTask], 10, TimeUnit.MINUTES)
+      hwt.newTimeout(mock[netty.TimerTask], 10, TimeUnit.MINUTES)
 
     // kick off the task to do the monitoring.
     // have the monitoring task to run quickly the first time and only once.

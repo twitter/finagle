@@ -254,7 +254,7 @@ case class Netty3Listener[In, Out](
   channelWriteCompletionTimeout: Duration = Duration.Top,
   tlsConfig: Option[Netty3ListenerTLSConfig] = None,
   timer: com.twitter.util.Timer = DefaultTimer.twitter,
-  nettyTimer: org.jboss.netty.util.Timer = DefaultTimer,
+  nettyTimer: org.jboss.netty.util.Timer = DefaultTimer.netty,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   monitor: com.twitter.util.Monitor = NullMonitor,
   logger: java.util.logging.Logger = DefaultLogger

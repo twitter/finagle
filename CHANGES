@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `TimerFromNettyTimer` is renamed to `HashedWheelTimer` and
+    the constructor accepting `org.jboss.netty.util.Timer` made private. For
+    compatibility, `HashedWheelTimer` has additional constructors to match
+    those provided by `org.jboss.netty.util.HashedWheelTimer`. ``RB_ID=748514``
+
 6.29.0
 ~~~~~~
 
