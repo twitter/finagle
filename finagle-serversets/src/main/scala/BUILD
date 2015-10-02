@@ -12,7 +12,6 @@ scala_library(name='scala',
     'science/src/thrift/com/twitter/thrift:thrift-java',
     '3rdparty/jvm/org/slf4j:slf4j-api',
     'finagle/finagle-core',
-    'util/util-cache',
     'util/util-core',
     'util/util-zk-common'
   ],
