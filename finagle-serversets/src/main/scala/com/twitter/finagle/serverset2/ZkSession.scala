@@ -17,7 +17,7 @@ import com.twitter.util._
  * with [[com.twitter.util.Future Futures]]; watches and session states are
  * represented with a [[com.twitter.util.Var]].
  */
-private class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Timer) {
+private[serverset2] class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Timer) {
   import ZkSession.randomizedDelay
   import ZkSession.logger
 
@@ -142,7 +142,7 @@ private class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Tim
         getChildrenWatchOp(path) transform {
           case Activity.Pending => Activity.pending
           case Activity.Ok(Node.Children(children, _)) =>
-            Activity.value(children.withFilter(_.startsWith(prefix)).map(path + "/" + _).toSet)
+            Activity.value(children.filter(_.startsWith(prefix)).toSet)
           case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Set.empty)
           case Activity.Failed(exc) =>
             logger.error(s"GetChildrenWatch to ($path, $prefix) failed with exception $exc")

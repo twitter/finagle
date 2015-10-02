@@ -291,6 +291,7 @@ object Finagle extends Build {
     fork in Test := true,
     libraryDependencies ++= Seq(
       "commons-codec" % "commons-codec" % "1.6",
+      util("cache"),
       util("zk-common"),
       util("zk-test") % "test",
       "com.twitter.common.zookeeper" % "server-set" % "1.0.103",
