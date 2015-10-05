@@ -5,7 +5,6 @@ import com.twitter.finagle.Status
 import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
 import com.twitter.util._
-import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -127,46 +126,40 @@ private class ThresholdFailureDetector(
   loop()
 }
 
-private object WindowedMax {
-  private case class AgedLong(v: Long, age: Int)
-}
-
 /**
- * Maintains maximum value over a history.
+ * Maintains the maximum value over most recent `windowSize` elements of the stream, providing
+ * amortized O(1) for insertion, and O(1) for fetching max.
  *
- * Build based on Deque. New elements are inserted from the tail.
- * Smaller elements from the tail (if any) are removed before a new
- * insertion. This guarantees the max element can always be fetched
- * from the head of deque.
- *
- * Each element is inserted and removed once from deque, providing
- * O(n) for insertion, and O(1) for fetching max.
- *
- * @param window the number of history values to keep
+ * @param windowSize the size of the window to keep track of
  */
-private class WindowedMax(window: Int) {
-  import WindowedMax._
-  require(window > 0)
+private[mux] class WindowedMax(windowSize: Int) {
+  private[this] var currentMax: Long = Long.MinValue
+  private[this] val buf: Array[Long] = Array.fill(windowSize)(Long.MinValue)
+  private[this] var index: Int = 0
 
-  private[this] val values: ArrayDeque[AgedLong] = new ArrayDeque[AgedLong](window)
-  private[this] var currAge: Int = -1
-
-  def add(v: Long): Unit = synchronized {
-    currAge += 1
-    // remove aged element from head
-    if (!values.isEmpty && currAge - values.peekFirst.age >= window) {
-      values.pollFirst()
+  // Amortized 0(1)
+  def add(value: Long): Unit = synchronized {
+    if (value > currentMax) {
+      currentMax = value
     }
 
-    while (!values.isEmpty && v > values.getLast.v) {
-      values.pollLast()
+    val prev = buf(index)
+    buf(index) = value
+    index = (index + 1) % windowSize
+
+    // We should recalculate currentMax if it was evicted from the window.
+    if (prev == currentMax && currentMax != value) {
+      var i = 0
+      var nextMax = Long.MinValue
+      while (i < windowSize) {
+        val v = buf(i)
+        nextMax = if (v > nextMax) v else nextMax
+        i = i + 1
+      }
+      currentMax = nextMax
     }
-
-    values.addLast(AgedLong(v, currAge))
   }
 
-  def get: Long = synchronized {
-    if (values.isEmpty) Long.MinValue
-    else values.peekFirst.v
-  }
+  // O(1)
+  def get: Long = synchronized { currentMax }
 }

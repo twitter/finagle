@@ -534,6 +534,7 @@ object Finagle extends Build {
     finagleCore,
     finagleExp,
     finagleMemcached,
+    finagleMux,
     finagleOstrich4,
     finagleStats,
     finagleThriftMux,
