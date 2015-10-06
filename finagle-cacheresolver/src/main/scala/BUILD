@@ -6,7 +6,7 @@ scala_library(name='scala',
   ),
   dependencies=[
     '3rdparty/jvm/com/google/code/gson',
-    '3rdparty/jvm/org/apache/zookeeper',
+    '3rdparty/jvm/org/apache/zookeeper:zookeeper-client',
     'science/src/java/com/twitter/common/io:io',
     'science/src/java/com/twitter/common/quantity:quantity',
     'science/src/java/com/twitter/common/zookeeper:client',
