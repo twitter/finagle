@@ -35,6 +35,9 @@ New Features
   * finagle-httpx: Experimental support `multipart/form-data` (file uploads)
     decoding via `c.t.f.httpx.exp.Multipart`. ``RB_ID=730102``
 
+  * finagle-zipkin: Drops `c.t.zipkin.thrift.Annotation.duration` and associated thrift field
+    `c.t.f.thrift.thrift.Annotation.duration`. ``#420``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
