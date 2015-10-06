@@ -15,6 +15,12 @@ Breaking API Changes
     compatibility, `HashedWheelTimer` has additional constructors to match
     those provided by `org.jboss.netty.util.HashedWheelTimer`. ``RB_ID=748514``
 
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-zipkin: Drop `c.t.zipkin.thrift.Annotation.duration` and associated thrift field
+    `c.t.f.thrift.thrift.Annotation.duration`. ``RB_ID=751986``
+
 6.29.0
 ~~~~~~
 

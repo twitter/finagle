@@ -1,7 +1,7 @@
 package com.twitter.finagle.zipkin.thrift
 
 import com.twitter.finagle.thrift.thrift
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.Time
 import java.nio.ByteBuffer
 
 /**
@@ -10,8 +10,7 @@ import java.nio.ByteBuffer
 case class ZipkinAnnotation(
   timestamp: Time,
   value:     String,
-  endpoint:  Endpoint,
-  duration:  Option[Duration]
+  endpoint:  Endpoint
 ) {
 
   def toThrift: thrift.Annotation = {
@@ -20,7 +19,6 @@ case class ZipkinAnnotation(
     thriftAnnotation.setTimestamp(timestamp.inMicroseconds)
     thriftAnnotation.setValue(value)
     thriftAnnotation.setHost(localEndpoint)
-    duration foreach { d => thriftAnnotation.setDuration(d.inMicroseconds.toInt) }
 
     thriftAnnotation
   }
