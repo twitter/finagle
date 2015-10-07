@@ -350,7 +350,7 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * you can construct a client interface with a Finagle Service per thrift method:
    *
    * {{{
-   *   val loggerService = Thrift.newServiceIface(Logger, "localhost:8000")
+   *   val loggerService = Thrift.newServiceIface[Logger.ServiceIface]("localhost:8000")
    *   val response = loggerService.log(Logger.Log.Args("log message", 1))
    * }}}
    *
