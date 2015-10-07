@@ -50,7 +50,6 @@ script:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-spdy/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stats/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stream/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stress/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-testers/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thrift/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thriftmux/test

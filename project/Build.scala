@@ -178,9 +178,6 @@ object Finagle extends Build {
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
     finagleSpdy, finagleRedis,
-
-    // Use and integration
-    finagleStress
     // removing benchmark because swift can't build outside of twitter for now
     // finagleBenchmark
 
@@ -473,18 +470,6 @@ object Finagle extends Build {
     ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
 
   // Uses
-
-  lazy val finagleStress = Project(
-    id = "finagle-stress",
-    base = file("finagle-stress"),
-    settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-stress",
-    libraryDependencies ++= Seq(ostrichLib, util("logging")) ++ thriftLibs,
-    libraryDependencies += "com.google.caliper" % "caliper" % "0.5-rc1"
-  ).dependsOn(finagleCore, finagleOstrich4, finagleThrift, finagleThriftMux)
 
   lazy val finagleMdns = Project(
     id = "finagle-mdns",

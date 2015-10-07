@@ -26,6 +26,11 @@ Breaking API Changes
   * finagle-core: Marked `HandletimeFilter` private[finagle], and renamed it to
     `ServerStatsFilter`. ``RB_ID=75268``
 
+  * finagle-zipkin: Drop `c.t.zipkin.thrift.Annotation.duration` and associated thrift field
+    `c.t.f.thrift.thrift.Annotation.duration`. ``RB_ID=751986``
+
+  * finagle-stress: Project has been removed from Finagle. ``RB_ID=752201``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -33,18 +38,13 @@ Runtime Behavior Changes
     (deadline_budget_ms) stats are now only recorded for servers, not for
     clients anymore, since they're only meaningful for servers. ``RB_ID=75268``
 
-Deprecations
-
-  * finagle-zipkin: Drop `c.t.zipkin.thrift.Annotation.duration` and associated thrift field
-    `c.t.f.thrift.thrift.Annotation.duration`. ``RB_ID=751986``
-
 6.29.0
 ~~~~~~
 
 Deprecations
 ~~~~~~~~~~~~
 
-  * finagle-http: Deprecated in favor of finagle-httpx and now removed.
+  * finagle-http: Deprecated in favour of finagle-httpx and now removed.
 
 New Features
 ~~~~~~~~~~~~
