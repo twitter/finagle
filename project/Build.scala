@@ -55,8 +55,8 @@ object Finagle extends Build {
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    crossScalaVersions := Seq("2.10.5", "2.11.7"),
-    scalaVersion := "2.10.5",
+    crossScalaVersions := Seq("2.10.6", "2.11.7"),
+    scalaVersion := "2.11.7",
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",
       "org.scalatest" %% "scalatest" % "2.2.4" % "test",
