@@ -132,50 +132,39 @@ class ClientTest extends FunSuite {
     }
   }
 
-  test("logs while draining") {
+  test("instrument request draining") {
     Time.withCurrentTimeFrozen { ctl =>
       import Message._
 
-      val log = Logger.get("")
-      val handler = new StringHandler(BareFormatter, None)
-      log.setLevel(Level.DEBUG)
-      log.addHandler(handler)
-
       val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
-      val req = Request(Path.empty, ChannelBufferBuf(buf))
+      val req = Request(Path.empty, ChannelBufferBuf.Owned(buf))
       val inMemory = new InMemoryStatsReceiver
 
-      var accumulated: String = ""
-      val started = "Started draining a connection to test\n"
-      val finished = "Finished draining a connection to test\n"
+      def drained = inMemory.counters(Seq("drained"))
+      def draining = inMemory.counters(Seq("draining"))
 
       val client1 = new Client(inMemory)
       val client2 = new Client(inMemory)
 
-      assert(handler.get === accumulated)
       client2.respond(encode(Tdrain(1))) // drain, nothing outstanding
+      assert(drained == 1)
+      assert(draining == 1)
 
-      accumulated += (started + finished)
-      assert(handler.get === accumulated)
-
-      val f1 = client1(req)
+      client1(req)
       val Some(Return(treq)) = client1.read().poll
       val Tdispatch(tag, contexts, _, _, _) = decode(treq)
 
       client1.respond(encode(Tdrain(1))) // drain, nothing outstanding
+      assert(drained == 1)
+      assert(draining == 2)
 
-      accumulated += started
-      assert(handler.get === accumulated)
 
       client1.respond(encode(
         RdispatchOk(tag, contexts,
           ChannelBuffers.copiedBuffer(buf.toString(Charset.forName("UTF-8")).reverse, Charsets.Utf8))))
       // outstanding finished
-
-      accumulated += finished
-      assert(handler.get === accumulated)
-
-      log.clearHandlers()
+      assert(drained == 2)
+      assert(draining == 2)
     }
   }
 }
