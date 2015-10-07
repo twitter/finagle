@@ -13,13 +13,9 @@ import java.util.logging.Logger
 
 /**
  * The aperture load-band balancer balances load to the smallest
- * subset ("aperture") of services so that:
- *
- *  1. The concurrent load, measured over a window specified by
- *     `smoothWin`, to each service stays within the load band, delimited
- *     by `lowLoad` and `highLoad`.
- *  2. Services receive load proportional to the ratio of their
- *     weights.
+ * subset ("aperture") of services so that the concurrent load to each service,
+ * measured over a window specified by `smoothWin`, stays within the
+ * load band delimited by `lowLoad` and `highLoad`.
  *
  * Unavailable services are not counted--the aperture expands as
  * needed to cover those that are available.
@@ -62,10 +58,14 @@ private class ApertureLoadBandBalancer[Req, Rep](
   with Updating[Req, Rep]
 
 object Aperture {
+  // Note, we need to have a non-zero range for each node
+  // in order for Ring.pick2 to pick distinctly. That is,
+  // `RingWidth` should be wider than the number of slices
+  // in the ring.
   private val RingWidth = Int.MaxValue
 
   // Ring that maps to 0 for every value.
-  private val ZeroRing = Ring.fromWeights(Seq(1), RingWidth)
+  private val ZeroRing = Ring(1, RingWidth)
 }
 
 /**
@@ -74,14 +74,8 @@ object Aperture {
  * control mechanism so that a controller can adjust the aperture
  * according to load conditions.
  *
- * The window contains a number of discrete serving units, each of
- * which corresponds to the serving capacity represented by a unit
- * weight. Thus a single serving unit may be half of a node with
- * weight=2, or two nodes with weight=0.5. This arrangement allows
- * the aperture distributor to maintain the weight contract: in
- * aggregate, endpoints are assigned loads according to their weight
- * and the current load metric. No load metric is prescribed: this
- * can be mixed in separately.
+ * The window contains a number of discrete serving units, one for each
+ * node. No load metric is prescribed: this can be mixed in separately.
  *
  * The underlying nodes are arranged in a consistent fashion: an
  * aperture of a given size always refers to the same set of nodes; a
@@ -120,14 +114,9 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       if (up.isEmpty) {
         (ZeroRing, RingWidth, RingWidth)
       } else {
-        val N = up.size
-        val weights = up.map(Function.const(1.0))
-        // We know `sum` can never be zero because
-        // up nodes have a non-zero weight.
-        val sum = weights.sum
-        // TODO: Remove weights from Ring implementation.
-        val ring = Ring.fromWeights(weights, RingWidth)
-        val unit = (RingWidth/sum).toInt
+        val numNodes = up.size
+        val ring = Ring(numNodes, RingWidth)
+        val unit = (RingWidth/numNodes).toInt
         val max = RingWidth/unit
         (ring, unit, max)
       }
@@ -163,9 +152,6 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       if (up.size == 1)
         return up(0)
 
-      // TODO(marius): return fractional contribution,
-      // so that we can multiply this with the node's
-      // weight.
       val (i, j) = ring.pick2(rng, 0, aperture*unitWidth)
       val a = up(i)
       val b = up(j)
