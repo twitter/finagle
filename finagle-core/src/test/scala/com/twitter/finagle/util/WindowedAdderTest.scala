@@ -1,14 +1,14 @@
 package com.twitter.finagle.util
 
 import com.twitter.conversions.time._
-import com.twitter.util.Time
+import com.twitter.util.{Time, Stopwatch}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class WindowedAdderTest extends FunSuite {
-  private def newAdder() = WindowedAdder(3 * 1000, 3, WindowedAdder.timeMs)
+  private def newAdder() = WindowedAdder(3 * 1000, 3, Stopwatch.timeMillis)
 
   test("sums things up when time stands still") {
     Time.withCurrentTimeFrozen { tc =>

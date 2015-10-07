@@ -27,10 +27,6 @@ private[finagle] object WindowedAdder {
     require(slices > 1)
     new WindowedAdder(range/slices, slices-1, now)
   }
-
-  // we use nanos instead of current time millis because it increases monotonically
-  val systemMs: () => Long = () => System.nanoTime() / (1000 * 1000)
-  val timeMs: () => Long = () => Time.now.inMilliseconds
 }
 
 private[finagle] class WindowedAdder private[WindowedAdder](

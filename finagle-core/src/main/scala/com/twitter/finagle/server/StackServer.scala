@@ -46,7 +46,7 @@ object StackServer {
    * @see [[com.twitter.finagle.tracing.ServerTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    * @see [[com.twitter.finagle.filter.MonitorFilter]]
-   * @see [[com.twitter.finagle.filter.HandletimeFilter]]
+   * @see [[com.twitter.finagle.filter.ServerStatsFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
@@ -62,7 +62,7 @@ object StackServer {
     stk.push(ExceptionSourceFilter.module)
     stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
       newJvmFilter[Req, Rep]() andThen next))
-    stk.push(HandletimeFilter.module)
+    stk.push(ServerStatsFilter.module)
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ServerTracingFilter.module)
     stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))

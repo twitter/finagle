@@ -1,6 +1,6 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.Duration
+import com.twitter.util.{Duration, Stopwatch}
 
 /**
  * A token bucket is used to control the relative rates of two
@@ -73,5 +73,5 @@ private[finagle] object TokenBucket {
    * the ones added to the bucket.
    */
   def newLeakyBucket(ttl: Duration, reserve: Int): TokenBucket =
-    newLeakyBucket(ttl, reserve, WindowedAdder.systemMs)
+    newLeakyBucket(ttl, reserve, Stopwatch.systemMillis)
 }

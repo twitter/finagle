@@ -2,7 +2,7 @@ package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.util.WindowedAdder
+import com.twitter.util.Stopwatch
 import org.openjdk.jmh.annotations._
 import org.openjdk.jmh.infra.Blackhole
 
@@ -29,7 +29,7 @@ class LatencyHistogramBench extends StdBenchAnnotations {
       err,
       1.minute.inMillis,
       LatencyHistogram.DefaultSlices,
-      WindowedAdder.systemMs)
+      Stopwatch.systemMillis)
 
     // give it some data to start with
     0L.until(maxDurationMs).foreach(histo.add)

@@ -2,9 +2,8 @@ package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
-import com.twitter.finagle.util.WindowedAdder
 import com.twitter.finagle.{Failure, BackupRequestLost, Service, SimpleFilter}
-import com.twitter.util.{Duration, Future, Return, Throw, Timer}
+import com.twitter.util.{Duration, Future, Return, Throw, Timer, Stopwatch}
 import java.util.concurrent.atomic.AtomicInteger
 
 object BackupRequestFilter {
@@ -16,7 +15,7 @@ object BackupRequestFilter {
   /**
    * Default for calculating now in milliseconds.
    */
-  val DefaultNowMs: () => Long = WindowedAdder.systemMs
+  val DefaultNowMs: () => Long = Stopwatch.systemMillis
 
   /**
    * Default value for how many requests trigger a recalculation of the cutoff.

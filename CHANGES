@@ -23,8 +23,17 @@ Breaking API Changes
     compatibility, `HashedWheelTimer` has additional constructors to match
     those provided by `org.jboss.netty.util.HashedWheelTimer`. ``RB_ID=748514``
 
+  * finagle-core: Marked `HandletimeFilter` private[finagle], and renamed it to
+    `ServerStatsFilter`. ``RB_ID=75268``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: The transit latency (transit_latency_ms) and deadline budget
+    (deadline_budget_ms) stats are now only recorded for servers, not for
+    clients anymore, since they're only meaningful for servers. ``RB_ID=75268``
+
 Deprecations
-~~~~~~~~~~~~
 
   * finagle-zipkin: Drop `c.t.zipkin.thrift.Annotation.duration` and associated thrift field
     `c.t.f.thrift.thrift.Annotation.duration`. ``RB_ID=751986``

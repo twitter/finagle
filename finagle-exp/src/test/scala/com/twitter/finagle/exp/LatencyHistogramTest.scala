@@ -1,8 +1,7 @@
 package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.util.WindowedAdder
-import com.twitter.util.{Duration, Time}
+import com.twitter.util.{Duration, Time, Stopwatch}
 import org.junit.runner.RunWith
 import org.scalatest.{Matchers, FunSuite}
 import org.scalatest.junit.JUnitRunner
@@ -16,7 +15,7 @@ class LatencyHistogramTest extends FunSuite
 
   def testRandom(rng: Random, N: Int, err: Double): Unit = {
     val histo = new LatencyHistogram(
-      range, err, Duration.Top.inMilliseconds, LatencyHistogram.DefaultSlices, WindowedAdder.timeMs)
+      range, err, Duration.Top.inMilliseconds, LatencyHistogram.DefaultSlices, Stopwatch.timeMillis)
     val input = Array.fill(N) {
       (rng.nextDouble() * range).toLong
     }
@@ -53,13 +52,13 @@ class LatencyHistogramTest extends FunSuite
 
   test("constructor checks inputs") {
     intercept[IllegalArgumentException] {
-      new LatencyHistogram(-1L, 0.0, 1L, LatencyHistogram.DefaultSlices, WindowedAdder.systemMs)
+      new LatencyHistogram(-1L, 0.0, 1L, LatencyHistogram.DefaultSlices, Stopwatch.systemMillis)
     }
     intercept[IllegalArgumentException] {
-      new LatencyHistogram(1L, -0.1, 1L, LatencyHistogram.DefaultSlices, WindowedAdder.systemMs)
+      new LatencyHistogram(1L, -0.1, 1L, LatencyHistogram.DefaultSlices, Stopwatch.systemMillis)
     }
     intercept[IllegalArgumentException] {
-      new LatencyHistogram(1L, 1.1, 1L, LatencyHistogram.DefaultSlices, WindowedAdder.systemMs)
+      new LatencyHistogram(1L, 1.1, 1L, LatencyHistogram.DefaultSlices, Stopwatch.systemMillis)
     }
   }
 
@@ -79,7 +78,7 @@ class LatencyHistogramTest extends FunSuite
         error = 0.0,
         history = 4000,
         slices = LatencyHistogram.DefaultSlices,
-        now = WindowedAdder.timeMs)
+        now = Stopwatch.timeMillis)
       for (_ <- 0 until 100) histo.add(30)
       tc.advance(1.second)
 
@@ -101,7 +100,7 @@ class LatencyHistogramTest extends FunSuite
       error = 0.0,
       history = 4 * 1000,
       slices = LatencyHistogram.DefaultSlices,
-      now = WindowedAdder.timeMs)
+      now = Stopwatch.timeMillis)
     histo.add(40)
   }
 }

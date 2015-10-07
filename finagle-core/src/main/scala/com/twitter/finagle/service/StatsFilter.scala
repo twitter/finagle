@@ -2,11 +2,10 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.{
   MultiCategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
 import com.twitter.jsr166e.LongAdder
-import com.twitter.util.{Future, Stopwatch, Throw, Return, Time, Duration}
+import com.twitter.util.{Future, Stopwatch, Throw, Return}
 import java.util.concurrent.TimeUnit
 
 object StatsFilter {
@@ -56,20 +55,16 @@ object StatsFilter {
     override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
       new StatsFilter[Req, Rep](statsReceiver, exceptionStatsHandler)
   }
-
-  /** Used as a sentinel with reference equality to indicate the absence of a deadline */
-  private val NoDeadline = Deadline(Time.Undefined, Time.Undefined)
-  private val NoDeadlineFn = () => NoDeadline
 }
 
 /**
  * StatsFilter reports request statistics to the given receiver.
  *
  * @param timeUnit this controls what granularity is used for
- * measuring latency, transit time, and budget time. The default is milliseconds,
+ * measuring latency.  The default is milliseconds,
  * but other values are valid. The choice of this changes the name of the stat
  * attached to the given [[StatsReceiver]]. For the common units,
- * it will be "request_latency_ms", "transit_latency_ms" and "deadline_budget_ms".
+ * it will be "request_latency_ms".
  *
  * @note The innocent bystander may find the semantics with respect
  * to backup requests a bit puzzling; they are entangled in legacy.
@@ -109,18 +104,9 @@ class StatsFilter[Req, Rep](
   private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.sum() }
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
-  private[this] val transitTimeStat = statsReceiver.stat(s"transit_latency_$latencyStatSuffix")
-  private[this] val budgetTimeStat = statsReceiver.stat(s"deadline_budget_$latencyStatSuffix")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val elapsed = Stopwatch.start()
-
-    val dl = Contexts.broadcast.getOrElse(Deadline, NoDeadlineFn)
-    if (dl ne NoDeadline) {
-      val now = Time.now
-      transitTimeStat.add(((now-dl.timestamp) max Duration.Zero).inUnit(timeUnit))
-      budgetTimeStat.add(((dl.deadline-now) max Duration.Zero).inUnit(timeUnit))
-    }
 
     outstandingRequestCount.increment()
     service(request).respond { response =>
