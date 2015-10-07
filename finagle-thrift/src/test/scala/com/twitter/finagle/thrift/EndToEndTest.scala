@@ -5,6 +5,7 @@ import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.test._
@@ -316,6 +317,37 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters(Seq("success")) === 1)
 
     server.close()
+  }
+
+  test("serveIface works with X.FutureIface, X[Future] with extended services") {
+    // 1. Server extends X.FutureIface.
+    class ExtendedEchoService1 extends ExtendedEcho.FutureIface {
+      override def echo(msg: String): Future[String] = Future.value(msg)
+      override def getStatus(): Future[String] = Future.value("OK")
+    }
+
+    val server1 = Thrift.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new ExtendedEchoService1()
+    )
+    val client1 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(server1.boundAddress), "client")
+
+    assert(Await.result(client1.echo("asdf")) === "asdf")
+    assert(Await.result(client1.getStatus()) === "OK")
+
+    // 2. Server extends X[Future].
+    class ExtendedEchoService2 extends ExtendedEcho[Future] {
+      override def echo(msg: String): Future[String] = Future.value(msg)
+      override def getStatus(): Future[String] = Future.value("OK")
+    }
+    val server2 = Thrift.serveIface(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new ExtendedEchoService2()
+    )
+    val client2 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(server2.boundAddress), "client")
+
+    assert(Await.result(client2.echo("asdf")) === "asdf")
+    assert(Await.result(client2.getStatus()) === "OK")
   }
 
   runThriftTests()

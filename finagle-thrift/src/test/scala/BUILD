@@ -10,6 +10,7 @@ junit_tests(name='scala',
     'finagle/finagle-test',
     'finagle/finagle-thrift',
     'finagle/finagle-thrift/src/test/java',
+    'finagle/finagle-thrift/src/test/thrift',
     'util/util-core',
 
     ':silly-thrift-dep',

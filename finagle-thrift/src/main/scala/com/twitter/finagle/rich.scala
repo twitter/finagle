@@ -53,7 +53,10 @@ private[twitter] object ThriftUtil {
     }
 
   def findRootWithSuffix(str: String, suffix: String): Option[String] =
-    if (str.endsWith(suffix)) Some(str.dropRight(suffix.length)) else None
+    if (str.endsWith(suffix))
+      Some(str.stripSuffix(suffix))
+    else
+      None
 
   lazy val findSwiftClass: Class[_] => Option[Class[_]] = {
     val f = for {
@@ -157,7 +160,8 @@ private[twitter] object ThriftUtil {
           Some(iface.getName)
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService") orElse
           findClass[BinaryService](baseName + "$FinagledService")
-        cons       <- findConstructor(serviceCls, iface, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE)
+        baseClass  <- findClass1(baseName)
+        cons       <- findConstructor(serviceCls, baseClass, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE)
       } yield cons.newInstance(impl, protocolFactory, stats, Int.box(maxThriftBufferSize))
 
     // The legacy $FinagleService that doesn't take stats.
