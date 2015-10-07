@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: `com.twitter.finagle.client.LatencyCompensator` allows its
+    default Compensator value to be set via an API call. This allows
+    libraries to set defaults for clients that have not configured this module.
+    ``RB_ID=750228``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

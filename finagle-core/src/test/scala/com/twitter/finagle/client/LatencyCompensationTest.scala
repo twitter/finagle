@@ -1,6 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.client.LatencyCompensation.Compensator
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.{MockTimer => _, _}
@@ -8,7 +9,7 @@ import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 /**
  * An end-to-end test for LatencyCompensation.
@@ -18,6 +19,7 @@ class LatencyCompensationTest
   extends FunSuite
   with AssertionsForJUnit
   with Eventually
+  with BeforeAndAfterEach
   with IntegrationPatience
 {
   def verifyCompensationModule(expected: Duration) =
@@ -34,6 +36,10 @@ class LatencyCompensationTest
       }
     }
 
+  // after each test, make sure to reset the override
+  override def afterEach() =
+    LatencyCompensation.DefaultOverride.reset()
+
   test("Sets Compensation param") {
     val stk = new StackBuilder[ServiceFactory[String, String]](nilStack[String, String])
     stk.push(verifyCompensationModule(100.millis))
@@ -46,6 +52,11 @@ class LatencyCompensationTest
     stk.push(verifyCompensationModule(0.second))
     stk.push(LatencyCompensation.module)
     stk.result.make(Stack.Params.empty)
+  }
+
+  test("Override can only be set once") {
+    assert(LatencyCompensation.DefaultOverride.set(Compensator(_ => Duration.Zero)))
+    assert(!LatencyCompensation.DefaultOverride.set(Compensator(_ => Duration.Zero)))
   }
 
   class Ctx {
@@ -79,20 +90,21 @@ class LatencyCompensationTest
       }
     }
 
+    lazy val baseEchoClient = Echo.stringClient
+          .configured(TimeoutFilter.Param(baseTimeout))
+          .configured(param.Timer(timer))
+
+    lazy val compensatedEchoClient = baseEchoClient
+          .configured(LatencyCompensation.Compensator(compensator))
+
     /*
      * N.B. connection timeout compensation is not tested
      * end-to-end-because it's tricky to cause connection latency.
      */
-
-    def whileConnected(f: Service[String, String] => Unit): Unit = {
+    def whileConnected(echoClient: Echo.Client)(f: Service[String, String] => Unit): Unit = {
       val server = Echo.serve("127.1:0", service)
       val addr = Addr.Bound(Set(server.boundAddress), metadata)
-      val client =
-        Echo.stringClient
-            .configured(TimeoutFilter.Param(baseTimeout))
-            .configured(param.Timer(timer))
-            .configured(LatencyCompensation.Compensator(compensator))
-            .newService(Name.Bound(Var.value(addr), "id"), "label")
+      val client = echoClient.newService(Name.Bound(Var.value(addr), "id"), "label")
 
       try f(client)
       finally Await.result(client.close() join server.close(), 10.seconds)
@@ -105,7 +117,65 @@ class LatencyCompensationTest
       metadata = Addr.Metadata("compensation" -> 2.seconds)
 
       Time.withCurrentTimeFrozen { clock =>
-        whileConnected { client =>
+        whileConnected(compensatedEchoClient) { client =>
+          val yo = client("yo")
+          assert(!yo.isDefined)
+
+          awaitReceipt()
+          assert(!yo.isDefined)
+
+          clock.advance(2.seconds)
+          timer.tick()
+
+          respond.setValue("yo")
+          eventually {
+            assert(yo.isDefined)
+          }
+          assert(Await.result(yo, 10.seconds) === "yo")
+        }
+      }
+    }
+  }
+
+  test("TimeoutFilter.module accomodates configured latency compensation even when default override is set") {
+    new Ctx {
+      // set a compensation to 0 which should cause a failure if the caller does not
+      // explicitly .configure the client with a compensation parameter.
+      LatencyCompensation.DefaultOverride.set(new Compensator(_ => Duration.Zero))
+
+      metadata = Addr.Metadata("compensation" -> 2.seconds)
+
+      Time.withCurrentTimeFrozen { clock =>
+
+        // use the client which is configured with a compensation parameter
+        whileConnected(compensatedEchoClient) { client =>
+          val yo = client("yo")
+          assert(!yo.isDefined)
+
+          awaitReceipt()
+          assert(!yo.isDefined)
+
+          clock.advance(2.seconds)
+          timer.tick()
+
+          respond.setValue("yo")
+          eventually {
+            assert(yo.isDefined)
+          }
+          assert(Await.result(yo, 10.seconds) === "yo")
+        }
+      }
+    }
+  }
+
+  test("TimeoutFilter.module accomodates configured latency compensation when set by override") {
+    new Ctx {
+      // Do not set the .configured param for LatencyCompensation. Instead override the default
+      // compensation to 2 seconds which will make this succeed.
+      LatencyCompensation.DefaultOverride.set(new Compensator(_ => 2.seconds))
+
+      Time.withCurrentTimeFrozen { clock =>
+        whileConnected(baseEchoClient) { client =>
           val yo = client("yo")
           assert(!yo.isDefined)
 
@@ -131,7 +201,7 @@ class LatencyCompensationTest
       metadata = Addr.Metadata("compensation" -> 2.seconds)
 
       Time.withCurrentTimeFrozen { clock =>
-        whileConnected { client =>
+        whileConnected(compensatedEchoClient) { client =>
           val sup = client("sup")
           assert(!sup.isDefined)
           assert(respond.interrupted === None)
@@ -159,7 +229,7 @@ class LatencyCompensationTest
   test("Latency compensator doesn't always add compensation") {
     new Ctx {
       Time.withCurrentTimeFrozen { clock =>
-        whileConnected { client =>
+        whileConnected(compensatedEchoClient) { client =>
           val nm = client("nm")
           assert(!nm.isDefined)
           assert(respond.interrupted === None)
@@ -189,7 +259,7 @@ class LatencyCompensationTest
       metadata = Addr.Metadata("compensation" -> 2.seconds)
 
       Time.withCurrentTimeFrozen { clock =>
-        whileConnected { client =>
+        whileConnected(compensatedEchoClient) { client =>
           val aight = client("aight")
           assert(!aight.isDefined)
           assert(respond.interrupted === None)
