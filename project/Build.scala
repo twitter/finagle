@@ -512,11 +512,19 @@ object Finagle extends Build {
     finagleCore, finagleThrift, finagleMemcached, finagleKestrel,
     finagleRedis, finagleMySQL, finagleOstrich4, finagleStats)
 
+  lazy val finagleBenchmarkThrift = Project(
+    id = "finagle-benchmark-thrift",
+    base = file("finagle-benchmark-thrift"),
+    settings = Project.defaultSettings ++
+      ScroogeSBT.newSettings
+  ).settings(
+    libraryDependencies ++= scroogeLibs
+  ).dependsOn(finagleThrift)
+
   lazy val finagleBenchmark = Project(
     id = "finagle-benchmark",
     base = file("finagle-benchmark"),
     settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings ++
       sharedSettings ++ JmhPlugin.projectSettings
   )
   .enablePlugins(JmhPlugin)
@@ -530,6 +538,7 @@ object Finagle extends Build {
       "org.apache.curator" % "curator-framework" % "2.8.0"
     )
   ).dependsOn(
+    finagleBenchmarkThrift,
     finagleCommonsStats,
     finagleCore,
     finagleExp,
