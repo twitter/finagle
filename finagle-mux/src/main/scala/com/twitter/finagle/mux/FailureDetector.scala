@@ -33,9 +33,11 @@ private object NullFailureDetector extends FailureDetector {
  * behavior.
  */
 object sessionFailureDetector extends GlobalFlag(
-  "none",
+  // by default, use `DarkModeConfig` to just send pings.
+  // This is an intermediate step to use `ThresholdConfig()`.
+  "dark",
   "The failure detector used to determine session liveness " +
-      "[none|threshold:minPeriod:threshold:win:closeThreshold]")
+      "[none|dark|threshold:minPeriod:threshold:win:closeThreshold]")
 
 
 /**
@@ -98,9 +100,7 @@ object FailureDetector {
   }
 
   case object Param {
-    // by default, use `DarkModeConfig` to just send pings.
-    // This is an intermediate step to use `ThresholdConfig()`.
-    implicit val param = Stack.Param(Param(DarkModeConfig()))
+    implicit val param = Stack.Param(Param(GlobalFlagConfig))
   }
 
   private[this] val log = Logger.getLogger(getClass.getName)
@@ -160,6 +160,10 @@ object FailureDetector {
       case list("threshold") =>
         new ThresholdFailureDetector(
           ping, close, nanoTime = nanoTime, statsReceiver = statsReceiver)
+
+      case list("dark") =>
+        new ThresholdFailureDetector(
+          ping, close, nanoTime = nanoTime, statsReceiver = statsReceiver, darkMode = true)
 
       case list("none") =>
         NullFailureDetector

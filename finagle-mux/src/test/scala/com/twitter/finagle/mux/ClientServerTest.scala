@@ -114,29 +114,33 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     assert(f3.poll === Some(Return(reps(2))))
   }
 
-  test("server respond to pings") {
-    val ctx = new Ctx
-    import ctx._
+  test("server responds to pings") {
+    sessionFailureDetector.let("none") {
+      val ctx = new Ctx
+      import ctx._
 
-    for (i <- 0 until 5) {
-      assert(nping.get === i)
-      val pinged = client.ping()
-      assert(!pinged.isDefined)
-      assert(nping.get === i+1)
-      pingRep.flip()
-      assert(pinged.isDefined && Await.result(pinged) == ())
+      for (i <- 0 until 5) {
+        assert(nping.get === i)
+        val pinged = client.ping()
+        assert(!pinged.isDefined)
+        assert(nping.get === i+1)
+        pingRep.flip()
+        assert(pinged.isDefined && Await.result(pinged) == ())
+      }
     }
   }
 
   test("concurrent pings") {
-    val ctx = new Ctx
-    import ctx._
+    sessionFailureDetector.let("none") {
+      val ctx = new Ctx
+      import ctx._
 
-    val pinged = (client.ping() join client.ping()).unit
-    assert(!pinged.isDefined)
-    assert(nping.get === 2)
-    pingRep.flip()
-    assert(pinged.isDefined && Await.result(pinged) == ())
+      val pinged = (client.ping() join client.ping()).unit
+      assert(!pinged.isDefined)
+      assert(nping.get === 2)
+      pingRep.flip()
+      assert(pinged.isDefined && Await.result(pinged) == ())
+    }
   }
 
   test("server nacks new requests after draining") {
