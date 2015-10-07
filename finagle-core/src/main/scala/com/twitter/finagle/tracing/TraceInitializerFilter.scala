@@ -257,10 +257,12 @@ private[finagle] object WireTracingFilter {
       val description = "Report wire recv/send events"
       def make(next: ServiceFactory[Req, Rep]) = filter andThen next
 
-      val filter = Filter.mk[Req, Rep, Req, Rep] { (req, svc) =>
-        Trace.record(Annotation.WireRecv)
-        svc(req) onSuccess { _ =>
-          Trace.record(Annotation.WireSend)
+      object filter extends Filter[Req, Rep, Req, Rep] {
+        def apply(req: Req, service: Service[Req, Rep]) = {
+          Trace.record(Annotation.WireRecv)
+          service(req).onSuccess { _ =>
+            Trace.record(Annotation.WireSend)
+          }
         }
       }
     }
