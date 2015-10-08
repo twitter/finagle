@@ -738,6 +738,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     timer,
     statsReceiver)
 {
+  import FailureAccrualFactory._
   def this(
     underlying: ServiceFactory[Req, Rep],
     numFailures: Int,
@@ -795,14 +796,14 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     if (ejectFailedHost) healthBroker ! NodeMarkedDead(key)
   }
 
-  override def revive() {
-    super.revive()
-    if (ejectFailedHost) healthBroker ! NodeRevived(key)
-  }
+  override def didSucceed(): Unit = {
+      super.didSucceed()
+      if (ejectFailedHost) healthBroker ! NodeRevived(key)
+    }
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
     getState match {
-      case FailureAccrualFactory.Alive => super.apply(conn)
+      case Alive(_) | ProbeOpen  => super.apply(conn)
       // One finagle client presents one node on the Ketama ring,
       // the load balancer has one cache client. When the client
       // is in a busy state, continuing to dispatch requests is likely

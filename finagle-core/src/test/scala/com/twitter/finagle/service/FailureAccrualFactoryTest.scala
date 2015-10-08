@@ -8,6 +8,8 @@ import com.twitter.util._
 import java.util.concurrent.TimeUnit
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{times, verify, when}
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
 import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.scalatest.FunSuite
@@ -63,7 +65,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("a failing service should be revived (for one request) after the markDeadFor duration") {
+  test("a failing service should enter the probing state after the markDeadFor duration") {
     val h = new Helper
     import h._
 
@@ -84,9 +86,10 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       timeControl.advance(10.seconds)
       timer.tick()
 
-      // Healthy again!
+      // Probing, not revived yet.
       assert(statsReceiver.counters.get(List("removals")) === Some(1))
-      assert(statsReceiver.counters.get(List("revivals")) === Some(1))
+      assert(statsReceiver.counters.get(List("revivals")) === None)
+
       assert(factory.isAvailable)
       assert(service.isAvailable)
 
@@ -127,6 +130,78 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("a failing service should only be able to accept one request after " +
+   "being revived, then multiple requests after it successfully completes") {
+    val h = new Helper
+    import h._
+
+    Time.withCurrentTimeFrozen { tc =>
+      for (i <- 1 to 3) {
+        intercept[Exception] {
+          Await.result(service(123))
+        }
+      }
+
+      assert(factory.status == Status.Busy)
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      assert(factory.status == Status.Open)
+
+      when(underlyingService(456)).thenAnswer {
+        new Answer[Future[Int]] {
+          override def answer(invocation: InvocationOnMock) = {
+            // The service should be busy after one request while probing
+            assert(factory.status == Status.Busy)
+            Future(456)
+          }
+        }
+      }
+
+      Await.result(service(456))
+      assert(factory.status == Status.Open)
+    }
+  }
+
+  test("a failing service should go back to the Busy state after probing fails") {
+    val h = new Helper
+    import h._
+
+    Time.withCurrentTimeFrozen { tc =>
+      for (i <- 1 to 3) {
+        intercept[Exception] {
+          Await.result(service(123))
+        }
+      }
+
+      assert(factory.status == Status.Busy)
+
+      tc.advance(10.seconds)
+      timer.tick()
+
+      assert(factory.status == Status.Open)
+
+      when(underlyingService(456)).thenAnswer {
+        new Answer[Future[Int]] {
+          override def answer(invocation: InvocationOnMock) = {
+            // The service should be busy after one request while probing
+            assert(factory.status == Status.Busy)
+            // Fail the probing request
+            Future.exception(new Exception)
+          }
+        }
+      }
+
+      intercept[Exception] {
+        Await.result(service(456))
+      }
+
+      // Should be busy after probe fails
+      assert(factory.status == Status.Busy)
+    }
+  }
+
   test("a failing service should reset failure counters after an individual success") {
     val h = new Helper
     import h._
@@ -148,15 +223,16 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       timeControl.advance(10.seconds)
       timer.tick()
 
-      // Healthy again!
-      assert(statsReceiver.counters.get(List("revivals")) === Some(1))
+      // Probing, not revived yet.
+      assert(statsReceiver.counters.get(List("revivals")) === None)
       assert(statsReceiver.counters.get(List("removals")) === Some(1))
       assert(factory.isAvailable)
       assert(service.isAvailable)
 
       when(underlyingService(123)) thenReturn Future.value(321)
+      Await.result(service(123))
 
-      // A good dispatch!
+      // A good dispatch; revived
       assert(statsReceiver.counters.get(List("revivals")) === Some(1))
       assert(statsReceiver.counters.get(List("removals")) === Some(1))
       assert(Await.result(service(123)) === 321)

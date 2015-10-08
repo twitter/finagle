@@ -30,6 +30,8 @@ object FailureAccrualFactory {
 
   private[this] val rng = new Random
 
+  private[FailureAccrualFactory] val AliveNoFailures = Alive(0)
+
   /**
    * Add jitter in `markDeadFor` to reduce correlation.
    * Return a () => Duration type that can be used in Param.
@@ -152,9 +154,29 @@ object FailureAccrualFactory {
       }
     }
 
+
+  // The FailureAccrualFactory transitions between Alive, Dead, ProbeOpen,
+  // and ProbeClosed. The factory starts in the Alive state. After numFailures
+  // failures, the factory transitions to Dead. When it is revived,
+  // it transitions to ProbeOpen. After a request is received,
+  // it transitions to ProbeClosed and cannot accept any further requests until
+  // the initial request is satisfied. If the request is successful, it
+  // transitions back to Alive, otherwise Dead.
+  //
+  // The transitions can be visualized using the state diagram:
+  //
+  // ,<-----------.
+  // Alive        |
+  // |  ,---ProbeClosed
+  // ∨  ∨         ^
+  // Dead         |
+  //  `---> ProbeOpen
+
   protected[finagle] sealed trait State
-  protected[finagle] case object Alive extends State
+  protected[finagle] case class Alive(failureCount: Int) extends State
   protected[finagle] case object Dead extends State
+  protected[finagle] case object ProbeOpen extends State
+  protected[finagle] case object ProbeClosed extends State
 }
 
 /**
@@ -174,7 +196,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
   logger: Logger = DefaultLogger,
   endpoint: SocketAddress = unconnected
 ) extends ServiceFactory[Req, Rep] {
-  import FailureAccrualFactory.{State, Alive, Dead}
+  import FailureAccrualFactory._
 
   def this(
     underlying: ServiceFactory[Req, Rep],
@@ -187,45 +209,47 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     endpoint: SocketAddress
   ) = this(underlying, numFailures, () => markDeadFor, timer, statsReceiver, label, logger, endpoint)
 
-  private[this] var failureCount = 0
-  @volatile private[this] var state: State = Alive
+  @volatile private[this] var state: State = FailureAccrualFactory.AliveNoFailures
+
   private[this] var reviveTimerTask: Option[TimerTask] = None
 
   private[this] val removalCounter = statsReceiver.counter("removals")
   private[this] val revivalCounter = statsReceiver.counter("revivals")
 
   private[this] def didFail() = synchronized {
-    failureCount += 1
-    if (failureCount >= numFailures) markDead()
+    state match {
+      case Alive(failureCount) =>
+        if (failureCount + 1 >= numFailures) markDead()
+        else state = Alive(failureCount + 1)
+      case ProbeClosed => markDead()
+      case _ =>
+    }
   }
 
-  private[this] def didSucceed() = synchronized {
-    failureCount = 0
+  protected def didSucceed() = synchronized {
+    // Only count revivals when the probe succeeds.
+    if (state == ProbeClosed) revivalCounter.incr()
+    state = FailureAccrualFactory.AliveNoFailures
   }
 
   protected def markDead() = synchronized {
-    state match {
-      case Dead =>
-      case Alive =>
-        removalCounter.incr()
-        state = Dead
-        val timerTask = timer.schedule(markDeadFor().fromNow) { revive() }
-        reviveTimerTask = Some(timerTask)
+    state = Dead
+    removalCounter.incr()
 
-        if (logger.isLoggable(Level.DEBUG))
-          logger.log(Level.DEBUG, s"""FailureAccrualFactory marking connection to "$label" as dead. Remote Address: ${endpoint.toString}""")
-    }
+    val timerTask = timer.schedule(markDeadFor().fromNow) { startProbing() }
+    reviveTimerTask = Some(timerTask)
+
+    if (logger.isLoggable(Level.DEBUG))
+      logger.log(Level.DEBUG, s"""FailureAccrualFactory marking connection to "$label" as dead. Remote Address: ${endpoint.toString}""")
   }
 
-  protected def revive() = synchronized {
-    state match {
-      case Alive =>
-      case Dead =>
-        state = Alive
-        revivalCounter.incr()
-    }
-    reviveTimerTask foreach { _.cancel() }
-    reviveTimerTask = None
+  /**
+   * Enter 'Probing' state.
+   * The service must satisfy one request before accepting more.
+   */
+  private[this] def startProbing() = synchronized {
+    state = ProbeOpen
+    cancelReviveTimerTasks()
   }
 
   protected def isSuccess(response: Try[Rep]): Boolean = response.isReturn
@@ -234,7 +258,20 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     underlying(conn) map { service =>
       new Service[Req, Rep] {
         def apply(request: Req) = {
-          service(request) respond { response =>
+
+          // If service has just been revived, accept no further requests.
+          // Note: Another request may have come in before state transitions to
+          // ProbeClosed, so > 1 requests may be processing while in the
+          // ProbeClosed state. The result of first to complete will determine
+          // whether the factory transitions to Alive (successful) or Dead
+          // (unsuccessful).
+          if (state == ProbeOpen) {
+            synchronized {
+              if (state == ProbeOpen) state = ProbeClosed
+            }
+          }
+
+          service(request).respond { response =>
             if (isSuccess(response)) didSucceed()
             else didFail()
           }
@@ -248,15 +285,19 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
   }
 
   override def status = state match {
-    case Alive => underlying.status
-    case Dead => Status.Busy
+    case Alive(_) | ProbeOpen => underlying.status
+    case Dead | ProbeClosed => Status.Busy
   }
 
   protected[this] def getState: State = state
 
-  def close(deadline: Time) = underlying.close(deadline) ensure {
-    // We revive to make sure we've cancelled timer tasks, etc.
-    revive()
+  private[this] def cancelReviveTimerTasks(): Unit = {
+    reviveTimerTask.foreach(_.cancel())
+    reviveTimerTask = None
+  }
+
+  def close(deadline: Time) = underlying.close(deadline).ensure {
+    cancelReviveTimerTasks()
   }
 
   override val toString = "failure_accrual_%s".format(underlying.toString)

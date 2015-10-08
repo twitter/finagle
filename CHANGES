@@ -82,6 +82,11 @@ Runtime Behavior Changes
     within Finagle according to `networkaddress.cache.ttl`; we rely
     instead on however caching is configured in the JVM and OS. ``RB_ID=735006``
 
+  * finagle-core: After being revived, a `FailureAccrualFactory` enters a
+    'probing' state wherein it must successfully satisfy a request before
+    accepting more. If the request fails, it waits for the next `markDeadFor`
+    period. ``RB_ID=747541``
+
   * finagle-serversets: DNS lookups in Zk2Resolver are no longer
     cached within Finagle according to `networkaddress.cache.ttl`;
     instead they are cached indefinitely. ``RB_ID=735006``

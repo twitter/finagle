@@ -256,7 +256,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         assert(statsReceiver.counters(Seq("failure_accrual", "removals")) === 1)
         control.advance(4.seconds)
         timer.tick()
-        assert(statsReceiver.counters(Seq("failure_accrual", "revivals")) === 1)
+        assert(statsReceiver.counters.get(Seq("failure_accrual", "revivals")) === None)
       }
     }
   }
