@@ -14,6 +14,6 @@ public class StackParameterCompilationTest {
           .configured(new FailureDetector.Param(FailureDetectors.NULL_CONFIG).mk())
           .configured(
             new FailureDetector.Param(
-              new FailureDetector.ThresholdConfig(Duration.forever(), 2, 5, -1)).mk());
+              new FailureDetector.ThresholdConfig(Duration.Top(), 2, 5, -1)).mk());
   }
 }

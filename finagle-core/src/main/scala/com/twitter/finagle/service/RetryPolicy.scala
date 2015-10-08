@@ -123,7 +123,7 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
   def backoffAt(retry: Int): Duration
 
   /**
-   * A convenience method to access Duration.forever from Java. This is a sentinel value that
+   * A convenience method to access Duration.Top from Java. This is a sentinel value that
    * signals no-further-retries.
    */
   final val never = Duration.Top

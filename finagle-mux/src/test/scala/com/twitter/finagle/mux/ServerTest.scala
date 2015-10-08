@@ -93,7 +93,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     import ctx._
 
     nackOnExpiredLease.parse("true")
-    issue(Duration.zero)
+    issue(Duration.Zero)
 
     demonstrateNack()
   }
@@ -117,7 +117,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
       nackOnExpiredLease.parse("true")
 
-      issue(Duration.zero)
+      issue(Duration.Zero)
 
 
       demonstrateNack()
