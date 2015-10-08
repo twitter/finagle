@@ -86,7 +86,7 @@ class ClientBuilderTest extends FunSuite
 
       val f = client("123")
 
-      assert(f.isDefined)
+      eventually { assert(f.isDefined) }
       assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
       assert(
         // one request which requeues until failure accrual limit + one retry
@@ -148,7 +148,7 @@ class ClientBuilderTest extends FunSuite
 
       val f = client("123")
 
-      assert(f.isDefined)
+      eventually { assert(f.isDefined) }
       assert(inMemory.counters(Seq("test", "tries", "requests")) === 1)
 
       // failure accrual limited requeues + one retry which is not requeued

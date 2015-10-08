@@ -2,26 +2,22 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Filter.TypeAgnostic
+import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.Trace
-import com.twitter.finagle.{Filter, Service, SimpleFilter}
+import com.twitter.finagle.{Filter, Service}
 import com.twitter.util.{Function => _, _}
 
 object RetryingService {
 
-  private[this] val fakeTimer = new Timer {
-    def schedule(when: Time)(f: => Unit): TimerTask = throw new Exception("illegal use!")
-    def schedule(when: Time, period: Duration)(f: => Unit): TimerTask = throw new Exception("illegal use!")
-    def stop() { throw new Exception("illegal use!") }
-  }
-
   /**
-   * Returns a filter that will try a total of numTries times, but only if
-   * encountering a WriteException.
+   * Returns a filter that will retry a failed request a total of
+   * `numTries - 1` times, but only when the failure encountered
+   * is a [[com.twitter.finagle.WriteException WriteException]].
    */
   def tries[Req, Rep](numTries: Int, stats: StatsReceiver): Filter[Req, Rep, Req, Rep] = {
     val policy = RetryPolicy.tries(numTries)
-    new RetryExceptionsFilter[Req, Rep](policy, fakeTimer, stats)
+    new RetryExceptionsFilter[Req, Rep](policy, HighResTimer.Default, stats)
   }
 }
 
@@ -30,6 +26,9 @@ object RetryingService {
  * [[com.twitter.finagle.Service Services]]. Successful and exceptional
  * responses can can be classified as retryable via the retryPolicy
  * [[com.twitter.finagle.service.RetryPolicy]] argument.
+ *
+ * @note consider using a [[Timer]] with high resolution so that there is
+ * less correlation between retries. For example [[HighResTimer.Default]].
  */
 class RetryFilter[Req, Rep](
     retryPolicy: RetryPolicy[(Req, Try[Rep])],
@@ -55,16 +54,19 @@ class RetryFilter[Req, Rep](
     service: Service[Req, Rep],
     policy: RetryPolicy[(Req, Try[Rep])],
     count: Int = 0
-  ): Future[Rep] = service(req).transform { rep =>
-    policy((req, rep)) match {
-      case Some((howlong, nextPolicy)) =>
-        schedule(howlong) {
-          Trace.record("finagle.retry")
-          dispatch(req, service, nextPolicy, count + 1)
-        }
-      case None =>
-        retriesStat.add(count)
-        Future.const(rep)
+  ): Future[Rep] = {
+    val svcRep = service(req)
+    svcRep.transform { rep =>
+      policy((req, rep)) match {
+        case Some((howlong, nextPolicy)) =>
+          schedule(howlong) {
+            Trace.record("finagle.retry")
+            dispatch(req, service, nextPolicy, count + 1)
+          }
+        case None =>
+          retriesStat.add(count)
+          svcRep
+      }
     }
   }
 
@@ -73,10 +75,21 @@ class RetryFilter[Req, Rep](
 }
 
 object RetryFilter {
+
+  /**
+   * @param backoffs See [[Backoff]] for common backoff patterns.
+   *
+   * @note consider using a [[Timer]] with high resolution so that there is
+   * less correlation between retries. For example [[HighResTimer.Default]].
+   */
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean])(implicit timer: Timer) =
+  )(
+    shouldRetry: PartialFunction[(Req, Try[Rep]), Boolean]
+  )(
+    implicit timer: Timer
+  ): RetryFilter[Req, Rep] =
     new RetryFilter[Req, Rep](RetryPolicy.backoff(backoffs)(shouldRetry), timer, statsReceiver)
 }
 
@@ -85,6 +98,10 @@ object RetryFilter {
  * [[com.twitter.finagle.Service Services]]. Exceptional responses can can be
  * classified as retryable via the retryPolicy argument
  * [[com.twitter.finagle.service.RetryPolicy]].
+ *
+ * @note consider using a [[Timer]] with high resolution so that there is
+ * less correlation between retries. For example [[HighResTimer.Default]].
+ *
  * @see [[RetryFilter]] for a version that allows for retries on "successful"
  * responses as well as failures.
  */
@@ -98,11 +115,25 @@ final class RetryExceptionsFilter[Req, Rep](
     statsReceiver)
 
 object RetryExceptionsFilter {
+
+  /**
+   * @param backoffs See [[Backoff]] for common backoff patterns.
+   *
+   * @note consider using a [[Timer]] with high resolution so that there is
+   * less correlation between retries. For example [[HighResTimer.Default]].
+   */
   def apply[Req, Rep](
     backoffs: Stream[Duration],
     statsReceiver: StatsReceiver = NullStatsReceiver
-  )(shouldRetry: PartialFunction[Try[Nothing], Boolean])(implicit timer: Timer) =
-    new RetryExceptionsFilter[Req, Rep](RetryPolicy.backoff(backoffs)(shouldRetry), timer, statsReceiver)
+  )(
+    shouldRetry: PartialFunction[Try[Nothing], Boolean]
+  )(
+    implicit timer: Timer
+  ): RetryExceptionsFilter[Req, Rep] =
+    new RetryExceptionsFilter[Req, Rep](
+      RetryPolicy.backoff(backoffs)(shouldRetry),
+      timer,
+      statsReceiver)
 
   def typeAgnostic(
     retryPolicy: RetryPolicy[Try[Nothing]],

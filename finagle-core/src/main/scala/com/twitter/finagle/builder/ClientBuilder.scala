@@ -589,6 +589,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * known to be safe to retry. This includes [[WriteException WriteExceptions]]
    * and [[Failure]]s that are marked [[Failure.Restartable restartable]].
    *
+   * The configured policy has jittered backoffs between retries.
+   *
    * @param value the maximum number of attempts (including retries) that
    *              can be made.
    *               - A value of `1` means one attempt and no retries
@@ -914,19 +916,19 @@ private object ClientBuilderClient {
   import com.twitter.finagle.param._
 
   private class RetryFilterModule[Req, Rep]
-      extends Stack.Module3[Stats, Retries, Timer, ServiceFactory[Req, Rep]] {
+      extends Stack.Module3[Stats, Retries, HighResTimer, ServiceFactory[Req, Rep]] {
     override val role = new Stack.Role("ClientBuilder RetryFilter")
     override val description = "Application-configured retries"
 
     override def make(
       statsP: Stats,
       retriesP: Retries,
-      timerP: Timer,
+      timerP: HighResTimer,
       next: ServiceFactory[Req, Rep]
     ) = {
       val Stats(statsReceiver) = statsP
       val Retries(policy) = retriesP
-      val Timer(timer) = timerP
+      val HighResTimer(timer) = timerP
 
       if (policy eq RetryPolicy.Never) next
       else {

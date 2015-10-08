@@ -8,9 +8,29 @@ import java.util.concurrent.ThreadLocalRandom
  * to java.util.Random. We bridge this gap.
  */
 trait Rng {
+  /**
+   * Generate a random Double between `0.0` and `1.0`, inclusive.
+   */
   def nextDouble(): Double
+
+  /**
+   * Generate a random Int betwen 0 (inclusive) and `n` (exclusive).
+   *
+   * @param n the upper bound (exclusive). Must be a positive value.
+   */
   def nextInt(n: Int): Int
+
+  /**
+   * Generate a random Int across the entire allowed integer values
+   * from `Int.MinValue` to `Int.MaxValue`, inclusive.
+   */
   def nextInt(): Int
+
+  /**
+   * Generate a random Long betwen 0 (inclusive) and `n` (exclusive).
+   *
+   * @param n the upper bound (exclusive). Must be a positive value.
+   */
   def nextLong(n: Long): Long
 }
 

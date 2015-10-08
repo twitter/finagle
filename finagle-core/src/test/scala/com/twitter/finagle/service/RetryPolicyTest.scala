@@ -137,7 +137,7 @@ class RetryPolicyTest extends FunSpec {
 
     val combinedPolicy =
       RetryPolicy.combine(
-        RetryPolicy.tries(3, RetryPolicy.WriteExceptionsOnly),
+        RetryPolicy.backoff(Backoff.const(Duration.Zero).take(2))(RetryPolicy.WriteExceptionsOnly),
         RetryPolicy.backoff(Stream.fill(3)(channelClosedBackoff))(RetryPolicy.ChannelClosedExceptionsOnly)
       )
 

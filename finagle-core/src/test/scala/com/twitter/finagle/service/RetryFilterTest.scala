@@ -7,18 +7,29 @@ import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{never, times, verify, when}
 import org.mockito.Matchers.anyObject
-import org.scalatest.FunSpec
+import org.scalatest.{BeforeAndAfter, FunSpec}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
-class RetryFilterTest extends FunSpec with MockitoSugar {
-  val timer = new MockTimer
+class RetryFilterTest extends FunSpec
+  with MockitoSugar
+  with BeforeAndAfter
+{
+  var timer: JavaTimer = _
   val backoffs = Stream(1.second, 2.seconds, 3.seconds)
   val shouldRetryException: PartialFunction[Try[Nothing], Boolean] = {
     case Throw(WriteException(_)) => true
     case _ => false
+  }
+
+  before {
+    timer = new JavaTimer(true)
+  }
+
+  after {
+    timer.stop()
   }
 
   val goodResponse = 321
@@ -49,14 +60,18 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
     val retryingService = filter andThen service
   }
 
-  class PolicyFixture(policy: RetryPolicy[_], retryExceptionsOnly: Boolean) {
+  class PolicyFixture(
+      policy: RetryPolicy[_],
+      retryExceptionsOnly: Boolean,
+      theTimer: Timer)
+  {
     val stats = mock[StatsReceiver]
     val retriesStat = mock[Stat]
     when(stats.stat("retries")) thenReturn retriesStat
     val filter = if (retryExceptionsOnly)
-        new RetryExceptionsFilter[Int, Int](policy.asInstanceOf[RetryPolicy[Try[Nothing]]], timer, stats)
+        new RetryExceptionsFilter[Int, Int](policy.asInstanceOf[RetryPolicy[Try[Nothing]]], theTimer, stats)
       else
-        new RetryFilter[Int, Int](policy.asInstanceOf[RetryPolicy[(Int, Try[Int])]], timer, stats)
+        new RetryFilter[Int, Int](policy.asInstanceOf[RetryPolicy[(Int, Try[Int])]], theTimer, stats)
     val service = mock[Service[Int, Int]]
     when(service.close(anyObject[Time])) thenReturn Future.Done
     val retryingService = filter andThen service
@@ -193,7 +208,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
     def testExceptionPolicy(policy: RetryPolicy[_], retryExceptionsOnly: Boolean) {
 
       it("always try once") {
-        new PolicyFixture(policy, retryExceptionsOnly) {
+        new PolicyFixture(policy, retryExceptionsOnly, timer) {
           when(service(123)) thenReturn Future(321)
           assert(Await.result(retryingService(123)) === 321)
           verify(service)(123)
@@ -202,7 +217,8 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
       it("when failed with a WriteException, consult the retry strategy") {
-        new PolicyFixture(policy, retryExceptionsOnly) {
+        val timer = new MockTimer()
+        new PolicyFixture(policy, retryExceptionsOnly, timer) {
           Time.withCurrentTimeFrozen { tc =>
             when(service(123)) thenReturn Future.exception(WriteException(new Exception))
             val f = retryingService(123)
@@ -221,7 +237,8 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
       it("give up when the retry strategy is exhausted") {
-        new PolicyFixture(policy, retryExceptionsOnly) {
+        val timer = new MockTimer()
+        new PolicyFixture(policy, retryExceptionsOnly, timer) {
           Time.withCurrentTimeFrozen { tc =>
             when(service(123)) thenReturn Future.exception(WriteException(new Exception("i'm exhausted")))
             val f = retryingService(123)
@@ -244,7 +261,8 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
       it("when failed with a non-WriteException, fail immediately") {
-        new PolicyFixture(policy, retryExceptionsOnly) {
+        val timer = new MockTimer()
+        new PolicyFixture(policy, retryExceptionsOnly, timer) {
           when(service(123)) thenReturn Future.exception(new Exception("WTF!"))
           val e = intercept[Exception] {
             Await.result(retryingService(123))
@@ -257,7 +275,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
       it("when no retry occurs, no stat update") {
-        new PolicyFixture(policy, retryExceptionsOnly) {
+        new PolicyFixture(policy, retryExceptionsOnly, timer) {
           when(service(123)) thenReturn Future(321)
           assert(Await.result(retryingService(123)) === 321)
           verify(retriesStat).add(0)
@@ -265,7 +283,7 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
       it("propagate cancellation") {
-        new PolicyFixture(policy, retryExceptionsOnly) {
+        new PolicyFixture(policy, retryExceptionsOnly, timer) {
           val replyPromise = new Promise[Int] {
             @volatile var interrupted: Option[Throwable] = None
             setInterruptHandler { case exc => interrupted = Some(exc) }
@@ -287,7 +305,8 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
     def testSuccessPolicy(policy: RetryPolicy[(Int, Try[Int])]) {
 
       it("when it succeeds with a bad response, consult the retry strategy") {
-        new PolicyFixture(policy, retryExceptionsOnly=false) {
+        val timer = new MockTimer()
+        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
           Time.withCurrentTimeFrozen { tc =>
             when(service(123)) thenReturn Future(badResponse)
             val f = retryingService(123)
@@ -306,7 +325,8 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
       it("return result when the retry strategy is exhausted") {
-        new PolicyFixture(policy, retryExceptionsOnly=false) {
+        val timer = new MockTimer()
+        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
           Time.withCurrentTimeFrozen { tc =>
             when(service(123)) thenReturn Future(badResponse)
             val f = retryingService(123)
@@ -325,7 +345,8 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
       it("when it succeeds, return the result immediately") {
-        new PolicyFixture(policy, retryExceptionsOnly=false) {
+        val timer = new MockTimer()
+        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
           when(service(123)) thenReturn Future(goodResponse)
           val f = retryingService(123)
           verify(service)(123)
@@ -335,37 +356,12 @@ class RetryFilterTest extends FunSpec with MockitoSugar {
       }
 
      it("when no retry occurs, no stat update") {
-        new PolicyFixture(policy, retryExceptionsOnly=false) {
+        new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
           when(service(123)) thenReturn Future(321)
           assert(Await.result(retryingService(123)) === 321)
           verify(retriesStat).add(0)
         }
       }
-    }
-  }
-
-  describe("Backoff") {
-    it("Backoff.exponential") {
-      val backoffs = Backoff.exponential(1.seconds, 2) take 10
-      assert(backoffs.force.toSeq === (0 until 10 map { i => (1 << i).seconds }))
-    }
-
-    it("Backoff.exponential with upper limit") {
-      val backoffs = (Backoff.exponential(1.seconds, 2) take 5) ++ Backoff.const(32.seconds)
-      assert((backoffs take 10).force.toSeq === (0 until 10 map {
-        i => math.min(1 << i, 32).seconds
-      }))
-    }
-
-    it("Backoff.linear") {
-      val backoffs = Backoff.linear(2.seconds, 10.seconds) take 10
-      assert(backoffs.head === 2.seconds)
-      assert(backoffs.tail.force.toSeq === (1 until 10 map { i => 2.seconds + 10.seconds * i }))
-    }
-
-    it("Backoff.const") {
-      val backoffs = Backoff.const(10.seconds) take 10
-      assert(backoffs.force.toSeq === (0 until 10 map { _ => 10.seconds}))
     }
   }
 }

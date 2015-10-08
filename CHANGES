@@ -15,6 +15,12 @@ New Features
     libraries to set defaults for clients that have not configured this module.
     ``RB_ID=750228``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `RetryPolicy.tries` now uses jittered backoffs instead of
+    having no delay. ``RB_ID=752629``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
