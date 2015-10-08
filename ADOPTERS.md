@@ -15,6 +15,7 @@ URLs if possible) and [submit a pull request][1]!
 * [DICE](http://dice.se/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)
+* [Globo.com](http://globo.com/)
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
