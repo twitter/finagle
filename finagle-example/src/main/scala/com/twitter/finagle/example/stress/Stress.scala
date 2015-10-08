@@ -3,7 +3,7 @@ package com.twitter.finagle.example.stress
 import com.google.common.util.concurrent.AtomicLongMap
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.httpx.{Http, Method, Request, Response, Status, Version}
+import com.twitter.finagle.http.{Http, Method, Request, Response, Status, Version}
 import com.twitter.finagle.stats.SummarizingStatsReceiver
 import com.twitter.util.{Stopwatch, Future}
 import java.net.{InetSocketAddress, URI}

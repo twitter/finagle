@@ -16,7 +16,7 @@ implement [[com.twitter.finagle.Client Client]] and/or
 Thus a simple HTTP server is built like this:
 
 {{{
-import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.{Http, Service}
 import org.jboss.netty.handler.codec.http.{
   HttpRequest, HttpResponse, DefaultHttpResponse}
 import org.jboss.netty.handler.codec.http.HttpVersion._

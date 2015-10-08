@@ -39,7 +39,6 @@ script:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exception/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exp/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-httpx/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-kestrel/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mdns/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mux/test

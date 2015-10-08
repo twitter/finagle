@@ -1,7 +1,7 @@
 package com.twitter.finagle.example.http
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.httpx._
+import com.twitter.finagle.http._
 import java.net.InetSocketAddress
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.io.Charsets

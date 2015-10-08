@@ -2,7 +2,7 @@ package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.{HistogramInterface, AbstractGauge, Metrics}
-import com.twitter.finagle.httpx.HttpMuxHandler
+import com.twitter.finagle.http.HttpMuxHandler
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.Buf
 import com.twitter.logging.Logger

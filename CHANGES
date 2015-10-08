@@ -23,6 +23,10 @@ Breaking API Changes
     compatibility, `HashedWheelTimer` has additional constructors to match
     those provided by `org.jboss.netty.util.HashedWheelTimer`. ``RB_ID=748514``
 
+  * finagle-httpx / finagle-httpx-compat: Renamed to finagle-http and
+    finagle-http-compat respectively. This changes the package names, e.g.:
+    com.twitter.finagle.httpx to com.twitter.finagle.http. ``RB_ID=751876``
+
   * finagle-core: Marked `HandletimeFilter` private[finagle], and renamed it to
     `ServerStatsFilter`. ``RB_ID=75268``
 

@@ -2,7 +2,7 @@ package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
-import com.twitter.finagle.httpx.{RequestParamMap, Response, Request, HttpMuxHandler}
+import com.twitter.finagle.http.{RequestParamMap, Response, Request, HttpMuxHandler}
 import com.twitter.io.Buf
 import com.twitter.ostrich.stats.{StatsListener, Stats}
 import com.twitter.util.Future

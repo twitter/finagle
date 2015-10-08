@@ -2,7 +2,7 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{AbstractGauge, Metrics}
 import com.twitter.conversions.time._
-import com.twitter.finagle.httpx.{RequestParamMap, MediaType, Request}
+import com.twitter.finagle.http.{RequestParamMap, MediaType, Request}
 import com.twitter.util.{Time, MockTimer, Await}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

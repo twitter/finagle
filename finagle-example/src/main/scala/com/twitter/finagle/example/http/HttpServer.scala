@@ -1,7 +1,7 @@
 package com.twitter.finagle.example.http
 
 import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.httpx._
+import com.twitter.finagle.http._
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.io.Charsets.Utf8
 import com.twitter.util.Future

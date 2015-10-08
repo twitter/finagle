@@ -174,7 +174,7 @@ object Finagle extends Build {
     finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
     // Protocols
-    finagleHttpX, finagleHttpXCompat, finagleStream, finagleNative,
+    finagleHttp, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
     finagleSpdy, finagleRedis,
@@ -219,7 +219,7 @@ object Finagle extends Build {
       util("registry"),
       util("stats")
     )
-  ).dependsOn(finagleCore, finagleHttpX)
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleStats = Project(
     id = "finagle-stats",
@@ -236,7 +236,7 @@ object Finagle extends Build {
       util("stats")
     ),
     libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleHttpX)
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",
@@ -318,13 +318,13 @@ object Finagle extends Build {
 
   // see https://finagle.github.io/blog/2014/10/20/upgrading-finagle-to-netty-4/
   // for an explanation of the role of transitional -x packages in the netty4 migration.
-  lazy val finagleHttpX = Project(
-    id = "finagle-httpx",
-    base = file("finagle-httpx"),
+  lazy val finagleHttp = Project(
+    id = "finagle-http",
+    base = file("finagle-http"),
     settings = Project.defaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-httpx",
+    name := "finagle-http",
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6",
@@ -332,14 +332,14 @@ object Finagle extends Build {
     )
   ).dependsOn(finagleCore)
 
-  lazy val finagleHttpXCompat = Project(
-    id = "finagle-httpx-compat",
-    base = file("finagle-httpx-compat"),
+  lazy val finagleHttpCompat = Project(
+    id = "finagle-http-compat",
+    base = file("finagle-http-compat"),
     settings = Project.defaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-httpx-compat"
-  ).dependsOn(finagleCore, finagleHttpX)
+    name := "finagle-http-compat"
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleNative = Project(
     id = "finagle-native",
@@ -348,7 +348,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-native"
-  ).dependsOn(finagleCore, finagleHttpX)
+  ).dependsOn(finagleCore, finagleHttp)
 
   lazy val finagleStream = Project(
     id = "finagle-stream",
@@ -584,7 +584,7 @@ object Finagle extends Build {
 
     // Make the "test" command run both, test and doctest:test
     test <<= Seq(test in Test, test in DocTest).dependOn
-    ).dependsOn(finagleCore, finagleHttpX, finagleMySQL)
+    ).dependsOn(finagleCore, finagleHttp, finagleMySQL)
 
   /* Test Configuration for running tests on doc sources */
   lazy val DocTest = config("doctest") extend(Test)
