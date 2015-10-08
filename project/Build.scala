@@ -177,8 +177,8 @@ object Finagle extends Build {
     finagleHttp, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy, finagleRedis,
-    // removing benchmark because swift can't build outside of twitter for now
+    finagleSpdy, finagleRedis
+
     // finagleBenchmark
 
     // Removing projects with specs tests and their dependencies
@@ -552,19 +552,6 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-spdy"
   ).dependsOn(finagleCore)
-
-
-/*  lazy val finagleSwift = Project(
-    id = "finagle-swift",
-    base = file("finagle-swift"),
-    settings = Project.defaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-swift",
-    libraryDependencies ++= Seq(
-      "com.twitter.com.facebook.swift" % "swift-codec" % "0.6.0"
-    )
-  ).dependsOn(finagleCore, finagleThrift)*/
 
   lazy val finagleDoc = Project(
     id = "finagle-doc",

@@ -35,6 +35,9 @@ Breaking API Changes
 
   * finagle-stress: Project has been removed from Finagle. ``RB_ID=752201``
 
+  * finagle-swift: Project has been moved off of Finagle to
+    https://github.com/finagle/finagle-swift . ``RB_ID=752826``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
