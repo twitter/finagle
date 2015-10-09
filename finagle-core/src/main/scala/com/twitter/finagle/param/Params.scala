@@ -65,10 +65,11 @@ object HighResTimer {
    *
    * It is a shared resource and as such, `stop` is ignored.
    */
-  val Default: com.twitter.util.Timer =
-    new JavaTimer(true, Some("HighResTimer")) {
-      override def stop(): Unit = ()
-    }
+  val Default: com.twitter.util.Timer = util.DefaultTimer.twitter
+    // todo: make JavaTimer the default instance again  CSL-2208
+    // new JavaTimer(true, Some("HighResTimer")) {
+    //  override def stop(): Unit = ()
+    // }
 
   implicit val param = Stack.Param(HighResTimer(Default))
 }
