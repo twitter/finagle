@@ -29,6 +29,6 @@ private object ThriftCatalog extends FBThriftCatalog {
 }
 
 private object ThriftCodecManager extends FBThriftCodecManager(
-  new CompilerThriftCodecFactory, ThriftCatalog,
+  new CompilerThriftCodecFactory(false), ThriftCatalog,
   Collections.emptySet[ThriftCodec[_]]())
 
