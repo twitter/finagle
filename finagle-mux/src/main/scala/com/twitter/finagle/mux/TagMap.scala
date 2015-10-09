@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux
 
 import java.util.HashMap
+import scala.reflect.ClassTag
 
 /**
  * TagMaps maintains a mapping between tags and elements of type `T`.
@@ -35,7 +36,7 @@ private trait TagMap[T] extends Iterable[(Int, T)] {
 }
 
 private object TagMap {
-  def apply[T <: Object: ClassManifest](
+  def apply[T <: Object: ClassTag](
       set: TagSet,
       fastSize: Int = 256
   ): TagMap[T] = new TagMap[T] {

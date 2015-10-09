@@ -5,12 +5,12 @@ import com.twitter.finagle.MockTimer
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Duration, Promise, Stopwatch, Var}
+import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time._
-import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
@@ -22,7 +22,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
   implicit val patienceConfig = PatienceConfig(
     timeout = toSpan(1.second),
     interval = toSpan(zkTimeout))
-  
+
   /* This can be useful if you want to retain ZK logging output for debugging.
   val app = new org.apache.log4j.ConsoleAppender
   app.setTarget(org.apache.log4j.ConsoleAppender.SYSTEM_ERR)
@@ -52,13 +52,13 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     val session1 = ZkSession.retrying(zkTimeout, () => ZkSession(inst.zookeeperConnectString))
     @volatile var states = Seq.empty[SessionState]
     val state = session1 flatMap { session1 => session1.state }
-    state observe {
+    state.changes.register(Witness({ ws => ws match {
       case WatchState.SessionState(s) => states = s +: states
       case _ =>
-    }
+    }}))
 
-    Await.result(state.observeUntil(connected))
-    val cond = state.observeUntil(notConnected)
+    Await.result(state.changes.filter(connected).toFuture())
+    val cond = state.changes.filter(notConnected).toFuture()
 
     val session2 = {
       val z = Var.sample(session1)
@@ -69,14 +69,14 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
         .hosts(inst.zookeeperConnectString)
         .sessionTimeout(zkTimeout)
         .sessionId(z.sessionId)
-        .password(Buf.ByteArray(p))
+        .password(Buf.ByteArray.Owned(p))
         .reader()
     }
-    Await.result(session2.state.observeUntil(connected))
+    Await.result(session2.state.changes.filter(connected).toFuture())
     session2.value.close()
 
     Await.result(cond)
-    Await.result(state.observeUntil(connected))
+    Await.result(state.changes.filter(connected).toFuture())
 
     assert(states === Seq(
       SessionState.SyncConnected, SessionState.Expired,
@@ -91,16 +91,16 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     val varZkState = varZkSession flatMap { _.state }
 
     @volatile var zkStates = Seq[(SessionState, Duration)]()
-    varZkState observe {
+    varZkState.changes.register(Witness({ ws => ws match {
       case WatchState.SessionState(state) =>
         zkStates = (state, watch()) +: zkStates
       case _ =>
-    }
+    }}))
 
     @volatile var sessions = Seq[ZkSession]()
-    varZkSession observe { s =>
+    varZkSession.changes.register(Witness({ s =>
       sessions = s +: sessions
-    }
+    }))
 
     // Wait for the initial connect.
     eventually {
@@ -120,28 +120,28 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
         .hosts(inst.zookeeperConnectString)
         .sessionTimeout(zkTimeout)
         .sessionId(session1.sessionId)
-        .password(Buf.ByteArray(p))
+        .password(Buf.ByteArray.Owned(p))
         .reader()
     }
 
     val connected = new Promise[Unit]
     val closed = new Promise[Unit]
-    session2.state observe {
+    session2.state.changes.register(Witness({ ws => ws match {
       case WatchState.SessionState(SessionState.SyncConnected) =>
         connected.setDone()
       case WatchState.SessionState(SessionState.Disconnected) =>
         closed.setDone()
       case _ =>
-    }
+    }}))
 
     Await.ready(connected)
     Await.ready(session2.value.close())
 
     // This will expire the session.
-    val session1Expired = session1.state.observeUntil(
-      _ == WatchState.SessionState(SessionState.Expired))
-    val zkConnected = varZkState.observeUntil(
-      _ == WatchState.SessionState(SessionState.SyncConnected))
+    val session1Expired = session1.state.changes.filter(
+      _ == WatchState.SessionState(SessionState.Expired)).toFuture()
+    val zkConnected = varZkState.changes.filter(
+      _ == WatchState.SessionState(SessionState.SyncConnected)).toFuture()
 
     Await.ready(session1.getData("/sadfads"))
     Await.ready(session1Expired)

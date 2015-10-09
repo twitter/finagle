@@ -116,7 +116,7 @@ class Codec[A: Manifest](
     event match {
       case message: DownstreamMessageEvent => {
         val obj = message.getMessage
-        if (manifest[A].erasure.isAssignableFrom(obj.getClass)) {
+        if (manifest[A].runtimeClass.isAssignableFrom(obj.getClass)) {
           encode(obj.asInstanceOf[A]) match {
             case Some(buffer) =>
               Channels.write(context, message.getFuture, buffer, message.getRemoteAddress)

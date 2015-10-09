@@ -9,13 +9,12 @@ import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, Cluster}
-import com.twitter.finagle.cacheresolver.{CacheNode, CachePoolCluster, CachePoolConfig}
+import com.twitter.finagle.cacheresolver.{CachePoolConfig, CacheNode, CachePoolCluster}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.{Client, KetamaClientBuilder, PartitionedClient}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.finagle.{Name, Resolver}
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util.{FuturePool, Await, Duration, Future}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
@@ -75,9 +74,8 @@ class ClusterClientTest
               fail("could not start TestMemcachedServer")
           }
         }
-      ), TimeOut
-    )
-
+      )
+    , TimeOut)
 
     if (!testServers.isEmpty) {
       // set cache pool config node data
@@ -85,7 +83,6 @@ class ClusterClientTest
       val output: ByteArrayOutputStream = new ByteArrayOutputStream
       CachePoolConfig.jsonCodec.serialize(cachePoolConfig, output)
       boundedWait(zookeeperClient.get().setData(zkPath, output.toByteArray, -1))
-
 
       // a separate client which only does zk discovery for integration test
       zookeeperClient = zookeeperServer.createClient(ZooKeeperClient.digestCredentials("user","pass"))
@@ -114,7 +111,6 @@ class ClusterClientTest
     }
   }
 
-
   test("Simple ClusterClient using finagle load balancing - many keys") {
     // create simple cluster client
     val mycluster =
@@ -126,9 +122,9 @@ class ClusterClientTest
     val count = 100
     Await.result(
       Future.collect((0 until count) map { n =>
-        client.set("foo"+n, "bar"+n)
-      }), TimeOut
-    )
+        client.set("foo"+n, Buf.Utf8("bar"+n))
+      })
+    , TimeOut)
 
     val tmpClients = testServers map {
       case(server) =>
@@ -297,8 +293,9 @@ class ClusterClientTest
 
       Await.result(client.delete("foo"), TimeOut)
       assert(Await.result(client.get("foo"), TimeOut) === None)
-      Await.result(client.set("foo", "bar"), TimeOut)
-      assert(Await.result(client.get("foo"), TimeOut).get.toString(Charsets.Utf8) === "bar")
+      Await.result(client.set("foo", Buf.Utf8("bar")), TimeOut)
+      val Buf.Utf8(res) = Await.result(client.get("foo"), TimeOut).get
+      assert(res === "bar")
     }
   }
 
@@ -313,13 +310,14 @@ class ClusterClientTest
 
       val count = 100
       Await.result(Future.collect(
-        (0 until count) map { n => client.set("foo" + n, "bar" + n) }
+        (0 until count) map { n => client.set("foo" + n, Buf.Utf8("bar" + n))}
       ), TimeOut)
 
       (0 until count).foreach {
         n => {
           val c = client.clientOf("foo" + n)
-          assert(Await.result(c.get("foo" + n), TimeOut).get.toString(Charsets.Utf8) === "bar" + n)
+          val Buf.Utf8(res) = Await.result(c.get("foo" + n), TimeOut).get
+          assert(res === "bar" + n)
         }
       }
     }

@@ -1,5 +1,6 @@
 package com.twitter.finagle.server
 
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
@@ -80,6 +81,10 @@ case class DefaultServer[Req, Rep, In, Out](
 
   val underlying: StackServer[Req, Rep] = Server()
 
+  private[this] val sem =
+    if (maxConcurrentRequests == Int.MaxValue) None
+    else Some(new AsyncSemaphore(maxConcurrentRequests, 0))
+
   val configured = underlying
     .configured(param.Label(name))
     .configured(param.Timer(timer))
@@ -90,7 +95,7 @@ case class DefaultServer[Req, Rep, In, Out](
     .configured(param.Reporter(reporter))
     .configured(MaskCancelFilter.Param(!cancelOnHangup))
     .configured(TimeoutFilter.Param(requestTimeout))
-    .configured(RequestSemaphoreFilter.Param(maxConcurrentRequests))
+    .configured(RequestSemaphoreFilter.Param(sem))
 
   def serve(addr: SocketAddress, factory: ServiceFactory[Req, Rep]): ListeningServer =
     configured.serve(addr, factory)

@@ -1,9 +1,8 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.transport.Transport
-import com.twitter.concurrent.{AsyncQueue, Permit}
+import com.twitter.concurrent.AsyncQueue
 import com.twitter.util.{Future, Promise, Throw, Return}
-import com.twitter.finagle.WriteException
 
 /**
  * A generic pipelining dispatcher, which assumes that servers will
@@ -21,21 +20,20 @@ class PipeliningDispatcher[Req, Rep](trans: Transport[Req, Rep])
     extends GenSerialClientDispatcher[Req, Rep, Req, Rep](trans) {
   private[this] val q = new AsyncQueue[Promise[Rep]]
 
-  private[this] def loop() {
-    q.poll() onSuccess { p =>
-      trans.read() onSuccess { rep =>
-        p.setValue(rep)
-      } onFailure { exc =>
-        p.setException(exc)
-      } ensure {
-        loop()
+  private[this] val transRead: Promise[Rep] => Unit =
+    p =>
+      trans.read().respond { res =>
+        try p.update(res)
+        finally loop()
       }
-    }
-  }
+
+  private[this] def loop(): Unit =
+    q.poll().onSuccess(transRead)
+
   loop()
 
   protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
-    trans.write(req) onSuccess { _ => q.offer(p) }
+    trans.write(req).onSuccess { _ => q.offer(p) }
 
   override def apply(req: Req): Future[Rep] = super.apply(req).masked
 }

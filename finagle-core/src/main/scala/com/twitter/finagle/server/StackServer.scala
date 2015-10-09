@@ -118,7 +118,14 @@ trait StackServer[Req, Rep]
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   extends StackServer[Req, Rep] { self =>
 
+  /**
+   * The type we write into the transport.
+   */
   protected type In
+
+  /**
+   * The type we read out of the transport.
+   */
   protected type Out
 
   /**

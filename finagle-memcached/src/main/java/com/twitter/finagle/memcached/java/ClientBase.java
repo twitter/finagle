@@ -1,16 +1,15 @@
 package com.twitter.finagle.memcached.java;
 
 import java.util.List;
+import java.util.Map;
 
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
-import scala.collection.immutable.Map;
-
-import org.jboss.netty.buffer.ChannelBuffer;
 
 import com.twitter.finagle.memcached.GetResult;
 import com.twitter.finagle.memcached.GetsResult;
+import com.twitter.io.Buf;
 import com.twitter.util.Function;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
@@ -23,10 +22,10 @@ public class ClientBase extends Client {
     this.underlying = underlying;
   }
 
-  public Future<ChannelBuffer> get(String key) {
-    Future<Option<ChannelBuffer>> result = underlying.get(key);
-    return result.map(new Function<Option<ChannelBuffer>, ChannelBuffer>() {
-      public ChannelBuffer apply(Option<ChannelBuffer> value) {
+  public Future<Buf> get(String key) {
+    Future<Option<Buf>> result = underlying.get(key);
+    return result.map(new Function<Option<Buf>, Buf>() {
+      public Buf apply(Option<Buf> value) {
         if (value.isDefined()) {
           return value.get();
         } else {
@@ -37,46 +36,44 @@ public class ClientBase extends Client {
   }
 
   public Future<ResultWithCAS> gets(String key) {
-    Future<Option<Tuple2<ChannelBuffer, ChannelBuffer>>> result = underlying.gets(key);
-    return result.map(
-      new Function<Option<Tuple2<ChannelBuffer, ChannelBuffer>>, ResultWithCAS>() {
-        public ResultWithCAS apply(Option<Tuple2<ChannelBuffer, ChannelBuffer>> value) {
-          if (value.isDefined()) {
-            return new ResultWithCAS(value.get()._1(), value.get()._2());
-          } else {
-            return null;
-          }
+    Future<Option<Tuple2<Buf, Buf>>> result = underlying.gets(key);
+    return result.map(new Function<Option<Tuple2<Buf, Buf>>, ResultWithCAS>() {
+      public ResultWithCAS apply(Option<Tuple2<Buf, Buf>> value) {
+        if (value.isDefined()) {
+          return new ResultWithCAS(value.get()._1(), value.get()._2());
+        } else {
+          return null;
         }
       }
-    );
+    });
   }
 
-  public Future<java.util.Map<String, ChannelBuffer>> get(List<String> keys) {
-    Future<scala.collection.immutable.Map<String, ChannelBuffer>> result =
+  public Future<Map<String, Buf>> get(List<String> keys) {
+    Future<scala.collection.immutable.Map<String, Buf>> result =
       underlying.get(JavaConversions.asScalaBuffer(keys));
     return result.map(
-      new Function<Map<String, ChannelBuffer>, java.util.Map<String, ChannelBuffer>>() {
-        public java.util.Map<String, ChannelBuffer> apply(Map<String, ChannelBuffer> map) {
+      new Function<scala.collection.immutable.Map<String, Buf>, Map<String, Buf>>() {
+        public Map<String, Buf> apply(scala.collection.immutable.Map<String, Buf> map) {
           return JavaConversions.mapAsJavaMap(map);
         }
       }
     );
   }
 
-  public Future<java.util.Map<String, ResultWithCAS>> gets(List<String> keys) {
-    Future<Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>> result =
+  public Future<Map<String, ResultWithCAS>> gets(List<String> keys) {
+    Future<scala.collection.immutable.Map<String, Tuple2<Buf, Buf>>> result =
       underlying.gets(JavaConversions.asScalaBuffer(keys));
     return result.map(new Function<
-      Map<String, Tuple2<ChannelBuffer, ChannelBuffer>>,
-      java.util.Map<String, ResultWithCAS>>() {
-      public java.util.Map<String, ResultWithCAS> apply(
-        Map<String, Tuple2<ChannelBuffer, ChannelBuffer>> map) {
+      scala.collection.immutable.Map<String, Tuple2<Buf, Buf>>,
+      Map<String, ResultWithCAS>>() {
+      public Map<String, ResultWithCAS> apply(
+        scala.collection.immutable.Map<String, Tuple2<Buf, Buf>> map) {
         return JavaConversions.mapAsJavaMap(
-          map.mapValues(new Function<Tuple2<ChannelBuffer, ChannelBuffer>, ResultWithCAS>() {
-            public ResultWithCAS apply(Tuple2<ChannelBuffer, ChannelBuffer> tuple) {
-              return new ResultWithCAS(tuple._1(), tuple._2());
-            }
-          })
+            map.mapValues(new Function<Tuple2<Buf, Buf>, ResultWithCAS>() {
+              public ResultWithCAS apply(Tuple2<Buf, Buf> tuple) {
+                return new ResultWithCAS(tuple._1(), tuple._2());
+              }
+            })
         );
       }
     });
@@ -90,7 +87,7 @@ public class ClientBase extends Client {
     return underlying.getsResult(JavaConversions.asScalaBuffer(keys));
   }
 
-  public Future<Void> set(String key, ChannelBuffer value) {
+  public Future<Void> set(String key, Buf value) {
     Future<scala.runtime.BoxedUnit> result = underlying.set(key, value);
     return result.map(new Function<scala.runtime.BoxedUnit, Void>() {
       public Void apply(scala.runtime.BoxedUnit obj) {
@@ -99,7 +96,7 @@ public class ClientBase extends Client {
     });
   }
 
-  public Future<Void> set(String key, int flags, Time expiry, ChannelBuffer value) {
+  public Future<Void> set(String key, int flags, Time expiry, Buf value) {
     Future<scala.runtime.BoxedUnit> result = underlying.set(key, flags, expiry, value);
     return result.map(new Function<scala.runtime.BoxedUnit, Void>() {
       public Void apply(scala.runtime.BoxedUnit obj) {
@@ -108,37 +105,37 @@ public class ClientBase extends Client {
     });
   }
 
-  public Future<Boolean> add(String key, ChannelBuffer value) {
+  public Future<Boolean> add(String key, Buf value) {
     return underlying.add(key, value);
   }
 
-  public Future<Boolean> add(String key, int flags, Time expiry, ChannelBuffer value) {
+  public Future<Boolean> add(String key, int flags, Time expiry, Buf value) {
     return underlying.add(key, flags, expiry, value);
   }
 
-  public Future<Boolean> append(String key, ChannelBuffer value) {
+  public Future<Boolean> append(String key, Buf value) {
     return underlying.append(key, value);
   }
 
-  public Future<Boolean> prepend(String key, ChannelBuffer value) {
+  public Future<Boolean> prepend(String key, Buf value) {
     return underlying.prepend(key, value);
   }
 
-  public Future<Boolean> replace(String key, ChannelBuffer value) {
+  public Future<Boolean> replace(String key, Buf value) {
     return underlying.replace(key, value);
   }
 
-  public Future<Boolean> replace(String key, int flags, Time expiry, ChannelBuffer value) {
+  public Future<Boolean> replace(String key, int flags, Time expiry, Buf value) {
     return underlying.replace(key, flags, expiry, value);
   }
 
-  public Future<Boolean> cas(String key, ChannelBuffer value, ChannelBuffer casUnique) {
+  public Future<Boolean> cas(String key, Buf value, Buf casUnique) {
     return underlying.cas(key, value, casUnique);
   }
 
   public Future<Boolean> cas(
     String key, int flags, Time expiry,
-    ChannelBuffer value, ChannelBuffer casUnique) {
+    Buf value, Buf casUnique) {
     return underlying.cas(key, flags, expiry, value, casUnique);
   }
 
@@ -151,7 +148,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }
@@ -164,7 +161,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }
@@ -177,7 +174,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }
@@ -190,7 +187,7 @@ public class ClientBase extends Client {
     return result.map(new Function<Option<Long>, Long>() {
       public Long apply(Option<Long> value) {
         if (value.isDefined()) {
-          return (Long) value.get();
+          return value.get();
         } else {
           return -1L;
         }

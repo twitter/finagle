@@ -1,15 +1,17 @@
 package com.twitter.finagle.httpx
 
+import com.twitter.collection.RecordSchema
 import com.twitter.finagle.httpx.netty.{HttpRequestProxy, Bijections}
 import com.twitter.io.{Charsets, Reader}
-import java.io.ByteArrayOutputStream
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
+import scala.annotation.varargs
 import scala.beans.BeanProperty
+import scala.annotation.varargs
 import scala.collection.JavaConverters._
 
 import Bijections._
@@ -20,6 +22,16 @@ import Bijections._
  * Use RequestProxy to create an even richer subclass.
  */
 abstract class Request extends Message with HttpRequestProxy {
+
+  /**
+   * Arbitrary user-defined context associated with this request object.
+   * [[com.twitter.collection.RecordSchema.Record RecordSchema.Record]] is
+   * used here, rather than [[com.twitter.finagle.Context Context]] or similar
+   * out-of-band mechanisms, to make the connection between the request and its
+   * associated context explicit.
+   */
+  def ctx: Request.Schema.Record = _ctx
+  private[this] val _ctx = Request.Schema.newRecord()
 
   def isRequest = true
 
@@ -164,6 +176,13 @@ abstract class Request extends Message with HttpRequestProxy {
 
 object Request {
 
+  /**
+   * [[com.twitter.collection.RecordSchema RecordSchema]] declaration, used
+   * to generate [[com.twitter.collection.RecordSchema.Record Record]] instances
+   * for Request.ctx.
+   */
+  val Schema: RecordSchema = new RecordSchema
+
   /** Decode a Request from a String */
   def decodeString(s: String): Request = {
     decodeBytes(s.getBytes(Charsets.Utf8))
@@ -187,6 +206,7 @@ object Request {
    *
    * @params params a list of key-value pairs representing the query string.
    */
+  @varargs
   def apply(params: Tuple2[String, String]*): Request =
     apply("/", params:_*)
 

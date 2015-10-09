@@ -14,6 +14,9 @@ junit_tests(name='scala',
 
     ':silly-thrift-dep',
   ],
+  resources=[
+    'finagle/finagle-thrift/src/test/resources',
+  ],
   sources=rglobs('*.scala')
 )
 

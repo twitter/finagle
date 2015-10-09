@@ -3,17 +3,20 @@ package com.twitter.finagle.thrift
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.ssl.Ssl
+import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
+import com.twitter.finagle.transport.Transport
 import com.twitter.test._
 import com.twitter.util.{Closable, Await, Duration, Future}
-import java.io.{PrintWriter, StringWriter}
+import java.io.{File, PrintWriter, StringWriter}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TProtocolFactory, TCompactProtocol}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import scala.reflect.ClassTag
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
@@ -28,7 +31,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   type Iface = B.ServiceIface
-  def ifaceManifest = implicitly[ClassManifest[B.ServiceIface]]
+  def ifaceManifest = implicitly[ClassTag[B.ServiceIface]]
 
   class BServiceImpl extends B.ServiceIface {
     def add(a: Int, b: Int) = Future.exception(new AnException)
@@ -274,6 +277,45 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
       assert(Await.result(client.someway()) === null)  // don't block!
     }
+  }
+
+  test("Configuring SSL over stack param") {
+    object SslFile {
+      val cert = new File(getClass.getResource("/cert.pem").toURI).getAbsolutePath
+      val key = new File(getClass.getResource("/key.pem").toURI).getAbsolutePath
+    }
+
+    def mkThriftTlsServer(sr: StatsReceiver) =
+      Thrift.server
+        .configured(Stats(sr))
+        .configured(Transport.TLSServerEngine(Some {
+        () =>  Ssl.server(SslFile.cert, SslFile.key, null, null, null)
+      }))
+        .serve(
+          new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+          ifaceToService(processor, Protocols.binaryFactory()))
+
+    def mkThriftTlsClient(server: ListeningServer) =
+      Thrift.client
+        .configured(Transport.TLSClientEngine(Some({
+          case inet: InetSocketAddress =>
+            Ssl.clientWithoutCertificateValidation(inet.getHostName, inet.getPort)
+          case _ =>
+            Ssl.clientWithoutCertificateValidation()
+        })))
+        .newIface[B.ServiceIface](server)
+
+
+    val sr = new InMemoryStatsReceiver()
+
+    val server = mkThriftTlsServer(sr)
+    val client = mkThriftTlsClient(server)
+
+    Await.result(client.multiply(1, 42), Duration.fromSeconds(15))
+
+    assert(sr.counters(Seq("success")) === 1)
+
+    server.close()
   }
 
   runThriftTests()

@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
-import com.twitter.finagle.param.{Label, Stats}
+import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.transport.Transport
@@ -57,7 +57,10 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     with Server[Array[Byte], Array[Byte]] with ThriftRichServer {
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
-  protected val defaultClientName = "thrift"
+
+  protected lazy val Label(defaultClientName) = client.params[Label]
+
+  override protected lazy val Stats(stats) = client.params[Stats]
 
   object param {
     case class ClientId(clientId: Option[thrift.ClientId])
@@ -125,7 +128,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   case class Client(
     stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
-    params: Stack.Params = StackClient.defaultParams,
+    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift"),
     framed: Boolean = true
   ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client] with ThriftRichClient {
     protected def copy1(
@@ -133,12 +136,13 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected val defaultClientName = "thrift"
+    protected lazy val Label(defaultClientName) = params[Label]
 
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
 
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
+    override protected lazy val Stats(stats) = params[Stats]
 
     protected def newTransporter(): Transporter[In, Out] = {
       val pipeline =
@@ -207,7 +211,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
-    params: Stack.Params = StackServer.defaultParams,
+    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("thrift"),
     framed: Boolean = true
   ) extends StdStackServer[Array[Byte], Array[Byte], Server] with ThriftRichServer {
     protected def copy1(
@@ -225,7 +229,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
         if (framed) thrift.ThriftServerFramedPipelineFactory
         else thrift.ThriftServerBufferedPipelineFactory(protocolFactory)
 
-      Netty3Listener("thrift", pipeline)
+      Netty3Listener(pipeline,
+        if (params.contains[Label]) params else params + Label("thrift"))
     }
 
     protected def newDispatcher(
@@ -247,3 +252,4 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     service: ServiceFactory[Array[Byte], Array[Byte]]
   ): ListeningServer = server.serve(addr, service)
 }
+

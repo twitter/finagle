@@ -63,6 +63,8 @@ class DelayedFactory[Req, Rep](
     else Status.Busy
 
   private[finagle] def numWaiters(): Int = q.size()
+
+  override def toString: String = s"DelayedFactory(waiters=${numWaiters()})"
 }
 
 object DelayedFactory {

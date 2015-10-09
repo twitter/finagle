@@ -1,13 +1,14 @@
 package com.twitter.finagle.httpx
 
 import com.google.common.base.Charsets
+import com.twitter.collection.RecordSchema
 import com.twitter.finagle.httpx.netty.{HttpResponseProxy, Bijections}
 import com.twitter.io.Reader
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http.{
   DefaultHttpResponse, HttpResponse, HttpResponseDecoder, HttpResponseEncoder,
-  HttpResponseStatus, HttpVersion
+  HttpResponseStatus
 }
 
 import Bijections._
@@ -16,6 +17,15 @@ import Bijections._
  * Rich HttpResponse
  */
 abstract class Response extends Message with HttpResponseProxy {
+
+  /**
+   * Arbitrary user-defined context associated with this response object.
+   * [[com.twitter.collection.RecordSchema.Record RecordSchema.Record]] is
+   * used here, rather than [[com.twitter.finagle.Context Context]] or similar
+   * out-of-band mechanisms, to make the connection between the response and its
+   * associated context explicit.
+   */
+  val ctx: Response.Schema.Record = Response.Schema.newRecord()
 
   def isRequest = false
 
@@ -40,17 +50,35 @@ abstract class Response extends Message with HttpResponseProxy {
 }
 
 object Response {
+  /**
+   * Utility class to make it possible to mock/spy a Response.
+   */
+  class Ok extends Response {
+    val httpResponse = apply.httpResponse
+  }
 
-  /** Decode a Response from a String */
+  /**
+   * [[com.twitter.collection.RecordSchema RecordSchema]] declaration, used
+   * to generate [[com.twitter.collection.RecordSchema.Record Record]] instances
+   * for Response.ctx.
+   */
+  val Schema: RecordSchema = new RecordSchema
+
+  /** Decode a [[Response]] from a String */
   def decodeString(s: String): Response = {
+    decodeBytes(s.getBytes(Charsets.UTF_8))
+  }
+
+  /** Decode a [[Response]] from a byte array */
+  def decodeBytes(b: Array[Byte]): Response = {
     val decoder = new DecoderEmbedder(
       new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
-    decoder.offer(ChannelBuffers.wrappedBuffer(s.getBytes(Charsets.UTF_8)))
+    decoder.offer(ChannelBuffers.wrappedBuffer(b))
     val res = decoder.poll().asInstanceOf[HttpResponse]
     assert(res ne null)
     Response(res)
   }
-
+  
   /** Create Response. */
   def apply(): Response =
     apply(Version.Http11, Status.Ok)

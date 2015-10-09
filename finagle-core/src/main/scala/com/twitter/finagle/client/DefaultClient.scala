@@ -4,21 +4,21 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
-import com.twitter.finagle.loadbalancer.{
-  DefaultBalancerFactory, LoadBalancerFactory, WeightedLoadBalancerFactory}
+import com.twitter.finagle.loadbalancer.{DefaultBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.service.{
   ExpiringService, FailFastFactory, FailureAccrualFactory, TimeoutFilter}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{
-  DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+  DefaultLogger, DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.util.{Duration, Monitor, Timer, Var}
 import java.net.{SocketAddress, InetSocketAddress}
 
 object DefaultClient {
   private def defaultFailureAccrual(sr: StatsReceiver): ServiceFactoryWrapper =
-    FailureAccrualFactory.wrapper(sr, 5, () => 5.seconds)(DefaultTimer.twitter)
+    FailureAccrualFactory.wrapper(sr, 5, () => 5.seconds, "DefaultClient", DefaultLogger, unconnected)(DefaultTimer.twitter)
 
   /** marker trait for uninitialized failure accrual */
   private[finagle] trait UninitializedFailureAccrual
@@ -74,7 +74,7 @@ case class DefaultClient[Req, Rep](
   tracer: Tracer  = DefaultTracer,
   monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
-  loadBalancer: WeightedLoadBalancerFactory = DefaultBalancerFactory,
+  loadBalancer: LoadBalancerFactory = DefaultBalancerFactory,
   newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
 ) extends Client[Req, Rep] { outer =>
 
@@ -140,7 +140,7 @@ case class DefaultClient[Req, Rep](
   }
 
   private[this] val underlying = Client()
-  
+
   def newService(dest: Name, label: String) =
     underlying.newService(dest, label)
 

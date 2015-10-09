@@ -1,19 +1,19 @@
 package com.twitter.finagle.memcached
 
-import com.twitter.finagle.memcached.protocol._
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.util.{Time, Future}
+import com.google.common.hash.Hashing
 import com.twitter.finagle.Service
-import com.twitter.finagle.memcached.util.{ParserUtils, AtomicMap}
-import com.twitter.io.Charsets
+import com.twitter.finagle.memcached.protocol._
+import com.twitter.finagle.memcached.util.{AtomicMap, ParserUtils}
+import com.twitter.io.Buf
+import com.twitter.util.{Future, Time}
 
 /**
- * Evalutes a given Memcached operation and returns the result.
+ * Evaluates a given Memcached operation and returns the result.
  */
-class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
+class Interpreter(map: AtomicMap[Buf, Entry]) {
+
   import ParserUtils._
+  import Interpreter._
 
   def apply(command: Command): Response = {
     command match {
@@ -47,16 +47,33 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
               NotStored()
           }
         }
-      case Append(key, flags, expiry, value) =>
+      case Append(key, flags, expiry, value: Buf) =>
         map.lock(key) { data =>
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              data(key) = Entry(wrappedBuffer(entry.value, value), expiry)
+              data(key) = Entry(entry.value.concat(value), expiry)
               Stored()
             case Some(_) =>
               data.remove(key) // expired
               NotStored()
+            case _ =>
+              NotStored()
+          }
+        }
+      case Cas(key, flags, expiry, value, casUnique) =>
+        map.lock(key) { data =>
+          val existing = data.get(key)
+          existing match {
+            case Some(entry) if entry.valid =>
+              val currentValue = entry.value
+              val hash = hash64(currentValue)
+              if (casUnique.equals(hash)) {
+                data(key) = Entry(value, expiry)
+                Stored()
+              } else {
+                NotStored()
+              }
             case _ =>
               NotStored()
           }
@@ -66,7 +83,7 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              data(key) = Entry(wrappedBuffer(value, entry.value), expiry)
+              data(key) = Entry(value.concat(entry.value), expiry)
               Stored()
             case Some(_) =>
               data.remove(key) // expired
@@ -77,18 +94,20 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
         }
       case Get(keys) =>
         Values(
-          keys flatMap { key =>
+          keys.flatMap { key =>
             map.lock(key) { data =>
               data.get(key) filter { entry =>
                 if (!entry.valid)
                   data.remove(key) // expired
                 entry.valid
               } map { entry =>
-                Value(key, wrappedBuffer(entry.value))
+                Value(key, entry.value)
               }
             }
           }
         )
+      case Gets(keys) =>
+        getByKeys(keys)
       case Delete(key) =>
         map.lock(key) { data =>
           if (data.remove(key).isDefined)
@@ -101,16 +120,16 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
           val existing = data.get(key)
           existing match {
             case Some(entry) if entry.valid =>
-              val existingString = entry.value.toString(Charsets.UsAscii)
+              val Buf.Utf8(existingString) = entry.value
               if (!existingString.isEmpty && !DigitsPattern.matcher(existingString).matches())
                 throw new ClientError("cannot increment or decrement non-numeric value")
 
-              val existingValue =
+              val existingValue: Long =
                 if (existingString.isEmpty) 0L
                 else existingString.toLong
 
-              val result = existingValue + delta
-              data(key) = Entry(result.toString, entry.expiry)
+              val result: Long = existingValue + delta
+              data(key) = Entry(Buf.Utf8(result.toString), entry.expiry)
 
               Number(result)
             case Some(_) =>
@@ -128,9 +147,40 @@ class Interpreter(map: AtomicMap[ChannelBuffer, Entry]) {
         NoOp()
     }
   }
+
+  private def getByKeys(keys: Seq[Buf]): Values = {
+    Values(
+      keys.flatMap { key =>
+        map.lock(key) { data =>
+          data.get(key).filter { entry =>
+            entry.valid
+          }.map { entry =>
+            val value = entry.value
+            Value(key, value, Some(hash64(value)))
+          }
+        }
+      }
+    )
+  }
+
 }
 
-case class Entry(value: ChannelBuffer, expiry: Time) {
+private[memcached] object Interpreter {
+  /*
+  * Using non-cryptographic goodFastHash Hashing Algorithm
+  * for we only care about speed for testing.
+  */
+  private[memcached] def hash64(value: Buf): Buf = {
+    val hash = Hashing.goodFastHash(64)
+      .newHasher(value.length)
+      .putBytes(Buf.ByteArray.Owned.extract(value))
+      .hash()
+      .asBytes()
+    Buf.ByteArray.Owned(hash)
+  }
+}
+
+case class Entry(value: Buf, expiry: Time) {
   /**
    * Whether or not the cache entry has expired
    */

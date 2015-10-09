@@ -7,9 +7,10 @@ package com.twitter.finagle
  */
 
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
 import com.twitter.finagle.tracing.TraceInitializerFilter
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.Closable
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
@@ -77,6 +78,11 @@ trait Codec[Req, Rep] {
    * Client/Server Builders rather than stacks.
    */
   def newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]
+
+  /**
+   * A protocol library name to use for displaying which protocol library this client or server is using.
+   */
+  def protocolLibraryName: String = "not-specified"
 }
 
 /**
@@ -128,4 +134,9 @@ trait CodecFactory[Req, Rep] {
 
   def client: Client
   def server: Server
+
+  /**
+   * A protocol library name to use for displaying which protocol library this client or server is using.
+   */
+  def protocolLibraryName: String = "not-specified"
 }

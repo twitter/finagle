@@ -1,16 +1,10 @@
 package com.twitter.finagle.tracing
 
-/**
- * Tracers record trace events.
- */
-
 import com.twitter.finagle.util.LoadService
-import com.twitter.util.Future
 import com.twitter.util.{Duration, Time, TimeFormat}
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.logging.Logger
-import scala.collection.mutable.ArrayBuffer
 
 private[tracing] object RecordTimeFormat
   extends TimeFormat("MMdd HH:mm:ss.SSS")
@@ -29,17 +23,26 @@ object Record {
  * @param annotation What kind of information should we record?
  * @param duration Did this event have a duration? For example: how long did a certain code block take to run
  */
-case class Record(traceId: TraceId, timestamp: Time, annotation: Annotation, duration: Option[Duration]) {
-  override def toString = "%s %s] %s".format(
+case class Record(
+    traceId: TraceId,
+    timestamp: Time,
+    annotation: Annotation,
+    duration: Option[Duration]) {
+  override def toString: String = "%s %s] %s".format(
     RecordTimeFormat.format(timestamp), traceId, annotation)
 }
 
 sealed trait Annotation
 object Annotation {
+  case object WireSend                             extends Annotation
+  case object WireRecv                             extends Annotation
+  case class WireRecvError(error: String)          extends Annotation
   case class ClientSend()                          extends Annotation
   case class ClientRecv()                          extends Annotation
+  case class ClientRecvError(error: String)        extends Annotation
   case class ServerSend()                          extends Annotation
   case class ServerRecv()                          extends Annotation
+  case class ServerSendError(error: String)        extends Annotation
   case class ClientSendFragment()                  extends Annotation
   case class ClientRecvFragment()                  extends Annotation
   case class ServerSendFragment()                  extends Annotation
@@ -64,8 +67,11 @@ object Tracer {
   type Factory = () => Tracer
 }
 
+/**
+ * Tracers record trace events.
+ */
 trait Tracer {
-  def record(record: Record)
+  def record(record: Record): Unit
 
   /**
    * Should we sample this trace or not? Could be decided
@@ -79,7 +85,7 @@ trait Tracer {
 
 class NullTracer extends Tracer {
   val factory: Tracer.Factory = () => this
-  def record(record: Record) {/*ignore*/}
+  def record(record: Record): Unit = {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
 
@@ -94,12 +100,12 @@ object BroadcastTracer {
   }
 
   private class Two(first: Tracer, second: Tracer) extends Tracer {
-    def record(record: Record) {
+    def record(record: Record): Unit = {
       first.record(record)
       second.record(record)
     }
 
-    def sampleTrace(traceId: TraceId) = {
+    def sampleTrace(traceId: TraceId): Option[Boolean] = {
       val sampledByFirst = first.sampleTrace(traceId)
       val sampledBySecond = second.sampleTrace(traceId)
       if (sampledByFirst == Some(true) || sampledBySecond == Some(true))
@@ -112,11 +118,11 @@ object BroadcastTracer {
   }
 
   private class N(tracers: Seq[Tracer]) extends Tracer {
-    def record(record: Record) {
+    def record(record: Record): Unit = {
       tracers foreach { _.record(record) }
     }
 
-    def sampleTrace(traceId: TraceId) = {
+    def sampleTrace(traceId: TraceId): Option[Boolean] = {
       if (tracers exists { _.sampleTrace(traceId) == Some(true) })
         Some(true)
       else if (tracers forall { _.sampleTrace(traceId) == Some(false) })
@@ -130,13 +136,18 @@ object BroadcastTracer {
 object DefaultTracer extends Tracer with Proxy {
   private[this] val tracers = LoadService[Tracer]()
   private[this] val log = Logger.getLogger(getClass.getName)
-  tracers foreach { tracer =>
+  tracers.foreach { tracer =>
     log.info("Tracer: %s".format(tracer.getClass.getName))
   }
+
+  // Note, `self` can be null during part of app initialization
   @volatile var self: Tracer = BroadcastTracer(tracers)
 
-  def record(record: Record) = self.record(record)
-  def sampleTrace(traceId: TraceId) = self.sampleTrace(traceId)
+  def record(record: Record): Unit =
+    if (self == null) () else self.record(record)
+
+  def sampleTrace(traceId: TraceId): Option[Boolean] =
+    if (self == null) None else self.sampleTrace(traceId)
 
   val get = this
 }
@@ -150,13 +161,13 @@ class BufferingTracer extends Tracer
 {
   private[this] var buf: List[Record] = Nil
 
-  def record(record: Record) = synchronized {
+  def record(record: Record): Unit = synchronized {
     buf ::= record
   }
 
-  def iterator = synchronized(buf).reverse.iterator
+  def iterator: Iterator[Record] = synchronized(buf).reverseIterator
 
-  def clear() = synchronized { buf = Nil }
+  def clear(): Unit = synchronized { buf = Nil }
 
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
 }
@@ -164,7 +175,7 @@ class BufferingTracer extends Tracer
 object ConsoleTracer extends Tracer {
   val factory: Tracer.Factory = () => this
 
-  def record(record: Record) {
+  def record(record: Record): Unit = {
     println(record)
   }
 

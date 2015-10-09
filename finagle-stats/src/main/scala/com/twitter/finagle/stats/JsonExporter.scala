@@ -3,16 +3,17 @@ package com.twitter.finagle.stats
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.google.common.annotations.VisibleForTesting
 import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.httpx.{RequestParamMap, Response, Request, MediaType}
+import com.twitter.finagle.httpx.{MediaType, RequestParamMap, Response, Request, Status}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
+import com.twitter.util.registry.GlobalRegistry
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
 import scala.util.matching.Regex
@@ -34,7 +35,6 @@ object useCounterDeltas extends GlobalFlag[Boolean](
 
 object JsonExporter {
 
-  @VisibleForTesting
   private[stats] def startOfNextMinute: Time =
     Time.fromSeconds(Time.now.inMinutes * 60) + 1.minute
 
@@ -60,10 +60,18 @@ class JsonExporter(
     mkRegex(regexesString)
   }
 
+  private[this] val registryLoaded = new AtomicBoolean(false)
+
   // thread-safety provided by synchronization on `this`
   private[this] var deltas: Option[CounterDeltas] = None
 
   def apply(request: Request): Future[Response] = {
+    if (registryLoaded.compareAndSet(false, true)) {
+      GlobalRegistry.get.put(
+        Seq("stats", "commons_metrics", "counters_latched"),
+        useCounterDeltas().toString)
+    }
+
     val response = Response()
     response.contentType = MediaType.Json
 
@@ -119,7 +127,14 @@ class JsonExporter(
     filtered: Boolean,
     counterDeltasOn: Boolean = false
   ): String = {
-    val gauges = registry.sampleGauges().asScala
+    val gauges = try registry.sampleGauges().asScala catch {
+      case NonFatal(e) =>
+        // because gauges run arbitrary user code, we want to protect ourselves here.
+        // while the underlying registry should protect against individual misbehaving
+        // gauges, an extra level of belt-and-suspenders seemed worthwhile.
+        log.error(e, "exception while collecting gauges")
+        Map.empty[String, Number]
+    }
     val histos = registry.sampleHistograms().asScala
     val counters = if (counterDeltasOn && useCounterDeltas()) {
       getOrRegisterLatchedStats().deltas

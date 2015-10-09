@@ -29,7 +29,8 @@ class WatermarkPool[Req, Rep](
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxWaiters: Int = Int.MaxValue)
   extends ServiceFactory[Req, Rep]
-{
+{ thePool => // note: avoids `self` as an alias because ServiceProxy has a `self`
+
   private[this] val queue       = new ArrayDeque[ServiceWrapper]()
   private[this] val waiters     = new ArrayDeque[Promise[Service[Req, Rep]]]()
   private[this] var numServices = 0
@@ -37,14 +38,18 @@ class WatermarkPool[Req, Rep](
 
   private[this] val numWaiters = statsReceiver.counter("pool_num_waited")
   private[this] val tooManyWaiters = statsReceiver.counter("pool_num_too_many_waiters")
-  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") { synchronized { waiters.size } }
-  private[this] val sizeStat = statsReceiver.addGauge("pool_size") { synchronized { numServices } }
+  private[this] val waitersStat = statsReceiver.addGauge("pool_waiters") {
+    thePool.synchronized { waiters.size }
+  }
+  private[this] val sizeStat = statsReceiver.addGauge("pool_size") {
+    thePool.synchronized { numServices }
+  }
 
   /**
    * Flush waiters by creating new services for them. This must
    * be called whenever we decrease the service count.
    */
-  private[this] def flushWaiters() = synchronized {
+  private[this] def flushWaiters() = thePool.synchronized {
     while (numServices < highWatermark && !waiters.isEmpty) {
       val waiter = waiters.removeFirst()
       waiter.become(this())
@@ -55,7 +60,7 @@ class WatermarkPool[Req, Rep](
     extends ServiceProxy[Req, Rep](underlying)
   {
     override def close(deadline: Time) = {
-      val releasable = WatermarkPool.this.synchronized {
+      val releasable = thePool.synchronized {
         if (!isOpen) {
           numServices -= 1
           true
@@ -105,7 +110,7 @@ class WatermarkPool[Req, Rep](
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
     if (!isOpen)
       return Future.exception(new ServiceClosedException)
-    synchronized {
+    thePool.synchronized {
       dequeue() match {
         case Some(service) =>
           return Future.value(service)
@@ -119,9 +124,9 @@ class WatermarkPool[Req, Rep](
           numWaiters.incr()
           waiters.addLast(p)
           p.setInterruptHandler { case _cause =>
-            if (WatermarkPool.this.synchronized(waiters.remove(p))) {
+            if (thePool.synchronized(waiters.remove(p))) {
               val failure = Failure.adapt(
-                new CancelledConnectionException(_cause), 
+                new CancelledConnectionException(_cause),
                 Failure.Restartable|Failure.Interrupted)
               p.setException(failure)
             }
@@ -133,10 +138,10 @@ class WatermarkPool[Req, Rep](
     // If we reach this point, we've committed to creating a service
     // (numServices was increased by one).
     val p = new Promise[Service[Req, Rep]]
-    val underlying = factory(conn) map { new ServiceWrapper(_) }
-    underlying respond { res =>
+    val underlying = factory(conn).map { new ServiceWrapper(_) }
+    underlying.respond { res =>
       p.updateIfEmpty(res)
-      if (res.isThrow) synchronized {
+      if (res.isThrow) thePool.synchronized {
         numServices -= 1
         flushWaiters()
       }
@@ -144,12 +149,12 @@ class WatermarkPool[Req, Rep](
     p.setInterruptHandler { case e =>
       val failure = Failure.adapt(e, Failure.Restartable|Failure.Interrupted)
       if (p.updateIfEmpty(Throw(failure)))
-        underlying onSuccess { _.close() }
+        underlying.onSuccess { _.close() }
     }
     p
   }
 
-  def close(deadline: Time) = synchronized {
+  def close(deadline: Time): Future[Unit] = thePool.synchronized {
     // Mark the pool closed, relinquishing completed requests &
     // denying the issuance of further requests. The order here is
     // important: we mark the service unavailable before releasing the
@@ -169,9 +174,9 @@ class WatermarkPool[Req, Rep](
     factory.close(deadline)
   }
 
-  override def status = 
+  override def status: Status =
     if (isOpen) factory.status
     else Status.Closed
 
-  override val toString = "watermark_pool_%s".format(factory.toString)
+  override val toString: String = "watermark_pool_%s".format(factory.toString)
 }

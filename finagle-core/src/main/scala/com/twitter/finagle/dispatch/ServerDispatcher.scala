@@ -35,7 +35,7 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
    * since the entire request is present. For streaming requests,
    * `eos.setDone()` must be called at the end of stream (in HTTP, this is on
    * receipt of last chunk). Refer to the implementation in
-   * [[com.twitter.finagle.http.codec.HttpServerDispatcher]].
+   * [[com.twitter.finagle.httpx.codec.HttpServerDispatcher]].
    */
   protected def dispatch(req: Out, eos: Promise[Unit]): Future[Rep]
   protected def handle(rep: Rep): Future[Unit]

@@ -179,16 +179,19 @@ private[finagle] object Message {
       contexts: Seq[(ChannelBuffer, ChannelBuffer)],
       dst: Path,
       dtab: Dtab,
-      req: ChannelBuffer
-  ) extends Message {
+      req: ChannelBuffer)
+    extends Message {
     def typ = Types.Tdispatch
     lazy val buf = {
       // first, compute how large the message header is (in 'n')
       var n = 2
       var seq = contexts
       while (seq.nonEmpty) {
-        val (k, v) = seq.head
-        n += 2 + k.readableBytes + 2 + v.readableBytes
+        // Note: here and below we don't use the scala dereferencing sugar of
+        // `val (k, v) = seq.head` as that caused unnecessary Tuple2 allocations.
+        seq.head match { case (k, v) =>
+          n += 2 + k.readableBytes + 2 + v.readableBytes
+        }
         seq = seq.tail
       }
 
@@ -198,16 +201,17 @@ private[finagle] object Message {
 
       val dtabbytes = new Array[(Array[Byte], Array[Byte])](dtab.size)
       var dtabidx = 0
-      val delegations = dtab.iterator
-      while (delegations.hasNext) {
-        val Dentry(src, tree) = delegations.next()
-        val srcbytes = src.show.getBytes(Charsets.Utf8)
-        val treebytes = tree.show.getBytes(Charsets.Utf8)
+      var i = 0
+      while (i < dtab.length) {
+        val dentry = dtab(i)
+        val srcbytes = dentry.prefix.show.getBytes(Charsets.Utf8)
+        val treebytes = dentry.dst.show.getBytes(Charsets.Utf8)
 
         n += srcbytes.length + 2 + treebytes.length + 2
 
         dtabbytes(dtabidx) = (srcbytes, treebytes)
         dtabidx += 1
+        i += 1
       }
 
       // then, allocate and populate the header
@@ -217,11 +221,12 @@ private[finagle] object Message {
       while (seq.nonEmpty) {
         // TODO: it may or may not make sense
         // to do zero-copy here.
-        val (k, v) = seq.head
-        hd.writeShort(k.readableBytes)
-        hd.writeBytes(k.slice())
-        hd.writeShort(v.readableBytes)
-        hd.writeBytes(v.slice())
+        seq.head match { case (k, v) =>
+          hd.writeShort(k.readableBytes)
+          hd.writeBytes(k.slice())
+          hd.writeShort(v.readableBytes)
+          hd.writeBytes(v.slice())
+        }
         seq = seq.tail
       }
 
@@ -231,11 +236,12 @@ private[finagle] object Message {
       hd.writeShort(dtab.size)
       dtabidx = 0
       while (dtabidx != dtabbytes.length) {
-        val (srcbytes, treebytes) = dtabbytes(dtabidx)
-        hd.writeShort(srcbytes.length)
-        hd.writeBytes(srcbytes)
-        hd.writeShort(treebytes.length)
-        hd.writeBytes(treebytes)
+        dtabbytes(dtabidx) match { case (srcbytes, treebytes) =>
+          hd.writeShort(srcbytes.length)
+          hd.writeBytes(srcbytes)
+          hd.writeShort(treebytes.length)
+          hd.writeBytes(treebytes)
+        }
         dtabidx += 1
       }
 
@@ -254,8 +260,9 @@ private[finagle] object Message {
       var n = 1+2
       var seq = contexts
       while (seq.nonEmpty) {
-        val (k, v) = seq.head
-        n += 2+k.readableBytes+2+v.readableBytes
+        seq.head match { case (k, v) =>
+          n += 2+k.readableBytes+2+v.readableBytes
+        }
         seq = seq.tail
       }
 
@@ -264,11 +271,12 @@ private[finagle] object Message {
       hd.writeShort(contexts.length)
       seq = contexts
       while (seq.nonEmpty) {
-        val (k, v) = seq.head
-        hd.writeShort(k.readableBytes)
-        hd.writeBytes(k.slice())
-        hd.writeShort(v.readableBytes)
-        hd.writeBytes(v.slice())
+        seq.head match { case (k, v) =>
+          hd.writeShort(k.readableBytes)
+          hd.writeBytes(k.slice())
+          hd.writeShort(v.readableBytes)
+          hd.writeBytes(v.slice())
+        }
         seq = seq.tail
       }
 

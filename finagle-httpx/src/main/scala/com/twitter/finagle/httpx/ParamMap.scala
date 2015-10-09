@@ -233,13 +233,12 @@ class RequestParamMap(val request: Request) extends ParamMap {
   }
 
   // Get iterable for JMap, which might be null
-  private def jiterator(params: JMap[String, JList[String]]): Iterator[(String, String)] = {
-    params.entrySet.asScala flatMap { entry =>
+  private def jiterator(params: JMap[String, JList[String]]): Iterator[(String, String)] =
+    params.entrySet.asScala.flatMap { entry =>
       entry.getValue.asScala map { value =>
         (entry.getKey, value)
       }
-    } toIterator
-  }
+    }.toIterator
 }
 
 

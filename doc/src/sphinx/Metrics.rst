@@ -33,6 +33,15 @@ having trouble making services.
 
 .. include:: metrics/Construction.rst
 
+Finagle
+-------
+
+.. _finagle_stats:
+
+These metrics track various Finagle internals.
+
+.. include:: metrics/Finagle.rst
+
 Service Discovery
 -----------------
 
@@ -62,6 +71,16 @@ The client stats under the `failfast` scope give insight into how
 finagle handles services where it can't make a connection.
 
 .. include:: metrics/FailFast.rst
+
+Failure Accrual
+---------------
+
+.. _failure_accrual_stats:
+
+The client stats under the `failure_accrual` scope track how `FailureAccrualFactory`
+manages failures.
+
+.. include: metrics/FailureAccrual.rst
 
 Idle Apoptosis
 --------------
@@ -102,6 +121,16 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 
 .. include:: metrics/Transport.rst
 
+Requeues
+--------
+
+.. _requeues:
+
+These metrics show requeues (automatic retries) by the Finagle Stack. The number of retries are
+controlled by a dynamic budget.
+
+.. include:: metrics/Requeues.rst
+
 Mux
 ---
 
@@ -109,4 +138,14 @@ Mux
 
 These stats pertain to :ref:`Mux <mux>`.
 
-.. include:: metrics/Mux.rst 
+.. include:: metrics/Mux.rst
+
+Threshold Failure Detector
+--------------------------
+
+.. _failure_detector:
+
+The client metrics under the `mux/failuredetector` scope track the behavior of out-of-band ping
+based failure detection. They only apply to the mux protocol.
+
+.. include:: metrics/FailureDetector.rst

@@ -3,8 +3,9 @@ package com.twitter.finagle.client
 import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Stack, ServiceFactory}
+import com.twitter.finagle.{Name, Service, ServiceFactory, Stack}
 import com.twitter.io.Charsets
+import com.twitter.util.Future
 import org.jboss.netty.channel.{
   ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
   SimpleChannelHandler}
@@ -31,11 +32,22 @@ private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
   }
 }
 
-
 private[finagle] trait StringClient {
-  case class Client(stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
+
+  case class RichClient(underlying: Service[String, String]) {
+    def ping(): Future[String] = underlying("ping")
+  }
+
+  trait StringRichClient { self: com.twitter.finagle.Client[String, String] =>
+    def newRichClient(dest: Name, label: String): RichClient =
+      RichClient(newService(dest, label))
+  }
+
+  case class Client(
+      stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
       params: Stack.Params = Stack.Params.empty)
-   extends StdStackClient[String, String, Client] {
+    extends StdStackClient[String, String, Client]
+    with StringRichClient {
     protected def copy1(
       stack: Stack[ServiceFactory[String, String]] = this.stack,
       params: Stack.Params = this.params

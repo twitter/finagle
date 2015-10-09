@@ -2,7 +2,7 @@ package com.twitter.finagle.exp.swift
 
 import com.twitter.util.Future
 import scala.beans.BeanProperty
-import scala.annotation.target._
+import scala.annotation.meta._
 
 @ThriftStruct
 case class Test1Exc(

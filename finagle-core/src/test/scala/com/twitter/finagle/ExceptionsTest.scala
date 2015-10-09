@@ -109,13 +109,13 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
     val ex = new NoBrokersAvailableException(
       "/s/cool/story",
       Dtab.base,
-      Dtab.read("/=>/#/com.twitter.butt")
+      Dtab.read("/foo=>/$/com.twitter.butt")
     )
 
     assert(ex.getMessage ===
       "No hosts are available for /s/cool/story, " +
       s"Dtab.base=[${Dtab.base.show}], " +
-      "Dtab.local=[/=>/#/com.twitter.butt]"
+      "Dtab.local=[/foo=>/$/com.twitter.butt]"
     )
   }
 }

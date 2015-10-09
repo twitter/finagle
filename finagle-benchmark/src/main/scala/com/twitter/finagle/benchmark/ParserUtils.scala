@@ -20,15 +20,14 @@ class ParserUtils extends SimpleBenchmark {
     ChannelBuffers.copiedBuffer(rnd.nextString(5), Charsets.UTF_8)
   }
 
+  def matches(buffer: ChannelBuffer, string: String): Boolean =
+    buffer.toString(Charsets.UTF_8).matches(string)
+
   def timeDIGITS(nreps: Int) {
     var i = 0
     while (i < nreps) {
-      numbers foreach { cb =>
-        cb.matches(ParserUtils.DIGITS)
-      }
-      strings foreach { cb =>
-        cb.matches(ParserUtils.DIGITS)
-      }
+      numbers.foreach(matches(_, ParserUtils.DIGITS))
+      strings foreach(matches(_, ParserUtils.DIGITS))
       i += 1
     }
   }

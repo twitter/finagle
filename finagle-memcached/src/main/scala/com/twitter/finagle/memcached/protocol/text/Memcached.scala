@@ -1,18 +1,21 @@
 package com.twitter.finagle.memcached.protocol.text
 
+import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.channel._
+
+import scala.collection.immutable
+
 import client.DecodingToResponse
 import client.{Decoder => ClientDecoder}
 import server.DecodingToCommand
 import server.{Decoder => ServerDecoder}
-import com.twitter.io.Charsets.Utf8
+
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel._
-import scala.collection.immutable
+import com.twitter.io.Buf
 
 object Memcached {
   def apply(stats: StatsReceiver = NullStatsReceiver) = new Memcached(stats)
@@ -69,6 +72,8 @@ class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
       override def newTraceInitializer = MemcachedTraceInitializer.Module
     }
   }
+
+  override val protocolLibraryName: String = "memcached"
 }
 
 /**
@@ -87,16 +92,15 @@ private class MemcachedTracingFilter extends SimpleFilter[Command, Response] {
         case Values(values) =>
           command match {
             case cmd: RetrievalCommand =>
-              val keys = immutable.Set(cmd.keys map { _.toString(Utf8) }: _*)
+              val keys: immutable.Set[String] = immutable.Set(cmd.keys map { case Buf.Utf8(s) => s }: _*)
               val hits = values.map {
                 case value =>
-                  Trace.recordBinary(value.key.toString(Utf8), "Hit")
-                  value.key.toString(Utf8)
+                  val Buf.Utf8(keyStr) = value.key
+                  Trace.recordBinary(keyStr, "Hit")
+                  keyStr
               }
-              val misses = keys -- hits
-              misses foreach { k =>
-                Trace.recordBinary(k.toString(Utf8), "Miss")
-              }
+              val misses: immutable.Set[String] = keys -- hits
+              misses foreach { k: String => Trace.recordBinary(k, "Miss") }
               case _ =>
           }
         case _  =>

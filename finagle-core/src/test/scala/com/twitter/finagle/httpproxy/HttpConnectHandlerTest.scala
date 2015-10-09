@@ -1,15 +1,16 @@
 package com.twitter.finagle.httpproxy
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import com.twitter.finagle.client.Transporter.Credentials
+import java.net.{InetAddress, SocketAddress, InetSocketAddress}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{times, verify, when, atLeastOnce}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers._
-import org.jboss.netty.channel._
-import java.net.{InetAddress, SocketAddress, InetSocketAddress}
-import org.jboss.netty.handler.codec.http._
+import org.mockito.Mockito.{times, verify, when, atLeastOnce}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
@@ -29,7 +30,7 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
     val connectFuture = Channels.future(channel, true)
     val connectRequested = new DownstreamChannelStateEvent(
       channel, connectFuture, ChannelState.CONNECTED, remoteAddress)
-    val ch = HttpConnectHandler.addHandler(proxyAddress, remoteAddress, pipeline)
+    val ch = HttpConnectHandler.addHandler(proxyAddress, remoteAddress, pipeline, None)
     ch.handleDownstream(ctx, connectRequested)
 
     def checkDidClose() {
@@ -132,6 +133,33 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
       assert(e.getState === ChannelState.CONNECTED)
       assert(e.getValue === remoteAddress)
     }
+  }
+
+  test("HttpConnectHandler should add ProxyAuthorization header when proxy credentials are supplied") {
+    val h = new HttpConnectHandlerHelper
+    import h._
+
+    val handler = HttpConnectHandler.addHandler(
+      proxyAddress,
+      remoteAddress,
+      pipeline,
+      Some(Credentials("user", "pass")))
+
+    handler.handleDownstream(ctx, connectRequested)
+    handler.handleUpstream(ctx, new UpstreamChannelStateEvent(
+      channel, ChannelState.CONNECTED, remoteAddress))
+    assert(!connectFuture.isDone)
+    verify(ctx, times(0)).sendUpstream(any[ChannelEvent])
+
+    // send connect request
+    val ec = ArgumentCaptor.forClass(classOf[DownstreamMessageEvent])
+    verify(ctx, atLeastOnce).sendDownstream(ec.capture)
+    val e = ec.getValue
+    val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
+    assert(req.getMethod === HttpMethod.CONNECT)
+    assert(req.getUri === "localhost:" + port)
+    assert(req.headers().get("Host") === "localhost:" + port)
+    assert(req.headers().get("Proxy-Authorization") === "Basic dXNlcjpwYXNz")
   }
 
   test("HttpConnectHandler should propagate connection failure") {

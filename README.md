@@ -1,3 +1,14 @@
+# Finagle
+
+[![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
+[![Coverage status](https://img.shields.io/coveralls/twitter/finagle/develop.svg)](https://coveralls.io/r/twitter/finagle?branch=develop)
+[![Project status](https://img.shields.io/badge/status-active-brightgreen.svg)](#status)
+
+## Status
+
+This project is used in production at Twitter (and many other organizations),
+and is being actively developed and maintained.
+
 ![Finagle logo](https://raw.github.com/twitter/finagle/master/doc/src/sphinx/_static/logo_small.png)
 
 ## Getting involved
@@ -24,6 +35,7 @@ our way.
 The following are a few of the companies that are using Finagle:
 
 * [Foursquare](https://foursquare.com/)
+* [ING Bank](https://ing.nl)
 * [Pinterest](https://www.pinterest.com/)
 * [SoundCloud](https://soundcloud.com/)
 * [Tumblr](https://www.tumblr.com/)

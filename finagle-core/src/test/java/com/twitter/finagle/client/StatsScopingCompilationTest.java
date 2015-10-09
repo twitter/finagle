@@ -9,7 +9,7 @@ import com.twitter.util.Function2;
  * Just a compilation test for Java.
  */
 class StatsScopingCompilationTest {
-  public void testRetryingFilter() {
+  public void testRetryFilter() {
     Function2<StatsReceiver, Map<String, Object>, StatsReceiver> datfunk =
       new Function2<StatsReceiver, Map<String, Object>, StatsReceiver>() {
         @Override

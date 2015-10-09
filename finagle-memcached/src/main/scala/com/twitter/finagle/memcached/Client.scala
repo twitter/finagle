@@ -1,26 +1,22 @@
 package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import _root_.java.net.{SocketAddress, InetSocketAddress}
-import _root_.java.util.{Map => JMap}
-
+import _root_.java.net.{InetSocketAddress, SocketAddress}
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
+import com.twitter.finagle
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
+import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
-import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.protocol.text
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.service.{FailureAccrualFactory, FailedService}
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, ClientStatsReceiver}
+import com.twitter.finagle.memcached.exp.LocalMemcached
+import com.twitter.finagle.memcached.protocol.{text, _}
+import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
+import com.twitter.finagle.service.{FailedService, FailureAccrualFactory}
+import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
-import com.twitter.io.Charsets.Utf8
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Command => _, Function => _, _}
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers
 import scala.collection.{immutable, mutable}
-import scala.util.Random
 
 object Client {
   /**
@@ -84,9 +80,10 @@ case class GetResult private[memcached](
   misses: immutable.Set[String] = immutable.Set.empty,
   failures: Map[String, Throwable] = Map.empty
 ) {
-  lazy val values = hits mapValues { _.value }
+  lazy val values: Map[String, Buf] = hits.mapValues { _.value }
 
-  def ++(o: GetResult) = GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
+  def ++(o: GetResult): GetResult =
+    GetResult(hits ++ o.hits, misses ++ o.misses, failures ++ o.failures)
 }
 
 case class GetsResult(getResult: GetResult) {
@@ -94,23 +91,26 @@ case class GetsResult(getResult: GetResult) {
   def misses = getResult.misses
   def failures = getResult.failures
   def values = getResult.values
-  lazy val valuesWithTokens = hits mapValues { v => (v.value, v.casUnique.get) }
+  lazy val valuesWithTokens = hits.mapValues { v => (v.value, v.casUnique.get) }
   def ++(o: GetsResult) = GetsResult(getResult ++ o.getResult)
 }
 
 object GetResult {
+
+  private[memcached] val Empty: GetResult = GetResult()
+
   /**
-   * Equivalaent to results.reduceLeft { _ ++ _ }, but written to be more efficient.
+   * Equivalent to results.reduceLeft { _ ++ _ }, but written to be more efficient.
    */
   private[memcached] def merged(results: Seq[GetResult]): GetResult = {
     results match {
-      case Nil => GetResult()
+      case Nil => Empty
       case Seq(single) => single
       case Seq(a, b) => a ++ b
       case _ =>
-        val hits = new mutable.HashMap[String, Value]
-        val misses = new mutable.HashSet[String]
-        val failures = new mutable.HashMap[String, Throwable]
+        val hits = immutable.Map.newBuilder[String, Value]
+        val misses = immutable.Set.newBuilder[String]
+        val failures = immutable.Map.newBuilder[String, Throwable]
 
         for (result <- results) {
           hits ++= result.hits
@@ -118,12 +118,12 @@ object GetResult {
           failures ++= result.failures
         }
 
-        GetResult(hits.toMap, misses.toSet, failures.toMap)
+        GetResult(hits.result(), misses.result(), failures.result())
     }
   }
 
   private[memcached] def merged(results: Seq[GetsResult]): GetsResult = {
-    val unwrapped = results map { _.getResult }
+    val unwrapped = results.map { _.getResult }
     GetsResult(merged(unwrapped))
   }
 }
@@ -132,7 +132,7 @@ object GetResult {
  * A friendly client to talk to a Memcached server.
  */
 trait BaseClient[T] {
-  def channelBufferToType(a: ChannelBuffer): T
+  def bufferToType(a: Buf): T
 
   /**
    * Store a key. Override an existing value.
@@ -176,21 +176,21 @@ trait BaseClient[T] {
    * @return true if replaced, false if not
    */
   def cas(
-    key: String, flags: Int, expiry: Time, value: T, casUnique: ChannelBuffer
+    key: String, flags: Int, expiry: Time, value: T, casUnique: Buf
   ): Future[JBoolean]
 
   /**
    * Get a key from the server.
    */
-  def get(key: String): Future[Option[T]] = get(Seq(key))  map { _.values.headOption }
+  def get(key: String): Future[Option[T]] = get(Seq(key)).map { _.values.headOption }
 
   /**
    * Get a key from the server, with a "cas unique" token.  The token
    * is treated opaquely by the memcache client but is in reality a
    * string-encoded u64.
    */
-  def gets(key: String): Future[Option[(T, ChannelBuffer)]] =
-    gets(Seq(key)) map { _.values.headOption }
+  def gets(key: String): Future[Option[(T, Buf)]] =
+    gets(Seq(key)).map { _.values.headOption }
 
   /**
    * Get a set of keys from the server.
@@ -201,7 +201,7 @@ trait BaseClient[T] {
       if (result.failures.nonEmpty) {
         Future.exception(result.failures.values.head)
       } else {
-        Future.value(result.values mapValues { channelBufferToType(_) })
+        Future.value(result.values.mapValues { bufferToType(_) })
       }
     }
   }
@@ -211,16 +211,16 @@ trait BaseClient[T] {
    * token.  The token is treated opaquely by the memcache client but
    * is in reality a string-encoded u64.
    *
-   * @return a Map[String, (T, ChannelBuffer)] of all the
+   * @return a Map[String, (T, Buf)] of all the
    * keys the server had, together with their "cas unique" token
    */
-  def gets(keys: Iterable[String]): Future[Map[String, (T, ChannelBuffer)]] = {
+  def gets(keys: Iterable[String]): Future[Map[String, (T, Buf)]] = {
     getsResult(keys) flatMap { result =>
       if (result.failures.nonEmpty) {
         Future.exception(result.failures.values.head)
       } else {
-        Future.value(result.valuesWithTokens mapValues {
-          case (v, u) => (channelBufferToType(v), u)
+        Future.value(result.valuesWithTokens.mapValues {
+          case (v, u) => (bufferToType(v), u)
         })
       }
     }
@@ -304,7 +304,7 @@ trait BaseClient[T] {
    *
    * @return true if replaced, false if not
    */
-  def cas(key: String, value: T, casUnique: ChannelBuffer): Future[JBoolean] =
+  def cas(key: String, value: T, casUnique: Buf): Future[JBoolean] =
     cas(key, 0, Time.epoch, value, casUnique)
 
   /**
@@ -328,25 +328,25 @@ trait BaseClient[T] {
   def release(): Unit
 }
 
-trait Client extends BaseClient[ChannelBuffer] {
-  def channelBufferToType(v: ChannelBuffer) = v
+trait Client extends BaseClient[Buf] {
+  def bufferToType(v: Buf) = v
 
-  def adapt[T](bijection: Bijection[ChannelBuffer, T]): BaseClient[T] =
+  def adapt[T](bijection: Bijection[Buf, T]): BaseClient[T] =
     new ClientAdaptor[T](this, bijection)
 
   /** Adaptor to use String as values */
   def withStrings: BaseClient[String] = adapt(
-    new Bijection[ChannelBuffer, String] {
-      def apply(a: ChannelBuffer): String  = channelBufferToString(a)
-      def invert(b: String): ChannelBuffer = stringToChannelBuffer(b)
+    new Bijection[Buf, String] {
+      def apply(a: Buf): String  = a match { case Buf.Utf8(s) => s }
+      def invert(b: String): Buf = Buf.Utf8(b)
     }
   )
 
   /** Adaptor to use Array[Byte] as values */
   def withBytes: BaseClient[Array[Byte]] = adapt(
-    new Bijection[ChannelBuffer, Array[Byte]] {
-      def apply(a: ChannelBuffer): Array[Byte]  = channelBufferToBytes(a)
-      def invert(b: Array[Byte]): ChannelBuffer = bytesToChannelBuffer(b)
+    new Bijection[Buf, Array[Byte]] {
+      def apply(a: Buf): Array[Byte]  = a.toArray
+      def invert(b: Array[Byte]): Buf = Buf.ByteArray.Owned(b)
     }
   )
 }
@@ -358,21 +358,21 @@ trait ProxyClient extends Client {
 
   def getsResult(keys: Iterable[String]) = proxyClient.getsResult(keys)
 
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.set(key, flags, expiry, value)
+  def set(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.set(key, flags, expiry, value)
 
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.add(key, flags, expiry, value)
+  def add(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.add(key, flags, expiry, value)
 
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.replace(key, flags, expiry, value)
+  def replace(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.replace(key, flags, expiry, value)
 
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.append(key, flags, expiry, value)
+  def append(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.append(key, flags, expiry, value)
 
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = proxyClient.prepend(key, flags, expiry, value)
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf) = proxyClient.prepend(key, flags, expiry, value)
 
   def incr(key: String, delta: Long) = proxyClient.incr(key, delta)
 
   def decr(key: String, delta: Long) = proxyClient.decr(key, delta)
 
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) = proxyClient.cas(key, flags, expiry, value, casUnique)
+  def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) = proxyClient.cas(key, flags, expiry, value, casUnique)
 
   def delete(key: String) = proxyClient.delete(key)
 
@@ -381,22 +381,30 @@ trait ProxyClient extends Client {
   def release() { proxyClient.release() }
 }
 
+private object ConnectedClient {
+  val JavaTrue: Future[JBoolean] = Future.value(true)
+  val JavaFalse: Future[JBoolean] = Future.value(false)
+}
+
 /**
  * A Client connected to an individual Memcached server.
  *
  * @param  service  the underlying Memcached Service.
  */
 protected class ConnectedClient(protected val service: Service[Command, Response]) extends Client {
-  protected def rawGet(command: RetrievalCommand) = {
-    val keys = immutable.Set(command.keys map { _.toString(Utf8) }: _*)
+  import ConnectedClient._
+  import scala.collection.breakOut
 
-    service(command) map {
+  protected def rawGet(command: RetrievalCommand) = {
+    val keys: immutable.Set[String] = command.keys.map { case Buf.Utf8(s) => s }(breakOut)
+
+    service(command).map {
       case Values(values) =>
-        val tuples = values.map {
-          case value => (value.key.toString(Utf8), value)
-        }
-        val hits = tuples.toMap
-        val misses = keys -- hits.keySet
+        val hits: Map[String, Value] = values.map { case value =>
+          val Buf.Utf8(keyStr) = value.key
+          (keyStr, value)
+        }(breakOut)
+        val misses = util.NotFound(keys, hits.keySet)
         GetResult(hits, misses)
       case Error(e) => throw e
       case other    =>
@@ -404,32 +412,32 @@ protected class ConnectedClient(protected val service: Service[Command, Response
           "Invalid response type from get: %s".format(other.getClass.getSimpleName)
         )
     } handle {
-      case t: RequestException => GetResult(failures = (keys map { (_, t) }).toMap)
-      case t: ChannelException => GetResult(failures = (keys map { (_, t) }).toMap)
-      case t: ServiceException => GetResult(failures = (keys map { (_, t) }).toMap)
+      case t: RequestException => GetResult(failures = (keys.map { (_, t) }).toMap)
+      case t: ChannelException => GetResult(failures = (keys.map { (_, t) }).toMap)
+      case t: ServiceException => GetResult(failures = (keys.map { (_, t) }).toMap)
     }
   }
 
-  def getResult(keys: Iterable[String]) = {
+  def getResult(keys: Iterable[String]): Future[GetResult] = {
     try {
       if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
-      rawGet(Get(keys.toSeq))
+      rawGet(Get(keys))
     } catch {
       case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
-  def getsResult(keys: Iterable[String]) = {
+  def getsResult(keys: Iterable[String]): Future[GetsResult] = {
     try {
       if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
-      rawGet(Gets(keys.toSeq)) map { GetsResult(_) }
+      rawGet(Gets(keys)).map { GetsResult(_) }
     }  catch {
       case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  def set(key: String, flags: Int, expiry: Time, value: Buf): Future[Unit] = {
     try {
-      service(Set(key, flags, expiry, value)) map {
+      service(Set(key, flags, expiry, value)).map {
         case Stored() => ()
         case Error(e) => throw e
         case _        => throw new IllegalStateException
@@ -439,129 +447,132 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     }
   }
 
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) = {
+  def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf): Future[JBoolean] = {
     try {
-      service(Cas(key, flags, expiry, value, casUnique)) map {
-        case Stored()   => true
-        case Exists()   => false
-        case NotFound() => false
-        case Error(e)   => throw e
-        case _          => throw new IllegalStateException
+      service(Cas(key, flags, expiry, value, casUnique)).flatMap {
+        case Stored()   => JavaTrue
+        case Exists()   => JavaFalse
+        case NotFound() => JavaFalse
+        case Error(e)   => Future.exception(e)
+        case _          => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  def add(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
-      service(Add(key, flags, expiry, value)) map {
-        case Stored()     => true
-        case NotStored()  => false
-        case Error(e)     => throw e
-        case _            => throw new IllegalStateException
+      service(Add(key, flags, expiry, value)).flatMap {
+        case Stored()     => JavaTrue
+        case NotStored()  => JavaFalse
+        case Error(e)     => Future.exception(e)
+        case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  def append(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
-      service(Append(key, flags, expiry, value)) map {
-        case Stored()     => true
-        case NotStored()  => false
-        case Error(e)     => throw e
-        case _            => throw new IllegalStateException
+      service(Append(key, flags, expiry, value)).flatMap {
+        case Stored()     => JavaTrue
+        case NotStored()  => JavaFalse
+        case Error(e)     => Future.exception(e)
+        case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
-      service(Prepend(key, flags, expiry, value)) map {
-        case Stored()     => true
-        case NotStored()  => false
-        case Error(e)     => throw e
-        case _            => throw new IllegalStateException
+      service(Prepend(key, flags, expiry, value)).flatMap {
+        case Stored()     => JavaTrue
+        case NotStored()  => JavaFalse
+        case Error(e)     => Future.exception(e)
+        case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  def replace(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] = {
     try {
-      service(Replace(key, flags, expiry, value)) map {
-        case Stored()     => true
-        case NotStored()  => false
-        case Error(e)     => throw e
-        case _            => throw new IllegalStateException
+      service(Replace(key, flags, expiry, value)).flatMap {
+        case Stored()     => JavaTrue
+        case NotStored()  => JavaFalse
+        case Error(e)     => Future.exception(e)
+        case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
-  def delete(key: String) = {
+  def delete(key: String): Future[JBoolean] = {
     try {
-      service(Delete(key)) map {
-        case Deleted()    => true
-        case NotFound()   => false
-        case Error(e)     => throw e
-        case _            => throw new IllegalStateException
+      service(Delete(key)).flatMap {
+        case Deleted()    => JavaTrue
+        case NotFound()   => JavaFalse
+        case Error(e)     => Future.exception(e)
+        case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def incr(key: String, delta: Long): Future[Option[JLong]] = {
     try {
-      service(Incr(key, delta)) map {
-        case Number(value) => Some(value)
-        case NotFound()    => None
-        case Error(e)      => throw e
-        case _             => throw new IllegalStateException
+      service(Incr(key, delta)).flatMap {
+        case Number(value) => Future.value(Some(value))
+        case NotFound()    => Future.None
+        case Error(e)      => Future.exception(e)
+        case _             => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def decr(key: String, delta: Long): Future[Option[JLong]] = {
     try {
-      service(Decr(key, delta)) map {
-        case Number(value) => Some(value)
-        case NotFound()    => None
-        case Error(e)      => throw e
-        case _             => throw new IllegalStateException
+      service(Decr(key, delta)).flatMap {
+        case Number(value) => Future.value(Some(value))
+        case NotFound()    => Future.None
+        case Error(e)      => Future.exception(e)
+        case _             => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
     }
   }
 
   def stats(args: Option[String]): Future[Seq[String]] = {
-    val statArgs: Seq[ChannelBuffer] = args match {
-      case None => Seq(ChannelBuffers.EMPTY_BUFFER)
-      case Some(args) => args.split(" ").toSeq
+    val statArgs: Seq[Buf] = args match {
+      case None => Seq(Buf.Empty)
+      case Some(args) => args.split(" ").map(nonEmptyStringToBuf).toSeq
     }
-    service(Stats(statArgs)) map {
-      case InfoLines(lines) => lines.map { line =>
-        val key = line.key
-        val values = line.values
-        key.toString(Utf8) + " " + values.map { value => value.toString(Utf8) }.mkString(" ")
+    service(Stats(statArgs)).flatMap {
+      case InfoLines(lines) => Future {
+        lines.map { line =>
+          val key = line.key
+          val values = line.values
+          val Buf.Utf8(keyStr) = key
+          "%s %s".format(keyStr, values.map { case Buf.Utf8(str) => str } mkString (" "))
+        }
       }
-      case Error(e) => throw e
-      case Values(list) => Nil
-      case _ => throw new IllegalStateException
+      case Error(e) => Future.exception(e)
+      case Values(list) => Future.Nil
+      case _ => Future.exception(new IllegalStateException)
     }
   }
 
-  def release() {
+  def release(): Unit = {
     service.close()
   }
 }
@@ -577,7 +588,7 @@ trait PartitionedClient extends Client {
     keys: Iterable[String])(f: (Client, Iterable[String]) => Future[A]
   ): Future[Seq[A]] = {
     Future.collect(
-      keys groupBy(clientOf(_)) map Function.tupled(f) toSeq
+      keys.groupBy(clientOf).map(Function.tupled(f)).toSeq
     )
   }
 
@@ -585,9 +596,9 @@ trait PartitionedClient extends Client {
     if (keys.nonEmpty) {
       withKeysGroupedByClient(keys) {
         _.getResult(_)
-      } map { GetResult.merged(_) }
+      }.map { GetResult.merged(_) }
     } else {
-      Future.value(GetResult())
+      Future.value(GetResult.Empty)
     }
   }
 
@@ -595,23 +606,23 @@ trait PartitionedClient extends Client {
     if (keys.nonEmpty) {
       withKeysGroupedByClient(keys) {
          _.getsResult(_)
-      } map { GetResult.merged(_) }
+      }.map { GetResult.merged(_) }
     } else {
-      Future.value(GetsResult(GetResult()))
+      Future.value(GetsResult(GetResult.Empty))
     }
   }
 
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def set(key: String, flags: Int, expiry: Time, value: Buf) =
     clientOf(key).set(key, flags, expiry, value)
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def add(key: String, flags: Int, expiry: Time, value: Buf) =
     clientOf(key).add(key, flags, expiry, value)
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def append(key: String, flags: Int, expiry: Time, value: Buf) =
     clientOf(key).append(key, flags, expiry, value)
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf) =
     clientOf(key).prepend(key, flags, expiry, value)
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  def replace(key: String, flags: Int, expiry: Time, value: Buf) =
     clientOf(key).replace(key, flags, expiry, value)
-  def cas(key: String, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer) =
+  def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
     clientOf(key).cas(key, flags, expiry, value, casUnique)
 
   def delete(key: String)            = clientOf(key).delete(key)
@@ -649,6 +660,11 @@ object KetamaClientKey {
     HostPortBasedKey(host, port, weight)
 
   def apply(id: String) = CustomKey(id)
+
+  def fromCacheNode(node: CacheNode): KetamaClientKey = node.key match {
+    case Some(id) => KetamaClientKey(id)
+    case None => KetamaClientKey(node.host, node.port, node.weight)
+  }
 }
 
 private[finagle] sealed trait NodeEvent
@@ -658,7 +674,55 @@ private[finagle] case class NodeRevived(key: KetamaClientKey) extends NodeHealth
 
 class FailureAccrualException(message: String) extends RequestException(message, cause = null)
 
-class KetamaFailureAccrualFactory[Req, Rep](
+private[finagle] object KetamaFailureAccrualFactory {
+  /**
+   * Configures a stackable KetamaFailureAccrual factory with the given
+   * `key` and `healthBroker`. The rest of the context is extracted from
+   * Stack.Params.
+   */
+  def module[Req, Rep](
+    key: KetamaClientKey,
+    healthBroker: Broker[NodeHealth]
+  ): Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module4[
+      FailureAccrualFactory.Param,
+      Memcached.param.EjectFailedHost,
+      finagle.param.Timer,
+      finagle.param.Stats,
+      ServiceFactory[Req, Rep]] {
+      import FailureAccrualFactory.Param
+      val role = FailureAccrualFactory.role
+      val description = "Memcached ketama failure accrual"
+
+      def make(
+        failureAccrual: Param,
+        _ejectFailedHost: Memcached.param.EjectFailedHost,
+        _timer: finagle.param.Timer,
+        _stats: finagle.param.Stats,
+        next: ServiceFactory[Req, Rep]
+      ) = failureAccrual match {
+          case Param.Configured(numFailures, markDeadFor) =>
+            val Memcached.param.EjectFailedHost(ejectFailedHost) = _ejectFailedHost
+            val finagle.param.Timer(timer) = _timer
+            val finagle.param.Stats(stats) = _stats
+            new KetamaFailureAccrualFactory[Req, Rep](next, numFailures, markDeadFor,
+              timer, key, healthBroker, ejectFailedHost, stats)
+
+          case Param.Replaced(f) =>
+            val param.Timer(timer) = _timer
+            f(timer) andThen next
+
+          case Param.Disabled => next
+        }
+    }
+}
+
+/**
+ * A FailureAccrual module that can additionally communicate `NodeHealth` via
+ * `healthBroker`. The broker is shared between the `KetamaPartitionedClient` and
+ * allows for unhealthy nodes to be ejected from the ring if ejectFailedHost is true.
+ */
+private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
     numFailures: Int,
     markDeadFor: () => Duration,
@@ -716,8 +780,8 @@ class KetamaFailureAccrualFactory[Req, Rep](
   // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
   override def isSuccess(response: Try[Rep]): Boolean = response match {
     case Return(_) => true
-    case Throw(f@Failure(_: CancelledRequestException)) if f.isFlagged(Failure.Interrupted) => true
-    case Throw(f@Failure(_: CancelledConnectionException))  if f.isFlagged(Failure.Interrupted) => true
+    case Throw(f: Failure) if f.cause.exists(_.isInstanceOf[CancelledRequestException]) && f.isFlagged(Failure.Interrupted) => true
+    case Throw(f: Failure) if f.cause.exists(_.isInstanceOf[CancelledConnectionException]) && f.isFlagged(Failure.Interrupted) => true
       // Failure.InterruptedBy(_) would subsume all these eventually after rb/334371
     case Throw(WriteException(_: CancelledRequestException)) => true
     case Throw(_: CancelledRequestException) => true
@@ -749,24 +813,52 @@ class KetamaFailureAccrualFactory[Req, Rep](
     }
 }
 
-abstract class KetamaPartitionedClient private[finagle](
-    ketamaNodeGrp: Group[(KetamaClientKey, KetamaNode[Client])],
-    nodeHealthBroker: Broker[NodeHealth],
-    statsReceiver: StatsReceiver,
-    keyHasher: KeyHasher = KeyHasher.byName("ketama"),
-    numReps: Int = KetamaClient.DefaultNumReps,
+private[finagle] object KetamaPartitionedClient {
+  val DefaultNumReps = 160
+
+  val shardNotAvailableDistributor: Distributor[Client] = {
+    val failedService = new FailedService(new ShardNotAvailableException)
+    new SingletonDistributor(TwemcacheClient(failedService): Client)
+  }
+}
+
+/**
+ * A partitioned client which implements consistent hashing across `cacheNodeGroup`.
+ * The group is dynamic and the hash ring is rebuilt upon observed changes to
+ * the group. It's also possible to communicate node health to this client by wiring
+ * in a `nodeHealthBroker`. Unhealthy nodes are removed from the hash ring.
+ *
+ * TODO: This partitioning scheme should be moved inside the finagle stack
+ * so that we can support non-bound names.
+ */
+private[finagle] class KetamaPartitionedClient(
+    cacheNodeGroup: Group[CacheNode],
+    newService: CacheNode => Service[Command, Response],
+    nodeHealthBroker: Broker[NodeHealth] = new Broker[NodeHealth],
+    statsReceiver: StatsReceiver = NullStatsReceiver,
+    keyHasher: KeyHasher = KeyHasher.KETAMA,
+    numReps: Int = KetamaPartitionedClient.DefaultNumReps,
     oldLibMemcachedVersionComplianceMode: Boolean = false)
-  extends PartitionedClient
-{
+  extends PartitionedClient {
+  import KetamaPartitionedClient._
+
   private object NodeState extends Enumeration {
     type t = this.Value
     val Live, Ejected = Value
   }
+
   private case class Node(node: KetamaNode[Client], var state: NodeState.Value)
+
+  private[this] val ketamaNodeGrp: Group[(KetamaClientKey, KetamaNode[Client])] =
+    cacheNodeGroup.map { node =>
+      val key = KetamaClientKey.fromCacheNode(node)
+      val underlying = TwemcacheClient(newService(node))
+      key -> KetamaNode(key.identifier, node.weight, underlying)
+    }
 
   @volatile private[this] var ketamaNodeSnap = ketamaNodeGrp()
   @volatile private[this] var nodes = mutable.Map[KetamaClientKey, Node]() ++ {
-    ketamaNodeSnap.toMap mapValues { kn: KetamaNode[Client] => Node(kn, NodeState.Live) }
+    ketamaNodeSnap.toMap.mapValues { kn: KetamaNode[Client] => Node(kn, NodeState.Live) }
   }
 
   nodeHealthBroker.recv foreach {
@@ -774,7 +866,7 @@ abstract class KetamaPartitionedClient private[finagle](
     case NodeRevived(key) => reviveNode(key)
   }
 
-  private[this] val pristineDistributor = buildDistributor(nodes.values map(_.node) toSeq)
+  private[this] val pristineDistributor = buildDistributor(nodes.values.map(_.node).toSeq)
   @volatile private[this] var currentDistributor: Distributor[Client] = pristineDistributor
 
   private[this] val liveNodeGauge = statsReceiver.addGauge("live_nodes") {
@@ -788,7 +880,7 @@ abstract class KetamaPartitionedClient private[finagle](
   private[this] val keyRingRedistributeCount = statsReceiver.counter("redistributes")
 
   private[this] def buildDistributor(nodes: Seq[KetamaNode[Client]]) = synchronized {
-    if (nodes.isEmpty) KetamaClient.shardNotAvailableDistributor
+    if (nodes.isEmpty) shardNotAvailableDistributor
     else new KetamaDistributor(nodes, numReps, oldLibMemcachedVersionComplianceMode)
   }
 
@@ -796,13 +888,14 @@ abstract class KetamaPartitionedClient private[finagle](
     if (ketamaNodeGrp() ne ketamaNodeSnap)
       updateGroup()
 
-    val hash = keyHasher.hashKey(key)
+    val bytes = key.getBytes(Charsets.Utf8)
+    val hash = keyHasher.hashKey(bytes)
     currentDistributor.nodeForHash(hash)
   }
 
   private[this] def rebuildDistributor(): Unit = synchronized {
     val liveNodes = for ((_, Node(node, NodeState.Live)) <- nodes) yield node
-    currentDistributor = buildDistributor(liveNodes toSeq)
+    currentDistributor = buildDistributor(liveNodes.toSeq)
     keyRingRedistributeCount.incr()
   }
 
@@ -859,25 +952,25 @@ abstract class KetamaPartitionedClient private[finagle](
 
   override def getResult(keys: Iterable[String]) = ready.interruptible before super.getResult(keys)
 
-  override def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  override def set(key: String, flags: Int, expiry: Time, value: Buf) =
     ready.interruptible before super.set(key, flags, expiry, value)
 
   override def delete(key: String) = ready.interruptible before super.delete(key)
 
   override def cas(key: String, flags: Int, expiry: Time,
-      value: ChannelBuffer, casUnique: ChannelBuffer) =
+      value: Buf, casUnique: Buf) =
     ready.interruptible before super.cas(key, flags, expiry, value, casUnique)
 
-  override def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  override def add(key: String, flags: Int, expiry: Time, value: Buf) =
     ready.interruptible before super.add(key, flags, expiry, value)
 
-  override def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  override def replace(key: String, flags: Int, expiry: Time, value: Buf) =
     ready.interruptible before super.replace(key, flags, expiry, value)
 
-  override def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  override def prepend(key: String, flags: Int, expiry: Time, value: Buf) =
     ready.interruptible before super.prepend(key, flags, expiry, value)
 
-  override def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer) =
+  override def append(key: String, flags: Int, expiry: Time, value: Buf) =
     ready.interruptible before super.append(key, flags, expiry, value)
 
   override def incr(key: String, delta: Long) = ready.interruptible before super.incr(key, delta)
@@ -891,67 +984,41 @@ abstract class KetamaPartitionedClient private[finagle](
 }
 
 object KetamaClient {
-  val DefaultNumReps = 160
-  val shardNotAvailableDistributor = {
-    val failedService = new FailedService(new ShardNotAvailableException)
-    new SingletonDistributor(TwemcacheClient(failedService): Client)
-  }
-
-  private def mkGrp(
-    initialServices: Group[CacheNode],
-    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
-    nodeHealthBroker: Broker[NodeHealth],
-    legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, () => Duration)) => Service[Command, Response]]
-  ): Group[(KetamaClientKey, KetamaNode[Client])] =
-    initialServices.map { node =>
-      val key = node.key match {
-        case Some(id) => KetamaClientKey(id)
-        case None => KetamaClientKey(node.host, node.port, node.weight)
-      }
-      val faClient: Client = legacyFAClientBuilder map { builder =>
-        TwemcacheClient(builder(node, key, nodeHealthBroker, failureAccrualParams))
-      } getOrElse MemcachedFailureAccrualClient(
-        key, nodeHealthBroker, failureAccrualParams
-      ).newTwemcacheClient(node.host+":"+node.port)
-
-      key -> KetamaNode(key.identifier, node.weight, faClient)
-    }
+  val DefaultNumReps = KetamaPartitionedClient.DefaultNumReps
 }
 
-class KetamaClient private[finagle](
-    initialServices: Group[CacheNode],
-    keyHasher: KeyHasher,
-    numReps: Int,
-    failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
-    legacyFAClientBuilder: Option[(CacheNode, KetamaClientKey, Broker[NodeHealth], (Int, () => Duration)) => Service[Command, Response]],
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    oldLibMemcachedVersionComplianceMode: Boolean = false,
-    nodeHealthBroker: Broker[NodeHealth] = new Broker[NodeHealth])
-  extends KetamaPartitionedClient(
-    KetamaClient.mkGrp(
-      initialServices, failureAccrualParams, nodeHealthBroker, legacyFAClientBuilder),
-    nodeHealthBroker,
-    statsReceiver,
-    keyHasher,
-    numReps,
-    oldLibMemcachedVersionComplianceMode)
-
-// deprecated, in favor of `c.t.f.memcached.Memcached`, 2015-02-22
-case class KetamaClientBuilder private[memcached] (
+@deprecated(message = "Use the `com.twitter.finagle.Memcached builder", since = "2015-02-22")
+case class KetamaClientBuilder private[memcached](
   _group: Group[CacheNode],
   _hashName: Option[String],
   _clientBuilder: Option[ClientBuilder[_, _, _, _, ClientConfig.Yes]],
   _failureAccrualParams: (Int, () => Duration) = (5, () => 30.seconds),
   _ejectFailedHost: Boolean = true,
   oldLibMemcachedVersionComplianceMode: Boolean = false,
-  numReps: Int = KetamaClient.DefaultNumReps
+  numReps: Int = KetamaPartitionedClient.DefaultNumReps
 ) {
+  private lazy val localMemcachedName = Resolver.eval("localhost:" + LocalMemcached.port)
+
+  private def withLocalMemcached = {
+    val Name.Bound(va) = localMemcachedName
+    copy(
+      _group = CacheNodeGroup(
+        Group.fromVarAddr(va),
+        useOnlyResolvedAddress = false
+      )
+    )
+  }
 
   def dest(
     name: Name,
     useOnlyResolvedAddress: Boolean = false
   ): KetamaClientBuilder = {
-    val Name.Bound(va) = name
+    val Name.Bound(va) = if (LocalMemcached.enabled) {
+      localMemcachedName
+    } else {
+      name
+    }
+
     copy(
       _group = CacheNodeGroup(
         Group.fromVarAddr(va),
@@ -961,11 +1028,17 @@ case class KetamaClientBuilder private[memcached] (
   }
 
   def dest(name: String): KetamaClientBuilder =
-    dest(Resolver.eval(name))
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else dest(Resolver.eval(name))
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def group(group: Group[CacheNode]): KetamaClientBuilder = {
-    copy(_group = group)
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else {
+      copy(_group = group)
+    }
   }
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
@@ -975,13 +1048,22 @@ case class KetamaClientBuilder private[memcached] (
 
   @deprecated("Use `KetamaClientBuilder.dest(name: Name)` instead", "7.0.0")
   def cachePoolCluster(cluster: Cluster[CacheNode]): KetamaClientBuilder = {
-    copy(_group = Group.fromCluster(cluster))
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else {
+      copy(_group = Group.fromCluster(cluster))
+    }
   }
 
-  def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder =
-    copy(_group = Group(nodes map {
-      case (host, port, weight) => new CacheNode(host, port, weight)
-    }:_*))
+  def nodes(nodes: Seq[(String, Int, Int)]): KetamaClientBuilder = {
+    if (LocalMemcached.enabled) {
+      withLocalMemcached
+    } else {
+      copy(_group = Group(nodes.map {
+        case (host, port, weight) => new CacheNode(host, port, weight)
+      }: _*))
+    }
+  }
 
   def nodes(hostPortWeights: String): KetamaClientBuilder =
     group(CacheNodeGroup(hostPortWeights))
@@ -1011,43 +1093,40 @@ case class KetamaClientBuilder private[memcached] (
     copy(_ejectFailedHost = eject)
 
   def build(): Client = {
-    val builder =
+    val stackBasedClient =
       (_clientBuilder getOrElse ClientBuilder().hostConnectionLimit(1).daemon(true))
         .codec(text.Memcached())
+        .underlying
 
     val keyHasher = KeyHasher.byName(_hashName.getOrElse("ketama"))
-    val statsReceiver = builder.statsReceiver.scope("memcached_client")
 
-    def legacyFAClientBuilder(
-      node: CacheNode, key: KetamaClientKey, broker: Broker[NodeHealth], faParams: (Int, () => Duration)
-    ) = {
-      builder.hosts(new InetSocketAddress(node.host, node.port))
-          .failureAccrualFactory(filter(key, broker, faParams, _ejectFailedHost) _)
-          .build()
-    }
+    val (numFailures, markDeadFor) = _failureAccrualParams
 
-    def filter(
-      key: KetamaClientKey,
-      broker: Broker[NodeHealth],
-      faParams: (Int, () => Duration),
-      ejectFailedHost: Boolean
-    )(timer: Timer) = {
-      val (_numFailures, _markDeadFor) = faParams
-      new ServiceFactoryWrapper {
-        def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]) =
-          new KetamaFailureAccrualFactory(
-            factory, _numFailures, _markDeadFor, timer, key, broker, ejectFailedHost, statsReceiver)
-      }
-    }
+    val label = stackBasedClient.params[finagle.param.Label].label
+    val stats = stackBasedClient.params[finagle.param.Stats]
+      .statsReceiver.scope(label).scope("memcached_client")
 
-    new KetamaClient(
-      initialServices       = _group,
-      keyHasher             = keyHasher,
-      numReps               = numReps,
-      failureAccrualParams  = _failureAccrualParams,
-      legacyFAClientBuilder = Some(legacyFAClientBuilder(_, _, _, _)),
-      statsReceiver         = statsReceiver,
-      oldLibMemcachedVersionComplianceMode = oldLibMemcachedVersionComplianceMode)
+    val healthBroker = new Broker[NodeHealth]
+
+    def newService(node: CacheNode) = stackBasedClient
+      .configured(Memcached.param.EjectFailedHost(_ejectFailedHost))
+      .configured(FailureAccrualFactory.Param(numFailures, markDeadFor))
+      .configured(FactoryToService.Enabled(true))
+      .transformed(new Stack.Transformer {
+        val key = KetamaClientKey.fromCacheNode(node)
+        def apply[Command, Response](stk: Stack[ServiceFactory[Command, Response]]) =
+          stk.replace(FailureAccrualFactory.role,
+            KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
+      }).newClient(s"${node.host}:${node.port}").toService
+
+    new KetamaPartitionedClient(
+      _group,
+      newService,
+      healthBroker,
+      stats,
+      keyHasher,
+      numReps,
+      oldLibMemcachedVersionComplianceMode)
   }
 }
 
@@ -1056,13 +1135,13 @@ object KetamaClientBuilder {
   def get() = apply()
 }
 
-
 /**
  * Ruby memcache-client (MemCache) compatible client.
  */
 class RubyMemCacheClient(clients: Seq[Client]) extends PartitionedClient {
   protected[memcached] def clientOf(key: String) = {
-    val hash = (KeyHasher.CRC32_ITU.hashKey(key) >> 16) & 0x7fff
+    val bytes = key.getBytes(Charsets.Utf8)
+    val hash = (KeyHasher.CRC32_ITU.hashKey(bytes) >> 16) & 0x7fff
     val index = hash % clients.size
     clients(index.toInt)
   }
@@ -1088,9 +1167,9 @@ case class RubyMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): RubyMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members map {
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.map {
       node: CacheNode => (node.host, node.port, node.weight)
-    } toSeq)
+    }.toSeq)
 
   def clientBuilder(clientBuilder: ClientBuilder[_, _, _, _, ClientConfig.Yes]): RubyMemCacheClientBuilder =
     copy(_clientBuilder = Some(clientBuilder))
@@ -1134,9 +1213,9 @@ case class PHPMemCacheClientBuilder(
     copy(_nodes = nodes)
 
   def nodes(hostPortWeights: String): PHPMemCacheClientBuilder =
-    copy(_nodes = CacheNodeGroup(hostPortWeights).members map {
+    copy(_nodes = CacheNodeGroup(hostPortWeights).members.map {
       node: CacheNode => (node.host, node.port, node.weight)
-    } toSeq)
+    }.toSeq)
 
   def hashName(hashName: String): PHPMemCacheClientBuilder =
     copy(_hashName = Some(hashName))

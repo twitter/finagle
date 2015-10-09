@@ -5,7 +5,6 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 
-
 trait Strings { self: BaseClient =>
 
   /**
@@ -160,11 +159,11 @@ trait Strings { self: BaseClient =>
   def mGet(keys: Seq[ChannelBuffer]): Future[Seq[Option[ChannelBuffer]]] =
     doRequest(MGet(keys)) {
       case MBulkReply(messages) => Future {
-        messages map {
+        messages.map {
           case BulkReply(message) => Some(message)
           case EmptyBulkReply()   => None
           case _ => throw new IllegalStateException()
-        } toSeq
+        }.toSeq
       }
       case EmptyMBulkReply()    => Future.Nil
     }

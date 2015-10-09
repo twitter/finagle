@@ -3,12 +3,10 @@ package com.twitter.finagle.memcached.java;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-
 import com.twitter.finagle.Service;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
+import com.twitter.io.Buf;
 import com.twitter.util.Future;
 import com.twitter.util.Time;
 
@@ -31,7 +29,7 @@ public abstract class Client {
   /**
    * Get a key from the server.
    */
-  public abstract Future<ChannelBuffer> get(String key);
+  public abstract Future<Buf> get(String key);
 
   /**
    * Get a key from the server together with a "cas unique" token used
@@ -41,9 +39,9 @@ public abstract class Client {
 
   /**
    * Get a set of keys from the server.
-   * @return a Map[String, ChannelBuffer] of all of the keys that the server had.
+   * @return a Map[String, Buf] of all of the keys that the server had.
    */
-  public abstract Future<Map<String, ChannelBuffer>> get(List<String> keys);
+  public abstract Future<Map<String, Buf>> get(List<String> keys);
 
   /**
    * Get a set of keys from the server together with a "cas unique" token.
@@ -55,53 +53,53 @@ public abstract class Client {
    * Store a key. Override an existing value.
    * @return true
    */
-  public abstract Future<Void> set(String key, ChannelBuffer value);
+  public abstract Future<Void> set(String key, Buf value);
 
   /**
    * Store a key. Override an existing value.
    * @return void
    */
-  public abstract Future<Void> set(String key, int flags, Time expiry, ChannelBuffer value);
+  public abstract Future<Void> set(String key, int flags, Time expiry, Buf value);
 
   /**
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  public abstract Future<Boolean> add(String key, ChannelBuffer value);
+  public abstract Future<Boolean> add(String key, Buf value);
 
   /**
    * Store a key but only if it doesn't already exist on the server.
    * @return true if stored, false if not stored
    */
-  public abstract Future<Boolean> add(String key, int flags, Time expiry, ChannelBuffer value);
+  public abstract Future<Boolean> add(String key, int flags, Time expiry, Buf value);
 
   /**
    * Append bytes to the end of an existing key. If the key doesn't
    * exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  public abstract Future<Boolean> append(String key, ChannelBuffer value);
+  public abstract Future<Boolean> append(String key, Buf value);
 
   /**
    * Prepend bytes to the beginning of an existing key. If the key
    * doesn't exist, the operation has no effect.
    * @return true if stored, false if not stored
    */
-  public abstract Future<Boolean> prepend(String key, ChannelBuffer value);
+  public abstract Future<Boolean> prepend(String key, Buf value);
 
   /**
    * Replace bytes on an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  public abstract Future<Boolean> replace(String key, ChannelBuffer value);
+  public abstract Future<Boolean> replace(String key, Buf value);
 
   /**
    * Replace bytes on an existing key. If the key doesn't exist, the
    * operation has no effect.
    * @return true if stored, false if not stored
    */
-  public abstract Future<Boolean> replace(String key, int flags, Time expiry, ChannelBuffer value);
+  public abstract Future<Boolean> replace(String key, int flags, Time expiry, Buf value);
 
  /**
    * Perform a compare-and-set operation.  This is like a replace,
@@ -113,18 +111,18 @@ public abstract class Client {
 
   public abstract Future<Boolean> cas(
     String key, int flags, Time expiry,
-    ChannelBuffer value, ChannelBuffer casUnique);
+    Buf value, Buf casUnique);
 
   /**
    * A version of cas with default flags & expiry paramters.
    */
-  public abstract Future<Boolean> cas(String key, ChannelBuffer value, ChannelBuffer casUnique);
+  public abstract Future<Boolean> cas(String key, Buf value, Buf casUnique);
 
   /**
    * Convenience version of cas used to store string values.
    */
-  public Future<Boolean> cas(String key, String value, ChannelBuffer casUnique) {
-    return this.cas(key, toChannelBuffer(value), casUnique);
+  public Future<Boolean> cas(String key, String value, Buf casUnique) {
+    return this.cas(key, toBuffer(value), casUnique);
   }
 
   /**
@@ -148,19 +146,19 @@ public abstract class Client {
   public abstract Future<Long> decr(String key, long delta);
 
   public Future<Void> set(String key, String value) {
-    return this.set(key, toChannelBuffer(value));
+    return this.set(key, toBuffer(value));
   }
 
   public Future<Boolean> add(String key, String value) {
-    return this.add(key, toChannelBuffer(value));
+    return this.add(key, toBuffer(value));
   }
 
   public Future<Boolean> append(String key, String value) {
-    return this.append(key, toChannelBuffer(value));
+    return this.append(key, toBuffer(value));
   }
 
   public Future<Boolean> prepend(String key, String value) {
-    return this.prepend(key, toChannelBuffer(value));
+    return this.prepend(key, toBuffer(value));
   }
 
   /**
@@ -168,7 +166,7 @@ public abstract class Client {
    */
   public abstract void release();
 
-  private ChannelBuffer toChannelBuffer(String value) {
-    return ChannelBuffers.wrappedBuffer(value.getBytes());
+  private Buf toBuffer(String value) {
+    return Buf.Utf8$.MODULE$.apply(value);
   }
 }

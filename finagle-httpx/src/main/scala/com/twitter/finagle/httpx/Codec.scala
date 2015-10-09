@@ -1,21 +1,14 @@
 package com.twitter.finagle.httpx
 
-/**
- * This puts it all together: The HTTP codec itself.
- */
-
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
-import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.httpx.codec._
-import com.twitter.finagle.httpx.filter.DtabFilter
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.httpx.filter.{DtabFilter, HttpNackFilter}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.util.{Try, StorageUnit, Future, Closable}
-import java.net.InetSocketAddress
-import org.jboss.netty.channel.{
-  ChannelPipelineFactory, UpstreamMessageEvent, Channel, Channels,
-  ChannelEvent, ChannelHandlerContext, SimpleChannelDownstreamHandler, MessageEvent}
+import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Closable, StorageUnit, Try}
+import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
 import org.jboss.netty.handler.codec.http._
 
 private[finagle] case class BadHttpRequest(
@@ -55,7 +48,7 @@ class SafeHttpServerCodec(
  * compress text-like content-types with the default compression level (6). Otherwise, use
  * [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]] for all
  * content-types with specified compression level.
- * @param streaming Streaming allows applications to work with HTTP messages
+ * @param _streaming Streaming allows applications to work with HTTP messages
  * that have large (or infinite) content bodies. When this flag is set to
  * `true`, the message content is available through a [[com.twitter.io.Reader]],
  * which gives the application a handle to the byte stream. If `false`, the
@@ -112,7 +105,7 @@ case class Http(
       override def prepareServiceFactory(
         underlying: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] =
-        underlying map(new DelayedReleaseService(_))
+        underlying.map(new DelayedReleaseService(_))
 
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response]
@@ -120,7 +113,7 @@ case class Http(
         // Note: This is a horrible hack to ensure that close() calls from
         // ExpiringService do not propagate until all chunks have been read
         // Waiting on CSL-915 for a proper fix.
-        underlying map(new DelayedReleaseService(_))
+        underlying.map(new DelayedReleaseService(_))
        }
 
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
@@ -180,13 +173,15 @@ case class Http(
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] =
-        new DtabFilter.Finagle[Request] andThen underlying
+        (new HttpNackFilter).andThen(new DtabFilter.Finagle[Request]).andThen(underlying)
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpServerTraceInitializer[Request, Response]
         else TraceInitializerFilter.empty[Request, Response]
     }
   }
+
+  override val protocolLibraryName: String = "httpx"
 }
 
 object Http {
@@ -194,6 +189,12 @@ object Http {
 }
 
 object HttpTracing {
+
+  /**
+   * HTTP headers used for tracing.
+   *
+   * See [[headers()]] for Java compatibility.
+   */
   object Header {
     val TraceId = "X-B3-TraceId"
     val SpanId = "X-B3-SpanId"
@@ -204,6 +205,9 @@ object HttpTracing {
     val All = Seq(TraceId, SpanId, ParentSpanId, Sampled, Flags)
     val Required = Seq(TraceId, SpanId)
   }
+
+  /** Java compatibility API for [[Header]]. */
+  def headers(): Header.type = Header
 
   /**
    * Remove any parameters from url.
@@ -259,19 +263,20 @@ private object TraceInfo {
   }
 
   def setClientRequestHeaders(request: Request): Unit = {
-    Header.All foreach { request.headers.remove(_) }
+    Header.All.foreach { request.headers.remove(_) }
 
-    request.headers.add(Header.TraceId, Trace.id.traceId.toString)
-    request.headers.add(Header.SpanId, Trace.id.spanId.toString)
+    val traceId = Trace.id
+    request.headers.add(Header.TraceId, traceId.traceId.toString)
+    request.headers.add(Header.SpanId, traceId.spanId.toString)
     // no parent id set means this is the root span
-    Trace.id._parentId foreach { id =>
+    traceId._parentId.foreach { id =>
       request.headers.add(Header.ParentSpanId, id.toString)
     }
     // three states of sampled, yes, no or none (let the server decide)
-    Trace.id.sampled foreach { sampled =>
+    traceId.sampled.foreach { sampled =>
       request.headers.add(Header.Sampled, sampled.toString)
     }
-    request.headers.add(Header.Flags, Trace.id.flags.toLong)
+    request.headers.add(Header.Flags, traceId.flags.toLong)
     traceRpc(request)
   }
 
@@ -332,7 +337,6 @@ private[finagle] class HttpClientTraceInitializer[Req <: Request, Rep]
 private[finagle] class HttpClientTracingFilter[Req <: Request, Res](serviceName: String)
   extends SimpleFilter[Req, Res]
 {
-  import HttpTracing._
 
   def apply(request: Req, service: Service[Req, Res]) = {
     TraceInfo.setClientRequestHeaders(request)

@@ -58,7 +58,7 @@ private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
  * performance: one-shots could be created constantly for a hot cache
  * key, but should work well when there are a few hot keys.
  */
-private class ServiceFactoryCache[Key, Req, Rep](
+private[finagle] class ServiceFactoryCache[Key, Req, Rep](
     newFactory: Key => ServiceFactory[Req, Rep],
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxCacheSize: Int = 8)
@@ -79,7 +79,6 @@ private class ServiceFactoryCache[Key, Req, Rep](
   private[this] val nidle = statsReceiver.addGauge("idle") {
     cache count { case (_, f) => f.idleFor > Duration.Zero }
   }
-  private[this] val misstime = statsReceiver.stat("misstime_ms")
 
   /*
    * This returns a Service rather than a ServiceFactory to avoid
@@ -114,8 +113,6 @@ private class ServiceFactoryCache[Key, Req, Rep](
       }
     }
 
-    val watch = Stopwatch.start()
-
     val svc = try {
       nmiss.incr()
 
@@ -140,12 +137,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
       writeLock.unlock()
     }
 
-    svc onSuccess { _ =>
-      val d = watch()
-        // generalize message
-      Trace.record("Interpreter cache miss with key "+key+": "+d, d)
-      misstime.add(d.inMilliseconds)
-    }
+    svc
   }
 
   private[this] def oneshot(factory: ServiceFactory[Req, Rep], conn: ClientConnection)
@@ -176,7 +168,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
     } finally {
       readLock.unlock()
     }
-    
+
     // This is somewhat dubious, as the status is outdated
     // pretty much right after we query it.
     val factory = newFactory(key)

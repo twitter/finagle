@@ -32,8 +32,10 @@ private[finagle] class TTwitterServerFilter(
     buffer.toArray
   }
 
-  def apply(request: Array[Byte],
-      service: Service[Array[Byte], Array[Byte]]): Future[Array[Byte]] = {
+  def apply(
+    request: Array[Byte],
+    service: Service[Array[Byte], Array[Byte]]
+  ): Future[Array[Byte]] = {
     // What to do on exceptions here?
     if (isUpgraded) {
       val header = new thrift.RequestHeader

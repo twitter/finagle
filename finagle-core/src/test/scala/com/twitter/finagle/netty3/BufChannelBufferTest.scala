@@ -1474,4 +1474,33 @@ class BufChannelBufferTest extends FunSuite with BeforeAndAfter {
     assert(!set.contains(cbB))
     assertEquals(0, set.size())
   }
+
+  test("BufChannelBuffer.apply from empty Buf") {
+    val cb = BufChannelBuffer(Buf.Empty)
+    assert(cb.readableBytes() == 0)
+    assert(cb.capacity() == 0)
+  }
+
+  test("BufChannelBuffer.apply from Buf.ByteArray.Owned") {
+    val arr = Array[Byte](0, 1, 2, 3, 4)
+    val baBuf = Buf.ByteArray.Owned(arr, 1, 4)
+    val bcb = BufChannelBuffer(baBuf)
+    assert(bcb.readableBytes() == 3)
+    assert(bcb.capacity() == 3)
+    assert(bcb.getByte(0) == 1)
+    assert(bcb.getByte(1) == 2)
+    assert(bcb.getByte(2) == 3)
+  }
+
+  test("BufChannelBuffer.apply from Buf.ByteBuffer.Owned") {
+    val arr = Array[Byte](0, 1, 2)
+    val baBuf = Buf.ByteBuffer.Owned(ByteBuffer.wrap(arr))
+    val bcb = BufChannelBuffer(baBuf)
+    assert(bcb.readableBytes() == 3)
+    assert(bcb.capacity() == 3)
+    assert(bcb.getByte(0) == 0)
+    assert(bcb.getByte(1) == 1)
+    assert(bcb.getByte(2) == 2)
+  }
+
 }

@@ -1,10 +1,8 @@
 package com.twitter.finagle.example.http
 
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.http.Http
+import com.twitter.finagle.httpx._
 import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.io.Charsets
 import com.twitter.util.Future
@@ -21,22 +19,22 @@ object HttpClient {
   /**
    * Convert HTTP 4xx and 5xx class responses into Exceptions.
    */
-  class HandleErrors extends SimpleFilter[HttpRequest, HttpResponse] {
-    def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
+  class HandleErrors extends SimpleFilter[Request, Response] {
+    def apply(request: Request, service: Service[Request, Response]) = {
       // flatMap asynchronously responds to requests and can "map" them to both
       // success and failure values:
       service(request) flatMap { response =>
-        response.getStatus match {
-          case OK        => Future.value(response)
-          case FORBIDDEN => Future.exception(new InvalidRequest)
-          case _         => Future.exception(new Exception(response.getStatus.getReasonPhrase))
+        response.status match {
+          case Status.Ok => Future.value(response)
+          case Status.Forbidden => Future.exception(new InvalidRequest)
+          case _ => Future.exception(new Exception(response.status.reason))
         }
       }
     }
   }
 
   def main(args: Array[String]) {
-    val clientWithoutErrorHandling: Service[HttpRequest, HttpResponse] = ClientBuilder()
+    val clientWithoutErrorHandling: Service[Request, Response] = ClientBuilder()
       .codec(Http())
       .hosts(new InetSocketAddress(8080))
       .hostConnectionLimit(1)
@@ -45,7 +43,7 @@ object HttpClient {
     val handleErrors = new HandleErrors
 
     // compose the Filter with the client:
-    val client: Service[HttpRequest, HttpResponse] = handleErrors andThen clientWithoutErrorHandling
+    val client: Service[Request, Response] = handleErrors andThen clientWithoutErrorHandling
 
     println("))) Issuing two requests in parallel: ")
     val request1 = makeAuthorizedRequest(client)
@@ -57,19 +55,18 @@ object HttpClient {
     }
   }
 
-  private[this] def makeAuthorizedRequest(client: Service[HttpRequest, HttpResponse]) = {
-    val authorizedRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-    authorizedRequest.headers().add(HttpHeaders.Names.AUTHORIZATION, "open sesame")
+  private[this] def makeAuthorizedRequest(client: Service[Request, Response]) = {
+    val authorizedRequest = Request(Version.Http11, Method.Get, "/")
+    authorizedRequest.headerMap.add(Fields.Authorization, "open sesame")
 
     client(authorizedRequest) onSuccess { response =>
-      val responseString = response.getContent.toString(Charsets.Utf8)
+      val responseString = response.contentString
       println("))) Received result for authorized request: " + responseString)
     }
   }
 
-  private[this] def makeUnauthorizedRequest(client: Service[HttpRequest, HttpResponse]) = {
-    val unauthorizedRequest = new DefaultHttpRequest(
-      HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
+  private[this] def makeUnauthorizedRequest(client: Service[Request, Response]) = {
+    val unauthorizedRequest = Request(Version.Http11, Method.Get, "/")
 
     // use the onFailure callback since we convert HTTP 4xx and 5xx class
     // responses to Exceptions.

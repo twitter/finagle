@@ -5,7 +5,7 @@ import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatc
 import com.twitter.finagle.filter.MaskCancelFilter
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
 import com.twitter.finagle.server.{StackServer, Listener, StdStackServer}
-import com.twitter.finagle.service.{RetryingFilter, RetryPolicy, TimeoutFilter}
+import com.twitter.finagle.service.{RetryExceptionsFilter, RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Future, Await}
@@ -138,7 +138,7 @@ object BasicClientExample extends App {
 
 object Filters {
   //#filters
-  val retry = new RetryingFilter[String, String](
+  val retry = new RetryExceptionsFilter[String, String](
     retryPolicy = RetryPolicy.tries(3),
     timer = DefaultTimer.twitter
   )

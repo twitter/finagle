@@ -327,7 +327,7 @@ object ZUnionStore extends ZStoreCompanion {
 
 case class ZRangeResults(entries: Array[ChannelBuffer], scores: Array[Double]) {
   def asTuples(): Seq[(ChannelBuffer, Double)] =
-    (entries, scores).zipped map { (entry, score) => (entry, score) } toSeq
+    (entries, scores).zipped.map { (entry, score) => (entry, score) }.toSeq
 }
 object ZRangeResults {
   def apply(tuples: Seq[(ChannelBuffer, ChannelBuffer)]): ZRangeResults = {

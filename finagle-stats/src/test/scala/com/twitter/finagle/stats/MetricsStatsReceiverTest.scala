@@ -54,6 +54,13 @@ class MetricsStatsReceiverTest extends FunSuite with GeneratorDrivenPropertyChec
     }
   }
 
+  test("toString") {
+    val sr = new MetricsStatsReceiver(Metrics.createDetached())
+    assert("MetricsStatsReceiver" == sr.toString)
+    assert("MetricsStatsReceiver/s1" == sr.scope("s1").toString)
+    assert("MetricsStatsReceiver/s1/s2" == sr.scope("s1").scope("s2").toString)
+  }
+
   test("store and read counter into the root StatsReceiver") {
     rootReceiver.counter("my_counter").incr()
     assert(readInRoot("my_counter") === 1)

@@ -1,28 +1,27 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.builder.{ClientBuilder, Server, ServerBuilder}
+import com.twitter.finagle.builder.{ClientBuilder, Server => MServer, ServerBuilder}
 import com.twitter.finagle.memcached.Client
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.protocol.{Command, Response}
 import com.twitter.finagle.{Service, ServiceClosedException}
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util.Await
 import java.net.{InetAddress, InetSocketAddress}
-import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class ProxyTest extends FunSuite with BeforeAndAfter {
 
   type MemcacheService = Service[Command, Response]
   /**
-    * Note: This integration test requires a real Memcached server to run.
-    */
+   * Note: This integration test requires a real Memcached server to run.
+   */
   var externalClient: Client = null
-  var server: Server = null
+  var server: MServer = null
   var serverAddress: InetSocketAddress = null
   var proxyService: MemcacheService = null
   var proxyClient: MemcacheService = null
@@ -40,6 +39,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       proxyService = new MemcacheService {
         def apply(request: Command) = proxyClient(request)
       }
+
       server = ServerBuilder()
         .codec(Memcached())
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
@@ -58,11 +58,11 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       server.close(0.seconds)
       proxyService.close()
       proxyClient.close()
-      testServer map { _.stop() }
+      testServer.map(_.stop())
     }
   }
 
-  override def withFixture(test: NoArgTest): Outcome = {
+  override def withFixture(test: NoArgTest) = {
     if (testServer == None) {
       info("Cannot start memcached. skipping test...")
       cancel()
@@ -73,10 +73,11 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
   test("Proxied Memcached Servers should handle a basic get/set operation") {
     Await.result(externalClient.delete("foo"))
     assert(Await.result(externalClient.get("foo")) === None)
-    Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(Charsets.Utf8))))
+    Await.result(externalClient.set("foo", Buf.Utf8("bar")))
     val foo = Await.result(externalClient.get("foo"))
     assert(foo.isDefined)
-    assert(foo.get.toString(Charsets.Utf8) === "bar")
+    val Buf.Utf8(res) = foo.get
+    assert(res === "bar")
     externalClient.release()
   }
 
@@ -84,7 +85,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     test("stats is supported") {
       Await.result(externalClient.delete("foo"))
       assert(Await.result(externalClient.get("foo")) === None)
-      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(Charsets.Utf8))))
+      Await.result(externalClient.set("foo", Buf.Utf8("bar")))
       Seq(None, Some("slabs")).foreach { arg =>
         val stats = Await.result(externalClient.stats(arg))
         assert(stats != null)
@@ -101,7 +102,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
     test("stats (cachedump) is supported") {
       Await.result(externalClient.delete("foo"))
       assert(Await.result(externalClient.get("foo")) === None)
-      Await.result(externalClient.set("foo", ChannelBuffers.wrappedBuffer("bar".getBytes(Charsets.Utf8))))
+      Await.result(externalClient.set("foo", Buf.Utf8("bar")))
       val slabs = Await.result(externalClient.stats(Some("slabs")))
       assert(slabs != null)
       assert(!slabs.isEmpty)

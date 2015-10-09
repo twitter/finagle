@@ -101,18 +101,51 @@ class BucketedHistogramTest extends FunSuite
     assert(h.percentile(1.0) == 0)
   }
 
-  test("merged") {
-    val h1 = BucketedHistogram()
-    1L.to(5L).foreach(h1.add)
-    val h2 = BucketedHistogram()
-    6L.to(10L).foreach(h2.add)
+  test("sum") {
+    val h = BucketedHistogram()
+    assert(h.sum == 0)
 
-    val m = BucketedHistogram.merged(Array(h1, h2))
-    assert(m.getQuantile(0.5) == 5)
-    assert(m.getQuantile(1.0) == 10)
+    h.add(100)
+    h.add(200)
+    assert(h.sum == 300)
+
+    h.clear()
+    assert(h.sum == 0)
   }
 
-  test("percentile stays within error bounds") {
+  test("count") {
+    val h = BucketedHistogram()
+    assert(h.count == 0)
+
+    h.add(100)
+    h.add(200)
+    assert(h.count == 2)
+
+    h.clear()
+    assert(h.count == 0)
+  }
+
+  test("average") {
+    val h = BucketedHistogram()
+    assert(h.average == 0.0)
+
+    h.add(100)
+    h.add(200)
+    assert(h.average == 150.0)
+
+    h.clear()
+    assert(h.average == 0)
+  }
+
+  test("outliers are handled") {
+    val h = BucketedHistogram()
+    h.add(2137204091L)
+    h.add(-1)
+    h.add(Long.MinValue)
+    h.add(Long.MaxValue)
+  }
+
+  test("percentile and min and max stays within error bounds") {
     forAll(BucketedHistogramTest.generator) { case (samples: List[Int], p: Double) =>
       // although this uses Gen.nonEmptyContainerOf I observed an empty List
       // generated. As an example, this failed with an NPE:
@@ -125,7 +158,7 @@ class BucketedHistogramTest extends FunSuite
       //      Occurred when passed generated values (
       //        arg0 = (List(-1),0.9370612091967268) // 33 shrinks
       //
-      whenever(samples.size > 0 && samples.forall(_ >= 0)) {
+      whenever(samples.nonEmpty && samples.forall(_ >= 0)) {
         val h = BucketedHistogram()
         samples.foreach { s => h.add(s.toLong)}
 
@@ -134,6 +167,10 @@ class BucketedHistogramTest extends FunSuite
         val ideal = sorted(index).toLong
         val actual = h.percentile(p)
         assertWithinError(ideal, actual)
+
+        // check min and max too
+        assertWithinError(sorted.head, h.minimum)
+        assertWithinError(sorted.last, h.maximum)
       }
     }
   }

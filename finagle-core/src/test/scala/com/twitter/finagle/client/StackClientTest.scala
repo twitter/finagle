@@ -1,9 +1,11 @@
 package com.twitter.finagle.client
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.service.FailFastFactory.FailFast
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
@@ -12,7 +14,7 @@ import com.twitter.util._
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.FunSuite
+import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 @RunWith(classOf[JUnitRunner])
@@ -20,7 +22,8 @@ class StackClientTest extends FunSuite
   with StringClient
   with AssertionsForJUnit
   with Eventually
-  with IntegrationPatience {
+  with IntegrationPatience
+  with BeforeAndAfter {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver
@@ -28,21 +31,26 @@ class StackClientTest extends FunSuite
       .configured(param.Stats(sr))
   }
 
+  after {
+    NameInterpreter.global = DefaultInterpreter
+  }
+
   test("client stats are scoped to label")(new Ctx {
     // use dest when no label is set
-    client.newService("inet!localhost:8080")
+    client.newService("inet!127.0.0.1:8080")
     eventually {
-      assert(sr.counters(Seq("inet!localhost:8080", "loadbalancer", "adds")) === 1)
+      val counter = sr.counters(Seq("inet!127.0.0.1:8080", "loadbalancer", "adds"))
+      assert(counter == 1, s"The instance should be to the loadbalancer once instead of $counter times.")
     }
 
     // use param.Label when set
-    client.configured(param.Label("myclient")).newService("localhost:8080")
+    client.configured(param.Label("myclient")).newService("127.0.0.1:8080")
     eventually {
       assert(sr.counters(Seq("myclient", "loadbalancer", "adds")) === 1)
     }
 
     // use evaled label when both are set
-    client.configured(param.Label("myclient")).newService("othername=localhost:8080")
+    client.configured(param.Label("myclient")).newService("othername=127.0.0.1:8080")
     eventually {
       assert(sr.counters(Seq("othername", "loadbalancer", "adds")) === 1)
     }
@@ -323,12 +331,17 @@ class StackClientTest extends FunSuite
     val addr1 = new InetSocketAddress(1729)
     val addr2 = new InetSocketAddress(1730)
 
-    // override name resolution to a Union of two addresses
-    val dtab = new Dtab(Dtab.base) {
-      override def lookup(path: Path): Activity[NameTree[Name]] =
+    val baseDtab = Dtab.read("/s=>/test")
+
+    // override name resolution to a Union of two addresses, and check
+    // that the base dtab is properly passed in
+    NameInterpreter.global = new NameInterpreter {
+      override def bind(dtab: Dtab, path: Path): Activity[NameTree[Name.Bound]] = {
+        assert(dtab === baseDtab)
         Activity.value(NameTree.Union(
           NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr1))),
           NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr2)))))
+      }
     }
 
     val stack = StackClient.newStack[Unit, Unit]
@@ -355,7 +368,7 @@ class StackClientTest extends FunSuite
       new FactoryToService(stack.make(Stack.Params.empty +
         FactoryToService.Enabled(true) +
         param.Stats(sr) +
-        BindingFactory.BaseDtab(() => dtab)))
+        BindingFactory.BaseDtab(() => baseDtab)))
 
     intercept[ChannelWriteException] {
       Await.result(service(()))
@@ -385,5 +398,31 @@ class StackClientTest extends FunSuite
       client.configured(param.Label("foo"))
     val client3: StackClient[String, String] =
       client.configured[param.Label]((param.Label("foo"), param.Label.param))
+  }
+
+  test("StackClient binds to a local service via ServiceFactorySocketAddress") {
+    val reverser = Service.mk[String, String] { in => Future.value(in.reverse) }
+    val sf = ServiceFactory(() => Future.value(reverser))
+    val sa = ServiceFactorySocketAddress(sf)
+    val name = Name.bound(sa)
+    val service = stringClient.newService(name, "sfsa-test")
+    val forward = "a man a plan a canal: panama"
+    val reversed = Await.result(service(forward), 1.second)
+    assert(reversed == forward.reverse)
+  }
+
+  test("filtered composes filters atop the stack") {
+    val echoServer = Service.mk[String, String] { in => Future.value(in) }
+    val sf = ServiceFactory(() => Future.value(echoServer))
+    val sa = ServiceFactorySocketAddress(sf)
+    val name = Name.bound(sa)
+
+    val reverseFilter = new SimpleFilter[String, String] {
+      def apply(str: String, svc: Service[String, String]) =
+        svc(str.reverse)
+    }
+
+    val svc = stringClient.filtered(reverseFilter).newRichClient(name, "test_client")
+    assert(Await.result(svc.ping(), 1.second) == "ping".reverse)
   }
 }

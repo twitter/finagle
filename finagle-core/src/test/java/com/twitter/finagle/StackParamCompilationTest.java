@@ -3,10 +3,10 @@ package com.twitter.finagle;
 import java.net.SocketAddress;
 
 import scala.Option;
+import scala.Some;
 
+import com.twitter.concurrent.AsyncSemaphore;
 import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.channel.IdleConnectionFilter;
-import com.twitter.finagle.channel.OpenConnectionsThresholds;
 import com.twitter.finagle.client.DefaultPool;
 import com.twitter.finagle.client.StackClient;
 import com.twitter.finagle.client.Transporter;
@@ -14,9 +14,11 @@ import com.twitter.finagle.factory.BindingFactory;
 import com.twitter.finagle.factory.TimeoutFactory;
 import com.twitter.finagle.filter.MaskCancelFilter;
 import com.twitter.finagle.filter.RequestSemaphoreFilter;
-import com.twitter.finagle.loadbalancer.DefaultBalancerFactory;
+import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
 import com.twitter.finagle.netty3.Netty3Transporter;
+import com.twitter.finagle.netty3.channel.IdleConnectionFilter;
+import com.twitter.finagle.netty3.channel.OpenConnectionsThresholds;
 import com.twitter.finagle.netty3.param.Netty3Timer;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.param.Logger;
@@ -34,6 +36,7 @@ import com.twitter.finagle.socks.SocksProxyFlags;
 import com.twitter.finagle.ssl.Engine;
 import com.twitter.finagle.stats.NullStatsReceiver;
 import com.twitter.finagle.transport.Transport;
+import com.twitter.finagle.util.Rngs;
 import com.twitter.util.Duration;
 import com.twitter.util.Function0;
 
@@ -58,31 +61,42 @@ public class StackParamCompilationTest {
           new Transporter.SocksProxy(
             SocksProxyFlags.socksProxy(),
             SocksProxyFlags.socksUsernameAndPassword()).mk())
-        .configured(new Transporter.HttpProxy(Option.<SocketAddress>empty()).mk())
+        .configured(
+          new Transporter.HttpProxy(
+            Option.<SocketAddress>empty(),
+            Option.<Transporter.Credentials>empty()).mk())
         .configured(
           new BindingFactory.BaseDtab(new Function0<Dtab>() {
               public Dtab apply() { return Dtab.empty(); }
           }).mk())
         .configured(new TimeoutFactory.Param(Duration.Top()).mk())
         .configured(new MaskCancelFilter.Param(false).mk())
-        .configured(new RequestSemaphoreFilter.Param(Integer.MAX_VALUE).mk())
+        .configured(new RequestSemaphoreFilter.Param(
+          new Some<AsyncSemaphore>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
-        .configured(new LoadBalancerFactory.Param(DefaultBalancerFactory.get()).mk())
+        .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
         .configured(new Netty3Transporter.ChannelFactory(null).mk())
         .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get()).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
         .configured(new FailFastFactory.FailFast(true).mk())
-        .configured(new FailureAccrualFactory.Param(0, Duration.Top()).mk())
+        .configured(FailureAccrualFactory.Param(10, Duration.Bottom()).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
         .configured(new Transport.Verbose(false).mk())
+        .configured(new Transporter.TrafficClass(new Some<Object>(1)).mk())
+        .configured(new Listener.TrafficClass(Option.empty()).mk())
         .configured(
           new Transport.TLSClientEngine(
             Option.<scala.Function1<SocketAddress, Engine>>empty()
           ).mk())
         .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
+
+    StackClient<String, String> client1 =
+        new ClientBuilder()
+        .failFast(true)
+        .<String, String>stackClientOfCodec(null);
   }
 
   void testModule1() {

@@ -15,6 +15,7 @@ class SourceTrackingMonitor(logger: Logger, which: String) extends Monitor {
     // we don't want these noisy IOExceptions leaking into the logs.
     val level = exc match {
       case _: IOException => Level.FINE
+      case f: Failure => f.logLevel
       case _ => Level.SEVERE
     }
     logger.log(

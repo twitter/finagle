@@ -16,6 +16,8 @@ trait ReporterFactory extends ((String, Option[SocketAddress]) => Monitor)
 
 object NullReporterFactory extends ReporterFactory {
   def apply(name: String, addr: Option[SocketAddress]): Monitor = NullMonitor
+
+  override def toString = "NullReporterFactory"
 }
 
 object LoadedReporterFactory extends ReporterFactory {
@@ -25,4 +27,9 @@ object LoadedReporterFactory extends ReporterFactory {
     factories.map(_(name, addr)).foldLeft(NullMonitor: Monitor) { (a, m) => a andThen m }
 
   val get = this
+
+  override def toString: String = {
+    val names = factories.map(_.getClass.getName).mkString(",")
+    s"LoadedReporterFactory($names)"
+  }
 }

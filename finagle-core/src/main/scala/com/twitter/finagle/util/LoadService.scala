@@ -1,17 +1,18 @@
 package com.twitter.finagle.util
 
+import com.twitter.app.GlobalFlag
 import com.twitter.logging.Level
 import com.twitter.util.NonFatal
 import com.twitter.util.registry.GlobalRegistry
 import java.io.{File, IOException}
 import java.net.{URI, URISyntaxException, URLClassLoader}
 import java.nio.charset.MalformedInputException
-import java.util.jar.JarFile
 import java.util.ServiceConfigurationError
-
+import java.util.jar.JarFile
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
+import scala.reflect.ClassTag
 
 /**
  * Inspect and load the classpath. Inspired by Guava's ClassPath
@@ -22,9 +23,11 @@ import scala.io.Source
  */
 private object ClassPath {
 
-  private val ignoredPackages = Seq(
+  private val defaultIgnoredPackages = Seq(
     "apple/", "ch/epfl/", "com/apple/", "com/oracle/",
     "com/sun/", "java/", "javax/", "scala/", "sun/", "sunw/")
+
+  private[util] def ignoredPackages = defaultIgnoredPackages ++ loadServiceIgnoredPaths()
 
   /**
    * Information about a classpath entry.
@@ -68,17 +71,34 @@ private object ClassPath {
     ents
   }
 
-  private[finagle] def browseUri(uri: URI, loader: ClassLoader, buf: mutable.Buffer[Info]) {
+  private[finagle] def browseUri(
+    uri: URI,
+    loader: ClassLoader,
+    buf: mutable.Buffer[Info]
+  ): Unit = browseUri0(uri, loader, buf, mutable.Set[String]())
+
+  private def browseUri0(
+    uri: URI,
+    loader: ClassLoader,
+    buf: mutable.Buffer[Info],
+    history: mutable.Set[String]
+  ): Unit = {
+
     if (uri.getScheme != "file")
       return
     val f = new File(uri)
     if (!(f.exists() && f.canRead))
       return
+    val path = f.getCanonicalPath
+    if (history.contains(path))
+      return
+
+    history.add(path)
 
     if (f.isDirectory)
       browseDir(f, loader, "", buf)
     else
-      browseJar(f, loader, buf)
+      browseJar(f, loader, buf, history)
   }
 
   private def browseDir(
@@ -97,14 +117,14 @@ private object ClassPath {
       }
   }
 
-  private def browseJar(file: File, loader: ClassLoader, buf: mutable.Buffer[Info]) {
+  private def browseJar(file: File, loader: ClassLoader, buf: mutable.Buffer[Info], history: mutable.Set[String]) {
     val jarFile = try new JarFile(file) catch {
       case _: IOException => return  // not a Jar file
     }
 
     try {
       for (uri <- jarClasspath(file, jarFile.getManifest))
-        browseUri(uri, loader, buf)
+        browseUri0(uri, loader, buf, history)
 
       for {
         e <- jarFile.entries.asScala
@@ -113,7 +133,7 @@ private object ClassPath {
         if !(ignoredPackages exists (n startsWith _))
         iface <- ifaceOfName(n)
       } {
-        val source = Source.fromInputStream(jarFile.getInputStream(e))
+        val source = Source.fromInputStream(jarFile.getInputStream(e), "UTF-8")
         val lines = readLines(source)
         buf += Info(n, iface, lines)
       }
@@ -157,6 +177,9 @@ private object ClassPath {
   }
 }
 
+object loadServiceIgnoredPaths extends GlobalFlag(Seq.empty[String],
+    "Additional packages to be excluded from recursive directory scan")
+
 /**
  * Load a singleton class in the manner of [[java.util.ServiceLoader]]. It is
  * more resilient to varying Java packaging configurations than ServiceLoader.
@@ -165,8 +188,9 @@ object LoadService {
 
   private val cache: mutable.Map[ClassLoader, Seq[ClassPath.Info]] = mutable.Map.empty
 
-  def apply[T: ClassManifest](): Seq[T] = synchronized {
-    val iface = implicitly[ClassManifest[T]].erasure.asInstanceOf[Class[T]]
+  def apply[T: ClassTag](): Seq[T] = synchronized {
+    val iface = implicitly[ClassTag[T]].runtimeClass.asInstanceOf[Class[T]]
+
     val ifaceName = iface.getName
     val loader = iface.getClassLoader
 
@@ -178,7 +202,7 @@ object LoadService {
 
     val classNamesFromResources = for {
       rsc <- loader.getResources("META-INF/services/" + ifaceName).asScala
-      line <- ClassPath.readLines(Source.fromURL(rsc))
+      line <- ClassPath.readLines(Source.fromURL(rsc, "UTF-8"))
     } yield line
 
     val buffer = mutable.ListBuffer.empty[String]
@@ -211,3 +235,4 @@ object LoadService {
     result
   }
 }
+

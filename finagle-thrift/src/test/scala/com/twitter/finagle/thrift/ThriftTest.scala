@@ -7,13 +7,14 @@ import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.apache.thrift.protocol._
 import org.scalatest.FunSuite
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 /**
  * A test mixin to test all combinations of servers, clients and protocols.
  */
 trait ThriftTest { self: FunSuite =>
   type Iface <: AnyRef
-  def ifaceManifest: ClassManifest[Iface]
+  def ifaceManifest: ClassTag[Iface]
   val processor: Iface
   val ifaceToService: (Iface, TProtocolFactory) => Service[Array[Byte], Array[Byte]]
   val serviceToIface: (Service[ThriftClientRequest, Array[Byte]], TProtocolFactory) => Iface

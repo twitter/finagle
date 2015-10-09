@@ -4,8 +4,8 @@ import _root_.java.net.SocketAddress
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import com.twitter.finagle.memcached.protocol.text
 import com.twitter.finagle.memcached.util.AtomicMap
+import com.twitter.io.Buf
 import com.twitter.util.{Await, SynchronizedLruMap}
-import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * An in-process memcached server.
@@ -16,7 +16,7 @@ class Server(address: SocketAddress) {
   val slots = 500000
   val slotsPerLru = slots / concurrencyLevel
   val maps = (0 until concurrencyLevel) map { i =>
-    new SynchronizedLruMap[ChannelBuffer, Entry](slotsPerLru)
+    new SynchronizedLruMap[Buf, Entry](slotsPerLru)
   }
 
   private[this] val service = {

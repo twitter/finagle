@@ -2,6 +2,7 @@ package com.twitter.finagle.exp.mysql
 
 import java.sql.{Timestamp, Date => SQLDate}
 import java.util.{Calendar, Date, TimeZone}
+import com.twitter.finagle.exp.mysql.Parameter.NullParameter
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -73,7 +74,7 @@ class HandshakeResponseTest extends FunSuite {
 class ExecuteRequestTest extends FunSuite {
   test("null values") {
     val numOfParams = 18
-    val nullParams: Array[Any] = Array.fill(numOfParams)(null)
+    val nullParams: Array[Parameter] = Array.fill(numOfParams)(null)
     val e = ExecuteRequest(0, nullParams, false)
     val br = BufferReader(e.toPacket.body)
     br.skip(10) // payload header (10bytes)
@@ -97,7 +98,7 @@ class ExecuteRequestTest extends FunSuite {
   val timestamp = new Timestamp(millis)
   val sqlDate = new SQLDate(millis)
   val datetime = new Date(millis)
-  val params = IndexedSeq(
+  val params: IndexedSeq[Parameter] = IndexedSeq(
     strVal,
     nonAsciiStrVal,
     boolVal,
@@ -158,10 +159,15 @@ class ExecuteRequestTest extends FunSuite {
     assert(hasNewParams === true)
   }
 
+  test("sanitized null parameters") {
+    assert(!req.params.contains(null))
+    assert(req.params.count(_ == NullParameter) == 4)
+  }
+
   if (hasNewParams) {
     test("type codes") {
-      for (p <- params)
-        assert(br.readShort() === Type.getCode(p))
+      for (p <- req.params)
+        assert(br.readShort() === p.typeCode)
     }
 
     test("String") {

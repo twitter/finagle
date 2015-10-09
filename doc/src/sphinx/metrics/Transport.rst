@@ -81,3 +81,9 @@ IdleConnectionFilter
 
 **closed**
   a counter of the number of connections that have been closed for being idle
+
+Thrift
+<<<<<<
+
+**srv/thrift/buffer/resetCount**
+  a counter for the number of times the thrift server re-initialized the buffer for thrift responses. The thrift server maintains a growable reusable buffer for responses. Once the buffer reaches the threshold size it is discarded and reset to a smaller size. This is done to accommodate variable response sizes. A high resetCount means the server is allocating and releasing memory frequently. Use the `com.twitter.finagle.Thrift.param.MaxReusableBufferSize` to set the max buffer size to the size of  a typical thrift response for your server.

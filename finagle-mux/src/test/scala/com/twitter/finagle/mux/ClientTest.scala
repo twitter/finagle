@@ -30,7 +30,7 @@ class ClientTest extends FunSuite {
       val clientToServer = new AsyncQueue[ChannelBuffer]
       val serverToClient = new AsyncQueue[ChannelBuffer]
       val transport = new QueueTransport(writeq=clientToServer, readq=serverToClient)
-      val client = new ClientDispatcher("test", transport, NullStatsReceiver)
+      val client = new ClientDispatcher("test", transport, NullStatsReceiver, FailureDetector.NullConfig)
       fn(
         client,
         transport,
@@ -59,7 +59,7 @@ class ClientTest extends FunSuite {
     val clientToServer = new AsyncQueue[ChannelBuffer]
     val serverToClient = new AsyncQueue[ChannelBuffer]
     val transport = new QueueTransport(writeq=clientToServer, readq=serverToClient)
-    val client = new ClientDispatcher("test", transport, sr)
+    val client = new ClientDispatcher("test", transport, sr, FailureDetector.NullConfig)
 
     def apply(req: Request): Future[Response] = client(req)
     def respond(rep: ChannelBuffer): Unit = serverToClient.offer(rep)

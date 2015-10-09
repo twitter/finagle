@@ -1,12 +1,11 @@
 package com.twitter.finagle.exp.mysql
 
-import java.util.{Calendar, TimeZone}
-import java.util.logging.Logger
-import java.sql.{Date, Timestamp, Time}
-import java.text.ParsePosition
-import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter}
+import com.twitter.finagle.exp.mysql.transport.{BufferReader, BufferWriter}
 import com.twitter.util.TwitterDateFormat
-
+import java.sql.{Date, Timestamp}
+import java.text.ParsePosition
+import java.util.logging.Logger
+import java.util.{Calendar, TimeZone}
 
 /**
  * Defines a Value ADT that represents the domain of values
@@ -85,7 +84,7 @@ class TimestampValue(
     bw.writeByte(cal.get(Calendar.HOUR_OF_DAY))
     bw.writeByte(cal.get(Calendar.MINUTE))
     bw.writeByte(cal.get(Calendar.SECOND))
-    bw.writeInt(ts.getNanos / 1000) // subsecond part is written as microseconds
+    bw.writeInt(ts.getNanos / 1000) // sub-second part is written as microseconds
     RawValue(Type.Timestamp, Charset.Binary, true, bytes)
   }
 
@@ -291,7 +290,7 @@ object DateValue extends Injectable[Date] with Extractable[Date] {
    * Invalid DATE values are converted to
    * the “zero” value of the appropriate type
    * ('0000-00-00' or '0000-00-00 00:00:00').
-   * @param An array of bytes representing a DATE written in the
+   * @param bytes An array of bytes representing a DATE written in the
    * MySQL binary protocol.
    */
   private[this] def fromBytes(bytes: Array[Byte]): Date = {

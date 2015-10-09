@@ -52,12 +52,12 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     verify(trans, times(2)).read()
   })
 
-  test("Inject the transport SSLSession if present") (new Ctx {
-    val mockSesh = mock[X509Certificate]
-    when(trans.peerCertificate).thenReturn(Some(mockSesh))
+  test("Inject the transport certificate if present") (new Ctx {
+    val mockCert = mock[X509Certificate]
+    when(trans.peerCertificate).thenReturn(Some(mockCert))
     val service = new Service[String, String] {
       override def apply(request: String): Future[String] = Future.value {
-        if (Contexts.local.get(Transport.peerCertCtx) == Some(mockSesh)) "ok" else "not ok"
+        if (Contexts.local.get(Transport.peerCertCtx) == Some(mockCert)) "ok" else "not ok"
       }
     }
 

@@ -17,6 +17,7 @@
 package com.twitter.finagle.redis.naggati
 
 import org.jboss.netty.buffer.ChannelBuffer
+import scala.language.implicitConversions
 
 object Stages {
   /**

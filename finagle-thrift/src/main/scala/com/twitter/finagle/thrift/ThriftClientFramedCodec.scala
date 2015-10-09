@@ -1,16 +1,11 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
-import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
 import com.twitter.util.Future
-import java.util.logging.{Logger, Level}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
-  SimpleChannelDownstreamHandler}
+import org.jboss.netty.channel._
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -74,6 +69,8 @@ class ThriftClientFramedCodec(
   override def prepareConnFactory(
     underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]
   ) = preparer.prepare(underlying)
+
+  override val protocolLibraryName: String = "thrift"
 }
 
 
@@ -91,14 +88,16 @@ private[thrift] class ThriftClientChannelBufferEncoder
         Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
         if (request.oneway) {
           // oneway RPCs are satisfied when the write is complete.
-          e.getFuture() {
-            case Ok(_) =>
-              Channels.fireMessageReceived(ctx, ChannelBuffers.EMPTY_BUFFER)
-            case Error(e) =>
-              Channels.fireExceptionCaught(ctx, e)
-            case Cancelled =>
-              Channels.fireExceptionCaught(ctx, new CancelledRequestException)
-          }
+          e.getFuture.addListener(new ChannelFutureListener {
+            override def operationComplete(f: ChannelFuture): Unit =
+              if (f.isSuccess) {
+                Channels.fireMessageReceived(ctx, ChannelBuffers.EMPTY_BUFFER)
+              } else if (f.isCancelled) {
+                Channels.fireExceptionCaught(ctx, new CancelledRequestException)
+              } else {
+                Channels.fireExceptionCaught(ctx, f.getCause)
+              }
+          })
         }
 
       case _ =>
@@ -117,8 +116,9 @@ private[finagle] case class ThriftClientPreparer(
     clientId: Option[ClientId] = None,
     useCallerSeqIds: Boolean = false) {
 
-  def prepareService(service: Service[ThriftClientRequest, Array[Byte]])
-    : Future[Service[ThriftClientRequest, Array[Byte]]] = {
+  def prepareService(
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
     // Attempt to upgrade the protocol the first time around by
     // sending a magic method invocation.
     val buffer = new OutputBuffer(protocolFactory)

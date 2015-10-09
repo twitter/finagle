@@ -26,13 +26,23 @@ public class Constants {
    * The following is from BigBrotherBird:
    *   http://j.mp/fZZnyD
    */
+  public static final String WIRE_SEND = "ws";
+
+  public static final String WIRE_RECV = "wr";
+
+  public static final String WIRE_RECV_ERROR   = "Wire Receive Error";
+
   public static final String CLIENT_SEND = "cs";
 
   public static final String CLIENT_RECV = "cr";
 
+  public static final String CLIENT_RECV_ERROR   = "Client Receive Error";
+
   public static final String SERVER_SEND = "ss";
 
   public static final String SERVER_RECV = "sr";
+
+  public static final String SERVER_SEND_ERROR   = "Server Send Error";
 
   public static final String SERVER_ADDR = "sa";
 

@@ -1,22 +1,20 @@
 package com.twitter.finagle.memcached.protocol.text.client
 
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import java.nio.charset.{Charset => JCharset}
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.finagle.memcached.protocol.text.{StatLines, TokensWithData, ValueLines, Tokens}
+import com.twitter.io.Buf
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder
-import text.{StatLines, TokensWithData, ValueLines, Tokens}
 
 object AbstractDecodingToResponse {
-  private[finagle] val STORED        = "STORED":          ChannelBuffer
-  private[finagle] val NOT_FOUND     = "NOT_FOUND":       ChannelBuffer
-  private[finagle] val NOT_STORED    = "NOT_STORED":      ChannelBuffer
-  private[finagle] val EXISTS        = "EXISTS":          ChannelBuffer
-  private[finagle] val DELETED       = "DELETED":         ChannelBuffer
-  private[finagle] val ERROR         = "ERROR":           ChannelBuffer
-  private[finagle] val CLIENT_ERROR  = "CLIENT_ERROR":    ChannelBuffer
-  private[finagle] val SERVER_ERROR  = "SERVER_ERROR":    ChannelBuffer
+  private[finagle] val STORED        = Buf.Utf8("STORED")
+  private[finagle] val NOT_FOUND     = Buf.Utf8("NOT_FOUND")
+  private[finagle] val NOT_STORED    = Buf.Utf8("NOT_STORED")
+  private[finagle] val EXISTS        = Buf.Utf8("EXISTS")
+  private[finagle] val DELETED       = Buf.Utf8("DELETED")
+  private[finagle] val ERROR         = Buf.Utf8("ERROR")
+  private[finagle] val CLIENT_ERROR  = Buf.Utf8("CLIENT_ERROR")
+  private[finagle] val SERVER_ERROR  = Buf.Utf8("SERVER_ERROR")
 }
 
 abstract class AbstractDecodingToResponse[R <: AnyRef] extends OneToOneDecoder {
@@ -30,23 +28,23 @@ abstract class AbstractDecodingToResponse[R <: AnyRef] extends OneToOneDecoder {
     case _ => throw new IllegalArgumentException("Expecting a Decoding")
   }
 
-  protected def parseResponse(tokens: Seq[ChannelBuffer]): R
+  protected def parseResponse(tokens: Seq[Buf]): R
   protected def parseValues(valueLines: Seq[TokensWithData]): R
   protected def parseStatLines(lines: Seq[Tokens]): R
 }
 
 class DecodingToResponse extends AbstractDecodingToResponse[Response] {
   import AbstractDecodingToResponse._
-  private[this] val asciiCharset = JCharset.forName("US-ASCII")
+  import com.twitter.finagle.memcached.util.Bufs.RichBuf
 
-  protected def parseResponse(tokens: Seq[ChannelBuffer]) = {
+  protected def parseResponse(tokens: Seq[Buf]) = {
     tokens.headOption match {
-      case None               => NoOp()
-      case Some(NOT_FOUND)    => NotFound()
-      case Some(STORED)       => Stored()
-      case Some(NOT_STORED)   => NotStored()
-      case Some(EXISTS)       => Exists()
-      case Some(DELETED)      => Deleted()
+      case None               => Response.NoOp
+      case Some(NOT_FOUND)    => Response.NotFound
+      case Some(STORED)       => Response.Stored
+      case Some(NOT_STORED)   => Response.NotStored
+      case Some(EXISTS)       => Response.Exists
+      case Some(DELETED)      => Response.Deleted
       case Some(ERROR)        => Error(new NonexistentCommand(parseErrorMessage(tokens)))
       case Some(CLIENT_ERROR) => Error(new ClientError(parseErrorMessage(tokens)))
       case Some(SERVER_ERROR) => Error(new ServerError(parseErrorMessage(tokens)))
@@ -72,7 +70,7 @@ class DecodingToResponse extends AbstractDecodingToResponse[Response] {
     Values(values)
   }
 
-  private[this] def parseErrorMessage(tokens: Seq[ChannelBuffer]) = {
-    tokens.lastOption map { _.toString(asciiCharset) } getOrElse("")
-  }
+  private[this] def parseErrorMessage(tokens: Seq[Buf]) =
+    tokens.drop(1).map { case Buf.Utf8(s) => s }.mkString(" ")
+
 }

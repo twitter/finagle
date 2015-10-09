@@ -5,7 +5,6 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.{Await, Future, Duration}
-import java.util.concurrent.TimeUnit
 import org.openjdk.jmh.annotations._
 
 object PoolBench {

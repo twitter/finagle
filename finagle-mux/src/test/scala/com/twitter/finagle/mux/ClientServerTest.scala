@@ -3,13 +3,13 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
-import com.twitter.finagle.{Filter, SimpleFilter, Service, Status, Path, Failure}
+import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, Promise, Return, Throw, Time, TimeControl}
+import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
@@ -20,7 +20,7 @@ import org.mockito.stubbing.Answer
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{OneInstancePerTest, FunSuite, Tag}
+import org.scalatest.{FunSuite, OneInstancePerTest, Tag}
 
 private object TestContext {
   val testContext = new Contexts.broadcast.Key[Buf]("com.twitter.finagle.mux.MuxContext") {
@@ -36,7 +36,6 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   with AssertionsForJUnit
   with Eventually
   with IntegrationPatience {
-  import TestContext._
   val tracer = new BufferingTracer
 
   class Ctx {
@@ -48,7 +47,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val clientTransport =
       new QueueTransport(writeq=clientToServer, readq=serverToClient)
     val service = mock[Service[Request, Response]]
-    val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver)
+    val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver, FailureDetector.GlobalFlagConfig)
     val nping = new AtomicInteger(0)
     val pingReq, pingRep = new Latch
     def ping() = {
@@ -57,10 +56,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       pingReq.flip()
       f
     }
-    
+
     val filter = new SimpleFilter[Message, Message] {
       def apply(req: Message, service: Service[Message, Message]): Future[Message] = req match {
-        case Message.Tdispatch(tag, _, _, _, _) if !canDispatch => 
+        case Message.Tdispatch(tag, _, _, _, _) if !canDispatch =>
           Future.value(Message.Rerr(tag, "Tdispatch not enabled"))
         case Message.Tping(tag) =>
           ping() before Future.value(Message.Rping(tag))
@@ -69,7 +68,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     }
 
     val server = new ServerDispatcher(
-      serverTransport, filter andThen Processor andThen service, 
+      serverTransport, filter andThen Processor andThen service,
       Lessor.nil, tracer, NullStatsReceiver)
   }
 

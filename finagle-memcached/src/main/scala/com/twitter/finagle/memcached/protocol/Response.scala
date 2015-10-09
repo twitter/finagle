@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.protocol
 
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.io.Buf
 
 sealed abstract class Response
 case class NotFound()                     extends Response
@@ -11,14 +11,23 @@ case class Deleted()                      extends Response
 case class Error(cause: Exception)        extends Response
 case class NoOp()                         extends Response
 
-case class Info(key: ChannelBuffer, values: Seq[ChannelBuffer]) extends Response
+case class Info(key: Buf, values: Seq[Buf]) extends Response
 case class InfoLines(lines: Seq[Info]) extends Response
 
 case class Values(values: Seq[Value])     extends Response
 case class Number(value: Long)            extends Response
 
 case class Value(
-    key: ChannelBuffer,
-    value: ChannelBuffer,
-    casUnique: Option[ChannelBuffer] = None,
-    flags: Option[ChannelBuffer] = None)
+    key: Buf,
+    value: Buf,
+    casUnique: Option[Buf] = None,
+    flags: Option[Buf] = None)
+
+private[protocol] object Response {
+  val NotFound = new NotFound()
+  val Stored = new Stored()
+  val NotStored = new NotStored()
+  val Exists = new Exists()
+  val Deleted = new Deleted()
+  val NoOp = new NoOp()
+}

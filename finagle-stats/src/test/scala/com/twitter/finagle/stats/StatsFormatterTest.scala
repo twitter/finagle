@@ -24,7 +24,8 @@ class StatsFormatterTest extends FunSuite {
     val formatter = StatsFormatter.CommonsMetrics
     val formatted = formatter(values)
 
-    assert(formatted === metrics.sample().asScala)
+    // remove stddev as it is not supported
+    assert(formatted === metrics.sample().asScala.filterKeys(!_.endsWith("stddev")))
 
     assert(formatted("histo1.p50") === 50)
     assert(formatted("histo1.p90") === 90)

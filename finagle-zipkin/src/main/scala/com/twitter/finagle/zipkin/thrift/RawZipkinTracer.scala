@@ -1,11 +1,10 @@
 package com.twitter.finagle.zipkin.thrift
 
 import com.google.common.io.BaseEncoding
-import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{Protocols, ThriftClientFramedCodec, thrift}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.util.DefaultTimer
@@ -18,9 +17,8 @@ import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.concurrent.{ArrayBlockingQueue, TimeoutException}
 import org.apache.thrift.TByteArrayOutputStream
-import org.apache.thrift.protocol.TProtocol
-import org.apache.thrift.transport.TTransport
 import scala.collection.mutable.{ArrayBuffer, HashMap, SynchronizedMap}
+import scala.language.reflectiveCalls
 
 object RawZipkinTracer {
   private[this] def newClient(
@@ -31,7 +29,12 @@ object RawZipkinTracer {
       .name("zipkin-tracer")
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
+      .reportTo(ClientStatsReceiver)
       .hostConnectionLimit(5)
+      // using an arbitrary, but bounded number of waiters to avoid memory leaks
+      .hostConnectionMaxWaiters(250)
+      // somewhat arbitrary, but bounded timeouts
+      .timeout(1.second)
       .daemon(true)
       .build()
 
@@ -97,6 +100,8 @@ private[thrift] class RawZipkinTracer(
   maxBufferSize: StorageUnit = 1.megabyte
 ) extends Tracer {
   private[this] val TraceCategory = "zipkin" // scribe category
+
+  private[this] val ErrorAnnotation = "%s: %s" // annotation: errorMessage
 
   // this sends off spans after the deadline is hit, no matter if it ended naturally or not.
   private[this] val spanMap: DeadlineSpanMap =
@@ -188,11 +193,11 @@ private[thrift] class RawZipkinTracer(
    * Log the span data via Scribe.
    */
   def logSpans(spans: Seq[Span]): Future[Unit] = {
-    client.log(createLogEntries(spans)) respond {
+    client.log(createLogEntries(spans)).respond {
       case Return(ResultCode.Ok) => okCounter.incr()
       case Return(ResultCode.TryLater) => tryLaterCounter.incr()
       case Throw(e) => errorReceiver.counter(e.getClass.getName).incr()
-    } unit
+    }.unit
   }
 
   /**
@@ -208,21 +213,31 @@ private[thrift] class RawZipkinTracer(
 
   def record(record: Record) {
     record.annotation match {
-      case tracing.Annotation.ClientSend()   =>
+      case tracing.Annotation.WireSend =>
+        annotate(record, thrift.Constants.WIRE_SEND)
+      case tracing.Annotation.WireRecv =>
+        annotate(record, thrift.Constants.WIRE_RECV)
+      case tracing.Annotation.WireRecvError(error: String) =>
+        annotate(record, ErrorAnnotation.format(thrift.Constants.WIRE_RECV_ERROR, error))
+      case tracing.Annotation.ClientSend() =>
         annotate(record, thrift.Constants.CLIENT_SEND)
-      case tracing.Annotation.ClientRecv()   =>
+      case tracing.Annotation.ClientRecv() =>
         annotate(record, thrift.Constants.CLIENT_RECV)
-      case tracing.Annotation.ServerSend()   =>
+      case tracing.Annotation.ClientRecvError(error: String) =>
+        annotate(record, ErrorAnnotation.format(thrift.Constants.CLIENT_RECV_ERROR, error))
+      case tracing.Annotation.ServerSend() =>
         annotate(record, thrift.Constants.SERVER_SEND)
-      case tracing.Annotation.ServerRecv()   =>
+      case tracing.Annotation.ServerRecv() =>
         annotate(record, thrift.Constants.SERVER_RECV)
-      case tracing.Annotation.ClientSendFragment()   =>
+      case tracing.Annotation.ServerSendError(error: String) =>
+        annotate(record, ErrorAnnotation.format(thrift.Constants.SERVER_SEND_ERROR, error))
+      case tracing.Annotation.ClientSendFragment() =>
         annotate(record, thrift.Constants.CLIENT_SEND_FRAGMENT)
-      case tracing.Annotation.ClientRecvFragment()   =>
+      case tracing.Annotation.ClientRecvFragment() =>
         annotate(record, thrift.Constants.CLIENT_RECV_FRAGMENT)
-      case tracing.Annotation.ServerSendFragment()   =>
+      case tracing.Annotation.ServerSendFragment() =>
         annotate(record, thrift.Constants.SERVER_SEND_FRAGMENT)
-      case tracing.Annotation.ServerRecvFragment()   =>
+      case tracing.Annotation.ServerRecvFragment() =>
         annotate(record, thrift.Constants.SERVER_RECV_FRAGMENT)
       case tracing.Annotation.Message(value) =>
         annotate(record, value)

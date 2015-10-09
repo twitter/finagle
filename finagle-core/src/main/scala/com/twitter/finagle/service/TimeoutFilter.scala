@@ -1,5 +1,6 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.client.LatencyCompensation
@@ -29,19 +30,19 @@ object TimeoutFilter {
    */
   def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module3[
-        TimeoutFilter.Param, 
-        param.Timer, 
-        LatencyCompensation.Compensation, 
+        TimeoutFilter.Param,
+        param.Timer,
+        LatencyCompensation.Compensation,
         ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
-      def make(_param: Param, _timer: param.Timer, 
-          _compensation: LatencyCompensation.Compensation, 
+      def make(_param: Param, _timer: param.Timer,
+          _compensation: LatencyCompensation.Compensation,
           next: ServiceFactory[Req, Rep]) = {
         val Param(timeout) = _param
         val param.Timer(timer) = _timer
         val LatencyCompensation.Compensation(compensation) = _compensation
-        
+
         val exc = new IndividualRequestTimeoutException(timeout)
         val filter = new TimeoutFilter[Req, Rep](timeout + compensation, exc, timer)
         filter andThen next
@@ -54,8 +55,8 @@ object TimeoutFilter {
    */
   def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module2[
-        TimeoutFilter.Param, 
-        param.Timer, 
+        TimeoutFilter.Param,
+        param.Timer,
         ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
@@ -69,6 +70,15 @@ object TimeoutFilter {
         }
       }
     }
+
+  def typeAgnostic(
+    timeout: Duration,
+    exception: RequestTimeoutException,
+    timer: Timer
+  ): TypeAgnostic = new TypeAgnostic {
+    override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] =
+      new TimeoutFilter[Req, Rep](timeout, exception, timer)
+  }
 }
 
 /**
@@ -92,7 +102,7 @@ class TimeoutFilter[Req, Rep](
     // If there's a current deadline, we combine it with the one derived
     // from our timeout.
     val deadline = Contexts.broadcast.get(Deadline) match {
-      case Some(current) => 
+      case Some(current) =>
         Deadline.combined(timeoutDeadline, current)
       case None => timeoutDeadline
     }

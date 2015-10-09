@@ -1,38 +1,54 @@
 package com.twitter.finagle.factory
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.util.{Future, Time, Await}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{FunSuite, Tag}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import com.twitter.conversions.time._
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
-  test("cache, evict") (Time.withCurrentTimeFrozen { tc  =>
-    var factories: Map[Int, Int] = Map.empty
-    var news: Map[Int, Int] = Map.empty
 
-    case class SF(i: Int) extends ServiceFactory[String, String] {
-      assert(!(factories contains i))
-      factories += (i -> 0)
-      news += (i -> (1+news.getOrElse(i, 0)))
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    super.test(testName, testTags:_*) {
+      factories = Map.empty
+      news = Map.empty
+    }
+  }
 
-      def apply(conn: ClientConnection) = Future.value(new Service[String, String] {
-        factories = factories + (i -> (factories(i)+1))
-        def apply(req: String) = Future.value(i.toString)
-        override def close(deadline: Time) = {
-          factories += (i -> (factories(i) - 1))
-          Future.Done
-        }
-      })
+  var factories: Map[Int, Int] = Map.empty
+  var news: Map[Int, Int] = Map.empty
 
-      def close(deadline: Time) = {
-        factories -= i
+  case class SF(i: Int) extends ServiceFactory[String, String] {
+    assert(!(factories contains i))
+    factories += (i -> 0)
+    news += (i -> (1+news.getOrElse(i, 0)))
+
+    def apply(conn: ClientConnection) = Future.value(new Service[String, String] {
+      factories = factories + (i -> (factories(i)+1))
+      def apply(req: String) = Future.value(i.toString)
+      override def close(deadline: Time) = {
+        factories += (i -> (factories(i) - 1))
         Future.Done
       }
+    })
+
+    def close(deadline: Time) = {
+      factories -= i
+      Future.Done
     }
+  }
+
+  case class exceptingSF(i: Int) extends ServiceFactory[String, String] {
+    def apply(conn: ClientConnection) = Future.exception(new Exception("oh no"))
+    def close(deadline: Time) = Future.Done
+  }
+
+
+  test("cache, evict") (Time.withCurrentTimeFrozen { tc  =>
 
     val newFactory: Int => ServiceFactory[String, String] = { i => SF(i) }
     val cache = new ServiceFactoryCache[Int, String, String](newFactory, maxCacheSize=2)

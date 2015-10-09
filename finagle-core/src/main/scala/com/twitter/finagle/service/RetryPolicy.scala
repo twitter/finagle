@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException, WriteException}
 import com.twitter.util.{
-  TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Throw, Try}
+  TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Return, Throw, Try}
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConverters._
@@ -166,6 +166,24 @@ object RetryPolicy extends JavaSingleton {
   }
 
   /**
+   * Converts a `RetryPolicy[Try[Nothing]]` to a `RetryPolicy[(Req, Try[Rep])]`
+   * that acts only on exceptions.
+   */
+  private[finagle] def convertExceptionPolicy[Req, Rep](
+    policy: RetryPolicy[Try[Nothing]]
+  ): RetryPolicy[(Req, Try[Rep])] =
+    new RetryPolicy[(Req, Try[Rep])] {
+      def apply(input: (Req, Try[Rep])): Option[(Duration, RetryPolicy[(Req, Try[Rep])])] = input match {
+        case (_, t@Throw(_)) =>
+          policy(t.asInstanceOf[Throw[Nothing]]) match {
+            case Some((howlong, nextPolicy)) => Some((howlong, convertExceptionPolicy(nextPolicy)))
+            case None => None
+          }
+        case (_, Return(_)) => None
+      }
+    }
+
+  /**
    * Lifts a function of type `A => Option[(Duration, RetryPolicy[A])]` in the  `RetryPolicy` type.
    */
   def apply[A](f: A => Option[(Duration, RetryPolicy[A])]): RetryPolicy[A] =
@@ -290,7 +308,7 @@ object RetryPolicy extends JavaSingleton {
 /**
  * Implements various backoff strategies. Strategies are defined by a
  * `Stream[Duration]` and intended for use with
- * [[com.twitter.finagle.service.RetryingFilter#backoff]] to determine the duration
+ * [[com.twitter.finagle.service.RetryFilter#backoff]] to determine the duration
  * after which a request is to be retried
  */
 object Backoff {

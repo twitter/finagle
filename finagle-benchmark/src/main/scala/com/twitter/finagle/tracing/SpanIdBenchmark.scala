@@ -1,6 +1,5 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.tracing.SpanId
 import com.twitter.util.RichU64Long
 import java.util.concurrent.TimeUnit
 import org.openjdk.jmh.annotations._

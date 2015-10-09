@@ -27,8 +27,7 @@ class DeadlineSpanMapTest extends FunSuite {
       tc.advance(10.seconds) // advance timer
       timer.tick() // execute scheduled event
 
-      // span must have been removed and logged
-      assert(map.remove(traceId) === None)
+      // span must have been logged
       assert(spansLogged)
     }
   }

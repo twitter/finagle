@@ -11,10 +11,11 @@ import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.memcached.PartitionedClient
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.Buf
 import com.twitter.ostrich.admin.{AdminHttpService, RuntimeEnvironment}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicLong
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import scala.collection.mutable
 
 object KetamaClientStress extends App {
 
@@ -64,9 +65,9 @@ object KetamaClientStress extends App {
 
   private[this] def createCluster(hosts: String): Cluster[CacheNode] = {
     CachePoolCluster.newStaticCluster(
-      PartitionedClient.parseHostPortWeights(hosts) map {
+      PartitionedClient.parseHostPortWeights(hosts).map {
         case (host, port, weight) => new CacheNode(host, port, weight)
-      } toSet)
+      }.toSet)
   }
 
   def main() {
@@ -85,9 +86,11 @@ object KetamaClientStress extends App {
     println(builder)
 
     // the test keys/values
-    val keyValueSet: Seq[(String, ChannelBuffer)] = 1 to config.numkeys() map { _ =>
-      (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes)) }
-    def nextKeyValue: (String, ChannelBuffer) = keyValueSet((load_count.getAndIncrement()%config.numkeys()).toInt)
+    val keyValueSet: Seq[(String, Buf)] = List.fill(config.numkeys()) {
+      (randomString(config.keysize()), Buf.Utf8(randomString(config.valuesize())))
+    }
+
+    def nextKeyValue: (String, Buf) = keyValueSet((load_count.getAndIncrement()%config.numkeys()).toInt)
 
     // local admin service
     val runtime = RuntimeEnvironment(this, Array()/*no args for you*/)
@@ -138,24 +141,22 @@ object KetamaClientStress extends App {
             ketamaClient.gets(key)
           }
         case "getsThenCas" =>
-          keyValueSet map { case (k, v) => ketamaClient.set(k, v)() }
-          val casMap: scala.collection.mutable.Map[String, (ChannelBuffer, ChannelBuffer)] = scala.collection.mutable.Map()
+          keyValueSet.map { case (k, v) => ketamaClient.set(k, v)() }
+          val casMap = mutable.Map.empty[String, (Buf, Buf)]
 
           () => {
             val (key, value) = nextKeyValue
             casMap.remove(key) match {
               case Some((_, unique)) => ketamaClient.cas(key, value, unique)
-              case None => ketamaClient.gets(key) map {
+              case None => ketamaClient.gets(key).map {
                 case Some(r) => casMap(key) = r
                 case None => // not expecting
               }
             }
           }
         case "add" =>
-          val (key, value) = (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes))
-          () => {
-            ketamaClient.add(key+load_count.getAndIncrement().toString, value)
-          }
+          val (key, value) = (randomString(config.keysize()), Buf.Utf8(randomString(config.valuesize())))
+          () => ketamaClient.add(key+load_count.getAndIncrement().toString, value)
         case "replace" =>
           keyValueSet foreach { case (k, v) => ketamaClient.set(k, v)() }
           () => {
@@ -224,8 +225,8 @@ object KetamaClientStress extends App {
             replicationClient.getsAll(key)
           }
         case "getsAllThenCas" =>
-          keyValueSet map { case (k, v) => replicationClient.set(k, v)() }
-          val casMap: scala.collection.mutable.Map[String, ReplicationStatus[Option[(ChannelBuffer, ReplicaCasUnique)]]] = scala.collection.mutable.Map()
+          keyValueSet.map { case (k, v) => replicationClient.set(k, v)() }
+          val casMap: scala.collection.mutable.Map[String, ReplicationStatus[Option[(Buf, ReplicaCasUnique)]]] = scala.collection.mutable.Map()
 
           () => {
             val (key, value) = nextKeyValue
@@ -241,11 +242,11 @@ object KetamaClientStress extends App {
               case Some(FailedReplication(failureSeq)) =>
                 // not expecting this to ever happen
                 replicationClient.set(key, value)
-              case None => replicationClient.getsAll(key) map { casMap(key) = _ }
+              case None => replicationClient.getsAll(key).map { casMap(key) = _ }
             }
           }
         case "add" =>
-          val (key, value) = (randomString(config.keysize()), ChannelBuffers.wrappedBuffer(randomString(config.valuesize()).getBytes))
+          val (key, value) = (randomString(config.keysize()), Buf.Utf8(randomString(config.valuesize())))
           () => {
             replicationClient.add(key+load_count.getAndIncrement().toString, value)
           }

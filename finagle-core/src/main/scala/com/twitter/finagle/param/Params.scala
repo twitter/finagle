@@ -16,6 +16,18 @@ object Label {
 }
 
 /**
+ * A class eligible for configuring a client library name used to identify
+ * which client library a client is using.
+ */
+case class ProtocolLibrary(name: String) {
+  def mk(): (ProtocolLibrary, Stack.Param[ProtocolLibrary]) =
+    (this, ProtocolLibrary.param)
+}
+object ProtocolLibrary {
+  implicit val param = Stack.Param(ProtocolLibrary("not-specified"))
+}
+
+/**
  * A class eligible for configuring a [[com.twitter.util.Timer]] used
  * throughout finagle clients and servers.
  */

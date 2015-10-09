@@ -5,7 +5,7 @@ import org.openjdk.jmh.annotations._
 
 @State(Scope.Benchmark)
 @Threads(Threads.MAX)
-class ConcurrentRingBufferBenchmark extends StdBenchAnnotations {
+class ConcurrentRingBufferBench extends StdBenchAnnotations {
 
   @Param(Array("1000"))
   var size: Int = _

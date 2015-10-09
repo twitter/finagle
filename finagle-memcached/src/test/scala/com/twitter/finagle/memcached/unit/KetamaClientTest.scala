@@ -6,8 +6,8 @@ import com.twitter.finagle.cacheresolver.CacheNode
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.hashing.KeyHasher
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Future}
-import org.jboss.netty.buffer.ChannelBuffers
 import scala.collection.{immutable, mutable}
 import _root_.java.io.{BufferedReader, InputStreamReader}
 import org.junit.runner.RunWith
@@ -51,9 +51,9 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       CacheNode("10.0.1.7", 11211, 950)  -> newMock(),
       CacheNode("10.0.1.8", 11211, 100)  -> newMock()
     )
-    val mockBuilder =
-      (node: CacheNode, k: KetamaClientKey, _: Broker[NodeHealth], _: (Int, () => Duration)) => clients.get(node).get
-    val ketamaClient = new KetamaClient(Group(clients.keys.toSeq:_*), KeyHasher.KETAMA, 160, (Int.MaxValue, () => Duration.Zero), Some(mockBuilder))
+
+    def newService(node: CacheNode) = clients.get(node).get
+    val ketamaClient = new KetamaPartitionedClient(Group(clients.keys.toSeq:_*), newService)
 
     info("pick the correct node")
     val ipToService = clients map { case (key, service) => key.host -> service } toMap
@@ -78,11 +78,10 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
   test("interrupted request does not change ready") {
     val mockService = mock[Service[Command, Response]]
     val client1 = CacheNode("10.0.1.1", 11211, 600)
-    val mockBuilder =
-      (node: CacheNode, k: KetamaClientKey, _: Broker[NodeHealth], _: (Int, () => Duration)) => mockService
+    def newService(node: CacheNode) = mockService
     // create a client with no members (yet)
     val backends: MutableGroup[CacheNode] = Group.mutable()
-    val ketamaClient = new KetamaClient(backends, KeyHasher.KETAMA, 160, (Int.MaxValue, () => Duration.Zero), Some(mockBuilder))
+    val ketamaClient = new KetamaPartitionedClient(backends, newService)
 
     // simulate a cancelled request
     val r = ketamaClient.getResult(Seq("key"))
@@ -120,17 +119,14 @@ class KetamaClientTest extends FunSuite with MockitoSugar {
       )
       val mutableGroup = Group.mutable(services.keys.toSeq:_*)
 
-      val key = ChannelBuffers.wrappedBuffer("foo".getBytes)
+      val key = Buf.Utf8("foo")
       val value = mock[Value](RETURNS_SMART_NULLS)
       when(value.key) thenReturn key
       when(serviceA(any())) thenReturn Future.value(Values(Seq(value)))
 
-      var broker = new Broker[NodeHealth]
-      val mockBuilder = (node: CacheNode, k: KetamaClientKey, internalBroker: Broker[NodeHealth], _: (Int, () => Duration)) => {
-        broker = internalBroker
-        services.get(node).get
-      }
-      val ketamaClient = new KetamaClient(mutableGroup, KeyHasher.KETAMA, 160, (Int.MaxValue, () => Duration.Zero), Some(mockBuilder))
+      val broker = new Broker[NodeHealth]
+      def newService(node: CacheNode) = services.get(node).get
+      val ketamaClient = new KetamaPartitionedClient(mutableGroup, newService, broker)
 
       Await.result(ketamaClient.get("foo"))
       verify(serviceA, times(1)).apply(any())

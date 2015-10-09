@@ -3,40 +3,37 @@ package com.twitter.finagle
 import java.net.{SocketAddress, InetSocketAddress}
 
 /**
- * A SocketAddress with a weight.
+ * A SocketAddress with a weight. `WeightedSocketAddress` can be nested.
  */
+case class WeightedSocketAddress(addr: SocketAddress, weight: Double) extends SocketAddress
+
 object WeightedSocketAddress {
-  private case class Impl(
-    addr: SocketAddress,
-    weight: Double
-  ) extends SocketAddress
-
   /**
-   * Create a weighted socket address with weight `weight`.
+   * Extract `SocketAddress` and weight recursively until it reaches
+   * an unweighted address instance. Weights are multiplied.
+   *
+   * If the input `addr` is an unweighted instance, return a weight of 1.0.
    */
-  def apply(addr: SocketAddress, weight: Double): SocketAddress =
-    Impl(addr, weight)
-
-  /**
-   * Destructuring a weighted socket address is liberal: we return a
-   * weight of 1 if it is unweighted.
-   */
-  def unapply(addr: SocketAddress): Option[(SocketAddress, Double)] =
+  def extract(addr: SocketAddress): (SocketAddress, Double) =
     addr match {
-      case Impl(addr, weight) => Some(addr, weight)
-      case addr => Some(addr, 1D)
+      case WeightedSocketAddress(sa, weight) =>
+        val (underlying, anotherW) = extract(sa)
+        (underlying, weight * anotherW)
+      case _ =>
+        (addr, 1.0)
     }
 }
 
 object WeightedInetSocketAddress {
- /**
+  /**
    * Destructuring a weighted inet socket address is liberal: we
    * return a weight of 1 if it is unweighted.
    */
-  def unapply(addr: SocketAddress): Option[(InetSocketAddress, Double)] =
-    addr match {
-      case WeightedSocketAddress(ia: InetSocketAddress, weight) => Some(ia, weight)
-      case ia: InetSocketAddress => Some(ia, 1D)
+  def unapply(addr: SocketAddress): Option[(InetSocketAddress, Double)] = {
+    val (base, weight) = WeightedSocketAddress.extract(addr)
+    base match {
+      case sa: InetSocketAddress => Some(sa, weight)
       case _ => None
     }
+  }
 }

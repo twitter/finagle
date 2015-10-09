@@ -138,7 +138,7 @@ class NoBrokersAvailableException(
     s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
 }
 
-@deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
+@deprecated("no longer used by com.twitter.finagle.service.RetryExceptionsFilter", "7.0.0")
 class RetryFailureException(cause: Throwable) extends RequestException(cause)
 
 /**
@@ -180,7 +180,7 @@ class CancelledConnectionException(cause: Throwable) extends RequestException(ca
   def this() = this(null)
 }
 
-@deprecated("no longer used by com.twitter.finagle.service.RetryingFilter", "7.0.0")
+@deprecated("no longer used by com.twitter.finagle.service.RetryFilter", "7.0.0")
 class ReplyCastException extends RequestException
 
 /**
@@ -276,7 +276,7 @@ class ChannelClosedException(underlying: Throwable, remoteAddress: SocketAddress
 
 /**
  * Indicates that a write to a given `remoteAddress` timed out. See
- * [[com.twitter.finagle.channel.WriteCompletionTimeoutHandler]] for details.
+ * [[com.twitter.finagle.netty3.channel.WriteCompletionTimeoutHandler]] for details.
  */
 class WriteTimedOutException(remoteAddress: SocketAddress) extends ChannelException(null, remoteAddress) {
   def this() = this(null)
@@ -442,8 +442,8 @@ class CodecException(description: String) extends Exception(description)
 class ChannelBufferUsageException(description: String) extends Exception(description)
 
 /**
- * An exception that is raised on backup requests that are discarded because
- * their corresponding initial requests succeeded in time. See
+ * An exception that is raised on requests that are discarded because
+ * their corresponding backup requests succeeded first. See
  * [[com.twitter.finagle.exp.BackupRequestFilter]] for details.
  */
 object BackupRequestLost extends Exception with NoStacktrace

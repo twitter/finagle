@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -xe
+
+# Publish local dependencies when not in a master branch
+FINAGLE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$FINAGLE_BRANCH" != "master" ]; then
+  FINAGLE_DIR=$(pwd)
+   # TODO try to use ./sbt of each project instead of scrooge's sbt
+  FINAGLE_SBT=$FINAGLE_DIR/sbt
+  FINAGLE_TMP_DIR=$(mktemp -d -t ostrich.XXXXXXXXXX.tmp)
+  # util
+  cd $FINAGLE_TMP_DIR
+  git clone https://github.com/twitter/util.git --branch develop
+  cd util
+  $FINAGLE_SBT ++$TRAVIS_SCALA_VERSION publishLocal
+  # ostrich
+  cd $FINAGLE_TMP_DIR
+  git clone https://github.com/twitter/ostrich.git --branch develop
+  cd ostrich
+  $FINAGLE_SBT ++$TRAVIS_SCALA_VERSION publishLocal
+  # clean up
+  cd $FINAGLE_DIR
+  rm -rf $FINAGLE_TMP_DIR
+fi

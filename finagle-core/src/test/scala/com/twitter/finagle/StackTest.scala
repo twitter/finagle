@@ -117,6 +117,29 @@ class StackTest extends FunSuite {
     assert(stack.make(empty) === Seq(20, 10, 20, 10, 1, 2, 3, 4))
   }
 
+  test("Stack.+:") {
+    val stk0 = newStack()
+    assert(stk0.make(empty) == Seq(20, 10, 1, 2, 3, 4))
+
+    val m1 = new Stack.Module0[List[Int]] {
+      val role = testRole1
+      val description = testRole1.toString
+      def make(next: List[Int]): List[Int] = 30 :: next
+    }
+
+    val stk1 = m1 +: stk0
+    assert(stk1.make(empty) == Seq(30, 20, 10, 1, 2, 3, 4))
+
+    val m2 = new Stack.Module0[List[Int]] {
+      val role = testRole1
+      val description = testRole1.toString
+      def make(next: List[Int]): List[Int] = 40 :: next
+    }
+
+    val stk2 = m2 +: stk1
+    assert(stk2.make(empty) == Seq(40, 30, 20, 10, 1, 2, 3, 4))
+  }
+
   case class TestParam(p1: Int) {
     def mk() = (this, TestParam.param)
   }

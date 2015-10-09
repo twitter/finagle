@@ -23,6 +23,8 @@ namespace rb FinagleThrift
  */
 
 // these are the annotations we always expect to find in a span
+const string WIRE_SEND = "ws"
+const string WIRE_RECV = "wr"
 const string CLIENT_SEND = "cs"
 const string CLIENT_RECV = "cr"
 const string SERVER_SEND = "ss"

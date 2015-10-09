@@ -1,5 +1,7 @@
 package com.twitter.finagle.util
 
+import com.google.common.io.ByteStreams
+import com.twitter.app.GlobalFlag
 import com.twitter.finagle.{Announcement, Announcer, Resolver}
 import com.twitter.util.Future
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
@@ -115,6 +117,54 @@ class LoadServiceTest extends FunSuite with MockitoSugar {
     executor.shutdown()
   }
 
+  test("LoadService shouldn't fail on self-referencing jar") {
+    import java.io._
+    import java.util.jar._
+    import Attributes.Name._
+    val jarFile = File.createTempFile("test", ".jar")
+    try {
+      val manifest = new Manifest
+      val attributes = manifest.getMainAttributes
+      attributes.put(MANIFEST_VERSION, "1.0")
+      attributes.put(CLASS_PATH, jarFile.getName)
+      val jos = new JarOutputStream(new FileOutputStream(jarFile), manifest)
+      jos.close
+      val loader = mock[ClassLoader]
+      val buf = mutable.Buffer.empty[ClassPath.Info]
+      ClassPath.browseUri(jarFile.toURI, loader, buf)
+    } finally {
+      jarFile.delete
+    }
+  }
+
+  test("LoadService shouldn't fail on circular referencing jar") {
+    import java.io._
+    import java.util.jar._
+    import Attributes.Name._
+    val jar1 = File.createTempFile("test", ".jar")
+    val jar2 = File.createTempFile("test", ".jar")
+    try {
+      val manifest = new Manifest
+      val attributes = manifest.getMainAttributes
+      attributes.put(MANIFEST_VERSION, "1.0")
+      attributes.put(CLASS_PATH, jar2.getName)
+      new JarOutputStream(new FileOutputStream(jar1), manifest).close
+      attributes.put(CLASS_PATH, jar1.getName)
+      new JarOutputStream(new FileOutputStream(jar2), manifest).close
+      val loader = mock[ClassLoader]
+      val buf = mutable.Buffer.empty[ClassPath.Info]
+      ClassPath.browseUri(jar1.toURI, loader, buf)
+    } finally {
+      jar1.delete
+      jar2.delete
+    }
+  }
+
+  test("LoadService should ignore packages according to ignoredPaths GlobalFlag") {
+    loadServiceIgnoredPaths.let(Seq("foo/", "/bar")){
+      assert(ClassPath.ignoredPackages.takeRight(2) == Seq("foo/", "/bar"))
+    }
+  }
 }
 
 class LoadServiceCallable extends Callable[Seq[Any]] {
@@ -122,18 +172,19 @@ class LoadServiceCallable extends Callable[Seq[Any]] {
 }
 
 class MetaInfCodedClassloader(parent: ClassLoader) extends ClassLoader(parent) {
-  override def loadClass(p1: String): Class[_] = {
-    if (p1.startsWith("com.twitter.finagle" )) {
+  override def loadClass(name: String): Class[_] = {
+    if (name.startsWith("com.twitter.finagle" )) {
       try {
-        val is: InputStream = getClass.getClassLoader.getResourceAsStream(p1.replaceAll("\\.", "/") + ".class")
-        val buf = new Array[Byte](2*is.available())
-        val len = is.read(buf)
-        defineClass(p1, buf, 0, len)
+        val path = name.replaceAll("\\.", "/") + ".class"
+        val is: InputStream = getClass.getClassLoader.getResourceAsStream(path)
+        val buf = ByteStreams.toByteArray(is)
+
+        defineClass(name, buf, 0, buf.length)
       } catch {
-        case e: Exception => throw new ClassNotFoundException("Couldn't load class " + p1, e)
+        case e: Exception => throw new ClassNotFoundException("Couldn't load class " + name, e)
       }
     } else {
-      parent.loadClass(p1)
+      parent.loadClass(name)
     }
   }
 
@@ -155,3 +206,4 @@ class FooAnnouncer extends Announcer {
 
   override def announce(addr: InetSocketAddress, name: String): Future[Announcement] = null
 }
+

@@ -1,7 +1,8 @@
 package com.twitter.finagle.memcached.util
 
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.io.Buf
 import java.util.regex.Pattern
+import org.jboss.netty.buffer.ChannelBuffer
 
 object ParserUtils {
 
@@ -35,5 +36,21 @@ object ParserUtils {
     }
     true
   }
+
+  /**
+   * @return true iff the Buf is non empty and every byte in the Buf is a digit.
+   */
+  def isDigits(buf: Buf): Boolean =
+    if (buf.isEmpty) false
+    else {
+      val Buf.ByteArray.Owned(bytes, begin, end) = Buf.ByteArray.coerce(buf)
+      var i = begin
+      while (i < end) {
+        if (bytes(i) < '0' || bytes(i) > '9')
+          return false
+        i += 1
+      }
+      true
+    }
 
 }

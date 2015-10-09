@@ -8,6 +8,7 @@ junit_tests(name='scala',
     'finagle/finagle-exp',
     'finagle/finagle-test',
     'util/util-core',
+    'util/util-stats',
   ],
   sources=rglobs('*.scala')
 )

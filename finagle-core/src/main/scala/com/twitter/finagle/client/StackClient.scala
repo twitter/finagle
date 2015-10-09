@@ -18,7 +18,7 @@ object StackClient {
   /**
    * Canonical Roles for each Client-related Stack modules.
    */
-  object Role extends Stack.Role("StackClient"){
+  object Role extends Stack.Role("StackClient") {
     val pool = Stack.Role("Pool")
     val requestDraining = Stack.Role("RequestDraining")
     val prepFactory = Stack.Role("PrepFactory")
@@ -32,6 +32,7 @@ object StackClient {
    * Note that this is terminated by a [[com.twitter.finagle.service.FailingFactory]]:
    * users are expected to terminate it with a concrete service factory.
    *
+   * @see [[com.twitter.finagle.tracing.WireTracingFilter]]
    * @see [[com.twitter.finagle.service.ExpiringService]]
    * @see [[com.twitter.finagle.service.FailFastFactory]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
@@ -51,6 +52,7 @@ object StackClient {
 
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](nilStack[Req, Rep])
     stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
+    stk.push(WireTracingFilter.module)
     stk.push(ExpiringService.module)
     stk.push(FailFastFactory.module)
     stk.push(DefaultPool.module)
@@ -277,7 +279,14 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     extends StackClient[Req, Rep] { self =>
 
+  /**
+   * The type we write into the transport.
+   */
   protected type In
+
+  /**
+   * The type we read out of the transport.
+   */
   protected type Out
 
   /**
@@ -320,6 +329,19 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     copy1(params = params)
 
   /**
+   * Prepends `filter` to the top of the client. That is, after materializing
+   * the client (newClient/newService) `filter` will be the first element which
+   * requests flow through. This is a familiar chaining combinator for filters and
+   * is particularly useful for `StdStackClient` implementations that don't expose
+   * services but instead wrap the resulting service with a rich API.
+   */
+  def filtered(filter: Filter[Req, Rep, Req, Rep]): This = {
+    val role = Stack.Role(filter.getClass.getSimpleName)
+    val stackable = Filter.canStackFromFac.toStackable(role, filter)
+    withStack(stackable +: stack)
+  }
+
+  /**
    * A copy constructor in lieu of defining StackClient as a
    * case class.
    */
@@ -338,9 +360,14 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       val parameters = Seq(implicitly[Stack.Param[Transporter.EndpointAddr]])
       def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
-        val endpointClient = copy1(params=prms)
-        val transporter = endpointClient.newTransporter()
-        Stack.Leaf(this, ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher)))
+        val factory = addr match {
+          case ServiceFactorySocketAddress(sf: ServiceFactory[Req, Rep]) => sf
+          case _ =>
+            val endpointClient = copy1(params=prms)
+            val transporter = endpointClient.newTransporter()
+            ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher))
+        }
+        Stack.Leaf(this, factory)
       }
     }
 

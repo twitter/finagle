@@ -1,10 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Activity, Var}
 import com.twitter.finagle.util.Showable
 import scala.annotation.tailrec
-import java.net.{InetSocketAddress, SocketAddress}
-import scala.collection.breakOut
 
 /**
  * Name trees represent a composite T-typed name whose interpretation
@@ -323,7 +320,7 @@ object NameTree {
    * Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)
    * }}}
    *
-   * The production ``path`` is documented at [[com.twitter.finagle.Path$ Path.read]].
+   * The production `path` is documented at [[com.twitter.finagle.Path$ Path.read]].
    *
    * @throws IllegalArgumentException when the string does not
    * represent a valid name tree.

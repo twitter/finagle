@@ -1,12 +1,12 @@
 maven_layout()
 
-jar_library(name='finagle-serversets',
+target(name='finagle-serversets',
   dependencies=[
     'finagle/finagle-serversets/src/main/scala'
   ]
 )
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
     'finagle/finagle-serversets/src/test/scala'
   ]

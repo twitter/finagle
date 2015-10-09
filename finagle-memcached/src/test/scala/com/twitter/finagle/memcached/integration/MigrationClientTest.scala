@@ -4,18 +4,17 @@ import com.twitter.common.io.FileUtils._
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.{ServerSets, ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.conversions.time._
-import com.twitter.finagle.MemcachedClient
+import com.twitter.finagle.Memcached
 import com.twitter.finagle.cacheresolver.CachePoolConfig
 import com.twitter.finagle.memcached.migration._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.zk.ServerCnxnFactory
 import java.io.ByteArrayOutputStream
 import java.net.{InetAddress, InetSocketAddress}
 import org.apache.zookeeper.server.ZooKeeperServer
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
@@ -36,6 +35,7 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
   var connectionFactory: ServerCnxnFactory = null
 
   var testServers: List[TestMemcachedServer] = List()
+
   val TIMEOUT = 15.seconds
 
   override def beforeEach() {
@@ -43,8 +43,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
     // start zookeeper server and create zookeeper client
     zookeeperServer = new ZooKeeperServer(
-      new FileTxnSnapLog(createTempDir(), createTempDir()),
-      new ZooKeeperServer.BasicDataTreeBuilder)
+      createTempDir(),
+      createTempDir(),
+      ZooKeeperServer.DEFAULT_TICK_TIME)
     connectionFactory = ServerCnxnFactory(loopback)
     connectionFactory.startup(zookeeperServer)
     zookeeperServerPort = zookeeperServer.getClientPort
@@ -101,9 +102,9 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
 
   if (!sys.props.contains("SKIP_FLAKY")) // CSL-1719
   test("not migrating yet") {
-    val client1 = MemcachedClient.newKetamaClient(
+    val client1 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
+    val client2 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
@@ -111,10 +112,12 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     eventually { Await.result(migrationClient.get("test")) }
 
     assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
-    Await.result(migrationClient.set("foo", "bar"), TIMEOUT)
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    Await.result(migrationClient.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(migrationClient.get("foo"), TIMEOUT).get
+    assert(res === "bar")
 
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    val Buf.Utf8(client1Res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(client1Res === "bar")
     eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
@@ -124,20 +127,22 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
       val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
       zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-      val client1 = MemcachedClient.newKetamaClient(
+      val client1 = Memcached.client.newRichClient(
         dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-      val client2 = MemcachedClient.newKetamaClient(
+      val client2 = Memcached.client.newRichClient(
         dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
       val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
       migrationClient.loadZKData() // force loading the config to fully set-up the client
 
       eventually { Await.result(migrationClient.get("test")) }
-      assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
-      Await.result(migrationClient.set("foo", "bar"), TIMEOUT)
-      assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
 
-      assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
-      eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
+      assert(Await.result(migrationClient.get("foo"), TIMEOUT) === None)
+      Await.result(migrationClient.set("foo", Buf.Utf8("bar")), TIMEOUT)
+
+      assert(Await.result(migrationClient.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
+
+      assert(Await.result(client1.get("foo"), TIMEOUT).get === Buf.Utf8("bar"))
+      eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
     }
   }
 
@@ -147,23 +152,26 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-    val client1 = MemcachedClient.newKetamaClient(
+    val client1 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
+    val client2 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"), TIMEOUT)
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    Await.result(client1.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res === "bar")
     assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    val Buf.Utf8(mcRes) = Await.result(migrationClient.get("foo"), TIMEOUT).get
+    assert(mcRes === "bar")
 
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
-    eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
+    val Buf.Utf8(cl1Res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(cl1Res === "bar")
+    eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
   }
 
   if (!sys.props.contains("SKIP_FLAKY")) // CSL-1731
@@ -172,22 +180,25 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-    val client1 = MemcachedClient.newKetamaClient(
+    val client1 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
+    val client2 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"), TIMEOUT)
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    Await.result(client1.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res === "bar")
     assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    val Buf.Utf8(res2) = Await.result(migrationClient.get("foo"), TIMEOUT).get
+    assert(res2 === "bar")
 
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    val Buf.Utf8(res3) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res3 === "bar")
     eventually { assert(Await.result(client2.get("foo")) === None) }
   }
 
@@ -197,22 +208,25 @@ class MigrationClientTest extends FunSuite with BeforeAndAfterEach with BeforeAn
     val migrationDataArray = MigrationConstants.jsonMapper.writeValueAsString(migrationConfig)
     zookeeperClient.get().setData(basePath, migrationDataArray, -1)
 
-    val client1 = MemcachedClient.newKetamaClient(
+    val client1 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+oldPoolPath)
-    val client2 = MemcachedClient.newKetamaClient(
+    val client2 = Memcached.client.newRichClient(
       dest = "twcache!localhost:"+zookeeperServerPort+"!"+newPoolPath)
     val migrationClient = MigrationClient.newMigrationClient("localhost:"+zookeeperServerPort, basePath)
     migrationClient.loadZKData() // force loading the config to fully set-up the client
 
     eventually { Await.result(migrationClient.get("test")) }
 
-    Await.result(client1.set("foo", "bar"), TIMEOUT)
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    Await.result(client1.set("foo", Buf.Utf8("bar")), TIMEOUT)
+    val Buf.Utf8(res) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res === "bar")
     assert(Await.result(client2.get("foo"), TIMEOUT) === None)
 
-    assert(Await.result(migrationClient.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
+    val Buf.Utf8(res2) = Await.result(migrationClient.get("foo"), TIMEOUT).get
+    assert(res2 === "bar")
 
-    assert(Await.result(client1.get("foo"), TIMEOUT).get.toString(Charsets.Utf8) === "bar")
-    eventually { assert(Await.result(client2.get("foo")).map(_.toString(Charsets.Utf8)) === Some("bar")) }
+    val Buf.Utf8(res3) = Await.result(client1.get("foo"), TIMEOUT).get
+    assert(res3 === "bar")
+    eventually { assert(Await.result(client2.get("foo")).map { case Buf.Utf8(s) => s } === Some("bar")) }
   }
 }

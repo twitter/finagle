@@ -1,18 +1,22 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.client.{LatencyCompensation, Transporter}
-import com.twitter.finagle.param.Label
-import com.twitter.finagle.socks.SocksConnectHandler
 import com.twitter.finagle.Stack
+import com.twitter.finagle.client.Transporter.Credentials
+import com.twitter.finagle.client.{LatencyCompensation, Transporter}
+import com.twitter.finagle.netty3.socks.SocksConnectHandler
+import com.twitter.finagle.netty3.transport.ChannelTransport
+import com.twitter.finagle.param.Label
 import com.twitter.finagle.ssl.Engine
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
-import com.twitter.util.Duration
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.InetSocketAddressUtil
+import com.twitter.util.{Await, Duration}
 import java.net.InetSocketAddress
-import javax.net.ssl.{SSLEngineResult, SSLEngine, SSLSession}
-import org.jboss.netty.channel._
+import java.nio.channels.UnresolvedAddressException
+import javax.net.ssl.{SSLEngine, SSLEngineResult, SSLSession}
 import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.channel._
 import org.jboss.netty.handler.timeout.IdleStateHandler
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
@@ -33,7 +37,7 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
           Transporter.ConnectTimeout(1.seconds) +
           LatencyCompensation.Compensation(12.millis) +
           Transporter.TLSHostname(Some("tls.host")) +
-          Transporter.HttpProxy(Some(new InetSocketAddress(0))) +
+          Transporter.HttpProxy(Some(new InetSocketAddress(0)), Some(Credentials("user", "pw"))) +
           Transporter.SocksProxy(Some(new InetSocketAddress(0)), Some("user", "pw")) +
           Transport.BufferSizes(Some(100), Some(200)) +
           Transport.TLSClientEngine.param.default +
@@ -49,6 +53,7 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
           inputParams[Transport.TLSClientEngine].e.map(
             Netty3TransporterTLSConfig(_, inputParams[Transporter.TLSHostname].hostname)))
       assert(transporter.httpProxy == inputParams[Transporter.HttpProxy].sa)
+      assert(transporter.httpProxyCredentials == inputParams[Transporter.HttpProxy].credentials)
       assert(transporter.socksProxy == inputParams[Transporter.SocksProxy].sa)
       assert(transporter.socksUsernameAndPassword == inputParams[Transporter.SocksProxy].credentials)
       assert(transporter.channelReaderTimeout == inputParams[Transport.Liveness].readTimeout)
@@ -77,6 +82,15 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
       val unresolved = InetSocketAddress.createUnresolved("supdog", 0)
       val pl = transporter.newPipeline(unresolved, NullStatsReceiver)
       assert(pl === pipeline) // mainly just checking that we don't NPE anymore
+    }
+
+    it("expose UnresolvedAddressException") {
+      val transporter =
+        Netty3Transporter[Int, Int]("name", Channels.pipelineFactory(Channels.pipeline()))
+      val addr = InetSocketAddressUtil.parseHosts("localhost/127.0.0.1:1234")
+      intercept[UnresolvedAddressException] {
+        Await.result(transporter(addr.head, new InMemoryStatsReceiver))
+      }
     }
 
     describe("IdleStateHandler") {

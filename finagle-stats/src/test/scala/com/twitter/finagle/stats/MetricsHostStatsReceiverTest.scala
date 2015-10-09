@@ -1,6 +1,5 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.{MetricCollisionException, Metrics}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
@@ -13,7 +12,7 @@ class MetricsHostStatsReceiverTest extends FunSuite {
     hostStatsReceiver.registry.sample().get(name)
 
   def readUnderlyingStatsReceiver(name: String): Number =
-    hostStatsReceiver.self.asInstanceOf[MetricsStatsReceiver].registry.sample().get(name)
+    hostStatsReceiver.self.registry.sample().get(name)
 
   test("MetricsHostStatsReceiver is a proxy of underlying MetricsStatsReceiver") {
     hostStatsReceiver.addGauge("my_cumulative_gauge")(1)

@@ -10,10 +10,9 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol.{Command, Response, Set}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.{Addr, ClientConnection, Service, ServiceFactory}
+import com.twitter.io.Buf
 import com.twitter.util._
-import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.{times, verify, when}
@@ -38,6 +37,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
   trait MultiReaderHelper {
     val queueName = "the_queue"
+    val queueNameBuf = Buf.Utf8(queueName)
     val N = 3
     val handles = (0 until N) map { _ => Mockito.spy(new MockHandle) }
     val va: Var[Return[ISet[ReadHandle]]] = Var.value(Return(handles.toSet))
@@ -45,6 +45,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
   trait AddrClusterHelper {
     val queueName = "the_queue"
+    val queueNameBuf = Buf.Utf8(queueName)
     val N = 3
     val hosts = 0 until N map { i =>
       InetSocketAddress.createUnresolved("10.0.0.%d".format(i), 22133)
@@ -54,7 +55,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
     def newKestrelService(
       executor: Option[ExecutorService],
-      queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]
+      queues: LoadingCache[Buf, BlockingDeque[Buf]]
     ): Service[Command, Response] = {
       val interpreter = new Interpreter(queues)
       new Service[Command, Response] {
@@ -76,8 +77,8 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
     val hostQueuesMap = hosts.map { host =>
       val queues = CacheBuilder.newBuilder()
-        .build(new CacheLoader[ChannelBuffer, BlockingDeque[ChannelBuffer]] {
-        def load(k: ChannelBuffer) = new LinkedBlockingDeque[ChannelBuffer]
+        .build(new CacheLoader[Buf, BlockingDeque[Buf]] {
+        def load(k: Buf) = new LinkedBlockingDeque[Buf]
       })
       (host, queues)
     }.toMap
@@ -114,7 +115,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val UTF8 = Charset.forName("UTF-8")
 
       handle.messages foreach { msg =>
-        val str = msg.bytes.toString(UTF8)
+        val Buf.Utf8(str) = msg.bytes
         messages += str
         msg.ack.sync()
       }
@@ -155,7 +156,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
     def newKestrelService(
       executor: Option[ExecutorService],
-      queues: LoadingCache[ChannelBuffer, BlockingDeque[ChannelBuffer]]
+      queues: LoadingCache[Buf, BlockingDeque[Buf]]
     ): Service[Command, Response] = {
       val interpreter = new Interpreter(queues)
       new Service[Command, Response] {
@@ -177,8 +178,8 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
     val hostQueuesMap = hosts.map { host =>
       val queues = CacheBuilder.newBuilder()
-        .build(new CacheLoader[ChannelBuffer, BlockingDeque[ChannelBuffer]] {
-        def load(k: ChannelBuffer) = new LinkedBlockingDeque[ChannelBuffer]
+        .build(new CacheLoader[Buf, BlockingDeque[Buf]] {
+        def load(k: Buf) = new LinkedBlockingDeque[Buf]
       })
       (host, queues)
     }.toMap
@@ -211,10 +212,9 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
     def configureMessageReader(handle: ReadHandle): MSet[String] = {
       val messages = MSet[String]()
-      val UTF8 = Charset.forName("UTF-8")
 
       handle.messages foreach { msg =>
-        val str = msg.bytes.toString(UTF8)
+        val Buf.Utf8(str) = msg.bytes
         messages += str
         msg.ack.sync()
       }
@@ -293,7 +293,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueName, Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
       }
 
       eventually {
@@ -311,7 +311,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueName, Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
       }
 
       // 0, 3, 6 ...
@@ -341,7 +341,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueName, Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
       }
 
       eventually {
@@ -354,7 +354,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
         // write to all 3
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          Await.result(services(i % services.size).apply(Set(queueName, Time.now, m)))
+          Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
         }
 
         // expect fewer to be read on each pass
@@ -376,7 +376,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueName, Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
       }
 
       assert(messages.size === 0) // cluster not ready
@@ -424,7 +424,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
 
       eventually {
@@ -443,7 +443,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
 
       // 0, 3, 6 ...
@@ -472,7 +472,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
 
       eventually {
@@ -485,7 +485,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
         // write to all 3
         sentMessages.zipWithIndex foreach { case (m, i) =>
-          Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
+          Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
         }
 
         // expect fewer to be read on each pass
@@ -508,7 +508,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       assert(messages.size === 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
 
       assert(messages.size === 0) // cluster not ready
@@ -544,7 +544,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
       eventually {
         assert(messages === sentMessages.toSet)
@@ -554,7 +554,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       cluster.del(InetSocketAddress.createUnresolved("10.0.0.100", 22133))
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set("the_queue", Time.now, m)))
+        Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
       eventually {
         assert(messages === sentMessages.toSet)

@@ -1,10 +1,7 @@
 package com.twitter.finagle.memcached.integration;
 
-import java.nio.charset.Charset;
-
 import scala.Option;
 
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +13,7 @@ import com.twitter.finagle.memcached.java.ClientBase;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.finagle.memcached.protocol.text.Memcached;
+import com.twitter.io.Buf;
 import com.twitter.util.Await;
 
 import static org.junit.Assert.assertEquals;
@@ -30,7 +28,7 @@ public class TestClient {
   }
 
   /**
-   * Tests Get and Set operations.
+   * Tests Get/Set commands.
    */
   @Test
   public void testGetAndSet() throws Exception {
@@ -44,7 +42,8 @@ public class TestClient {
 
     Client client = ClientBase.newInstance(service);
     Await.ready(client.set("foo", "bar"));
-    assertEquals("bar",
-        Await.<ChannelBuffer>result(client.get("foo")).toString(Charset.defaultCharset()));
+
+    Option<String> res = Buf.Utf8$.MODULE$.unapply(Await.result(client.get("foo")));
+    assertEquals("bar", res.get());
   }
 }

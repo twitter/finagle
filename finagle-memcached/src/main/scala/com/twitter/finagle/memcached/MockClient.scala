@@ -1,9 +1,8 @@
 package com.twitter.finagle.memcached
 
 import com.twitter.finagle.memcached.protocol.{ClientError, Value}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils
+import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 import scala.collection.mutable
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
@@ -12,11 +11,11 @@ import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
  *
  * Note: expiry and flags are ignored on update operations.
  */
-class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
-  def this() = this(mutable.Map[String, ChannelBuffer]())
+class MockClient(val map: mutable.Map[String, Buf]) extends Client {
+  def this() = this(mutable.Map[String, Buf]())
 
   def this(contents: Map[String, Array[Byte]]) =
-    this(mutable.Map[String, ChannelBuffer]() ++ (contents mapValues { ChannelBuffers.wrappedBuffer(_) }))
+    this(mutable.Map[String, Buf]() ++ (contents mapValues { v => Buf.ByteArray(v) }))
 
   def this(contents: Map[String, String])(implicit m: Manifest[String]) =
     this(contents mapValues { _.getBytes })
@@ -28,8 +27,8 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
     map.synchronized {
       keys foreach { key =>
         map.get(key) match {
-          case Some(v: ChannelBuffer) =>
-            hits += (key -> Value(ChannelBuffers.wrappedBuffer(key.getBytes), v))
+          case Some(v: Buf) =>
+            hits += (key -> Value(Buf.Utf8(key), v, Some(Interpreter.hash64(v))))
           case _ =>
             misses += key
         }
@@ -49,7 +48,7 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   /**
    * Note: expiry and flags are ignored.
    */
-  def set(key: String, flags: Int, expiry: Time, value: ChannelBuffer) = {
+  def set(key: String, flags: Int, expiry: Time, value: Buf) = {
     map.synchronized { map(key) = value }
     Future.Unit
   }
@@ -57,7 +56,7 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   /**
    * Note: expiry and flags are ignored.
    */
-  def add(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
+  def add(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     Future.value(
       map.synchronized {
         if (!map.contains(key)) {
@@ -72,12 +71,12 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   /**
    * Note: expiry and flags are ignored.
    */
-  def append(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
+  def append(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     Future.value(
       map.synchronized {
         map.get(key) match {
           case Some(previousValue) =>
-            map(key) = ChannelBuffers.copiedBuffer(previousValue, value)
+            map(key) = previousValue.concat(value)
             true
           case None =>
             false
@@ -88,12 +87,12 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   /**
    * Note: expiry and flags are ignored.
    */
-  def prepend(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
+  def prepend(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     Future.value(
       map.synchronized {
         map.get(key) match {
           case Some(previousValue) =>
-            map(key) = ChannelBuffers.copiedBuffer(value, previousValue)
+            map(key) = value.concat(previousValue)
             true
           case None =>
             false
@@ -104,7 +103,7 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
   /**
    * Note: expiry and flags are ignored.
    */
-  def replace(key: String, flags: Int, expiry: Time, value: ChannelBuffer): Future[JBoolean] =
+  def replace(key: String, flags: Int, expiry: Time, value: Buf): Future[JBoolean] =
     Future.value(
       map.synchronized {
         if (map.contains(key)) {
@@ -125,8 +124,8 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
     key: String,
     flags: Int,
     expiry: Time,
-    value: ChannelBuffer,
-    casUnique: ChannelBuffer
+    value: Buf,
+    casUnique: Buf
   ): Future[JBoolean] =
     Future.value(
       map.synchronized {
@@ -156,10 +155,11 @@ class MockClient(val map: mutable.Map[String, ChannelBuffer]) extends Client {
     Future.value(
       map.synchronized {
         map.get(key) match {
-          case Some(value: ChannelBuffer) =>
+          case Some(value: Buf) =>
             try {
-              val newValue = math.max((ChannelBufferUtils.channelBufferToString(value).toLong + delta), 0L)
-              map(key) = ChannelBuffers.wrappedBuffer(newValue.toString.getBytes)
+              val Buf.Utf8(valStr) = value
+              val newValue = math.max(valStr.toLong + delta, 0L)
+              map(key) = Buf.Utf8(newValue.toString)
               Some(newValue)
             } catch {
               case _: NumberFormatException =>

@@ -1,15 +1,11 @@
 package com.twitter.finagle.example.http
 
+import com.twitter.finagle.builder.{Server, ServerBuilder}
+import com.twitter.finagle.httpx._
 import com.twitter.finagle.{Service, SimpleFilter}
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.codec.http.HttpResponseStatus._
-import org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import com.twitter.io.Charsets.Utf8
 import com.twitter.util.Future
 import java.net.InetSocketAddress
-import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.http.Http
 
 /**
  * This example demonstrates a sophisticated HTTP server that handles exceptions
@@ -22,19 +18,19 @@ object HttpServer {
    * A simple Filter that catches exceptions and converts them to appropriate
    * HTTP responses.
    */
-  class HandleExceptions extends SimpleFilter[HttpRequest, HttpResponse] {
-    def apply(request: HttpRequest, service: Service[HttpRequest, HttpResponse]) = {
+  class HandleExceptions extends SimpleFilter[Request, Response] {
+    def apply(request: Request, service: Service[Request, Response]) = {
 
       // `handle` asynchronously handles exceptions.
       service(request) handle { case error =>
         val statusCode = error match {
           case _: IllegalArgumentException =>
-            FORBIDDEN
+            Status.Forbidden
           case _ =>
-            INTERNAL_SERVER_ERROR
+            Status.InternalServerError
         }
-        val errorResponse = new DefaultHttpResponse(HTTP_1_1, statusCode)
-        errorResponse.setContent(copiedBuffer(error.getStackTraceString, Utf8))
+        val errorResponse = Response(Version.Http11, statusCode)
+        errorResponse.contentString = error.getStackTraceString
 
         errorResponse
       }
@@ -45,9 +41,9 @@ object HttpServer {
    * A simple Filter that checks that the request is valid by inspecting the
    * "Authorization" header.
    */
-  class Authorize extends SimpleFilter[HttpRequest, HttpResponse] {
-    def apply(request: HttpRequest, continue: Service[HttpRequest, HttpResponse]) = {
-      if ("open sesame" == request.headers().get(HttpHeaders.Names.AUTHORIZATION)) {
+  class Authorize extends SimpleFilter[Request, Response] {
+    def apply(request: Request, continue: Service[Request, Response]) = {
+      if (Some("open sesame") == request.headerMap.get(Fields.Authorization)) {
         continue(request)
       } else {
         Future.exception(new IllegalArgumentException("You don't know the secret"))
@@ -58,10 +54,10 @@ object HttpServer {
   /**
    * The service itself. Simply echos back "hello world"
    */
-  class Respond extends Service[HttpRequest, HttpResponse] {
-    def apply(request: HttpRequest) = {
-      val response = new DefaultHttpResponse(HTTP_1_1, OK)
-      response.setContent(copiedBuffer("hello world", Utf8))
+  class Respond extends Service[Request, Response] {
+    def apply(request: Request) = {
+      val response = Response(Version.Http11, Status.Ok)
+      response.contentString = "hello world"
       Future.value(response)
     }
   }
@@ -72,7 +68,7 @@ object HttpServer {
     val respond = new Respond
 
     // compose the Filters and Service together:
-    val myService: Service[HttpRequest, HttpResponse] = handleExceptions andThen authorize andThen respond
+    val myService: Service[Request, Response] = handleExceptions andThen authorize andThen respond
 
     val server: Server = ServerBuilder()
       .codec(Http())

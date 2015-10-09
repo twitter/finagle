@@ -1,12 +1,13 @@
 package com.twitter.finagle.netty3
 
 import com.twitter.finagle._
-import com.twitter.finagle.channel.{
-  ChannelRequestStatsHandler, ChannelStatsHandler, WriteCompletionTimeoutHandler}
+import com.twitter.finagle.netty3.channel._
+import com.twitter.finagle.netty3.ssl.SslListenerConnectionHandler
+import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.server.{Listener, ServerRegistry}
-import com.twitter.finagle.ssl.{Engine, SslShutdownHandler}
+import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.{ChannelTransport, Transport}
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
 import java.net.SocketAddress
@@ -19,6 +20,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.handler.ssl._
 import org.jboss.netty.handler.timeout.{ReadTimeoutException, ReadTimeoutHandler}
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /**
  * Netty3 TLS configuration.
@@ -106,17 +108,25 @@ object Netty3Listener {
     // notification events. Renegotiation will be enabled for those Engines with
     // a true handlesRenegotiation value.
     handler.setEnableRenegotiation(engine.handlesRenegotiation)
-
     pipeline.addFirst("ssl", handler)
 
     // Netty's SslHandler does not provide SSLEngine implementations any hints that they
     // are no longer needed (namely, upon disconnection.) Since some engine implementations
     // make use of objects that are not managed by the JVM's memory manager, we need to
-    // know when memory can be released. The SslShutdownHandler will invoke the shutdown
-    // method on implementations that define shutdown(): Unit.
+    // know when memory can be released. This will invoke the shutdown method  on implementations
+    // that define shutdown(): Unit. The SslListenerConnectionHandler also ensures that the SSL
+    // handshake is complete before continuing.
+    def onShutdown(): Unit =
+      try {
+        val method = engine.getClass.getMethod("shutdown")
+        method.invoke(engine)
+      } catch {
+        case _: NoSuchMethodException =>
+      }
+
     pipeline.addFirst(
-      "sslShutdown",
-      new SslShutdownHandler(engine)
+      "sslConnect",
+      new SslListenerConnectionHandler(handler, onShutdown)
     )
   }
 
@@ -168,17 +178,25 @@ object Netty3Listener {
       case _ => None
     }
 
-    Netty3Listener[In, Out](label, pipeline, snooper, cf, bootstrapOptions = {
-      val o = new scala.collection.mutable.MapBuilder[String, Object, Map[String, Object]](Map())
-        o += "soLinger" -> (0: java.lang.Integer)
-        o += "reuseAddress" -> java.lang.Boolean.TRUE
-        o += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
-        for (v <- backlog) o += "backlog" -> (v: java.lang.Integer)
-        for (v <- sendBufSize) o += "child.sendBufferSize" -> (v: java.lang.Integer)
-        for (v <- recvBufSize) o += "child.receiveBufferSize" -> (v: java.lang.Integer)
-        for (v <- keepAlive) o += "child.keepAlive" -> (v: java.lang.Boolean)
-        o.result()
-      },
+    val opts = new mutable.HashMap[String, Object]()
+    opts += "soLinger" -> (0: java.lang.Integer)
+    opts += "reuseAddress" -> java.lang.Boolean.TRUE
+    opts += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
+    for (v <- backlog) opts += "backlog" -> (v: java.lang.Integer)
+    for (v <- sendBufSize) opts += "child.sendBufferSize" -> (v: java.lang.Integer)
+    for (v <- recvBufSize) opts += "child.receiveBufferSize" -> (v: java.lang.Integer)
+    for (v <- keepAlive) opts += "child.keepAlive" -> (v: java.lang.Boolean)
+    for (v <- params[Listener.TrafficClass].value) {
+      opts += "trafficClass" -> (v: java.lang.Integer)
+      opts += "child.trafficClass" -> (v: java.lang.Integer)
+    }
+
+    Netty3Listener[In, Out](
+      label,
+      pipeline,
+      snooper,
+      cf,
+      bootstrapOptions = opts.toMap,
       channelReadTimeout = readTimeout,
       channelWriteCompletionTimeout = writeTimeout,
       tlsConfig = engine.map(Netty3ListenerTLSConfig),
@@ -361,17 +379,16 @@ private[netty3] class ServerBridge[In, Out](
     case _ => Level.WARNING
   }
 
-  override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  override def channelConnected(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
     val channel = e.getChannel
     channels.add(channel)
 
     val transport = new ChannelTransport(channel).cast[In, Out]
     serveTransport(transport)
-
     super.channelOpen(ctx, e)
   }
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): Unit = {
     val cause = e.getCause
 
     cause match {

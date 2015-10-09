@@ -1,11 +1,12 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcached.protocol.{
-  Error => MemcacheError, ClientError, NonexistentCommand, ServerError}
-import com.twitter.io.Charsets
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+
+import com.twitter.finagle.memcached.protocol.{
+  Error => MemcacheError, ClientError, NonexistentCommand, ServerError}
+import com.twitter.io.Buf
 
 @RunWith(classOf[JUnitRunner])
 class ShowTest extends FunSuite {
@@ -17,7 +18,8 @@ class ShowTest extends FunSuite {
     assert(res.getClass === classOf[Tokens])
     val tokens = res.asInstanceOf[Tokens]
     assert(tokens.tokens.size === 1)
-    assert(tokens.tokens.head.toString(Charsets.Utf8) === "ERROR")
+    val Buf.Utf8(result) = tokens.tokens.head
+    assert(result === "ERROR")
   }
 
   test("encode errors - CLIENT_ERROR") {
@@ -26,7 +28,8 @@ class ShowTest extends FunSuite {
     assert(res.getClass === classOf[Tokens])
     val tokens = res.asInstanceOf[Tokens]
     assert(tokens.tokens.size === 2)
-    assert(tokens.tokens.head.toString(Charsets.Utf8) === "CLIENT_ERROR")
+    val Buf.Utf8(result) = tokens.tokens.head
+    assert(result === "CLIENT_ERROR")
   }
 
   test("encode errors - SERVER_ERROR") {
@@ -35,6 +38,8 @@ class ShowTest extends FunSuite {
     assert(res.getClass === classOf[Tokens])
     val tokens = res.asInstanceOf[Tokens]
     assert(tokens.tokens.size === 2)
-    assert(tokens.tokens.head.toString(Charsets.Utf8) === "SERVER_ERROR")
+
+    val Buf.Utf8(result) = tokens.tokens.head
+    assert(result === "SERVER_ERROR")
   }
 }

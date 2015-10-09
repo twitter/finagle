@@ -1,6 +1,6 @@
 package com.twitter.finagle.failters
 
-import com.twitter.util.Var
+import com.twitter.util.{Witness, Var}
 import com.twitter.finagle.stats.StatsReceiver
 
 object Failter {
@@ -12,8 +12,9 @@ trait Failter {
   def seed: Long
   def stats: StatsReceiver
 
+  @volatile
   protected var prob: Double = _
-  probability.observe { newProb => prob = newProb }
+  probability.changes.register(Witness({ newProb => prob = newProb }))
 
   protected val probGauge = stats.provideGauge("probability") { prob.toFloat }
   protected val rejectedStat = stats.counter("rejected")

@@ -1,9 +1,20 @@
 package com.twitter.finagle.httpx
 
-sealed trait Version
+/**
+ * Represents the HTTP version.
+ *
+ * For Java-friendly enums, see [[com.twitter.finagle.httpx.Versions]].
+ */
+sealed abstract class Version
 
-/** Scala aliases for HttpVersion.  Java users should use Netty's HttpVersion */
 object Version {
-  case object Http10 extends Version
-  case object Http11 extends Version
+  /** HTTP 1.0 */
+  case object Http10 extends Version {
+    override def toString: String = "HTTP/1.0"
+  }
+
+  /** HTTP 1.1 */
+  case object Http11 extends Version {
+    override def toString: String = "HTTP/1.1"
+  }
 }

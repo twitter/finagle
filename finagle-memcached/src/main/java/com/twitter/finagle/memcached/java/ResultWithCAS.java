@@ -1,12 +1,12 @@
 package com.twitter.finagle.memcached.java;
 
-import org.jboss.netty.buffer.ChannelBuffer;
+import com.twitter.io.Buf;
 
 public class ResultWithCAS {
-  public final ChannelBuffer value;
-  public final ChannelBuffer casUnique;
+  public final Buf value;
+  public final Buf casUnique;
 
-  public ResultWithCAS(ChannelBuffer value, ChannelBuffer casUnique) {
+  public ResultWithCAS(Buf value, Buf casUnique) {
     if (value == null) {
       throw new NullPointerException("value cannot be null");
     }

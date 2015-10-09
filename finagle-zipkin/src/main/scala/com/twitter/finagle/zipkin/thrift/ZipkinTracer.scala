@@ -6,7 +6,7 @@ import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation, Trace}
 import com.twitter.finagle.zipkin.{host => Host, initialSampleRate => sampleRateFlag}
 import com.twitter.io.Buf
 import com.twitter.util.events.{Event, Sink}
-import com.twitter.util.{Time, Return, Throw, Try}
+import com.twitter.util.{Time, Throw, Try}
 
 private object Json {
   import com.fasterxml.jackson.annotation.{JsonTypeInfo, JsonInclude}
@@ -197,11 +197,14 @@ class SamplingTracer(
   def record(record: Record) {
     if (sampler.sampleRecord(record)) {
       underlyingTracer.record(record)
-      if (Trace.hasId) {
-        sink.event(ZipkinTracer.Trace, objectVal = record.annotation,
-          traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
-      } else {
-        sink.event(ZipkinTracer.Trace, objectVal = record.annotation)
+      if (sink.recording) {
+        if (Trace.hasId) {
+          val traceId = Trace.id
+          sink.event(ZipkinTracer.Trace, objectVal = record.annotation,
+            traceIdVal = traceId.traceId.self, spanIdVal = traceId.spanId.self)
+        } else {
+          sink.event(ZipkinTracer.Trace, objectVal = record.annotation)
+        }
       }
     }
   }

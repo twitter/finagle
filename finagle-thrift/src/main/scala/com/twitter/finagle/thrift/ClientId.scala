@@ -38,7 +38,10 @@ object ClientId {
     }
   }
 
-  def current: Option[ClientId] = Contexts.broadcast.get(clientIdCtx).flatten
+  private[this] val NoClientFn: () => Option[ClientId] = () => None
+
+  def current: Option[ClientId] =
+    Contexts.broadcast.getOrElse(clientIdCtx, NoClientFn)
 
   private[finagle] def let[R](clientId: ClientId)(f: => R): R =
     Contexts.broadcast.let(clientIdCtx, Some(clientId))(f)

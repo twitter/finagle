@@ -1,113 +1,131 @@
 package com.twitter.finagle.memcached.protocol
 
-import com.twitter.finagle.memcached.util.ChannelBufferUtils
+import com.twitter.finagle.memcached.util.Bufs
+import com.twitter.io.Buf
 import com.twitter.util.Time
-import org.jboss.netty.buffer.ChannelBuffer
 
-/**
- * This trait contains cache command key validation logic.
- * The validation is done by searching each key channel buffer for invalid character defined in
- * ChannelBufferUtils.FIND_INVALID_KEY_CHARACTER index finder, during construction of this trait.
- *
- * All cache commands accepting key/keys should mixin this trait.
- */
-trait KeyValidation {
-  private val MAXKEYLENGTH = 250
-  def keys: Seq[ChannelBuffer]
+private object KeyValidation {
+  private val MaxKeyLength = 250
 
-  {
-    // Validating keys
-    if (keys == null)
-      throw new IllegalArgumentException("Invalid keys: cannot have null for keys")
+  private def tooLong(key: Buf): Boolean = key.length > MaxKeyLength
 
-    keys foreach { key =>
+  /** Return -1 if no invalid bytes */
+  private def invalidByteIndex(key: Buf): Int = {
+    val bs = Buf.ByteArray.Owned.extract(key)
+    var i = 0
+    while (i < bs.length) {
+      if (Bufs.INVALID_KEY_CHARACTERS.contains(bs(i)))
+        return i
+      i += 1
+    }
+    -1
+  }
+
+  private val KeyCheck: Buf => Unit =
+    key => {
       if (key == null)
         throw new IllegalArgumentException("Invalid keys: key cannot be null")
 
       if (tooLong(key))
         throw new IllegalArgumentException(
-          "Invalid keys: key cannot be longer than %d bytes (%d)".format(MAXKEYLENGTH, key.readableBytes))
+          "Invalid keys: key cannot be longer than %d bytes (%d)".format(MaxKeyLength, key.length))
 
       val index = invalidByteIndex(key)
-      if (index != -1)
+      if (index != -1) {
+        val ch = Buf.ByteArray.Owned.extract(key)(index)
         throw new IllegalArgumentException(
-          "Invalid keys: key cannot have whitespace or control characters: '0x%d'".format(key.getByte(index)))
+          "Invalid keys: key cannot have whitespace or control characters: '0x%d'".format(ch))
+      }
     }
+
+}
+
+/**
+ * This trait contains cache command key validation logic.
+ * The validation is done by searching each buffer for invalid character defined in
+ * Bufs.INVALID_KEY_CHARACTER, during construction of this trait.
+ *
+ * All cache commands accepting key/keys should mixin this trait.
+ */
+trait KeyValidation {
+  import KeyValidation._
+
+  def keys: Seq[Buf]
+
+  {
+    // Validating keys
+    val ks = keys
+    if (ks == null)
+      throw new IllegalArgumentException("Invalid keys: cannot have null for keys")
+
+    ks.foreach(KeyCheck)
   }
 
-  private[this] def tooLong(key: ChannelBuffer): Boolean = key.readableBytes > MAXKEYLENGTH
-
-  /** Return -1 if no invalid bytes */
-  private[this] def invalidByteIndex(key: ChannelBuffer): Int = {
-    key.indexOf(key.readerIndex(), key.writerIndex(), ChannelBufferUtils.FIND_INVALID_KEY_CHARACTER)
-  }
-
-  def badKey(key: ChannelBuffer): Boolean = {
+  def badKey(key: Buf): Boolean = {
     if (key == null) true else {
       tooLong(key) || invalidByteIndex(key) != -1
     }
   }
-
 }
 
 sealed abstract class Command(val name: String)
 
 abstract class StorageCommand(
-    key: ChannelBuffer,
+    key: Buf,
     flags: Int,
     expiry: Time,
-    value: ChannelBuffer,
+    value: Buf,
     name: String)
   extends Command(name)
   with KeyValidation {
-  def keys: Seq[ChannelBuffer] = Seq(key)
+  def keys: Seq[Buf] = Seq(key)
 }
 
 abstract class NonStorageCommand(name: String) extends Command(name)
 
 abstract class ArithmeticCommand(
-    key: ChannelBuffer,
+    key: Buf,
     delta: Long,
     name: String)
   extends NonStorageCommand(name)
   with KeyValidation {
-  def keys: Seq[ChannelBuffer] = Seq(key)
+  def keys: Seq[Buf] = Seq(key)
 }
 
 abstract class RetrievalCommand(name: String) extends NonStorageCommand(name) with KeyValidation {
-  def keys: Seq[ChannelBuffer]
+  def keys: Seq[Buf]
 }
 
 // storage commands
-case class Set(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)
+case class Set(key: Buf, flags: Int, expiry: Time, value: Buf)
   extends StorageCommand(key, flags, expiry, value, "Set")
-case class Add(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)
+case class Add(key: Buf, flags: Int, expiry: Time, value: Buf)
   extends StorageCommand(key, flags, expiry, value, "Add")
-case class Replace(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)
+case class Replace(key: Buf, flags: Int, expiry: Time, value: Buf)
   extends StorageCommand(key, flags, expiry, value, "Replace")
-case class Append(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)
+case class Append(key: Buf, flags: Int, expiry: Time, value: Buf)
   extends StorageCommand(key, flags, expiry, value, "Append")
-case class Prepend(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer)
+case class Prepend(key: Buf, flags: Int, expiry: Time, value: Buf)
   extends StorageCommand(key, flags, expiry, value, "Prepend")
-case class Cas(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer, casUnique: ChannelBuffer)
+case class Cas(key: Buf, flags: Int, expiry: Time, value: Buf, casUnique: Buf)
   extends StorageCommand(key, flags, expiry, value, "Cas")
 
 // retrieval commands
-case class Get(keys: Seq[ChannelBuffer]) extends RetrievalCommand("Get")
-case class Gets(keys: Seq[ChannelBuffer]) extends RetrievalCommand("Gets")
+case class Get(keys: Seq[Buf]) extends RetrievalCommand("Get")
+case class Gets(keys: Seq[Buf]) extends RetrievalCommand("Gets")
 
 // arithmetic commands
-case class Incr(key: ChannelBuffer, value: Long) extends ArithmeticCommand(key, value, "Incr")
-case class Decr(key: ChannelBuffer, value: Long) extends ArithmeticCommand(key, -value, "Decr")
+case class Incr(key: Buf, value: Long) extends ArithmeticCommand(key, value, "Incr")
+case class Decr(key: Buf, value: Long) extends ArithmeticCommand(key, -value, "Decr")
 
 // other commands
-case class Delete(key: ChannelBuffer) extends Command("Delete") with KeyValidation {
-  def keys: Seq[ChannelBuffer] = Seq(key)
+case class Delete(key: Buf) extends Command("Delete") with KeyValidation {
+  def keys: Seq[Buf] = Seq(key)
 }
-case class Stats(args: Seq[ChannelBuffer]) extends NonStorageCommand("Stats")
+case class Stats(args: Seq[Buf]) extends NonStorageCommand("Stats")
 case class Quit() extends Command("Quit")
 
 // twemcache specific commands
-case class Upsert(key: ChannelBuffer, flags: Int, expiry: Time, value: ChannelBuffer, version: ChannelBuffer)
+case class Upsert(key: Buf, flags: Int, expiry: Time, value: Buf, version: Buf)
     extends StorageCommand(key, flags, expiry, value, "Upsert")
-case class Getv(keys: Seq[ChannelBuffer]) extends RetrievalCommand("Getv")
+case class Getv(keys: Seq[Buf]) extends RetrievalCommand("Getv")

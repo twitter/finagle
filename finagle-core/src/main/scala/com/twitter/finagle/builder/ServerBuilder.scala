@@ -1,18 +1,19 @@
 package com.twitter.finagle.builder
 
-import com.twitter.finagle.{Server => FinagleServer, _}
-import com.twitter.finagle.channel.IdleConnectionFilter
-import com.twitter.finagle.channel.OpenConnectionsThresholds
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
+import com.twitter.finagle.netty3.channel.IdleConnectionFilter
+import com.twitter.finagle.netty3.channel.OpenConnectionsThresholds
 import com.twitter.finagle.netty3.Netty3Listener
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
-import com.twitter.finagle.service.ExpiringService
-import com.twitter.finagle.service.TimeoutFilter
+import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.{Ssl, Engine}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing.TraceInitializerFilter
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
+import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.util
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.net.SocketAddress
@@ -74,29 +75,29 @@ object ServerConfig {
   }
 
   // params specific to ServerBuilder
-  case class BindTo(addr: SocketAddress) {
+  private[builder] case class BindTo(addr: SocketAddress) {
     def mk(): (BindTo, Stack.Param[BindTo]) =
       (this, BindTo.param)
   }
-  object BindTo {
+  private[builder] object BindTo {
     implicit val param = Stack.Param(BindTo(new SocketAddress {
       override val toString = "unknown"
     }))
   }
 
-  case class MonitorFactory(mFactory: (String, SocketAddress) => util.Monitor) {
+  private[builder] case class MonitorFactory(mFactory: (String, SocketAddress) => util.Monitor) {
     def mk(): (MonitorFactory, Stack.Param[MonitorFactory]) =
       (this, MonitorFactory.param)
   }
-  object MonitorFactory {
+  private[builder] object MonitorFactory {
     implicit val param = Stack.Param(MonitorFactory((_, _) => NullMonitor))
   }
 
-  case class Daemonize(onOrOff: Boolean) {
+  private[builder] case class Daemonize(onOrOff: Boolean) {
     def mk(): (Daemonize, Stack.Param[Daemonize]) =
       (this, Daemonize.param)
   }
-  object Daemonize {
+  private[builder] object Daemonize {
     implicit val param = Stack.Param(Daemonize(false))
   }
 }
@@ -198,11 +199,13 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     codec: Codec[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     this.codec((_: ServerCodecConfig) => codec)
+      .configured(ProtocolLibrary(codec.protocolLibraryName))
 
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     this.codec(codecFactory.server)
+      .configured(ProtocolLibrary(codecFactory.protocolLibraryName))
 
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Server
@@ -329,8 +332,21 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def newFinagleSslEngine(v: () => Engine): This =
     configured(Transport.TLSServerEngine(Some(v)))
 
-  def maxConcurrentRequests(max: Int): This =
-    configured(RequestSemaphoreFilter.Param(max))
+  /**
+   * Configures the maximum concurrent requests that are admitted
+   * by the server at any given time. If the server receives a
+   * burst of traffic that exceeds this limit, the burst is rejected
+   * with a `Failure.Rejected` exception. Note, this failure signals
+   * a graceful rejection which is transmitted to clients by certain
+   * protocols in Finagle (e.g. Http, ThriftMux).
+   */
+  def maxConcurrentRequests(max: Int): This = {
+    val sem =
+      if (max == Int.MaxValue) None
+      else Some(new AsyncSemaphore(max, 0))
+
+    configured(RequestSemaphoreFilter.Param(sem))
+  }
 
   def requestTimeout(howlong: Duration): This =
     configured(TimeoutFilter.Param(howlong))
@@ -377,6 +393,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     configured(IdleConnectionFilter.Param(Some(thresholds)))
+
+  /**
+   * Configures the traffic class.
+   *
+   * @see [[Listener.TrafficClass]]
+   */
+  def trafficClass(value: Option[Int]): This =
+    configured(Listener.TrafficClass(value))
 
   /**
    * When true, the server is daemonized. As with java threads, a

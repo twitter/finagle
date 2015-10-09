@@ -8,7 +8,6 @@ private[serverset2] trait StatsClient extends ZooKeeperClient {
   sealed trait StatFilter {
     val name: String
     lazy val failure = stats.counter(s"${name}_failures")
-    lazy val latency = stats.stat(s"${name}_latency_ms")
     lazy val success = stats.counter(s"${name}_successes")
 
     def apply[T](result: Future[T]): Future[T] = {
@@ -71,7 +70,11 @@ private[serverset2] trait StatsWriter extends StatsClient with ZooKeeperWriter {
   protected val underlying: ZooKeeperWriter
 
   def create(
-      path: String, data: Option[Buf], acl: Seq[Data.ACL], createMode: CreateMode): Future[String] = createMode match {
+    path: String,
+    data: Option[Buf],
+    acl: Seq[Data.ACL],
+    createMode: CreateMode
+  ): Future[String] = createMode match {
     case CreateMode.Ephemeral => EphemeralFilter(underlying.create(path, data, acl, createMode))
     case CreateMode.EphemeralSequential => EphemeralFilter(underlying.create(path, data, acl, createMode))
     case _ => WriteFilter(underlying.create(path, data, acl, createMode))
@@ -101,10 +104,26 @@ private[serverset2] trait StatsRWMulti extends ZooKeeperRWMulti with StatsReader
 }
 
 private[serverset2] trait EventStats {
+  import NodeEvent._
+
   protected val stats: StatsReceiver
 
+  private[this] lazy val createdCounter = stats.counter(Created.name)
+  private[this] lazy val dataChangedCounter = stats.counter(DataChanged.name)
+  private[this] lazy val deletedCounter = stats.counter(Deleted.name)
+  private[this] lazy val childrenChangedCounter = stats.counter(ChildrenChanged.name)
+  private[this] lazy val dataWatchRemovedCounter = stats.counter(DataWatchRemoved.name)
+  private[this] lazy val childWatchRemovedCounter = stats.counter(ChildWatchRemoved.name)
+
   protected def EventFilter(event: NodeEvent): NodeEvent = {
-    stats.counter(event.name).incr()
+    event match {
+      case Created => createdCounter.incr()
+      case DataChanged => dataChangedCounter.incr()
+      case Deleted => deletedCounter.incr()
+      case ChildrenChanged => childrenChangedCounter.incr()
+      case DataWatchRemoved => dataWatchRemovedCounter.incr()
+      case ChildWatchRemoved => childWatchRemovedCounter.incr()
+    }
     event
   }
 }
@@ -115,20 +134,41 @@ object SessionStats {
     statsReceiver: StatsReceiver,
     interval: Duration,
     timer: Timer
-  ) = Var.async[WatchState](WatchState.Pending) { v =>
+  ): Var[WatchState] = {
+    import SessionState._
+    val unknownCounter = statsReceiver.counter(Unknown.name)
+    val authFailedCounter = statsReceiver.counter(AuthFailed.name)
+    val disconnectedCounter = statsReceiver.counter(Disconnected.name)
+    val expiredCounter = statsReceiver.counter(Expired.name)
+    val syncConnectedCounter = statsReceiver.counter(SyncConnected.name)
+    val noSyncConnectedCounter = statsReceiver.counter(NoSyncConnected.name)
+    val connectedReadOnlyCounter = statsReceiver.counter(ConnectedReadOnly.name)
+    val saslAuthenticatedCounter = statsReceiver.counter(SaslAuthenticated.name)
 
-    val stateTracker = new StateTracker(statsReceiver, interval, timer)
+    Var.async[WatchState](WatchState.Pending) { v =>
+      val stateTracker = new StateTracker(statsReceiver, interval, timer)
 
-    underlying.changes respond { w: WatchState =>
-      w match {
-        case WatchState.SessionState(newState) =>
-          stateTracker.transition(newState)
-          statsReceiver.counter(newState.name).incr()
-        case _ => ()
+      underlying.changes.respond { w: WatchState =>
+        w match {
+          case WatchState.SessionState(newState) =>
+            stateTracker.transition(newState)
+
+            newState match {
+              case Unknown => unknownCounter.incr()
+              case AuthFailed => authFailedCounter.incr()
+              case Disconnected => disconnectedCounter.incr()
+              case Expired => expiredCounter.incr()
+              case SyncConnected => syncConnectedCounter.incr()
+              case NoSyncConnected => noSyncConnectedCounter.incr()
+              case ConnectedReadOnly => connectedReadOnlyCounter.incr()
+              case SaslAuthenticated => saslAuthenticatedCounter.incr()
+            }
+          case _ => ()
+        }
+        v() = w
       }
-      v() = w
-    }
 
-    Closable.all(stateTracker)
+      stateTracker
+    }
   }
 }

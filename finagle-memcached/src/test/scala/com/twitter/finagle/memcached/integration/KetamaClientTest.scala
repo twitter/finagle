@@ -1,14 +1,11 @@
 package com.twitter.finagle.memcached.integration
 
-import _root_.java.lang.{Boolean => JBoolean}
-import java.net.{InetAddress, SocketAddress, InetSocketAddress}
-import java.net.{SocketAddress, InetSocketAddress}
 import com.twitter.finagle.cacheresolver.CacheNodeGroup
 import com.twitter.finagle.memcached.KetamaClientBuilder
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.{Group, Name}
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -36,6 +33,7 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
     server2.stop()
   }
 
+
   test("doesn't blow up") {
     val client = KetamaClientBuilder()
       .nodes("localhost:%d,localhost:%d".format(address1.getPort, address2.getPort))
@@ -43,8 +41,10 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
 
     Await.result(client.delete("foo"))
     assert(Await.result(client.get("foo")) === None)
-    Await.result(client.set("foo", "bar"))
-    assert(Await.result(client.get("foo")).get.toString(Charsets.Utf8) === "bar")
+
+    Await.result(client.set("foo", Buf.Utf8("bar")))
+    val Buf.Utf8(res) = Await.result(client.get("foo")).get
+    assert(res === "bar")
   }
 
   test("using Name doesn't blow up") {
@@ -53,8 +53,9 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
 
     Await.result(client.delete("foo"))
     assert(Await.result(client.get("foo")) === None)
-    Await.result(client.set("foo", "bar"))
-    assert(Await.result(client.get("foo")).get.toString(Charsets.Utf8) === "bar")
+    Await.result(client.set("foo", Buf.Utf8("bar")))
+    val Buf.Utf8(res) = Await.result(client.get("foo")).get
+    assert(res === "bar")
   }
 
   test("using Group[InetSocketAddress] doesn't blow up") {
@@ -65,8 +66,9 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
 
     Await.result(client.delete("foo"))
     assert(Await.result(client.get("foo")) === None)
-    Await.result(client.set("foo", "bar"))
-    assert(Await.result(client.get("foo")).get.toString(Charsets.Utf8) === "bar")
+    Await.result(client.set("foo", Buf.Utf8("bar")))
+    val Buf.Utf8(res) = Await.result(client.get("foo")).get
+    assert(res === "bar")
   }
 
   test("using custom keys doesn't blow up") {
@@ -76,8 +78,10 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
 
     Await.result(client.delete("foo"))
     assert(Await.result(client.get("foo")) === None)
-    Await.result(client.set("foo", "bar"))
-    assert(Await.result(client.get("foo")).get.toString(Charsets.Utf8) === "bar")
+    Await.result(client.set("foo", Buf.Utf8("bar")))
+
+    val Buf.Utf8(res) = Await.result(client.get("foo")).get
+    assert(res === "bar")
   }
 
   test("even in future pool") {

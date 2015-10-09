@@ -1,9 +1,9 @@
 package com.twitter.finagle.thrift
 
-import scala.beans.BeanProperty
-
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocol}
 import org.apache.thrift.{TBase, TApplicationException}
+import scala.beans.BeanProperty
+import scala.language.existentials
 
 /**
  * The ThriftCall object represents a thrift dispatch on the

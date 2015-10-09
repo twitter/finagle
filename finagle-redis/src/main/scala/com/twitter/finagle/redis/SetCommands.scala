@@ -28,7 +28,7 @@ trait Sets { self: BaseClient =>
    */
   def sMembers(key: ChannelBuffer): Future[ImmutableSet[ChannelBuffer]] =
     doRequest(SMembers(key)) {
-      case MBulkReply(list) => Future.value(ReplyFormat.toChannelBuffers(list) toSet)
+      case MBulkReply(list) => Future.value(ReplyFormat.toChannelBuffers(list).toSet)
       case EmptyMBulkReply() => Future.value(ImmutableSet())
     }
 

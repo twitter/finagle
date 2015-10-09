@@ -55,6 +55,23 @@ class RetryPolicyTest extends FunSpec {
       assert(taweo(Throw(timeoutExc)) === true)
       assert(taweo(Throw(new com.twitter.util.TimeoutException(""))) === true)
     }
+
+    it("RetryableWriteException matches retryable exception") {
+      val retryable = Seq(Failure.rejected("test"), WriteException(new Exception))
+      val nonRetryable =
+        Seq(Failure("test", Failure.Interrupted), new Exception, new ChannelClosedException)
+
+      retryable.foreach {
+        case RetryPolicy.RetryableWriteException(_) =>
+        case _ => fail("should match RetryableWriteException")
+      }
+
+      nonRetryable.foreach {
+        case RetryPolicy.RetryableWriteException(_) =>
+          fail("should not match RetryableWriteException")
+        case _ =>
+      }
+    }
   }
 
   case class IException(i: Int) extends Exception

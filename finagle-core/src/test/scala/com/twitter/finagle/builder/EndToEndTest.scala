@@ -46,7 +46,7 @@ class EndToEndTest extends FunSuite {
     cluster.del(server.boundAddress)
     assert(!response.isDefined)
     constRes.setValue("foo")
-    assert(Await.result(response, 1.second) === "foo")
+    assert(Await.result(response, 1.second) == "foo")
   }
 
   test("Finagle client should queue requests while waiting for cluster to initialize") {
@@ -83,14 +83,14 @@ class EndToEndTest extends FunSuite {
 
     cluster.ready.map { _ =>
       0 until 5 foreach { i =>
-        assert(Await.result(responses(i), 1.second) === i.toString)
+        assert(Await.result(responses(i), 1.second) == i.toString)
       }
     }
     thread.start()
     thread.join()
   }
 
-  test("ClientBuilder should be properly instrumented on failure") {
+  test("ClientBuilder should be properly instrumented on service application failure") {
     val never = new Service[String, String] {
       def apply(request: String) = new Promise[String]
     }
@@ -115,22 +115,39 @@ class EndToEndTest extends FunSuite {
 
     // generate com.twitter.finagle.IndividualRequestTimeoutException
     intercept[IndividualRequestTimeoutException] { Await.result(client("hi"), 1.second) }
-    Await.ready(server.close())
+    Await.ready(server.close(), 1.second)
+
+    val requestFailures = mem.counters(Seq("client", "failures"))
+    val requeues =
+      mem.counters.get(Seq("client", "requeue", "requeues"))
+    assert(requestFailures == 1)
+    assert(requeues == None)
+  }
+
+  test("ClientBuilder should be properly instrumented on service acquisition failure") {
+    val mem = new InMemoryStatsReceiver
+    val client = ClientBuilder()
+        .name("client")
+        .hosts(TestAddr("a"))  // triggers write exceptions
+        .codec(StringCodec)
+        .daemon(true) // don't create an exit guard
+        .requestTimeout(10.millisecond)
+        .hostConnectionLimit(1)
+        .hostConnectionMaxWaiters(1)
+        .reportTo(mem)
+        .build()
+
     // generate com.twitter.finagle.ChannelWriteException
     intercept[ChannelWriteException] { Await.result(client("hi"), 1.second) }
 
-    val requestFailures = mem.counters(Seq("client", "failures"))
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
-
     val requeues =
       mem.counters.get(Seq("client", "requeue", "requeues"))
 
-    assert(requestFailures === 1)
-
     // initial write exception and no requeues
-    assert(serviceCreationFailures === 1)
-    assert(requeues === None)
+    assert(serviceCreationFailures == 1)
+    assert(requeues == None)
   }
 
   test("ClientBuilder should be properly instrumented on success") {
@@ -155,14 +172,14 @@ class EndToEndTest extends FunSuite {
       .retries(1)
       .build()
 
-    Await.result(client("ping"), 1.second)
+    Await.result(client("ping"), 10.second)
     Await.ready(server.close(), 1.second)
 
     val requests = mem.counters(Seq("testClient", "requests"))
     val triesRequests = mem.counters(Seq("testClient", "tries", "requests"))
 
-    assert(requests === 1)
-    assert(triesRequests === 1)
+    assert(requests == 1)
+    assert(triesRequests == 1)
   }
 
   test("ClientBuilderClient.ofCodec should be properly instrumented on success") {
@@ -194,7 +211,7 @@ class EndToEndTest extends FunSuite {
     val requests = mem.counters(Seq("testClient", "requests"))
     val triesRequests = mem.counters(Seq("testClient", "tries", "requests"))
 
-    assert(requests === 1)
-    assert(triesRequests === 1)
+    assert(requests == 1)
+    assert(triesRequests == 1)
   }
 }

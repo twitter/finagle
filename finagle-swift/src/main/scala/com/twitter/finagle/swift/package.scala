@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import scala.annotation.target.{beanGetter, beanSetter}
+import scala.annotation.meta.{beanGetter, beanSetter}
 import scala.beans.BeanProperty
 
 /**

@@ -9,7 +9,9 @@ scala_library(name='scala',
     'finagle/finagle-core',
     'finagle/finagle-httpx',
     'ostrich',
-    'util/util-core'
+    'util/util-core',
+    'util/util-registry',
+    'util/util-stats',
   ],
   sources=rglobs('*.scala'),
   resources=[

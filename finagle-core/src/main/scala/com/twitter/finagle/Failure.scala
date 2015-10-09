@@ -17,7 +17,7 @@ final class Failure private[finagle](
   protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
   val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace,
   val logLevel: Level = Level.WARNING
-) extends Exception(why, cause.getOrElse(null)) with NoStacktrace {
+) extends Exception(why, cause.orNull) with NoStacktrace {
   import Failure._
 
   require(!isFlagged(Wrapped) || cause.isDefined)
@@ -172,13 +172,13 @@ object Failure {
   /**
    * Create a new failure with the given cause and flags.
    */
-  def apply(cause: Throwable, flags: Long): Failure =
+  def apply(cause: Throwable, flags: Long, logLevel: Level = Level.WARNING): Failure =
     if (cause == null)
-      new Failure("unknown", None, flags)
+      new Failure("unknown", None, flags, logLevel = logLevel)
     else if (cause.getMessage == null)
-      new Failure(cause.getClass.getName, Some(cause), flags)
+      new Failure(cause.getClass.getName, Some(cause), flags, logLevel = logLevel)
     else 
-      new Failure(cause.getMessage, Some(cause), flags)
+      new Failure(cause.getMessage, Some(cause), flags, logLevel = logLevel)
 
   /**
    * Create a new failure with the given cause; no flags.
@@ -216,6 +216,21 @@ object Failure {
   def unapply(exc: Failure): Option[Option[Throwable]] = Some(exc.cause)
 
   /**
+   * Expose flags as strings, used for stats reporting
+   */
+  def flagsOf(exc: Throwable): Set[String] =
+    exc match {
+      case f: Failure =>
+        var flags: Set[String] = Set.empty
+        if (f.isFlagged(Interrupted)) flags += "interrupted"
+        if (f.isFlagged(Restartable)) flags += "restartable"
+        if (f.isFlagged(Wrapped))     flags += "wrapped"
+        if (f.isFlagged(Naming))      flags += "naming"
+        flags
+      case _ => Set.empty
+    }
+
+  /**
    * Adapt an exception. If the passed-in exception is already a failure,
    * this returns a chained failure with the assigned flags. If it is not, 
    * it returns a new failure with the given flags.
@@ -247,12 +262,12 @@ object Failure {
   /**
    * Create a new [[Restartable]] failure with the given message.
    */
-  def rejected(why: String): Failure = Failure(why, Failure.Restartable)
+  def rejected(why: String): Failure = new Failure(why, None, Failure.Restartable, logLevel = Level.DEBUG)
 
   /**
    * Create a new [[Restartable]] failure with the given cause.
    */
-  def rejected(cause: Throwable): Failure = Failure(cause, Failure.Restartable)
+  def rejected(cause: Throwable): Failure = Failure(cause, Failure.Restartable, logLevel = Level.DEBUG)
 
   /**
    * A default [[Restartable]] failure.

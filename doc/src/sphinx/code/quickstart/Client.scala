@@ -1,20 +1,18 @@
-import com.twitter.finagle.{Http, Service}
+import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.httpx
 import com.twitter.util.{Await, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http._
 
 object Client extends App {
 //#builder
-  val client: Service[HttpRequest, HttpResponse] =
-    Http.newService("www.google.com:80")
+  val client: Service[httpx.Request, httpx.Response] = Httpx.newService("www.scala-lang.org:80")
 //#builder
 //#dispatch
-  val request =  new DefaultHttpRequest(
-    HttpVersion.HTTP_1_1, HttpMethod.GET, "/")
-  val response: Future[HttpResponse] = client(request)
+  val request = httpx.Request(httpx.Method.Get, "/")
+  request.host = "www.scala-lang.org"
+  val response: Future[httpx.Response] = client(request)
 //#dispatch
 //#callback
-  response onSuccess { resp: HttpResponse =>
+  response.onSuccess { resp: httpx.Response =>
     println("GET success: " + resp)
   }
   Await.ready(response)

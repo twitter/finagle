@@ -43,4 +43,20 @@ object Listener {
   object Backlog {
     implicit val param = Stack.Param(Backlog(None))
   }
+
+  /**
+   * Configures the traffic class to be used servers.
+   *
+   * @param value `None` indicates no class specified. When `Some`, is an opaque
+   * identifier and its meaning and interpretation are implementation specific.
+   * Currently used to configure [[java.net.StandardSocketOptions.IP_TOS]].
+   */
+  case class TrafficClass(value: Option[Int]) {
+    def mk(): (TrafficClass, Stack.Param[TrafficClass]) =
+      (this, TrafficClass.param)
+  }
+  object TrafficClass {
+    implicit val param = Stack.Param(TrafficClass(None))
+  }
+
 }

@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.util.{Await, Time, Future, MockTimer}
+import com.twitter.util.{Await, Future, MockTimer, Time}
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Matchers
@@ -44,7 +44,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     verify(underlying)()
   }
 
-  test("fail immediately after consecutive failures and busy status, revive after markDeadFor duration") {
+  test("fail immediately after consecutive failures, revive after markDeadFor duration") {
     val h = new Helper(false)
     import h._
 

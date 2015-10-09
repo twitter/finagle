@@ -14,10 +14,12 @@ object Flags {
   val SamplingKnown = 1L << 1
   val Sampled = 1L << 2
 
+  private[this] val Empty: Flags = Flags(0L)
+
   /**
    * @return a flags instance with no flags set.
    */
-  def apply(): Flags = Flags(0L)
+  def apply(): Flags = Empty
 }
 
 /**

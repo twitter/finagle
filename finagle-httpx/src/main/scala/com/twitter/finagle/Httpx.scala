@@ -2,18 +2,15 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
+import com.twitter.finagle.httpx.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.httpx.codec.{HttpClientDispatcher, HttpServerDispatcher}
-import com.twitter.finagle.httpx.filter.DtabFilter
-import com.twitter.finagle.httpx.{
-  HttpTransport, HttpServerTraceInitializer, HttpClientTraceInitializer,
-  Request, Response
-}
+import com.twitter.finagle.httpx.filter.{DtabFilter, HttpNackFilter}
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{ProtocolLibrary, Stats}
 import com.twitter.finagle.server._
 import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, StorageUnit}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.Channel
@@ -29,9 +26,8 @@ trait HttpxRichClient { self: Client[Request, Response] =>
       val port = if (url.getPort < 0) url.getDefaultPort else url.getPort
       new InetSocketAddress(url.getHost, port)
     }
-    val group = Group[SocketAddress](addr)
     val req = httpx.RequestBuilder().url(url).buildGet()
-    val service = newClient(group).toService
+    val service = newService(Name.bound(addr), "")
     service(req) ensure {
       service.close()
     }
@@ -81,13 +77,14 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
   }
 
   object Client {
-    val stack: Stack[ServiceFactory[Request, Response]] = StackClient.newStack
+    val stack: Stack[ServiceFactory[Request, Response]] =
+      StackClient.newStack
+        .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
   }
 
   case class Client(
-    stack: Stack[ServiceFactory[Request, Response]] = Client.stack.replace(
-        TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response]),
-    params: Stack.Params = StackClient.defaultParams
+    stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
+    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("httpx")
   ) extends StdStackClient[Request, Response, Client] {
     protected type In = Any
     protected type Out = Any
@@ -112,7 +109,7 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
       new HttpClientDispatcher(transport)
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
-      configured((Transport.TLSClientEngine(Some(cfg.newEngine))))
+      configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
         .configured(Transporter.TLSHostname(cfg.verifyHost))
         .transformed { stk => httpx.TlsFilter.module +: stk }
 
@@ -152,15 +149,24 @@ object Httpx extends Client[Request, Response] with HttpxRichClient
   def newClient(dest: Name, label: String): ServiceFactory[Request, Response] =
     client.newClient(dest, label)
 
+  object Server {
+    val stack: Stack[ServiceFactory[Request, Response]] =
+      StackServer.newStack
+        .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
+        .replace(
+          StackServer.Role.preparer,
+          (next: ServiceFactory[Request, Response]) => (new HttpNackFilter).andThen(next))
+  }
+
   case class Server(
-    stack: Stack[ServiceFactory[Request, Response]] =
-      StackServer.newStack.replace(
-        TraceInitializerFilter.role,
-        new HttpServerTraceInitializer[Request, Response]),
-    params: Stack.Params = StackServer.defaultParams
+    stack: Stack[ServiceFactory[Request, Response]] = Server.stack,
+    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("httpx")
   ) extends StdStackServer[Request, Response, Server] {
     protected type In = Any
     protected type Out = Any
+
+    // This override allows java callers to use this method, working around https://issues.scala-lang.org/browse/SI-8905
+    override def configured[P](psp: (P, Stack.Param[P])): StackServer[Request, Response] = super.configured[P](psp)
 
     protected def newListener(): Listener[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]

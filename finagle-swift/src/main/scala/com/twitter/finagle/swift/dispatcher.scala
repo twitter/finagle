@@ -4,13 +4,14 @@ import com.facebook.swift.codec.ThriftCodec
 import com.facebook.swift.codec.internal.{TProtocolReader, TProtocolWriter}
 import com.google.common.base.Defaults
 import com.google.common.primitives.Primitives
+import com.google.common.reflect.TypeToken
 import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.util.Arrays
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TProtocol, TBinaryProtocol, TMessage, TMessageType}
 import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
-import com.google.common.reflect.TypeToken
+import scala.language.existentials
 
 /**
  * SwiftService is given a Swift-annotated processor, to which

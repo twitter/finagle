@@ -1,18 +1,20 @@
 package com.twitter.finagle.httpx
 
 import com.twitter.finagle.httpx.netty.HttpMessageProxy
-import org.jboss.netty.handler.codec.http.HttpMessage
+import com.twitter.util.TwitterDateFormat
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale, TimeZone}
+import scala.annotation.varargs
 import scala.collection.mutable
 import scala.collection.JavaConverters._
-
 
 /**
  * Mutable message headers map.
  *
- * Header names are case-insensitive.  For example, get("accept") is the same as
+ * Header names are case-insensitive.  For example, `get("accept")` is the same as
  * get("Accept").
  *
- * The map is a multi-map.  Use getAll() to get all values for a key.  Use add()
+ * The map is a multi-map.  Use [[getAll]] to get all values for a key.  Use [[add]]
  * to append a key-value.
  */
 abstract class HeaderMap
@@ -22,26 +24,58 @@ abstract class HeaderMap
   def getAll(key: String): Iterable[String]
 
   /** Add a header but don't replace existing header(s). */
-  def add(k: String, v: String)
+  def add(k: String, v: String): HeaderMap
+
+  /**
+   * Adds a header without replacing existing headers, as in [[add(String, String)]],
+   * but with standard formatting for dates in HTTP headers.
+   */
+  def add(k: String, date: Date): HeaderMap =
+    add(k, HeaderMap.format(date))
+
+  /**
+   * Set a header. If an entry already exists, it is replaced.
+   */
+  def set(k: String, v: String): HeaderMap
+
+  /**
+   * Set or replace a header, as in [[set(String, String)]],
+   * but with standard formatting for dates in HTTP headers.
+   */
+  def set(k: String, date: Date): HeaderMap =
+    set(k, HeaderMap.format(date))
+
+  /**
+   * Set or replace a header, as in [[+=((String, String))]],
+   * but with standard formatting for dates in HTTP headers.
+   */
+  def += (kv: (String, Date)): HeaderMap =
+    += ((kv._1, HeaderMap.format(kv._2)))
 
   override def empty: HeaderMap = new MapHeaderMap(mutable.Map.empty)
 }
 
 
-/** Mutable-Map-backed HeaderMap */
+/** Mutable-Map-backed [[HeaderMap]] */
 class MapHeaderMap(underlying: mutable.Map[String, Seq[String]]) extends HeaderMap {
 
   def getAll(key: String): Iterable[String] =
     underlying.getOrElse(key, Nil)
 
-  def add(k: String, v: String) = {
+  def add(k: String, v: String): MapHeaderMap = {
     underlying(k) = underlying.getOrElse(k, Nil) :+ v
+    this
+  }
+
+  def set(key: String, value: String): MapHeaderMap = {
+    underlying.retain { case (a, _) => !a.equalsIgnoreCase(key) }
+    underlying(key) = Seq(value)
     this
   }
 
   // For Map/MapLike
   def get(key: String): Option[String] = {
-    underlying.find { case (k, v) => k.equalsIgnoreCase(key) } flatMap { _._2.headOption }
+    underlying.find { case (k, v) => k.equalsIgnoreCase(key) }.flatMap { _._2.headOption }
   }
 
   // For Map/MapLike
@@ -51,13 +85,13 @@ class MapHeaderMap(underlying: mutable.Map[String, Seq[String]]) extends HeaderM
   }
 
   // For Map/MapLike
-  def += (kv: (String, String)) = {
+  def += (kv: (String, String)): MapHeaderMap.this.type = {
     underlying(kv._1) = Seq(kv._2)
     this
   }
 
   // For Map/MapLike
-  def -= (key: String) = {
+  def -= (key: String): MapHeaderMap.this.type = {
     underlying.retain { case (a, b) => !a.equalsIgnoreCase(key) }
     this
   }
@@ -84,15 +118,14 @@ object MapHeaderMap {
 
 
 /**
- * Mutable HttpMessage-backed HeaderMap.
+ * Mutable HttpMessage-backed [[HeaderMap]].
  */
 private[finagle] class MessageHeaderMap(httpMessage: HttpMessageProxy) extends HeaderMap {
-
   def get(key: String): Option[String] =
     Option(httpMessage.headers.get(key))
 
   def iterator: Iterator[(String, String)] =
-    httpMessage.headers.iterator.asScala map { entry =>
+    httpMessage.headers.iterator.asScala.map { entry =>
       (entry.getKey, entry.getValue)
     }
 
@@ -108,12 +141,12 @@ private[finagle] class MessageHeaderMap(httpMessage: HttpMessageProxy) extends H
   override def contains(key: String): Boolean =
     httpMessage.headers.contains(key)
 
-  def += (kv: (String, String)) = {
+  def += (kv: (String, String)): MessageHeaderMap.this.type = {
     httpMessage.headers.set(kv._1, kv._2)
     this
   }
 
-  def -= (key: String) = {
+  def -= (key: String): MessageHeaderMap.this.type = {
     httpMessage.headers.remove(key)
     this
   }
@@ -121,7 +154,12 @@ private[finagle] class MessageHeaderMap(httpMessage: HttpMessageProxy) extends H
   def getAll(key: String): Iterable[String] =
     httpMessage.headers.getAll(key).asScala
 
-  def add(k: String, v: String) = {
+  def set(k: String, v: String): HeaderMap = {
+    httpMessage.headers.set(k,v)
+    this
+  }
+
+  def add(k: String, v: String): MessageHeaderMap = {
     httpMessage.headers.add(k, v)
     this
   }
@@ -129,7 +167,22 @@ private[finagle] class MessageHeaderMap(httpMessage: HttpMessageProxy) extends H
 
 
 object HeaderMap {
-  /** Create HeaderMap from header list.  Convenience method for testing. */
+
+  /** Create HeaderMap from header list. */
+  @varargs
   def apply(headers: Tuple2[String, String]*): HeaderMap =
     MapHeaderMap(headers: _*)
+
+  private[this] val formatter = new ThreadLocal[SimpleDateFormat] {
+    override protected def initialValue(): SimpleDateFormat = {
+      val f = TwitterDateFormat("E, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
+      f.setTimeZone(TimeZone.getTimeZone("GMT"))
+      f
+    }
+  }
+
+  private def format(date: Date): String =
+    if (date == null) null
+    else formatter.get().format(date)
+
 }

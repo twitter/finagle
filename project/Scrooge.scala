@@ -164,7 +164,7 @@ object Scrooge extends Plugin {
         out.log.info("Fetching scrooge2 " + ver + " ...")
 
         val environment = System.getenv().asScala
-        val homeRepo =  "http://maven.twttr.com/"
+        val homeRepo =  "https://maven.twttr.com/"
         val localRepo = System.getProperty("user.home") + "/.m2/repository/"
         val zipPath = "/com/twitter/scrooge/" + ver + "/scrooge-" + ver + ".zip"
         val fetchUrl = if (new File(localRepo + zipPath).exists) {

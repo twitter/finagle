@@ -8,6 +8,8 @@ import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
 import com.twitter.util.TimeConversions.intToTimeableNumber
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.util.DefaultLogger
+import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -245,7 +247,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         timer = timer,
         statsReceiver = statsReceiver,
         failureAccrual = { factory: ServiceFactory[Int, Int] =>
-          FailureAccrualFactory.wrapper(statsReceiver, 6, () => 3.seconds)(timer) andThen factory
+          FailureAccrualFactory.wrapper(statsReceiver, 6, () => 3.seconds, name, DefaultLogger, unconnected)(timer) andThen factory
         }
       )
 

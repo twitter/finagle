@@ -5,7 +5,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.integration.InProcessMemcached
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.protocol.text.Memcached
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Time}
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
@@ -33,15 +33,15 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
   }
 
   test("set & get") {
-    val _key   = "key"
-    val value = "value"
-    val zero = "0"
+    val _key  = "key"
+    val value = Buf.Utf8("value")
+    val zero  = Buf.Utf8("0")
     val start = System.currentTimeMillis
     (0 until 100) map { i =>
       val key = _key + i
-      Await.result(client(Delete(key)))
-      Await.result(client(Set(key, 0, Time.epoch, value)))
-      assert(Await.result(client(Get(Seq(key)))) === Values(Seq(Value(key, value, None, Some(zero)))))
+      Await.result(client(Delete(Buf.Utf8(key))))
+      Await.result(client(Set(Buf.Utf8(key), 0, Time.epoch, value)))
+      assert(Await.result(client(Get(Seq(Buf.Utf8(key))))) === Values(Seq(Value(Buf.Utf8(key), value, None, Some(zero)))))
     }
     val end = System.currentTimeMillis
     // println("%d ms".format(end - start))

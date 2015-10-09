@@ -112,4 +112,12 @@ class MockClientTest extends FunSuite {
     assert(Await.result(memcache.decr("unknown")) === None)
     assert(Await.result(memcache.get("unknown")) === None)
   }
+
+  test("`getResults` command populates the `casUnique` value") {
+    val memcache = new MockClient(Map("key" -> "value", "count" -> "1")).withStrings
+
+    val result = Await.result(memcache.getResult(Seq("key")))
+
+    assert(result.hits("key").casUnique.isDefined)
+  }
 }

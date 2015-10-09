@@ -21,7 +21,7 @@ The workflow that we support:
 
 1.  Fork finagle
 2.  Check out the `develop` branch
-3.  Make a feature branch
+3.  Make a feature branch (use `git checkout -b "cool-new-feature"`)
 4.  Make your cool new feature or bugfix on your branch
 5.  Write a test for your change
 6.  From your branch, make a pull request against `twitter/finagle/develop`
@@ -37,6 +37,13 @@ Because ScalaTest has such a big surface area, we use a restricted subset of it
 in our tests to keep them easy to read.  We've chosen the `assert` API, not the
 `Matchers` one, and we use the [`FunSuite` mixin][funsuite], which supports
 xUnit-like semantics.
+
+We encourage our contributors to ensure Java compatibility for any new public APIs
+they introduce. The easiest way to do so is to provide _Java compilation tests_
+and make sure the new API is easily accessible (typing `X$.MODULE$` is not easy)
+from Java. These compilation tests also provide Java users with testable examples
+of the API usage. For an example of a Java compilation test see
+[AddrCompilationTest.java][9].
 
 Note that while you will see a [Travis CI][travis-ci] status message in your
 pull request, this may not always be accurate, and in any case all changes will
@@ -56,7 +63,6 @@ Files should be exempt of trailing spaces.
 
 We adhere to a specific format for commit messages. Please write your commit
 messages along these guidelines:
-
     One line description of your change (less than 72 characters)
 
     Problem
@@ -142,6 +148,7 @@ requests that improve the existing ScalaDocs!
 [6]: http://sphinx-doc.org/install.html
 [7]: http://docutils.sourceforge.net/rst.html
 [8]: http://docs.scala-lang.org/style/scaladoc.html
+[9]: https://github.com/twitter/finagle/blob/master/finagle-core/src/test/java/com/twitter/finagle/AddrCompilationTest.java
 [es]: https://twitter.github.io/effectivescala/
 [funsuite]: http://www.scalatest.org/getting_started_with_fun_suite
 [ostrich]: https://github.com/twitter/ostrich

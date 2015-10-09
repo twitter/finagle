@@ -1,6 +1,6 @@
 maven_layout()
 
-jar_library(name='tests',
+target(name='tests',
   dependencies=[
     'finagle/finagle-validate/src/test/scala'
   ]

@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.java;
 
-import java.nio.charset.Charset;
+import scala.Option;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -13,6 +13,8 @@ import com.twitter.finagle.memcached.KetamaClientBuilder;
 import com.twitter.finagle.memcached.protocol.Command;
 import com.twitter.finagle.memcached.protocol.Response;
 import com.twitter.finagle.memcached.protocol.text.Memcached;
+import com.twitter.io.Buf;
+import com.twitter.util.Await;
 
 /**
  * This is mainly for internal testing, not for external purpose
@@ -21,7 +23,7 @@ public final class ClientTest {
 
   private ClientTest() { }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     Service<Command, Response> service =
       ClientBuilder.safeBuild(
         ClientBuilder
@@ -48,14 +50,17 @@ public final class ClientTest {
 
   }
 
-  public static void testClient(Client client) {
-    client.delete("foo").get();
-    client.set("foo", "bar").get();
-    assert "bar".equals(client.get("foo").get().toString(Charset.defaultCharset()));
-    ResultWithCAS res = client.gets("foo").get();
-    assert client.cas("foo", "baz", res.casUnique).get();
-    assert "baz".equals(client.get("foo").get().toString(Charset.defaultCharset()));
-    client.delete("foo").get();
+  public static void testClient(Client client) throws Exception {
+    Await.result(client.delete("foo"));
+    Await.result(client.set("foo", "bar"));
+    Option<String> res = Buf.Utf8$.MODULE$.unapply(Await.result(client.get("foo")));
+    assert "bar".equals(res.get());
+    ResultWithCAS casRes = Await.result(client.gets("foo"));
+    assert Await.result(client.cas("foo", "baz", casRes.casUnique));
+
+    Option<String> res2 = Buf.Utf8$.MODULE$.unapply(Await.result(client.get("foo")));
+    assert "baz".equals(res2.get());
+    Await.result(client.delete("foo"));
     System.err.println("passed.");
     client.release();
   }

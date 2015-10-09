@@ -10,14 +10,15 @@ import java.util.Arrays
 import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessageType, TMessage}
 import org.apache.thrift.transport.{TMemoryBuffer, TMemoryInputTransport}
+import scala.reflect.ClassTag
 
 object SwiftProxy {
   /**
    * Given a service, create a `T`-typed client that dispatches
    * thrift-encoded messages on it. `T` must be Swift-annotated.
    */
-  def newClient[T: ClassManifest](service: Service[ThriftClientRequest, Array[Byte]]): T = {
-    val k = implicitly[ClassManifest[T]].erasure
+  def newClient[T: ClassTag](service: Service[ThriftClientRequest, Array[Byte]]): T = {
+    val k = implicitly[ClassTag[T]].runtimeClass
     val sym = ServiceSym(k)
     Proxy.newProxyInstance(
       k.getClassLoader(),

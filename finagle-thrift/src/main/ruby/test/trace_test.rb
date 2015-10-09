@@ -1,7 +1,4 @@
-require 'rubygems'
-require 'thrift'
-require 'finagle-thrift'
-require 'test/unit'
+require_relative 'test_helper'
 
 class TraceIdTest < Test::Unit::TestCase
   def test_debug_flag
@@ -21,5 +18,19 @@ class TraceIdTest < Test::Unit::TestCase
     id = Trace::SpanId.new(Trace.generate_id)
     id2 = Trace::SpanId.from_value(id.to_s)
     assert_equal id.to_i, id2.to_i
+  end
+end
+
+class TraceTest < Test::Unit::TestCase
+  def test_stack_object_id
+    obj_id1 = Thread.new { Trace.id; Trace.send(:stack).object_id }.value
+    obj_id2 = Thread.new { Trace.id; Trace.send(:stack).object_id }.value
+    assert_not_equal obj_id1, obj_id2
+  end
+
+  def test_stack=
+    Trace.send("stack=",[1])
+    stack = Trace.send(:stack)
+    assert_equal [1], stack
   end
 end

@@ -1,8 +1,10 @@
 package com.twitter.finagle.service
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionStatsHandler, InMemoryStatsReceiver}
 import com.twitter.finagle._
-import com.twitter.util.{Await, Promise}
+import com.twitter.util.{Time, Await, Promise}
+import java.util.concurrent.TimeUnit
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -22,6 +24,39 @@ class StatsFilterTest extends FunSuite {
     }
 
     (promise, receiver, statsFilter andThen service)
+  }
+
+  test("latency stat defaults to milliseconds") {
+    val sr = new InMemoryStatsReceiver()
+    val filter = new StatsFilter[String, String](sr)
+    val promise = new Promise[String]
+    val svc = filter andThen new Service[String, String] {
+      def apply(request: String) = promise
+    }
+
+    Time.withCurrentTimeFrozen { tc =>
+      svc("1")
+      tc.advance(100.millis)
+      promise.setValue("done")
+      assert(sr.stat("request_latency_ms")() == Seq(100))
+    }
+  }
+
+  test("latency stat in microseconds") {
+    val sr = new InMemoryStatsReceiver()
+    val filter = new StatsFilter[String, String](
+      sr, StatsFilter.DefaultExceptions, TimeUnit.MICROSECONDS)
+    val promise = new Promise[String]
+    val svc = filter andThen new Service[String, String] {
+      def apply(request: String) = promise
+    }
+
+    Time.withCurrentTimeFrozen { tc =>
+      svc("1")
+      tc.advance(100.millis)
+      promise.setValue("done")
+      assert(sr.stat("request_latency_us")() == Seq(100.millis.inMicroseconds))
+    }
   }
 
   test("report exceptions") {

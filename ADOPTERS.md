@@ -8,20 +8,25 @@ URLs if possible) and [submit a pull request][1]!
 
 * [Attendify](https://attendify.com)
 * [Box](https://www.box.com/)
+* [Buoyant](http://buoyant.io/)
 * [Chartboost](https://www.chartboost.com/)
 * [Crimson Hexagon](http://www.crimsonhexagon.com/)
+* [Despegar](http://www.despegar.com/)
 * [DICE](http://dice.se/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
+* [Hopper](https://www.hopper.com/)
+* [ING Bank](https://ing.nl)
 * [JusBrasil](http://www.jusbrasil.com.br)
 * [Magine TV](https://magine.com/)
 * [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
 * [Nest](https://nest.com/)
 * The [New York Times](http://www.nytimes.com/)
 * [OpenAura](http://openaura.com/)
+* [OrchardPlatform](https://orchardplatform.com/)
 * [PagerDuty](https://www.pagerduty.com/)
 * [Pellucid Analytics](http://www.pellucid.com/)
 * [Pinterest](https://www.pinterest.com/)
@@ -36,6 +41,7 @@ URLs if possible) and [submit a pull request][1]!
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SmartNews](https://www.smartnews.com/en/)
   * ["Scala (Finagle) @ SmartNews"][12]
+* [SoFi](https://www.sofi.com/)
 * [SoundCloud](https://soundcloud.com/)
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]

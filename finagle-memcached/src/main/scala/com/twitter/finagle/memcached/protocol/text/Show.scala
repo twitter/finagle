@@ -1,20 +1,23 @@
 package com.twitter.finagle.memcached.protocol.text
 
 import com.twitter.finagle.memcached.protocol._
+import com.twitter.io.Buf
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel._
 
+/**
+ * Used by the server.
+ */
 class ResponseToEncoding extends OneToOneEncoder {
-  private[this] val ZERO          = "0"
-  private[this] val VALUE         = "VALUE"
+  private[this] val ZERO          = Buf.Utf8("0")
+  private[this] val VALUE         = Buf.Utf8("VALUE")
 
-  private[this] val STORED        = "STORED"
-  private[this] val NOT_STORED    = "NOT_STORED"
-  private[this] val EXISTS        = "EXISTS"
-  private[this] val NOT_FOUND     = "NOT_FOUND"
-  private[this] val DELETED       = "DELETED"
+  private[this] val STORED        = Buf.Utf8("STORED")
+  private[this] val NOT_STORED    = Buf.Utf8("NOT_STORED")
+  private[this] val EXISTS        = Buf.Utf8("EXISTS")
+  private[this] val NOT_FOUND     = Buf.Utf8("NOT_FOUND")
+  private[this] val DELETED       = Buf.Utf8("DELETED")
 
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = message match {
     case Stored()       => Tokens(Seq(STORED))
@@ -23,12 +26,11 @@ class ResponseToEncoding extends OneToOneEncoder {
     case Deleted()      => Tokens(Seq(DELETED))
     case NotFound()     => Tokens(Seq(NOT_FOUND))
     case NoOp()         => Tokens(Nil)
-    case Number(value)  => Tokens(Seq(value.toString))
+    case Number(value)  => Tokens(Seq(Buf.Utf8(value.toString)))
     case Error(cause)   =>
-      val formatted = ExceptionHandler.format(cause)
-      Tokens(formatted.map { ChannelBuffers.copiedBuffer(_) })
+      val formatted: Seq[Array[Byte]] = ExceptionHandler.format(cause)
+      Tokens(formatted.map { Buf.ByteArray.Owned(_) })
     case InfoLines(lines) =>
-      val buffer = ChannelBuffers.dynamicBuffer(100 * lines.size)
       val statLines = lines map { line =>
         val key = line.key
         val values = line.values
@@ -36,7 +38,6 @@ class ResponseToEncoding extends OneToOneEncoder {
       }
       StatLines(statLines)
     case Values(values) =>
-      val buffer = ChannelBuffers.dynamicBuffer(100 * values.size)
       val tokensWithData = values map {
         case Value(key, value, casUnique, Some(flags)) =>
           TokensWithData(Seq(VALUE, key, flags), value, casUnique)
@@ -47,54 +48,62 @@ class ResponseToEncoding extends OneToOneEncoder {
   }
 }
 
+/**
+ * Used by the client.
+ */
 class CommandToEncoding extends OneToOneEncoder {
-  private[this] val GET           = "get"
-  private[this] val GETS          = "gets"
-  private[this] val DELETE        = "delete"
-  private[this] val INCR          = "incr"
-  private[this] val DECR          = "decr"
+  private[this] val GET           = Buf.Utf8("get")
+  private[this] val GETS          = Buf.Utf8("gets")
+  private[this] val DELETE        = Buf.Utf8("delete")
+  private[this] val INCR          = Buf.Utf8("incr")
+  private[this] val DECR          = Buf.Utf8("decr")
 
-  private[this] val ADD           = "add"
-  private[this] val SET           = "set"
-  private[this] val APPEND        = "append"
-  private[this] val PREPEND       = "prepend"
-  private[this] val REPLACE       = "replace"
-  private[this] val CAS           = "cas"
+  private[this] val ADD           = Buf.Utf8("add")
+  private[this] val SET           = Buf.Utf8("set")
+  private[this] val APPEND        = Buf.Utf8("append")
+  private[this] val PREPEND       = Buf.Utf8("prepend")
+  private[this] val REPLACE       = Buf.Utf8("replace")
+  private[this] val CAS           = Buf.Utf8("cas")
 
-  private[this] val GETV          = "getv"
-  private[this] val UPSERT        = "upsert"
+  private[this] val GETV          = Buf.Utf8("getv")
+  private[this] val UPSERT        = Buf.Utf8("upsert")
 
-  private[this] val QUIT          = "quit"
-  private[this] val STATS         = "stats"
+  private[this] val QUIT          = Buf.Utf8("quit")
+  private[this] val STATS         = Buf.Utf8("stats")
+
+  private[this] val ZeroBuf = Buf.Utf8("0")
+
+  private[this] def intToUtf8(i: Int): Buf =
+    if (i == 0) ZeroBuf else Buf.Utf8(i.toString)
 
   def encode(ctx: ChannelHandlerContext, ch: Channel, message: AnyRef): Decoding = message match {
     case Add(key, flags, expiry, value) =>
-      TokensWithData(Seq(ADD, key, flags.toString, expiry.inSeconds.toString), value)
+      TokensWithData(Seq(ADD, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Set(key, flags, expiry, value) =>
-      TokensWithData(Seq(SET, key, flags.toString, expiry.inSeconds.toString), value)
+      TokensWithData(Seq(SET, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Replace(key, flags, expiry, value) =>
-      TokensWithData(Seq(REPLACE, key, flags.toString, expiry.inSeconds.toString), value)
+      TokensWithData(Seq(REPLACE, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Append(key, flags, expiry, value) =>
-      TokensWithData(Seq(APPEND, key, flags.toString, expiry.inSeconds.toString), value)
+      TokensWithData(Seq(APPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Prepend(key, flags, expiry, value) =>
-      TokensWithData(Seq(PREPEND, key, flags.toString, expiry.inSeconds.toString), value)
+      TokensWithData(Seq(PREPEND, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value)
     case Cas(key, flags, expiry, value, casUnique) =>
-      TokensWithData(Seq(CAS, key, flags.toString, expiry.inSeconds.toString), value, Some(casUnique))
+      TokensWithData(Seq(CAS, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(casUnique))
     case Get(keys) =>
-      Tokens(Seq[ChannelBuffer](GET) ++ keys)
+      Tokens(GET +: keys)
     case Gets(keys) =>
-      Tokens(Seq[ChannelBuffer](GETS) ++ keys)
+      Tokens(GETS +: keys)
     case Getv(keys) =>
-      Tokens(Seq[ChannelBuffer](GETV) ++ keys)
+      Tokens(GETV +: keys)
     case Upsert(key, flags, expiry, value, version) =>
-      TokensWithData(Seq(UPSERT, key, flags.toString, expiry.inSeconds.toString), value, Some(version))
+      TokensWithData(Seq(UPSERT, key, intToUtf8(flags), intToUtf8(expiry.inSeconds)), value, Some(version))
     case Incr(key, amount) =>
-      Tokens(Seq(INCR, key, amount.toString))
+      Tokens(Seq(INCR, key, Buf.Utf8(amount.toString)))
     case Decr(key, amount) =>
-      Tokens(Seq(DECR, key, amount.toString))
+      Tokens(Seq(DECR, key, Buf.Utf8(amount.toString)))
     case Delete(key) =>
       Tokens(Seq(DELETE, key))
-    case Stats(args) => Tokens(Seq[ChannelBuffer](STATS) ++ args)
+    case Stats(args) => Tokens(STATS +: args)
     case Quit() =>
       Tokens(Seq(QUIT))
   }

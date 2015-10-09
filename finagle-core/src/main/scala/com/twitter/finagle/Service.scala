@@ -1,9 +1,11 @@
 package com.twitter.finagle
 
-import java.net.SocketAddress
+import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.util.{Closable, Future, NonFatal, Time}
+import java.net.SocketAddress
 
 object Service {
+
   /**
    * Wrap an underlying service such that any synchronously thrown exceptions are lifted into
    * Future.exception
@@ -24,9 +26,15 @@ object Service {
 
   /**
    * A service with a constant reply. Always available; never closable.
+   *
+   * @see [[constant]] for a Java compatible API.
    */
   def const[Rep](rep: Future[Rep]): Service[Any, Rep] =
     new service.ConstantService(rep)
+
+  /** Java compatible API for [[const]] as `const` is a reserved word in Java */
+  def constant[Rep](rep: Future[Rep]): Service[Any, Rep] =
+    Service.const(rep)
 }
 
 /**
@@ -65,10 +73,8 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   /**
    * Determines whether this service is available (can accept requests
    * with a reasonable likelihood of success).
-   *
-   * TODO(CSL-1336): Finalize isAvailable
    */
-  def isAvailable: Boolean = status == Status.Open
+  final def isAvailable: Boolean = status == Status.Open
 }
 
 /**
@@ -97,8 +103,6 @@ trait ClientConnection extends Closable {
 
 object ClientConnection {
   val nil: ClientConnection = new ClientConnection {
-    private[this] val unconnected =
-      new SocketAddress { override def toString = "unconnected" }
     def remoteAddress = unconnected
     def localAddress = unconnected
     def close(deadline: Time) = Future.Done
@@ -116,21 +120,8 @@ abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   def apply(request: Req) = self(request)
   override def close(deadline: Time) = self.close(deadline)
 
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceProxy.status]] and [[ServiceProxy.isAvailable]] must be
-   * overridden together, pending CSL-1336.
-   */
   override def status = self.status
 
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceProxy.status]] and [[ServiceProxy.isAvailable]] must be
-   * overridden together, pending CSL-1336.
-   */
-  override def isAvailable = self.isAvailable
   override def toString = self.toString
 }
 
@@ -163,8 +154,7 @@ abstract class ServiceFactory[-Req, +Rep]
           f(service) onFailure { _ => service.close() }
         }
       def close(deadline: Time) = self.close(deadline)
-      // TODO(CSL-1336): Finalize isAvailable
-      override def isAvailable = self.isAvailable
+      override def status: Status = self.status
       override def toString() = self.toString()
     }
 
@@ -186,8 +176,7 @@ abstract class ServiceFactory[-Req, +Rep]
    */
   def status: Status = Status.Open
 
-  // TODO(CSL-1336): Finalize isAvailable
-  def isAvailable: Boolean = status == Status.Open
+  final def isAvailable: Boolean = status == Status.Open
 }
 
 object ServiceFactory {
@@ -214,21 +203,7 @@ trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Prox
   def apply(conn: ClientConnection) = self(conn)
   def close(deadline: Time) = self.close(deadline)
 
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceFactoryProxy.status]] and [[ServiceFactoryProxy.isAvailable]] must
-   * be overridden together, pending CSL-1336.
-   */
   override def status = self.status
-
-  /**
-   * @inheritdoc
-   *
-   * [[ServiceFactoryProxy.status]] and [[ServiceFactoryProxy.isAvailable]] must
-   * be overridden together, pending CSL-1336.
-   */
-  override def isAvailable = self.isAvailable
 }
 
 /**
@@ -240,6 +215,9 @@ abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
   extends ProxyServiceFactory[Req, Rep] {
   def self: ServiceFactory[Req, Rep] = _self
 }
+
+private[finagle] case class ServiceFactorySocketAddress[Req, Rep](factory: ServiceFactory[Req, Rep])
+  extends SocketAddress
 
 object FactoryToService {
   val role = Stack.Role("FactoryToService")
@@ -318,8 +296,6 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
 
   override def close(deadline: Time): Future[Unit] = factory.close(deadline)
   override def status: Status = factory.status
-  // TODO(CSL-1336): Finalize isAvailable
-  override def isAvailable: Boolean = factory.isAvailable
 }
 
 /**

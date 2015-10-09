@@ -1,10 +1,8 @@
 package com.twitter.finagle.thrift
 
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.silly.Silly
 import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Promise, Return, Try}
-import org.apache.thrift.protocol.TBinaryProtocol
 import org.jboss.netty.bootstrap.{ClientBootstrap, ServerBootstrap}
 import org.jboss.netty.channel._
 import org.jboss.netty.channel.local._
@@ -68,14 +66,18 @@ class AsyncServerEndToEndTest extends FunSuite {
 
     val addr = new LocalAddress("thrift-async")
     val serverChannel = serverBootstrap.bind(addr)
-    for (ch <- clientBootstrap.connect(addr)) {
-      val thriftCall =
-        new ThriftCall[Silly.bleep_args, Silly.bleep_result](
-          "bleep",
-          new Silly.bleep_args("heyhey"),
-          classOf[Silly.bleep_result])
-      Channels.write(ch, thriftCall)
-    }
+    clientBootstrap.connect(addr).addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (f.isSuccess) {
+          val ch = f.getChannel
+          val thriftCall =
+            new ThriftCall[Silly.bleep_args, Silly.bleep_result](
+              "bleep",
+              new Silly.bleep_args("heyhey"),
+              classOf[Silly.bleep_result])
+          Channels.write(ch, thriftCall)
+        }
+    })
 
     val result = Try(Await.result(callResults, 1.second))
     assert(result.isReturn === true)

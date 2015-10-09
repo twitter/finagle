@@ -1,20 +1,20 @@
 //#imports
-import com.twitter.finagle.{Http, Service}
+import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.httpx
 import com.twitter.util.{Await, Future}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http._
 //#imports
 
 object Server extends App {
 //#service
-  val service = new Service[HttpRequest, HttpResponse] {
-    def apply(req: HttpRequest): Future[HttpResponse] =
-      Future.value(new DefaultHttpResponse(
-        req.getProtocolVersion, HttpResponseStatus.OK))
+  val service = new Service[httpx.Request, httpx.Response] {
+    def apply(req: httpx.Request): Future[httpx.Response] =
+      Future.value(
+        httpx.Response(req.version, httpx.Status.Ok)
+      )
   }
 //#service
 //#builder
-  val server = Http.serve(":8080", service)
+  val server = Httpx.serve(":8080", service)
   Await.ready(server)
 //#builder
 }
