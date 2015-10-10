@@ -1,11 +1,12 @@
 package com.twitter.finagle.mux
 
+import java.util.concurrent.atomic.AtomicReference
+
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
 import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
 import com.twitter.util._
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The threshold failure detector uses session pings to gauge the health
@@ -133,7 +134,7 @@ private class ThresholdFailureDetector(
  * @param windowSize the size of the window to keep track of
  */
 private[mux] class WindowedMax(windowSize: Int) {
-  private[this] var currentMax: Long = Long.MinValue
+  @volatile private[this] var currentMax: Long = Long.MinValue
   private[this] val buf: Array[Long] = Array.fill(windowSize)(Long.MinValue)
   private[this] var index: Int = 0
 
@@ -153,7 +154,7 @@ private[mux] class WindowedMax(windowSize: Int) {
       var nextMax = Long.MinValue
       while (i < windowSize) {
         val v = buf(i)
-        nextMax = if (v > nextMax) v else nextMax
+        nextMax = math.max(nextMax, v)
         i = i + 1
       }
       currentMax = nextMax
@@ -161,5 +162,5 @@ private[mux] class WindowedMax(windowSize: Int) {
   }
 
   // O(1)
-  def get: Long = synchronized { currentMax }
+  def get: Long = currentMax
 }

@@ -501,7 +501,7 @@ object Finagle extends Build {
     id = "finagle-benchmark-thrift",
     base = file("finagle-benchmark-thrift"),
     settings = Project.defaultSettings ++
-      ScroogeSBT.newSettings
+      sharedSettings ++ ScroogeSBT.newSettings
   ).settings(
     libraryDependencies ++= scroogeLibs
   ).dependsOn(finagleThrift)
