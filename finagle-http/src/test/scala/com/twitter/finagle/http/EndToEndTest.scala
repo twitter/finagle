@@ -1,5 +1,6 @@
 package com.twitter.finagle.http
 
+import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
@@ -541,5 +542,24 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         override def close(deadline: Time) =
           Closable.all(client, server).close(deadline)
       }
+  }
+
+  test("servers return 413s for requests with too large payloads") {
+    import com.twitter.finagle
+
+    val svc = Service.mk { _: Request => Future.value(Response()) }
+    val addr = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0)
+    val server = finagle.Http.server.withMaxRequestSize(1.byte).serve(addr, svc)
+    val client = finagle.Http.client.newService(Name.bound(server.boundAddress), "macaw-yeps")
+
+
+    val tooBig = Request("/")
+    tooBig.content = Buf.ByteArray.Owned(Array[Byte](1,2))
+
+    val justRight = Request("/")
+    justRight.content = Buf.ByteArray.Owned(Array[Byte](1))
+
+    assert(Await.result(client(tooBig)).status == Status.RequestEntityTooLarge)
+    assert(Await.result(client(justRight)).status == Status.Ok)
   }
 }

@@ -149,6 +149,10 @@ case class Http(
             pipeline.addLast("httpCompressor", new TextualContentCompressor)
           }
 
+          // The payload size handler should come before the RespondToExpectContinue handler so that we don't
+          // send a 100 CONTINUE for oversize requests we have no intention of handling.
+          pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSizeInBytes))
+
           // Response to ``Expect: Continue'' requests.
           pipeline.addLast("respondToExpectContinue", new RespondToExpectContinue)
           if (!_streaming)

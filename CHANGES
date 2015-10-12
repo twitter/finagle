@@ -51,6 +51,10 @@ Runtime Behavior Changes
     (deadline_budget_ms) stats are now only recorded for servers, not for
     clients anymore, since they're only meaningful for servers. ``RB_ID=75268``
 
+  * finagle-http: Clients sending requests with payloads larger than the server 
+    accepts (default 5MB) now receive a HTTP 413 response instead of a channel 
+    closed exception.  ``RB_ID=753664``
+
 6.29.0
 ~~~~~~
 
