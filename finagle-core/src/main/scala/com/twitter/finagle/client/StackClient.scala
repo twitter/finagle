@@ -52,7 +52,7 @@ object StackClient {
 
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](nilStack[Req, Rep])
     stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
-    stk.push(WireTracingFilter.module)
+    stk.push(WireTracingFilter.clientModule)
     stk.push(ExpiringService.module)
     stk.push(FailFastFactory.module)
     stk.push(DefaultPool.module)

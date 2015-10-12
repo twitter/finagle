@@ -21,6 +21,9 @@ Runtime Behavior Changes
   * finagle-core: `RetryPolicy.tries` now uses jittered backoffs instead of
     having no delay. ``RB_ID=752629``
 
+  * finagle-core: Introduce WireRecv & WireSend tracing into Finagle servers.  Now WireRecv
+    annotations are always recorded on message ingress and WireSend on egress.
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
