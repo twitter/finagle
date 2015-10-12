@@ -258,11 +258,11 @@ private[finagle] object WireTracingFilter {
       def make(next: ServiceFactory[Req, Rep]) = filter andThen next
 
       object filter extends Filter[Req, Rep, Req, Rep] {
+        private[this] def recv(): Unit = Trace.record(Annotation.WireRecv)
+        private[this] def send(rsp: Rep): Unit = Trace.record(Annotation.WireSend)
         def apply(req: Req, service: Service[Req, Rep]) = {
-          Trace.record(Annotation.WireRecv)
-          service(req).onSuccess { _ =>
-            Trace.record(Annotation.WireSend)
-          }
+          recv()
+          service(req).onSuccess(send)
         }
       }
     }
