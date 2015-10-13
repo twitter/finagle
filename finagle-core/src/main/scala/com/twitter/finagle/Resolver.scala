@@ -1,5 +1,7 @@
 package com.twitter.finagle
 
+import com.google.common.cache.{CacheLoader, CacheBuilder}
+import com.twitter.cache.guava.GuavaCache
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
@@ -196,6 +198,53 @@ private[finagle] class InetResolver(
   }
 }
 
+/**
+ * InetResolver that caches all successful DNS lookups indefinitely
+ * and does not poll for updates.
+ *
+ * Clients should only use this in scenarios where host -> IP map changes
+ * do not occur.
+ */
+private[finagle] object FixedInetResolver {
+
+  val scheme = "fixedinet"
+
+  def apply(): InetResolver = apply(DefaultStatsReceiver)
+  def apply(statsReceiver: StatsReceiver): InetResolver =
+    new FixedInetResolver(statsReceiver, None)
+}
+
+/**
+ * Uses a future cache to do lookups once. Allows unit tests to
+ * specify a CI-friendly resolve fn. Otherwise defaults to InetResolver.resolveHost
+ * @param statsReceiver Unscoped receiver for InetResolver
+ * @param resolveOverride Optional fn. If None, defaults back to superclass implementation
+ */
+private[finagle] class FixedInetResolver(
+    statsReceiver: StatsReceiver,
+    resolveOverride: Option[String => Future[Seq[InetAddress]]]
+  ) extends InetResolver(statsReceiver, None) {
+
+  override val scheme = FixedInetResolver.scheme
+
+  // fallback to InetResolver.resolveHost if no override was provided
+  val resolveFn: (String => Future[Seq[InetAddress]]) =
+    resolveOverride.getOrElse(super.resolveHost)
+
+  // A size-bounded FutureCache backed by a LoaderCache
+  private[this] val cache = CacheBuilder
+      .newBuilder()
+      .maximumSize(16000L)
+      .build(
+        new CacheLoader[String, Future[Seq[InetAddress]]]() {
+          def load(host: String) = resolveFn(host)
+        })
+  private[this] val futureCache = GuavaCache.fromLoadingCache(cache)
+
+  override def resolveHost(host: String): Future[Seq[InetAddress]] =
+    futureCache(host)
+}
+
 object NegResolver extends Resolver {
   val scheme = "neg"
   def bind(arg: String) = Var.value(Addr.Neg)
@@ -213,11 +262,12 @@ object FailResolver extends Resolver {
 
 private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
   private[this] val inetResolver = InetResolver()
+  private[this] val fixedInetResolver = FixedInetResolver()
 
   private[this] lazy val resolvers = {
     val rs = f()
     val log = Logger.getLogger(getClass.getName)
-    val resolvers = Seq(inetResolver, NegResolver, NilResolver, FailResolver) ++ rs
+    val resolvers = Seq(inetResolver, fixedInetResolver, NegResolver, NilResolver, FailResolver) ++ rs
 
     val dups = resolvers
       .groupBy(_.scheme)

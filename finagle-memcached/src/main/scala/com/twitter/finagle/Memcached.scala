@@ -184,6 +184,14 @@ object Memcached extends finagle.Client[Command, Response]
       .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Response])
       .replace(DefaultPool.Role, SingletonPool.module[Command, Response])
       .replace(ClientTracingFilter.role, MemcachedTraceInitializer.Module)
+
+    /**
+     * The memcached client should be using fixed hosts that do not change
+     * IP addresses. Force usage of the FixedInetResolver to prevent spurious
+     * DNS lookups and polling.
+     */
+    def mkDestination(hostName: String, port: Int): String =
+      s"${FixedInetResolver.scheme}!$hostName:$port"
   }
 
   case class Client(
@@ -191,6 +199,8 @@ object Memcached extends finagle.Client[Command, Response]
       params: Stack.Params = Client.defaultParams)
     extends StdStackClient[Command, Response, Client]
     with MemcachedRichClient {
+
+    import Client.mkDestination
 
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Response]] = this.stack,
@@ -208,7 +218,7 @@ object Memcached extends finagle.Client[Command, Response]
 
     def newTwemcacheClient(dest: Name, label: String) = {
       val _dest = if (LocalMemcached.enabled) {
-        Resolver.eval("localhost:" + LocalMemcached.port)
+        Resolver.eval(mkDestination("localhost", LocalMemcached.port))
       } else dest
 
       // Memcache only support Name.Bound names (TRFC-162).
@@ -229,7 +239,7 @@ object Memcached extends finagle.Client[Command, Response]
         val key = KetamaClientKey.fromCacheNode(node)
         val stk = stack.replace(FailureAccrualFactory.role,
           KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
-        withStack(stk).newService(s"${node.host}:${node.port}", label)
+        withStack(stk).newService(mkDestination(node.host, node.port), label)
       }
 
       val group = CacheNodeGroup(Group.fromVarAddr(va))

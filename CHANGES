@@ -15,6 +15,12 @@ New Features
     libraries to set defaults for clients that have not configured this module.
     ``RB_ID=750228``
 
+  * finagle-core: New Resolver `com.twitter.finagle.FixedInetResolver` extends
+    InetResolver by caching successful DNS lookups indefinitely. It's scheme is 'fixedinet'.
+    This is used by clients or resolvers that do not want or expect
+    host->ip map changes (such as the zk2 resolver and twemcache client).
+    ``RB=753712``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

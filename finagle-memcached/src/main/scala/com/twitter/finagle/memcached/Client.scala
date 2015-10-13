@@ -998,6 +998,8 @@ case class KetamaClientBuilder private[memcached](
   oldLibMemcachedVersionComplianceMode: Boolean = false,
   numReps: Int = KetamaPartitionedClient.DefaultNumReps
 ) {
+  import Memcached.Client.mkDestination
+
   private lazy val localMemcachedName = Resolver.eval("localhost:" + LocalMemcached.port)
 
   private def withLocalMemcached = {
@@ -1118,7 +1120,7 @@ case class KetamaClientBuilder private[memcached](
         def apply[Command, Response](stk: Stack[ServiceFactory[Command, Response]]) =
           stk.replace(FailureAccrualFactory.role,
             KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
-      }).newClient(s"${node.host}:${node.port}").toService
+      }).newClient(mkDestination(node.host, node.port)).toService
 
     new KetamaPartitionedClient(
       _group,
