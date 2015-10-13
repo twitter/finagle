@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{Rng, DefaultTimer}
 import com.twitter.finagle.{ServiceFactory, NoBrokersAvailableException}
-import com.twitter.util.{Activity, Duration, Timer}
+import com.twitter.util.{Activity, Duration, Future, Timer, Time}
 import scala.util.Random
 
 /**
@@ -79,6 +79,10 @@ object Balancers {
     ): ServiceFactory[Req, Rep] =
       new P2CBalancerPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc) {
         private[this] val gauge = sr.addGauge("p2cPeakEwma")(1)
+        override def close(when: Time): Future[Unit] = {
+          gauge.remove()
+          super.close(when)
+        }
       }
   }
 
@@ -96,6 +100,10 @@ object Balancers {
       ): ServiceFactory[Req, Rep] = {
         new HeapBalancer(endpoints, sr, exc, rng) {
           private[this] val gauge = sr.addGauge("heap")(1)
+          override def close(when: Time): Future[Unit] = {
+            gauge.remove()
+            super.close(when)
+          }
         }
       }
     }
@@ -130,6 +138,10 @@ object Balancers {
       new ApertureLoadBandBalancer(endpoints, smoothWin, lowLoad,
         highLoad, minAperture, maxEffort, rng, timer, sr, exc) {
         private[this] val gauge = sr.addGauge("aperture")(1)
+        override def close(when: Time): Future[Unit] = {
+          gauge.remove()
+          super.close(when)
+        }
       }
     }
   }
