@@ -5,8 +5,10 @@ import com.twitter.common.metrics.{HistogramInterface, AbstractGauge, Metrics}
 import com.twitter.finagle.http.HttpMuxHandler
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.Buf
+import com.twitter.jsr166e.LongAdder
 import com.twitter.logging.Logger
 import com.twitter.util.events.{Event, Sink}
+import com.twitter.util.lint.{Issue, Category, Rule, GlobalRules}
 import com.twitter.util.{Time, Throw, Try}
 import java.util.concurrent.ConcurrentHashMap
 
@@ -75,10 +77,14 @@ object MetricsStatsReceiver {
   private[this] val _defaultHostRegistry = Metrics.createDetached()
   val defaultHostRegistry = _defaultHostRegistry
 
-  private[this] val log = Logger.get()
-
   private def defaultFactory(name: String): HistogramInterface =
     new MetricsBucketedHistogram(name)
+
+  /**
+   * A semi-arbitrary value, but should a service call any counter/stat/addGauge
+   * this often, it's a good indication that they are not following best practices.
+   */
+  private val CreateRequestLimit = 100000L
 
   private[this] case class CounterIncrData(name: String, value: Long)
   private[this] case class StatAddData(name: String, delta: Long)
@@ -182,9 +188,40 @@ class MetricsStatsReceiver(
 
   private[this] val loggedStats: Set[String] = debugLoggedStatNames()
 
+  private[this] val counterRequests = new LongAdder()
+  private[this] val statRequests = new LongAdder()
+  private[this] val gaugeRequests = new LongAdder()
+
+  private[this] def checkRequestsLimit(which: String, adder: LongAdder): Option[Issue] = {
+    // todo: ideally these would be computed as rates over time, but this is a
+    // relatively simple proxy for bad behavior.
+    val count = adder.sum()
+    if (count > CreateRequestLimit)
+      Some(Issue(s"StatReceiver.$which() has been called $count times"))
+    else
+      None
+  }
+
+  GlobalRules.get.add(
+    Rule(
+      Category.Performance,
+      "Elevated metric creation requests",
+      "For best performance, metrics should be created and stored in member variables " +
+        "and not requested via `StatsReceiver.{counter,stat,addGauge}` at runtime. " +
+        "Large numbers are an indication that these metrics are being requested " +
+        "frequently at runtime."
+    ) {
+      Seq(
+        checkRequestsLimit("counter", counterRequests),
+        checkRequestsLimit("stat", statRequests),
+        checkRequestsLimit("addGauge", gaugeRequests)
+      ).flatten
+    }
+  )
+
   // Scope separator, a string value used to separate scopes defined by `StatsReceiver`.
   private[this] val separator: String = scopeSeparator()
-  require(separator.length == 1, "Scope separator should be one symbol.")
+  require(separator.length == 1, s"Scope separator should be one symbol: '$separator'")
 
   override def toString: String = "MetricsStatsReceiver"
 
@@ -192,6 +229,7 @@ class MetricsStatsReceiver(
    * Create and register a counter inside the underlying Metrics library
    */
   def counter(names: String*): Counter = {
+    counterRequests.increment()
     var counter = counters.get(names)
     if (counter == null) counters.synchronized {
       counter = counters.get(names)
@@ -221,6 +259,7 @@ class MetricsStatsReceiver(
    * Create and register a stat (histogram) inside the underlying Metrics library
    */
   def stat(names: String*): Stat = {
+    statRequests.increment()
     var stat = stats.get(names)
     if (stat == null) stats.synchronized {
       stat = stats.get(names)
@@ -248,6 +287,11 @@ class MetricsStatsReceiver(
       }
     }
     stat
+  }
+
+  override def addGauge(name: String*)(f: => Float): Gauge = {
+    gaugeRequests.increment()
+    super.addGauge(name: _*)(f)
   }
 
   protected[this] def registerGauge(names: Seq[String], f: => Float) {

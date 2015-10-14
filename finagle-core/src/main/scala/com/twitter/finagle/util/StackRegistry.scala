@@ -22,7 +22,7 @@ object StackRegistry {
           // this is not very useful, and it might make sense to filter them out in the future.
           val fields = p.getClass.getDeclaredFields.map(_.getName).toSeq
           val values = p.productIterator.map(_.toString).toSeq
-          seq ++ (fields.zipAll(values, "<unknown>", "<unknown>"))
+          seq ++ fields.zipAll(values, "<unknown>", "<unknown>")
 
         case (seq, _) => seq
       }
@@ -51,14 +51,30 @@ trait StackRegistry {
   /** The name of the [[StackRegistry]], to be used for identification in the registry. */
   def registryName: String
 
+  // thread-safe updates via synchronization on `this`
   private[this] var registry = Map.empty[String, Entry]
+
   private[this] val numEntries = new AtomicInteger(0)
+
+  // thread-safe updates via synchronization on `this`
+  private[this] var duplicates = Vector.empty[Entry]
+
+  /**
+   * Returns any registered [[Entry Entries]] that had the same [[Label]].
+   */
+  def registeredDuplicates: Seq[Entry] = synchronized {
+    duplicates
+  }
 
   /** Registers an `addr` and `stk`. */
   def register(addr: String, stk: Stack[_], params: Stack.Params): Unit = {
     val entry = Entry(addr, stk, params)
     addEntries(entry)
-    synchronized { registry += entry.name -> entry }
+    synchronized {
+      if (registry.contains(entry.name))
+        duplicates :+= entry
+      registry += entry.name -> entry
+    }
   }
 
   /** Unregisters an `addr` and `stk`. */
