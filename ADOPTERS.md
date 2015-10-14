@@ -6,7 +6,7 @@ or if you'd like us to feature a link to a blog post or article about how
 you're using Finagle. Or even better, add the links yourself (please use HTTPS
 URLs if possible) and [submit a pull request][1]!
 
-* [Attendify](https://attendify.com)
+* [Attendify](https://attendify.com/)
 * [Box](https://www.box.com/)
 * [Buoyant](http://buoyant.io/)
 * [Chartboost](https://www.chartboost.com/)
@@ -19,9 +19,10 @@ URLs if possible) and [submit a pull request][1]!
 * [Green Man Gaming](http://www.greenmangaming.com/)
 * [Gutefrage.net](http://www.gutefrage.net/)
   * ["Introducing Gutefrage.net's Service-Oriented Architecture"][2]
+* [Hotel Urbano](https://www.hotelurbano.com/)
 * [Hopper](https://www.hopper.com/)
-* [ING Bank](https://ing.nl)
-* [JusBrasil](http://www.jusbrasil.com.br)
+* [ING Bank](https://ing.nl/)
+* [JusBrasil](http://www.jusbrasil.com.br/)
 * [Magine TV](https://magine.com/)
 * [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
 * [Nest](https://nest.com/)
@@ -32,12 +33,12 @@ URLs if possible) and [submit a pull request][1]!
 * [Pellucid Analytics](http://www.pellucid.com/)
 * [Pinterest](https://www.pinterest.com/)
   * ["How we make pins more useful"][3]
-* [Quanttus](http://www.Quanttus.com)
+* [Quanttus](http://www.Quanttus.com/)
 * [Qubit](http://www.qubitproducts.com/)
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Reputation.com](https://www.reputation.com/)
-* [Sabre Labs](http://sabrelabs.com)
+* [Sabre Labs](http://sabrelabs.com/)
 * [Sharethrough](https://www.sharethrough.com/)
   * ["Finagle @ Sharethrough: Twitter #Conf Presentation"][5]
 * [SmartNews](https://www.smartnews.com/en/)
@@ -47,7 +48,7 @@ URLs if possible) and [submit a pull request][1]!
   * ["Building Products at SoundCloud—Part III: Microservices in Scala and
     Finagle"][6]
 * [Spright](https://spright.com/)
-* [SproutSocial](https://www.sproutsocial.com)
+* [SproutSocial](https://www.sproutsocial.com/)
   * ["Trendy Engineering: How We Built the Twitter Trends Report"][7]
 * [Strava](http://www.strava.com/)
   * ["Introducing Routemaster"][8]
@@ -56,7 +57,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Tapad](http://www.tapad.com/)
   * [Case study][9] by [Typesafe][10]
 * [Teads.tv](https://teads.tv/)
-* [Tendril](http://www.tendrilinc.com)
+* [Tendril](http://www.tendrilinc.com/)
 * [Tumblr](https://www.tumblr.com/)
 * [Twitter](https://twitter.com/)
   * ["Finagle: A Protocol-Agnostic RPC System"][11]
