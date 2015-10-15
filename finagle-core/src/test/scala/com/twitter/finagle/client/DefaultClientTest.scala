@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.service.FailureAccrualFactory
+import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
 import com.twitter.util.TimeConversions.intToTimeableNumber
@@ -247,7 +247,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         timer = timer,
         statsReceiver = statsReceiver,
         failureAccrual = { factory: ServiceFactory[Int, Int] =>
-          FailureAccrualFactory.wrapper(statsReceiver, 6, () => 3.seconds, name, DefaultLogger, unconnected)(timer) andThen factory
+          FailureAccrualFactory.wrapper(statsReceiver, 6, Backoff.const(3.seconds), name, DefaultLogger, unconnected)(timer) andThen factory
         }
       )
 

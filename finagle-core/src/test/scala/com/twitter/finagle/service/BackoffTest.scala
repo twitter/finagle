@@ -2,6 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.Rng
+import com.twitter.util.Duration
 import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
@@ -67,6 +68,24 @@ class BackoffTest extends FunSuite
     }
   }
 
+  test("equalJittered") {
+    forAll { seed: Long =>
+      val rng = Rng(seed)
+      val maximum = 120.millis
+      val backoffs = Backoff.equalJittered(5.millis, maximum, rng)
+        .take(10).force.toSeq.map(_.inMillis)
+
+      assert(5 == backoffs.head)
+
+      val ranges = Seq((5, 10), (10, 20), (20, 40), (40,  80),
+        (80, 120), (80, 120), (80, 120), (80, 120), (80, 120))
+      backoffs.tail.zip(ranges).foreach { case (b, (min, max)) =>
+        assert(b >= min)
+        assert(b <= max)
+      }
+    }
+  }
+
   test("linear") {
     val backoffs = Backoff.linear(2.seconds, 10.seconds) take 10
     assert(backoffs.head === 2.seconds)
@@ -83,4 +102,14 @@ class BackoffTest extends FunSuite
     assert(backoffs.force.toSeq === (0 until 10 map { _ => 10.seconds}))
   }
 
+  test("from function") {
+    forAll { seed: Long =>
+      val fRng, rng = Rng(seed)
+      val f: () => Duration = () => {
+        Duration.fromNanoseconds(fRng.nextLong(10))
+      }
+      val backoffs = Backoff.fromFunction(f).take(10).force.toSeq.map(_.inNanoseconds)
+      backoffs.foreach { b => assert(b == rng.nextLong(10)) }
+    }
+  }
 }

@@ -27,6 +27,9 @@ Runtime Behavior Changes
   * finagle-core: `RetryPolicy.tries` now uses jittered backoffs instead of
     having no delay. ``RB_ID=752629``
 
+  * finagle-core: `FailureAccrualFactory` uses jittered backoffs as the duration
+    to mark dead for, if `markDeadFor` is not configured. ``RB_ID=746930``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

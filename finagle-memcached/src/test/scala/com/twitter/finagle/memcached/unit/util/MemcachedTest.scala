@@ -20,7 +20,7 @@ import org.scalatest.mock.MockitoSugar
 class MemcachedTest extends FunSuite with MockitoSugar {
   test("Memcached.Client has expected stack and params") {
     val client = Memcached.client
-      .configured(FailureAccrualFactory.Param(20, () => 1.seconds))
+      .configured(FailureAccrualFactory.Param(20, () => 1.second))
       .configured(Transporter.ConnectTimeout(100.milliseconds))
       .configured(TimeoutFilter.Param(200.milliseconds))
       .configured(TimeoutFactory.Param(200.milliseconds))
@@ -33,7 +33,7 @@ class MemcachedTest extends FunSuite with MockitoSugar {
     val params = client.params
     val FailureAccrualFactory.Param.Configured(numFailures, markDeadFor) = params[FailureAccrualFactory.Param]
     assert(numFailures == 20)
-    assert(markDeadFor() == 1.seconds)
+    assert(markDeadFor.take(10).force.toSeq === (0 until 10 map { _ => 1.second }))
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
     assert(params[Memcached.param.EjectFailedHost] == Memcached.param.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))

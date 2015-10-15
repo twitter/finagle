@@ -18,7 +18,7 @@ import java.net.{SocketAddress, InetSocketAddress}
 
 object DefaultClient {
   private def defaultFailureAccrual(sr: StatsReceiver): ServiceFactoryWrapper =
-    FailureAccrualFactory.wrapper(sr, 5, () => 5.seconds, "DefaultClient", DefaultLogger, unconnected)(DefaultTimer.twitter)
+    FailureAccrualFactory.wrapper(sr, 5, FailureAccrualFactory.jitteredBackoff, "DefaultClient",  DefaultLogger, unconnected)(DefaultTimer.twitter)
 
   /** marker trait for uninitialized failure accrual */
   private[finagle] trait UninitializedFailureAccrual
