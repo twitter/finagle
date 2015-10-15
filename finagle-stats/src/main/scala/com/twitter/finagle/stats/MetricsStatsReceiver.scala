@@ -66,7 +66,7 @@ object debugLoggedStatNames extends GlobalFlag[Set[String]](
 // It's possible to override the scope separator (the default value for `MetricsStatsReceiver` is
 // `"/"`), which is used to separate scopes defined by  `StatsReceiver`. This flag might be useful
 // while migrating from Commons Stats (i.e., `CommonsStatsReceiver`), which is configured to use
-// `"_"` as scope separor.
+// `"_"` as scope separator.
 object scopeSeparator extends GlobalFlag[String](
   "/",
   "Override the scope separator."
