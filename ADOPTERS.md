@@ -35,6 +35,7 @@ URLs if possible) and [submit a pull request][1]!
   * ["How we make pins more useful"][3]
 * [Quanttus](http://www.Quanttus.com/)
 * [Qubit](http://www.qubitproducts.com/)
+* [QuizUp] (http://www.quizup.com)
 * [Rdio](https://www.rdio.com/)
   * [Thor, a Finagle-based image processor][4]
 * [Reputation.com](https://www.reputation.com/)
