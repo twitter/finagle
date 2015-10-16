@@ -1,12 +1,12 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.{Monitor, NullMonitor}
 import java.net.SocketAddress
 
-// TODO
+import com.twitter.util.{Monitor, NullMonitor}
+
+@deprecated("Use com.twitter.util.RootMonitor instead", "2015-10-15")
 object DefaultMonitor extends Monitor {
   def handle(exc: Throwable) = false
-
   override def toString = "DefaultMonitor"
 
   val get = this

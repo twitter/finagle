@@ -3,7 +3,6 @@ package com.twitter.finagle.client
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.factory.TimeoutFactory
-import com.twitter.finagle.filter.{ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.{DefaultBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.service.{
   ExpiringService, FailFastFactory, FailureAccrualFactory, TimeoutFilter}
@@ -11,10 +10,10 @@ import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsR
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{
-  DefaultLogger, DefaultMonitor, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+  DefaultLogger, DefaultTimer, LoadedReporterFactory, ReporterFactory}
 import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
-import com.twitter.util.{Duration, Monitor, Timer, Var}
-import java.net.{SocketAddress, InetSocketAddress}
+import com.twitter.util._
+import java.net.SocketAddress
 
 object DefaultClient {
   private def defaultFailureAccrual(sr: StatsReceiver): ServiceFactoryWrapper =
@@ -72,7 +71,7 @@ case class DefaultClient[Req, Rep](
   statsReceiver: StatsReceiver = ClientStatsReceiver,
   hostStatsReceiver: StatsReceiver = NullStatsReceiver,
   tracer: Tracer  = DefaultTracer,
-  monitor: Monitor = DefaultMonitor,
+  monitor: Monitor = RootMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
   loadBalancer: LoadBalancerFactory = DefaultBalancerFactory,
   newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]

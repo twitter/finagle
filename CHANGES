@@ -33,6 +33,10 @@ Runtime Behavior Changes
   * finagle-core: `FailureAccrualFactory` uses jittered backoffs as the duration
     to mark dead for, if `markDeadFor` is not configured. ``RB_ID=746930``
 
+  * finagle-core: Default value for the `c.t.f.param.Monitor` stack param has been changed from
+    `c.t.f.util.DefaultMonitor` to `c.t.u.RootMonitor`, which logs the unhanded exceptions.
+    ``RB_ID=728585``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

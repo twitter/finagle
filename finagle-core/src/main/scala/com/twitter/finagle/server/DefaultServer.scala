@@ -6,10 +6,10 @@ import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{DefaultMonitor, DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
+import com.twitter.finagle.util.{DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
 import com.twitter.finagle.{param, Stack, Stackable}
 import com.twitter.finagle.{Server, Service, ServiceFactory, ListeningServer}
-import com.twitter.util.{Closable, Duration, Future, Monitor, Timer}
+import com.twitter.util._
 import java.net.SocketAddress
 
 /**
@@ -22,7 +22,7 @@ import java.net.SocketAddress
  * @param listener The Listener from which to accept new typed
  * Transports.
  *
- * @param serveTransport The function used to bind an accepted
+ * @param serviceTransport The function used to bind an accepted
  * Transport with a Service. Requests read from the transport are
  * dispatched onto the Service, with replies written back.
  *
@@ -48,7 +48,7 @@ case class DefaultServer[Req, Rep, In, Out](
   prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] =
     (sf: ServiceFactory[Req, Rep]) => sf,
   timer: Timer = DefaultTimer.twitter,
-  monitor: Monitor = DefaultMonitor,
+  monitor: Monitor = RootMonitor,
   logger: java.util.logging.Logger = DefaultLogger,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   tracer: Tracer = DefaultTracer,

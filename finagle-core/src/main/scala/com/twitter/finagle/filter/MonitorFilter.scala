@@ -1,7 +1,6 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle._
-import com.twitter.finagle.util.{DefaultMonitor, ReporterFactory, LoadedReporterFactory}
 import com.twitter.util.{Monitor, Future}
 
 private[finagle] object MonitorFilter {

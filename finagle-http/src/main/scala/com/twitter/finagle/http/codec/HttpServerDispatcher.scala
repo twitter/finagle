@@ -7,12 +7,12 @@ import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Reader, Buf, BufReader}
+import com.twitter.io.{Reader, BufReader}
 import com.twitter.logging.Logger
-import com.twitter.util.{Future, NonFatal, Promise, Return, Throw, Throwables}
+import com.twitter.util.{Future, Promise, Throwables}
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 class HttpServerDispatcher(
   trans: Transport[Any, Any],
@@ -31,27 +31,27 @@ class HttpServerDispatcher(
     service.close()
   }
 
-  private[this] def BadRequestResponse =
+  private[this] def badRequestResponse(): Response =
     Response(Version.Http10, Status.BadRequest)
 
-  private[this] def RequestUriTooLongResponse =
+  private[this] def requestUriTooLongResponse(): Response =
     Response(Version.Http10, Status.RequestURITooLong)
 
-  private[this] def RequestHeaderFieldsTooLarge =
+  private[this] def requestHeaderFieldsTooLarge(): Response =
     Response(Version.Http10, Status.RequestHeaderFieldsTooLarge)
 
-  protected def dispatch(m: Any, eos: Promise[Unit]) = m match {
+  protected def dispatch(m: Any, eos: Promise[Unit]): Future[Response] = m match {
     case badReq: BadHttpRequest =>
       eos.setDone()
       val response = badReq.exception match {
         case ex: TooLongFrameException =>
           // this is very brittle :(
           if (ex.getMessage().startsWith("An HTTP line is larger than "))
-            RequestUriTooLongResponse
+            requestUriTooLongResponse()
           else
-            RequestHeaderFieldsTooLarge
+            requestHeaderFieldsTooLarge()
         case _ =>
-          BadRequestResponse
+          badRequestResponse()
       }
       // The connection in unusable so we close it here.
       // Note that state != Idle while inside dispatch
@@ -94,7 +94,7 @@ class HttpServerDispatcher(
       // this is likely an issue with the Netty content
       // compressors, which (should?) adjust headers regardless of
       // transfer encoding.
-      rep.headers.remove(HttpHeaders.Names.CONTENT_LENGTH)
+      rep.headers.remove(Fields.ContentLength)
 
       val p = new Promise[Unit]
       val f = trans.write(from[Response, HttpResponse](rep)) before
@@ -122,7 +122,7 @@ class HttpServerDispatcher(
     }
   }
 
-  protected def setKeepAlive(rep: Response, keepAlive: Boolean) {
+  protected def setKeepAlive(rep: Response, keepAlive: Boolean): Unit = {
     rep.version match {
       case Version.Http10 =>
         if (keepAlive) {

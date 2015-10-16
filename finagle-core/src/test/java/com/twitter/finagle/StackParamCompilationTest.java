@@ -39,6 +39,8 @@ import com.twitter.finagle.transport.Transport;
 import com.twitter.finagle.util.Rngs;
 import com.twitter.util.Duration;
 import com.twitter.util.Function0;
+import com.twitter.util.NullMonitor;
+import com.twitter.util.RootMonitor;
 
 public class StackParamCompilationTest {
   void testParams() {
@@ -48,7 +50,8 @@ public class StackParamCompilationTest {
         .configured(new Timer(com.twitter.finagle.util.DefaultTimer.twitter()).mk())
         .configured(new Logger(java.util.logging.Logger.getLogger("com.twitter.finagle")).mk())
         .configured(new Stats(com.twitter.finagle.stats.DefaultStatsReceiver.get()).mk())
-        .configured(new Monitor(com.twitter.finagle.util.DefaultMonitor.get()).mk())
+        .configured(new Monitor(RootMonitor.getInstance()).mk())
+        .configured(new Monitor(NullMonitor.getInstance()).mk())
         .configured(new Reporter(com.twitter.finagle.util.LoadedReporterFactory.get()).mk())
         .configured(new Tracer(com.twitter.finagle.tracing.DefaultTracer.get()).mk())
         .configured(new FactoryToService.Enabled(true).mk())
