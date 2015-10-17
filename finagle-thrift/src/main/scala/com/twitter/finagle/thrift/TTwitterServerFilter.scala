@@ -1,9 +1,10 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.finagle.{Service, SimpleFilter, Dtab}
+import com.twitter.finagle.{Dtab, Service, SimpleFilter}
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.apache.thrift.protocol.{TMessage, TMessageType, TProtocolFactory}
@@ -59,11 +60,10 @@ private[finagle] class TTwitterServerFilter(
               env, Buf.ByteArray.Owned(c.getKey()), Buf.ByteArray.Owned(c.getValue()))
           }
         }
-
-        Trace.recordRpc({
-          val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
-          msg.name
-        })
+        val msg = new InputBuffer(request_, protocolFactory)().readMessageBegin()
+        Trace.recordRpc(msg.name)
+        val rpcStatsReciver = ServerStatsReceiver.scope(serviceName).scope(msg.name)
+        rpcStatsReciver.counter("requests").incr()
 
         // If `header.client_id` field is non-null, then allow it to take
         // precedence over the id provided by ClientIdContext.
@@ -71,14 +71,15 @@ private[finagle] class TTwitterServerFilter(
           Trace.recordBinary("srv/thrift/clientId", ClientId.current.getOrElse("None"))
 
           Contexts.broadcast.let(env) {
-            service(request_) map {
+            service(request_).map {
               case response if response.isEmpty => response
               case response =>
                 val responseHeader = new thrift.ResponseHeader
                 ByteArrays.concat(
                   OutputBuffer.messageToArray(responseHeader, protocolFactory),
                   response)
-            }
+            }.onSuccess(_ => rpcStatsReciver.counter("success").incr())
+             .onFailure(e => rpcStatsReciver.counter("failures").incr())
           }
         }
       }
@@ -100,7 +101,12 @@ private[finagle] class TTwitterServerFilter(
         // request from client without tracing support
         Trace.recordRpc(msg.name)
         Trace.recordBinary("srv/thrift/ttwitter", false)
+        val rpcStatsReciver = ServerStatsReceiver.scope(serviceName).scope(msg.name)
+
+        rpcStatsReciver.counter("requests").incr()
         service(request)
+            .onSuccess(_ => rpcStatsReciver.counter("success").incr())
+            .onFailure(e => rpcStatsReciver.counter("failures").incr())
       }
     }
   }
