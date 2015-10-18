@@ -168,7 +168,7 @@ The following retries a request infinitely should it fail with a
 
 	def fetchUrl(url: String): Future[HttpResponse]
 	
-	def fetchUrlWithRetry(url: String) = 
+	def fetchUrlWithRetry(url: String): Future[HttpResponse] = 
 	  fetchUrl(url).rescue {
 	    case exc: TimeoutException => fetchUrlWithRetry(url)
 	  }
