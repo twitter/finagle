@@ -52,6 +52,8 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    */
   def andThen[Req2, Rep2](next: Filter[ReqOut, RepIn, Req2, Rep2]): Filter[ReqIn, RepOut, Req2, Rep2] =
     if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
+    // Rewrites Filter composition via `andThen` with AndThen's composition
+    // which is just function composition.
     else AndThen(service => andThen(next.andThen(service)))
 
   /**
@@ -109,15 +111,17 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
 
 object Filter {
+  // `AndThen` is a function that represents the prefix of the filter chain to
+  // transform a terminal Service received as an argument.
   private case class AndThen[ReqIn, RepOut, ReqOut, RepIn](
-      build: Service[ReqOut, RepIn] => Service[ReqIn, RepOut]
-  )
+      build: Service[ReqOut, RepIn] => Service[ReqIn, RepOut])
     extends Filter[ReqIn, RepOut, ReqOut, RepIn]
   {
     override def andThen[Req2, Rep2](
       next: Filter[ReqOut, RepIn, Req2, Rep2]
     ): Filter[ReqIn, RepOut, Req2, Rep2] =
-      AndThen(service => build(next.andThen(service)))
+      if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
+      else AndThen(service => build(next.andThen(service)))
 
     override def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] =
       build(service)
@@ -141,15 +145,13 @@ object Filter {
 
   private case object Identity extends SimpleFilter[Any, Nothing] {
     override def andThen[Req2, Rep2](
-      next: Filter[Any, Nothing, Req2, Rep2]
-    ): Filter[Any, Nothing, Req2, Rep2] = next
+      next: Filter[Any, Nothing, Req2, Rep2]): Filter[Any, Nothing, Req2, Rep2] = next
 
     override def andThen(service: Service[Any, Nothing]): Service[Any, Nothing] = service
 
     override def andThen(factory: ServiceFactory[Any, Nothing]): ServiceFactory[Any, Nothing] = factory
 
-    def apply(request: Any, service: Service[Any, Nothing]): Future[Nothing] =
-      service(request)
+    def apply(request: Any, service: Service[Any, Nothing]): Future[Nothing] = service(request)
   }
 
   implicit def canStackFromSvc[Req, Rep]
