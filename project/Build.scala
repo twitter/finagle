@@ -474,7 +474,6 @@ object Finagle extends Build {
     ).settings(
       name := "finagle-exp",
       libraryDependencies ++= Seq(
-        "com.google.caliper" % "caliper" % "0.5-rc1",
         "com.twitter" % "jsr166e" % "1.0.0"
       )
     ).dependsOn(finagleCore, finagleThrift, finagleTest % "test")
@@ -527,7 +526,6 @@ object Finagle extends Build {
     name := "finagle-benchmark",
     libraryDependencies ++= Seq(
       util("codec"),
-      "com.google.caliper" % "caliper" % "0.5-rc1",
       "com.twitter.common" % "metrics-data-sample" % "0.0.1",
       "org.apache.curator" % "curator-test" % "2.8.0",
       "org.apache.curator" % "curator-framework" % "2.8.0"

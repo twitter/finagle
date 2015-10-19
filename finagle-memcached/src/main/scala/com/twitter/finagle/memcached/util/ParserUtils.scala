@@ -16,9 +16,6 @@ object ParserUtils {
   /**
    * Returns true if every readable byte in the ChannelBuffer is a digit,
    * false otherwise.
-   *
-   * See caliper test in finagle-benchmark, about 15x faster and does 0 allocations
-   * versus using ChannelBufferUtils.matches(DIGITS)
    */
   def isDigits(cb: ChannelBuffer): Boolean = {
     val len = cb.readableBytes()
