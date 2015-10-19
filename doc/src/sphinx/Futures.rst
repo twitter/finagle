@@ -166,9 +166,9 @@ The following retries a request infinitely should it fail with a
 
 .. code-block:: scala
 
-	def fetchUrl(url: String): Future[HttpResponse]
+	def fetchUrl(url: String): Future[http.Response]
 	
-	def fetchUrlWithRetry(url: String): Future[HttpResponse] = 
+	def fetchUrlWithRetry(url: String): Future[http.Response] = 
 	  fetchUrl(url).rescue {
 	    case exc: TimeoutException => fetchUrlWithRetry(url)
 	  }
