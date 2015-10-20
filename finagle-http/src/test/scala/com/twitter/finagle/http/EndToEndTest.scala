@@ -562,4 +562,15 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     assert(Await.result(client(tooBig)).status == Status.RequestEntityTooLarge)
     assert(Await.result(client(justRight)).status == Status.Ok)
   }
+
+  test("codec should require a message size be less than 2Gb") {
+    intercept[IllegalArgumentException](Http().maxRequestSize(2.gigabytes))
+    intercept[IllegalArgumentException](Http(_maxResponseSize = 100.gigabytes))
+    intercept[IllegalArgumentException] {
+      com.twitter.finagle.Http.server.withMaxRequestSize(2049.megabytes)
+    }
+    intercept[IllegalArgumentException] {
+      com.twitter.finagle.Http.client.withMaxResponseSize(3000.megabytes)
+    }
+  }
 }

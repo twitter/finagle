@@ -41,12 +41,18 @@ object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
   object param {
-    case class MaxRequestSize(size: StorageUnit)
+    case class MaxRequestSize(size: StorageUnit) {
+      require(size < 2.gigabytes,
+        s"MaxRequestSize should be less than 2 Gb, but was $size")
+    }
     implicit object MaxRequestSize extends Stack.Param[MaxRequestSize] {
       val default = MaxRequestSize(5.megabytes)
     }
 
-    case class MaxResponseSize(size: StorageUnit)
+    case class MaxResponseSize(size: StorageUnit) {
+      require(size < 2.gigabytes,
+        s"MaxResponseSize should be less than 2 Gb, but was $size")
+    }
     implicit object MaxResponseSize extends Stack.Param[MaxResponseSize] {
       val default = MaxResponseSize(5.megabytes)
     }

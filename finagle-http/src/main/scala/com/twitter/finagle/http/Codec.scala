@@ -48,6 +48,15 @@ class SafeHttpServerCodec(
  * compress text-like content-types with the default compression level (6). Otherwise, use
  * [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]] for all
  * content-types with specified compression level.
+ *
+ * @param _maxRequestSize The maximum size of the inbound request an HTTP server constructed with
+ * this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
+ * `Int.MaxValue` bytes). Use streaming/chunked requests to handle larger messages.
+ *
+ * @param _maxResponseSize The maximum size of the inbound response an HTTP client constructed with
+ * this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
+ * `Int.MaxValue` bytes). Use streaming/chunked requests to handle larger messages.
+ *
  * @param _streaming Streaming allows applications to work with HTTP messages
  * that have large (or infinite) content bodies. When this flag is set to
  * `true`, the message content is available through a [[com.twitter.io.Reader]],
@@ -66,6 +75,13 @@ case class Http(
     _maxHeaderSize: StorageUnit = 8192.bytes,
     _streaming: Boolean = false
 ) extends CodecFactory[Request, Response] {
+
+  require(_maxRequestSize < 2.gigabytes,
+    s"maxRequestSize should be less than 2 Gb, but was ${_maxRequestSize}")
+
+  require(_maxResponseSize < 2.gigabytes,
+    s"maxResponseSize should be less than 2 Gb, but was ${_maxResponseSize}")
+
   def compressionLevel(level: Int) = copy(_compressionLevel = level)
   def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
