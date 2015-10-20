@@ -3,7 +3,6 @@ package com.twitter.finagle
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.util.Showable
-import com.twitter.scrooge.{ThriftMethod, ThriftStruct}
 import com.twitter.util.NonFatal
 import java.lang.reflect.{Constructor, Method}
 import java.net.SocketAddress
@@ -145,7 +144,8 @@ private[twitter] object ThriftUtil {
     impl: AnyRef,
     protocolFactory: TProtocolFactory,
     stats: StatsReceiver,
-    maxThriftBufferSize: Int
+    maxThriftBufferSize: Int,
+    label: String
   ): BinaryService = {
     def tryThriftFinagleService(iface: Class[_]): Option[BinaryService] =
       for {
@@ -155,14 +155,27 @@ private[twitter] object ThriftUtil {
       } yield cons.newInstance(impl, protocolFactory)
 
     def tryScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
-      for {
+      (for {
         baseName   <- findRootWithSuffix(iface.getName, "$FutureIface") orElse
           Some(iface.getName)
         serviceCls <- findClass[BinaryService](baseName + "$FinagleService") orElse
           findClass[BinaryService](baseName + "$FinagledService")
         baseClass  <- findClass1(baseName)
-        cons       <- findConstructor(serviceCls, baseClass, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE)
-      } yield cons.newInstance(impl, protocolFactory, stats, Int.box(maxThriftBufferSize))
+      } yield {
+        // The new constructor takes one more 'label' paramater than the old one, so we first try find
+        // the new constructor, it it doesn't not exist, fallback to the one without 'label' parameter.
+        val oldParameters = Seq(baseClass, classOf[TProtocolFactory], classOf[StatsReceiver], Integer.TYPE)
+        val newParameters = oldParameters :+ classOf[String]
+        val oldArgs = Seq(impl, protocolFactory, stats, Int.box(maxThriftBufferSize))
+        val newArgs = oldArgs :+ label
+        def newConsCall: Option[BinaryService] = findConstructor(serviceCls, newParameters: _*).map(
+          cons => cons.newInstance(newArgs: _*)
+        )
+        def oldConsCall: Option[BinaryService] = findConstructor(serviceCls, oldParameters: _*).map(
+          cons => cons.newInstance(oldArgs: _*)
+        )
+        newConsCall.orElse(oldConsCall)
+      }).flatten
 
     // The legacy $FinagleService that doesn't take stats.
     def tryLegacyScroogeFinagleService(iface: Class[_]): Option[BinaryService] =
@@ -198,8 +211,8 @@ private[twitter] object ThriftUtil {
    * interface using whichever Thrift code-generation toolchain is available.
    * (Legacy version for backward-compatibility).
    */
-  def serverFromIface(impl: AnyRef, protocolFactory: TProtocolFactory): BinaryService = {
-    serverFromIface(impl, protocolFactory, LoadedStatsReceiver, Thrift.maxThriftBufferSize)
+  def serverFromIface(impl: AnyRef, protocolFactory: TProtocolFactory, serviceName: String): BinaryService = {
+    serverFromIface(impl, protocolFactory, LoadedStatsReceiver, Thrift.maxThriftBufferSize, serviceName)
   }
 }
 
@@ -435,11 +448,11 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
    * $serveIface
    */
   def serveIface(addr: String, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize))
+    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
 
   /**
    * $serveIface
    */
   def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
-    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize))
+    serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
 }
