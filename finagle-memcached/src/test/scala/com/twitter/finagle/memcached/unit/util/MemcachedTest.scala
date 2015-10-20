@@ -1,23 +1,27 @@
-package com.twitter.finagle.memcached.unit
+package com.twitter.finagle.memcached.unit.util
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.Memcached
-import com.twitter.finagle.memcached._
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{Name, Stack, WriteException}
+import com.twitter.finagle.WriteException
 import com.twitter.util.{Time, Await}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
-class MemcachedTest extends FunSuite with MockitoSugar {
+class MemcachedTest extends FunSuite
+  with MockitoSugar
+  with Eventually
+  with IntegrationPatience
+{
   test("Memcached.Client has expected stack and params") {
     val client = Memcached.client
       .configured(FailureAccrualFactory.Param(20, () => 1.second))
@@ -44,6 +48,11 @@ class MemcachedTest extends FunSuite with MockitoSugar {
     val client = Memcached.client
       .configured(Stats(st))
       .newRichClient("memcache=127.0.0.1:12345")
+
+    // wait until we have at least 1 node, or risk getting a ShardNotAvailable exception
+    eventually {
+      assert(st.gauges(Seq("live_nodes"))() >= 1)
+    }
 
     val numberRequests = 10
     Time.withCurrentTimeFrozen { _ =>

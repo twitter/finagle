@@ -135,6 +135,7 @@ class CoordinatorTest extends FunSuite with LocalConductors with MockitoSugar {
     assert(Coordinator.parNewCMS(memories, garbages).isDefined)
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("Coordinator sleeps until discount remaining") {
     val ctx = new Ctx{}
     import ctx._

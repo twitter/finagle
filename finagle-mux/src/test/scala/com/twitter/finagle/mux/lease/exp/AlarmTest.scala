@@ -71,6 +71,7 @@ class AlarmTest extends FunSuite with LocalConductors {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("DurationAlarm should sleep until it's over") {
     val conductor = new Conductor
     import conductor._
