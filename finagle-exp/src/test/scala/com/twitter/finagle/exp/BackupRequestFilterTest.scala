@@ -2,7 +2,7 @@ package com.twitter.finagle.exp
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{Service, MockTimer, BackupRequestLost}
+import com.twitter.finagle.{Service, BackupRequestLost}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Matchers._

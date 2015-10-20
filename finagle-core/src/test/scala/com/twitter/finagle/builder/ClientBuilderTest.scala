@@ -2,9 +2,10 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
-import com.twitter.finagle.service.FailureAccrualFactory
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.service.{RetryPolicy, FailureAccrualFactory}
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
+import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{verify, when}
 import org.mockito.Matchers
@@ -186,31 +187,46 @@ class ClientBuilderTest extends FunSuite
     }
   }
 
-  /* TODO: Stopwatches eliminated mocking.
-    "measure codec connection preparation latency" in {
-      Time.withCurrentTimeFrozen { timeControl =>
-        val m = new MockChannel {
-          codec.prepareConnFactory(any) answers { s =>
-            val factory = s.asInstanceOf[ServiceFactory[String, String]]
-            // Create a fake ServiceFactory that take time to return a dummy Service
-            new ServiceFactoryProxy[String, String](factory) {
-              override def apply(con: ClientConnection) = {
-                timeControl.advance(500.milliseconds)
-                Future.value(new Service[String, String] {
-                  def apply(req: String) = Future.value(req)
-                })
-              }
-            }
-          }
-        }
-        val service = m.clientBuilder.build()
-        timeControl.advance(100.milliseconds)
-        service("blabla")
+  private class SpecificException extends RuntimeException
 
-        val key = Seq(m.name, "codec_connection_preparation_latency_ms")
-        val stat = m.statsReceiver.stats.get(key).get
-        stat.head must be_==(500.0f)
+  test("Retries have locals propagated") {
+
+    new ClientBuilderHelper {
+      val specificExceptionRetry: PartialFunction[Try[Nothing], Boolean] = {
+        case Throw(e: SpecificException) => true
       }
+      val builder = ClientBuilder()
+        .name("test")
+        .hostConnectionLimit(1)
+        .stack(m.client)
+        .daemon(true) // don't create an exit guard
+        .hosts(Seq(m.clientAddress))
+        .retryPolicy(RetryPolicy.tries(2, specificExceptionRetry))
+        .reportTo(NullStatsReceiver)
+      val client = builder.build()
+
+      val aLocal = new Local[Int]
+      val first = new AtomicBoolean(false)
+      val localOnRetry = new AtomicInteger(0)
+
+      // 1st call fails and triggers a retry which
+      // captures the value of the local
+      val service = Service.mk[String, String] { str: String =>
+        if (first.compareAndSet(false, true)) {
+          Future.exception(new SpecificException())
+        } else {
+          localOnRetry.set(aLocal().getOrElse(-1))
+          Future(str)
+        }
+      }
+      preparedServicePromise() = Return(service)
+
+      aLocal.let(999) {
+        val rep = client("hi")
+        assert("hi" == Await.result(rep, Duration.fromSeconds(5)))
+      }
+      assert(999 == localOnRetry.get)
     }
-*/
+  }
+
 }

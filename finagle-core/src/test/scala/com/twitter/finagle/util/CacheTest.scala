@@ -9,7 +9,6 @@ import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.{times, verify}
 import org.mockito.Mockito
 import org.mockito.Matchers._
-import com.twitter.finagle.MockTimer
 
 @RunWith(classOf[JUnitRunner])
 class CacheTest extends FunSuite with MockitoSugar {

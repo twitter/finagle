@@ -2,9 +2,9 @@ package com.twitter.finagle.group
 
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, MockTimer}
+import com.twitter.finagle.Group
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.Time
+import com.twitter.util.{MockTimer, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

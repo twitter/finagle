@@ -1,7 +1,6 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.MockTimer
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.io.Buf

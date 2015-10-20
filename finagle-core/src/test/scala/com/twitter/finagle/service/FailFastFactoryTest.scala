@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.{FailedFastException, MockTimer, Service, ServiceFactory, SourcedException, Status}
+import com.twitter.finagle.{FailedFastException, Service, ServiceFactory, SourcedException, Status}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith

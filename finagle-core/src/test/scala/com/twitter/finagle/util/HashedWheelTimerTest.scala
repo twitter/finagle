@@ -16,7 +16,7 @@ import org.mockito.stubbing.Answer
 import org.mockito.invocation.InvocationOnMock
 
 @RunWith(classOf[JUnitRunner])
-class TimerTest extends FunSuite with MockitoSugar {
+class HashedWheelTimerTest extends FunSuite with MockitoSugar {
   test("HashedWheelTimer should Support cancelling recurring tasks") {
     val timer = mock[nu.Timer]
     val nstop = new AtomicInteger(0)
@@ -46,6 +46,7 @@ class TimerTest extends FunSuite with MockitoSugar {
     taskCaptor.getValue.run(firstTimeout)
 
     verify(timer, atMost(1)).newTimeout(any[org.jboss.netty.util.TimerTask], any[Long], any[java.util.concurrent.TimeUnit])
-
   }
+
+  // ko todo: add test for locals
 }

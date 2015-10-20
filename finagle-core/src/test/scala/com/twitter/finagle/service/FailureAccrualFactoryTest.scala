@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
-import com.twitter.finagle.{Status, MockTimer, ServiceFactory, Service, ServiceFactoryWrapper, Stack}
+import com.twitter.finagle.{Status, ServiceFactory, Service, ServiceFactoryWrapper, Stack}
 import com.twitter.finagle.param
 import com.twitter.util._
 import java.util.concurrent.TimeUnit

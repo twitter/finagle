@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.client.LatencyCompensation.Compensator
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.nilStack
-import com.twitter.finagle.{MockTimer => _, _}
+import com.twitter.finagle._
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -61,7 +61,7 @@ class LatencyCompensationTest
 
   class Ctx {
 
-    val timer = new MockTimer
+    val timer = new MockTimer()
 
     class TestPromise[T] extends Promise[T] {
       @volatile var interrupted: Option[Throwable] = None

@@ -1,10 +1,9 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.MockTimer
 import com.twitter.finagle.stats.{Counter, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.{Service, Status}
-import com.twitter.util.{Future, Time, Promise, Return, Duration, Timer}
+import com.twitter.util.{Future, Time, MockTimer, Promise, Return, Duration, Timer}
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}

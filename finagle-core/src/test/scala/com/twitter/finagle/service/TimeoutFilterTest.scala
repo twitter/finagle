@@ -2,13 +2,12 @@ package com.twitter.finagle.service
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
-import com.twitter.finagle.Deadline
+import com.twitter.finagle.{Deadline, IndividualRequestTimeoutException, Service}
 import com.twitter.finagle.context.Contexts
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
-import com.twitter.finagle.{IndividualRequestTimeoutException, Service, MockTimer}
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
@@ -79,7 +78,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
 
     Time.withCurrentTimeFrozen { tc =>
       assert(Await.result(timeoutService()) == Some(Deadline(Time.now, Time.now+1.second)))
-      
+
       // Adjust existing ones.
       val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+200.milliseconds)) {
         timeoutService()
@@ -94,7 +93,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
 
     Time.withCurrentTimeFrozen { tc =>
       assert(Await.result(timeoutService()) == Some(Deadline(Time.now, Time.Top)))
-      
+
       // Adjust existing ones
       val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+1.second)) {
         timeoutService()

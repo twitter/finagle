@@ -2,7 +2,7 @@ package com.twitter.finagle.param
 
 import com.twitter.finagle.service.StatsFilter
 import com.twitter.finagle.{stats, tracing, util, Stack}
-import com.twitter.util.RootMonitor
+import com.twitter.util.{JavaTimer, RootMonitor}
 
 /**
  * A class eligible for configuring a label used to identify finagle
@@ -32,6 +32,9 @@ object ProtocolLibrary {
  * A class eligible for configuring a [[com.twitter.util.Timer]] used
  * throughout finagle clients and servers.
  *
+ * @param timer it is a requirement that it propagates [[com.twitter.util.Local Locals]]
+ *  from scheduling time to execution time.
+ *
  * @see [[HighResTimer]] for a configuration that needs a more
  *   fine-grained timer as this is typically implemented via a
  *   "hashed wheel timer" which is optimized for approximated
@@ -49,6 +52,9 @@ object Timer {
  * A class eligible for configuring a high resolution [[com.twitter.util.Timer]]
  * such that tasks are run tighter to their schedule.
  *
+ * @param timer it is a requirement that it propagates [[com.twitter.util.Local Locals]]
+ *  from scheduling time to execution time.
+ *
  * @see [[Timer]] for a configuration that is appropriate for
  *   tasks that do not need fine-grained scheduling.
  *
@@ -65,11 +71,10 @@ object HighResTimer {
    *
    * It is a shared resource and as such, `stop` is ignored.
    */
-  val Default: com.twitter.util.Timer = util.DefaultTimer.twitter
-    // todo: make JavaTimer the default instance again  CSL-2208
-    // new JavaTimer(true, Some("HighResTimer")) {
-    //  override def stop(): Unit = ()
-    // }
+  val Default: com.twitter.util.Timer =
+    new JavaTimer(true, Some("HighResTimer")) {
+      override def stop(): Unit = ()
+    }
 
   implicit val param = Stack.Param(HighResTimer(Default))
 }

@@ -9,23 +9,27 @@ import org.jboss.netty.{util => netty}
 
 // Wrapper around Netty timers.
 private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
-  def schedule(when: Time)(f: => Unit): TimerTask = {
+  protected def scheduleOnce(when: Time)(f: => Unit): TimerTask = {
     val timeout = underlying.newTimeout(new netty.TimerTask {
-      val saved = Local.save()
-      def run(to: netty.Timeout) {
-        if (!to.isCancelled) runInContext(saved, f)
+      def run(to: netty.Timeout): Unit = {
+        if (!to.isCancelled)
+          f
       }
     }, math.max(0, (when - Time.now).inMilliseconds), TimeUnit.MILLISECONDS)
     toTimerTask(timeout)
   }
 
-  def schedule(when: Time, period: Duration)(f: => Unit): TimerTask = new TimerTask {
-    val saved = Local.save()
+  protected def schedulePeriodically(
+    when: Time,
+    period: Duration
+  )(
+    f: => Unit
+  ): TimerTask = new TimerTask {
     var isCancelled = false
     var ref: TimerTask = schedule(when) { loop() }
 
-    def loop() {
-      runInContext(saved, f)
+    def loop(): Unit = {
+      f
       synchronized {
         if (!isCancelled) ref = schedule(period.fromNow) { loop() }
       }
@@ -42,7 +46,7 @@ private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
   def stop(): Unit = underlying.stop()
 
   private[this] def toTimerTask(task: netty.Timeout) = new TimerTask {
-    def cancel() { task.cancel() }
+    def cancel(): Unit = task.cancel()
   }
 
   private[this] def runInContext(saved: Local.Context, f: => Unit): Unit = {
@@ -54,7 +58,7 @@ private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
 /**
  * A HashedWheelTimer that uses [[org.jboss.netty.util.HashedWheelTimer]] under
  * the hood. Prefer using a single instance per application, the default
- * instance is [[Default]].
+ * instance is [[HashedWheelTimer.Default]].
  */
 object HashedWheelTimer {
   /**

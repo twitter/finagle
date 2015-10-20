@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{Stat, StatsReceiver}
-import com.twitter.finagle.{MockTimer, Service, WriteException}
+import com.twitter.finagle.{Service, WriteException}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{never, times, verify, when}
