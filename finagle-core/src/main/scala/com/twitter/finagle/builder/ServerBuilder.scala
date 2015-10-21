@@ -254,7 +254,15 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
       }
 
-      Server()
+      val proto = params[ProtocolLibrary]
+      val serverParams =
+        if (proto != ProtocolLibrary.param.default) ps
+        else ps + ProtocolLibrary(codec.protocolLibraryName)
+
+      Server(
+        stack = newStack,
+        params = serverParams
+      )
     })
 
   /**

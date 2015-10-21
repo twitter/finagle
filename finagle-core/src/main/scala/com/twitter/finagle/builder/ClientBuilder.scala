@@ -1130,7 +1130,17 @@ private case class CodecClient[Req, Rep](
         codec.newClientDispatcher(transport, params)
     }
 
-    Client().newClient(dest, label)
+    val proto = params[ProtocolLibrary]
+
+    // don't override a configured protocol value
+    val clientParams =
+      if (proto != ProtocolLibrary.param.default) params
+      else params + ProtocolLibrary(codec.protocolLibraryName)
+
+    Client(
+      stack = clientStack,
+      params = clientParams
+    ).newClient(dest, label)
   }
 
   // not called

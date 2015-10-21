@@ -2,9 +2,11 @@ package com.twitter.finagle.builder
 
 import com.twitter.finagle._
 import com.twitter.finagle.integration.IntegrationBase
+import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.service.{RetryPolicy, FailureAccrualFactory}
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
+import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
 import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{verify, when}
@@ -53,6 +55,82 @@ class ClientBuilderTest extends FunSuite
       assert(requestFuture.poll === Some(Return("321")))
     }
   }
+
+
+  def verifyProtocolRegistry(name: String, expected: String)(build: => Service[String, String]) = {
+    test(name + " registers protocol library") {
+      val simple = new SimpleRegistry()
+      GlobalRegistry.withRegistry(simple) {
+        build
+
+        val entries = GlobalRegistry.get.toSet
+        val unspecified = entries.count(_.key.startsWith(Seq("client", "not-specified")))
+        assert(unspecified == 0, "saw registry keys with 'not-specified' protocol")
+        val specified = entries.count(_.key.startsWith(Seq("client", expected)))
+        assert(specified > 0, "did not see expected protocol registry keys")
+      }
+    }
+  }
+
+  verifyProtocolRegistry("#codec(Codec)", expected = "fancy") {
+    val ctx = new ClientBuilderHelper {}
+    when(ctx.m.codec.protocolLibraryName).thenReturn("fancy")
+
+    ClientBuilder()
+      .name("test")
+      .hostConnectionLimit(1)
+      .codec(ctx.m.codec)
+      .hosts("")
+      .build()
+  }
+
+  verifyProtocolRegistry("#codec(CodecFactory)", expected = "fancy") {
+    val ctx = new ClientBuilderHelper {}
+    val cf = new CodecFactory[String, String] {
+      def client: Client = (_: ClientCodecConfig) => ctx.m.codec
+      def server: Server = ???
+      override def protocolLibraryName = "fancy"
+    }
+
+    ClientBuilder()
+      .name("test")
+      .hostConnectionLimit(1)
+      .codec(cf)
+      .hosts("")
+      .build()
+  }
+
+  verifyProtocolRegistry("#codec(CodecFactory#Client)", expected = "fancy") {
+    val ctx = new ClientBuilderHelper {}
+    when(ctx.m.codec.protocolLibraryName).thenReturn("fancy")
+
+    val cfClient: CodecFactory[String, String]#Client =
+      { (_: ClientCodecConfig) => ctx.m.codec }
+
+    ClientBuilder()
+      .name("test")
+      .hostConnectionLimit(1)
+      .codec(cfClient)
+      .hosts("")
+      .build()
+  }
+
+  verifyProtocolRegistry("configured protocol", expected = "extra fancy") {
+    val ctx = new ClientBuilderHelper {}
+    when(ctx.m.codec.protocolLibraryName).thenReturn("fancy")
+
+    val cfClient: CodecFactory[String, String]#Client =
+      { (_: ClientCodecConfig) => ctx.m.codec }
+
+    val stk = ClientBuilder.stackClientOfCodec(cfClient)
+    ClientBuilder()
+      .name("test")
+      .hostConnectionLimit(1)
+      .hosts("")
+      .stack(stk.configured(ProtocolLibrary("extra fancy")))
+      .build()
+  }
+
 
   test("ClientBuilder should close properly") {
     new ClientBuilderHelper {
