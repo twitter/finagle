@@ -185,11 +185,16 @@ object loadServiceIgnoredPaths extends GlobalFlag[Seq[String]](
  * A deny list of implementations to ignore. Keys are the fully qualified class names.
  * Any other implementations that are found via `LoadService.apply` are eligible to be used.
  *
- * As an example, here's how to filter out `OstrichStatsReceiver` and `CommonsStatsReceiver`:
+ * As an example, here's how to filter out `OstrichStatsReceiver`, `OstrichExporter` and 
+ * `CommonsStatsReceiver` using a global flag:
  *
  * {{{
- * -com.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.CommonsStatsReceiver
+ * -Dcom.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.OstrichExporter,com.twitter.finagle.stats.CommonsStatsReceiver
  * }}}
+ *
+ * We need to pass the arguments as Java property values instead of as Java application
+ * arguments (regular TwitterServer flags) because [[LoadService]] may be loaded before
+ * application arguments are parsed.
  */
 object loadServiceDenied extends GlobalFlag[Set[String]](
     Set.empty,
