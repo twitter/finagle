@@ -11,7 +11,7 @@ import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.{text, _}
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
-import com.twitter.finagle.service.{Backoff, FailedService, FailureAccrualFactory}
+import com.twitter.finagle.service.{FailedService, FailureAccrualFactory}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
 import com.twitter.io.{Buf, Charsets}
@@ -725,7 +725,7 @@ private[finagle] object KetamaFailureAccrualFactory {
 private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
     numFailures: Int,
-    markDeadFor: Stream[Duration],
+    markDeadFor: () => Duration,
     timer: Timer,
     key: KetamaClientKey,
     healthBroker: Broker[NodeHealth],
@@ -738,26 +738,6 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     timer,
     statsReceiver)
 {
-  import FailureAccrualFactory._
-  def this(
-    underlying: ServiceFactory[Req, Rep],
-    numFailures: Int,
-    markDeadFor: () => Duration,
-    timer: Timer,
-    key: KetamaClientKey,
-    healthBroker: Broker[NodeHealth],
-    ejectFailedHost: Boolean,
-    statsReceiver: StatsReceiver
-  ) = this(
-    underlying,
-    numFailures,
-    Backoff.fromFunction(markDeadFor),
-    timer,
-    key,
-    healthBroker,
-    ejectFailedHost,
-    statsReceiver)
-
   def this(
     underlying: ServiceFactory[Req, Rep],
     numFailures: Int,
@@ -769,7 +749,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
   ) = this(
     underlying,
     numFailures,
-    Backoff.const(markDeadFor),
+    () => markDeadFor,
     timer,
     key,
     healthBroker,
@@ -787,7 +767,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
   ) = this(
     underlying,
     numFailures,
-    Backoff.fromFunction(markDeadFor),
+    markDeadFor,
     timer,
     key,
     healthBroker,
@@ -815,14 +795,14 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     if (ejectFailedHost) healthBroker ! NodeMarkedDead(key)
   }
 
-  override def didSucceed(): Unit = {
-      super.didSucceed()
-      if (ejectFailedHost) healthBroker ! NodeRevived(key)
-    }
+  override def revive() {
+    super.revive()
+    if (ejectFailedHost) healthBroker ! NodeRevived(key)
+  }
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
     getState match {
-      case Alive(_, _) | ProbeOpen(_)  => super.apply(conn)
+      case FailureAccrualFactory.Alive => super.apply(conn)
       // One finagle client presents one node on the Ketama ring,
       // the load balancer has one cache client. When the client
       // is in a busy state, continuing to dispatch requests is likely
