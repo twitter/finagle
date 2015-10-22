@@ -2,7 +2,7 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.{TestParam, TestParam2}
+import com.twitter.finagle.util.{StackRegistry, TestParam, TestParam2}
 import com.twitter.util.{Var, Return, Activity, Future, Await}
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 import com.twitter.conversions.time.intToTimeableNumber
@@ -196,5 +196,27 @@ class ClientRegistryTest extends FunSuite
 
       assert(GlobalRegistry.get.isEmpty)
     }
+  }
+
+  test("RegistryEntryLifecycle module cleans up duplicates after service closes") {
+    val stk = newStack()
+    val params = Stack.Params.empty + param.Label("foo")
+
+    ClientRegistry.register("first", stk, params)
+    ClientRegistry.register("second", stk, params)
+    val factory = (RegistryEntryLifecycle.module[Int, Int] +: stk).make(params)
+
+    assert(ClientRegistry.registeredDuplicates.size == 2)
+    assert(ClientRegistry.registeredDuplicates(0).name == "foo")
+    assert(ClientRegistry.registeredDuplicates(0).addr == "second")
+    assert(ClientRegistry.registeredDuplicates(1).name == "foo")
+    assert(ClientRegistry.registeredDuplicates(1).addr == "/$/fail")
+
+
+    factory.close()
+
+    assert(ClientRegistry.registeredDuplicates.size == 1)
+    assert(ClientRegistry.registeredDuplicates(0).name == "foo")
+    assert(ClientRegistry.registeredDuplicates(0).addr == "/$/fail")
   }
 }

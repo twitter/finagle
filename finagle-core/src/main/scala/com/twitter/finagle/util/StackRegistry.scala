@@ -57,13 +57,14 @@ trait StackRegistry {
   private[this] val numEntries = new AtomicInteger(0)
 
   // thread-safe updates via synchronization on `this`
-  private[this] var duplicates = Vector.empty[Entry]
+  private[this] var duplicates: Map[String, Seq[Entry]] =
+    Map.empty[String, Seq[Entry]]
 
   /**
    * Returns any registered [[Entry Entries]] that had the same [[Label]].
    */
   def registeredDuplicates: Seq[Entry] = synchronized {
-    duplicates
+    duplicates.values.flatten.toSeq
   }
 
   /** Registers an `addr` and `stk`. */
@@ -71,8 +72,13 @@ trait StackRegistry {
     val entry = Entry(addr, stk, params)
     addEntries(entry)
     synchronized {
-      if (registry.contains(entry.name))
-        duplicates :+= entry
+      if (registry.contains(entry.name)) {
+        val updated = duplicates.get(entry.name) match {
+          case Some(values) => values :+ entry
+          case None => Seq(entry)
+        }
+        duplicates += entry.name -> updated
+      }
       registry += entry.name -> entry
     }
   }
@@ -80,7 +86,20 @@ trait StackRegistry {
   /** Unregisters an `addr` and `stk`. */
   def unregister(addr: String, stk: Stack[_], params: Stack.Params): Unit = {
     val entry = Entry(addr, stk, params)
-    synchronized { registry -= entry.name }
+    synchronized {
+      duplicates.get(entry.name) match {
+        case Some(dups) =>
+          if (dups.size == 1)
+            duplicates -= entry.name
+          else
+            // We may not remove the exact same entry, but since they are duplicates,
+            // it does not matter.
+            duplicates += entry.name -> dups.drop(1)
+        case None =>
+          // only remove when there is no more duplications
+          registry -= entry.name
+      }
+    }
     removeEntries(entry)
   }
 
@@ -114,5 +133,8 @@ trait StackRegistry {
   def registrants: Iterable[Entry] = synchronized { registry.values }
 
   // added for tests
-  private[finagle] def clear(): Unit = synchronized { registry = Map.empty[String, Entry] }
+  private[finagle] def clear(): Unit = synchronized {
+    registry = Map.empty[String, Entry]
+    duplicates = Map.empty[String, Seq[Entry]]
+  }
 }
