@@ -38,6 +38,13 @@ Breaking API Changes
   * finagle-core: `BackupRequestLost` is no longer itself an `Exception`. Use
     `BackupRequestLost.Exeption` in its place. ``RB_ID=758056``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: Fix race condition in `c.t.f.netty3.channel.IdleConnectionFilter` when
+    a connection is closed by the client.
+
+
 6.30.0
 ~~~~~~~
 

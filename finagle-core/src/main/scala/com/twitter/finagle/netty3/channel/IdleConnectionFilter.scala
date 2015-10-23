@@ -108,7 +108,13 @@ class IdleConnectionFilter[Req, Rep](
     def apply(request: Req, service: Service[Req, Rep]) = {
       queue.remove(c)
       service(request) ensure {
-        queue.touch(c)
+        // The connection might have been closed by the client during the request
+        if (c.onClose.isDefined) {
+          queue.touch(c)
+          if (c.onClose.isDefined) {
+            queue.remove(c)
+          }
+        }
       }
     }
   }
