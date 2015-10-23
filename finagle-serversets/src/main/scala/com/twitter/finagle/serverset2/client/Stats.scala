@@ -1,6 +1,6 @@
 package com.twitter.finagle.serverset2.client
 
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{StatsReceiver, Stat}
 import com.twitter.io.Buf
 import com.twitter.util._
 
@@ -11,7 +11,7 @@ private[serverset2] trait StatsClient extends ZooKeeperClient {
     lazy val success = stats.counter(s"${name}_successes")
 
     def apply[T](result: Future[T]): Future[T] = {
-      stats.timeFuture(s"${name}_latency_ms")(result).onSuccess { _ =>
+      Stat.timeFuture(stats.stat(s"${name}_latency_ms"))(result).onSuccess { _ =>
         success.incr()
       }.onFailure {
         case ke: KeeperException => stats.counter(ke.name).incr()
