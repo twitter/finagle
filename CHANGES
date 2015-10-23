@@ -13,12 +13,15 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-core: Default value for the `c.t.f.param.Monitor` stack param has been changed from
-    `c.t.f.util.DefaultMonitor` to `c.t.u.RootMonitor`, which logs the unhanded exceptions.
-    ``RB_ID=728585``
+  * finagle-core: The behavior for `c.t.f.util.DefaultMonitor` has changed such that
+    unhandled exceptions are propagated to `c.t.u.RootMonitor` except for
+    `c.t.f.Failures` with a log `Level` below INFO. ``RB_ID=758056``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `BackupRequestLost` is no longer itself an `Exception`. Use
+    `BackupRequestLost.Exeption` in its place.
 
 6.30.0
 ~~~~~~~

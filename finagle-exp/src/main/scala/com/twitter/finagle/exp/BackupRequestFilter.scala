@@ -183,7 +183,7 @@ class BackupRequestFilter[Req, Rep] private[exp](
           val other = reps((firstIndex+1)%2)
           first.transform {
             case r @ Return(v) =>
-              if (first eq backup) orig.raise(BackupRequestLost)
+              if (first eq backup) orig.raise(BackupRequestLost.Exception)
               Future.const(r)
             case Throw(_) =>
               other

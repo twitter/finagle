@@ -9,8 +9,7 @@ import com.twitter.finagle.service.{
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{
-  DefaultLogger, DefaultTimer, LoadedReporterFactory, ReporterFactory}
+import com.twitter.finagle.util._
 import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.util._
 import java.net.SocketAddress
@@ -71,7 +70,7 @@ case class DefaultClient[Req, Rep](
   statsReceiver: StatsReceiver = ClientStatsReceiver,
   hostStatsReceiver: StatsReceiver = NullStatsReceiver,
   tracer: Tracer  = DefaultTracer,
-  monitor: Monitor = RootMonitor,
+  monitor: Monitor = DefaultMonitor,
   reporter: ReporterFactory = LoadedReporterFactory,
   loadBalancer: LoadBalancerFactory = DefaultBalancerFactory,
   newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.clientModule[Req, Rep]

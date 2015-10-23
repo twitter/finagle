@@ -1,14 +1,40 @@
 package com.twitter.finagle.util
 
+import com.twitter.finagle.Failure
+import com.twitter.logging.{Logger, Level}
+import com.twitter.util.{RootMonitor, Monitor, NullMonitor}
 import java.net.SocketAddress
 
-import com.twitter.util.{Monitor, NullMonitor}
+/**
+ * Exposed for testing.
+ *
+ * Use the companion object [[DefaultMonitor]].
+ */
+private[util] class DefaultMonitor(log: Logger) extends Monitor {
+  private[this] val MinLogLevel = Level.INFO.value
 
-@deprecated("Use com.twitter.util.RootMonitor instead", "2015-10-15")
-object DefaultMonitor extends Monitor {
-  def handle(exc: Throwable) = false
-  override def toString = "DefaultMonitor"
+  def handle(exc: Throwable): Boolean = {
+    exc match {
+      case f: Failure if f.logLevel.value < MinLogLevel =>
+        log.log(f.logLevel, f, "Exception propagated to DefaultMonitor")
+        true
+      case _ =>
+        RootMonitor.handle(exc)
+    }
+  }
 
+  override def toString: String = "DefaultMonitor"
+}
+
+/**
+ * The default [[Monitor]] to be used throughout Finagle.
+ *
+ * Mostly delegates to [[RootMonitor]], with the exception
+ * of [[Failure Failures]] with a `Failure.logLevel` below `INFO`.
+ */
+object DefaultMonitor
+  extends DefaultMonitor(Logger.get(classOf[DefaultMonitor]))
+{
   val get = this
 }
 
@@ -17,7 +43,7 @@ trait ReporterFactory extends ((String, Option[SocketAddress]) => Monitor)
 object NullReporterFactory extends ReporterFactory {
   def apply(name: String, addr: Option[SocketAddress]): Monitor = NullMonitor
 
-  override def toString = "NullReporterFactory"
+  override def toString: String = "NullReporterFactory"
 }
 
 object LoadedReporterFactory extends ReporterFactory {

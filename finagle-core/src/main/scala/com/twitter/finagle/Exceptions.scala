@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.logging.Level
 import com.twitter.util.Duration
 import java.net.SocketAddress
 
@@ -441,9 +442,15 @@ class CodecException(description: String) extends Exception(description)
  */
 class ChannelBufferUsageException(description: String) extends Exception(description)
 
-/**
- * An exception that is raised on requests that are discarded because
- * their corresponding backup requests succeeded first. See
- * [[com.twitter.finagle.exp.BackupRequestFilter]] for details.
- */
-object BackupRequestLost extends Exception with NoStacktrace
+object BackupRequestLost {
+
+  /**
+   * An exception that is raised on requests that are discarded because
+   * their corresponding backup requests succeeded first. See
+   * [[com.twitter.finagle.exp.BackupRequestFilter]] for details.
+   */
+  val Exception =
+    Failure("request lost to the other request")
+      .withLogLevel(Level.TRACE)
+
+}

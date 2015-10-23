@@ -112,7 +112,8 @@ class StatsFilter[Req, Rep](
     service(request).respond { response =>
       outstandingRequestCount.decrement()
       response match {
-        case Throw(BackupRequestLost) | Throw(WriteException(BackupRequestLost)) =>
+        case Throw(BackupRequestLost.Exception)
+          | Throw(WriteException(BackupRequestLost.Exception)) =>
           // We blackhole this request. It doesn't count for anything.
           // After the Failure() patch, this should no longer need to
           // be a special case.

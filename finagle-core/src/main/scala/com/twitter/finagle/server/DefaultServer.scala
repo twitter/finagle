@@ -6,7 +6,7 @@ import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.{DefaultTimer, DefaultLogger, ReporterFactory, LoadedReporterFactory}
+import com.twitter.finagle.util._
 import com.twitter.finagle.{param, Stack, Stackable}
 import com.twitter.finagle.{Server, Service, ServiceFactory, ListeningServer}
 import com.twitter.util._
@@ -48,7 +48,7 @@ case class DefaultServer[Req, Rep, In, Out](
   prepare: ServiceFactory[Req, Rep] => ServiceFactory[Req, Rep] =
     (sf: ServiceFactory[Req, Rep]) => sf,
   timer: Timer = DefaultTimer.twitter,
-  monitor: Monitor = RootMonitor,
+  monitor: Monitor = DefaultMonitor,
   logger: java.util.logging.Logger = DefaultLogger,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   tracer: Tracer = DefaultTracer,

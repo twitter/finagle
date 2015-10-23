@@ -109,7 +109,7 @@ class BackupRequestFilterTest extends FunSuite
       p1.setValue("backup")
       assert(f.poll === Some(Return("backup")))
       assert(p1.isInterrupted === None)
-      assert(p.isInterrupted === Some(BackupRequestLost))
+      assert(p.isInterrupted === Some(BackupRequestLost.Exception))
       assert(statsReceiver.counters(Seq("lost")) === 1)
       // original request takes longer than cutoff
       assert(statsReceiver.counters(Seq("timeouts")) === 1)
