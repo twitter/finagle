@@ -175,6 +175,7 @@ class BackupRequestFilter[Req, Rep] private[exp](
       } else {
         // If we've waited long enough to fire the backup normally, do so and
         // pass on the first successful result we get back.
+        timeouts.incr()
         val backup = record(service(req), lost)
         val reps = Array(orig, backup)
         Future.selectIndex(reps).flatMap { firstIndex =>

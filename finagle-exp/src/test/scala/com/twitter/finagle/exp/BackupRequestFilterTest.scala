@@ -111,6 +111,8 @@ class BackupRequestFilterTest extends FunSuite
       assert(p1.isInterrupted === None)
       assert(p.isInterrupted === Some(BackupRequestLost))
       assert(statsReceiver.counters(Seq("lost")) === 1)
+      // original request takes longer than cutoff
+      assert(statsReceiver.counters(Seq("timeouts")) === 1)
     }
   }
 
@@ -148,6 +150,8 @@ class BackupRequestFilterTest extends FunSuite
       assert(task.isCancelled)
       timer.tick()
       assert(timer.tasks.isEmpty)
+      // original request succeeds within cutoff
+      assert(!statsReceiver.counters.contains(Seq("timeouts")))
     }
   }
 
@@ -199,6 +203,8 @@ class BackupRequestFilterTest extends FunSuite
       val ex = intercept[Exception] { Await.result(origPromise) }
       assert(ex === cancelEx)
       assert(statsReceiver.counters(Seq("lost")) === 1)
+      // original request fails instead of timing out
+      assert(!statsReceiver.counters.contains(Seq("timeouts")))
     }
   }
 
@@ -252,6 +258,8 @@ class BackupRequestFilterTest extends FunSuite
       val ex = intercept[Exception] { Await.result(origPromise) }
       assert(ex === cancelEx)
       assert(statsReceiver.counters(Seq("lost")) === 1)
+      // original request takes longer than cutoff
+      assert(statsReceiver.counters(Seq("timeouts")) === 1)
     }
   }
 }
