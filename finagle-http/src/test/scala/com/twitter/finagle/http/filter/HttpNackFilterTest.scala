@@ -3,10 +3,10 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{ChannelClosedException, Failure, Http, Name, Service}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http.{Request, Response, Status}
-import com.twitter.finagle.param.Stats
+import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Closable, Await, Future}
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
@@ -42,6 +42,8 @@ class HttpNackFilterTest extends FunSuite {
       // reuse connections
       assert(Await.result(client(request)).status == Status.Ok)
       assert(st.counters(Seq("http", "connects")) == 1)
+
+      Closable.all(client, server).close()
     }
   }
 
@@ -58,6 +60,8 @@ class HttpNackFilterTest extends FunSuite {
 
       assert(Await.result(client(request)).status == Status.Ok)
       assert(st.counters(Seq("http", "requeue", "requeues")) == 1)
+
+      Closable.all(client, server).close()
     }
   }
 
@@ -76,6 +80,8 @@ class HttpNackFilterTest extends FunSuite {
 
       assert(Await.result(client(request)).status == Status.Ok)
       assert(st.counters(Seq("http", "requeue", "requeues")) == 1)
+
+      Closable.all(client, server).close()
     }
   }
 
@@ -84,27 +90,47 @@ class HttpNackFilterTest extends FunSuite {
       val server =
         Http.server
           .withStack(StackServer.newStack)
+          .configured(Stats(st))
+          .configured(Label("http-server"))
           .serve(new InetSocketAddress(0), flakyService)
 
       val client =
         Http.client
           .configured(Stats(st))
-          .newService(Name.bound(server.boundAddress), "http")
+          .newService(Name.bound(server.boundAddress), "http-client")
 
-      intercept[ChannelClosedException](Await.result(client(request)))
+      val rep = Await.result(client(request))
+      assert(rep.status == Status.InternalServerError)
+      assert(rep.headerMap.get(HttpNackFilter.Header) == None)
+      assert(st.counters.get(Seq("http-client", "requeue", "requeues")) == None)
+      assert(st.counters.get(Seq("http-server", "success")) == None)
+      assert(st.counters(Seq("http-server", "failures")) == 1)
+
+      Closable.all(client, server).close()
     }
   }
 
   test("HttpNack does not convert non-retryable failures") {
     new ClientCtx {
       n.set(-1)
-      val server = Http.server.serve(new InetSocketAddress(0), flakyService)
+      val server =
+        Http.server
+          .configured(Stats(st))
+          .configured(Label("http-server"))
+          .serve(new InetSocketAddress(0), flakyService)
       val client =
         Http.client
           .configured(Stats(st))
-          .newService(Name.bound(server.boundAddress), "http")
+          .newService(Name.bound(server.boundAddress), "http-client")
 
-      intercept[ChannelClosedException](Await.result(client(request)))
+      val rep = Await.result(client(request))
+      assert(rep.status == Status.InternalServerError)
+      assert(rep.headerMap.get(HttpNackFilter.Header) == None)
+      assert(st.counters.get(Seq("http-client", "requeue", "requeues")) == None)
+      assert(st.counters.get(Seq("http-server", "success")) == None)
+      assert(st.counters(Seq("http-server", "failures")) == 1)
+
+      Closable.all(client, server).close()
     }
   }
 }

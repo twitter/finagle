@@ -29,11 +29,11 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
     } rescue {
       case e: CancelledRequestException =>
         // This only happens when ChannelService cancels a reply.
-        log.warning("cancelled request: uri:%s", request.getUri)
+        log.warning("cancelled request: uri:%s", request.uri)
         respond(request, ClientClosedRequestStatus)
       case e: Throwable =>
         try {
-          log.warning(e, "exception: uri:%s exception:%s", request.getUri, e)
+          log.warning(e, "exception: uri:%s exception:%s", request.uri, e)
           respond(request, Status.InternalServerError)
         } catch {
           // logging or internals are broken.  Write static string to console -

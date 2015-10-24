@@ -29,6 +29,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
   }
 
   type HttpService = Service[Request, Response]
+  type HttpTest = String => (HttpService => HttpService) => Unit
 
   def drip(w: Writer): Future[Unit] = w.write(buf("*")) before drip(w)
   def buf(msg: String): Buf = Buf.Utf8(msg)
@@ -49,14 +50,69 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     loop(Buf.Empty)
   }
 
-  def go(name: String)(connect: HttpService => HttpService) {
+  def run(name: String)(tests: HttpTest*)(connect: HttpService => HttpService): Unit = {
+    tests.foreach(t => t(name)(connect))
+  }
 
+  def standardErrors(name: String)(connect: HttpService => HttpService): Unit = {
+    test(name + ": request uri too long") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+      val request = Request("/" + "a" * 4096)
+      val response = Await.result(client(request))
+      assert(response.status == Status.RequestURITooLong)
+      client.close()
+    }
+
+    test(name + ": request header fields too large") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+      val request = Request()
+      request.headers().add("header", "a" * 8192)
+      val response = Await.result(client(request))
+      assert(response.status == Status.RequestHeaderFieldsTooLarge)
+      client.close()
+    }
+
+    test(name + ": unhandled exceptions are converted into 500s") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.exception(new IllegalArgumentException("bad news"))
+      }
+
+      val client = connect(service)
+      val response = Await.result(client(Request()))
+      assert(response.status == Status.InternalServerError)
+      client.close()
+    }
+
+    test(name + ": return 413s for requests with too large payloads") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+
+      val tooBig = Request("/")
+      tooBig.content = Buf.ByteArray.Owned(new Array[Byte](200))
+
+      val justRight = Request("/")
+      justRight.content = Buf.ByteArray.Owned(Array[Byte](100))
+
+      assert(Await.result(client(tooBig)).status == Status.RequestEntityTooLarge)
+      assert(Await.result(client(justRight)).status == Status.Ok)
+      client.close()
+    }
+  }
+
+  def standardBehaviour(name: String)(connect: HttpService => HttpService) {
     test(name + ": client stack observes max header size") {
-      import scala.collection.JavaConverters._
       val service = new HttpService {
         def apply(req: Request) = {
           val res = Response()
-          res.headers.set("Foo", ("*" * 8192) + "Bar: a")
+          res.headerMap.put("Foo", ("*" * 8192) + "Bar: a")
           Future.value(res)
         }
       }
@@ -67,7 +123,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val hasBar = client(Request()).transform {
         case Throw(_) => Future.False
         case Return(res) =>
-          val names = res.headers.names().asScala
+          val names = res.headerMap.keys
           Future.value(names.exists(_.contains("Bar")))
       }
       assert(!Await.result(hasBar))
@@ -102,7 +158,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = connect(service)
       val response = client(Request("123"))
-      assert(Await.result(response).contentString === "123")
+      assert(Await.result(response).contentString == "123")
       client.close()
     }
 
@@ -124,7 +180,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         Dtab.local ++= Dtab.read("/a=>/b; /c=>/d")
 
         val res = Await.result(client(Request("/")))
-        assert(res.contentString === "Dtab(2)\n\t/a => /b\n\t/c => /d\n")
+        assert(res.contentString == "Dtab(2)\n\t/a => /b\n\t/c => /d\n")
       }
 
       client.close()
@@ -134,7 +190,6 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val service = new HttpService {
         def apply(request: Request) = {
           val stringer = new StringWriter
-          val printer = new PrintWriter(stringer)
 
           val response = Response(request)
           response.contentString = "%d".format(Dtab.local.length)
@@ -145,7 +200,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service)
 
       val res = Await.result(client(Request("/")))
-      assert(res.contentString === "0")
+      assert(res.contentString == "0")
 
       client.close()
     }
@@ -165,7 +220,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val writer = Reader.writable()
       val client = connect(service(writer))
       val response = Await.result(client(Request()))
-      assert(response.contentString === "helloworld")
+      assert(response.contentString == "helloworld")
       client.close()
     }
 
@@ -188,32 +243,9 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         }
       })
     }
-
-    test(name + ": request uri too long") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
-      }
-      val client = connect(service)
-      val request = Request("/" + "a" * 4096)
-      val response = Await.result(client(request))
-      assert(response.status === Status.RequestURITooLong)
-      client.close()
-    }
-
-    test(name + ": request header fields too large") {
-      val service = new HttpService {
-        def apply(request: Request) = Future.value(Response())
-      }
-      val client = connect(service)
-      val request = Request()
-      request.headers().add("header", "a" * 8192)
-      val response = Await.result(client(request))
-      assert(response.status === Status.RequestHeaderFieldsTooLarge)
-      client.close()
-    }
   }
 
-  def rich(name: String)(connect: HttpService => HttpService) {
+  def streaming(name: String)(connect: HttpService => HttpService) {
     def service(r: Reader) = new HttpService {
       def apply(request: Request) = {
         val response = new Response {
@@ -228,21 +260,21 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     test(name + ": symmetric reader and getContent") {
       val s = Service.mk[Request, Response] { req =>
         val buf = Await.result(Reader.readAll(req.reader))
-        assert(buf === Buf.Utf8("hello"))
-        assert(req.contentString === "hello")
+        assert(buf == Buf.Utf8("hello"))
+        assert(req.contentString == "hello")
 
-        req.response.setContent(req.getContent)
+        req.response.content = req.content
         Future.value(req.response)
       }
       val req = Request()
       req.contentString = "hello"
-      req.headers.set("Content-Length", 5)
+      req.headerMap.put("Content-Length", "5")
       val client = connect(s)
       val res = Await.result(client(req))
 
       val buf = Await.result(Reader.readAll(res.reader))
-      assert(buf === Buf.Utf8("hello"))
-      assert(res.contentString === "hello")
+      assert(buf == Buf.Utf8("hello"))
+      assert(res.contentString == "hello")
     }
 
     test(name + ": stream") {
@@ -250,9 +282,9 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service(writer))
       val reader = Await.result(client(Request())).reader
       Await.result(writer.write(buf("hello")))
-      assert(Await.result(readNBytes(5, reader)) === Buf.Utf8("hello"))
+      assert(Await.result(readNBytes(5, reader)) == Buf.Utf8("hello"))
       Await.result(writer.write(buf("world")))
-      assert(Await.result(readNBytes(5, reader)) === Buf.Utf8("world"))
+      assert(Await.result(readNBytes(5, reader)) == Buf.Utf8("world"))
       client.close()
     }
 
@@ -303,7 +335,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       Await.result(req.writer.write(buf("hello")))
 
       val contentf = resf flatMap { res => Reader.readAll(res.reader) }
-      assert(Await.result(contentf) === Buf.Utf8("hello"))
+      assert(Await.result(contentf) == Buf.Utf8("hello"))
 
       // drip should terminate because the request is discarded.
       intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer)) }
@@ -344,30 +376,9 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       Await.result(client(Request()))
       client.close()
     }
-
-    test(name + ": request uri too long") {
-      val ok = Response()
-      val svc = Service.mk[Request, Response] { _ => Future.value(ok) }
-      val client = connect(svc)
-      val request = Request("/" + "a" * 4096)
-      val response = Await.result(client(request))
-      assert(response.status === Status.RequestURITooLong)
-      assert(Await.result(client(Request())).status === ok.status)
-      client.close()
-    }
-
-    test(name + ": request header fields too large") {
-      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
-      val client = connect(svc)
-      val request = Request()
-      request.headers.add("header", "a" * 8192)
-      val response = Await.result(client(request))
-      assert(response.status === Status.RequestHeaderFieldsTooLarge)
-      client.close()
-    }
   }
 
-  def trace(name: String)(connect: HttpService => HttpService) {
+  def tracing(name: String)(connect: HttpService => HttpService) {
     test(name + ": trace") {
       var (outerTrace, outerSpan) = ("", "")
 
@@ -394,8 +405,8 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val response = Await.result(outer(Request()))
       val Seq(innerTrace, innerSpan, innerParent) =
         response.contentString.split('.').toSeq
-      assert(innerTrace === outerTrace, "traceId")
-      assert(outerSpan === innerParent, "outer span vs inner parent")
+      assert(innerTrace == outerTrace, "traceId")
+      assert(outerSpan == innerParent, "outer span vs inner parent")
       assert(innerSpan != outerSpan, "inner (%s) vs outer (%s) spanId".format(innerSpan, outerSpan))
 
       outer.close()
@@ -403,10 +414,31 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     }
   }
 
-  trace("Client/Server") {
+  run("ClientBuilder")(standardErrors, standardBehaviour) {
+    service =>
+      val server = ServerBuilder()
+        .codec(Http().maxRequestSize(100.bytes))
+        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
+        .name("server")
+        .build(service)
+
+      val client = ClientBuilder()
+        .codec(Http())
+        .hosts(Seq(server.boundAddress))
+        .hostConnectionLimit(1)
+        .name("client")
+        .build()
+
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
+
+  run("Client/Server")(standardErrors, standardBehaviour, tracing) {
     service =>
       import com.twitter.finagle
-      val server = finagle.Http.serve("localhost:*", service)
+      val server = finagle.Http.server.withMaxRequestSize(100.bytes).serve("localhost:*", service)
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
       val client = finagle.Http.newService("%s:%d".format(addr.getHostName, addr.getPort))
 
@@ -416,16 +448,16 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
   }
 
-  trace("ClientBuilder") {
+  run("ClientBuilder (streaming)")(streaming) {
     service =>
       val server = ServerBuilder()
-        .codec(Http().enableTracing(true))
+        .codec(Http().streaming(true))
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
       val client = ClientBuilder()
-        .codec(Http().enableTracing(true))
+        .codec(Http().streaming(true))
         .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
@@ -437,49 +469,16 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
   }
 
-  go("ClientBuilder") {
+  run("ClientBuilder (tracing)")(tracing) {
     service =>
       val server = ServerBuilder()
-        .codec(Http())
+        .codec(Http().enableTracing(true))
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
       val client = ClientBuilder()
-        .codec(Http())
-        .hosts(Seq(server.boundAddress))
-        .hostConnectionLimit(1)
-        .name("client")
-        .build()
-
-      new ServiceProxy(client) {
-        override def close(deadline: Time) =
-          Closable.all(client, server).close(deadline)
-      }
-  }
-
-  go("Client/Server") {
-    service =>
-      import com.twitter.finagle
-      val server = finagle.Http.serve("localhost:*", service)
-      val client = finagle.Http.newService(server)
-
-      new ServiceProxy(client) {
-        override def close(deadline: Time) =
-          Closable.all(client, server).close(deadline)
-      }
-  }
-
-  rich("ClientBuilder (streaming)") {
-    service =>
-      val server = ServerBuilder()
-        .codec(Http().streaming(true))
-        .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
-        .name("server")
-        .build(service)
-
-      val client = ClientBuilder()
-        .codec(Http().streaming(true))
+        .codec(Http().enableTracing(true))
         .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
@@ -542,25 +541,6 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         override def close(deadline: Time) =
           Closable.all(client, server).close(deadline)
       }
-  }
-
-  test("servers return 413s for requests with too large payloads") {
-    import com.twitter.finagle
-
-    val svc = Service.mk { _: Request => Future.value(Response()) }
-    val addr = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0)
-    val server = finagle.Http.server.withMaxRequestSize(1.byte).serve(addr, svc)
-    val client = finagle.Http.client.newService(Name.bound(server.boundAddress), "macaw-yeps")
-
-
-    val tooBig = Request("/")
-    tooBig.content = Buf.ByteArray.Owned(Array[Byte](1,2))
-
-    val justRight = Request("/")
-    justRight.content = Buf.ByteArray.Owned(Array[Byte](1))
-
-    assert(Await.result(client(tooBig)).status == Status.RequestEntityTooLarge)
-    assert(Await.result(client(justRight)).status == Status.Ok)
   }
 
   test("codec should require a message size be less than 2Gb") {

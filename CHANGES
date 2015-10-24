@@ -20,6 +20,10 @@ Runtime Behavior Changes
     unhandled exceptions are propagated to `c.t.u.RootMonitor` except for
     `c.t.f.Failures` with a log `Level` below INFO. ``RB_ID=758056``
 
+  * finagle-http: Unhandled exceptions from user defined HTTP services are now converted
+    into very basic 500 responses so clients talking to those services see standard HTTP
+    responses instead of a dropped connection. ``RB_ID=755846``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

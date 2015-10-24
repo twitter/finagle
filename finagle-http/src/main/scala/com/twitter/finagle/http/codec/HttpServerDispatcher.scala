@@ -31,15 +31,6 @@ class HttpServerDispatcher(
     service.close()
   }
 
-  private[this] def badRequestResponse(): Response =
-    Response(Version.Http10, Status.BadRequest)
-
-  private[this] def requestUriTooLongResponse(): Response =
-    Response(Version.Http10, Status.RequestURITooLong)
-
-  private[this] def requestHeaderFieldsTooLarge(): Response =
-    Response(Version.Http10, Status.RequestHeaderFieldsTooLarge)
-
   protected def dispatch(m: Any, eos: Promise[Unit]): Future[Response] = m match {
     case badReq: BadHttpRequest =>
       eos.setDone()
@@ -47,11 +38,11 @@ class HttpServerDispatcher(
         case ex: TooLongFrameException =>
           // this is very brittle :(
           if (ex.getMessage().startsWith("An HTTP line is larger than "))
-            requestUriTooLongResponse()
+            Response(from(badReq.httpVersion), Status.RequestURITooLong)
           else
-            requestHeaderFieldsTooLarge()
+            Response(from(badReq.httpVersion), Status.RequestHeaderFieldsTooLarge)
         case _ =>
-          badRequestResponse()
+          Response(from(badReq.httpVersion), Status.BadRequest)
       }
       // The connection in unusable so we close it here.
       // Note that state != Idle while inside dispatch
@@ -79,7 +70,9 @@ class HttpServerDispatcher(
       }
 
       val req = Request(reqIn, reader, addr)
-      service(req)
+      service(req).handle {
+        case _ => Response(req.version, Status.InternalServerError)
+      }
 
     case invalid =>
       eos.setDone()
