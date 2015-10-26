@@ -1,6 +1,6 @@
 package com.twitter.finagle.example.http
 
-import com.twitter.concurrent.exp.AsyncStream
+import com.twitter.concurrent.AsyncStream
 import com.twitter.util.{Await, Base64StringEncoder => Base64, Future}
 import com.twitter.finagle.http.{Request, Method, Status}
 import com.twitter.finagle.Http
