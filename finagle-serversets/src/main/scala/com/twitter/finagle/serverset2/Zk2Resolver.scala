@@ -41,22 +41,24 @@ private[serverset2] object Zk2Resolver {
  * @param statsReceiver: maintains stats and gauges used in resolution
  * @param removalWindow: how long a member stays in limbo before it is removed from a ServerSet
  * @param batchWindow: how long do we batch up change notifications before finalizing a ServerSet
+ * @param timer: timer to use for stabilization and zk sessions
  */
 class Zk2Resolver(
     statsReceiver: StatsReceiver,
     removalWindow: Duration,
-    batchWindow: Duration)
+    batchWindow: Duration,
+    timer: Timer = DefaultTimer.twitter)
   extends Resolver {
   import Zk2Resolver._
 
-  def this() = this(DefaultStatsReceiver.scope("zk2"), 40.seconds, 5.seconds)
+  def this() = this(DefaultStatsReceiver.scope("zk2"), 40.seconds, 5.seconds, DefaultTimer.twitter)
 
   def this(statsReceiver: StatsReceiver) =
-    this(statsReceiver, 40.seconds, 5.seconds)
+    this(statsReceiver, 40.seconds, 5.seconds, DefaultTimer.twitter)
 
   val scheme = "zk2"
 
-  private[this] implicit val injectTimer = DefaultTimer.twitter
+  private[this] implicit val injectTimer = timer
 
   private[this] val inetResolver = FixedInetResolver(statsReceiver)
   private[this] val sessionTimeout = 10.seconds
