@@ -27,6 +27,8 @@ import com.twitter.util.{NonFatal, Future, Time}
 abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut])
 {
+  import Filter.AndThen
+
   /**
    * This is the method to override/implement to create your own Filter.
    *
@@ -48,28 +50,11 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    *
    * @param next another filter to follow after this one
    */
-  def andThen[Req2, Rep2](next: Filter[ReqOut, RepIn, Req2, Rep2]) =
-    new Filter[ReqIn, RepOut, Req2, Rep2] {
-      def apply(request: ReqIn, service: Service[Req2, Rep2]) = {
-        val svc: Service[ReqOut, RepIn] = new Service[ReqOut, RepIn] with Proxy {
-          // note that while `Service.rescue` could be used here it would
-          // entail an extra allocation.
-          def apply(request: ReqOut): Future[RepIn] = {
-            try {
-              next(request, service)
-            } catch {
-              case NonFatal(e) => Future.exception(e)
-            }
-          }
-          def self = service
-          override def close(deadline: Time) = service.close(deadline)
-          override def status = service.status
-          override def toString() = service.toString()
-        }
-
-        Filter.this.apply(request, svc)
-      }
-    }
+  def andThen[Req2, Rep2](next: Filter[ReqOut, RepIn, Req2, Rep2]): Filter[ReqIn, RepOut, Req2, Rep2] =
+    if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
+    // Rewrites Filter composition via `andThen` with AndThen's composition
+    // which is just function composition.
+    else AndThen(service => andThen(next.andThen(service)))
 
   /**
    * Terminates a filter chain in a service. For example,
@@ -126,6 +111,49 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
 abstract class SimpleFilter[Req, Rep] extends Filter[Req, Rep, Req, Rep]
 
 object Filter {
+  // `AndThen` is a function that represents the prefix of the filter chain to
+  // transform a terminal Service received as an argument.
+  private case class AndThen[ReqIn, RepOut, ReqOut, RepIn](
+      build: Service[ReqOut, RepIn] => Service[ReqIn, RepOut])
+    extends Filter[ReqIn, RepOut, ReqOut, RepIn]
+  {
+    override def andThen[Req2, Rep2](
+      next: Filter[ReqOut, RepIn, Req2, Rep2]
+    ): Filter[ReqIn, RepOut, Req2, Rep2] =
+      if (next eq Filter.identity) this.asInstanceOf[Filter[ReqIn, RepOut, Req2, Rep2]]
+      else AndThen(service => build(next.andThen(service)))
+
+    override def andThen(service: Service[ReqOut, RepIn]): Service[ReqIn, RepOut] =
+      build(service)
+
+    override def andThen(
+      factory: ServiceFactory[ReqOut, RepIn]
+    ): ServiceFactory[ReqIn, RepOut] =
+      new ServiceFactory[ReqIn, RepOut] {
+        val fn: Service[ReqOut, RepIn] => Service[ReqIn, RepOut] =
+          svc => AndThen.this.andThen(svc)
+        def apply(conn: ClientConnection): Future[Service[ReqIn, RepOut]] =
+          factory(conn).map(fn)
+        def close(deadline: Time) = factory.close(deadline)
+        override def status = factory.status
+        override def toString() = factory.toString()
+      }
+
+    def apply(request: ReqIn, service: Service[ReqOut, RepIn]): Future[RepOut] =
+      build(service)(request)
+  }
+
+  private case object Identity extends SimpleFilter[Any, Nothing] {
+    override def andThen[Req2, Rep2](
+      next: Filter[Any, Nothing, Req2, Rep2]): Filter[Any, Nothing, Req2, Rep2] = next
+
+    override def andThen(service: Service[Any, Nothing]): Service[Any, Nothing] = service
+
+    override def andThen(factory: ServiceFactory[Any, Nothing]): ServiceFactory[Any, Nothing] = factory
+
+    def apply(request: Any, service: Service[Any, Nothing]): Future[Nothing] = service(request)
+  }
+
   implicit def canStackFromSvc[Req, Rep]
     : CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] =
     new CanStackFrom[Filter[Req, Rep, Req, Rep], Service[Req, Rep]] {
@@ -160,13 +188,8 @@ object Filter {
     }
   }
 
-  def identity[Req, Rep] = new SimpleFilter[Req, Rep] {
-    override def andThen[Req2, Rep2](next: Filter[Req, Rep, Req2, Rep2]) = next
-    override def andThen(service: Service[Req, Rep]) = service
-    override def andThen(factory: ServiceFactory[Req, Rep]) = factory
-
-    def apply(request: Req, service: Service[Req, Rep]) = service(request)
-  }
+  def identity[Req, Rep]: SimpleFilter[Req, Rep] =
+    Identity.asInstanceOf[SimpleFilter[Req, Rep]]
 
   def mk[ReqIn, RepOut, ReqOut, RepIn](
     f: (ReqIn, ReqOut => Future[RepIn]) => Future[RepOut]
