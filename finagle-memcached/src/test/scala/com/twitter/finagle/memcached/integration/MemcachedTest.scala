@@ -5,9 +5,14 @@ import com.twitter.finagle.Name
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.Memcached
 import com.twitter.finagle.memcached.{Client, PartitionedClient}
+import com.twitter.finagle.param
+import com.twitter.finagle.Service
 import com.twitter.finagle.service.FailureAccrualFactory
+import com.twitter.finagle.ShardNotAvailableException
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future}
+import com.twitter.util.{Await, Future, MockTimer, Time}
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
 import org.scalatest.junit.JUnitRunner
@@ -200,5 +205,54 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       if (Await.result(client.get(s"foo$i"), TimeOut) == None) cacheMisses = cacheMisses + 1
     }
     assert(cacheMisses > 0)
+  }
+
+  test("host comes back into ring after being ejected") {
+    import com.twitter.finagle.memcached.protocol._
+
+    class MockedMemcacheServer extends Service[Command, Response] {
+      def apply(command: Command) = command match {
+        case Get(key) => Future.value(Values(List(Value(Buf.Utf8("foo"), Buf.Utf8("bar")))))
+        case Set(_, _, _, _) => Future.value(Error(new Exception))
+      }
+    }
+
+    val cacheServer = Memcached.serve(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+      new MockedMemcacheServer)
+
+    val timer = new MockTimer
+    val statsReceiver = new InMemoryStatsReceiver
+
+    val client = Memcached.client
+      .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
+      .configured(Memcached.param.EjectFailedHost(true))
+      .configured(param.Timer(timer))
+      .configured(param.Stats(statsReceiver))
+      .newRichClient(Name.bound(cacheServer.boundAddress), "cacheClient")
+
+    Time.withCurrentTimeFrozen { timeControl =>
+
+      // Send a bad request
+      intercept[Exception] { Await.result(client.set("foo", Buf.Utf8("bar"))) }
+
+      // Node should have been ejected
+      assert(statsReceiver.counters.get(List("ejections")) == Some(1))
+
+      // Node should have been marked dead, and still be dead after 5 minutes
+      timeControl.advance(5.minutes)
+
+      // Shard should be unavailable
+      intercept[ShardNotAvailableException] {
+        Await.result(client.get(s"foo"))
+      }
+
+      timeControl.advance(5.minutes)
+      timer.tick()
+
+      // 10 minutes (markDeadFor duration) have passed, so the request should go through
+      assert(statsReceiver.counters.get(List("revivals")) == Some(1))
+      assert(Await.result(client.get(s"foo")).get == Buf.Utf8("bar"))
+    }
   }
 }

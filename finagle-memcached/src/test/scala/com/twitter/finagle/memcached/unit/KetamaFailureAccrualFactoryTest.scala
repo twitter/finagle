@@ -155,10 +155,16 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       timeControl.advance(10.seconds)
       timer.tick()
 
-      // revives after duration
+      // Probing, not revived yet.
       assert(factory.isAvailable)
       assert(service.isAvailable)
 
+      when(underlyingService(123)) thenReturn Future.value(321)
+      Await.result(service(123))
+
+      // A good dispatch; revived
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
       val recv2 = broker.recv.sync()
       assert(Await.result(recv2) === NodeRevived(key))
     }

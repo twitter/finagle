@@ -43,7 +43,7 @@ object Backoff {
    *
    * @param start must be greater than 0 and less than or equal to `maximum`.
    * @param maximum must be greater than 0 and greater than or equal to `start`.
-   * @see [[decorrelatedJittered]] for an alternative jittered approach.
+   * @see [[decorrelatedJittered]] and [[equalJittered]] for alternative jittered approaches.
    */
   def exponentialJittered(start: Duration, maximum: Duration): Stream[Duration] =
     exponentialJittered(start, maximum, Rng.threadLocal)
@@ -74,7 +74,7 @@ object Backoff {
    *
    * @param start must be greater than 0 and less than or equal to `maximum`.
    * @param maximum must be greater than 0 and greater than or equal to `start`.
-   * @see [[exponentialJittered]] for an alternative jittered approach.
+   * @see [[exponentialJittered]] and [[equalJittered]] for alternative jittered approaches.
    */
   def decorrelatedJittered(start: Duration, maximum: Duration): Stream[Duration] =
     decorrelatedJittered(start, maximum, Rng.threadLocal)
@@ -104,6 +104,33 @@ object Backoff {
   }
 
   /**
+   * Create backoffs that keep half of the exponential growth, and jitter
+   * between 0 and that amount.
+   *
+   * @see [[exponentialJittered]] and [[decorelatedJittered]] for alternative jittered approaches.
+   */
+  def equalJittered(start: Duration, maximum: Duration): Stream[Duration] =
+    equalJittered(start, maximum, Rng.threadLocal)
+
+  /** Exposed for testing */
+  private[service] def equalJittered(
+    start: Duration,
+    maximum: Duration,
+    rng: Rng = Rng.threadLocal
+  ): Stream[Duration] = {
+    require(start > Duration.Zero)
+    require(maximum > Duration.Zero)
+    require(start <= maximum)
+    // this is "equal jitter" via http://www.awsarchitectureblog.com/2015/03/backoff.html
+    def next(attempt: Int): Stream[Duration] = {
+      val halfExp = start * (1L << (attempt - 1))
+      val backoff = maximum.min(halfExp + Duration.fromNanoseconds(rng.nextLong(halfExp.inNanoseconds)))
+      backoff #:: next(attempt + 1)
+    }
+    start #:: next(1)
+  }
+
+  /**
    * Create backoffs that grow linear by `offset`.
    */
   def linear(start: Duration, offset: Duration): Stream[Duration] =
@@ -121,6 +148,14 @@ object Backoff {
   /** See [[constant]] for a Java friendly API */
   def const(start: Duration): Stream[Duration] =
     Backoff(start)(Function.const(start))
+
+  /**
+   * Create backoffs with values produced by a given generation function.
+   */
+  def fromFunction(f: () => Duration): Stream[Duration] = {
+    def next(): Stream[Duration] = f() #:: next()
+    next()
+  }
 
   /**
    * Convert a [[Stream]] of [[Duration Durations]] into a Java-friendly representation.
