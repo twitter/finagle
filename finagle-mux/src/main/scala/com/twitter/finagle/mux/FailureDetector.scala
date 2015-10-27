@@ -108,25 +108,24 @@ object FailureDetector {
   /**
    * Instantiate a new FailureDetector based on the config type
    */
-  def apply(
+  private[mux] def apply(
     config: Config,
     ping: () => Future[Unit],
-    close: () => Future[Unit],
     statsReceiver: StatsReceiver
   ): FailureDetector = {
     config match {
       case NullConfig => NullFailureDetector
 
       case cfg: DarkModeConfig =>
-        new ThresholdFailureDetector(ping, close, cfg.minPeriod, cfg.threshold,
+        new ThresholdFailureDetector(ping, cfg.minPeriod, cfg.threshold,
           cfg.windowSize, cfg.closeThreshold, darkMode = true, statsReceiver = statsReceiver)
 
       case cfg: ThresholdConfig =>
-        new ThresholdFailureDetector(ping, close, cfg.minPeriod, cfg.threshold,
+        new ThresholdFailureDetector(ping, cfg.minPeriod, cfg.threshold,
           cfg.windowSize, cfg.closeThreshold, darkMode = false, statsReceiver = statsReceiver)
 
       case GlobalFlagConfig =>
-        parseConfigFromFlags(ping, close, statsReceiver = statsReceiver)
+        parseConfigFromFlags(ping, statsReceiver = statsReceiver)
     }
   }
 
@@ -136,34 +135,33 @@ object FailureDetector {
    */
   private def parseConfigFromFlags(
     ping: () => Future[Unit],
-    close: () => Future[Unit],
     nanoTime: () => Long = System.nanoTime,
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): FailureDetector = {
     sessionFailureDetector() match {
       case list("threshold", duration(min), double(threshold), int(win), int(closeThreshold)) =>
         new ThresholdFailureDetector(
-          ping, close, min, threshold, win, closeThreshold, nanoTime, false, statsReceiver)
+          ping, min, threshold, win, closeThreshold, nanoTime, false, statsReceiver)
 
       case list("threshold", duration(min), double(threshold), int(win)) =>
         new ThresholdFailureDetector(
-          ping, close, min, threshold, win, nanoTime = nanoTime, statsReceiver = statsReceiver)
+          ping, min, threshold, win, nanoTime = nanoTime, statsReceiver = statsReceiver)
 
       case list("threshold", duration(min), double(threshold)) =>
         new ThresholdFailureDetector(
-          ping, close, min, threshold, nanoTime = nanoTime, statsReceiver = statsReceiver)
+          ping, min, threshold, nanoTime = nanoTime, statsReceiver = statsReceiver)
 
       case list("threshold", duration(min)) =>
         new ThresholdFailureDetector(
-          ping, close, min, nanoTime = nanoTime, statsReceiver = statsReceiver)
+          ping, min, nanoTime = nanoTime, statsReceiver = statsReceiver)
 
       case list("threshold") =>
         new ThresholdFailureDetector(
-          ping, close, nanoTime = nanoTime, statsReceiver = statsReceiver)
+          ping, nanoTime = nanoTime, statsReceiver = statsReceiver)
 
       case list("dark") =>
         new ThresholdFailureDetector(
-          ping, close, nanoTime = nanoTime, statsReceiver = statsReceiver, darkMode = true)
+          ping, nanoTime = nanoTime, statsReceiver = statsReceiver, darkMode = true)
 
       case list("none") =>
         NullFailureDetector

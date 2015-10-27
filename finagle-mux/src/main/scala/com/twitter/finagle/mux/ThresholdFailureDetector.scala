@@ -39,7 +39,6 @@ import com.twitter.util._
  */
 private class ThresholdFailureDetector(
     ping: () => Future[Unit],
-    close: () => Future[Unit],
     minPeriod: Duration = 5.seconds,
     threshold: Double = 2,
     windowSize: Int = 100,
@@ -64,6 +63,11 @@ private class ThresholdFailureDetector(
   // start as busy, and become open after receiving the first ping response
   private[this] val state: AtomicReference[Status] = new AtomicReference(Status.Busy)
 
+  private[this] val onBusyTimeout: Throwable => Unit =
+    x => x match {
+      case _: TimeoutException => markBusy()
+      case _ =>
+    }
 
   def status: Status =
     if (darkMode) Status.Open
@@ -81,6 +85,11 @@ private class ThresholdFailureDetector(
     }
   }
 
+  private[this] def markClosed(): Unit = {
+    closeCounter.incr()
+    state.set(Status.Closed)
+  }
+
   private[this] def loop(): Future[Unit] = {
     pingCounter.incr()
     timestampNs = nanoTime()
@@ -94,19 +103,9 @@ private class ThresholdFailureDetector(
         else (closeThreshold * max).nanoseconds
       }
 
-    p.within(busyTimeout).onFailure {
-      case _: TimeoutException => markBusy()
-      case _ =>
-    }
+    p.within(busyTimeout).onFailure(onBusyTimeout)
 
-    p.within(closeTimeout).onFailure {
-      case _: TimeoutException =>
-        closeCounter.incr()
-        close()
-      case _ =>
-    }
-
-    p.transform {
+    p.within(closeTimeout).transform {
       case Return(_) =>
         val rtt = nanoTime() - timestampNs
         pingLatencyStat.add(rtt.toFloat/1000)
@@ -114,16 +113,16 @@ private class ThresholdFailureDetector(
         markOpen()
         Future.sleep(minPeriod - rtt.nanoseconds) before loop()
       case Throw(ex) =>
-        markBusy()
         failureHandler.record(statsReceiver, ex)
+        markClosed()
         Future.exception(ex)
     }
   }
 
   // Note that we assume that the underlying ping() mechanism will
   // simply fail when the accrual detector is no longer required. If
-  // ping can fail in other ways, we may fail to do accrual (and indeed
-  // be forever stuck).
+  // ping can fail in other ways, and closeTimeout is not defined,
+  // we may fail to do accrual (and indeed be forever stuck).
   loop()
 }
 

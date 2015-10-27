@@ -20,7 +20,7 @@ class ThresholdFailureDetectorTest extends FunSuite
       Time.withCurrentTimeFrozen(f)
     }
 
-  private class Ctx(closeThreshold: Int = 1000) {
+  private class Ctx(closeThreshold: Int = 1000, darkMode: Boolean = false) {
     val n = new AtomicInteger(0)
     val latch = new Latch
 
@@ -29,24 +29,19 @@ class ThresholdFailureDetectorTest extends FunSuite
       latch.get
     }
 
-    val c = new AtomicInteger(0)
-
-    def close() = {
-      c.incrementAndGet()
-      Future.Done
-    }
-
     def nanoTime() = Time.now.inNanoseconds
+    val sr = new InMemoryStatsReceiver
 
     val timer = new MockTimer
     val d = new ThresholdFailureDetector(
       ping,
-      close,
       minPeriod = 10.milliseconds,
       threshold = 2,
       windowSize = 5,
       closeThreshold = closeThreshold,
       nanoTime = nanoTime,
+      darkMode = darkMode,
+      statsReceiver = sr,
       timer = timer
     )
   }
@@ -156,24 +151,24 @@ class ThresholdFailureDetectorTest extends FunSuite
     tc.advance(1.milliseconds)
     latch.flip() // rtt = 1, maxPing = 1
     assert(n.get == 1)
-    assert(c.get == 0)
+    assert(sr.counters.get(Seq("close")).isEmpty)
     assert(d.status == Status.Open)
     tc.advance(10.milliseconds)
     timer.tick()
     assert(d.status == Status.Open)
-    tc.advance(10.milliseconds)
-    timer.tick()
-    assert(d.status == Status.Busy)
-    (1 to 1000) foreach { _ =>
+    // after 10ms mark busy, keep in busy state for 1000ms until it closes
+    (1 to 99) foreach { p =>
       tc.advance(10.milliseconds)
       timer.tick()
       assert(d.status == Status.Busy)
     }
-
-    assert(c.get == 1)
+    tc.advance(10.milliseconds)
+    timer.tick()
+    assert(d.status == Status.Closed)
+    assert(sr.counters(Seq("close")) == 1)
   }
 
-  testt("busy if ping throws exceptions") { tc =>
+  testt("close if ping throws exceptions") { tc =>
     def nanoTime() = Time.now.inNanoseconds
     val timer = new MockTimer
     val sr = new InMemoryStatsReceiver
@@ -187,7 +182,6 @@ class ThresholdFailureDetectorTest extends FunSuite
 
     val d = new ThresholdFailureDetector(
       ping,
-      () => Future.Done,
       minPeriod = 10.milliseconds,
       threshold = 2,
       windowSize = 5,
@@ -205,39 +199,24 @@ class ThresholdFailureDetectorTest extends FunSuite
     }
 
     assert(n.get == failAfter)
-    assert(d.status == Status.Busy)
     assert(sr.counters(Seq("failures")) == 1)
-    assert(sr.counters(Seq("marked_busy")) == 1)
+    assert(sr.counters(Seq("close")) == 1)
+    assert(sr.counters.get(Seq("marked_busy")).isEmpty)
   }
 
   testt("darkmode does not change status") { tc =>
-    def nanoTime() = Time.now.inNanoseconds
-    val timer = new MockTimer
-    val sr = new InMemoryStatsReceiver
-    val n = new AtomicInteger(0)
+    val ctx = new Ctx(darkMode = true)
+    import ctx._
 
-    def ping() = {
-      if (n.getAndIncrement() > 0) Future.exception(new Exception("test"))
-      else Future.Done
-    }
+    tc.advance(2.milliseconds)
+    latch.flip() // rtt = 2, maxPing = 2
 
-    val d = new ThresholdFailureDetector(
-      () => ping(),
-      () => Future.Done,
-      minPeriod = 10.milliseconds,
-      threshold = 2,
-      windowSize = 5,
-      closeThreshold = -1,
-      nanoTime = nanoTime,
-      darkMode = true,
-      timer = timer,
-      statsReceiver = sr
-    )
-
-    // one successful ping, then fail
+    // second ping
     tc.advance(10.milliseconds)
     timer.tick()
 
+    tc.advance(5.milliseconds)
+    timer.tick()
     assert(d.status == Status.Open)
     assert(sr.counters(Seq("marked_busy")) == 1)
   }

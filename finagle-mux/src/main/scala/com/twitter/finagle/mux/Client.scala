@@ -190,6 +190,11 @@ private[twitter] class ClientDispatcher (
       for (p <- releaseTag(tag))
         p() = Throw(NackFailure)
 
+    case Rerr(PingTag, error) =>
+      val p = pingPromise.getAndSet(null)
+      if (p != null) {
+        p() = Throw(ServerError(error))
+      }
     case Rerr(tag, error) =>
       for (p <- releaseTag(tag))
         p() = Throw(ServerError(error))
@@ -364,11 +369,8 @@ private[twitter] class ClientDispatcher (
     } else p
   }
 
-  private[this] val detector = {
-    val close = () => trans.close(Time.now)
-    val dsr = sr.scope("failuredetector")
-    FailureDetector(failureDetectorConfig, ping, close, dsr)
-  }
+  private[this] val detector =
+    FailureDetector(failureDetectorConfig, ping, sr.scope("failuredetector"))
 
   override def status: Status =
     Status.worst(detector.status,
