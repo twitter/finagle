@@ -30,8 +30,7 @@ class TraceInitializationTest extends FunSuite {
 
     val (svc, closable) = f(tracer, tracer)
     try Await.result(svc(req)) finally {
-      svc.close()
-      closable.close()
+      Closable.all(svc, closable).close()
     }
 
     assertAnnotationsInOrder(tracer.toSeq, Seq(
@@ -52,9 +51,12 @@ class TraceInitializationTest extends FunSuite {
   test("TraceId is propagated through the protocol") {
     testTraces { (serverTracer, clientTracer) =>
       import com.twitter.finagle
-      val server = finagle.Http.server.configured(param.Tracer(serverTracer)).serve("theServer=:*", Svc)
+      val server = finagle.Http.server
+        .configured(param.Tracer(serverTracer))
+        .configured(param.Label("theServer")).serve(":*", Svc)
       val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
-      val client = finagle.Http.client.configured(param.Tracer(clientTracer)).newService("theClient=:" + port)
+      val client = finagle.Http.client
+        .configured(param.Tracer(clientTracer)).newService(":" + port, "theClient")
       (client, server)
     }
   }
@@ -80,11 +82,13 @@ class TraceInitializationTest extends FunSuite {
     }
   }
 
-  test("TraceId is set when a client does not proagate one") {
+  test("TraceId is set when a client does not propagate one") {
     import com.twitter.finagle
     val tracer = new BufferingTracer
 
-    val server = finagle.Http.server.configured(param.Tracer(tracer)).serve("theServer=:*", Svc)
+    val server = finagle.Http.server
+      .configured(param.Tracer(tracer))
+      .configured(param.Label("theServer")).serve(":*", Svc)
     try {
       val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
       val client = ClientBuilder()

@@ -20,6 +20,13 @@ jdk:
   - oraclejdk8
   - openjdk7
 
+notifications:
+  hipchat:
+    rooms:
+      secure: UlvjA1u/K7a/ykVt9hfRksqI5coq9k5fFqpeGCcEmqPOyrkOnCLj21xHHB16SzUfwy3pqjVK+B8kWORB9zaNyalHZm6I11Ba1hfmPXWemH/qA972IN/hdAQxnMVhhnWqJPzuoVlW7WAFxwltPTbAwDMzIczmsyMv+rCc2Xffiks=
+  template:
+    - '%{repository}: %{message} /cc @csl'
+
 before_script:
   # default $SBT_OPTS is irrelevant to sbt lancher
   - unset SBT_OPTS

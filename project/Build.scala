@@ -372,7 +372,7 @@ object Finagle extends Build {
   lazy val finagleThrift = Project(
     id = "finagle-thrift",
     base = file("finagle-thrift"),
-    settings = Project.defaultSettings ++
+    settings = Project.defaultSettings ++ ScroogeSBT.newSettings ++
       sharedSettings
   ).settings(
     name := "finagle-thrift",
