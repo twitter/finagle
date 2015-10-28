@@ -69,7 +69,7 @@ object FailureDetector {
       minPeriod: Duration = 5.seconds,
       threshold: Double = 2,
       windowSize: Int = 100,
-      closeThreshold: Int = -1)
+      closeTimeout: Duration = Duration.Top)
     extends Config
 
   /**
@@ -87,7 +87,7 @@ object FailureDetector {
       minPeriod: Duration = 5.seconds,
       threshold: Double = 2,
       windowSize: Int = 100,
-      closeThreshold: Int = -1)
+      closeTimeout: Duration = Duration.Top)
     extends Config
 
   /**
@@ -118,11 +118,11 @@ object FailureDetector {
 
       case cfg: DarkModeConfig =>
         new ThresholdFailureDetector(ping, cfg.minPeriod, cfg.threshold,
-          cfg.windowSize, cfg.closeThreshold, darkMode = true, statsReceiver = statsReceiver)
+          cfg.windowSize, cfg.closeTimeout, darkMode = true, statsReceiver = statsReceiver)
 
       case cfg: ThresholdConfig =>
         new ThresholdFailureDetector(ping, cfg.minPeriod, cfg.threshold,
-          cfg.windowSize, cfg.closeThreshold, darkMode = false, statsReceiver = statsReceiver)
+          cfg.windowSize, cfg.closeTimeout, darkMode = false, statsReceiver = statsReceiver)
 
       case GlobalFlagConfig =>
         parseConfigFromFlags(ping, statsReceiver = statsReceiver)
@@ -139,9 +139,9 @@ object FailureDetector {
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): FailureDetector = {
     sessionFailureDetector() match {
-      case list("threshold", duration(min), double(threshold), int(win), int(closeThreshold)) =>
+      case list("threshold", duration(min), double(threshold), int(win), duration(closeTimeout)) =>
         new ThresholdFailureDetector(
-          ping, min, threshold, win, closeThreshold, nanoTime, false, statsReceiver)
+          ping, min, threshold, win, closeTimeout, nanoTime, false, statsReceiver)
 
       case list("threshold", duration(min), double(threshold), int(win)) =>
         new ThresholdFailureDetector(

@@ -20,7 +20,7 @@ class ThresholdFailureDetectorTest extends FunSuite
       Time.withCurrentTimeFrozen(f)
     }
 
-  private class Ctx(closeThreshold: Int = 1000, darkMode: Boolean = false) {
+  private class Ctx(closeTimeout: Duration = 1000.milliseconds, darkMode: Boolean = false) {
     val n = new AtomicInteger(0)
     val latch = new Latch
 
@@ -38,7 +38,7 @@ class ThresholdFailureDetectorTest extends FunSuite
       minPeriod = 10.milliseconds,
       threshold = 2,
       windowSize = 5,
-      closeThreshold = closeThreshold,
+      closeTimeout = closeTimeout,
       nanoTime = nanoTime,
       darkMode = darkMode,
       statsReceiver = sr,
@@ -62,7 +62,7 @@ class ThresholdFailureDetectorTest extends FunSuite
   }
 
   testt("delays pings until reply") { tc =>
-    val ctx = new Ctx(-1)
+    val ctx = new Ctx(Duration.Top)
     import ctx._
 
     assert(n.get == 1)
@@ -185,7 +185,7 @@ class ThresholdFailureDetectorTest extends FunSuite
       minPeriod = 10.milliseconds,
       threshold = 2,
       windowSize = 5,
-      closeThreshold = -1,
+      closeTimeout = Duration.Top,
       nanoTime = nanoTime,
       timer = timer,
       statsReceiver = sr

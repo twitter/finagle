@@ -42,7 +42,7 @@ private class ThresholdFailureDetector(
     minPeriod: Duration = 5.seconds,
     threshold: Double = 2,
     windowSize: Int = 100,
-    closeThreshold: Int = -1,
+    closeTimeout: Duration = Duration.Top,
     nanoTime: () => Long = System.nanoTime,
     darkMode: Boolean = false,
     statsReceiver: StatsReceiver = NullStatsReceiver,
@@ -97,11 +97,6 @@ private class ThresholdFailureDetector(
 
     val max = maxPingNs.get
     val busyTimeout = (threshold * max).toLong.nanoseconds
-    val closeTimeout: Duration =
-      if (closeThreshold <= 0) Duration.Top else {
-        if (max == Long.MinValue) minPeriod * 12 // Arbitrary timeout used for the first ping
-        else (closeThreshold * max).nanoseconds
-      }
 
     p.within(busyTimeout).onFailure(onBusyTimeout)
 

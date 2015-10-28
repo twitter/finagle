@@ -27,6 +27,10 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-mux: `closeThreshold` in `c.t.f.mux.FailureDetector.ThresholdConfig` is
+    changed to `closeTimeout`, from an integer that was used as a multiplier to time
+    duration. This makes it easier to config. ``RB_ID=759406``
+
   * finagle-mux: `c.t.f.FailureDetector.apply` method is changed to private scope,
     to reduce API surface area. Using `FailureDetector.Config` is enough to config
     session based failure detection behavior. ``RB_ID=756833``
