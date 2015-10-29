@@ -49,6 +49,8 @@ object Backoff {
     exponentialJittered(start, maximum, Rng.threadLocal)
 
   private[this] val MinJitter = Duration.fromMilliseconds(1)
+  // Don't shift left more than 62 bits to avoid Long overflow.
+  private[this] val MaxBitShift = 62
 
   /** Exposed for testing */
   private[service] def exponentialJittered(
@@ -61,7 +63,8 @@ object Backoff {
     require(start <= maximum)
     // this is "full jitter" via http://www.awsarchitectureblog.com/2015/03/backoff.html
     def next(attempt: Int): Stream[Duration] = {
-      val maxBackoff = maximum.min(start * (1L << attempt))
+      val shift = math.min(attempt, MaxBitShift)
+      val maxBackoff = maximum.min(start * (1L << shift))
       val random = Duration.fromNanoseconds(rng.nextLong(maxBackoff.inNanoseconds))
       random #:: next(attempt + 1)
     }
@@ -123,7 +126,8 @@ object Backoff {
     require(start <= maximum)
     // this is "equal jitter" via http://www.awsarchitectureblog.com/2015/03/backoff.html
     def next(attempt: Int): Stream[Duration] = {
-      val halfExp = start * (1L << (attempt - 1))
+      val shift = math.min(attempt - 1, MaxBitShift)
+      val halfExp = start * (1L << shift)
       val backoff = maximum.min(halfExp + Duration.fromNanoseconds(rng.nextLong(halfExp.inNanoseconds)))
       backoff #:: next(attempt + 1)
     }

@@ -41,6 +41,10 @@ class BackoffTest extends FunSuite
       val maxBackoffs = Seq(10, 20, 40, 80, 120, 120, 120, 120, 120)
       backoffs.tail.zip(maxBackoffs)
         .foreach { case (b, m) => assert(b <= m) }
+
+      val manyBackoffs = Backoff.exponentialJittered(5.millis, 120.millis, rng)
+        .take(100).force.toSeq
+      assert(100 == manyBackoffs.size)
     }
   }
 
@@ -83,6 +87,9 @@ class BackoffTest extends FunSuite
         assert(b >= min)
         assert(b <= max)
       }
+
+      val manyBackoffs = Backoff.equalJittered(5.millis, maximum, rng).take(100).force.toSeq
+      assert(100 == manyBackoffs.size)
     }
   }
 
