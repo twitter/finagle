@@ -29,15 +29,20 @@ private object NullFailureDetector extends FailureDetector {
 
 /**
  * GlobalFlag to configure FailureDetection used only in the
- * absence of any app-specified config. This is the default (legacy)
+ * absence of any app-specified config. This is the default
  * behavior.
+ *
+ * Value of:
+ * "none": turn off threshold failure detector
+ * "dark": turn off threshold failure detector; but pings remote
+ *         servers, and export stats.
+ * "threshold:minPeriod:threshold:win:closeTimeout":
+ *         use the specified configuration for failure detection
  */
 object sessionFailureDetector extends GlobalFlag(
-  // by default, use `DarkModeConfig` to just send pings.
-  // This is an intermediate step to use `ThresholdConfig()`.
-  "dark",
+  "threshold:5.seconds:2:100:duration.top",
   "The failure detector used to determine session liveness " +
-      "[none|dark|threshold:minPeriod:threshold:win:closeThreshold]")
+      "[none|dark|threshold:minPeriod:threshold:win:closeTimeout]")
 
 
 /**
