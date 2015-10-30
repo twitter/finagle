@@ -1,12 +1,14 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.serverset2.client.{SessionState, WatchState}
 import com.twitter.finagle.stats.{Gauge, Stat, StatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
 import java.nio.charset.Charset
 import scala.collection.concurrent.{TrieMap => ConcurrentTrieMap}
+
 
 private[serverset2] object ServiceDiscoverer {
 
@@ -28,6 +30,26 @@ private[serverset2] object ServiceDiscoverer {
       ent -> w
     }
   }
+
+  /**
+   * ZooKeeper client health as observed by the ServiceDiscoverer.
+   */
+  private[serverset2] sealed trait ClientHealth
+  private[serverset2] object ClientHealth {
+    case object Healthy extends ClientHealth
+    case object Unhealthy extends ClientHealth
+
+    def apply(sessionState: SessionState): ClientHealth = {
+      sessionState match {
+        case SessionState.Expired | SessionState.NoSyncConnected
+             | SessionState.Unknown | SessionState.AuthFailed
+             | SessionState.Disconnected => Unhealthy
+        case SessionState.ConnectedReadOnly | SessionState.SaslAuthenticated
+            | SessionState.SyncConnected => Healthy
+      }
+    }
+  }
+
 }
 
 /**
@@ -36,10 +58,17 @@ private[serverset2] object ServiceDiscoverer {
  *
  * Given a ServerSet path, [[apply]] looks up the set and returns a
  * dynamic set of (entry, weight) tuples.
+ * @param varZkSession: The active, connected zkSession. This session
+ *    may change in response to normal zookeeper changes
+ *    (such as servers restarting).
+ * @param statsReceiver: Scoped statsReceiver
+ * @param healthStabilizationEpoch: Used in stabilizing the reporting
+ *  health changes of the underlying ZkSession
  */
 private[serverset2] class ServiceDiscoverer(
   varZkSession: Var[ZkSession],
-  statsReceiver: StatsReceiver
+  statsReceiver: StatsReceiver,
+  healthStabilizationEpoch: Epoch
 ) {
   import ServiceDiscoverer._
 
@@ -49,7 +78,7 @@ private[serverset2] class ServiceDiscoverer(
   private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
   private[this] val logger = Logger(getClass)
 
-  private[this] var gauges: Seq[Gauge] = Seq.empty
+  private[this] var gauges: Seq[Gauge] = Seq.empty[Gauge]
 
   // visible for testing.
   private[serverset2] val entriesOfCluster = Memoize { clusterPath: String =>
@@ -72,6 +101,39 @@ private[serverset2] class ServiceDiscoverer(
         u() = Activity.Ok(zkSession)
       }
     })
+
+  /**
+   * Monitor the session status of the ZkSession and expose to listeners whether
+   * the connection is healthy or unhealthy. Exposed for testing
+   */
+  private[serverset2] val rawHealth: Var[ClientHealth] = Var.async[ClientHealth](ClientHealth.Healthy) { u =>
+    @volatile var stateListener = Closable.nop
+
+    val sessionChanges = varZkSession.changes.dedup.respond { zk =>
+      // When the zk session changes, we need to stop observing changes
+      // to the previous session.
+      synchronized {
+        stateListener.close()
+        stateListener = zk.state.changes.dedup.respond {
+          case WatchState.SessionState(state) =>
+            u() = ClientHealth(state)
+          case _ => // don't need to update on non-sessionstate events
+        }
+      }
+    }
+
+    Closable.all(sessionChanges,
+      Closable.make(t => stateListener.close(t))
+    )
+  }
+
+  /**
+   * Monitor the session state of the ZkSession within a HealthStabilizer
+   * which only reports unhealthy when the rawHealth has been unhealthy for
+   * a long enough time (as defined by the stabilization epoch).
+   */
+  private[serverset2] val health: Var[ClientHealth] =
+    HealthStabilizer(rawHealth, healthStabilizationEpoch, statsReceiver)
 
   private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
     val elapsed = Stopwatch.start()

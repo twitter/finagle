@@ -2,9 +2,11 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
+import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
 import com.twitter.finagle.{FixedInetResolver, Addr, Resolver}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.logging.Logger
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -41,20 +43,23 @@ private[serverset2] object Zk2Resolver {
  * @param statsReceiver: maintains stats and gauges used in resolution
  * @param removalWindow: how long a member stays in limbo before it is removed from a ServerSet
  * @param batchWindow: how long do we batch up change notifications before finalizing a ServerSet
+ * @param unhealthyWindow: how long must the zk client be unhealthy for us to report before
+ *                       reporting trouble
  * @param timer: timer to use for stabilization and zk sessions
  */
 class Zk2Resolver(
     statsReceiver: StatsReceiver,
     removalWindow: Duration,
     batchWindow: Duration,
+    unhealthyWindow: Duration,
     timer: Timer = DefaultTimer.twitter)
   extends Resolver {
   import Zk2Resolver._
 
-  def this() = this(DefaultStatsReceiver.scope("zk2"), 40.seconds, 5.seconds, DefaultTimer.twitter)
+  def this() = this(DefaultStatsReceiver.scope("zk2"), 40.seconds, 5.seconds, 5.minutes, DefaultTimer.twitter)
 
   def this(statsReceiver: StatsReceiver) =
-    this(statsReceiver, 40.seconds, 5.seconds, DefaultTimer.twitter)
+    this(statsReceiver, 40.seconds, 5.seconds, 5.minutes, DefaultTimer.twitter)
 
   val scheme = "zk2"
 
@@ -62,9 +67,11 @@ class Zk2Resolver(
 
   private[this] val inetResolver = FixedInetResolver(statsReceiver)
   private[this] val sessionTimeout = 10.seconds
-  private[this] val removalEpoch = Stabilizer.epochs(removalWindow)
-  private[this] val batchEpoch = Stabilizer.epochs(batchWindow)
+  private[this] val removalEpoch = Epoch(removalWindow)
+  private[this] val batchEpoch = Epoch(batchWindow)
+  private[this] val unhealthyEpoch = Epoch(unhealthyWindow)
   private[this] val nsets = new AtomicInteger(0)
+  private[this] val logger = Logger(getClass)
 
   // Cache of ServiceDiscoverer instances.
   private[this] val discoverers = Memoize.snappable[String, ServiceDiscoverer] { hosts =>
@@ -72,7 +79,10 @@ class Zk2Resolver(
       ServiceDiscoverer.DefaultRetrying,
       () => ZkSession(hosts, sessionTimeout = sessionTimeout)
     )
-    new ServiceDiscoverer(varZkSession, statsReceiver)
+    // scope the stats per zk host set
+    // (string can be a long vip or set, keep the first 30 chars which should be sufficient)
+    val hostPrefix = hosts.take(30)
+    new ServiceDiscoverer(varZkSession, statsReceiver.scope(hostPrefix), unhealthyEpoch)
   }
 
   private[this] val gauges = Seq(
@@ -138,13 +148,13 @@ class Zk2Resolver(
 
       // The stabilizer ensures that we qualify changes by putting
       // removes in a limbo state for at least one removalEpoch, and emitting
-      // at most one update per batchEopch.
+      // at most one update per batchEpoch.
       val stabilized = Stabilizer(va, removalEpoch, batchEpoch)
 
       // Finally we output `State`s, which are always nonpending
       // address coupled with statistics from the stabilization
       // process.
-      val states = (stabilized.changes joinLast va.changes) collect {
+      val states = stabilized.changes.joinLast(va.changes) collect {
         case (stable, unstable) if stable != Addr.Pending =>
           val nstable = sizeOf(stable)
           val nunstable = sizeOf(unstable)
@@ -158,7 +168,9 @@ class Zk2Resolver(
         // stable Addr doesn't vary.
         var lastu: Addr = Addr.Pending
 
-        val reg = states.register(Witness { state: State =>
+        val reg = (discoverer.health.changes joinLast states).register(Witness { tuple =>
+          val (clientHealth, state) = tuple
+
           if (chatty()) {
             eprintf("New state for %s!%s: %s\n",
               path, endpointOption getOrElse "default", state)
@@ -168,9 +180,17 @@ class Zk2Resolver(
             val State(addr, _nlimbo, _size) = state
             nlimbo = _nlimbo
             size = _size
-            if (lastu != addr) {
-              lastu = addr
-              u() = addr
+
+            val newAddr =
+              if (clientHealth == ClientHealth.Unhealthy) {
+                logger.info("ZkResolver reports unhealthy. resolution moving to Addr.Pending")
+                Addr.Pending
+              }
+              else addr
+
+            if (lastu != newAddr) {
+              lastu = newAddr
+              u() = newAddr
             }
           }
         })

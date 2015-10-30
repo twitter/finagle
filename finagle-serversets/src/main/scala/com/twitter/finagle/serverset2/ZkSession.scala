@@ -3,7 +3,7 @@ package com.twitter.finagle.serverset2
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.util.{DefaultTimer, Rng}
+import com.twitter.finagle.util.Rng
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -17,7 +17,7 @@ import com.twitter.util._
  * with [[com.twitter.util.Future Futures]]; watches and session states are
  * represented with a [[com.twitter.util.Var]].
  */
-private class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Timer) {
+private[serverset2] class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Timer) {
   import ZkSession.randomizedDelay
   import ZkSession.logger
 

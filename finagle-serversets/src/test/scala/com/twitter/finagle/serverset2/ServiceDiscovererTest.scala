@@ -1,17 +1,22 @@
 package com.twitter.finagle.serverset2
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
 import com.twitter.finagle.serverset2.ZkOp.{GetData, GetChildrenWatch, ExistsWatch}
-import com.twitter.finagle.serverset2.client.{Node, NodeEvent, Data, WatchState, Watched}
+import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.io.Buf
 import com.twitter.util._
 import org.junit.runner.RunWith
+import org.mockito.Mockito.when
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
+import org.scalatest.mock.MockitoSugar
+import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(classOf[JUnitRunner])
-class ServiceDiscovererTest extends FunSuite {
+class ServiceDiscovererTest extends FunSuite with MockitoSugar {
   def ep(port: Int) = Endpoint(Array(null), "localhost", port, Int.MinValue, Endpoint.Status.Alive, port.toString)
+  val ForeverEpoch = Epoch(Duration.Top)(new MockTimer)
 
   test("ServiceDiscoverer.zipWithWeights") {
     val port1 = 80 // not bound
@@ -34,7 +39,7 @@ class ServiceDiscovererTest extends FunSuite {
   test("New observation do not cause reads; entries are cached") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver)
+    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver, ForeverEpoch)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
 
@@ -59,7 +64,7 @@ class ServiceDiscovererTest extends FunSuite {
   test("Removed entries are removed from cache") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver)
+    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver, ForeverEpoch)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val cache = sd.entriesOfCluster("/foo/bar")
@@ -146,4 +151,87 @@ class ServiceDiscovererTest extends FunSuite {
     assert(f2.isDefined)
   }
   */
+
+  def newZkSession(): (ZkSession, Witness[WatchState]) = {
+    val mockZkSession = mock[ZkSession]
+    val watchStateEvent = Event[WatchState]()
+    val watchStateVar = Var[WatchState](WatchState.Pending, watchStateEvent)
+    when(mockZkSession.state).thenReturn(watchStateVar)
+
+    (mockZkSession, watchStateEvent)
+  }
+
+  test("ServiceDiscoverer stabile health is reported correctly") {
+    Time.withCurrentTimeFrozen { timeControl =>
+      val zkSession = Event[ZkSession]()
+      val varZkSession = Var[ZkSession](ZkSession.nil, zkSession)
+      val period = 1.second
+      implicit val timer = new MockTimer
+      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, Epoch(period)(timer))
+
+      val stabilizedHealth = new AtomicReference[ClientHealth](ClientHealth.Healthy)
+      sd.health.changes.register(Witness {
+        stabilizedHealth
+      })
+
+      // should start as healthy until updated otherwise
+      assert(stabilizedHealth.get == ClientHealth.Healthy)
+
+      val (session1, state1) = newZkSession()
+      zkSession.notify(session1)
+      assert(stabilizedHealth.get == ClientHealth.Healthy)
+
+      // make unhealthy without turning the clock
+      state1.notify(WatchState.SessionState(SessionState.Expired))
+      assert(stabilizedHealth.get == ClientHealth.Healthy)
+      timer.tick()
+
+      //advance past the health period to make the stabilized health unhealthy
+      timeControl.advance(period)
+      timer.tick()
+      assert(stabilizedHealth.get == ClientHealth.Unhealthy)
+
+      // flip to a new session
+      val (session2, state2) = newZkSession()
+      state2.notify(WatchState.SessionState(SessionState.SyncConnected))
+      zkSession.notify(session2)
+      assert(stabilizedHealth.get == ClientHealth.Healthy)
+    }
+  }
+
+  test("ServiceDiscoverer rawHealth is reported correctly") {
+      val zkSession = Event[ZkSession]()
+      val varZkSession = Var[ZkSession](ZkSession.nil, zkSession)
+      val sd = new ServiceDiscoverer(varZkSession, NullStatsReceiver, ForeverEpoch)
+
+      val health = new AtomicReference[ClientHealth](ClientHealth.Healthy)
+      sd.rawHealth.changes.register(Witness {
+        health
+      })
+
+      // should start as healthy until updated otherwise
+      assert(health.get == ClientHealth.Healthy)
+
+      val (session1, state1) = newZkSession()
+      zkSession.notify(session1)
+      assert(health.get == ClientHealth.Healthy)
+
+      // make unhealthy
+      state1.notify(WatchState.SessionState(SessionState.Expired))
+      assert(health.get == ClientHealth.Unhealthy)
+
+      // flip to a new session
+      val (session2, state2) = newZkSession()
+      state2.notify(WatchState.SessionState(SessionState.SyncConnected))
+      zkSession.notify(session2)
+      assert(health.get == ClientHealth.Healthy)
+
+      // pulse the bad session (which is NOT the current session) and ensure we stay healthy
+      state1.notify(WatchState.SessionState(SessionState.Disconnected))
+      assert(health.get == ClientHealth.Healthy)
+
+      // pulse the current session with an event that should be ignored
+      state2.notify(WatchState.Pending)
+      assert(health.get == ClientHealth.Healthy)
+  }
 }

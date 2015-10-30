@@ -57,6 +57,10 @@ the ServerSet's ZooKeeper path.
   A gauge tracking the total size of the live cluster, not including
   members in limbo.
 
+**zkHealth**
+  A gauge tracking the health of the underlying zk client as seen by the resolver.
+  Unknown(0), Healthy(1), Unhealthy(2), Probation(3)
+
 **observed_serversets**
   A gauge tracking the number of clusters whose membership status is
   *currently* been tracked within the process. This metric differs from

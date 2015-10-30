@@ -1,31 +1,28 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.{Addr, WeightedSocketAddress}
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Event, Witness, Var, Time, Timer, Duration}
+import com.twitter.util._
 import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicInteger
+
+/**
+ * An Epoch is a Event that notifies its listener
+ * once per `period`
+ */
+private [serverset2] object Epoch {
+  def apply(period: Duration)(implicit timer: Timer): Epoch =
+    new Epoch(new Event[Unit] {
+      override def register(w: Witness[Unit]): Closable =
+        timer.schedule(period) {
+          w.notify(())
+        }
+    }, period)
+}
+
+private[serverset2] class Epoch(
+    val event: Event[Unit],
+    val period: Duration)
 
 private[serverset2] object Stabilizer {
-
-  class Epoch(
-    val event: Event[Unit],
-    val period: Duration
-  )
-
-  // Create an event of epochs for the given duration.
-  def epochs(period: Duration)(implicit timer: Timer): Epoch =
-    new Epoch(
-      new Event[Unit] {
-        def register(w: Witness[Unit]) = {
-          timer.schedule(period) {
-            w.notify(())
-          }
-        }
-      },
-      period
-    )
 
   // Used for delaying removals
   private case class State(

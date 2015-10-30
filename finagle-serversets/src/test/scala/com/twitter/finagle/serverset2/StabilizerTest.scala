@@ -22,10 +22,10 @@ class StabilizerTest extends FunSuite {
     val va = Var[Addr](Addr.Pending)
     val removalEvent = Event[Unit]()
     val batchEvent = Event[Unit]()
-    val removalEpoch = new Stabilizer.Epoch(removalEvent, -1.seconds)
-    val batchEpoch = new Stabilizer.Epoch(batchEvent, -1.seconds)
+    val removalEpoch = new Epoch(removalEvent, -1.seconds)
+    val batchEpoch = new Epoch(batchEvent, -1.seconds)
 
-    val slowBatchEpoch = new Stabilizer.Epoch(batchEvent, 10.seconds)
+    val slowBatchEpoch = new Epoch(batchEvent, 10.seconds)
 
     val stable = Stabilizer(va, removalEpoch, batchEpoch)
     val ref = new AtomicReference[Addr]
