@@ -6,9 +6,14 @@ We'd love to get patches from you!
 
 We are not currently publishing snapshots for Finagle's dependencies, which
 means that it may be necessary to publish the `develop` branches of these
-libraries locally in order to work on Finagle's `develop` branch. To do this you
-should clone [Util][util] and [Ostrich][ostrich], check out their `develop`
-branches, and run `./sbt +publishLocal` for each project.
+libraries locally in order to work on Finagle's `develop` branch. To do so
+you can run `./bin/travisci` script and pass it a `TRAVIS_SCALA_VERSION`
+environment variable. For example, the following command locally publishes
+all the Finagle dependencies built for Scala 2.11.7.
+
+```
+TRAVIS_SCALA_VERSION=2.11.7 ./bin/travisci
+```
 
 We are planning to begin publishing snapshots soon, which will make these steps
 unnecessary. If you have any questions or run into any problems, please create

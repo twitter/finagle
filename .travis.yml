@@ -4,6 +4,9 @@ sudo: required
 
 language: scala
 
+env:
+  - SKIP_FLAKY=true
+
 # These directories are cached to S3 at the end of the build
 cache:
   directories:
@@ -24,8 +27,6 @@ notifications:
   hipchat:
     rooms:
       secure: UlvjA1u/K7a/ykVt9hfRksqI5coq9k5fFqpeGCcEmqPOyrkOnCLj21xHHB16SzUfwy3pqjVK+B8kWORB9zaNyalHZm6I11Ba1hfmPXWemH/qA972IN/hdAQxnMVhhnWqJPzuoVlW7WAFxwltPTbAwDMzIczmsyMv+rCc2Xffiks=
-  template:
-    - '%{repository}: %{message} /cc @csl'
 
 before_script:
   # default $SBT_OPTS is irrelevant to sbt lancher
