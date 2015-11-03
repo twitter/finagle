@@ -1,7 +1,7 @@
 package com.twitter.finagle.thriftmux
 
-import com.twitter.finagle.{Path, Failure, mux, Dtab, ThriftMuxUtil}
-import com.twitter.finagle.mux.{BadMessageException, Message}
+import com.twitter.finagle.{Path, Failure, Dtab, ThriftMuxUtil}
+import com.twitter.finagle.mux.transport.{BadMessageException, Message, Netty3Framer}
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift._
@@ -387,8 +387,8 @@ private[finagle] class PipelineFactory(
     statsReceiver.addGauge("connections") { thriftMuxConnectionCount.get() }
 
   def getPipeline(): ChannelPipeline = {
-    val pipeline = mux.PipelineFactory.getPipeline()
-    pipeline.addLast("upgrader", new Upgrader)
+    val pipeline = Netty3Framer.getPipeline()
+    pipeline.addAfter("framer", "upgrader", new Upgrader)
     pipeline
   }
 }

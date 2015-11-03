@@ -1,11 +1,12 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.Stack.Param
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.RetryPolicy
+import com.twitter.finagle.Stack.Param
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.tracing.Trace
@@ -13,10 +14,10 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future, NonFatal}
 import java.net.SocketAddress
-import org.apache.thrift.TException
 import org.apache.thrift.protocol.TProtocolFactory
+import org.apache.thrift.TException
 import org.apache.thrift.transport.TMemoryInputTransport
-import org.jboss.netty.buffer.{ChannelBuffer => CB}
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * The `ThriftMux` object is both a [[com.twitter.finagle.Client]] and a
@@ -213,9 +214,10 @@ object ThriftMux
     stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
     params: Stack.Params = Mux.server.params + ProtocolLibrary("thriftmux")
   ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
-    protected type In = CB
-    protected type Out = CB
-    
+
+    protected type In = ChannelBuffer
+    protected type Out = ChannelBuffer
+
     private[this] val muxStatsReceiver = {
       val Stats(statsReceiver) = params[Stats]
       statsReceiver.scope("mux")
@@ -226,21 +228,21 @@ object ThriftMux
       params: Stack.Params = this.params
     ) = copy(stack, params)
 
-    protected def newListener(): Listener[CB, CB] = {
+    protected def newListener(): Listener[In, Out] = {
       val Stats(sr) = params[Stats]
       val scoped = sr.scope("thriftmux")
       val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
 
-      // Create a Listener that maintains gauges of how many ThriftMux and non-Mux
-      // downgraded connections are listening to clients.
-      new Listener[CB, CB] {
-        private[this] val underlying = Netty3Listener[CB, CB](
+      // Create a Listener with a pipeline that can downgrade the connection
+      // to vanilla thrift.
+      new Listener[In, Out] {
+        private[this] val underlying = Netty3Listener[In, Out](
           new thriftmux.PipelineFactory(scoped, pf),
           params
         )
 
         def listen(addr: SocketAddress)(
-          serveTransport: Transport[CB, CB] => Unit
+          serveTransport: Transport[In, Out] => Unit
         ): ListeningServer = underlying.listen(addr)(serveTransport)
       }
     }
@@ -251,7 +253,7 @@ object ThriftMux
     ): Closable = {
       val param.Tracer(tracer) = params[param.Tracer]
       mux.ServerDispatcher.newRequestResponse(
-        transport, service, 
+        transport.map(Message.encode, Message.decode), service,
         mux.lease.exp.ClockedDrainer.flagged,
         tracer, muxStatsReceiver)
     }

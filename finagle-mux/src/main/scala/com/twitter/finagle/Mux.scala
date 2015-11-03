@@ -5,6 +5,7 @@ import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.mux.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
+import com.twitter.finagle.mux.transport.{Message, Netty3Framer}
 import com.twitter.finagle.param.ProtocolLibrary
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
@@ -12,7 +13,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 import java.net.SocketAddress
-import org.jboss.netty.buffer.{ChannelBuffer => CB}
+import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
@@ -64,18 +65,20 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = CB
-    protected type Out = CB
+    protected type In = ChannelBuffer
+    protected type Out = ChannelBuffer
 
     protected def newTransporter(): Transporter[In, Out] =
-      Netty3Transporter(mux.PipelineFactory, params)
-    override protected def newDispatcher(
-      transport: Transport[CB, CB]
+      Netty3Transporter(Netty3Framer, params)
+
+    protected def newDispatcher(
+      transport: Transport[In, Out]
     ): Service[mux.Request, mux.Response] = {
       val param.Stats(sr) = params[param.Stats]
       val param.Label(name) = params[param.Label]
       val FailureDetector.Param(failDetectorConfig) = params[FailureDetector.Param]
-      new mux.ClientDispatcher(name, transport, sr.scope("mux"), failDetectorConfig)
+      val msgTrans = transport.map(Message.encode, Message.decode)
+      new mux.ClientDispatcher(name, msgTrans, sr.scope("mux"), failDetectorConfig)
     }
   }
 
@@ -100,8 +103,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
 
-    protected type In = CB
-    protected type Out = CB
+    protected type In = ChannelBuffer
+    protected type Out = ChannelBuffer
 
     private[this] val statsReceiver = {
       val param.Stats(statsReceiver) = params[param.Stats]
@@ -109,7 +112,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
 
     protected def newListener(): Listener[In, Out] =
-      Netty3Listener(mux.PipelineFactory, params)
+      Netty3Listener(Netty3Framer, params)
+
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[mux.Request, mux.Response]
@@ -117,7 +121,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val param.Tracer(tracer) = params[param.Tracer]
       val Lessor.Param(lessor) = params[Lessor.Param]
 
-      mux.ServerDispatcher.newRequestResponse(transport, service, lessor, tracer, statsReceiver)
+      val msgTrans = transport.map(Message.encode, Message.decode)
+      mux.ServerDispatcher.newRequestResponse(msgTrans, service, lessor, tracer, statsReceiver)
     }
   }
 

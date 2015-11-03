@@ -56,7 +56,7 @@ trait Codec[Req, Rep] {
     new ChannelTransport(ch)
 
   def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
-    new SerialClientDispatcher(transport.cast[Req, Rep])
+    new SerialClientDispatcher(Transport.cast[Req, Rep](transport))
 
   def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params): Service[Req, Rep] =
     newClientDispatcher(transport)
@@ -65,7 +65,7 @@ trait Codec[Req, Rep] {
     transport: Transport[Any, Any],
     service: Service[Req, Rep]
   ): Closable =
-    new SerialServerDispatcher[Req, Rep](transport.cast[Rep, Req], service)
+    new SerialServerDispatcher[Req, Rep](Transport.cast[Rep, Req](transport), service)
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to

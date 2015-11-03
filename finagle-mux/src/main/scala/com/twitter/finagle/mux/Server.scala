@@ -5,6 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
@@ -12,8 +13,8 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.util._
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
+import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.annotation.tailrec
@@ -147,7 +148,7 @@ private[twitter] object ServerDispatcher {
    * Construct a new request-response dispatcher.
    */
   def newRequestResponse(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Message, Message],
     service: Service[Request, Response],
     lessor: Lessor,
     tracer: Tracer,
@@ -160,7 +161,7 @@ private[twitter] object ServerDispatcher {
    * null lessor, tracer, and statsReceiver.
    */
   def newRequestResponse(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Message, Message],
     service: Service[Request, Response]
   ): ServerDispatcher =
     newRequestResponse(trans, service, Lessor.nil, NullTracer, NullStatsReceiver)
@@ -177,13 +178,12 @@ private[twitter] object ServerDispatcher {
  * handles concerns of leasing and draining.
  */
 private[twitter] class ServerDispatcher(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Message, Message],
     service: Service[Message, Message],
     lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
     tracer: Tracer,
     statsReceiver: StatsReceiver
 ) extends Closable with Lessee {
-  import Message._
   import ServerDispatcher.State
 
   private[this] implicit val injectTimer = DefaultTimer.twitter
@@ -193,18 +193,18 @@ private[twitter] class ServerDispatcher(
   private[this] val state: AtomicReference[State.Value] =
     new AtomicReference(State.Open)
 
-  @volatile private[this] var lease = Tlease.MaxLease
+  @volatile private[this] var lease = Message.Tlease.MaxLease
   @volatile private[this] var curElapsed = NilStopwatch.start()
   lessor.register(this)
 
   private[this] def write(m: Message): Future[Unit] =
-    trans.write(encode(m))
+    trans.write(m)
 
   private[this] def isAccepting: Boolean =
     !tracker.isDraining && (!nackOnExpiredLease() || (lease > Duration.Zero))
 
   private[this] def process(m: Message): Unit = m match {
-    case (_: Tdispatch | _: Treq) if isAccepting =>
+    case (_: Message.Tdispatch | _: Message.Treq) if isAccepting =>
       // A misbehaving client is sending duplicate pending tags.
       // Note that, since the client is managing multiple outstanding
       // requests for this tag, and we're returning an Rerr here, there
@@ -216,7 +216,7 @@ private[twitter] class ServerDispatcher(
       // (e.g., session termination).
       if (tracker.isTracking(m.tag)) {
         log.warning(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
-        write(Rerr(m.tag, s"Duplicate tag ${m.tag}"))
+        write(Message.Rerr(m.tag, s"Duplicate tag ${m.tag}"))
         return
       }
 
@@ -228,40 +228,40 @@ private[twitter] class ServerDispatcher(
           write(rep)
         case Throw(exc) =>
           log.log(Level.WARNING, s"Error processing message $m", exc)
-          write(Rerr(m.tag, exc.toString))
+          write(Message.Rerr(m.tag, exc.toString))
       }
 
     // Dispatch when !isAccepting
-    case d: Tdispatch =>
-      write(RdispatchNack(d.tag, Nil))
-    case r: Treq =>
-      write(RreqNack(r.tag))
+    case d: Message.Tdispatch =>
+      write(Message.RdispatchNack(d.tag, Nil))
+    case r: Message.Treq =>
+      write(Message.RreqNack(r.tag))
 
-    case _: Tping =>
-      service(m) respond {
+    case _: Message.Tping =>
+      service(m).respond {
         case Return(rep) => write(rep)
-        case Throw(exc) => write(Rerr(m.tag, exc.toString))
+        case Throw(exc) => write(Message.Rerr(m.tag, exc.toString))
       }
 
-    case Tdiscarded(tag, why) =>
+    case Message.Tdiscarded(tag, why) =>
       tracker.get(tag) match {
         case Some(reply) =>
           reply.raise(new ClientDiscardedRequestException(why))
         case None =>
       }
 
-    case Rdrain(1) if state.get == State.Draining =>
+    case Message.Rdrain(1) if state.get == State.Draining =>
       tracker.drain()
 
-    case m@Tmessage(tag) =>
-      val msg = Rerr(tag, f"Did not understand Tmessage ${m.typ}%d")
+    case m@Message.Tmessage(tag) =>
+      val msg = Message.Rerr(tag, f"Did not understand Tmessage ${m.typ}%d")
       write(msg)
   }
 
   private[this] def loop(): Unit =
-    Future.each(trans.read) { buf =>
+    Future.each(trans.read) { msg =>
       val save = Local.save()
-      process(decode(buf))
+      process(msg)
       Local.restore(save)
     } ensure { hangup(Time.now) }
 
@@ -315,10 +315,10 @@ private[twitter] class ServerDispatcher(
     }
 
     statsReceiver.counter("draining").incr()
-    val done = write(Tdrain(1)) before
+    val done = write(Message.Tdrain(1)) before
       tracker.drained.within(deadline-Time.now) before
       trans.close(deadline)
-    done transform {
+    done.transform {
       case Return(_) =>
         statsReceiver.counter("drained").incr()
         Future.Done
@@ -334,14 +334,14 @@ private[twitter] class ServerDispatcher(
     * equal to 0, also nack all requests until a new lease is issued.
     */
   def issue(howlong: Duration): Unit = {
-    require(howlong >= Tlease.MinLease)
+    require(howlong >= Message.Tlease.MinLease)
 
     synchronized {
       val diff = (lease - curElapsed()).abs
       if (diff > ServerDispatcher.Epsilon) {
         curElapsed = Stopwatch.start()
         lease = howlong
-        write(Tlease(howlong min Tlease.MaxLease))
+        write(Message.Tlease(howlong min Message.Tlease.MaxLease))
       } else if ((howlong < Duration.Zero) && (lease > Duration.Zero)) {
         curElapsed = Stopwatch.start()
         lease = howlong
@@ -368,7 +368,10 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
       (ChannelBufferBuf.Owned(k.duplicate), ChannelBufferBuf.Owned(v.duplicate))
   }
 
-  private[this] def dispatch(tdispatch: Tdispatch, service: Service[Request, Response]): Future[Message] = {
+  private[this] def dispatch(
+    tdispatch: Message.Tdispatch,
+    service: Service[Request, Response]
+  ): Future[Message] = {
     val contextBufs = tdispatch.contexts.map(ContextsToBufs)
 
     Contexts.broadcast.letUnmarshal(contextBufs) {
@@ -387,25 +390,28 @@ private[finagle] object Processor extends Filter[Message, Message, Request, Resp
     }
   }
 
-  private[this] def dispatch(treq: Treq, service: Service[Request, Response]): Future[Message] = {
+  private[this] def dispatch(
+    treq: Message.Treq,
+    service: Service[Request, Response]
+  ): Future[Message] = {
     Trace.letIdOption(treq.traceId) {
       service(Request(Path.empty, ChannelBufferBuf.Owned(treq.req))).transform {
         case Return(rep) =>
           Future.value(RreqOk(treq.tag, BufChannelBuffer(rep.body)))
 
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-          Future.value(RreqNack(treq.tag))
+          Future.value(Message.RreqNack(treq.tag))
 
         case Throw(exc) =>
-          Future.value(RreqError(treq.tag, exc.toString))
+          Future.value(Message.RreqError(treq.tag, exc.toString))
       }
     }
   }
 
   def apply(req: Message, service: Service[Request, Response]): Future[Message] = req match {
-    case d: Tdispatch => dispatch(d, service)
-    case r: Treq => dispatch(r, service)
-    case Tping(tag) => Future.value(Rping(tag))
+    case d: Message.Tdispatch => dispatch(d, service)
+    case r: Message.Treq => dispatch(r, service)
+    case Message.Tping(tag) => Future.value(Message.Rping(tag))
     case m => Future.exception(new IllegalArgumentException(s"Cannot process message $m"))
   }
 }

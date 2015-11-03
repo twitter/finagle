@@ -56,24 +56,27 @@ trait Transport[In, Out] extends Closable { self =>
   /**
    * The peer certificate if a TLS session is established.
    */
-  private[finagle] def peerCertificate: Option[Certificate]
+  def peerCertificate: Option[Certificate]
 
   /**
-   * Cast this transport to `Transport[In1, Out1]`. Note that this is
-   * generally unsafe: only do this when you know the cast is
-   * guaranteed safe.
+   * Maps this transport to `Transport[In1, Out2]`. Note, exceptions
+   * in `f` and `g` are lifted to a [[com.twitter.util.Future]].
+   *
+   * @param f The function applied to `write`s input.
+   * @param g The function applied to the result of a `read`
    */
-  def cast[In1, Out1]: Transport[In1, Out1] = new Transport[In1, Out1] {
-    def write(req: In1) = self.write(req.asInstanceOf[In])
-    def read(): Future[Out1] = self.read().asInstanceOf[Future[Out1]]
-    def status = self.status
-    val onClose = self.onClose
-    def localAddress = self.localAddress
-    def remoteAddress = self.remoteAddress
-    private[finagle] def peerCertificate = self.peerCertificate
-    def close(deadline: Time) = self.close(deadline)
-    override def toString: String = self.toString
-  }
+  def map[In1, Out1](f: In1 => In, g: Out => Out1): Transport[In1, Out1] =
+    new Transport[In1, Out1] {
+      def write(req: In1): Future[Unit] = Future(f(req)).flatMap(self.write)
+      def read(): Future[Out1] = self.read().map(g)
+      def status = self.status
+      val onClose = self.onClose
+      def localAddress = self.localAddress
+      def remoteAddress = self.remoteAddress
+      def peerCertificate = self.peerCertificate
+      def close(deadline: Time) = self.close(deadline)
+      override def toString: String = self.toString
+    }
 }
 
 /**
@@ -229,6 +232,15 @@ object Transport {
       raise(new Reader.ReaderDiscarded)
     }
   }
+
+  /**
+   * Casts an object transport to `Transport[In1, Out1]`. Note that this is
+   * generally unsafe: only do this when you know the cast is guaranteed safe.
+   * This is useful when coercing a netty object pipeline into a typed transport,
+   * for example.
+   */
+  def cast[In1, Out1](trans: Transport[Any, Any]): Transport[In1, Out1] =
+    trans.map(_.asInstanceOf[Any], _.asInstanceOf[Out1])
 }
 
 /**
@@ -268,5 +280,5 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   val onClose = closep
   val localAddress = new SocketAddress{}
   val remoteAddress = new SocketAddress{}
-  private[finagle] def peerCertificate: Option[Certificate] = None
+  def peerCertificate: Option[Certificate] = None
 }

@@ -33,7 +33,7 @@ class HttpTransport(self: Transport[Any, Any], manager: ConnectionManager)
       case NonFatal(e) => Future.exception(e)
     }
 
-  def status = 
+  def status =
     if (manager.shouldClose) finagle.Status.Closed
     else self.status
 
@@ -41,7 +41,7 @@ class HttpTransport(self: Transport[Any, Any], manager: ConnectionManager)
 
   def remoteAddress = self.remoteAddress
 
-  private[finagle] def peerCertificate = self.peerCertificate
+  def peerCertificate = self.peerCertificate
 
   val onClose = self.onClose
 }

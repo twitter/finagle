@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.mux.util
 
 import java.util.HashMap
 import scala.reflect.ClassTag
@@ -8,7 +8,7 @@ import scala.reflect.ClassTag
  * Tags are acquired from- and released to- `set`. TagMap maintains
  * the first `fastSize` tags in an array for efficient access.
  */
-private trait TagMap[T] extends Iterable[(Int, T)] {
+private[mux] trait TagMap[T] extends Iterable[(Int, T)] {
   /**
    * If a tag is available, an unused tag is returned and `el` is
    * associated with it. Otherwise, None is returned.
@@ -35,7 +35,7 @@ private trait TagMap[T] extends Iterable[(Int, T)] {
   def get(tag: Int): Option[T]
 }
 
-private object TagMap {
+private[mux] object TagMap {
   def apply[T <: Object: ClassTag](
       set: TagSet,
       fastSize: Int = 256

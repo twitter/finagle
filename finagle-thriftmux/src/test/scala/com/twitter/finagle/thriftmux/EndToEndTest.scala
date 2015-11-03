@@ -11,17 +11,18 @@ import com.twitter.finagle.service.Requeues
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientFramedCodec, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.thriftscala.{TestService, TestService$FinagleClient, TestService$FinagleService}
-import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.tracing._
+import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Closable, Future, Promise, Return, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
-import org.apache.thrift.TApplicationException
 import org.apache.thrift.protocol._
+import org.apache.thrift.TApplicationException
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with AssertionsForJUnit {
@@ -640,7 +641,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
     response.setValue("done")
 
-    assert(Await.result(close, 1.second) === ())
+    assert(Await.result(close, 1.second) === (()))
     assert(Await.result(f, 1.second) === "done")
 
   }

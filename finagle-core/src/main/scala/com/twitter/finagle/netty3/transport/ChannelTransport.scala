@@ -139,7 +139,7 @@ class ChannelTransport[In, Out](ch: Channel)
   def localAddress: SocketAddress = ch.getLocalAddress()
   def remoteAddress: SocketAddress = ch.getRemoteAddress()
 
-  private[finagle] val peerCertificate: Option[Certificate] =
+  val peerCertificate: Option[Certificate] =
     ch.getPipeline.get(classOf[SslHandler]) match {
       case null => None
       case handler =>

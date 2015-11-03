@@ -1,5 +1,6 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.mux.util
 
+import com.twitter.finagle.mux.transport.Message
 import java.util.BitSet
 import scala.collection.immutable.Range
 
@@ -8,7 +9,7 @@ import scala.collection.immutable.Range
  * within a specified range. TagSets reuses smaller available
  * tags before issuing larger ones.
  */
-private trait TagSet extends Iterable[Int] {
+private[mux] trait TagSet extends Iterable[Int] {
   /** The range of tags maintained by this TagSet */
   val range: Range
   /** Acquire a tag, if available */
@@ -17,7 +18,7 @@ private trait TagSet extends Iterable[Int] {
   def release(tag: Int)
 }
 
-private object TagSet {
+private[mux] object TagSet {
   /**
    * Constructs a space-efficient TagSet for the range of available
    * tags in the mux protocol.

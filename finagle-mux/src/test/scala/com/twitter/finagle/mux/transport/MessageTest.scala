@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.mux.transport
 
 import com.twitter.finagle.{Path, tracing, Dtab, Dentry}
 import com.twitter.io.Charsets
@@ -11,7 +11,9 @@ import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
-class ProtoTest extends FunSuite with AssertionsForJUnit {
+class MessageTest extends FunSuite with AssertionsForJUnit {
+  import Message._
+
   def buf(n: Int) = ChannelBuffers.wrappedBuffer((0 until n).toArray.map(_.toByte))
   val body = buf(4)
 
@@ -30,8 +32,6 @@ class ProtoTest extends FunSuite with AssertionsForJUnit {
   val goodTimeLeases = Seq(Time.epoch, Time.now, Time.now + 5.minutes)
   val goodContexts =
     Seq() ++ (for { k <- goodKeys; v <- goodBufs } yield (k, v)).combinations(2).toSeq
-
-  import Message._
 
   test("d(e(m)) == m") {
     val ms = mutable.Buffer[Message]()
@@ -107,14 +107,10 @@ class ProtoTest extends FunSuite with AssertionsForJUnit {
     assert(intercept[BadMessageException] {
       encode(Treq(-1, Some(tracing.Trace.nextId), body))
     } === BadMessageException("invalid tag number -1"))
-    /*assert(intercept[BadMessageException] {
-      encode(Treq(0, Some(tracing.Trace.nextId), body))
-    } === BadMessageException("invalid tag number 0"))*/
     assert(intercept[BadMessageException] {
-      encode(Treq(1<<24, Some(tracing.Trace.nextId), body))
+      encode(Treq(1 << 24, Some(tracing.Trace.nextId), body))
     } === BadMessageException("invalid tag number 16777216"))
   }
-
 
   test("not decode invalid messages") {
     assert(intercept[BadMessageException] {

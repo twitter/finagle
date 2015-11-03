@@ -85,7 +85,7 @@ case class Spdy(
         new ChannelTransport(ch)
 
       override def newClientDispatcher(transport: Transport[Any, Any]) =
-        new SpdyClientDispatcher(transport.cast[HttpRequest, HttpResponse])
+        new SpdyClientDispatcher(Transport.cast[HttpRequest, HttpResponse](transport))
     }
   }
 
@@ -113,7 +113,7 @@ case class Spdy(
           transport: Transport[Any, Any],
           service: Service[HttpRequest, HttpResponse]
       ): Closable = new SpdyServerDispatcher(
-        transport.cast[HttpResponse, HttpRequest], service)
+        Transport.cast[HttpResponse, HttpRequest](transport), service)
     }
   }
 

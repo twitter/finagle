@@ -3,8 +3,8 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.mux.Message._
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
@@ -43,9 +43,9 @@ class EndToEndTest extends FunSuite
 
     val svc = Service.mk[Request, Response](_ => p)
 
-    val q0, q1 = new AsyncQueue[ChannelBuffer]
-    val clientTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q0, q1)
-    val serverTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q1, q0)
+    val q0, q1 = new AsyncQueue[Message]
+    val clientTrans = new QueueTransport[Message, Message](q0, q1)
+    val serverTrans = new QueueTransport[Message, Message](q1, q0)
 
     val server = ServerDispatcher.newRequestResponse(serverTrans, svc)
     val client = new ClientDispatcher("test", clientTrans, NullStatsReceiver, FailureDetector.NullConfig)
@@ -296,14 +296,14 @@ EOF
 
       eventually { assert(leaseDuration() === format(Time.Top - Time.now)) }
       eventually { assert(available() === 1) }
-      lessor.list.foreach(_.issue(Tlease.MinLease))
+      lessor.list.foreach(_.issue(Message.Tlease.MinLease))
       eventually { assert(leaseCtr() === 1) }
       ctl.advance(2.seconds) // must advance time to re-lease and expire
-      eventually { assert(leaseDuration() === format(Tlease.MinLease - 2.seconds)) }
+      eventually { assert(leaseDuration() === format(Message.Tlease.MinLease - 2.seconds)) }
       eventually { assert(available() === 0) }
-      lessor.list.foreach(_.issue(Tlease.MaxLease))
+      lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
       eventually { assert(leaseCtr() === 2) }
-      eventually { assert(leaseDuration() === format(Tlease.MaxLease)) }
+      eventually { assert(leaseDuration() === format(Message.Tlease.MaxLease)) }
       eventually { assert(available() === 1) }
 
       Closable.sequence(Await.result(fclient), server, factory).close()

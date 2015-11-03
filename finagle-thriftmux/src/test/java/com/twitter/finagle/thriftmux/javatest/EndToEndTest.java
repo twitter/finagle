@@ -18,6 +18,7 @@ import com.twitter.finagle.param.Label;
 import com.twitter.finagle.thrift.ClientId;
 import com.twitter.finagle.thriftmux.thriftscala.TestService;
 import com.twitter.finagle.thriftmux.thriftscala.TestService$FinagleService;
+import com.twitter.util.Await;
 import com.twitter.util.Future;
 
 import static junit.framework.Assert.assertEquals;
@@ -28,7 +29,7 @@ public class EndToEndTest {
    * Tests interfaces.
    */
   @Test
-  public void testInterfaces() {
+  public void testInterfaces() throws Exception {
     ListeningServer server =
       ThriftMux.server().serveIface("localhost:*", new TestService.FutureIface() {
         public Future<String> query(String x) {
@@ -38,7 +39,7 @@ public class EndToEndTest {
 
     TestService.FutureIface client =
       ThriftMux.client().newIface(server, TestService.FutureIface.class);
-    assertEquals(client.query("ok").get(), "okok");
+    assertEquals(Await.result(client.query("ok")), "okok");
   }
 
   /**

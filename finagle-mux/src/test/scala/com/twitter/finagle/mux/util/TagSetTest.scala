@@ -1,4 +1,4 @@
-package com.twitter.finagle.mux
+package com.twitter.finagle.mux.util
 
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

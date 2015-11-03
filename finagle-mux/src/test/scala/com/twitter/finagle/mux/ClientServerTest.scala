@@ -3,6 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
@@ -11,11 +12,11 @@ import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
+import org.mockito.invocation.InvocationOnMock
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
-import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -39,13 +40,21 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   val tracer = new BufferingTracer
 
   class Ctx {
+    import Message.{encode, decode}
 
-    val clientToServer = new AsyncQueue[ChannelBuffer]
-    val serverToClient = new AsyncQueue[ChannelBuffer]
+    val clientToServer = new AsyncQueue[Message]
+    val serverToClient = new AsyncQueue[Message]
+
     val serverTransport =
-      new QueueTransport(writeq=serverToClient, readq=clientToServer)
+      new QueueTransport(writeq=serverToClient, readq=clientToServer) {
+        override def write(m: Message) = super.write(decode(encode(m)))
+      }
+
     val clientTransport =
-      new QueueTransport(writeq=clientToServer, readq=serverToClient)
+      new QueueTransport(writeq=clientToServer, readq=serverToClient) {
+        override def write(m: Message) = super.write(decode(encode(m)))
+      }
+
     val service = mock[Service[Request, Response]]
     val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver, FailureDetector.GlobalFlagConfig)
     val nping = new AtomicInteger(0)
@@ -122,10 +131,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       for (i <- 0 until 5) {
         assert(nping.get === i)
         val pinged = client.ping()
-        assert(!pinged.isDefined)
+        assert(!pinged.isDone)
         assert(nping.get === i+1)
         pingRep.flip()
-        assert(pinged.isDefined && Await.result(pinged) == ())
+        assert(pinged.isDone)
       }
     }
   }
@@ -136,10 +145,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       import ctx._
 
       val pinged = (client.ping() join client.ping()).unit
-      assert(!pinged.isDefined)
+      assert(!pinged.isDone)
       assert(nping.get === 2)
       pingRep.flip()
-      assert(pinged.isDefined && Await.result(pinged) == ())
+      assert(pinged.isDone)
     }
   }
 
