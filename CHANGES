@@ -13,6 +13,9 @@ New Features
   * finagle-core: `c.t.f.Server` now has a `serveAndAnnounce` method that accepts a `SocketAddress`
     as an address.
 
+  * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
+    method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -45,6 +48,12 @@ Breaking API Changes
 
   * finagle-core: `BackupRequestLost` is no longer itself an `Exception`. Use
     `BackupRequestLost.Exeption` in its place. ``RB_ID=758056``
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-thrift: `c.t.f.ThriftRichClient` scoped stats label is now threaded
+    properly through `newServiceIface` ``RB_ID=760157``
 
 6.30.0
 ~~~~~~~
