@@ -6,7 +6,7 @@ import com.twitter.finagle.http.HttpMuxHandler
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.Buf
 import com.twitter.jsr166e.LongAdder
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.events.{Event, Sink}
 import com.twitter.util.lint.{Issue, Category, Rule, GlobalRules}
 import com.twitter.util.{Time, Throw, Try}
@@ -229,6 +229,8 @@ class MetricsStatsReceiver(
    * Create and register a counter inside the underlying Metrics library
    */
   def counter(names: String*): Counter = {
+    if (log.isLoggable(Level.TRACE))
+      log.trace(s"Calling StatsReceiver.counter on $names")
     counterRequests.increment()
     var counter = counters.get(names)
     if (counter == null) counters.synchronized {
@@ -259,6 +261,8 @@ class MetricsStatsReceiver(
    * Create and register a stat (histogram) inside the underlying Metrics library
    */
   def stat(names: String*): Stat = {
+    if (log.isLoggable(Level.TRACE))
+      log.trace(s"Calling StatsReceiver.stat for $names")
     statRequests.increment()
     var stat = stats.get(names)
     if (stat == null) stats.synchronized {
@@ -290,6 +294,8 @@ class MetricsStatsReceiver(
   }
 
   override def addGauge(name: String*)(f: => Float): Gauge = {
+    if (log.isLoggable(Level.TRACE))
+      log.trace(s"Calling StatsReceiver.addGauge for $name")
     gaugeRequests.increment()
     super.addGauge(name: _*)(f)
   }
