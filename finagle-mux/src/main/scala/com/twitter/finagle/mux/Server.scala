@@ -12,6 +12,7 @@ import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
+import com.twitter.logging.HasLogLevel
 import com.twitter.util._
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import java.util.concurrent.ConcurrentHashMap
@@ -26,7 +27,12 @@ import scala.collection.JavaConverters._
  * This implies that the client issued a Tdiscarded message for a given tagged
  * request, as per [[com.twitter.finagle.mux]].
  */
-case class ClientDiscardedRequestException(why: String) extends Exception(why)
+case class ClientDiscardedRequestException(why: String)
+  extends Exception(why)
+  with HasLogLevel
+{
+  def logLevel: com.twitter.logging.Level = com.twitter.logging.Level.DEBUG
+}
 
 object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled. " +
   "Temporary measure to allow servers to deploy without hurting clients.")

@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.finagle.Failure
-import com.twitter.logging.{Logger, Level}
+import com.twitter.logging.{HasLogLevel, Logger, Level}
 import com.twitter.util.{RootMonitor, Monitor, NullMonitor}
 import java.net.SocketAddress
 
@@ -15,7 +15,7 @@ private[util] class DefaultMonitor(log: Logger) extends Monitor {
 
   def handle(exc: Throwable): Boolean = {
     exc match {
-      case f: Failure if f.logLevel.value < MinLogLevel =>
+      case f: HasLogLevel if f.logLevel.value < MinLogLevel =>
         log.log(f.logLevel, f, "Exception propagated to DefaultMonitor")
         true
       case _ =>

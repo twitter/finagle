@@ -9,6 +9,7 @@ import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
+import com.twitter.logging.HasLogLevel
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
 import java.net.SocketAddress
 import java.util.IdentityHashMap
@@ -367,7 +368,7 @@ private[netty3] class ServerBridge[In, Out](
   private[this] val writeTimeoutCounter = statsReceiver.counter("write_timeout")
 
   private[this] def severity(exc: Throwable): Level = exc match {
-    case e: Failure => e.logLevel
+    case e: HasLogLevel => e.logLevel
     case
         _: java.nio.channels.ClosedChannelException
       | _: javax.net.ssl.SSLException

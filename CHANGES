@@ -46,9 +46,6 @@ Breaking API Changes
     to reduce API surface area. Using `FailureDetector.Config` is enough to config
     session based failure detection behavior. ``RB_ID=756833``
 
-  * finagle-core: `BackupRequestLost` is no longer itself an `Exception`. Use
-    `BackupRequestLost.Exeption` in its place. ``RB_ID=758056``
-
 Bug Fixes
 ~~~~~~~~~
 

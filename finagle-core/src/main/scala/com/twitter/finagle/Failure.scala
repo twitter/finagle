@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.logging.Level
+import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.Future
 import scala.annotation.tailrec
 
@@ -11,13 +11,16 @@ import scala.annotation.tailrec
  * mark attributes of the Failure (e.g. Restartable).
  */
 final class Failure private[finagle](
-  private[finagle] val why: String,
-  val cause: Option[Throwable] = None,
-  val flags: Long = 0L,
-  protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
-  val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace,
-  val logLevel: Level = Level.WARNING
-) extends Exception(why, cause.orNull) with NoStacktrace {
+    private[finagle] val why: String,
+    val cause: Option[Throwable] = None,
+    val flags: Long = 0L,
+    protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
+    val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace,
+    val logLevel: Level = Level.WARNING)
+  extends Exception(why, cause.orNull)
+  with NoStacktrace
+  with HasLogLevel
+{
   import Failure._
 
   require(!isFlagged(Wrapped) || cause.isDefined)
@@ -40,19 +43,19 @@ final class Failure private[finagle](
     copy(stacktrace = Thread.currentThread.getStackTrace())
 
   /**
-   * This failure with the given flags added. 
+   * This failure with the given flags added.
    *
    * See [[Failure$ Failure]] for flag definitions.
    */
   def flagged(addFlags: Long): Failure =
-    if ((flags & addFlags ) == addFlags) this else 
+    if ((flags & addFlags ) == addFlags) this else
       copy(flags = flags | addFlags)
 
   /**
    * This failure with the given flags removed.
    *
    * See [[Failure$ Failure]] forflag definitions.
-   */  
+   */
   def unflagged(delFlags: Long): Failure =
     if ((flags & delFlags) == 0) this else
       copy(flags = flags & ~delFlags)
@@ -118,7 +121,7 @@ final class Failure private[finagle](
     }
   }
 
-  override def hashCode = 
+  override def hashCode: Int =
     why.hashCode ^
     cause.hashCode ^
     flags.hashCode ^
@@ -147,7 +150,7 @@ object Failure {
    * is ''restartable'' -- that is, it is safe to simply re-issue the action.
    */
   val Restartable: Long = 1L << 0
-  
+
   /**
    * Flag interrupted indicates that the error was caused due to an
    * interruption. (e.g., by invoking [[Future.raise]].)
@@ -165,7 +168,7 @@ object Failure {
    * Flag naming indicates a naming failure. This is Finagle-internal.
    */
   private[finagle] val Naming: Long = 1L << 32
-  
+
   // Flags that are showable to a user.
   private val ShowMask: Long = Interrupted
 
@@ -177,7 +180,7 @@ object Failure {
       new Failure("unknown", None, flags, logLevel = logLevel)
     else if (cause.getMessage == null)
       new Failure(cause.getClass.getName, Some(cause), flags, logLevel = logLevel)
-    else 
+    else
       new Failure(cause.getMessage, Some(cause), flags, logLevel = logLevel)
 
   /**
@@ -232,14 +235,14 @@ object Failure {
 
   /**
    * Adapt an exception. If the passed-in exception is already a failure,
-   * this returns a chained failure with the assigned flags. If it is not, 
+   * this returns a chained failure with the assigned flags. If it is not,
    * it returns a new failure with the given flags.
    */
   def adapt(exc: Throwable, flags: Long): Failure = exc match {
     case f: Failure => f.chained.flagged(flags)
     case exc => Failure(exc, flags)
   }
-  
+
   /**
    * Create a new wrapped Failure with the given flags. If the passed-in exception
    * is a failure, it is simply extended, otherwise a new Failure is created.
@@ -280,7 +283,7 @@ object Failure {
     else f.cause match {
       case Some(inner: Failure) => show(inner)
       case Some(inner: Throwable) => inner
-      case None => 
+      case None =>
         throw new IllegalArgumentException("Wrapped failure without a cause")
     }
   }
@@ -301,7 +304,7 @@ object Failure {
       case f: Failure => Future.exception(f.show)
     }
 
-    def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = 
+    def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
       service(req).rescue(Process)
   }
 
@@ -310,11 +313,11 @@ object Failure {
   /**
    * A module to strip out dangerous flags; more coming soon.
    */
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = 
+  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
     new Stack.Module0[ServiceFactory[Req, Rep]] {
       val role = Failure.role
       val description = "process failures"
-      
+
       private[this] val filter = new ProcessFailures[Req, Rep]
 
       def make(next: ServiceFactory[Req, Rep]) = filter andThen next

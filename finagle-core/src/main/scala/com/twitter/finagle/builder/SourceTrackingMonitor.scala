@@ -1,6 +1,7 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle.{Failure, SourcedException}
+import com.twitter.logging.HasLogLevel
 import com.twitter.util.Monitor
 import java.io.IOException
 import java.util.logging.{Level, Logger}
@@ -15,7 +16,7 @@ class SourceTrackingMonitor(logger: Logger, which: String) extends Monitor {
     // we don't want these noisy IOExceptions leaking into the logs.
     val level = exc match {
       case _: IOException => Level.FINE
-      case f: Failure => f.logLevel
+      case f: HasLogLevel => f.logLevel
       case _ => Level.SEVERE
     }
     logger.log(

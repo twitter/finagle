@@ -104,7 +104,7 @@ class StatsFilterTest extends FunSuite {
   }
 
   test("don't report BackupRequestLost exceptions") {
-    for (exc <- Seq(BackupRequestLost.Exception, WriteException(BackupRequestLost.Exception))) {
+    for (exc <- Seq(BackupRequestLost, WriteException(BackupRequestLost))) {
       val (promise, receiver, statsService) = getService()
 
       // It may seem strange to test for the absence
@@ -115,7 +115,7 @@ class StatsFilterTest extends FunSuite {
       assert(!receiver.counters.keys.exists(_ contains "failure"))
       statsService("foo")
       assert(receiver.gauges(Seq("pending"))() === 1.0)
-      promise.setException(BackupRequestLost.Exception)
+      promise.setException(BackupRequestLost)
       assert(!receiver.counters.keys.exists(_ contains "failure"))
       assert(!receiver.counters.contains(Seq("requests")))
       assert(!receiver.counters.contains(Seq("success")))
