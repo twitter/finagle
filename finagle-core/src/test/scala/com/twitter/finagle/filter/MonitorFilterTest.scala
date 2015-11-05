@@ -1,18 +1,19 @@
 package com.twitter.finagle.filter
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
+import com.twitter.conversions.time._
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.integration.{IntegrationBase, StringCodec}
+import com.twitter.finagle.{ChannelException, Service, ServiceFactory, SourcedException, Status}
+import com.twitter.util._
+import java.net.{InetAddress, InetSocketAddress}
+import java.util.logging.{Level, Logger, StreamHandler}
 import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
-import org.mockito.{Matchers, Mockito}
 import org.mockito.Matchers._
 import org.mockito.Mockito.{times, verify, when}
-import com.twitter.finagle.{ServiceFactory, ChannelException, SourcedException, Service, Status}
-import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
-import com.twitter.util._
-import java.util.logging.{Level, StreamHandler, Logger}
-import java.net.{InetAddress, InetSocketAddress}
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import org.mockito.{Matchers, Mockito}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase {
@@ -109,6 +110,10 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
       Matchers.eq(Level.SEVERE),
       Matchers.eq("A server service FakeService2 on behalf of FakeService1 threw an exception"),
       Matchers.eq(outer))
+
+    // need to properly close the client and the server, otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
+    Await.ready(server.close(), 1.second)
   }
 
   test("MonitorFilter should when attached to a client, report source for sourced exceptions") {

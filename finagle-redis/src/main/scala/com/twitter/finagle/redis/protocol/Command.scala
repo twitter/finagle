@@ -141,6 +141,16 @@ object Commands {
   val PFCOUNT           = "PFCOUNT"
   val PFMERGE           = "PFMERGE"
 
+  // Scripts
+  val EVAL              = "EVAL"
+  val EVALSHA           = "EVALSHA"
+  val SCRIPT            = "SCRIPT"
+  val FLUSH             = "FLUSH"
+  val LOAD              = "LOAD"
+  val SCRIPTEXISTS      = "SCRIPT EXISTS"
+  val SCRIPTFLUSH       = "SCRIPT FLUSH"
+  val SCRIPTLOAD        = "SCRIPT LOAD"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -266,6 +276,8 @@ object Commands {
     PFADD             -> {PFAdd(_)},
     PFCOUNT           -> {PFCount(_)},
     PFMERGE           -> {PFMerge(_)}
+
+    // TODO: add Scripts command map
 
   )
 
@@ -410,6 +422,18 @@ object CommandBytes {
   val PFADD             = StringToChannelBuffer("PFADD")
   val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
   val PFMERGE           = StringToChannelBuffer("PFMERGE")
+
+  // Scripts
+  val EVAL              = StringToChannelBuffer("EVAL")
+  val EVALSHA           = StringToChannelBuffer("EVALSHA")
+  val SCRIPT            = StringToChannelBuffer("SCRIPT")
+  val FLUSH             = StringToChannelBuffer("FLUSH")
+  val LOAD              = StringToChannelBuffer("LOAD")
+  val SCRIPTEXISTS      = StringToChannelBuffer("SCRIPT EXISTS")
+  val SCRIPTFLUSH       = StringToChannelBuffer("SCRIPT FLUSH")
+  val SCRIPTLOAD        = StringToChannelBuffer("SCRIPT LOAD")
+  // SCRIPT EXISTS, SCRIPT LOAD, SCRIPT FLUSH are subcommands
+  // which must not be transmitted as a whole ChannelBuffer
 }
 
 

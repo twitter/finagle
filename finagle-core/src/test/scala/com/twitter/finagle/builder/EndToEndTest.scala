@@ -5,10 +5,10 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{RetryPolicy, TimeoutFilter}
+import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, CountDownLatch, Future, Promise}
-import java.net.{InetAddress, SocketAddress, InetSocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -47,6 +47,9 @@ class EndToEndTest extends FunSuite {
     assert(!response.isDefined)
     constRes.setValue("foo")
     assert(Await.result(response, 1.second) == "foo")
+
+    // need to properly close the server, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(server.close(), 1.second)
   }
 
   test("Finagle client should queue requests while waiting for cluster to initialize") {
@@ -88,6 +91,9 @@ class EndToEndTest extends FunSuite {
     }
     thread.start()
     thread.join()
+
+    // need to properly close the server, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(server.close(), 1.second)
   }
 
   test("ClientBuilder should be properly instrumented on service application failure") {
@@ -180,6 +186,9 @@ class EndToEndTest extends FunSuite {
 
     assert(requests == 1)
     assert(triesRequests == 1)
+
+    // need to properly close the client, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 
   test("ClientBuilderClient.ofCodec should be properly instrumented on success") {
@@ -213,5 +222,8 @@ class EndToEndTest extends FunSuite {
 
     assert(requests == 1)
     assert(triesRequests == 1)
+
+    // need to properly close the client, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 }
