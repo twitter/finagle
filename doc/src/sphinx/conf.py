@@ -49,6 +49,7 @@ extlinks = {
   'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example '),
   'api': ('http://twitter.github.io/finagle/docs/#%s', ''),
   'util': ('http://twitter.github.io/util/docs/#%s', ''),
+  'util-stats-src':("https://github.com/twitter/util/blob/master/util-stats/src/main/scala/%s", 'util-stats github repo'),
   'src':("https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/%s", 'finagle-core github repo')
 }
 
