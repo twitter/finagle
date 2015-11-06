@@ -123,16 +123,6 @@ object ClientConfig {
     implicit val param = Stack.Param(GlobalTimeout(Duration.Top))
   }
 
-  // private[twitter] for historical use, but should be private[builder]
-  // and may become so in the future.
-  private[twitter] case class Retries(policy: RetryPolicy[Try[Nothing]]) {
-    def mk(): (Retries, Stack.Param[Retries]) =
-      (this, Retries.param)
-  }
-  private[twitter] object Retries {
-    implicit val param = Stack.Param(Retries(RetryPolicy.Never))
-  }
-
   private[builder] case class Daemonize(onOrOff: Boolean) {
     def mk(): (Daemonize, Stack.Param[Daemonize]) =
       (this, Daemonize.param)
@@ -605,6 +595,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       This is only applicable to service-builds (`build()`).
    *
    * @see [[com.twitter.finagle.service.RetryPolicy.tries]]
+   *
+   * @see [[retryBudget]] for governing how many failed requests are
+   * eligible for retries.
    */
   def retries(value: Int): This =
     retryPolicy(RetryPolicy.tries(value))
@@ -617,9 +610,24 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *       codecs that include exceptions, such as `Thrift`.
    *
    *       This is only applicable to service-builds (`build()`).
+   *
+   * @see [[retryBudget]] for governing how many failed requests are
+   * eligible for retries.
    */
   def retryPolicy(value: RetryPolicy[Try[Nothing]]): This =
-    configured(Retries(value))
+    configured(Retries.Policy(value))
+
+  /**
+   * The [[RetryBudget budget]] is shared across requests and governs
+   * the number of retries that can be made.
+   *
+   * Helps prevent clients from overwhelming the downstream service.
+   *
+   * @see [[retryPolicy]] for per-request rules on which failures are
+   * eligible for retries.
+   */
+  def retryBudget(budget: RetryBudget): This =
+    configured(Retries.Budget(budget))
 
   /**
    * Sets the TCP send buffer size.
@@ -915,33 +923,11 @@ private object ClientBuilderClient {
   import ClientConfig._
   import com.twitter.finagle.param._
 
-  private class RetryFilterModule[Req, Rep]
-      extends Stack.Module3[Stats, Retries, HighResTimer, ServiceFactory[Req, Rep]] {
-    override val role = new Stack.Role("ClientBuilder RetryFilter")
-    override val description = "Application-configured retries"
-
-    override def make(
-      statsP: Stats,
-      retriesP: Retries,
-      timerP: HighResTimer,
-      next: ServiceFactory[Req, Rep]
-    ) = {
-      val Stats(statsReceiver) = statsP
-      val Retries(policy) = retriesP
-      val HighResTimer(timer) = timerP
-
-      if (policy eq RetryPolicy.Never) next
-      else {
-        val retries = new RetryExceptionsFilter[Req, Rep](policy, timer, statsReceiver)
-        retries andThen next
-      }
-    }
-  }
-
   private class StatsFilterModule[Req, Rep]
       extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
     override val role = new Stack.Role("ClientBuilder StatsFilter")
-    override val description = "Record request stats scoped to 'tries'"
+    override val description =
+      "Record request stats scoped to 'tries', measured after any retries have occurred"
 
     override def make(
       statsP: Stats,
@@ -1035,8 +1021,8 @@ private object ClientBuilderClient {
         .transformed(new Stack.Transformer {
           def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]) =
             stack
-              .insertBefore(Requeues.role, new StatsFilterModule[Req, Rep])
-              .insertBefore(Requeues.role, new RetryFilterModule[Req, Rep])
+              .insertBefore(Retries.Role, new StatsFilterModule[Req, Rep])
+              .replace(Retries.Role, Retries.moduleWithRetryPolicy[Req, Rep])
               .prepend(new GlobalTimeoutModule[Req, Rep])
               .prepend(new ExceptionSourceFilterModule[Req, Rep])
         })

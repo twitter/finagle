@@ -83,7 +83,7 @@ object StackClient {
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.FactoryToService]]
-   * @see [[com.twitter.finagle.service.Requeues]]
+   * @see [[com.twitter.finagle.service.Retries]]
    * @see [[com.twitter.finagle.tracing.ClientTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    */
@@ -139,7 +139,7 @@ object StackClient {
      *    load balancer on each request (and closes it after the
      *    response completes).
      *
-     *  * `Requeues` retries `RetryPolicy.RetryableWriteException`s
+     *  * `Retries` retries `RetryPolicy.RetryableWriteException`s
      *    automatically. It must appear above `FactoryToService` so
      *    that service acquisition failures are retried.
      */
@@ -150,7 +150,7 @@ object StackClient {
     stk.push(TimeoutFactory.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
-    stk.push(Requeues.module)
+    stk.push(Retries.moduleRequeueable)
 
     /*
      * These modules deal with name resolution and request

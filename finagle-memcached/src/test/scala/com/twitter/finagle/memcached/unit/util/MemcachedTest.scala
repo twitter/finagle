@@ -57,13 +57,12 @@ class MemcachedTest extends FunSuite
     val numberRequests = 10
     Time.withCurrentTimeFrozen { _ =>
       for (i <- 0 until numberRequests)
-        intercept[WriteException](Await.result(client.get("foo")))
+        intercept[WriteException](Await.result(client.get("foo"), 3.seconds))
       // Since FactoryToService is enabled, number of requeues should be
-      // limited by leaky bucket util it exhausts retries, instead of
-      // retrying 25 times on service acquisition
-      assert(st.counters(Seq("memcache", "requeue", "budget_exhausted")) == numberRequests)
-      // number of requeues = 100 reserved tokens + 20% of qps in the time window
-      assert(st.counters(Seq("memcache", "requeue", "requeues")) == numberRequests/5 + 100)
+      // limited by leaky bucket until it exhausts retries, instead of
+      // retrying 25 times on service acquisition.
+      // number of requeues = maxRetriesPerReq * numRequests
+      assert(st.counters(Seq("memcache", "retries", "requeues")) > numberRequests)
     }
   }
 }

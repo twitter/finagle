@@ -1,7 +1,6 @@
 package com.twitter.finagle.util
 
 import com.twitter.jsr166e.LongAdder
-import com.twitter.util.Time
 import java.util.Arrays
 import java.util.concurrent.atomic.AtomicInteger
 

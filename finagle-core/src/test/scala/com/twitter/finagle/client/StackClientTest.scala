@@ -7,6 +7,7 @@ import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.service.FailFastFactory.FailFast
+import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
@@ -239,35 +240,38 @@ class StackClientTest extends FunSuite
       .configured(param.Label("myclient"))
       .newClient("/$/inet/localhost/0")
 
-    def requeues = sr.counters.get(Seq("myclient", "requeue", "requeues"))
-    def budget = sr.gauges(Seq("myclient", "requeue", "budget"))()
+    def requeues = sr.counters.get(Seq("myclient", "retries", "requeues"))
+    def budget = sr.gauges(Seq("myclient", "retries", "budget"))()
   }
+
+  // we get 20% of the budget, which is given 100 minimum retries
+  private val DefaultRequeues = 20
 
   test("requeue failing requests when the stack is Open")(new RequeueCtx {
     val session = cl()
     val b = budget
     // failing request and Open load balancer => max requeues
-    Await.ready(session.map(_("hi")))
-    assert(requeues === Some(b))
-    assert(budget === 0)
+    Await.ready(session.map(_("hi")), 5.seconds)
+    assert(requeues == Some(DefaultRequeues))
+    assert(budget == b - DefaultRequeues)
   })
 
   for (status <- Seq(Status.Busy, Status.Closed)) {
     test(s"don't requeue failing requests when the stack is $status")(new RequeueCtx {
       // failing request and Busy | Closed load balancer => zero requeues
       _status = status
-      Await.ready(cl().map(_("hi")))
-      assert(!requeues.isDefined)
+      Await.ready(cl().map(_("hi")), 5.seconds)
+      assert(requeues.isEmpty)
     })
   }
 
   test("dynamically stop requeuing")(new RequeueCtx {
     // load balancer begins Open, becomes Busy after 10 requeues => 10 requeues
     _status = Status.Open
-    runSideEffect = _ > 10
+    runSideEffect = _ > DefaultRequeues
     sideEffect = () => _status = Status.Busy
-    Await.ready(cl().map(_("hi")))
-    assert(requeues === Some(10))
+    Await.ready(cl().map(_("hi")), 5.seconds)
+    assert(requeues == Some(DefaultRequeues))
   })
 
   test("service acquisition requeues use a separate fixed budget")(new RequeueCtx {
@@ -278,7 +282,7 @@ class StackClientTest extends FunSuite
       def close(deadline: Time) = Future.Done
     }
 
-    intercept[Failure] { Await.result(cl()) }
+    intercept[Failure] { Await.result(cl(), 5.seconds) }
     assert(requeues.isDefined)
     assert(budget > 0)
   })
@@ -291,16 +295,16 @@ class StackClientTest extends FunSuite
       def close(deadline: Time) = Future.Done
     }
 
-    intercept[Failure] { Await.result(cl()) }
+    intercept[Failure] { Await.result(cl(), 5.seconds) }
 
-    assert(!requeues.isDefined)
+    assert(requeues.isEmpty)
     assert(budget > 0)
   })
 
   test("service acquisition requeues respect Status.Open")(new RequeueCtx {
     _status = Status.Closed
-    Await.result(cl())
-    assert(!requeues.isDefined)
+    Await.result(cl(), 5.seconds)
+    assert(requeues.isEmpty)
     assert(budget > 0)
   })
 
@@ -371,10 +375,10 @@ class StackClientTest extends FunSuite
         BindingFactory.BaseDtab(() => baseDtab)))
 
     intercept[ChannelWriteException] {
-      Await.result(service(()))
+      Await.result(service(()), 5.seconds)
     }
 
-    val requeues = sr.counters(Seq("requeue", "requeues"))
+    val requeues = sr.counters(Seq("retries", "requeues"))
 
     // all retries go to one service
     assert(

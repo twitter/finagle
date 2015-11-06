@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.DefaultPool
 import com.twitter.finagle.integration.{DynamicCluster, StringCodec}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{RetryPolicy, TimeoutFilter}
+import com.twitter.finagle.service.{Retries, RetryPolicy}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Await, CountDownLatch, Future, Promise}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
@@ -119,7 +119,7 @@ class EndToEndTest extends FunSuite {
 
     val requestFailures = mem.counters(Seq("client", "failures"))
     val requeues =
-      mem.counters.get(Seq("client", "requeue", "requeues"))
+      mem.counters.get(Seq("client", "retries", "requeues"))
     assert(requestFailures == 1)
     assert(requeues == None)
   }
@@ -143,7 +143,7 @@ class EndToEndTest extends FunSuite {
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
     val requeues =
-      mem.counters.get(Seq("client", "requeue", "requeues"))
+      mem.counters.get(Seq("client", "retries", "requeues"))
 
     // initial write exception and no requeues
     assert(serviceCreationFailures == 1)
@@ -202,7 +202,7 @@ class EndToEndTest extends FunSuite {
         /* idleTime   */ 5.seconds,
         /* maxWaiters */ 1))
       .configured(Stats(mem))
-      .configured(ClientConfig.Retries(RetryPolicy.tries(1)))
+      .configured(Retries.Policy(RetryPolicy.tries(1)))
       .newService(Name.bound(server.boundAddress), "testClient")
 
     Await.result(client("ping"), 1.second)

@@ -1,12 +1,12 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{Stat, StatsReceiver}
-import com.twitter.finagle.{Service, WriteException}
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, Stat, StatsReceiver}
+import com.twitter.finagle.{FailedFastException, Service, WriteException}
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{never, times, verify, when}
-import org.mockito.Matchers.anyObject
+import org.mockito.Matchers.{any, anyObject}
 import org.scalatest.{BeforeAndAfter, FunSpec}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -48,9 +48,10 @@ class RetryFilterTest extends FunSpec
   val retryPolicy = RetryPolicy.tries(3, shouldRetryResponse)
 
   class TriesFixture(retryExceptionsOnly: Boolean) {
-    val stats = mock[StatsReceiver]
-    val retriesStat = mock[Stat]
-    when(stats.stat("retries")) thenReturn retriesStat
+    val stats = new InMemoryStatsReceiver()
+
+    def retriesStat: Seq[Int] = stats.stat("retries")().map(_.toInt)
+
     val service = mock[Service[Int, Int]]
     when(service.close(anyObject[Time])) thenReturn Future.Done
     val filter = if (retryExceptionsOnly)
@@ -65,9 +66,9 @@ class RetryFilterTest extends FunSpec
       retryExceptionsOnly: Boolean,
       theTimer: Timer)
   {
-    val stats = mock[StatsReceiver]
-    val retriesStat = mock[Stat]
-    when(stats.stat("retries")) thenReturn retriesStat
+    val stats = new InMemoryStatsReceiver()
+    def retriesStat: Seq[Int] = stats.stat("retries")().map(_.toInt)
+
     val filter = if (retryExceptionsOnly)
         new RetryExceptionsFilter[Int, Int](policy.asInstanceOf[RetryPolicy[Try[Nothing]]], theTimer, stats)
       else
@@ -78,6 +79,32 @@ class RetryFilterTest extends FunSpec
   }
 
   describe("RetryFilter") {
+
+    it("respects RetryBudget") {
+      val stats = new InMemoryStatsReceiver()
+
+      // use a budget that just gets 2 retries
+      val budgetRetries = 2
+      val budget = RetryBudget(1.second, minRetriesPerSec = budgetRetries, percentCanRetry = 0.0)
+
+      // have a policy that allows for way more retries than the budgets allows for
+      val policy = RetryPolicy.tries(10, RetryPolicy.WriteExceptionsOnly)
+
+
+      val filter = new RetryExceptionsFilter[Throwable, Int](policy, Timer.Nil, stats, budget)
+      val service: Service[Throwable, Int] = Service.mk(Future.exception)
+
+      val svc = filter.andThen(service)
+
+      Time.withCurrentTimeFrozen { _ =>
+        intercept[FailedFastException] {
+          Await.result(svc(new FailedFastException("yep")), 5.seconds)
+        }
+
+        assert(1 == stats.counter("retries", "budget_exhausted")())
+        assert(budgetRetries == stats.stat("retries")().head)
+      }
+    }
 
     describe("with RetryPolicy.tries") {
 
@@ -109,7 +136,7 @@ class RetryFilterTest extends FunSpec
             }
             assert(e.getMessage === "WTF!")
             verify(service)(123)
-            verify(retriesStat).add(0)
+            assert(retriesStat == Seq(0))
           }
         }
 
@@ -117,7 +144,7 @@ class RetryFilterTest extends FunSpec
           new TriesFixture(retryExceptionsOnly) {
             when(service(123)) thenReturn Future(goodResponse)
             assert(Await.result(retryingService(123)) === goodResponse)
-            verify(retriesStat).add(0)
+            assert(retriesStat == Seq(0))
           }
         }
 
@@ -212,7 +239,7 @@ class RetryFilterTest extends FunSpec
           when(service(123)) thenReturn Future(321)
           assert(Await.result(retryingService(123)) === 321)
           verify(service)(123)
-          verify(retriesStat).add(0)
+          assert(retriesStat == Seq(0))
         }
       }
 
@@ -230,7 +257,7 @@ class RetryFilterTest extends FunSpec
             tc.advance(1.second); timer.tick()
 
             verify(service, times(2))(123)
-            verify(retriesStat).add(1)
+            assert(retriesStat == Seq(1))
             assert(Await.result(f) === 321)
           }
         }
@@ -245,11 +272,11 @@ class RetryFilterTest extends FunSpec
             1 to 3 foreach { i =>
               assert(f.isDefined === false)
               verify(service, times(i))(123)
-              verify(retriesStat, never).add(3)
+              assert(retriesStat == Seq.empty)
               tc.advance(i.seconds); timer.tick()
             }
 
-            verify(retriesStat).add(3)
+            assert(retriesStat == Seq(3))
             assert(f.isDefined === true)
             assert(Await.ready(f).poll.get.isThrow === true)
             val e = intercept[WriteException] {
@@ -270,7 +297,7 @@ class RetryFilterTest extends FunSpec
           assert(e.getMessage === "WTF!")
           verify(service)(123)
           assert(timer.tasks.isEmpty === true)
-          verify(retriesStat).add(0)
+          assert(retriesStat == Seq(0))
         }
       }
 
@@ -278,7 +305,7 @@ class RetryFilterTest extends FunSpec
         new PolicyFixture(policy, retryExceptionsOnly, timer) {
           when(service(123)) thenReturn Future(321)
           assert(Await.result(retryingService(123)) === 321)
-          verify(retriesStat).add(0)
+          assert(retriesStat == Seq(0))
         }
       }
 
@@ -318,7 +345,7 @@ class RetryFilterTest extends FunSpec
             tc.advance(1.second); timer.tick()
 
             verify(service, times(2))(123)
-            verify(retriesStat).add(1)
+            assert(retriesStat == Seq(1))
             assert(Await.result(f) === goodResponse)
           }
         }
@@ -333,11 +360,11 @@ class RetryFilterTest extends FunSpec
             1 to 3 foreach { i =>
               assert(f.isDefined === false)
               verify(service, times(i))(123)
-              verify(retriesStat, never).add(3)
+              assert(retriesStat == Seq.empty)
               tc.advance(i.seconds); timer.tick()
             }
 
-            verify(retriesStat).add(3)
+            assert(retriesStat == Seq(3))
             assert(f.isDefined === true)
             assert(Await.result(f) === badResponse)
           }
@@ -351,7 +378,7 @@ class RetryFilterTest extends FunSpec
           val f = retryingService(123)
           verify(service)(123)
           assert(timer.tasks.isEmpty === true)
-          verify(retriesStat).add(0)
+          assert(retriesStat == Seq(0))
         }
       }
 
@@ -359,7 +386,7 @@ class RetryFilterTest extends FunSpec
         new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
           when(service(123)) thenReturn Future(321)
           assert(Await.result(retryingService(123)) === 321)
-          verify(retriesStat).add(0)
+          assert(retriesStat == Seq(0))
         }
       }
     }

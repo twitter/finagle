@@ -11,7 +11,7 @@ New Features
 ~~~~~~~~~~~~
 
   * finagle-core: `c.t.f.Server` now has a `serveAndAnnounce` method that accepts a `SocketAddress`
-    as an address.
+    as an address. ``RB_ID=758862``
 
   * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
     method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
@@ -22,6 +22,10 @@ Runtime Behavior Changes
   * finagle-core: The behavior for `c.t.f.util.DefaultMonitor` has changed such that
     unhandled exceptions are propagated to `c.t.u.RootMonitor` except for
     `c.t.f.Failures` with a log `Level` below INFO. ``RB_ID=758056``
+
+  * finagle-core: The metrics for requeues `requeue/requeues`, `requeue/budget` and
+    `requeue/budget_exhausted` have moved under retries. They are now `retries/requeues`,
+    `retries/budget` and `retries/budget_exhausted`. ``RB_ID=760213``
 
   * finagle-http: Unhandled exceptions from user defined HTTP services are now converted
     into very basic 500 responses so clients talking to those services see standard HTTP
@@ -38,13 +42,19 @@ Runtime Behavior Changes
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
-  * finagle-mux: `closeThreshold` in `c.t.f.mux.FailureDetector.ThresholdConfig` is
-    changed to `closeTimeout`, from an integer that was used as a multiplier to time
-    duration. This makes it easier to config. ``RB_ID=759406``
+  * finagle-core: `BackupRequestLost` is no longer itself an `Exception`. Use
+    `BackupRequestLost.Exception` in its place. ``RB_ID=758056``
+
+  * finagle-core: Replaced `c.t.f.builder.ClientConfig.Retries` with
+    `c.t.f.service.Retries.Policy`. ``RB_ID=760213``
 
   * finagle-mux: `c.t.f.FailureDetector.apply` method is changed to private scope,
     to reduce API surface area. Using `FailureDetector.Config` is enough to config
     session based failure detection behavior. ``RB_ID=756833``
+
+  * finagle-mux: `closeThreshold` in `c.t.f.mux.FailureDetector.ThresholdConfig` is
+    changed to `closeTimeout`, from an integer that was used as a multiplier to time
+    duration. This makes it easier to config. ``RB_ID=759406``
 
 Bug Fixes
 ~~~~~~~~~
@@ -476,7 +486,7 @@ New Features
 
   * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
 
-  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`s.
+  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`\s.
 
   * finagle-core: Introduce per-address latency compensation.  Clients may be configured with
     a 'Compensator' function that uses the client's address metadata to adjust connection and

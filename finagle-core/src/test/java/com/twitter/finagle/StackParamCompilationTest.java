@@ -5,6 +5,8 @@ import java.net.SocketAddress;
 import scala.Option;
 import scala.Some;
 
+import org.junit.Test;
+
 import com.twitter.concurrent.AsyncSemaphore;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.client.DefaultPool;
@@ -31,6 +33,9 @@ import com.twitter.finagle.server.Listener;
 import com.twitter.finagle.service.ExpiringService;
 import com.twitter.finagle.service.FailFastFactory;
 import com.twitter.finagle.service.FailureAccrualFactory;
+import com.twitter.finagle.service.Retries;
+import com.twitter.finagle.service.RetryBudgets;
+import com.twitter.finagle.service.RetryPolicy;
 import com.twitter.finagle.service.TimeoutFilter;
 import com.twitter.finagle.socks.SocksProxyFlags;
 import com.twitter.finagle.ssl.Engine;
@@ -43,7 +48,9 @@ import com.twitter.util.NullMonitor;
 import com.twitter.util.RootMonitor;
 
 public class StackParamCompilationTest {
-  void testParams() {
+
+  @Test
+  public void testParams() {
     StackClient<String, String> client =
       ClientBuilder.<String, String>stackClientOfCodec(null)
         .configured(new Label("").mk())
@@ -53,6 +60,8 @@ public class StackParamCompilationTest {
         .configured(new Monitor(RootMonitor.getInstance()).mk())
         .configured(new Monitor(NullMonitor.getInstance()).mk())
         .configured(new Reporter(com.twitter.finagle.util.LoadedReporterFactory.get()).mk())
+        .configured(new Retries.Budget(RetryBudgets.EMPTY).mk())
+        .configured(new Retries.Policy(RetryPolicy.Never()).mk())
         .configured(new Tracer(com.twitter.finagle.tracing.DefaultTracer.get()).mk())
         .configured(new FactoryToService.Enabled(true).mk())
         .configured(new IdleConnectionFilter.Param(Option.<OpenConnectionsThresholds>empty()).mk())
@@ -82,7 +91,7 @@ public class StackParamCompilationTest {
         .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get().netty()).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
-        .configured(new FailFastFactory.FailFast(true).mk())
+          .configured(new FailFastFactory.FailFast(true).mk())
         .configured(FailureAccrualFactory.Param(10, Duration.Bottom()).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
@@ -102,7 +111,8 @@ public class StackParamCompilationTest {
         .<String, String>stackClientOfCodec(null);
   }
 
-  void testModule1() {
+  @Test
+  public void testModule1() {
     // or use FactoryToService.Enabled$.MODULE$.param
     Stack.Param<FactoryToService.Enabled> param =
       new FactoryToService.Enabled(true).mk()._2();

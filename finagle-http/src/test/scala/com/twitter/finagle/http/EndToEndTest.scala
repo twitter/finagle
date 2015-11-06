@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.Requeues
+import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.{Buf, Reader, Writer}
@@ -490,6 +490,10 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
   }
 
+  // use 1 less than the requeue limit so that we trigger failure accrual
+  // before we run into the requeue limit.
+  private val failureAccrualFailures = 19
+
   def status(name: String)(connect: (HttpService, StatsReceiver, String) => (HttpService)): Unit = {
     test(name + ": Status.busy propagates along the Stack") {
       val st = new InMemoryStatsReceiver
@@ -503,8 +507,8 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       intercept[Exception](Await.result(client(Request())))
 
       assert(st.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
-      assert(st.counters(Seq(clientName, "requeue", "requeues")) == Requeues.Cost - 1)
-      assert(st.counters(Seq(clientName, "failures", "restartable")) == Requeues.Cost)
+      assert(st.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)
+      assert(st.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures)
       client.close()
     }
   }
@@ -522,6 +526,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name(name)
+        .failureAccrualParams((failureAccrualFailures, 1.minute))
         .reportTo(st)
         .build()
 
@@ -535,7 +540,10 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     (service, st, name) =>
       import com.twitter.finagle
       val server = finagle.Http.serve(new InetSocketAddress(0), service)
-      val client = finagle.Http.client.configured(Stats(st)).newService(Name.bound(server.boundAddress), name)
+      val client = finagle.Http.client
+        .configured(Stats(st))
+        .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
+        .newService(Name.bound(server.boundAddress), name)
 
       new ServiceProxy(client) {
         override def close(deadline: Time) =

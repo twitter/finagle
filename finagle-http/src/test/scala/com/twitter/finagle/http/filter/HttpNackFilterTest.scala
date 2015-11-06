@@ -37,7 +37,7 @@ class HttpNackFilterTest extends FunSuite {
           .newService(Name.bound(server.boundAddress), "http")
 
       assert(Await.result(client(request)).status == Status.Ok)
-      assert(st.counters(Seq("http", "requeue", "requeues")) == 1)
+      assert(st.counters(Seq("http", "retries", "requeues")) == 1)
 
       // reuse connections
       assert(Await.result(client(request)).status == Status.Ok)
@@ -59,7 +59,7 @@ class HttpNackFilterTest extends FunSuite {
           .hostConnectionLimit(1).build()
 
       assert(Await.result(client(request)).status == Status.Ok)
-      assert(st.counters(Seq("http", "requeue", "requeues")) == 1)
+      assert(st.counters(Seq("http", "retries", "requeues")) == 1)
 
       Closable.all(client, server).close()
     }
@@ -79,7 +79,7 @@ class HttpNackFilterTest extends FunSuite {
           .newService(Name.bound(server.boundAddress), "http")
 
       assert(Await.result(client(request)).status == Status.Ok)
-      assert(st.counters(Seq("http", "requeue", "requeues")) == 1)
+      assert(st.counters(Seq("http", "retries", "requeues")) == 1)
 
       Closable.all(client, server).close()
     }

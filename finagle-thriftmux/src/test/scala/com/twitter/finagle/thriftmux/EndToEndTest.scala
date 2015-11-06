@@ -7,7 +7,7 @@ import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
-import com.twitter.finagle.service.Requeues
+import com.twitter.finagle.service.{Retries, RetryBudget}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientFramedCodec, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.thriftscala.{TestService, TestService$FinagleClient, TestService$FinagleService}
@@ -684,24 +684,29 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
           })
   }
 
+  /** no minimum, and 1 request gives 1 retry */
+  private def budget: RetryBudget =
+    RetryBudget(1.minute, minRetriesPerSec = 0, percentCanRetry = 1.0)
+
   test("thriftmux server + thriftmux client: auto requeues retryable failures") {
     new ThriftMuxFailServer {
       val sr = new InMemoryStatsReceiver
       val client =
         ThriftMux.client
           .configured(Stats(sr))
+          .configured(Retries.Budget(budget))
           .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
       val failure = intercept[Exception](Await.result(client.query("ok")))
       assert(failure.getMessage ==  "The request was Nacked by the server")
 
       assert(serverSr.counters(Seq("thrift", "thriftmux", "connects")) == 1)
-      assert(serverSr.counters(Seq("thrift", "requests")) == Requeues.Cost)
-      assert(serverSr.counters(Seq("thrift", "failures")) == Requeues.Cost)
+      assert(serverSr.counters(Seq("thrift", "requests")) == 2)
+      assert(serverSr.counters(Seq("thrift", "failures")) == 2)
 
       assert(sr.counters(Seq("client", "query", "requests")) == 1)
-      assert(sr.counters(Seq("client", "requests")) == Requeues.Cost)
-      assert(sr.counters(Seq("client", "failures")) == Requeues.Cost)
+      assert(sr.counters(Seq("client", "requests")) == 2)
+      assert(sr.counters(Seq("client", "failures")) == 2)
 
       // reuse connection
       intercept[Exception](Await.result(client.query("ok")))
@@ -727,7 +732,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       assert(sr.counters(Seq("client", "requests")) == 1)
       assert(sr.counters(Seq("client", "failures")) == 1)
       assert(sr.counters(Seq("client", "closed")) == 1)
-      assert(sr.counters.get(Seq("client", "requeue", "requeues")) == None)
+      assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
 
       intercept[ChannelClosedException](Await.result(client.query("ok")))
       // reconnects on the second request
@@ -755,6 +760,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client =
         ThriftMux.client
           .configured(Stats(sr))
+          .configured(Retries.Budget(budget))
           .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
       val failure = intercept[Exception](Await.result(client.query("ok")))
@@ -762,9 +768,9 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       assert(serverSr.counters(Seq("thrift", "mux", "draining")) >= 1)
 
-      assert(sr.counters(Seq("client", "requeue", "requeues")) == Requeues.Cost - 1)
-      assert(sr.counters(Seq("client", "requests")) == Requeues.Cost)
-      assert(sr.counters(Seq("client", "failures")) == Requeues.Cost)
+      assert(sr.counters(Seq("client", "retries", "requeues")) == 2 - 1)
+      assert(sr.counters(Seq("client", "requests")) == 2)
+      assert(sr.counters(Seq("client", "failures")) == 2)
     }
   }
 
@@ -777,7 +783,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
           .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
       intercept[ChannelClosedException](Await.result(client.query("ok")))
-      assert(sr.counters.get(Seq("client", "requeue", "requeues")) == None)
+      assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
       assert(sr.counters(Seq("client", "requests")) == 1)
       assert(sr.counters(Seq("client", "failures")) == 1)
     }

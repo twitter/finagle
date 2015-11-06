@@ -2,6 +2,7 @@ maven_layout()
 
 target(name='finagle-core',
   dependencies=[
+    'finagle/finagle-core/src/main/java',
     'finagle/finagle-core/src/main/scala'
   ]
 )

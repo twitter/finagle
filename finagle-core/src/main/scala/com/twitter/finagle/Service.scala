@@ -11,7 +11,7 @@ object Service {
    * Future.exception
    */
   def rescue[Req, Rep](service: Service[Req, Rep]) = new ServiceProxy[Req, Rep](service) {
-    override def apply(request: Req) = {
+    override def apply(request: Req): Future[Rep] = {
       try {
         service(request)
       } catch {
@@ -21,7 +21,7 @@ object Service {
   }
 
   def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
-    def apply(req: Req) = f(req)
+    def apply(req: Req): Future[Rep] = f(req)
   }
 
   /**
@@ -46,8 +46,8 @@ object Service {
  */
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   def map[Req1](f: Req1 => Req) = new Service[Req1, Rep] {
-    def apply(req1: Req1) = Service.this.apply(f(req1))
-    override def close(deadline: Time) = Service.this.close(deadline)
+    def apply(req1: Req1): Future[Rep] = Service.this.apply(f(req1))
+    override def close(deadline: Time): Future[Unit] = Service.this.close(deadline)
   }
 
   /**
@@ -61,9 +61,9 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
    */
   // This is asynchronous on purpose, the old API allowed for it.
   @deprecated("Use close() instead", "7.0.0")
-  final def release() { close() }
+  final def release(): Unit = close()
 
-  def close(deadline: Time) = Future.Done
+  def close(deadline: Time): Future[Unit] = Future.Done
 
   /**
    * The current availability [[Status]] of this Service.
@@ -103,10 +103,10 @@ trait ClientConnection extends Closable {
 
 object ClientConnection {
   val nil: ClientConnection = new ClientConnection {
-    def remoteAddress = unconnected
-    def localAddress = unconnected
-    def close(deadline: Time) = Future.Done
-    def onClose = Future.never
+    def remoteAddress: SocketAddress = unconnected
+    def localAddress: SocketAddress = unconnected
+    def close(deadline: Time): Future[Unit] = Future.Done
+    def onClose: Future[Unit] = Future.never
   }
 }
 
@@ -117,12 +117,12 @@ object ClientConnection {
 abstract class ServiceProxy[-Req, +Rep](val self: Service[Req, Rep])
   extends Service[Req, Rep] with Proxy
 {
-  def apply(request: Req) = self(request)
-  override def close(deadline: Time) = self.close(deadline)
+  def apply(request: Req): Future[Rep] = self(request)
+  override def close(deadline: Time): Future[Unit] = self.close(deadline)
 
-  override def status = self.status
+  override def status: Status = self.status
 
-  override def toString = self.toString
+  override def toString: String = self.toString
 }
 
 abstract class ServiceFactory[-Req, +Rep]
@@ -149,13 +149,13 @@ abstract class ServiceFactory[-Req, +Rep]
    */
   def flatMap[Req1, Rep1](f: Service[Req, Rep] => Future[Service[Req1, Rep1]]): ServiceFactory[Req1, Rep1] =
     new ServiceFactory[Req1, Rep1] {
-      def apply(conn: ClientConnection) =
+      def apply(conn: ClientConnection): Future[Service[Req1, Rep1]] =
         self(conn) flatMap { service =>
           f(service) onFailure { _ => service.close() }
         }
       def close(deadline: Time) = self.close(deadline)
       override def status: Status = self.status
-      override def toString() = self.toString()
+      override def toString(): String = self.toString()
     }
 
   /**
@@ -180,30 +180,31 @@ abstract class ServiceFactory[-Req, +Rep]
 }
 
 object ServiceFactory {
-  def const[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] = new ServiceFactory[Req, Rep] {
+  def const[Req, Rep](service: Service[Req, Rep]): ServiceFactory[Req, Rep] =
+    new ServiceFactory[Req, Rep] {
       private[this] val noRelease = Future.value(new ServiceProxy[Req, Rep](service) {
-       // close() is meaningless on connectionless services.
-       override def close(deadline: Time) = Future.Done
-     })
+        // close() is meaningless on connectionless services.
+        override def close(deadline: Time) = Future.Done
+      })
 
-      def apply(conn: ClientConnection) = noRelease
-      def close(deadline: Time) = Future.Done
+      def apply(conn: ClientConnection): Future[Service[Req, Rep]] = noRelease
+      def close(deadline: Time): Future[Unit] = Future.Done
     }
 
   def apply[Req, Rep](f: () => Future[Service[Req, Rep]]): ServiceFactory[Req, Rep] =
     new ServiceFactory[Req, Rep] {
-      def apply(_conn: ClientConnection) = f()
-      def close(deadline: Time) = Future.Done
+      def apply(_conn: ClientConnection): Future[Service[Req, Rep]] = f()
+      def close(deadline: Time): Future[Unit] = Future.Done
     }
 }
 
 @deprecated("use ServiceFactoryProxy instead", "6.7.5")
 trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Proxy {
   def self: ServiceFactory[Req, Rep]
-  def apply(conn: ClientConnection) = self(conn)
-  def close(deadline: Time) = self.close(deadline)
+  def apply(conn: ClientConnection): Future[Service[Req, Rep]] = self(conn)
+  def close(deadline: Time): Future[Unit] = self.close(deadline)
 
-  override def status = self.status
+  override def status: Status = self.status
 }
 
 /**
@@ -267,10 +268,10 @@ object FactoryToService {
            * This is too complicated.
            */
           val service = Future.value(new ServiceProxy[Req, Rep](new FactoryToService(next)) {
-            override def close(deadline: Time) = Future.Done
+            override def close(deadline: Time): Future[Unit] = Future.Done
           })
           new ServiceFactoryProxy(next) {
-            override def apply(conn: ClientConnection) = service
+            override def apply(conn: ClientConnection): Future[ServiceProxy[Req, Rep]] = service
           }
         } else {
           next
@@ -288,8 +289,8 @@ class FactoryToService[Req, Rep](factory: ServiceFactory[Req, Rep])
   extends Service[Req, Rep]
 {
   def apply(request: Req): Future[Rep] =
-    factory() flatMap { service =>
-      service(request) ensure {
+    factory().flatMap { service =>
+      service(request).ensure {
         service.close()
       }
     }
