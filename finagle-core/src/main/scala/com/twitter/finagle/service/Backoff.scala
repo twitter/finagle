@@ -110,7 +110,7 @@ object Backoff {
    * Create backoffs that keep half of the exponential growth, and jitter
    * between 0 and that amount.
    *
-   * @see [[exponentialJittered]] and [[decorelatedJittered]] for alternative jittered approaches.
+   * @see [[exponentialJittered]] and [[decorrelatedJittered]] for alternative jittered approaches.
    */
   def equalJittered(start: Duration, maximum: Duration): Stream[Duration] =
     equalJittered(start, maximum, Rng.threadLocal)
@@ -150,16 +150,12 @@ object Backoff {
   def constant(start: Duration): Stream[Duration] = const(start)
 
   /** See [[constant]] for a Java friendly API */
-  def const(start: Duration): Stream[Duration] =
-    Backoff(start)(Function.const(start))
+  def const(start: Duration): Stream[Duration] = Stream.continually(start)
 
   /**
    * Create backoffs with values produced by a given generation function.
    */
-  def fromFunction(f: () => Duration): Stream[Duration] = {
-    def next(): Stream[Duration] = f() #:: next()
-    next()
-  }
+  def fromFunction(f: () => Duration): Stream[Duration] = Stream.continually(f())
 
   /**
    * Convert a [[Stream]] of [[Duration Durations]] into a Java-friendly representation.

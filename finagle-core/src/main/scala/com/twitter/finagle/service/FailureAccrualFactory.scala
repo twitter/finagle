@@ -184,15 +184,15 @@ object FailureAccrualFactory {
   protected[finagle] sealed trait State {
     val nextMarkDeadFor: Stream[Duration]
   }
-  protected[finagle] case class Alive(failureCount: Int, val nextMarkDeadFor: Stream[Duration]) extends State
-  protected[finagle] case class Dead(val nextMarkDeadFor: Stream[Duration]) extends State
-  protected[finagle] case class ProbeOpen(val nextMarkDeadFor: Stream[Duration]) extends State
-  protected[finagle] case class ProbeClosed(val nextMarkDeadFor: Stream[Duration]) extends State
+  protected[finagle] case class Alive(failureCount: Int, nextMarkDeadFor: Stream[Duration]) extends State
+  protected[finagle] case class Dead(nextMarkDeadFor: Stream[Duration]) extends State
+  protected[finagle] case class ProbeOpen(nextMarkDeadFor: Stream[Duration]) extends State
+  protected[finagle] case class ProbeClosed(nextMarkDeadFor: Stream[Duration]) extends State
 }
 
 /**
  * A [[com.twitter.finagle.ServiceFactory]] that accrues failures, marking
- * itself unavailable when deemed unhealthy according to its parameterization.
+ * itself unavailable when deemed unhealthy according to its parametrization.
  *
  * TODO: treat different failures differently (eg. connect failures
  * vs. not), enable different backoff strategies.
@@ -251,6 +251,11 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     }
   }
 
+  private[this] val didFailOnAnyFailure: Throwable => Unit = { _ => didFail() }
+  private[this] val actOnResponse: Try[Rep] => Unit = { rep =>
+    if (isSuccess(rep)) didSucceed() else didFail()
+  }
+
   protected def didSucceed() = synchronized {
     // Only count revivals when the probe succeeds.
     state match {
@@ -277,7 +282,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
    * Enter 'Probing' state.
    * The service must satisfy one request before accepting more.
    */
-  protected def startProbing() = synchronized {
+  protected def startProbing(): Unit = synchronized {
     state = ProbeOpen(state.nextMarkDeadFor)
     cancelReviveTimerTasks()
   }
@@ -285,7 +290,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
   protected def isSuccess(response: Try[Rep]): Boolean = response.isReturn
 
   def apply(conn: ClientConnection) = {
-    underlying(conn) map { service =>
+    underlying(conn).map { service =>
       new Service[Req, Rep] {
         def apply(request: Req) = {
 
@@ -306,17 +311,14 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
             case _ =>
           }
 
-          service(request).respond { response =>
-            if (isSuccess(response)) didSucceed()
-            else didFail()
-          }
+          service(request).respond(actOnResponse)
         }
 
         override def close(deadline: Time) = service.close(deadline)
         override def status = Status.worst(service.status,
           FailureAccrualFactory.this.status)
       }
-    } onFailure { _ => didFail() }
+    }.onFailure(didFailOnAnyFailure)
   }
 
   override def status = state match {
