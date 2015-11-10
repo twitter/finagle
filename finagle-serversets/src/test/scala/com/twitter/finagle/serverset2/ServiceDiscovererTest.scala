@@ -3,8 +3,8 @@ package com.twitter.finagle.serverset2
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
 import com.twitter.finagle.serverset2.ZkOp.{GetData, GetChildrenWatch, ExistsWatch}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.serverset2.client._
-import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util._
 import org.junit.runner.RunWith
 import org.mockito.Mockito.when
@@ -15,6 +15,18 @@ import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(classOf[JUnitRunner])
 class ServiceDiscovererTest extends FunSuite with MockitoSugar {
+
+  class ServiceDiscovererWithExposedCache(
+    varZkSession: Var[ZkSession],
+    statsReceiver: StatsReceiver
+  ) extends ServiceDiscoverer(varZkSession, statsReceiver, ForeverEpoch) {
+    val cache = new ZkEntryCache("/foo/bar", NullStatsReceiver)
+    cache.setSession(varZkSession.sample)
+    override val entriesOf = Memoize { path: String =>
+      entitiesOf(path, cache, NullStatsReceiver.stat("meh"), ServiceDiscoverer.EndpointGlob)
+    }
+  }
+
   def ep(port: Int) = Endpoint(Array(null), "localhost", port, Int.MinValue, Endpoint.Status.Alive, port.toString)
   val ForeverEpoch = Epoch(Duration.Top)(new MockTimer)
 
@@ -64,10 +76,10 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
   test("Removed entries are removed from cache") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver, ForeverEpoch)
+    val sd = new ServiceDiscovererWithExposedCache(Var.value(new ZkSession(watchedZk)), NullStatsReceiver)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
-    val cache = sd.entriesOfCluster("/foo/bar")
+    val cache = sd.cache
 
     val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
     val ewwatchv = Var[WatchState](WatchState.Pending)
@@ -78,12 +90,10 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
     val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
     gw.res() = Return(Watched(Node.Children(Seq("member_1"), null), Var.value(new WatchState.Determined(NodeEvent.Created))))
 
-    assert(cache.keys == Set.empty)
-
     val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
     gd.res() = Return(Node.Data(None, null))
 
-    assert(cache.keys == Set("/foo/bar/member_1"))
+    assert(cache.keys == Set("member_1"))
 
     val gw2@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(3)
     gw2.res() = Return(Watched(Node.Children(Seq.empty, null), Var.value(new WatchState.Determined(NodeEvent.Created))))
@@ -96,7 +106,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
     val gd2@GetData("/foo/bar/member_2") = watchedZk.value.opq(5)
     gd2.res() = Return(Node.Data(None, null))
 
-    assert(cache.keys == Set("/foo/bar/member_2"))
+    assert(cache.keys == Set("member_2"))
 
     val gw4@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(6)
     gw4.res() = Return(Watched(Node.Children(Seq("member_3", "member_4"), null), Var.value(new WatchState.Determined(NodeEvent.Created))))
@@ -106,28 +116,13 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
     val gd4@GetData("/foo/bar/member_4") = watchedZk.value.opq(8)
     gd4.res() = Return(Node.Data(None, null))
 
-    assert(cache.keys == Set("/foo/bar/member_3", "/foo/bar/member_4"))
+    assert(cache.keys == Set("member_3", "member_4"))
   }
 
-  /**
-   * New code does not cache a given ZK getData call until the call finishes, so two rapid
-   * activity updates, or two calls to apply with the same serverset (as in this test) will cause
-   * multiple calls to ZK for the same node's getData. This does not leak memory, but is wasteful.
-   * The old code simply cached the Future with memoize (including failures). But any time the
-   * ZkSession was lost/renewed, it threw away the entire cache, thus retrying once per new
-   * ZkSession (needlessly retrying successes too though). This commented test will fail with
-   * the new code. This is not catastrophic, but is wasteful. Currently seeing if there's a nicer
-   * solution using a FutureCache or derivative, but seeing as this change fixes a major memory
-   * leak I thought it best to post as is. We can improve the caching behavior in a follow up I
-   * Think.
-   *
-   * Ticket for follow up: TRFC-491
-   */
-  /*
   test("Consecutive observations do not cause reads; entries are cached") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver)
+    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver, ForeverEpoch)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val f2 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
@@ -150,7 +145,37 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
     assert(f1.isDefined)
     assert(f2.isDefined)
   }
-  */
+
+  test("New sessions are used") {
+    implicit val timer = new MockTimer
+    val fakeWatchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
+    val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
+    val watchedZkVar = new ReadWriteVar(new ZkSession(fakeWatchedZk))
+    val sd = new ServiceDiscoverer(watchedZkVar, NullStatsReceiver, ForeverEpoch)
+
+    val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
+    val f2 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
+
+    watchedZkVar.update(new ZkSession(watchedZk))
+
+    val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
+    val ewwatchv = Var[WatchState](WatchState.Pending)
+    ew.res() = Return(Watched(Some(Data.Stat(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)), ewwatchv))
+
+    val gw@GetChildrenWatch("/foo/bar") = watchedZk.value.opq(1)
+    gw.res() = Return(Watched(Node.Children(Seq("member_1"), null), Var.value(WatchState.Pending)))
+
+    assert(!f1.isDefined)
+    assert(!f2.isDefined)
+
+    val gd@GetData("/foo/bar/member_1") = watchedZk.value.opq(2)
+    gd.res() = Return(Node.Data(None, null))
+
+    // ensure that we are hitting the cache: even though we called
+    // GetData only once, the two observations are fulfilled.
+    assert(f1.isDefined)
+    assert(f2.isDefined)
+  }
 
   def newZkSession(): (ZkSession, Witness[WatchState]) = {
     val mockZkSession = mock[ZkSession]

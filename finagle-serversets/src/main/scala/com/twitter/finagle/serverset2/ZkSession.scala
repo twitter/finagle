@@ -142,7 +142,7 @@ private[serverset2] class ZkSession(watchedZk: Watched[ZooKeeperReader])(implici
         getChildrenWatchOp(path) transform {
           case Activity.Pending => Activity.pending
           case Activity.Ok(Node.Children(children, _)) =>
-            Activity.value(children.withFilter(_.startsWith(prefix)).map(path + "/" + _).toSet)
+            Activity.value(children.filter(_.startsWith(prefix)).toSet)
           case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Set.empty)
           case Activity.Failed(exc) =>
             logger.error(s"GetChildrenWatch to ($path, $prefix) failed with exception $exc")
