@@ -65,6 +65,40 @@ class JsonExporterTest
     assert(exporter.mkRegex("").isEmpty, "Empty regex filter should result in no filter regex generated")
   }
 
+  test("statsFilterFile defaults without exception") {
+    val registry = Metrics.createDetached()
+    val exporter1 = new JsonExporter(registry)
+    assert(exporter1.statsFilterRegex.isEmpty)
+  }
+
+  test("statsFilterFile reads empty files") {
+    val registry = Metrics.createDetached()
+
+    statsFilterFile.let(new java.io.File("/dev/null")) {
+      val exporter = new JsonExporter(registry)
+      assert(exporter.statsFilterRegex.isEmpty)
+    }
+  }
+
+  test("statsFilterFile and statsFilter combine") {
+    val registry = Metrics.createDetached()
+
+    val tFile = java.io.File.createTempFile("regex", ".txt")
+    val writer = new java.io.PrintWriter(tFile)
+    writer.println("abc123")
+    writer.close()
+
+    statsFilterFile.let(tFile) {
+      statsFilter.let("def456") {
+        val exporter = new JsonExporter(registry)
+        val regex = exporter.statsFilterRegex
+        assert(regex.isDefined)
+        assert(regex.get.findFirstIn("abc123").isDefined)
+        assert(regex.get.findFirstIn("def456").isDefined)
+      }
+    }
+  }
+
   test("end-to-end fetching stats works") {
     val registry = Metrics.createDetached()
     val viewsCounter = registry.createCounter("views")

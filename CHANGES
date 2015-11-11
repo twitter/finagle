@@ -16,6 +16,10 @@ New Features
   * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
     method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
 
+  * finagle-stats: Added `c.t.f.stats` now has a `statsFilterFile` flag which will read a blacklist
+    of regex, newline-separated values. It will be used along with the `statsFilter` flag for stats
+    filtering. ``RB_ID=764914``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

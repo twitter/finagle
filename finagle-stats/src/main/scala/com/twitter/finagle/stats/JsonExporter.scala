@@ -14,18 +14,31 @@ import com.twitter.logging.Logger
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import java.util.concurrent.atomic.AtomicBoolean
+import java.io.{IOException, File}
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
+import scala.io.Source
 import scala.util.matching.Regex
 
 /**
- * Blacklist of regex, comma-separated. Comma is a reserved character and cannot be used.
+ * Blacklist of regex, comma-separated. Comma is a reserved character and
+ * cannot be used. Used with regexes from statsFilterFile.
  *
  * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
 object statsFilter extends GlobalFlag[String](
   "",
   "Comma-separated regexes that indicate which metrics to filter out")
+
+
+/**
+ * Blacklist of regex, comma-separated. Comma is a reserved character and
+ * cannot be used. Used with regexes from statsFilter.
+ *
+ * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
+ */
+object statsFilterFile extends GlobalFlag[File](
+  "File of newline separated regexes that indicate which metrics to filter out")
 
 object useCounterDeltas extends GlobalFlag[Boolean](
   false,
@@ -56,8 +69,19 @@ class JsonExporter(
   private[this] val writer = mapper.writer
   private[this] val prettyWriter = mapper.writer(new DefaultPrettyPrinter)
 
-  lazy val statsFilterRegex: Option[Regex] = statsFilter.get.flatMap { regexesString =>
-    mkRegex(regexesString)
+  lazy val statsFilterRegex: Option[Regex] = {
+    val regexesFromFile = statsFilterFile.get.toSeq.flatMap { fileName =>
+      try {
+        Source.fromFile(fileName.toString).getLines()
+      } catch {
+        case e: IOException =>
+          log.error(e, "Unable to read statsFilterFile: %s", fileName)
+          throw e
+      }
+    }
+    val regexesFromFlag = statsFilter.get.toSeq.flatMap(_.split(","))
+    val regexes: Seq[String] = regexesFromFlag ++ regexesFromFile
+    mkRegex(regexes)
   }
 
   private[this] val registryLoaded = new AtomicBoolean(false)
@@ -156,10 +180,18 @@ class JsonExporter(
     }
   }
 
+  private[this] def mkRegex(regexes: Seq[String]): Option[Regex] = {
+    if (regexes.isEmpty) {
+      None
+    } else {
+      Some(regexes.mkString("(", ")|(", ")").r)
+    }
+  }
+
   def mkRegex(regexesString: String): Option[Regex] = {
     regexesString.split(",") match {
       case Array("") => None
-      case regexes => Some(regexes.mkString("(", ")|(", ")").r)
+      case regexes => mkRegex(regexes)
     }
   }
 
