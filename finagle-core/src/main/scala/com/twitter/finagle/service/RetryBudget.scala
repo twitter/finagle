@@ -1,8 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.util.TokenBucket
-import com.twitter.util.{Stopwatch, Duration}
+import com.twitter.util.{Stopwatch, Duration, TokenBucket}
 
 /**
  * Represents a budget for retrying requests.
