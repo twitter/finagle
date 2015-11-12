@@ -328,7 +328,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
 
   protected[this] def getState: State = state
 
-  private[this] def cancelReviveTimerTasks(): Unit = {
+  private[this] def cancelReviveTimerTasks(): Unit = synchronized {
     reviveTimerTask.foreach(_.cancel())
     reviveTimerTask = None
   }

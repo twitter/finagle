@@ -48,11 +48,6 @@ private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
   private[this] def toTimerTask(task: netty.Timeout) = new TimerTask {
     def cancel(): Unit = task.cancel()
   }
-
-  private[this] def runInContext(saved: Local.Context, f: => Unit): Unit = {
-    Local.restore(saved)
-    Monitor(f)
-  }
 }
 
 /**
