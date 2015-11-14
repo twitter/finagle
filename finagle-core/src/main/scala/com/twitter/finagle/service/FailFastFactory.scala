@@ -166,7 +166,7 @@ private[finagle] class FailFastFactory[Req, Rep](
 
       case Observation.Timeout if state != Ok =>
         underlying(ClientConnection.nil).respond {
-          case Throw(exc) => this.apply(Observation.TimeoutFail)
+          case Throw(_) => this.apply(Observation.TimeoutFail)
           case Return(service) =>
             this.apply(Observation.Success)
             service.close()
@@ -174,14 +174,16 @@ private[finagle] class FailFastFactory[Req, Rep](
 
       case Observation.TimeoutFail if state != Ok =>
         state match {
-          case Retrying(_, _, _, Stream.Empty) =>
+          case Retrying(_, task, _, Stream.Empty) =>
+            task.cancel()
             // Backoff schedule exhausted. Optimistically become available in
             // order to continue trying.
             state = Ok
 
-          case Retrying(since, _, ntries, wait #:: rest) =>
-            val task = timer.schedule(Time.now + wait) { this.apply(Observation.Timeout) }
-            state = Retrying(since, task, ntries+1, rest)
+          case Retrying(since, task, ntries, wait #:: rest) =>
+            task.cancel()
+            val newTask = timer.schedule(Time.now + wait) { this.apply(Observation.Timeout) }
+            state = Retrying(since, newTask, ntries+1, rest)
 
           case Ok => assert(false)
         }
