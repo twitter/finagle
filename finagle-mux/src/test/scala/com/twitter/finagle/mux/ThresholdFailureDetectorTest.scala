@@ -20,7 +20,7 @@ class ThresholdFailureDetectorTest extends FunSuite
       Time.withCurrentTimeFrozen(f)
     }
 
-  private class Ctx(closeTimeout: Duration = 1000.milliseconds, darkMode: Boolean = false) {
+  private class Ctx(closeTimeout: Duration = 1000.milliseconds) {
     val n = new AtomicInteger(0)
     val latch = new Latch
 
@@ -40,7 +40,6 @@ class ThresholdFailureDetectorTest extends FunSuite
       windowSize = 5,
       closeTimeout = closeTimeout,
       nanoTime = nanoTime,
-      darkMode = darkMode,
       statsReceiver = sr,
       timer = timer
     )
@@ -202,22 +201,5 @@ class ThresholdFailureDetectorTest extends FunSuite
     assert(sr.counters(Seq("failures")) == 1)
     assert(sr.counters(Seq("close")) == 1)
     assert(sr.counters.get(Seq("marked_busy")).isEmpty)
-  }
-
-  testt("darkmode does not change status") { tc =>
-    val ctx = new Ctx(darkMode = true)
-    import ctx._
-
-    tc.advance(2.milliseconds)
-    latch.flip() // rtt = 2, maxPing = 2
-
-    // second ping
-    tc.advance(10.milliseconds)
-    timer.tick()
-
-    tc.advance(5.milliseconds)
-    timer.tick()
-    assert(d.status == Status.Open)
-    assert(sr.counters(Seq("marked_busy")) == 1)
   }
 }

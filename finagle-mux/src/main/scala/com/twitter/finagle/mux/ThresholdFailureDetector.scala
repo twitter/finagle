@@ -20,9 +20,8 @@ import com.twitter.util._
  * observations, the session is marked as [[Status.Busy]]. It is marked
  * [[Status.Open]] when the ping message returns.
  *
- * If `closeThreshold` is positive and no ping responses has been received
- * during a window of `closeThreshold` * max ping latency, then the `close`
- * function is called.
+ * If no ping responses has been received within `closeThreshold`, the
+ * session is marked as [[Status.Closed]].
  *
  * This scheme is pretty conservative, but it requires fairly little a priori
  * knowledge: the parameters are used only to tune its sensitivity to
@@ -44,7 +43,6 @@ private class ThresholdFailureDetector(
     windowSize: Int = 100,
     closeTimeout: Duration = Duration.Top,
     nanoTime: () => Long = System.nanoTime,
-    darkMode: Boolean = false,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     implicit val timer: Timer = DefaultTimer.twitter)
   extends FailureDetector {
@@ -69,9 +67,7 @@ private class ThresholdFailureDetector(
       case _ =>
     }
 
-  def status: Status =
-    if (darkMode) Status.Open
-    else state.get
+  def status: Status = state.get
 
   private[this] def markBusy(): Unit = {
     if (state.compareAndSet(Status.Open, Status.Busy)) {

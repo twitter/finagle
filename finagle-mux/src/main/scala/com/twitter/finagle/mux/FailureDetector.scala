@@ -34,15 +34,13 @@ private object NullFailureDetector extends FailureDetector {
  *
  * Value of:
  * "none": turn off threshold failure detector
- * "dark": turn off threshold failure detector; but pings remote
- *         servers, and export stats.
  * "threshold:minPeriod:threshold:win:closeTimeout":
  *         use the specified configuration for failure detection
  */
 object sessionFailureDetector extends GlobalFlag(
   "threshold:5.seconds:2:100:duration.top",
   "The failure detector used to determine session liveness " +
-      "[none|dark|threshold:minPeriod:threshold:win:closeTimeout]")
+      "[none|threshold:minPeriod:threshold:win:closeTimeout]")
 
 
 /**
@@ -65,17 +63,6 @@ object FailureDetector {
    * when creating a new detector
    */
   case object NullConfig extends Config
-
-  /**
-   * Indicated to use the default ping frequency and mark busy threshold;
-   * but it just exports stats instead of actually marking an endpoint as busy.
-   */
-  case class DarkModeConfig(
-      minPeriod: Duration = 5.seconds,
-      threshold: Double = 2,
-      windowSize: Int = 100,
-      closeTimeout: Duration = Duration.Top)
-    extends Config
 
   /**
    * Indicated to use the [[com.twitter.finagle.mux.ThresholdFailureDetector]]
@@ -121,13 +108,9 @@ object FailureDetector {
     config match {
       case NullConfig => NullFailureDetector
 
-      case cfg: DarkModeConfig =>
-        new ThresholdFailureDetector(ping, cfg.minPeriod, cfg.threshold,
-          cfg.windowSize, cfg.closeTimeout, darkMode = true, statsReceiver = statsReceiver)
-
       case cfg: ThresholdConfig =>
         new ThresholdFailureDetector(ping, cfg.minPeriod, cfg.threshold,
-          cfg.windowSize, cfg.closeTimeout, darkMode = false, statsReceiver = statsReceiver)
+          cfg.windowSize, cfg.closeTimeout, statsReceiver = statsReceiver)
 
       case GlobalFlagConfig =>
         parseConfigFromFlags(ping, statsReceiver = statsReceiver)
@@ -146,7 +129,7 @@ object FailureDetector {
     sessionFailureDetector() match {
       case list("threshold", duration(min), double(threshold), int(win), duration(closeTimeout)) =>
         new ThresholdFailureDetector(
-          ping, min, threshold, win, closeTimeout, nanoTime, false, statsReceiver)
+          ping, min, threshold, win, closeTimeout, nanoTime, statsReceiver)
 
       case list("threshold", duration(min), double(threshold), int(win)) =>
         new ThresholdFailureDetector(
@@ -163,10 +146,6 @@ object FailureDetector {
       case list("threshold") =>
         new ThresholdFailureDetector(
           ping, nanoTime = nanoTime, statsReceiver = statsReceiver)
-
-      case list("dark") =>
-        new ThresholdFailureDetector(
-          ping, nanoTime = nanoTime, statsReceiver = statsReceiver, darkMode = true)
 
       case list("none") =>
         NullFailureDetector
