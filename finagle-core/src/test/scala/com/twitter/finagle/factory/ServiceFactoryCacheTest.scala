@@ -56,35 +56,35 @@ class ServiceFactoryCacheTest extends FunSuite with MockitoSugar {
     assert(factories.isEmpty)
 
     val s1 = Await.result(cache(1, ClientConnection.nil))
-    assert(factories === Map(1->1))
+    assert(factories == Map(1->1))
     val s2 = Await.result(cache(2, ClientConnection.nil))
-    assert(factories === Map(1->1, 2->1))
+    assert(factories == Map(1->1, 2->1))
 
     val s3 = Await.result(cache(3, ClientConnection.nil))
-    assert(factories === Map(1->1, 2->1, 3->1))
+    assert(factories == Map(1->1, 2->1, 3->1))
     Await.result(s3.close())
 
-    assert(factories === Map(1->1, 2->1))
+    assert(factories == Map(1->1, 2->1))
     Await.result(s2.close())
     tc.advance(1.second)
-    assert(factories === Map(1->1, 2->0))
+    assert(factories == Map(1->1, 2->0))
     Await.result(s1.close())
     tc.advance(1.second)
-    assert(factories === Map(1->0, 2->0))
+    assert(factories == Map(1->0, 2->0))
 
-    assert(news === Map(1->1, 2->1, 3->1))
+    assert(news == Map(1->1, 2->1, 3->1))
 
     val s3x = Await.result(cache(3, ClientConnection.nil))
 
-    assert(factories === Map(1->0, 3->1))
-    assert(news === Map(1->1, 2->1, 3->2))
+    assert(factories == Map(1->0, 3->1))
+    assert(news == Map(1->1, 2->1, 3->2))
 
     val s1x, s1y = Await.result(cache(1, ClientConnection.nil))
-    assert(factories === Map(1->2, 3->1))
-    assert(news === Map(1->1, 2->1, 3->2))
+    assert(factories == Map(1->2, 3->1))
+    assert(news == Map(1->1, 2->1, 3->2))
 
     val s2x = Await.result(cache(2, ClientConnection.nil))
-    assert(factories === Map(1->2, 3->1, 2->1))
-    assert(news === Map(1->1, 2->2, 3->2))
+    assert(factories == Map(1->2, 3->1, 2->1))
+    assert(news == Map(1->1, 2->2, 3->2))
   })
 }

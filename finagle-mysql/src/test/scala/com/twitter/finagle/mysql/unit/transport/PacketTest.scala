@@ -14,8 +14,8 @@ class PacketTest extends FunSuite {
   test("Encode a Packet") {
     val buf = Buffer.fromChannelBuffer(packet.toChannelBuffer)
     val br = BufferReader(buf)
-    assert(bytes.size === br.readInt24())
-    assert(seq === br.readByte())
+    assert(bytes.size == br.readInt24())
+    assert(seq == br.readByte())
     assert(bytes === br.takeRest())
   }
 }

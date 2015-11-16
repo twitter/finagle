@@ -61,7 +61,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
-      assert(statsReceiver.counters.get(List("removals")) === Some(1))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -83,7 +83,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
-      assert(statsReceiver.counters.get(List("removals")) === Some(1))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -91,8 +91,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       timer.tick()
 
       // Probing, not revived yet.
-      assert(statsReceiver.counters.get(List("removals")) === Some(1))
-      assert(statsReceiver.counters.get(List("revivals")) === None)
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
+      assert(statsReceiver.counters.get(List("revivals")) == None)
 
       assert(factory.isAvailable)
       assert(service.isAvailable)
@@ -102,7 +102,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         Await.result(service(123))
       }
 
-      assert(statsReceiver.counters.get(List("removals")) === Some(2))
+      assert(statsReceiver.counters.get(List("removals")) == Some(2))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -132,7 +132,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           Await.result(service(123))
         }
 
-        assert(statsReceiver.counters.get(List("removals")) === Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -141,7 +141,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timeControl.advance(markDeadForList(i) - 1.second)
         timer.tick()
 
-        assert(statsReceiver.counters.get(List("removals")) === Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -151,8 +151,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timer.tick()
 
         // The service should be available for a probe
-        assert(statsReceiver.counters.get(List("removals")) === Some(i + 1))
-        assert(statsReceiver.counters.get(List("revivals")) === None)
+        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("revivals")) == None)
         assert(factory.isAvailable)
         assert(service.isAvailable)
       }
@@ -197,7 +197,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           Await.result(service(123))
         }
 
-        assert(statsReceiver.counters.get(List("removals")) === Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -206,7 +206,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timeControl.advance(markDeadFor(i) - 1.second)
         timer.tick()
 
-        assert(statsReceiver.counters.get(List("removals")) === Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -216,8 +216,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timer.tick()
 
         // The service should be available for a probe
-        assert(statsReceiver.counters.get(List("removals")) === Some(i + 1))
-        assert(statsReceiver.counters.get(List("revivals")) === None)
+        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("revivals")) == None)
         assert(factory.isAvailable)
         assert(service.isAvailable)
       }
@@ -305,14 +305,14 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       val h = new Helper
       import h._
 
-      assert(factory.status === Status.Open)
+      assert(factory.status == Status.Open)
       intercept[Exception] {
         Await.result(service(123))
       }
       intercept[Exception] {
         Await.result(service(123))
       }
-      assert(factory.status === Status.Open)
+      assert(factory.status == Status.Open)
       intercept[Exception] {
         Await.result(service(123))
       }
@@ -322,7 +322,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       tc.advance(10.seconds)
       timer.tick()
 
-      assert(factory.status === Status.Open)
+      assert(factory.status == Status.Open)
     }
   }
 
@@ -412,7 +412,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
-      assert(statsReceiver.counters.get(List("removals")) === Some(1))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -420,8 +420,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       timer.tick()
 
       // Probing, not revived yet.
-      assert(statsReceiver.counters.get(List("revivals")) === None)
-      assert(statsReceiver.counters.get(List("removals")) === Some(1))
+      assert(statsReceiver.counters.get(List("revivals")) == None)
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(factory.isAvailable)
       assert(service.isAvailable)
 
@@ -429,9 +429,9 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       Await.result(service(123))
 
       // A good dispatch; revived
-      assert(statsReceiver.counters.get(List("revivals")) === Some(1))
-      assert(statsReceiver.counters.get(List("removals")) === Some(1))
-      assert(Await.result(service(123)) === 321)
+      assert(statsReceiver.counters.get(List("revivals")) == Some(1))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
+      assert(Await.result(service(123)) == 321)
 
       assert(factory.isAvailable)
       assert(service.isAvailable)
@@ -441,8 +441,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
-      assert(statsReceiver.counters.get(List("revivals")) === Some(1))
-      assert(statsReceiver.counters.get(List("removals")) === Some(1))
+      assert(statsReceiver.counters.get(List("revivals")) == Some(1))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(factory.isAvailable)
       assert(service.isAvailable)
       intercept[Exception] {
@@ -453,8 +453,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
-      assert(statsReceiver.counters.get(List("revivals")) === Some(1))
-      assert(statsReceiver.counters.get(List("removals")) === Some(2))
+      assert(statsReceiver.counters.get(List("revivals")) == Some(1))
+      assert(statsReceiver.counters.get(List("removals")) == Some(2))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
     }
@@ -501,7 +501,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
     when(underlying.status) thenReturn Status.Busy
 
-    assert(service.status === Status.Busy)
+    assert(service.status == Status.Busy)
   }
 
   class BrokenFactoryHelper {
@@ -574,13 +574,13 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     import h._
 
     Time.withCurrentTimeFrozen { timeControl =>
-      assert(Await.result(service(123)) === 321)
-      assert(Await.result(service(123)) === 321)
+      assert(Await.result(service(123)) == 321)
+      assert(Await.result(service(123)) == 321)
       assert(factory.isAvailable)
       assert(service.isAvailable)
 
       // Now fail:
-      assert(Await.result(service(123)) === 321)
+      assert(Await.result(service(123)) == 321)
       assert(!service.isAvailable)
 
       verify(underlyingService, times(3))(123)

@@ -85,7 +85,7 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     assert(!m.isDefined)
     server.issue(123.milliseconds)
     assert(m.isDefined)
-    assert(Await.result(m) === Message.Tlease(123.milliseconds))
+    assert(Await.result(m) == Message.Tlease(123.milliseconds))
   }
 
   test("nack on 0 leases") {

@@ -132,7 +132,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
         val resp = clientIface.show_me_your_dtab()
         clientId match {
           case Some(cId) =>
-            assert(cId.name === Await.result(resp))
+            assert(cId.name == Await.result(resp))
           case None =>
             val ex = intercept[TApplicationException] { Await.result(resp) }
             assert(ex.getMessage.contains(missingClientIdEx.toString))
@@ -163,9 +163,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       Await.result(client.add(1, 2))
     }
 
-    assert(sr.counters(Seq("requests")) === 1)
-    assert(sr.counters.get(Seq("success")) === None)
-    assert(sr.counters(Seq("failures")) === 1)
+    assert(sr.counters(Seq("requests")) == 1)
+    assert(sr.counters.get(Seq("success")) == None)
+    assert(sr.counters(Seq("failures")) == 1)
     server.close()
   }
 
@@ -190,13 +190,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     Dtab.unwind {
       Dtab.local = Dtab.read("/a=>/b; /b=>/$/inet/google.com/80")
       val clientDtab = Await.result(client.show_me_your_dtab())
-      assert(clientDtab === "Dtab(2)\n\t/a => /b\n\t/b => /$/inet/google.com/80\n")
+      assert(clientDtab == "Dtab(2)\n\t/a => /b\n\t/b => /$/inet/google.com/80\n")
     }
   }
 
   testThrift("(don't) propagate Dtab") { (client, tracer) =>
     val dtabSize = Await.result(client.show_me_your_dtab_size())
-    assert(dtabSize === 0)
+    assert(dtabSize == 0)
   }
 
   test("JSON is broken (before we upgrade)") {
@@ -233,13 +233,13 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   testThrift("end-to-end tracing potpourri") { (client, tracer) =>
     val id = Trace.nextId
     Trace.letId(id) {
-      assert(Await.result(client.multiply(10, 30)) === 300)
+      assert(Await.result(client.multiply(10, 30)) == 300)
 
       assert(!tracer.isEmpty)
       val idSet = tracer.map(_.traceId).toSet
 
       val ids = idSet.filter(_.traceId == id.traceId)
-      assert(ids.size === 1)
+      assert(ids.size == 1)
       val theId = ids.head
 
       val traces: Seq[Record] = tracer
@@ -253,30 +253,30 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
       // Verify the count of the annotations. Order may change.
       // These are set twice - by client and server
-      assert(traces.collect { case Record(_, _, Annotation.BinaryAnnotation(k, v), _) => () }.size === 3)
-      assert(traces.collect { case Record(_, _, Annotation.Rpc("multiply"), _) => () }.size === 2)
-      assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size === 2)
+      assert(traces.collect { case Record(_, _, Annotation.BinaryAnnotation(k, v), _) => () }.size == 3)
+      assert(traces.collect { case Record(_, _, Annotation.Rpc("multiply"), _) => () }.size == 2)
+      assert(traces.collect { case Record(_, _, Annotation.ServerAddr(_), _) => () }.size == 2)
       // With Stack, we get an extra ClientAddr because of the
       // TTwitter upgrade request (ThriftTracing.CanTraceMethodName)
       assert(traces.collect { case Record(_, _, Annotation.ClientAddr(_), _) => () }.size >= 2)
       // LocalAddr is set on the server side only.
-      assert(traces.collect { case Record(_, _, Annotation.LocalAddr(_), _) => () }.size === 1)
+      assert(traces.collect { case Record(_, _, Annotation.LocalAddr(_), _) => () }.size == 1)
       // These are set by one side only.
-      assert(traces.collect { case Record(_, _, Annotation.ServiceName("thriftclient"), _) => () }.size === 1)
-      assert(traces.collect { case Record(_, _, Annotation.ServiceName("thriftserver"), _) => () }.size === 1)
-      assert(traces.collect { case Record(_, _, Annotation.ClientSend(), _) => () }.size === 1)
-      assert(traces.collect { case Record(_, _, Annotation.ServerRecv(), _) => () }.size === 1)
-      assert(traces.collect { case Record(_, _, Annotation.ServerSend(), _) => () }.size === 1)
-      assert(traces.collect { case Record(_, _, Annotation.ClientRecv(), _) => () }.size === 1)
+      assert(traces.collect { case Record(_, _, Annotation.ServiceName("thriftclient"), _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ServiceName("thriftserver"), _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ClientSend(), _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ServerRecv(), _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ServerSend(), _) => () }.size == 1)
+      assert(traces.collect { case Record(_, _, Annotation.ClientRecv(), _) => () }.size == 1)
 
 
       assert(Await.result(client.complex_return("a string")).arg_two
-        === "%s".format(Trace.id.spanId.toString))
+        == "%s".format(Trace.id.spanId.toString))
 
       intercept[AnException] { Await.result(client.add(1, 2)) }
       Await.result(client.add_one(1, 2))     // don't block!
 
-      assert(Await.result(client.someway()) === null)  // don't block!
+      assert(Await.result(client.someway()) == null)  // don't block!
     }
   }
 
@@ -314,7 +314,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
     Await.result(client.multiply(1, 42), Duration.fromSeconds(15))
 
-    assert(sr.counters(Seq("success")) === 1)
+    assert(sr.counters(Seq("success")) == 1)
 
     server.close()
   }
@@ -332,8 +332,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     )
     val client1 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(server1.boundAddress), "client")
 
-    assert(Await.result(client1.echo("asdf")) === "asdf")
-    assert(Await.result(client1.getStatus()) === "OK")
+    assert(Await.result(client1.echo("asdf")) == "asdf")
+    assert(Await.result(client1.getStatus()) == "OK")
 
     // 2. Server extends X[Future].
     class ExtendedEchoService2 extends ExtendedEcho[Future] {
@@ -346,8 +346,8 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     )
     val client2 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(server2.boundAddress), "client")
 
-    assert(Await.result(client2.echo("asdf")) === "asdf")
-    assert(Await.result(client2.getStatus()) === "OK")
+    assert(Await.result(client2.echo("asdf")) == "asdf")
+    assert(Await.result(client2.getStatus()) == "OK")
   }
 
   runThriftTests()

@@ -31,7 +31,7 @@ class RateLimitingFilterTest extends FunSuite with MockitoSugar {
     var t = Time.now
     Time.withTimeFunction(t) { _ =>
       (1 to 5) foreach { _ =>
-        assert(Await.result(rateLimitedService(1)) === 1)
+        assert(Await.result(rateLimitedService(1)) == 1)
         t += 100.milliseconds
       }
     }
@@ -44,7 +44,7 @@ class RateLimitingFilterTest extends FunSuite with MockitoSugar {
     var t = Time.now
     Time.withTimeFunction(t) { _ =>
       (1 to 5) foreach { _ =>
-        Await.result(rateLimitedService(1)) === 1
+        Await.result(rateLimitedService(1)) == 1
         t += 100.milliseconds
       }
 
@@ -61,7 +61,7 @@ class RateLimitingFilterTest extends FunSuite with MockitoSugar {
     var t = Time.now
     Time.withTimeFunction(t) { _ =>
       (1 to 5) foreach { _ =>
-        (1 to 5) foreach { i => assert(Await.result(rateLimitedService(i)) === 1) }
+        (1 to 5) foreach { i => assert(Await.result(rateLimitedService(i)) == 1) }
         t += 100.milliseconds
       }
     }

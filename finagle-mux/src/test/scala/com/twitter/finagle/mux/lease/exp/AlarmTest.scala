@@ -90,17 +90,17 @@ class AlarmTest extends FunSuite with LocalConductors {
 
       localThread(conductor) {
         waitForBeat(1)
-        assert(ctr === 1)
+        assert(ctr == 1)
         ctl.advance(2.seconds)
 
         waitForBeat(2)
-        assert(ctr === 1)
+        assert(ctr == 1)
         ctl.advance(3.seconds)
       }
     }
 
     localWhenFinished(conductor) {
-      assert(ctr === 2)
+      assert(ctr == 2)
     }
   }
 
@@ -200,9 +200,9 @@ class AlarmTest extends FunSuite with LocalConductors {
     import h._
     val ctr = FakeByteCounter(50.kilobytes.inBytes, Time.now, nfo)
     val alarm = new BytesAlarm(ctr, () => 5.megabytes)
-    // 5MB / (50 KB/ms) * 8 / 10 === 80.milliseconds
+    // 5MB / (50 KB/ms) * 8 / 10 == 80.milliseconds
     // 80.milliseconds < 100.milliseconds
-    assert(alarm.sleeptime === ((80 * 1.kilobyte.inBytes / 1000).milliseconds))
+    assert(alarm.sleeptime == ((80 * 1.kilobyte.inBytes / 1000).milliseconds))
   }
 
   test("BytesAlarm should use the default if the gap is too big") {
@@ -210,9 +210,9 @@ class AlarmTest extends FunSuite with LocalConductors {
     import h._
     val ctr = FakeByteCounter(1000, Time.now, nfo)
     val alarm = new BytesAlarm(ctr, () => 5.megabytes)
-    // 5MB / 1000000B/S * 8 / 10 === 4.seconds
+    // 5MB / 1000000B/S * 8 / 10 == 4.seconds
     // 4.seconds > 100.milliseconds
-    assert(alarm.sleeptime === 100.milliseconds)
+    assert(alarm.sleeptime == 100.milliseconds)
   }
 
   test("BytesAlarm should use zero if we're past") {
@@ -221,8 +221,8 @@ class AlarmTest extends FunSuite with LocalConductors {
     val ctr = FakeByteCounter(1000, Time.now, nfo)
     val alarm = new BytesAlarm(ctr, () => 5.megabytes)
     fakePool.setSnapshot(new FakeMemoryUsage(6.megabytes, 10.megabytes))
-    // -1MB / 1000000B/S * 8 / 10 === -800.milliseconds
+    // -1MB / 1000000B/S * 8 / 10 == -800.milliseconds
     // -800.milliseconds < 10.milliseconds
-    assert(alarm.sleeptime === 10.milliseconds)
+    assert(alarm.sleeptime == 10.milliseconds)
   }
 }

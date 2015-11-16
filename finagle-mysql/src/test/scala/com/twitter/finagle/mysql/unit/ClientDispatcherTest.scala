@@ -40,11 +40,11 @@ class ClientDispatcherTest extends FunSuite {
     import ctx._
     val packet = Await.result(handshakeResponse)
     val br = BufferReader(packet.body)
-    assert(br.readInt() === initReply().clientCap.mask)
-    assert(br.readInt() === initReply().maxPacketSize)
-    assert(br.readByte() === initReply().charset)
+    assert(br.readInt() == initReply().clientCap.mask)
+    assert(br.readInt() == initReply().maxPacketSize)
+    assert(br.readByte() == initReply().charset)
     assert(br.take(23) === Array.fill(23)(0.toByte))
-    assert(br.readNullTerminatedString() === "username")
+    assert(br.readNullTerminatedString() == "username")
   }
 
   test("serially dispatch requests") {
@@ -53,7 +53,7 @@ class ClientDispatcherTest extends FunSuite {
     val r1 = service(QueryRequest("SELECT 1"))
     val r2 = service(QueryRequest("SELECT 2"))
     val r3 = service(QueryRequest("SELECT 3"))
-    assert(serverq.size === 1)
+    assert(serverq.size == 1)
     clientq.offer(okPacket)
     assert(r1.isDefined)
     assert(!r2.isDefined)
@@ -67,7 +67,7 @@ class ClientDispatcherTest extends FunSuite {
     clientq.offer(okPacket)
     assert(Await.result(r).isInstanceOf[OK])
     val okResult = Await.result(r).asInstanceOf[OK]
-    assert(okResult === OK.decode(okPacket))
+    assert(okResult == OK.decode(okPacket))
   }
 
   test("decode Error packet as ServerError") {
@@ -195,8 +195,8 @@ class ClientDispatcherTest extends FunSuite {
     clientq.offer(makePreparedHeader(0, 0))
     assert(Await.result(query).isInstanceOf[PrepareOK])
     val res = Await.result(query).asInstanceOf[PrepareOK]
-    assert(res.numOfCols === 0)
-    assert(res.numOfParams === 0)
+    assert(res.numOfCols == 0)
+    assert(res.numOfParams == 0)
   }
 
   test("Decode PreparedStatement numParams > 0, numCols > 0") {
@@ -213,10 +213,10 @@ class ClientDispatcherTest extends FunSuite {
     clientq.offer(eof)
     assert(Await.result(query).isInstanceOf[PrepareOK])
     val res = Await.result(query).asInstanceOf[PrepareOK]
-    assert(res.numOfCols === 1)
-    assert(res.numOfParams === numParams)
-    assert(res.columns === cols.toList)
-    assert(res.params === fields.toList)
+    assert(res.numOfCols == 1)
+    assert(res.numOfParams == numParams)
+    assert(res.columns == cols.toList)
+    assert(res.params == fields.toList)
   }
 
   test("CloseStatement satisfies rpc") {
@@ -226,8 +226,8 @@ class ClientDispatcherTest extends FunSuite {
     val query = service(CloseRequest(5))
     val sent = Await.result(serverq.poll())
     val br = BufferReader(sent.body)
-    assert(br.readByte() === Command.COM_STMT_CLOSE)
-    assert(br.readInt() === stmtId)
+    assert(br.readByte() == Command.COM_STMT_CLOSE)
+    assert(br.readInt() == stmtId)
     // response should be synthesized
     val resp = Await.result(query)
     assert(resp.isInstanceOf[OK])

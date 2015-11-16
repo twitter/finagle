@@ -23,7 +23,7 @@ class HttpServerDispatcherTest extends FunSuite {
     assert(!f.isDefined)
     Await.ready(trans.write(chunk))
     val c = Await.result(f).asInstanceOf[HttpChunk]
-    assert(c.getContent === chunk.getContent)
+    assert(c.getContent == chunk.getContent)
   }
 
   test("invalid message") {
@@ -33,7 +33,7 @@ class HttpServerDispatcherTest extends FunSuite {
 
     in.write("invalid")
     Await.ready(out.onClose)
-    assert(out.status === Status.Closed)
+    assert(out.status == Status.Closed)
   }
 
   test("bad request") {
@@ -43,7 +43,7 @@ class HttpServerDispatcherTest extends FunSuite {
 
     in.write(BadHttpRequest(new Exception()))
     Await.result(in.read)
-    assert(out.status === Status.Closed)
+    assert(out.status == Status.Closed)
   }
 
   test("streaming request body") {

@@ -13,7 +13,7 @@ class HttpRequestProxyTest extends FunSuite {
       final val httpRequest = message
     }
     assert(proxy.httpMessage != null)
-    assert(proxy.getProtocolVersion === HttpVersion.HTTP_1_1)
-    assert(proxy.getMethod          === HttpMethod.GET)
+    assert(proxy.getProtocolVersion == HttpVersion.HTTP_1_1)
+    assert(proxy.getMethod          == HttpMethod.GET)
   }
 }

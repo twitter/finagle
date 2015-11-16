@@ -24,14 +24,14 @@ class ClientBuilderTest extends FlatSpec {
     val zkr = ClientBuilder().reader()
 
     assert(zkr.value.isInstanceOf[ZooKeeperReader])
-    assert(zkr.value.getClass === ApacheZooKeeper.newClient(config).value.getClass)
+    assert(zkr.value.getClass == ApacheZooKeeper.newClient(config).value.getClass)
   }
 
   "writer" should "return Apache ZK writer" in {
     val zkw = ClientBuilder().writer()
 
     assert(zkw.value.isInstanceOf[ZooKeeperRW])
-    assert(zkw.value.getClass === ApacheZooKeeper.newClient(config).value.getClass)
+    assert(zkw.value.getClass == ApacheZooKeeper.newClient(config).value.getClass)
   }
 
   "multi" should "raise RuntimeException" in {

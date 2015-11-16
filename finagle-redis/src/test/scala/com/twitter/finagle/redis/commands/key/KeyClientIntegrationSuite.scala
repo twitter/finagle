@@ -16,7 +16,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
       Await.result(client.del(Seq(foo)))
-      assert(Await.result(client.get(foo)) === None)
+      assert(Await.result(client.get(foo)) == None)
     }
   }
 
@@ -27,10 +27,10 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       val expectedBytes: Array[Byte] = Array(0, -64, 10, 6, 0, -8, 114, 63, -59, -5, -5, 95, 40)
 
       Await.result(client.set(k, v))
-      assert(Await.result(client.dump(k)).fold(fail("Expected result for DUMP"))(_.array) ===
+      assert(Await.result(client.dump(k)).fold(fail("Expected result for DUMP"))(_.array) ==
         expectedBytes)
       Await.result(client.del(Seq(foo)))
-      assert(Await.result(client.dump(foo)) === None)
+      assert(Await.result(client.dump(foo)) == None)
     }
   }
 
@@ -40,24 +40,24 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
       Await.result(client.set(baz, boo))
-      assert(CBToString(Await.result(client.scan(0, None, None)).apply(1)) === "baz")
+      assert(CBToString(Await.result(client.scan(0, None, None)).apply(1)) == "baz")
 
       val withCount = Await.result(client.scan(0, Some(10), None))
-      assert(CBToString(withCount(0)) === "0")
-      assert(CBToString(withCount(1)) === "baz")
-      assert(CBToString(withCount(2)) === "foo")
+      assert(CBToString(withCount(0)) == "0")
+      assert(CBToString(withCount(1)) == "baz")
+      assert(CBToString(withCount(2)) == "foo")
 
       val pattern = StringToChannelBuffer("b*")
       val withPattern = Await.result(client.scan(0, None, Some(pattern)))
-      assert(CBToString(withPattern(0)) === "0")
-      assert(CBToString(withPattern(1)) === "baz")
+      assert(CBToString(withPattern(0)) == "0")
+      assert(CBToString(withPattern(1)) == "baz")
     }
   }
 
   test("Correctly perform the EXISTS command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.exists(foo)) === true)
+      assert(Await.result(client.exists(foo)) == true)
     }
   }
 
@@ -66,7 +66,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       Await.result(client.set(foo, bar))
       val time = 20L
 
-      assert(Await.result(client.expire(foo, time)) === true)
+      assert(Await.result(client.expire(foo, time)) == true)
 
       val result = Await.result(client.ttl(foo)) match {
         case Some(num) => num
@@ -84,7 +84,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       // below is true for uninteresting reasons.
       val ttl = System.currentTimeMillis() + 20000L
 
-      assert(Await.result(client.expireAt(foo, ttl)) === true)
+      assert(Await.result(client.expireAt(foo, ttl)) == true)
 
       val result = Await.result(client.ttl(foo)) match {
         case Some(num) => num
@@ -103,10 +103,10 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       Await.result(client.select(fromDb))
 
       // This following fails with an exceptions since bar is not a database.
-      // assert(Await.result(client.move(foo, bar)) === false)
+      // assert(Await.result(client.move(foo, bar)) == false)
 
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.move(foo, StringToChannelBuffer(toDb.toString))) === true)
+      assert(Await.result(client.move(foo, StringToChannelBuffer(toDb.toString))) == true)
 
       Await.result(client.del(Seq(foo))) // clean up
     }
@@ -116,7 +116,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val ttl = 100000L
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.pExpire(foo, ttl)) === true)
+      assert(Await.result(client.pExpire(foo, ttl)) == true)
 
       val result = Await.result(client.pTtl(foo)) match {
         case Some(num) => num
@@ -131,7 +131,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       val horizon = 20000L
       val ttl = System.currentTimeMillis() + horizon
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.pExpireAt(foo, ttl)) === true)
+      assert(Await.result(client.pExpireAt(foo, ttl)) == true)
 
       val result = Await.result(client.pTtl(foo)) match {
         case Some(num) => num

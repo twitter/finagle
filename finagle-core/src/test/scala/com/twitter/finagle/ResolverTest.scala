@@ -35,7 +35,7 @@ class ResolverTest extends FunSuite {
     val Name.Bound(addr) = Resolver.eval("test!xyz")
     Var.sample(addr) match {
       case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
-        assert(addrs.head === TestAddr("xyz"))
+        assert(addrs.head == TestAddr("xyz"))
       case _ => fail()
     }
   }
@@ -45,7 +45,7 @@ class ResolverTest extends FunSuite {
     val binding = resolver.bind("xyz")
     Var.sample(binding) match {
       case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
-        assert(addrs.head === TestAddr("xyz"))
+        assert(addrs.head == TestAddr("xyz"))
       case _ => fail()
     }
   }
@@ -59,7 +59,7 @@ class ResolverTest extends FunSuite {
 
     val sockaddr = new SocketAddress {}
     ConstResolver(Addr.Bound(sockaddr)).resolve("blah") match {
-      case Return(g) => assert(g() === Set(sockaddr))
+      case Return(g) => assert(g() == Set(sockaddr))
       case _ => fail()
     }
   }
@@ -67,7 +67,7 @@ class ResolverTest extends FunSuite {
   test("Resolver.evalLabeled: Resolve labels of labeled addresses") {
     val label = "foo"
     val binding = Resolver.evalLabeled(label + "=test!xyz")
-    assert(binding._2 === label)
+    assert(binding._2 == label)
   }
 
   test("Resolver.evalLabeled: Resolve empty string as label for unlabeled addresses") {
@@ -76,7 +76,7 @@ class ResolverTest extends FunSuite {
   }
 
   test("Return equatable names") {
-    assert(Resolver.eval("test!xyz") === Resolver.eval("test!xyz"))
+    assert(Resolver.eval("test!xyz") == Resolver.eval("test!xyz"))
     assert(Resolver.eval("test!xyz") != Resolver.eval("test!xxx"))
   }
 

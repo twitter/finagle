@@ -40,7 +40,7 @@ class MysqlBuilderTest extends FunSuite with IntegrationClient {
         case Annotation.Message("mysql.PingRequest") => ()
       }
 
-      assert(mysqlTraces.size === 3, "missing traces")
+      assert(mysqlTraces.size == 3, "missing traces")
     }
 
   }

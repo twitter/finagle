@@ -42,13 +42,13 @@ class InterpreterServiceTest extends FunSuite with BeforeAndAfter {
       _ <- client(Set(key, 0, Time.epoch, value))
       r <- client(Get(Seq(key)))
     } yield r
-    assert(Await.result(result, 1.second) === Values(Seq(Value(key, value, None, Some(Buf.Utf8(zero))))))
+    assert(Await.result(result, 1.second) == Values(Seq(Value(key, value, None, Some(Buf.Utf8(zero))))))
     assert(client.isAvailable)
   }
 
   test("quit") {
     val result = client(Quit())
-    assert(Await.result(result) === NoOp())
+    assert(Await.result(result) == NoOp())
   }
 
 }

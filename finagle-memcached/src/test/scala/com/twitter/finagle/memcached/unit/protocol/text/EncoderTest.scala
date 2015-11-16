@@ -30,7 +30,7 @@ class EncoderTest extends FunSuite with MockitoSugar {
     def encodeIsPure(x: AnyRef) = {
       val buf1 = encode(x)
       val buf2 = encode(x)
-      assert(buf1 === buf2)
+      assert(buf1 == buf2)
     }
 
     info("tokens")

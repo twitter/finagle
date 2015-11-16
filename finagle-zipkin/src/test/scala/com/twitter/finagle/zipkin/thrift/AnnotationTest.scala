@@ -12,11 +12,11 @@ class AnnotationTest extends FunSuite {
     val tann = ann.toThrift
 
     assert(tann.isSetHost)
-    assert(tann.host.ipv4 === ann.endpoint.ipv4)
-    assert(tann.host.port === ann.endpoint.port)
+    assert(tann.host.ipv4 == ann.endpoint.ipv4)
+    assert(tann.host.port == ann.endpoint.port)
     assert(tann.isSetValue)
-    assert(tann.value === ann.value)
+    assert(tann.value == ann.value)
     assert(tann.isSetTimestamp)
-    assert(tann.timestamp === ann.timestamp.inMicroseconds)
+    assert(tann.timestamp == ann.timestamp.inMicroseconds)
   }
 }

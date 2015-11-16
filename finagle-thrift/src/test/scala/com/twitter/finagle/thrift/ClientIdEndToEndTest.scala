@@ -35,13 +35,13 @@ class ClientIdEndToEndTest extends FunSuite with ThriftTest {
   testThrift("end-to-end ClientId propagation", Some(ClientId(clientId))) { (client, _) =>
     // arg_two repurposed to be the serverside ClientId.
     val result = Await.result(client.complex_return("")).arg_two
-    assert(result === clientId)
+    assert(result == clientId)
   }
 
   testThrift("end-to-end empty ClientId propagation", None) { (client, _) =>
     // arg_two repurposed to be the serverside ClientId.
     val result = Await.result(client.complex_return("")).arg_two
-    assert(result === "")
+    assert(result == "")
   }
 
   runThriftTests()

@@ -37,7 +37,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
     promise.setValue("1")
     val res = timeoutService("blah")
     assert(res.isDefined)
-    assert(Await.result(res) === "1")
+    assert(Await.result(res) == "1")
   }
 
   test("TimeoutFilter should times out a request that is not successful, cancels underlying") {
@@ -47,7 +47,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
     Time.withCurrentTimeFrozen { tc: TimeControl =>
       val res = timeoutService("blah")
       assert(!res.isDefined)
-      assert(promise.interrupted === None)
+      assert(promise.interrupted == None)
       tc.advance(2.seconds)
       timer.tick()
       assert(res.isDefined)

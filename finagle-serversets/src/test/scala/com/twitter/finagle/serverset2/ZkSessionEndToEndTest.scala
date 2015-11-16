@@ -77,7 +77,7 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     Await.result(cond)
     Await.result(state.changes.filter(connected).toFuture())
 
-    assert(states === Seq(
+    assert(states == Seq(
       SessionState.SyncConnected, SessionState.Expired,
       SessionState.Disconnected, SessionState.SyncConnected))
   }
@@ -103,9 +103,9 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
 
     // Wait for the initial connect.
     eventually {
-      assert(Var.sample(varZkState) ===
+      assert(Var.sample(varZkState) ==
         WatchState.SessionState(SessionState.SyncConnected))
-      assert(sessions.size === 1)
+      assert(sessions.size == 1)
     }
 
     val session1 = Var.sample(varZkSession)
@@ -147,10 +147,10 @@ class ZkSessionEndToEndTest extends FunSuite with BeforeAndAfter {
     Await.ready(zkConnected)
 
     eventually {
-      assert((zkStates map { case (s, _) => s }).reverse ===
+      assert((zkStates map { case (s, _) => s }).reverse ==
         Seq(SessionState.SyncConnected, SessionState.Disconnected,
           SessionState.Expired, SessionState.SyncConnected))
     }
-    assert(sessions.size === 2)
+    assert(sessions.size == 2)
   }
 }

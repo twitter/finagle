@@ -40,7 +40,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
       "/srv/local => /srv/other;"+
       "/srv => /srv#/devel"
     )
-    assert(HttpDtab.read(m).get() === expected)
+    assert(HttpDtab.read(m).get() == expected)
   }
 
   test("Dtab-Local takes precedence over X-Dtab") {
@@ -56,7 +56,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
       "/srv/local => /srv/other;"+
       "/srv => /srv#/devel"
     )
-    assert(HttpDtab.read(m).get() === expected)
+    assert(HttpDtab.read(m).get() == expected)
   }
 
   // some base64 encoders insert newlines to enforce max line length.  ensure we aren't doing that
@@ -79,7 +79,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-02-B", "a")
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
-    assert(failure.why === "Unmatched X-Dtab headers")
+    assert(failure.why == "Unmatched X-Dtab headers")
   }
 
   test("X-Dtab: Invalid prefix") {
@@ -88,7 +88,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-B", "L2Zhcg==") // /far
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
-    assert(failure.why === "Invalid path: /foo => /far")
+    assert(failure.why == "Invalid path: /foo => /far")
   }
 
   test("X-Dtab: Invalid name") {
@@ -97,7 +97,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-B", "L2ZvbyA9PiAvZmFy") // /foo => /far
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
-    assert(failure.why === "Invalid name: /foo => /far")
+    assert(failure.why == "Invalid name: /foo => /far")
   }
 
   test("X-Dtab: Invalid: missing entry") {
@@ -107,7 +107,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-02-B", "a")
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
-    assert(failure.why === "Unmatched X-Dtab headers")
+    assert(failure.why == "Unmatched X-Dtab headers")
   }
 
   test("X-Dtab: Invalid: non-ASCII encoding") {
@@ -116,7 +116,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-B", "☹")
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
-    assert(failure.why === "Value not b64-encoded: ☺")
+    assert(failure.why == "Value not b64-encoded: ☺")
   }
 
   test("clear()") {

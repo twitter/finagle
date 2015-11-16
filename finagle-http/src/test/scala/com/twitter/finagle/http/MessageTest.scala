@@ -10,23 +10,23 @@ import org.scalatest.junit.JUnitRunner
 class MessageTest extends FunSuite {
   test("empty message") {
     val response = Response()
-    assert(response.length === 0)
-    assert(response.contentString === "")
+    assert(response.length == 0)
+    assert(response.contentString == "")
   }
 
   test("headers") {
     val response = Request()
-    response.allow.toList === Nil
+    response.allow.toList == Nil
     response.allow = Method.Get :: Method.Head :: Nil
-    assert(response.allow === Some("GET,HEAD"))
+    assert(response.allow == Some("GET,HEAD"))
 
-    assert(response.accept.toList === Nil)
+    assert(response.accept.toList == Nil)
     response.accept = "text/plain; q=0.5" :: "text/html" :: Nil
-    assert(response.accept.toList === "text/plain; q=0.5" :: "text/html" :: Nil)
+    assert(response.accept.toList == "text/plain; q=0.5" :: "text/html" :: Nil)
 
     response.accept = "A,,c;param,;d,;"
-    assert(response.accept.toList === "A" :: "c;param" :: ";d" :: ";" :: Nil)
-    assert(response.acceptMediaTypes.toList === "a" :: "c" :: Nil)
+    assert(response.accept.toList == "A" :: "c;param" :: ";d" :: ";" :: Nil)
+    assert(response.acceptMediaTypes.toList == "a" :: "c" :: Nil)
   }
 
   test("charset") {
@@ -44,7 +44,7 @@ class MessageTest extends FunSuite {
     tests.foreach { case (header, expected) =>
       val request = Request()
       request.headers.set("Content-Type", header)
-      assert(request.charset === Option(expected))
+      assert(request.charset == Option(expected))
     }
   }
 
@@ -63,7 +63,7 @@ class MessageTest extends FunSuite {
       val request = Request()
       request.headers.set("Content-Type", header)
       request.charset = charset
-      assert(request.headers.get("Content-Type") === expected)
+      assert(request.headers.get("Content-Type") == expected)
     }
   }
 
@@ -82,13 +82,13 @@ class MessageTest extends FunSuite {
       val request = Request()
       request.headers.set("Content-Type", header)
       // shorthand for empty mediaTypes really being returned as None after being parsed.
-      assert(request.mediaType === (if (expected.isEmpty) None else Some(expected)))
+      assert(request.mediaType == (if (expected.isEmpty) None else Some(expected)))
     }
   }
 
   test("empty mediaType") {
     val request = Request()
-    request.mediaType === None
+    request.mediaType == None
   }
 
   test("mediaType=") {
@@ -104,7 +104,7 @@ class MessageTest extends FunSuite {
       val request = Request()
       request.headers.set("Content-Type", header)
       request.mediaType = mediaType
-      assert(request.headers.get("Content-Type") === expected)
+      assert(request.headers.get("Content-Type") == expected)
     }
   }
 
@@ -114,22 +114,22 @@ class MessageTest extends FunSuite {
     response.write("hello")
     response.clearContent()
 
-    assert(response.contentString === "")
-    assert(response.length        === 0)
+    assert(response.contentString == "")
+    assert(response.length        == 0)
   }
 
   test("contentString") {
     val response = Response()
     response.content = Buf.Utf8("hello")
-    assert(response.contentString === "hello")
-    assert(response.contentString === "hello")
+    assert(response.contentString == "hello")
+    assert(response.contentString == "hello")
   }
 
   test("cacheControl") {
     val response = Response()
 
     response.cacheControl = 15123.milliseconds
-    assert(response.cacheControl === Some("max-age=15, must-revalidate"))
+    assert(response.cacheControl == Some("max-age=15, must-revalidate"))
   }
 
   test("withInputStream") {
@@ -138,7 +138,7 @@ class MessageTest extends FunSuite {
     response.withInputStream { inputStream =>
       val bytes = new Array[Byte](5)
       inputStream.read(bytes)
-      assert(new String(bytes) === "hello")
+      assert(new String(bytes) == "hello")
     }
   }
 
@@ -148,15 +148,15 @@ class MessageTest extends FunSuite {
     response.withReader { reader =>
       val bytes = new Array[Char](5)
       reader.read(bytes)
-      assert(new String(bytes) === "hello")
+      assert(new String(bytes) == "hello")
     }
   }
 
   test("write(String)") {
     val response = Response()
     response.write("hello")
-    assert(response.length        === 5)
-    assert(response.contentString === "hello")
+    assert(response.length        == 5)
+    assert(response.contentString == "hello")
   }
 
   test("write(String), multiple writes") {
@@ -166,8 +166,8 @@ class MessageTest extends FunSuite {
     response.write("l")
     response.write("l")
     response.write("o")
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withOutputStream") {
@@ -176,8 +176,8 @@ class MessageTest extends FunSuite {
       outputStream.write("hello".getBytes)
     }
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withOutputStream, multiple writes") {
@@ -189,8 +189,8 @@ class MessageTest extends FunSuite {
     }
     response.write("o")
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withWriter") {
@@ -199,8 +199,8 @@ class MessageTest extends FunSuite {
       writer.write("hello")
     }
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withWriter, multiple writes") {
@@ -212,7 +212,7 @@ class MessageTest extends FunSuite {
     }
     response.write("o")
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 }

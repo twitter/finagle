@@ -16,9 +16,9 @@ class SimpleCommandRequestTest extends FunSuite {
     val req = new SimpleCommandRequest(cmd.toByte, bytes)
     val buf = Buffer.fromChannelBuffer(req.toPacket.toChannelBuffer)
     val br = BufferReader(buf)
-    assert(br.readInt24() === bytes.size + 1) // cmd byte
-    assert(br.readByte() === 0x00)
-    assert(br.readByte() === cmd)
+    assert(br.readInt24() == bytes.size + 1) // cmd byte
+    assert(br.readByte() == 0x00)
+    assert(br.readByte() == cmd)
     assert(br.take(bytes.size) === bytes)
   }
 }
@@ -43,17 +43,17 @@ class HandshakeResponseTest extends FunSuite {
 
   test("encode capabilities") {
     val mask = br.readInt()
-    assert(mask === 0xfffff6ff)
+    assert(mask == 0xfffff6ff)
   }
 
   test("maxPacketSize") {
     val max = br.readInt()
-    assert(max === 16777216)
+    assert(max == 16777216)
   }
 
   test("charset") {
     val charset = br.readByte()
-    assert(charset === 33.toByte)
+    assert(charset == 33.toByte)
   }
 
   test("reserved bytes") {
@@ -62,7 +62,7 @@ class HandshakeResponseTest extends FunSuite {
   }
 
   test("username") {
-    assert(br.readNullTerminatedString() === username.get)
+    assert(br.readNullTerminatedString() == username.get)
   }
 
   test("password") {
@@ -80,7 +80,7 @@ class ExecuteRequestTest extends FunSuite {
     br.skip(10) // payload header (10bytes)
     br.skip(1) // new params bound flag
     val restSize = br.takeRest().size
-    assert(restSize === ((numOfParams+7)/8))
+    assert(restSize == ((numOfParams+7)/8))
   }
 
   // supported types
@@ -134,10 +134,10 @@ class ExecuteRequestTest extends FunSuite {
   val flg = br.readByte()
   val iter = br.readInt()
   test("statement Id, flags, and iteration count") {
-    assert(cmd === Command.COM_STMT_EXECUTE)
-    assert(id === stmtId)
-    assert(flg === flags)
-    assert(iter === 1)
+    assert(cmd == Command.COM_STMT_EXECUTE)
+    assert(id == stmtId)
+    assert(flg == flags)
+    assert(iter == 1)
   }
 
   val len = ((params.size + 7) / 8).toInt
@@ -148,15 +148,15 @@ class ExecuteRequestTest extends FunSuite {
     val bits = BigInt(bytesAsBigEndian)
     for (i <- 0 until params.size) {
       if (params(i) == null)
-        assert(bits.testBit(i) === true)
+        assert(bits.testBit(i) == true)
       else
-        assert(bits.testBit(i) === false)
+        assert(bits.testBit(i) == false)
     }
   }
 
   val hasNewParams = br.readByte() == 1
   test("has new parameters") {
-    assert(hasNewParams === true)
+    assert(hasNewParams == true)
   }
 
   test("sanitized null parameters") {
@@ -167,43 +167,43 @@ class ExecuteRequestTest extends FunSuite {
   if (hasNewParams) {
     test("type codes") {
       for (p <- req.params)
-        assert(br.readShort() === p.typeCode)
+        assert(br.readShort() == p.typeCode)
     }
 
     test("String") {
-      assert(br.readLengthCodedString() === strVal)
+      assert(br.readLengthCodedString() == strVal)
     }
 
     test("Non-Ascii String") {
-      assert(br.readLengthCodedString() === nonAsciiStrVal)
+      assert(br.readLengthCodedString() == nonAsciiStrVal)
     }
 
     test("Boolean") {
-      assert(br.readByte() === (if (boolVal) 1 else 0))
+      assert(br.readByte() == (if (boolVal) 1 else 0))
     }
 
     test("Byte") {
-      assert(br.readByte() === byteVal)
+      assert(br.readByte() == byteVal)
     }
 
     test("Short") {
-      assert(br.readShort() === shortVal)
+      assert(br.readShort() == shortVal)
     }
 
     test("Int") {
-      assert(br.readInt() === intVal)
+      assert(br.readInt() == intVal)
     }
 
     test("Long") {
-      assert(br.readLong() === longVal)
+      assert(br.readLong() == longVal)
     }
 
     test("Float") {
-      assert(br.readFloat() === floatVal)
+      assert(br.readFloat() == floatVal)
     }
 
     test("Double") {
-      assert(br.readDouble() === doubleVal)
+      assert(br.readDouble() == doubleVal)
     }
 
     val timestampValueLocal = new TimestampValue(TimeZone.getDefault(), TimeZone.getDefault())
@@ -211,47 +211,47 @@ class ExecuteRequestTest extends FunSuite {
     test("java.sql.Timestamp") {
       val raw = RawValue(Type.Timestamp, Charset.Binary, true, br.readLengthCodedBytes())
       val timestampValueLocal(ts) = raw
-      assert(ts === timestamp)
+      assert(ts == timestamp)
     }
 
     test("java.sql.Date") {
       val raw = RawValue(Type.Date, Charset.Binary, true, br.readLengthCodedBytes())
       val DateValue(d) = raw
-      assert(d.toString === sqlDate.toString)
+      assert(d.toString == sqlDate.toString)
     }
 
     test("java.util.Date") {
       val raw = RawValue(Type.DateTime, Charset.Binary, true, br.readLengthCodedBytes())
       val timestampValueLocal(dt) = raw
-      assert(dt.getTime === timestamp.getTime)
+      assert(dt.getTime == timestamp.getTime)
     }
 
     test("StringValue") {
-      assert(br.readLengthCodedString() === strVal)
+      assert(br.readLengthCodedString() == strVal)
     }
 
     test("ByteValue") {
-      assert(br.readByte() === byteVal)
+      assert(br.readByte() == byteVal)
     }
 
     test("ShortValue") {
-      assert(br.readShort() === shortVal)
+      assert(br.readShort() == shortVal)
     }
 
     test("IntValue") {
-      assert(br.readInt() === intVal)
+      assert(br.readInt() == intVal)
     }
 
     test("LongValue") {
-      assert(br.readLong() === longVal)
+      assert(br.readLong() == longVal)
     }
 
     test("FloatValue") {
-      assert(br.readFloat() === floatVal)
+      assert(br.readFloat() == floatVal)
     }
 
     test("DoubleValue") {
-      assert(br.readDouble() === doubleVal)
+      assert(br.readDouble() == doubleVal)
     }
   }
 }

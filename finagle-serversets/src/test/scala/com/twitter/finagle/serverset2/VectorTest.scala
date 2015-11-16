@@ -37,24 +37,24 @@ class VectorTest extends FunSuite {
     val ep1 = Endpoint(
       Array(null), "10.0.0.2", 123,
       Int.MinValue, Endpoint.Status.Alive, "1111")
-    assert(vec.weightOf(ep1) === 1.2*2.1)
+    assert(vec.weightOf(ep1) == 1.2*2.1)
 
     val ep2 = ep1.copy(memberId="9876")
-    assert(vec.weightOf(ep2) === 1.1*1.2)
+    assert(vec.weightOf(ep2) == 1.1*1.2)
 
     val ep3 = ep2.copy(memberId="blah")
-    assert(vec.weightOf(ep3) === 1.2)
+    assert(vec.weightOf(ep3) == 1.2)
 
     val ep4=  ep3.copy(host = "1.1.1.1", port = 333)
-    assert(vec.weightOf(ep4) === 1.0)
+    assert(vec.weightOf(ep4) == 1.0)
 
     for (ep <- Seq(ep1, ep2, ep3, ep4))
-      assert(Vector(Seq.empty).weightOf(ep) === 1.0)
+      assert(Vector(Seq.empty).weightOf(ep) == 1.0)
   }
 
   test("Vector.parseJson") {
     val Some(Vector(vec)) = Vector.parseJson("""{"vector":[{"select":"member=1","weight":1.2,"priority":1},{"select":"inet=10.0.0.3:%d","weight":1.3,"priority":2}]}""".format(port))
-    assert(vec === Seq(
+    assert(vec == Seq(
       Descriptor(Selector.Member("1"), 1.2, 1),
       Descriptor(Selector.Host("10.0.0.3", port), 1.3, 2)))
   }

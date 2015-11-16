@@ -84,7 +84,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
       val future = client.multiply(1, 2)
-      assert(Await.result(future) === 3)
+      assert(Await.result(future) == 3)
       testServer.shutdown
     }
 
@@ -122,7 +122,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
       Await.result(client.add_one(1, 2))
-      assert(true === true)
+      assert(true == true)
       testServer.shutdown
     }
 
@@ -140,9 +140,9 @@ class FinagleClientThriftServerTest extends FunSuite {
 
       val client = new B.ServiceToClient(service, new TBinaryProtocol.Factory())
 
-      assert(somewayPromise.isDefined === false)
-      assert(Await.result(client.someway()) === null)  // returns
-      assert(Await.result(somewayPromise) === (()))
+      assert(somewayPromise.isDefined == false)
+      assert(Await.result(client.someway()) == null)  // returns
+      assert(Await.result(somewayPromise) == (()))
 
       testServer.shutdown
     }
@@ -170,7 +170,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       {
         val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
         val resolved = futures map (Await.result(_, 5.seconds))
-        resolved foreach { r => assert(r === (3)) }
+        resolved foreach { r => assert(r == (3)) }
       }
 
       addrs.foreach(_.shutdown)

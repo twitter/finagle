@@ -95,7 +95,7 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
         assert(
           tag1 == tag2 && ctxs1 == ctxs2 && dst1 == dst2 &&
           Equiv[Dtab].equiv(dtab1, dtab2) && req1 == req2)
-      case (a, b) => assert(a === b)
+      case (a, b) => assert(a == b)
     }
 
     // Debugging tip: in an error message, 'm' is the RHS.
@@ -106,35 +106,35 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
   test("not encode invalid messages") {
     assert(intercept[BadMessageException] {
       encode(Treq(-1, Some(tracing.Trace.nextId), body))
-    } === BadMessageException("invalid tag number -1"))
+    } == BadMessageException("invalid tag number -1"))
     assert(intercept[BadMessageException] {
       encode(Treq(1 << 24, Some(tracing.Trace.nextId), body))
-    } === BadMessageException("invalid tag number 16777216"))
+    } == BadMessageException("invalid tag number 16777216"))
   }
 
   test("not decode invalid messages") {
     assert(intercept[BadMessageException] {
       decode(ChannelBuffers.EMPTY_BUFFER)
-    } === BadMessageException("short message"))
+    } == BadMessageException("short message"))
     assert(intercept[BadMessageException] {
       decode(ChannelBuffers.wrappedBuffer(Array[Byte](0, 0, 0, 1)))
-    } === BadMessageException("bad message type: 0 [tag=1]"))
+    } == BadMessageException("bad message type: 0 [tag=1]"))
   }
 
   test("extract control messages") {
     val tag = 0
     val buf = ChannelBuffers.EMPTY_BUFFER
 
-    assert(ControlMessage.unapply(Treq(tag, None, buf)) === None)
-    assert(ControlMessage.unapply(RreqOk(0, buf)) === None)
-    assert(ControlMessage.unapply(Tdispatch(tag, Seq.empty, Path.empty, Dtab.empty, buf)) === None)
-    assert(ControlMessage.unapply(RdispatchOk(tag, Seq.empty, buf)) === None)
+    assert(ControlMessage.unapply(Treq(tag, None, buf)) == None)
+    assert(ControlMessage.unapply(RreqOk(0, buf)) == None)
+    assert(ControlMessage.unapply(Tdispatch(tag, Seq.empty, Path.empty, Dtab.empty, buf)) == None)
+    assert(ControlMessage.unapply(RdispatchOk(tag, Seq.empty, buf)) == None)
 
-    assert(ControlMessage.unapply(Tdrain(tag)) === Some(tag))
-    assert(ControlMessage.unapply(Rdrain(tag)) === Some(tag))
-    assert(ControlMessage.unapply(Tping(tag)) === Some(tag))
-    assert(ControlMessage.unapply(Rping(tag)) === Some(tag))
-    assert(ControlMessage.unapply(Tdiscarded(tag, "")) === Some(tag))
-    assert(ControlMessage.unapply(Tlease(0, 0L)) === Some(tag))
+    assert(ControlMessage.unapply(Tdrain(tag)) == Some(tag))
+    assert(ControlMessage.unapply(Rdrain(tag)) == Some(tag))
+    assert(ControlMessage.unapply(Tping(tag)) == Some(tag))
+    assert(ControlMessage.unapply(Rping(tag)) == Some(tag))
+    assert(ControlMessage.unapply(Tdiscarded(tag, "")) == Some(tag))
+    assert(ControlMessage.unapply(Tlease(0, 0L)) == Some(tag))
   }
 }

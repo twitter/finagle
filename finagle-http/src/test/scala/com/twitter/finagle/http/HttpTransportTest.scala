@@ -19,6 +19,6 @@ class HttpTransportTest extends FunSuite {
 
     val f = trans.write(Unit)
     assert(f.isDefined)
-    assert(f.poll === Some(Throw(exc)))
+    assert(f.poll == Some(Throw(exc)))
   }
 }

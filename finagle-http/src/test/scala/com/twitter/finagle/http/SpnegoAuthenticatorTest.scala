@@ -57,7 +57,7 @@ class SpnegoAuthenticatorTest extends FunSuite with MockitoSugar {
     try {
       // should succeed with exactly one authenticated request
       val resp = Await.result(client(req))
-      assert(resp.status === Status.Ok)
+      assert(resp.status == Status.Ok)
       verify(service).apply(anyAuthenticated)
     } finally {
       server.close(Time.Bottom)

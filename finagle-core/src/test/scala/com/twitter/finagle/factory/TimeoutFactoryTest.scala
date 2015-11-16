@@ -32,7 +32,7 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
     val res = factory()
     Time.withCurrentTimeFrozen { tc =>
       verify(underlying)(any[ClientConnection])
-      assert(promise.interrupted === None)
+      assert(promise.interrupted == None)
       assert(!res.isDefined)
       tc.advance(5.seconds)
       timer.tick()
@@ -46,7 +46,7 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
         Await.result(res)
       }
       assert(failure.getCause.isInstanceOf[TimeoutException])
-      assert(failure.getCause === exception)
+      assert(failure.getCause == exception)
     }
   }
 
@@ -67,7 +67,7 @@ class TimeoutFactoryTest extends FunSuite with MockitoSugar {
       when(service.close(any[Time])).thenReturn(Future.Done)
       promise() = Return(service)
       assert(res.isDefined)
-      assert(res.poll === Some(Return(service)))
+      assert(res.poll == Some(Return(service)))
     }
   }
 }

@@ -292,10 +292,10 @@ class ClusterClientTest
         .build()
 
       Await.result(client.delete("foo"), TimeOut)
-      assert(Await.result(client.get("foo"), TimeOut) === None)
+      assert(Await.result(client.get("foo"), TimeOut) == None)
       Await.result(client.set("foo", Buf.Utf8("bar")), TimeOut)
       val Buf.Utf8(res) = Await.result(client.get("foo"), TimeOut).get
-      assert(res === "bar")
+      assert(res == "bar")
     }
   }
 
@@ -317,7 +317,7 @@ class ClusterClientTest
         n => {
           val c = client.clientOf("foo" + n)
           val Buf.Utf8(res) = Await.result(c.get("foo" + n), TimeOut).get
-          assert(res === "bar" + n)
+          assert(res == "bar" + n)
         }
       }
     }
@@ -342,7 +342,7 @@ class ClusterClientTest
       .cachePoolCluster(myClusterWithCustomKey)
       .build()
 
-    assert(trackCacheShards(client.asInstanceOf[PartitionedClient]).size === 5)
+    assert(trackCacheShards(client.asInstanceOf[PartitionedClient]).size == 5)
   }
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
@@ -358,7 +358,7 @@ class ClusterClientTest
         .asInstanceOf[PartitionedClient]
 
       // initially there should be 5 cache shards being used
-      assert(trackCacheShards(client).size === 5)
+      assert(trackCacheShards(client).size == 5)
 
       // add 4 more cache servers and update cache pool config data, now there should be 7 shards
       var additionalServers = List[EndpointStatus]()
@@ -370,7 +370,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 9) }
+      eventually { assert(trackCacheShards(client).size == 9) }
 
       // remove 2 cache servers and update cache pool config data, now there should be 7 shards
       try {
@@ -382,7 +382,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 7) }
+      eventually { assert(trackCacheShards(client).size == 7) }
 
       // remove another 2 cache servers and update cache pool config data, now there should be 5 shards
       try {
@@ -394,7 +394,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 5) }
+      eventually { assert(trackCacheShards(client).size == 5) }
 
       // add 2 more cache servers and update cache pool config data, now there should be 7 shards
       try {
@@ -405,7 +405,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 7) }
+      eventually { assert(trackCacheShards(client).size == 7) }
 
       // add another 2 more cache servers and update cache pool config data, now there should be 9 shards
       try {
@@ -416,7 +416,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 9) }
+      eventually { assert(trackCacheShards(client).size == 9) }
 
       // remove 2 and add 2, now there should be still 9 shards
       try {
@@ -429,7 +429,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 9) }
+      eventually { assert(trackCacheShards(client).size == 9) }
     }
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
@@ -445,7 +445,7 @@ class ClusterClientTest
         .asInstanceOf[PartitionedClient]
 
       // initially there should be 5 cache shards being used
-      assert(trackCacheShards(client).size === 5)
+      assert(trackCacheShards(client).size == 5)
 
       // add 4 more cache servers and update cache pool config data, now there should be 7 shards
       var additionalServers = List[EndpointStatus]()
@@ -456,7 +456,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 9) }
+      eventually { assert(trackCacheShards(client).size == 9) }
 
       // remove 2 cache servers and update cache pool config data, now there should be 7 shards
       try {
@@ -467,7 +467,7 @@ class ClusterClientTest
       }
       catch { case _: Exception => fail("it shouldn't trown an exception") }
 
-      eventually { assert(trackCacheShards(client).size === 7) }
+      eventually { assert(trackCacheShards(client).size == 7) }
     }
 
   def updateCachePoolConfigData(size: Int) {
@@ -499,7 +499,7 @@ class ClusterClientTest
     Await.result(myCachePool.ready, TimeOut) // wait until the pool is ready
     myCachePool.snap match {
       case (cachePool, changes) =>
-        assert(cachePool.size === expectedSize)
+        assert(cachePool.size == expectedSize)
     }
     myCachePool
   }
@@ -544,7 +544,7 @@ class ClusterClientTest
 
     myCachePool.snap match {
       case (cachePool, changes) =>
-        assert(cachePool.size === currentSize)
+        assert(cachePool.size == currentSize)
         poolSeen ++= cachePool
         val retFuture = changes flatMap expectMore
         ops // invoke the function now

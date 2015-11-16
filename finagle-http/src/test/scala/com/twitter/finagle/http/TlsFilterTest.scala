@@ -23,7 +23,7 @@ class TlsFilterTest extends FunSuite {
     val req = Request(Http11, Get, "/")
     val p = new Promise[Request]
     (tls andThen svc(p))(req)
-    assert(Await.result(p).headerMap.get("Host") === Some(host))
+    assert(Await.result(p).headerMap.get("Host") == Some(host))
   }
 
   test("module") {
@@ -33,6 +33,6 @@ class TlsFilterTest extends FunSuite {
       Stack.Leaf(TlsFilter.role, ServiceFactory.const(svc(p))))
     val fac = stk.make(Stack.Params.empty + Transporter.TLSHostname(Some(host)))
     Await.result(fac())(Request(Http11, Get, "/"))
-    assert(Await.result(p).headerMap.get("Host") === Some(host))
+    assert(Await.result(p).headerMap.get("Host") == Some(host))
   }
 }

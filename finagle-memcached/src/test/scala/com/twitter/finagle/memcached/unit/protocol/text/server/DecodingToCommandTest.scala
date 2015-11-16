@@ -44,10 +44,10 @@ class DecodingToCommandTest extends FunSuite {
           None
         )
         val command = decodingToCommand.decode(null, null, buffer)
-        assert(command.getClass === classOf[Set])
+        assert(command.getClass == classOf[Set])
         val set = command.asInstanceOf[Set]
-        assert(set.key === Buf.Utf8(key))
-        assert(set.value === Buf.Utf8(data))
+        assert(set.key == Buf.Utf8(key))
+        assert(set.value == Buf.Utf8(data))
         assert(set.expiry.moreOrLessEquals(expectedTime.expirationTime, allowedDelta))
       }
     }
@@ -64,11 +64,11 @@ class DecodingToCommandTest extends FunSuite {
       }
       val buffer = Tokens(cmd)
       val command = decodingToCommand.decode(null, null, buffer)
-      assert(command.getClass === classOf[Stats])
+      assert(command.getClass == classOf[Stats])
       val stats = command.asInstanceOf[Stats]
       stats.args.headOption match {
-        case None => assert(arg === None)
-        case Some(Buf.Utf8(cb)) => assert(cb === arg.get)
+        case None => assert(arg == None)
+        case Some(Buf.Utf8(cb)) => assert(cb == arg.get)
       }
     }
   }

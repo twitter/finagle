@@ -59,7 +59,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     new ThriftMuxTestServer {
       val client =
         ThriftMux.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
-      assert(Await.result(client.query("ok")) === "okok")
+      assert(Await.result(client.query("ok")) == "okok")
     }
   }
 
@@ -68,10 +68,10 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client =
         ThriftMux.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-      assert(Await.result(client.query("ok")) === "okok")
+      assert(Await.result(client.query("ok")) == "okok")
 
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(Await.result(client.query("ok")) === "hello context world")
+        assert(Await.result(client.query("ok")) == "hello context world")
       }
     }
   }
@@ -81,11 +81,11 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client =
         ThriftMux.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-      assert(Await.result(client.query("ok")) === "okok")
+      assert(Await.result(client.query("ok")) == "okok")
 
       Dtab.unwind {
         Dtab.local = Dtab.read("/foo=>/bar")
-        assert(Await.result(client.query("ok")) === "/foo=>/bar")
+        assert(Await.result(client.query("ok")) == "/foo=>/bar")
       }
     }
   }
@@ -95,7 +95,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client =
         Thrift.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
       1 to 5 foreach { _ =>
-        assert(Await.result(client.query("ok")) === "okok")
+        assert(Await.result(client.query("ok")) == "okok")
       }
     }
   }
@@ -105,10 +105,10 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client =
         Thrift.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-      assert(Await.result(client.query("ok")) === "okok")
+      assert(Await.result(client.query("ok")) == "okok")
 
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(Await.result(client.query("ok")) === "hello context world")
+        assert(Await.result(client.query("ok")) == "hello context world")
       }
     }
   }
@@ -118,11 +118,11 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       val client =
         Thrift.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-      assert(Await.result(client.query("ok")) === "okok")
+      assert(Await.result(client.query("ok")) == "okok")
 
       Dtab.unwind {
         Dtab.local = Dtab.read("/foo=>/bar")
-        assert(Await.result(client.query("ok")) === "/foo=>/bar")
+        assert(Await.result(client.query("ok")) == "/foo=>/bar")
       }
     }
   }
@@ -218,8 +218,8 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       for {
         (clientWhich, clientIface, clientClosable) <- clients(pf, port)
       } withClue(s"Server ($serverWhich), Client ($clientWhich) client with protocolFactory $pf") {
-        1.to(5).foreach { _ => assert(Await.result(clientIface.query("ok")) === "okok")}
-        assert(Await.result(clientIface.query("")) === clientId.name)
+        1.to(5).foreach { _ => assert(Await.result(clientIface.query("ok")) == "okok")}
+        assert(Await.result(clientIface.query("")) == clientId.name)
         clientClosable.close()
       }
       serverClosable.close()
@@ -230,10 +230,10 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     new ThriftMuxTestServer {
       val client = Thrift.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-      assert(Await.result(client.query("ok")) === "okok")
+      assert(Await.result(client.query("ok")) == "okok")
 
       Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(Await.result(client.query("ok")) === "hello context world")
+        assert(Await.result(client.query("ok")) == "hello context world")
       }
     }
   }
@@ -247,7 +247,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       })
     val client = Thrift.newIface[TestService.FutureIface](server)
     val thrown = intercept[TApplicationException] { Await.result(client.query("ok")) }
-    assert(thrown.getMessage === "Internal error processing query: 'java.lang.Exception: sad panda'")
+    assert(thrown.getMessage == "Internal error processing query: 'java.lang.Exception: sad panda'")
   }
 
   test("thriftmux server + Finagle thrift client: traceId should be passed from client to server") {
@@ -279,7 +279,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     Await.result(client.query("ok"))
 
     (srvTraceId, cltTraceId) match {
-      case (Some(id1), Some(id2)) => assert(id1 === id2)
+      case (Some(id1), Some(id2)) => assert(id1 == id2)
       case _ => assert(false, s"the trace ids sent by client and received by server do not match srv: $srvTraceId clt: $cltTraceId")
     }
   }
@@ -297,7 +297,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
     1 to 5 foreach { _ =>
-      assert(Await.result(client.query("ok")) === clientId)
+      assert(Await.result(client.query("ok")) == clientId)
     }
   }
 
@@ -316,7 +316,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
     1 to 5 foreach { _ =>
       otherClientId.asCurrent {
-        assert(Await.result(client.query("ok")) === clientId.name)
+        assert(Await.result(client.query("ok")) == clientId.name)
       }
     }
   }
@@ -358,7 +358,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
     1 to 5 foreach { _ =>
       otherClientId.asCurrent {
-        assert(Await.result(client.query("ok")) === clientId.name)
+        assert(Await.result(client.query("ok")) == clientId.name)
       }
     }
   }
@@ -370,7 +370,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     new ThriftMuxTestServer {
       val client = OldPlainThriftClient.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
       1 to 5 foreach { _ =>
-        assert(Await.result(client.query("ok")) === "okok")
+        assert(Await.result(client.query("ok")) == "okok")
       }
     }
   }
@@ -400,7 +400,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       })
     val client = OldPlainThriftClient.newIface[TestService.FutureIface](server)
     val thrown = intercept[TApplicationException] { Await.result(client.query("ok")) }
-    assert(thrown.getMessage === "Internal error processing query: 'java.lang.Exception: sad panda'")
+    assert(thrown.getMessage == "Internal error processing query: 'java.lang.Exception: sad panda'")
 
   }
 
@@ -421,9 +421,9 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       Await.result(client.query("hi"))
     }
     assert(ex.getMessage.contains("lolol"))
-    assert(sr.counters(Seq("thrift", "requests")) === 1)
-    assert(sr.counters.get(Seq("thrift", "success")) === None)
-    assert(sr.counters(Seq("thrift", "failures")) === 1)
+    assert(sr.counters(Seq("thrift", "requests")) == 1)
+    assert(sr.counters.get(Seq("thrift", "success")) == None)
+    assert(sr.counters(Seq("thrift", "failures")) == 1)
     server.close()
   }
 
@@ -455,11 +455,11 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     1 to nreqs foreach { i =>
       val req = Await.result(requestReceived(i-1), 5.seconds)
       if (i != nreqs) assert(!requestReceived(i).isDefined)
-      assert(testService.nReqReceived === i)
+      assert(testService.nReqReceived == i)
       servicePromises(i-1).setValue(req + req)
     }
     1 to nreqs foreach { i =>
-      assert(Await.result(reqs(i-1)) === "ok" + i + "ok" + i)
+      assert(Await.result(reqs(i-1)) == "ok" + i + "ok" + i)
     }
   }
 
@@ -475,7 +475,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     val client = ThriftMux.client.withClientId(ClientId("foo.bar"))
       .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-    assert(Await.result(client.query("ok")) === "foo.bar")
+    assert(Await.result(client.query("ok")) == "foo.bar")
   }
 
 /* TODO: add back when sbt supports old-school thrift gen
@@ -488,7 +488,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       })
 
     val client = ThriftMux.newIface[TestService.ServiceIface](server)
-    assert(client.query("ok").get() === "okok")
+    assert(client.query("ok").get() == "okok")
   }
 */
 
@@ -508,9 +508,9 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       .configured(Label("client"))
       .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-    assert(Await.result(client.query("ok")) === "okok")
-    assert(mem.gauges(Seq("server", "protocol", "thriftmux"))() === 1.0)
-    assert(mem.gauges(Seq("client", "protocol", "thriftmux"))() === 1.0)
+    assert(Await.result(client.query("ok")) == "okok")
+    assert(mem.gauges(Seq("server", "protocol", "thriftmux"))() == 1.0)
+    assert(mem.gauges(Seq("client", "protocol", "thriftmux"))() == 1.0)
   }
 
   test("ThriftMux clients are properly labeled and scoped") {
@@ -518,9 +518,9 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       def base(sr: InMemoryStatsReceiver) = ThriftMux.Client().configured(Stats(sr))
 
       def assertStats(prefix: String, sr: InMemoryStatsReceiver, iface: TestService.FutureIface) {
-        assert(Await.result(iface.query("ok")) === "okok")
+        assert(Await.result(iface.query("ok")) == "okok")
         // These stats are exported by scrooge generated code.
-        assert(sr.counters(Seq(prefix, "query", "requests")) === 1)
+        assert(sr.counters(Seq(prefix, "query", "requests")) == 1)
       }
 
       // non-labeled client inherits destination as label
@@ -549,8 +549,8 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     val thriftClient =
       Thrift.client.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
 
-    assert(Await.result(thriftClient.query("ok")) === "okok")
-    assert(sr.counters(Seq("myserver", "thriftmux", "downgraded_connects")) === 1)
+    assert(Await.result(thriftClient.query("ok")) == "okok")
+    assert(sr.counters(Seq("myserver", "thriftmux", "downgraded_connects")) == 1)
   }
 
   test("ThriftMux with TCompactProtocol") {
@@ -566,7 +566,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
         .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
-      assert(Await.result(tcompactClient.query("ok")) === "okok")
+      assert(Await.result(tcompactClient.query("ok")) == "okok")
 
       val tbinaryClient = ThriftMux.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
       intercept[com.twitter.finagle.mux.ServerApplicationError] {
@@ -586,7 +586,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
       val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
         .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
-      assert(Await.result(tcompactClient.query("ok")) === "okok")
+      assert(Await.result(tcompactClient.query("ok")) == "okok")
 
       val tbinaryClient = ThriftMux.newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
       intercept[com.twitter.finagle.mux.ServerApplicationError] {
@@ -641,8 +641,8 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
     response.setValue("done")
 
-    assert(Await.result(close, 1.second) === (()))
-    assert(Await.result(f, 1.second) === "done")
+    assert(Await.result(close, 1.second) == (()))
+    assert(Await.result(f, 1.second) == "done")
 
   }
 

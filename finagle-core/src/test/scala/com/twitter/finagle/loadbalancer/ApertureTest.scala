@@ -95,18 +95,18 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     val counts = new Counts
     val bal = new Bal
     bal.update(counts.range(10))
-    assert(bal.unitsx === 10)
+    assert(bal.unitsx == 10)
     bal.applyn(100)
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
 
     bal.adjustx(1)
     bal.applyn(100)
-    assert(counts.aperture === 2)
+    assert(counts.aperture == 2)
 
     counts.clear()
     bal.adjustx(-1)
     bal.applyn(100)
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
   }
 
   test("Don't operate outside of aperture range") {
@@ -116,12 +116,12 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     bal.update(counts.range(10))
     bal.adjustx(10000)
     bal.applyn(1000)
-    assert(counts.aperture === 10)
+    assert(counts.aperture == 10)
 
     counts.clear()
     bal.adjustx(-100000)
     bal.applyn(1000)
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
   }
 
   test("Increase aperture to match available hosts") {
@@ -131,7 +131,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     bal.update(counts.range(10))
     bal.adjustx(1)
     bal.applyn(100)
-    assert(counts.aperture === 2)
+    assert(counts.aperture == 2)
 
     // Since tokens are assigned, we don't know apriori what's in the
     // aperture*, so figure it out by observation.
@@ -142,7 +142,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     counts(keys2.head).status = Status.Closed
 
     bal.applyn(100)
-    assert(counts.aperture === 3)
+    assert(counts.aperture == 3)
     // Apertures are additive.
     assert(keys2.forall(counts.nonzero.contains))
 
@@ -150,7 +150,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     counts(keys2.head).status = Status.Open
     counts.clear()
     bal.applyn(100)
-    assert(counts.nonzero === keys2)
+    assert(counts.nonzero == keys2)
   }
 
   test("Empty vectors") {
@@ -169,14 +169,14 @@ private class ApertureTest extends FunSuite with ApertureTesting {
 
     bal.applyn(1000)
     // The correctness of this behavior could be argued either way.
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
     val Seq(badkey) = counts.nonzero.toSeq
     val goodkey = (badkey + 1) % 10
     counts(goodkey).status = Status.Open
 
     counts.clear()
     bal.applyn(1000)
-    assert(counts.nonzero === Set(goodkey))
+    assert(counts.nonzero == Set(goodkey))
   }
 }
 

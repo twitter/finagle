@@ -92,7 +92,7 @@ private class BalancerTest extends FunSuite
   test("status: balancer with no nodes is Closed") {
     val bal = new TestBalancer
     assert(bal.nodes.isEmpty)
-    assert(bal.status === Status.Closed)
+    assert(bal.status == Status.Closed)
   }
 
   test("status: balancer status is bestOf underlying nodes") {
@@ -100,7 +100,7 @@ private class BalancerTest extends FunSuite
       val bal = new TestBalancer
       bal.update(loadedNodes)
       val best = Status.bestOf[ServiceFactory[Unit,Unit]](loadedNodes, _.status)
-      assert(bal.status === best)
+      assert(bal.status == best)
     }
   }
 
@@ -110,16 +110,16 @@ private class BalancerTest extends FunSuite
     val f3 = newFac(Status.Open)
     bal.update(Seq(f1, f2, f3))
 
-    assert(bal.status === Status.Open)
+    assert(bal.status == Status.Open)
 
     // all closed
     bal.update(Seq(f1, f2))
-    assert(bal.status === Status.Closed)
+    assert(bal.status == Status.Closed)
 
     // one busy, remainder closed
     val busy = newFac(Status.Busy)
     bal.update(Seq(f1, f2, busy))
-    assert(bal.status === Status.Busy)
+    assert(bal.status == Status.Busy)
   }
 
 
@@ -136,24 +136,24 @@ private class BalancerTest extends FunSuite
     assert(rems() == 0)
 
     bal.update(Seq(f1, f2, f3))
-    assert(bal.factories === Set(f1, f2, f3))
+    assert(bal.factories == Set(f1, f2, f3))
     assert(size() == 3)
     assert(adds() == 3)
     assert(rems() == 0)
     for (f <- Seq(f1, f2, f3))
-      assert(f.ncloses === 0)
+      assert(f.ncloses == 0)
 
     bal.update(Seq(f1, f3))
     assert(size() == 2)
     assert(adds() == 3)
     assert(rems() == 1)
-    assert(bal.factories === Set(f1, f3))
-    assert(f1.ncloses === 0)
-    assert(f2.ncloses === 1)
-    assert(f3.ncloses === 0)
+    assert(bal.factories == Set(f1, f3))
+    assert(f1.ncloses == 0)
+    assert(f2.ncloses == 1)
+    assert(f3.ncloses == 0)
 
     bal.update(Seq(f1, f2, f3))
-    assert(bal.factories === Set(f1, f2, f3))
+    assert(bal.factories == Set(f1, f2, f3))
     assert(size() == 3)
     assert(adds() == 4)
     assert(rems() == 1)
@@ -192,14 +192,14 @@ private class BalancerTest extends FunSuite
       bal._rebuild()
       bal.update(Seq(f3))
       bal._rebuild()
-      assert(beat === 1)
+      assert(beat == 1)
       waitForBeat(2)
     }
 
     whenFinished {
-      assert(bal.factories === Set(f3))
-      assert(bal._dist().gen === 3)
-      assert(bal.updateThreads === Set(thread1Id))
+      assert(bal.factories == Set(f3))
+      assert(bal._dist().gen == 3)
+      assert(bal.updateThreads == Set(thread1Id))
     }
   }
 }

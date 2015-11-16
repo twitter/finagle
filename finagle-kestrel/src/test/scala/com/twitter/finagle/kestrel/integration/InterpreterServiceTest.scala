@@ -39,7 +39,7 @@ class InterpreterServiceTest extends FunSuite {
         _ <- client(Set(queueName, Time.now, value))
         r <- client(Get(queueName))
       } yield r
-      assert(Await.result(result, 5.seconds) === Values(Seq(Value(queueName, value))))
+      assert(Await.result(result, 5.seconds) == Values(Seq(Value(queueName, value))))
     }
   }
 
@@ -51,7 +51,7 @@ class InterpreterServiceTest extends FunSuite {
         _ <- client(Abort(queueName))
         r <- client(Open(queueName))
       } yield r
-      assert(Await.result(result, 5.seconds) === Values(Seq(Value(queueName, value))))
+      assert(Await.result(result, 5.seconds) == Values(Seq(Value(queueName, value))))
     }
   }
 }

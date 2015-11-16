@@ -9,6 +9,6 @@ import org.scalatest.junit.JUnitRunner
 final class ServerCodecSuite extends RedisRequestTest {
 
   test("Correctly encode FLUSHALL", CodecTest) {
-    assert(codec(wrap("FLUSHALL\r\n")) === List(FlushAll))
+    assert(codec(wrap("FLUSHALL\r\n")) == List(FlushAll))
   }
 }

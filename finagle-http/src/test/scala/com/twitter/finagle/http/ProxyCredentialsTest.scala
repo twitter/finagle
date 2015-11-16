@@ -8,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 class ProxyCredentialsTest extends FunSuite {
   test("add Proxy-Authorization header") {
     val creds = ProxyCredentials("foo", "bar")
-    assert(creds.basicAuthorization === "Basic Zm9vOmJhcg==")
+    assert(creds.basicAuthorization == "Basic Zm9vOmJhcg==")
   }
 
   test("construct via Map") {
@@ -16,6 +16,6 @@ class ProxyCredentialsTest extends FunSuite {
       "http_proxy_user" -> "foo",
       "http_proxy_pass" -> "bar"
     )).get
-    assert(creds.basicAuthorization === "Basic Zm9vOmJhcg==")
+    assert(creds.basicAuthorization == "Basic Zm9vOmJhcg==")
   }
 }

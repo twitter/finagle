@@ -35,14 +35,14 @@ class CounterDeltasTest extends FunSuite {
 
     // after `update` we should be comparing against the current value, 6
     cd.update(metrics.sampleCounters())
-    assert(counterDelta === 6)
+    assert(counterDelta == 6)
     // this increment will not be visible until the next `update`,
     // so the delta remains stable at 6
     counter.incr(1)
-    assert(counterDelta === 6)
+    assert(counterDelta == 6)
     // this `update` should now pick up that earlier increment
     cd.update(metrics.sampleCounters())
-    assert(counterDelta === 1)
+    assert(counterDelta == 1)
   }
 
 }

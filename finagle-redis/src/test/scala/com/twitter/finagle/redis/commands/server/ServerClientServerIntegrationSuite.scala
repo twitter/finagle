@@ -14,7 +14,7 @@ final class ServerClientServerIntegrationSuite extends RedisClientServerIntegrat
 
   test("FLUSHALL should return a StatusReply(\"OK\")", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(FlushAll)) === OKStatusReply)
+      assert(Await.result(client(FlushAll)) == OKStatusReply)
     }
   }
 }

@@ -22,7 +22,7 @@ class InetResolverTest extends FunSuite {
   test("host not found") {
     val addr = resolver.bind("no_TLDs_for_old_humans:80")
     val f = addr.changes.filter(_ == Addr.Neg).toFuture
-    assert(Await.result(f) === Addr.Neg)
+    assert(Await.result(f) == Addr.Neg)
     assert(statsReceiver.counter("inet", "dns", "failures")() > 0)
   }
 

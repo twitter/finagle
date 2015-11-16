@@ -19,7 +19,7 @@ class NameInterpreterTest extends FunSuite with BeforeAndAfter {
 
   // CSL-2175
   ignore("NameInterpreter uses dtab when interpreter is not set") {
-    assert(NameInterpreter.bind(dtab, name).sample() ===
+    assert(NameInterpreter.bind(dtab, name).sample() ==
       NameTree.Leaf(Path.read("/$/inet/some-host/1234")))
   }
 
@@ -29,6 +29,6 @@ class NameInterpreterTest extends FunSuite with BeforeAndAfter {
         Activity.value(NameTree.Leaf(Name.empty))
     }
 
-    assert(NameInterpreter.bind(dtab, name).sample() === NameTree.Leaf(Name.empty))
+    assert(NameInterpreter.bind(dtab, name).sample() == NameTree.Leaf(Name.empty))
   }
 }

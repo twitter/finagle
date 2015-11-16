@@ -47,13 +47,13 @@ class StackClientTest extends FunSuite
     // use param.Label when set
     client.configured(param.Label("myclient")).newService("127.0.0.1:8080")
     eventually {
-      assert(sr.counters(Seq("myclient", "loadbalancer", "adds")) === 1)
+      assert(sr.counters(Seq("myclient", "loadbalancer", "adds")) == 1)
     }
 
     // use evaled label when both are set
     client.configured(param.Label("myclient")).newService("othername=127.0.0.1:8080")
     eventually {
-      assert(sr.counters(Seq("othername", "loadbalancer", "adds")) === 1)
+      assert(sr.counters(Seq("othername", "loadbalancer", "adds")) == 1)
     }
   })
 
@@ -67,7 +67,7 @@ class StackClientTest extends FunSuite
     assert(ClientRegistry.registrants.count { e: StackRegistry.Entry =>
       val param.Label(actual) = e.params[param.Label]
       name == actual
-    } === 1)
+    } == 1)
   })
 
   test("FailFast is respected") {
@@ -101,14 +101,14 @@ class StackClientTest extends FunSuite
     def testClient(name: String, failFastOn: Option[Boolean]): Unit = {
       val svc = newClient(name, failFastOn)
       val e = intercept[RuntimeException] { Await.result(svc("hi")) }
-      assert(e === ex)
+      assert(e == ex)
       failFastOn match {
         case Some(on) if !on =>
-          assert(ctx.sr.counters.get(Seq(name, "failfast", "marked_dead")) === None)
+          assert(ctx.sr.counters.get(Seq(name, "failfast", "marked_dead")) == None)
           intercept[RuntimeException] { Await.result(svc("hi2")) }
         case _ =>
           eventually {
-            assert(ctx.sr.counters(Seq(name, "failfast", "marked_dead")) === 1)
+            assert(ctx.sr.counters(Seq(name, "failfast", "marked_dead")) == 1)
           }
           intercept[FailedFastException] { Await.result(svc("hi2")) }
       }
@@ -341,7 +341,7 @@ class StackClientTest extends FunSuite
     // that the base dtab is properly passed in
     NameInterpreter.global = new NameInterpreter {
       override def bind(dtab: Dtab, path: Path): Activity[NameTree[Name.Bound]] = {
-        assert(dtab === baseDtab)
+        assert(dtab == baseDtab)
         Activity.value(NameTree.Union(
           NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr1))),
           NameTree.Weighted(1D, NameTree.Leaf(Name.bound(addr2)))))

@@ -28,8 +28,8 @@ class CommandEncodingTest extends FunSuite {
 
     val Some((Buf.Utf8(queueName), expiry)) = extractCommand(decoded)
 
-    assert(queueName === name)
-    assert(timeout.map{_.inSeconds} === expiry.map{_.inSeconds})
+    assert(queueName == name)
+    assert(timeout.map{_.inSeconds} == expiry.map{_.inSeconds})
   }
 
   private def testCommandEncodeDecode(
@@ -47,7 +47,7 @@ class CommandEncodingTest extends FunSuite {
 
     val Some(Buf.Utf8(queueName)) = extractCommand(decoded)
 
-    assert(queueName === name)
+    assert(queueName == name)
   }
 
   test("SET can be decoded") {
@@ -68,9 +68,9 @@ class CommandEncodingTest extends FunSuite {
     val Set(Buf.Utf8(queueName), expiry, Buf.Utf8(dataOut)) =
       decoder.parseStorageCommand(msg.tokens, msg.data)
 
-    assert(queueName === qName)
-    assert(dataOut === data)
-    assert(expiry.inSeconds === time.inSeconds)
+    assert(queueName == qName)
+    assert(dataOut == data)
+    assert(expiry.inSeconds == time.inSeconds)
   }
 
   test("DELETE can be decoded") {

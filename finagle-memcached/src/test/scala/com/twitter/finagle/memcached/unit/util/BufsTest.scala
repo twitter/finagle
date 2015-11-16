@@ -12,12 +12,12 @@ class BufsTest extends FunSuite {
 
   test("RichBuf.toInt") {
     val buf = Buf.Utf8(Int.MaxValue.toString)
-    assert(RichBuf(buf).toInt === Int.MaxValue)
+    assert(RichBuf(buf).toInt == Int.MaxValue)
   }
 
   test("RichBuf.toLong") {
     val buf = Buf.Utf8(Long.MaxValue.toString)
-    assert(RichBuf(buf).toLong === Long.MaxValue)
+    assert(RichBuf(buf).toLong == Long.MaxValue)
   }
 
   test("RichBuf.apply") {
@@ -25,20 +25,20 @@ class BufsTest extends FunSuite {
     val expectedBytes = str.getBytes
     val buf = RichBuf(Buf.Utf8("12345"))
     (1 until str.length) foreach { idx =>
-      assert(buf(idx) === expectedBytes(idx))
+      assert(buf(idx) == expectedBytes(idx))
     }
   }
 
   test("RichBuf.split on space") {
     val splits = RichBuf(Buf.Utf8("hello world")).split(' ')
-    assert(splits(0) === Buf.Utf8("hello"))
-    assert(splits(1) === Buf.Utf8("world"))
+    assert(splits(0) == Buf.Utf8("hello"))
+    assert(splits(1) == Buf.Utf8("world"))
   }
 
   test("RichBuf.split on comma") {
     val splits = RichBuf(Buf.Utf8("hello,world")).split(',')
-    assert(splits(0) === Buf.Utf8("hello"))
-    assert(splits(1) === Buf.Utf8("world"))
+    assert(splits(0) == Buf.Utf8("hello"))
+    assert(splits(1) == Buf.Utf8("world"))
   }
 
   test("RichBuf.startsWith") {

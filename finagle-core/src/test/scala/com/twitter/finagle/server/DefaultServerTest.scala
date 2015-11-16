@@ -50,7 +50,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val e = intercept[SourcedException] {
         Await.result(clientTransport.read())()
       }
-      assert(e.serviceName === name)
+      assert(e.serviceName == name)
     }
 
     it("should close ServiceFactory and any dispatcher(s) on closure") {
@@ -74,7 +74,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       when(factory.close(any[Time])) thenReturn Future.Done
       val listeningServer: ListeningServer = server.serve(socket, factory)
 
-      assert(clientTransport.write(Return(3)).isDefined === true)
+      assert(clientTransport.write(Return(3)).isDefined == true)
 
       val deadline = 1.second.fromNow
       Await.result(listeningServer.close(deadline))
@@ -114,10 +114,10 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
 
       val f = clientService(Return(4))
       val closed = listeningServer.close(1.second.fromNow)
-      assert(closed.isDefined === false)
+      assert(closed.isDefined == false)
       p.setValue(Return(3))
-      assert(f.isDefined === true)
-      assert(closed.isDefined === true)
+      assert(f.isDefined == true)
+      assert(closed.isDefined == true)
     }
   }
 }

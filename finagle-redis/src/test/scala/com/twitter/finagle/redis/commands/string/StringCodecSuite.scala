@@ -27,12 +27,12 @@ final class StringCodecSuite extends RedisRequestTest {
 
     unwrap(codec(wrap("APPEND foo bar\r\n"))) {
       case Append(foo, value) =>
-        assert(BytesToString(value.array) === "bar")
+        assert(BytesToString(value.array) == "bar")
     }
   }
 
   test("Correctly encode BITCOUNT") {
-    assert(codec(wrap("BITCOUNT foo\r\n")) === List(BitCount(StringToChannelBuffer("foo"))))
+    assert(codec(wrap("BITCOUNT foo\r\n")) == List(BitCount(StringToChannelBuffer("foo"))))
   }
 
   test("Throw a ClientError if BITCOUNT is called with start but no end", CodecTest) {
@@ -42,7 +42,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode BITCOUNT with start and end") {
-    assert(codec(wrap("BITCOUNT foo 0 1\r\n")) ===
+    assert(codec(wrap("BITCOUNT foo 0 1\r\n")) ==
       List(BitCount(StringToChannelBuffer("foo"), Some(0), Some(1))))
   }
 
@@ -53,7 +53,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode BITOP AND") {
-    assert(codec(wrap("BITOP AND baz foo bar\r\n")) ===
+    assert(codec(wrap("BITOP AND baz foo bar\r\n")) ==
       List(
         BitOp(
           BitOp.And,
@@ -69,16 +69,16 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode BITOP NOT") {
-    assert(codec(wrap("BITOP NOT foo bar\r\n")) ===
+    assert(codec(wrap("BITOP NOT foo bar\r\n")) ==
       List(BitOp(BitOp.Not, StringToChannelBuffer("foo"), Seq(StringToChannelBuffer("bar")))))
   }
 
   test("Correctly encode DECR with an integer key") {
-    assert(codec(wrap("DECR 1\r\n")) === List(Decr(StringToChannelBuffer("1"))))
+    assert(codec(wrap("DECR 1\r\n")) == List(Decr(StringToChannelBuffer("1"))))
   }
 
   test("Correctly encode DECR with a string key") {
-    assert(codec(wrap("DECR foo\r\n")) === List(Decr(StringToChannelBuffer("foo"))))
+    assert(codec(wrap("DECR foo\r\n")) == List(Decr(StringToChannelBuffer("foo"))))
   }
 
   test("Throw a ClientError if DECR is called with two arguments") {
@@ -88,8 +88,8 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode DECRBY") {
-    assert(codec(wrap("DECRBY foo 1\r\n")) === List(DecrBy(StringToChannelBuffer("foo"), 1)))
-    assert(codec(wrap("DECRBY foo 4096\r\n")) === List(DecrBy(StringToChannelBuffer("foo"), 4096)))
+    assert(codec(wrap("DECRBY foo 1\r\n")) == List(DecrBy(StringToChannelBuffer("foo"), 1)))
+    assert(codec(wrap("DECRBY foo 4096\r\n")) == List(DecrBy(StringToChannelBuffer("foo"), 4096)))
   }
 
   test("Throw a ClientError if DECRBY is called with one argument") {
@@ -99,7 +99,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode GET") {
-    assert(codec(wrap("GET foo\r\n")) === List(Get(StringToChannelBuffer("foo"))))
+    assert(codec(wrap("GET foo\r\n")) == List(Get(StringToChannelBuffer("foo"))))
   }
 
   test("Throw a ClientError if GETBIT is called with no arguments") {
@@ -115,7 +115,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode GETBIT") {
-    assert(codec(wrap("GETBIT foo 0\r\n")) === List(GetBit(StringToChannelBuffer("foo"), 0)))
+    assert(codec(wrap("GETBIT foo 0\r\n")) == List(GetBit(StringToChannelBuffer("foo"), 0)))
   }
 
   test("Throw a ClientError if GETRANGE is called with no arguments") {
@@ -137,7 +137,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode GETRANGE") {
-    assert(codec(wrap("GETRANGE key 0 5\r\n")) ===
+    assert(codec(wrap("GETRANGE key 0 5\r\n")) ==
       List(GetRange(StringToChannelBuffer("key"), 0, 5)))
   }
 
@@ -158,17 +158,17 @@ final class StringCodecSuite extends RedisRequestTest {
 
     unwrap(codec(wrap("GETSET key value\r\n"))) {
       case GetSet(key, value) =>
-        assert(BytesToString(value.array) === "value")
+        assert(BytesToString(value.array) == "value")
     }
   }
 
   test("Correctly encode INCR with an integer argument") {
-    assert(codec(wrap("INCR 1\r\n")) ===
+    assert(codec(wrap("INCR 1\r\n")) ==
       List(Incr(StringToChannelBuffer("1"))))
   }
 
   test("Correctly encode INCR with a string argument") {
-    assert(codec(wrap("INCR foo\r\n")) ===
+    assert(codec(wrap("INCR foo\r\n")) ==
       List(Incr(StringToChannelBuffer("foo"))))
   }
 
@@ -179,8 +179,8 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode INCRBY") {
-    assert(codec(wrap("INCRBY foo 1\r\n")) === List(IncrBy(StringToChannelBuffer("foo"), 1)))
-    assert(codec(wrap("INCRBY foo 4096\r\n")) === List(IncrBy(StringToChannelBuffer("foo"), 4096)))
+    assert(codec(wrap("INCRBY foo 1\r\n")) == List(IncrBy(StringToChannelBuffer("foo"), 1)))
+    assert(codec(wrap("INCRBY foo 4096\r\n")) == List(IncrBy(StringToChannelBuffer("foo"), 4096)))
   }
 
   test("Throw a ClientError if INCRBY is called with one argument") {
@@ -190,7 +190,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode MGET") {
-    assert(codec(wrap("MGET foo bar\r\n")) ===
+    assert(codec(wrap("MGET foo bar\r\n")) ==
       List(MGet(List(StringToChannelBuffer("foo"), StringToChannelBuffer("bar")))))
   }
 
@@ -210,7 +210,7 @@ final class StringCodecSuite extends RedisRequestTest {
     unwrap(codec(wrap("MSETNX foo bar\r\n"))) {
       case MSetNx(map) =>
         assert(map.contains(foo))
-        assert(BytesToString(map(foo).array) === "bar")
+        assert(BytesToString(map(foo).array) == "bar")
     }
   }
 
@@ -221,14 +221,14 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode PSETEX") {
-    assert(codec(wrap("PSETEX foo 1000 bar\r\n")) ===
+    assert(codec(wrap("PSETEX foo 1000 bar\r\n")) ==
       List(PSetEx(StringToChannelBuffer("foo"), 1000L, StringToChannelBuffer("bar"))))
   }
 
   test("Correctly encode SET") {
     unwrap(codec(wrap("SET foo bar\r\n"))) {
       case Set(foo, bar, _, _, _) =>
-        assert(BytesToString(bar.array) === "bar")
+        assert(BytesToString(bar.array) == "bar")
     }
   }
 
@@ -251,7 +251,7 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode SETBIT") {
-    assert(codec(wrap("SETBIT foo 7 1\r\n")) ===
+    assert(codec(wrap("SETBIT foo 7 1\r\n")) ==
       List(SetBit(StringToChannelBuffer("foo"), 7, 1)))
   }
 
@@ -276,7 +276,7 @@ final class StringCodecSuite extends RedisRequestTest {
   test("Correctly encode SETEX") {
     unwrap(codec(wrap("SETEX key 30 value\r\n"))) {
       case SetEx(key, 30, value) =>
-        assert(BytesToString(value.array) === "value")
+        assert(BytesToString(value.array) == "value")
     }
   }
 
@@ -295,7 +295,7 @@ final class StringCodecSuite extends RedisRequestTest {
   test("Correctly encode SETNX") {
     unwrap(codec(wrap("SETNX key value\r\n"))) {
       case SetNx(key, value) =>
-        assert(BytesToString(value.array) === "value")
+        assert(BytesToString(value.array) == "value")
     }
   }
 
@@ -320,28 +320,28 @@ final class StringCodecSuite extends RedisRequestTest {
   test("Correctly encode the new SET syntax with EX") {
     unwrap(codec(wrap("SET foo bar EX 10\r\n"))) {
       case Set(key, value, ttl, false, false) =>
-        assert(ttl === Some(InSeconds(10L)))
+        assert(ttl == Some(InSeconds(10L)))
       }
   }
 
   test("Correctly encode the new SET syntax with PX") {
     unwrap(codec(wrap("SET foo bar PX 10000\r\n"))) {
       case Set(key, value, ttl, false, false) =>
-        assert(ttl === Some(InMilliseconds(10000L)))
+        assert(ttl == Some(InMilliseconds(10000L)))
       }
   }
 
   test("Correctly encode the new SET syntax with NX EX") {
     unwrap(codec(wrap("SET foo bar NX EX 10\r\n"))) {
       case Set(key, value, ttl, true, false) =>
-        assert(ttl === Some(InSeconds(10)))
+        assert(ttl == Some(InSeconds(10)))
       }
   }
 
   test("Correctly encode the new SET syntax with XX") {
     unwrap(codec(wrap("SET foo bar XX\r\n"))) {
       case Set(key, value, None, false, true) =>
-        assert(BytesToString(value.array) === "bar")
+        assert(BytesToString(value.array) == "bar")
       }
   }
 
@@ -367,7 +367,7 @@ final class StringCodecSuite extends RedisRequestTest {
   test("Correctly encode SETRANGE") {
     unwrap(codec(wrap("SETRANGE key 0 value\r\n"))) {
       case SetRange(key, 0, value) =>
-        assert(BytesToString(value.array) === "value")
+        assert(BytesToString(value.array) == "value")
     }
   }
 
@@ -378,99 +378,99 @@ final class StringCodecSuite extends RedisRequestTest {
   }
 
   test("Correctly encode STRLEN") {
-    assert(codec(wrap("STRLEN foo\r\n")) === List(Strlen(StringToChannelBuffer("foo"))))
+    assert(codec(wrap("STRLEN foo\r\n")) == List(Strlen(StringToChannelBuffer("foo"))))
   }
 
   // Unified GET request
   test("Correctly encode array size in unified GET requests", CodecTest) {
-    assert(codec(wrap("*2\r\n")) === Nil)
+    assert(codec(wrap("*2\r\n")) == Nil)
   }
 
   test("Correctly encode command string size in unified GET requests", CodecTest) {
-    assert(codec(wrap("$3\r\n")) === Nil)
+    assert(codec(wrap("$3\r\n")) == Nil)
   }
 
   test("Correctly encode the command in unified GET requests", CodecTest) {
-    assert(codec(wrap("GET\r\n")) === Nil)
+    assert(codec(wrap("GET\r\n")) == Nil)
   }
 
   test("Correctly encode string size in unified GET requests", CodecTest) {
-    assert(codec(wrap("$3\r\n")) === Nil)
+    assert(codec(wrap("$3\r\n")) == Nil)
   }
 
   test("Correctly encode unified GET requests", CodecTest) {
-    assert(codec(wrap("bar\r\n")) === List(Get(StringToChannelBuffer("bar"))))
+    assert(codec(wrap("bar\r\n")) == List(Get(StringToChannelBuffer("bar"))))
   }
 
   // Unified MGET request
   test("Correctly encode array size in unified MGET requests", CodecTest) {
-    assert(codec(wrap("*3\r\n")) === Nil)
+    assert(codec(wrap("*3\r\n")) == Nil)
   }
 
   test("Correctly encode command string size in unified MGET requests", CodecTest) {
-    assert(codec(wrap("$4\r\n")) === Nil)
+    assert(codec(wrap("$4\r\n")) == Nil)
   }
 
   test("Correctly encode the command in unified MGET requests", CodecTest) {
-    assert(codec(wrap("MGET\r\n")) === Nil)
+    assert(codec(wrap("MGET\r\n")) == Nil)
   }
 
   test("Correctly encode string size in unified MGET requests 1", CodecTest) {
-    assert(codec(wrap("$3\r\n")) === Nil)
+    assert(codec(wrap("$3\r\n")) == Nil)
   }
 
   test("Correctly encode string in unified MGET requests", CodecTest) {
-    assert(codec(wrap("foo\r\n")) === Nil)
+    assert(codec(wrap("foo\r\n")) == Nil)
   }
 
   test("Correctly encode string size in unified MGET requests 2", CodecTest) {
-    assert(codec(wrap("$3\r\n")) === Nil)
+    assert(codec(wrap("$3\r\n")) == Nil)
   }
 
   test("Correctly encode unified MGET requests", CodecTest) {
-    assert(codec(wrap("bar\r\n")) ===
+    assert(codec(wrap("bar\r\n")) ==
       List(MGet(List(StringToChannelBuffer("foo"), StringToChannelBuffer("bar")))))
   }
 
   // Unified MSET request
   test("Correctly encode array size in unified MSET requests", CodecTest) {
-    assert(codec(wrap("*5\r\n")) === Nil)
+    assert(codec(wrap("*5\r\n")) == Nil)
   }
 
   test("Correctly encode command string size in unified MSET requests", CodecTest) {
-    assert(codec(wrap("$4\r\n")) === Nil)
+    assert(codec(wrap("$4\r\n")) == Nil)
   }
 
   test("Correctly encode the command in unified MSET requests", CodecTest) {
-    assert(codec(wrap("MSET\r\n")) === Nil)
+    assert(codec(wrap("MSET\r\n")) == Nil)
   }
 
   test("Correctly encode string size in unified MSET requests 1", CodecTest) {
-    assert(codec(wrap("$3\r\n")) === Nil)
+    assert(codec(wrap("$3\r\n")) == Nil)
   }
 
   test("Correctly encode string in unified MSET requests 1", CodecTest) {
-    assert(codec(wrap("foo\r\n")) === Nil)
+    assert(codec(wrap("foo\r\n")) == Nil)
   }
 
   test("Correctly encode string size in unified MSET requests 2", CodecTest) {
-    assert(codec(wrap("$7\r\n")) === Nil)
+    assert(codec(wrap("$7\r\n")) == Nil)
   }
 
   test("Correctly encode string in unified MSET requests 2", CodecTest) {
-    assert(codec(wrap("bar baz\r\n")) === Nil)
+    assert(codec(wrap("bar baz\r\n")) == Nil)
   }
 
   test("Correctly encode string size in unified MSET requests 3", CodecTest) {
-    assert(codec(wrap("$3\r\n")) === Nil)
+    assert(codec(wrap("$3\r\n")) == Nil)
   }
 
   test("Correctly encode string in unified MSET requests 3", CodecTest) {
-    assert(codec(wrap("bar\r\n")) === Nil)
+    assert(codec(wrap("bar\r\n")) == Nil)
   }
 
   test("Correctly encode string size in unified MSET requests 4", CodecTest) {
-    assert(codec(wrap("$5\r\n")) === Nil)
+    assert(codec(wrap("$5\r\n")) == Nil)
   }
 
   test("Correctly encode unified MSET requests", CodecTest) {
@@ -479,7 +479,7 @@ final class StringCodecSuite extends RedisRequestTest {
         val nkv = kv.map {
           case(k, v) => (BytesToString(k.array), BytesToString(v.array))
         }
-        assert(nkv === Map("foo" -> "bar baz", "bar" -> "Hello"))
+        assert(nkv == Map("foo" -> "bar baz", "bar" -> "Hello"))
       case _ => fail("Expected MSet to be returned")
     }
   }

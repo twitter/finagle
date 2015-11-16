@@ -60,7 +60,7 @@ class RawZipkinTracerTest extends FunSuite {
         "AABmxsYW1hcwwAAwgAAQAACRMGAAIAFwsAAwAAAAtoaWNrdXBxdWFpbAAAAgAJAQA=\n")
 
     tracer.logSpans(Seq(span))
-    assert(scribe.messages === Seq(expected))
+    assert(scribe.messages == Seq(expected))
   }
 
   test("send all traces to scribe") {
@@ -86,7 +86,7 @@ class RawZipkinTracerTest extends FunSuite {
     tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
 
     // Note: Since ports are ephemeral, we can't hardcode expected message.
-    assert(scribe.messages.size === 1)
+    assert(scribe.messages.size == 1)
   }
 
   test("logSpan if a timeout occurs") {
@@ -102,6 +102,6 @@ class RawZipkinTracerTest extends FunSuite {
     tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
 
     // scribe Log method is in java
-    assert(scribe.messages.size === 1)
+    assert(scribe.messages.size == 1)
   }
 }

@@ -35,7 +35,7 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
       val sr = new InMemoryStatsReceiver()
 
       def connectionsIs(num: Int) {
-        assert(sr.gauges(Seq("connections"))() === num)
+        assert(sr.gauges(Seq("connections"))() == num)
       }
 
       val handler = new ChannelStatsHandler(sr)
@@ -64,8 +64,8 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
           handler.channelInterestChanged(ctxWritable, e)
           control.advance(20.minutes)
           handler.channelInterestChanged(ctxUnwritable, e)
-          assert(sr.counters(Seq("socket_writable_ms")) === 25.minutes.inMillis)
-          assert(sr.counters(Seq("socket_unwritable_ms")) === 10.minutes.inMillis)
+          assert(sr.counters(Seq("socket_writable_ms")) == 25.minutes.inMillis)
+          assert(sr.counters(Seq("socket_unwritable_ms")) == 10.minutes.inMillis)
         }
       }
     }

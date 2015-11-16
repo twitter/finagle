@@ -72,7 +72,7 @@ class EndToEndTest extends FunSuite
       for (n <- 0 until 2) {
         val rsp = Await.result(client(Request(Path.empty, Buf.Empty)), 30.seconds)
         val Buf.Utf8(str) = rsp.body
-        assert(str === "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
+        assert(str == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
       }
     }
   }
@@ -88,12 +88,12 @@ class EndToEndTest extends FunSuite
 
     val payload = Await.result(client(Request.empty), 30.seconds).body
     val cb = BufChannelBuffer(payload)
-    assert(cb.readableBytes() === 4)
-    assert(cb.readInt() === 0)
+    assert(cb.readableBytes() == 4)
+    assert(cb.readInt() == 0)
   }
 
   def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
-    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
+    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
   test("trace propagation") {
@@ -294,17 +294,17 @@ EOF
       }
       def format(duration: Duration): Float = duration.inMilliseconds.toFloat
 
-      eventually { assert(leaseDuration() === format(Time.Top - Time.now)) }
-      eventually { assert(available() === 1) }
+      eventually { assert(leaseDuration() == format(Time.Top - Time.now)) }
+      eventually { assert(available() == 1) }
       lessor.list.foreach(_.issue(Message.Tlease.MinLease))
-      eventually { assert(leaseCtr() === 1) }
+      eventually { assert(leaseCtr() == 1) }
       ctl.advance(2.seconds) // must advance time to re-lease and expire
-      eventually { assert(leaseDuration() === format(Message.Tlease.MinLease - 2.seconds)) }
-      eventually { assert(available() === 0) }
+      eventually { assert(leaseDuration() == format(Message.Tlease.MinLease - 2.seconds)) }
+      eventually { assert(available() == 0) }
       lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
-      eventually { assert(leaseCtr() === 2) }
-      eventually { assert(leaseDuration() === format(Message.Tlease.MaxLease)) }
-      eventually { assert(available() === 1) }
+      eventually { assert(leaseCtr() == 2) }
+      eventually { assert(leaseDuration() == format(Message.Tlease.MaxLease)) }
+      eventually { assert(available() == 1) }
 
       Closable.sequence(Await.result(fclient), server, factory).close()
     }

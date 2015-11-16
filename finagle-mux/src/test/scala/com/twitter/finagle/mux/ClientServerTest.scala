@@ -107,20 +107,20 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       verify(service)(reqs(i))
 
     for (f <- Seq(f1, f2, f3))
-      assert(f.poll === None)
+      assert(f.poll == None)
 
     val reps = Seq(10, 20, 9) map { i => Response(buf(i.toByte)) }
     p2.setValue(reps(1))
-    assert(f1.poll === None)
-    assert(f2.poll === Some(Return(reps(1))))
-    assert(f3.poll === None)
+    assert(f1.poll == None)
+    assert(f2.poll == Some(Return(reps(1))))
+    assert(f3.poll == None)
 
     p1.setValue(reps(0))
-    assert(f1.poll === Some(Return(reps(0))))
-    assert(f3.poll === None)
+    assert(f1.poll == Some(Return(reps(0))))
+    assert(f3.poll == None)
 
     p3.setValue(reps(2))
-    assert(f3.poll === Some(Return(reps(2))))
+    assert(f3.poll == Some(Return(reps(2))))
   }
 
   test("server responds to pings") {
@@ -129,10 +129,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       import ctx._
 
       for (i <- 0 until 5) {
-        assert(nping.get === i)
+        assert(nping.get == i)
         val pinged = client.ping()
         assert(!pinged.isDone)
-        assert(nping.get === i+1)
+        assert(nping.get == i+1)
         pingRep.flip()
         assert(pinged.isDone)
       }
@@ -146,7 +146,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 
       val pinged = (client.ping() join client.ping()).unit
       assert(!pinged.isDone)
-      assert(nping.get === 2)
+      assert(nping.get == 2)
       pingRep.flip()
       assert(pinged.isDone)
     }
@@ -163,7 +163,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     val f1 = client(req1)
     verify(service)(req1)
     server.close(Time.now)
-    assert(f1.poll === None)
+    assert(f1.poll == None)
     val req2 = Request(Path.empty, buf(2))
     client(req2).poll match {
       case Some(Throw(f: Failure)) => assert(f.isFlagged(Failure.Restartable))
@@ -173,7 +173,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 
     val rep1 = Response(buf(123))
     p1.setValue(rep1)
-    assert(f1.poll === Some(Return(rep1)))
+    assert(f1.poll == Some(Return(rep1)))
   }
 
   test("requeueable failures transit server-to-client") {
@@ -197,7 +197,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
 
     val req = Request(Path.empty, buf(1))
     when(service(req)).thenReturn(Future.exception(new Exception("sad panda")))
-    assert(client(req).poll === Some(
+    assert(client(req).poll == Some(
       Throw(ServerApplicationError("java.lang.Exception: sad panda"))))
   }
 
@@ -210,15 +210,15 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     when(service(req)).thenReturn(p)
     val f = client(req)
 
-    assert(f.poll === None)
-    assert(p.isInterrupted === None)
+    assert(f.poll == None)
+    assert(p.isInterrupted == None)
 
     val exc = new Exception("sad panda")
     f.raise(exc)
-    assert(p.isInterrupted === Some(
+    assert(p.isInterrupted == Some(
       ClientDiscardedRequestException("java.lang.Exception: sad panda")))
 
-    assert(f.poll === Some(Throw(exc)))
+    assert(f.poll == Some(Throw(exc)))
   }
 
   test("propagate trace ids") {
@@ -238,7 +238,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     }
     assert(resp.poll.isDefined)
     val Buf.Utf8(respStr) = Await.result(resp).body
-    assert(respStr === id.toString)
+    assert(respStr == id.toString)
   }
 
   test("propagate trace flags") {
@@ -263,9 +263,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     }
     assert(resp.poll.isDefined)
     val respCb = BufChannelBuffer(Await.result(resp).body)
-    assert(respCb.readableBytes === 8)
+    assert(respCb.readableBytes == 8)
     val respFlags = Flags(respCb.readLong())
-    assert(respFlags === flags)
+    assert(respFlags == flags)
   }
 
   test("failure detection") {
@@ -273,14 +273,14 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       val ctx = new Ctx
       import ctx._
 
-      assert(nping.get === 1)
+      assert(nping.get == 1)
       assert(client.status == Status.Busy)
       pingRep.flip()
       Status.awaitOpen(client.status)
 
       // This is technically racy, but would require a pretty
       // pathological test environment.
-      assert(client.status === Status.Open)
+      assert(client.status == Status.Open)
       eventually { assert(client.status == Status.Busy) }
 
       // Now begin replying.
@@ -291,7 +291,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       }
       loop()
       eventually {
-        assert(client.status === Status.Open)
+        assert(client.status == Status.Open)
       }
     }
   }
@@ -307,7 +307,7 @@ class ClientServerTestNoDispatch extends ClientServerTest(false) {
     val withoutDst = Request(Path.empty, buf(123))
     val rep = Response(buf(23))
     when(service(withoutDst)).thenReturn(Future.value(rep))
-    assert(Await.result(client(withDst)) === rep)
+    assert(Await.result(client(withDst)) == rep)
     verify(service)(withoutDst)
   }
 }
@@ -338,7 +338,7 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
       client(Request.empty)
     }
 
-    assert(Await.result(f).body === Buf.Utf8("My context!"))
+    assert(Await.result(f).body == Buf.Utf8("My context!"))
   }
 
   test("dispatches destinations") {
@@ -348,7 +348,7 @@ class ClientServerTestDispatch extends ClientServerTest(true) {
     val req = Request(Path.read("/dst/name"), buf(123))
     val rep = Response(buf(23))
     when(service(req)).thenReturn(Future.value(rep))
-    assert(Await.result(client(req)) === rep)
+    assert(Await.result(client(req)) == rep)
     verify(service)(req)
   }
 }

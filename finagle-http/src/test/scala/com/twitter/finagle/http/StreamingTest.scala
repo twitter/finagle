@@ -60,7 +60,7 @@ class StreamingTest extends FunSuite with Eventually {
 
     // Demonstrate normal operations by testing for a single echo'd chunk.
     await(req.writer.write(buf))
-    assert(await(res.reader.read(1)) === Some(buf))
+    assert(await(res.reader.read(1)) == Some(buf))
 
     // This request should queue in the service pool.
     val req2 = get("abc")

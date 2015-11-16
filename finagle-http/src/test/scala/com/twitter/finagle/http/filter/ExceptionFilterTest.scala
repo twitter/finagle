@@ -30,9 +30,9 @@ class ExceptionFilterTest extends FunSuite {
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))
-    assert(response.status        === Status.Ok)
-    assert(response.contentString ===  "hello")
-    assert(response.contentLength === Some(5))
+    assert(response.status        == Status.Ok)
+    assert(response.contentString ==  "hello")
+    assert(response.contentLength == Some(5))
   }
 
   test("handle exception") {
@@ -40,9 +40,9 @@ class ExceptionFilterTest extends FunSuite {
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))
-    assert(response.status        === Status.InternalServerError)
-    assert(response.contentString === "")
-    assert(response.contentLength === Some(0))
+    assert(response.status        == Status.InternalServerError)
+    assert(response.contentString == "")
+    assert(response.contentLength == Some(0))
   }
 
   test("handle throw") {
@@ -50,9 +50,9 @@ class ExceptionFilterTest extends FunSuite {
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))
-    assert(response.status        === Status.InternalServerError)
-    assert(response.contentString === "")
-    assert(response.contentLength === Some(0))
+    assert(response.status        == Status.InternalServerError)
+    assert(response.contentString == "")
+    assert(response.contentLength == Some(0))
   }
 
   test("handle cancel") {
@@ -60,8 +60,8 @@ class ExceptionFilterTest extends FunSuite {
     val filter = (new ExceptionFilter) andThen service
 
     val response = Await.result(filter(request))
-    assert(response.statusCode    === 499)
-    assert(response.contentString === "")
-    assert(response.contentLength === Some(0))
+    assert(response.statusCode    == 499)
+    assert(response.contentString == "")
+    assert(response.contentLength == Some(0))
   }
 }

@@ -112,7 +112,7 @@ class RetryFilterTest extends FunSpec
         it("always try once") {
           new TriesFixture(retryExceptionsOnly) {
             when(service(123)) thenReturn Future(321)
-            assert(Await.result(retryingService(123)) === 321)
+            assert(Await.result(retryingService(123)) == 321)
             verify(service)(123)
           }
         }
@@ -134,7 +134,7 @@ class RetryFilterTest extends FunSpec
             val e = intercept[Exception] {
               Await.result(retryingService(123))
             }
-            assert(e.getMessage === "WTF!")
+            assert(e.getMessage == "WTF!")
             verify(service)(123)
             assert(retriesStat == Seq(0))
           }
@@ -143,7 +143,7 @@ class RetryFilterTest extends FunSpec
         it("when no retry occurs, no stat update") {
           new TriesFixture(retryExceptionsOnly) {
             when(service(123)) thenReturn Future(goodResponse)
-            assert(Await.result(retryingService(123)) === goodResponse)
+            assert(Await.result(retryingService(123)) == goodResponse)
             assert(retriesStat == Seq(0))
           }
         }
@@ -157,13 +157,13 @@ class RetryFilterTest extends FunSpec
             when(service(123)) thenReturn replyPromise
 
             val res = retryingService(123)
-            assert(res.isDefined === false)
-            assert(replyPromise.interrupted === None)
+            assert(res.isDefined == false)
+            assert(replyPromise.interrupted == None)
 
             val exc = new Exception
             res.raise(exc)
-            assert(res.isDefined === false)
-            assert(replyPromise.interrupted === Some(exc))
+            assert(res.isDefined == false)
+            assert(replyPromise.interrupted == Some(exc))
           }
         }
       }
@@ -237,7 +237,7 @@ class RetryFilterTest extends FunSpec
       it("always try once") {
         new PolicyFixture(policy, retryExceptionsOnly, timer) {
           when(service(123)) thenReturn Future(321)
-          assert(Await.result(retryingService(123)) === 321)
+          assert(Await.result(retryingService(123)) == 321)
           verify(service)(123)
           assert(retriesStat == Seq(0))
         }
@@ -250,15 +250,15 @@ class RetryFilterTest extends FunSpec
             when(service(123)) thenReturn Future.exception(WriteException(new Exception))
             val f = retryingService(123)
             verify(service)(123)
-            assert(f.isDefined === false)
-            assert(timer.tasks.size === 1)
+            assert(f.isDefined == false)
+            assert(timer.tasks.size == 1)
 
             when(service(123)) thenReturn Future(321) // we succeed next time; tick!
             tc.advance(1.second); timer.tick()
 
             verify(service, times(2))(123)
             assert(retriesStat == Seq(1))
-            assert(Await.result(f) === 321)
+            assert(Await.result(f) == 321)
           }
         }
       }
@@ -270,19 +270,19 @@ class RetryFilterTest extends FunSpec
             when(service(123)) thenReturn Future.exception(WriteException(new Exception("i'm exhausted")))
             val f = retryingService(123)
             1 to 3 foreach { i =>
-              assert(f.isDefined === false)
+              assert(f.isDefined == false)
               verify(service, times(i))(123)
               assert(retriesStat == Seq.empty)
               tc.advance(i.seconds); timer.tick()
             }
 
             assert(retriesStat == Seq(3))
-            assert(f.isDefined === true)
-            assert(Await.ready(f).poll.get.isThrow === true)
+            assert(f.isDefined == true)
+            assert(Await.ready(f).poll.get.isThrow == true)
             val e = intercept[WriteException] {
               Await.result(f)
             }
-            assert(e.getMessage.endsWith("i'm exhausted") === true)
+            assert(e.getMessage.endsWith("i'm exhausted") == true)
           }
         }
       }
@@ -294,9 +294,9 @@ class RetryFilterTest extends FunSpec
           val e = intercept[Exception] {
             Await.result(retryingService(123))
           }
-          assert(e.getMessage === "WTF!")
+          assert(e.getMessage == "WTF!")
           verify(service)(123)
-          assert(timer.tasks.isEmpty === true)
+          assert(timer.tasks.isEmpty == true)
           assert(retriesStat == Seq(0))
         }
       }
@@ -304,7 +304,7 @@ class RetryFilterTest extends FunSpec
       it("when no retry occurs, no stat update") {
         new PolicyFixture(policy, retryExceptionsOnly, timer) {
           when(service(123)) thenReturn Future(321)
-          assert(Await.result(retryingService(123)) === 321)
+          assert(Await.result(retryingService(123)) == 321)
           assert(retriesStat == Seq(0))
         }
       }
@@ -318,13 +318,13 @@ class RetryFilterTest extends FunSpec
           when(service(123)) thenReturn replyPromise
 
           val res = retryingService(123)
-          assert(res.isDefined === false)
-          assert(replyPromise.interrupted === None)
+          assert(res.isDefined == false)
+          assert(replyPromise.interrupted == None)
 
           val exc = new Exception
           res.raise(exc)
-          assert(res.isDefined === false)
-          assert(replyPromise.interrupted === Some(exc))
+          assert(res.isDefined == false)
+          assert(replyPromise.interrupted == Some(exc))
         }
       }
     }
@@ -338,15 +338,15 @@ class RetryFilterTest extends FunSpec
             when(service(123)) thenReturn Future(badResponse)
             val f = retryingService(123)
             verify(service)(123)
-            assert(f.isDefined === false)
-            assert(timer.tasks.size === 1)
+            assert(f.isDefined == false)
+            assert(timer.tasks.size == 1)
 
             when(service(123)) thenReturn Future(goodResponse) // we succeed next time; tick!
             tc.advance(1.second); timer.tick()
 
             verify(service, times(2))(123)
             assert(retriesStat == Seq(1))
-            assert(Await.result(f) === goodResponse)
+            assert(Await.result(f) == goodResponse)
           }
         }
       }
@@ -358,15 +358,15 @@ class RetryFilterTest extends FunSpec
             when(service(123)) thenReturn Future(badResponse)
             val f = retryingService(123)
             1 to 3 foreach { i =>
-              assert(f.isDefined === false)
+              assert(f.isDefined == false)
               verify(service, times(i))(123)
               assert(retriesStat == Seq.empty)
               tc.advance(i.seconds); timer.tick()
             }
 
             assert(retriesStat == Seq(3))
-            assert(f.isDefined === true)
-            assert(Await.result(f) === badResponse)
+            assert(f.isDefined == true)
+            assert(Await.result(f) == badResponse)
           }
         }
       }
@@ -377,7 +377,7 @@ class RetryFilterTest extends FunSpec
           when(service(123)) thenReturn Future(goodResponse)
           val f = retryingService(123)
           verify(service)(123)
-          assert(timer.tasks.isEmpty === true)
+          assert(timer.tasks.isEmpty == true)
           assert(retriesStat == Seq(0))
         }
       }
@@ -385,7 +385,7 @@ class RetryFilterTest extends FunSpec
      it("when no retry occurs, no stat update") {
         new PolicyFixture(policy, retryExceptionsOnly=false, timer) {
           when(service(123)) thenReturn Future(321)
-          assert(Await.result(retryingService(123)) === 321)
+          assert(Await.result(retryingService(123)) == 321)
           assert(retriesStat == Seq(0))
         }
       }

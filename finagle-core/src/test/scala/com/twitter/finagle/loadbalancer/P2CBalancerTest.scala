@@ -92,7 +92,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
   def statsDict(r: InMemoryStatsReceiver) = new {
     private val zero = () => 0
 
-    def size = r.gauges.getOrElse(Seq("size"), zero)()
+    def rsize = r.gauges.getOrElse(Seq("size"), zero)()
     def adds = r.counters.getOrElse(Seq("adds"), 0)
     def removes = r.counters.getOrElse(Seq("removes"), 0)
     def load = r.gauges.getOrElse(Seq("load"), zero)()
@@ -150,7 +150,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     vec() = vec() drop 1
 
     for (_ <- 0 until R) bal()
-    assert(init0Load === init(0).load)
+    assert(init0Load == init(0).load)
   }
 
   test("Skip downed nodes; revive them") {
@@ -174,12 +174,12 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     init(0).stat = Status.Closed
 
     run(R)
-    assert(init0Load === init(0).load)
+    assert(init0Load == init(0).load)
     assertEven(init drop 1)
 
     Closable.all(byIndex(0).toSeq:_*).close()
     for (_ <- 0 until R) bal()
-    assert(init(0).load === 0)
+    assert(init(0).load == 0)
     assertEven(init drop 1)
 
     init(0).stat = Status.Open
@@ -201,7 +201,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
 
     vec() :+= new LoadedFactory(0)
     for (_ <- 0 until R) Await.result(bal())
-    assert(vec().head.load === R)
+    assert(vec().head.load == R)
 
     vec() = Vector.empty
     intercept[NoBrokersAvailableException] { Await.result(bal()) }
@@ -225,7 +225,7 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     for (f <- init drop N/2) f.stat = Status.Open
     for (_ <- 0 until R) bal()
 
-    assert(init0Load2 === init(0).load)
+    assert(init0Load2 == init(0).load)
     assertEven(init drop N/2)
     assertEven(init take N/2)
   }
@@ -236,38 +236,38 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     val bal = newBal(vec, statsReceiver)
     val stats = statsDict(statsReceiver)
 
-    assert(stats.load === 0)
-    assert(stats.size === 0)
-    assert(stats.adds === 0)
-    assert(stats.removes === 0)
-    assert(stats.available === 0)
+    assert(stats.load == 0)
+    assert(stats.rsize == 0)
+    assert(stats.adds == 0)
+    assert(stats.removes == 0)
+    assert(stats.available == 0)
 
     vec() +:= new LoadedFactory(0)
 
-    assert(stats.load === 0)
-    assert(stats.size === 1)
-    assert(stats.adds === 1)
-    assert(stats.removes === 0)
-    assert(stats.available === 1)
+    assert(stats.load == 0)
+    assert(stats.rsize == 1)
+    assert(stats.adds == 1)
+    assert(stats.removes == 0)
+    assert(stats.available == 1)
 
     vec() +:= new LoadedFactory(1)
 
-    assert(stats.load === 0)
-    assert(stats.size === 2)
-    assert(stats.adds === 2)
-    assert(stats.removes === 0)
-    assert(stats.available === 2)
+    assert(stats.load == 0)
+    assert(stats.rsize == 2)
+    assert(stats.adds == 2)
+    assert(stats.removes == 0)
+    assert(stats.available == 2)
 
     vec()(0).stat = Status.Closed
-    assert(stats.available === 1)
+    assert(stats.available == 1)
 
     val svcs = Seq.fill(R) { Await.result(bal()) }
-    assert(stats.load === R)
-    assert(vec()(0).load === 0)
-    assert(vec()(1).load === R)
+    assert(stats.load == R)
+    assert(vec()(0).load == 0)
+    assert(vec()(1).load == R)
     Closable.all(svcs:_*).close()
-    assert(vec()(1).load === 0)
-    assert(stats.load === 0)
+    assert(vec()(1).load == 0)
+    assert(stats.load == 0)
   }
 
   test("Closes") {
@@ -345,7 +345,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
     val vec = init :+ LatentFactory(N+1, Function.const(R*2))
     run(vec, R)
     assertEven(vec.init)
-    assert(vec(N).load === 1)
+    assert(vec(N).load == 1)
   }
 
   test("Balances proportionally across nodes with varying latencies") {

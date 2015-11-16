@@ -77,7 +77,7 @@ class EndToEndTest extends FunSuite {
       error !! EOF
 
       latch.within(1.second)
-      assert(result === "123")
+      assert(result == "123")
       client.close()
     }
 
@@ -99,7 +99,7 @@ class EndToEndTest extends FunSuite {
 
       latch.within(1.second)
       error !! EOF
-      assert(result === "123")
+      assert(result == "123")
       client.close()
     }
 
@@ -254,7 +254,7 @@ class EndToEndTest extends FunSuite {
       }
 
       latch.within(1.second)
-      assert(result === "1223")
+      assert(result == "1223")
     }
   }
 
@@ -368,17 +368,17 @@ class EndToEndTest extends FunSuite {
       .build()
 
     val res = Await.result(client(streamRequest), 1.second)
-    assert(count === 1)
+    assert(count == 1)
     val f2 = client(streamRequest)
     assert(f2.poll.isEmpty)  // because of the host connection limit
 
     messages !! Buf.Utf8("1")
-    assert((res.messages??) === Buf.Utf8("1"))
-    assert(count === 1)
+    assert((res.messages??) == Buf.Utf8("1"))
+    assert(count == 1)
     error !! EOF
     res.release()
     val res2 = Await.result(f2, 1.second)
-    assert(count === 2)
+    assert(count == 2)
     res2.release()
 
     Closable.all(client, server)

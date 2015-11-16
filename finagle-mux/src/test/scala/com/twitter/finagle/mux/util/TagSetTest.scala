@@ -10,9 +10,9 @@ class TagSetTest extends FunSuite {
   test("assign contiguous, small tags in the range") {
     val set = TagSet(range)
     for (i <- range)
-      assert(set.acquire() === Some(i))
+      assert(set.acquire() == Some(i))
 
-    assert(set.acquire() === None)
+    assert(set.acquire() == None)
 
     // Now give back some tags; we should
     // get the smallest one back.
@@ -20,20 +20,20 @@ class TagSetTest extends FunSuite {
     set.release(8)
     set.release(2)
 
-    assert(set.acquire() === Some(2))
-    assert(set.acquire() === Some(7))
-    assert(set.acquire() === Some(8))
+    assert(set.acquire() == Some(2))
+    assert(set.acquire() == Some(7))
+    assert(set.acquire() == Some(8))
 
-    assert(set.acquire() === None)
+    assert(set.acquire() == None)
   }
 
   test("iterate over current tags") {
     val set = TagSet(range)
 
     for (i <- range)
-      assert(set.acquire() === Some(i))
+      assert(set.acquire() == Some(i))
 
-    assert(set.toSeq === range.toSeq)
+    assert(set.toSeq == range.toSeq)
 
     set.release(2)
     assert(set.sameElements(range filter (_ != 2)))

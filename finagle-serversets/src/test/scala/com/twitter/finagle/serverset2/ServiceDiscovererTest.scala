@@ -41,7 +41,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
     val v2 = Vector(Seq(Descriptor(Selector.Member(port2.toString), 2.0, 1)))
     val vecs = Seq(v1, v2)
 
-    assert(ServiceDiscoverer.zipWithWeights(ents, vecs.toSet).toSet === Set(
+    assert(ServiceDiscoverer.zipWithWeights(ents, vecs.toSet).toSet == Set(
       ep(port1) -> 1.1,
       ep(port2) -> 2.8,
       ep(3) -> 3.1,

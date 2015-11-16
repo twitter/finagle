@@ -55,7 +55,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     when(trans.write(any[HttpRequest])).thenReturn(wp)
 
     val f = disp(request)
-    assert(f.isDefined === false)
+    assert(f.isDefined == false)
 
     verify(trans, times(1)).write(any[HttpRequest])
     verify(trans, never()).read()
@@ -67,13 +67,13 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
     verify(trans, times(1)).read()
 
-    assert(f.isDefined === false)
+    assert(f.isDefined == false)
     rp.setValue(response.httpResponse)
 
     f.poll match {
       case Some(Return(r)) =>
-        assert(r.version === response.version)
-        assert(r.status === response.status)
+        assert(r.version == response.version)
+        assert(r.status == response.status)
 
       case _ =>
         fail()

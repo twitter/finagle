@@ -35,8 +35,8 @@ class StabilizerTest extends FunSuite {
     val ref2 = new AtomicReference[Addr]
     batchStable.changes.register(Witness(ref2))
 
-    def assertStabilized(addr: Addr) = assert(ref.get === addr)
-    def assertBatchStabilized(addr: Addr) = assert(ref2.get === addr)
+    def assertStabilized(addr: Addr) = assert(ref.get == addr)
+    def assertBatchStabilized(addr: Addr) = assert(ref2.get == addr)
     def pulse() = {
       removalEvent.notify(())
       batchEvent.notify(())

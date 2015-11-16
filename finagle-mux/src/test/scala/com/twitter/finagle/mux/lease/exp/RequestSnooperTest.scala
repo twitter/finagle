@@ -30,7 +30,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
         snooper.observe(3.seconds)
       ctl.advance(12.seconds)
       tmr.tick()
-      assert(snooper.handleBytes() === 2000.bytes)
+      assert(snooper.handleBytes() == 2000.bytes)
     }
   }
 
@@ -55,7 +55,7 @@ class RequestSnooperTest extends FunSuite with MockitoSugar {
         snooper.observe(8.seconds)
       ctl.advance(12.seconds)
       tmr.tick()
-      assert(snooper.handleBytes() === 2000.bytes)
+      assert(snooper.handleBytes() == 2000.bytes)
     }
   }
 }

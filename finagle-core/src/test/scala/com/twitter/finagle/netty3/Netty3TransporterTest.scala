@@ -81,7 +81,7 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
 
       val unresolved = InetSocketAddress.createUnresolved("supdog", 0)
       val pl = transporter.newPipeline(unresolved, NullStatsReceiver)
-      assert(pl === pipeline) // mainly just checking that we don't NPE anymore
+      assert(pl == pipeline) // mainly just checking that we don't NPE anymore
     }
 
     // CSL-2175
@@ -132,7 +132,7 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
     it("should track connections with channelStatsHandler on different connections") {
       val sr = new InMemoryStatsReceiver
       def hasConnections(scope: String, num: Int) {
-        assert(sr.gauges(Seq(scope, "connections"))() === num)
+        assert(sr.gauges(Seq(scope, "connections"))() == num)
       }
 
       val firstPipeline = Channels.pipeline()

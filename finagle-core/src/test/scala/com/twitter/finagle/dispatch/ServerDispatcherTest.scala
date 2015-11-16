@@ -84,8 +84,8 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val disp = new SerialServerDispatcher(trans, s)
 
     readp.setValue("blah")
-    assert(ncall === 1)
-    assert(l() === Some("orig"))
+    assert(ncall == 1)
+    assert(l() == Some("orig"))
     verify(trans).write("undefined")
   })
 

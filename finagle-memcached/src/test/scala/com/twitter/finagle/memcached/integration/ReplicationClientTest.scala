@@ -485,7 +485,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     (0 until count).foreach {
       n => {
         val ConsistentReplication(Some(Buf.Utf8(res))) = Await.result(replicatedClient.getAll("foo"+n))
-        assert(res === "bar"+n)
+        assert(res == "bar"+n)
       }
     }
 

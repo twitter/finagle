@@ -30,7 +30,7 @@ class LatencyCompensationTest
         implicitly[Stack.Param[LatencyCompensation.Compensator]])
       def make(prms: Stack.Params, next: Stack[ServiceFactory[String, String]]) = {
         val LatencyCompensation.Compensation(compensation) = prms[LatencyCompensation.Compensation]
-        assert(expected === compensation)
+        assert(expected == compensation)
 
         Stack.Leaf(this, ServiceFactory.const(Service.mk[String, String](Future.value)))
       }
@@ -131,7 +131,7 @@ class LatencyCompensationTest
           eventually {
             assert(yo.isDefined)
           }
-          assert(Await.result(yo, 10.seconds) === "yo")
+          assert(Await.result(yo, 10.seconds) == "yo")
         }
       }
     }
@@ -162,7 +162,7 @@ class LatencyCompensationTest
           eventually {
             assert(yo.isDefined)
           }
-          assert(Await.result(yo, 10.seconds) === "yo")
+          assert(Await.result(yo, 10.seconds) == "yo")
         }
       }
     }
@@ -189,7 +189,7 @@ class LatencyCompensationTest
           eventually {
             assert(yo.isDefined)
           }
-          assert(Await.result(yo, 10.seconds) === "yo")
+          assert(Await.result(yo, 10.seconds) == "yo")
         }
       }
     }
@@ -204,11 +204,11 @@ class LatencyCompensationTest
         whileConnected(compensatedEchoClient) { client =>
           val sup = client("sup")
           assert(!sup.isDefined)
-          assert(respond.interrupted === None)
+          assert(respond.interrupted == None)
 
           awaitReceipt()
           assert(!sup.isDefined)
-          assert(respond.interrupted === None)
+          assert(respond.interrupted == None)
 
           clock.advance(4.seconds)
           timer.tick() // triggers the timeout
@@ -232,11 +232,11 @@ class LatencyCompensationTest
         whileConnected(compensatedEchoClient) { client =>
           val nm = client("nm")
           assert(!nm.isDefined)
-          assert(respond.interrupted === None)
+          assert(respond.interrupted == None)
 
           awaitReceipt()
           assert(!nm.isDefined)
-          assert(respond.interrupted === None)
+          assert(respond.interrupted == None)
 
           clock.advance(2.seconds)
           timer.tick() // triggers the timeout
@@ -262,11 +262,11 @@ class LatencyCompensationTest
         whileConnected(compensatedEchoClient) { client =>
           val aight = client("aight")
           assert(!aight.isDefined)
-          assert(respond.interrupted === None)
+          assert(respond.interrupted == None)
 
           awaitReceipt()
           assert(!aight.isDefined)
-          assert(respond.interrupted === None)
+          assert(respond.interrupted == None)
 
           clock.advance(4.seconds)
           timer.tick() // does not trigger the timeout
@@ -275,7 +275,7 @@ class LatencyCompensationTest
           eventually {
             assert(aight.isDefined)
           }
-          assert(Await.result(aight, 10.seconds) === "aight")
+          assert(Await.result(aight, 10.seconds) == "aight")
         }
       }
     }

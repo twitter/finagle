@@ -53,12 +53,12 @@ class BackupRequestFilterTest extends FunSuite
         assert(!f.isDefined)
         tc.advance(l)
         p.setValue("ok")
-        assert(f.poll === Some(Return("ok")))
+        assert(f.poll == Some(Return("ok")))
         val ideal = quantile(latencies take i + 1, 95)
         val actual = cutoff()
         BackupRequestFilter.defaultError(maxDuration) match {
           case 0.0 =>
-            assert(ideal === actual)
+            assert(ideal == actual)
           case error =>
             val epsilon = maxDuration.inMillis * error
             actual.inMillis.toDouble should be(ideal.inMillis.toDouble +- epsilon)
@@ -83,7 +83,7 @@ class BackupRequestFilterTest extends FunSuite
       // flush
       timer.tick()
       assert(timer.tasks.isEmpty)
-      assert(statsReceiver.counters(Seq("won")) === latencies.size)
+      assert(statsReceiver.counters(Seq("won")) == latencies.size)
       assert(cutoff() > Duration.Zero)
 
       val p = new Promise[String]
@@ -93,11 +93,11 @@ class BackupRequestFilterTest extends FunSuite
       val f = service("a")
       verify(underlying).apply("a")
       assert(!f.isDefined)
-      assert(timer.tasks.size === 1)
+      assert(timer.tasks.size == 1)
 
       tc.advance(cutoff() / 2)
       timer.tick()
-      assert(timer.tasks.size === 1)
+      assert(timer.tasks.size == 1)
       verify(underlying).apply("a")
       val p1 = new Promise[String]
       when(underlying("a")).thenReturn(p1)
@@ -107,12 +107,12 @@ class BackupRequestFilterTest extends FunSuite
       verify(underlying, times(2)).apply("a")
 
       p1.setValue("backup")
-      assert(f.poll === Some(Return("backup")))
-      assert(p1.isInterrupted === None)
-      assert(p.isInterrupted === Some(BackupRequestLost))
-      assert(statsReceiver.counters(Seq("lost")) === 1)
+      assert(f.poll == Some(Return("backup")))
+      assert(p1.isInterrupted == None)
+      assert(p.isInterrupted == Some(BackupRequestLost))
+      assert(statsReceiver.counters(Seq("lost")) == 1)
       // original request takes longer than cutoff
-      assert(statsReceiver.counters(Seq("timeouts")) === 1)
+      assert(statsReceiver.counters(Seq("timeouts")) == 1)
     }
   }
 
@@ -132,18 +132,18 @@ class BackupRequestFilterTest extends FunSuite
       // flush
       timer.tick()
       assert(timer.tasks.isEmpty)
-      assert(statsReceiver.counters(Seq("won")) === latencies.size)
+      assert(statsReceiver.counters(Seq("won")) == latencies.size)
       assert(cutoff() > Duration.Zero)
 
       val p = new Promise[String]
       when(underlying("b")).thenReturn(p)
       val f = service("b")
       verify(underlying).apply("b")
-      assert(timer.tasks.size === 1)
+      assert(timer.tasks.size == 1)
       val task = timer.tasks(0)
       assert(!task.isCancelled)
       tc.advance(cutoff() / 2)
-      assert(timer.tasks.toSeq === Seq(task))
+      assert(timer.tasks.toSeq == Seq(task))
       verify(underlying).apply("b")
       assert(!task.isCancelled)
       p.setValue("orig")
@@ -172,7 +172,7 @@ class BackupRequestFilterTest extends FunSuite
       // flush
       timer.tick()
       assert(timer.tasks.isEmpty)
-      assert(statsReceiver.counters(Seq("won")) === latencies.size)
+      assert(statsReceiver.counters(Seq("won")) == latencies.size)
       assert(cutoff() > Duration.Zero)
 
       val origPromise = new Promise[String]
@@ -183,11 +183,11 @@ class BackupRequestFilterTest extends FunSuite
       val f = service("c")
       verify(underlying).apply("c")
       assert(!f.isDefined)
-      assert(timer.tasks.size === 1) // backup request timer
+      assert(timer.tasks.size == 1) // backup request timer
 
       tc.advance(cutoff() / 2)
       timer.tick()
-      assert(timer.tasks.size === 1) // backup request timer
+      assert(timer.tasks.size == 1) // backup request timer
       verify(underlying).apply("c")
       val backupPromise = new Promise[String]
       when(underlying("c")).thenReturn(backupPromise)
@@ -198,11 +198,11 @@ class BackupRequestFilterTest extends FunSuite
       verify(underlying, times(2)).apply("c")
 
       backupPromise.setValue("backup")
-      assert(f.poll === Some(Return("backup")))
-      assert(backupPromise.isInterrupted === None)
+      assert(f.poll == Some(Return("backup")))
+      assert(backupPromise.isInterrupted == None)
       val ex = intercept[Exception] { Await.result(origPromise) }
-      assert(ex === cancelEx)
-      assert(statsReceiver.counters(Seq("lost")) === 1)
+      assert(ex == cancelEx)
+      assert(statsReceiver.counters(Seq("lost")) == 1)
       // original request fails instead of timing out
       assert(!statsReceiver.counters.contains(Seq("timeouts")))
     }
@@ -225,7 +225,7 @@ class BackupRequestFilterTest extends FunSuite
       // flush
       timer.tick()
       assert(timer.tasks.isEmpty)
-      assert(statsReceiver.counters(Seq("won")) === latencies.size)
+      assert(statsReceiver.counters(Seq("won")) == latencies.size)
       assert(cutoff() > Duration.Zero)
 
       val origPromise = new Promise[String]
@@ -236,11 +236,11 @@ class BackupRequestFilterTest extends FunSuite
       val f = service("d")
       verify(underlying).apply("d")
       assert(!f.isDefined)
-      assert(timer.tasks.size === 1) // backup request timer
+      assert(timer.tasks.size == 1) // backup request timer
 
       tc.advance(cutoff() / 2)
       timer.tick()
-      assert(timer.tasks.size === 1) // backup request timer
+      assert(timer.tasks.size == 1) // backup request timer
       verify(underlying).apply("d")
       val backupPromise = new Promise[String]
       when(underlying("d")).thenReturn(backupPromise)
@@ -253,13 +253,13 @@ class BackupRequestFilterTest extends FunSuite
       origPromise.raise(cancelEx)
 
       backupPromise.setValue("backup")
-      assert(f.poll === Some(Return("backup")))
-      assert(backupPromise.isInterrupted === None)
+      assert(f.poll == Some(Return("backup")))
+      assert(backupPromise.isInterrupted == None)
       val ex = intercept[Exception] { Await.result(origPromise) }
-      assert(ex === cancelEx)
-      assert(statsReceiver.counters(Seq("lost")) === 1)
+      assert(ex == cancelEx)
+      assert(statsReceiver.counters(Seq("lost")) == 1)
       // original request takes longer than cutoff
-      assert(statsReceiver.counters(Seq("timeouts")) === 1)
+      assert(statsReceiver.counters(Seq("timeouts")) == 1)
     }
   }
 }

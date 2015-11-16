@@ -27,7 +27,7 @@ class ClientIdRequiredFilterTest extends FunSuite with MockitoSugar {
     when(underlying(request)).thenReturn(response)
     clientId.asCurrent {
       val result = service(request)
-      assert(Await.result(result) === Await.result(response))
+      assert(Await.result(result) == Await.result(response))
       result
     }
   }

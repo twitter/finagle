@@ -36,7 +36,7 @@ class ChanTest extends FunSuite {
     t0.join();
     t1.join()
 
-    assert(threads.toSeq === Seq(t0, t1))
+    assert(threads.toSeq == Seq(t0, t1))
   }
 
   test("Proc should swallow exceptions") {

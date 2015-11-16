@@ -232,12 +232,12 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       // stripe some messages across
       val sentMessages = 0 until N * 100 map { _ => mock[ReadMessage] }
 
-      assert(messages.size === 0)
+      assert(messages.size == 0)
       sentMessages.zipWithIndex foreach { case (m, i) =>
         handles(i % handles.size)._messages ! m
       }
 
-      assert(messages === sentMessages)
+      assert(messages == sentMessages)
     }
   }
 
@@ -254,7 +254,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
         val handle = MultiReaderHelper.merge(va)
         assert(
-          ISet((handle.messages ??), (handle.messages ??), (handle.messages ??)) ===
+          ISet((handle.messages ??), (handle.messages ??), (handle.messages ??)) ==
           ISet(ms(0), ms(1), ms(2))
         )
       }
@@ -275,12 +275,12 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val handle = MultiReaderHelper.merge(va)
       val e = handle.error.sync()
       handles foreach { h =>
-        assert(e.isDefined === false)
+        assert(e.isDefined == false)
         h._error ! new Exception("sad panda")
       }
 
-      assert(e.isDefined === true)
-      assert(Await.result(e) === AllHandlesDiedException)
+      assert(e.isDefined == true)
+      assert(Await.result(e) == AllHandlesDiedException)
     }
   }
 
@@ -290,14 +290,14 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
       }
 
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
     }
   }
@@ -308,7 +308,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
@@ -316,7 +316,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
       // 0, 3, 6 ...
       eventually {
-        assert(messages === sentMessages.grouped(N).map { _.head }.toSet)
+        assert(messages == sentMessages.grouped(N).map { _.head }.toSet)
       }
       messages.clear()
 
@@ -324,7 +324,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
       // 1, 2, 4, 5, ...
       eventually {
-        assert(messages === sentMessages.grouped(N).map { _.tail }.flatten.toSet)
+        assert(messages == sentMessages.grouped(N).map { _.tail }.flatten.toSet)
       }
     }
   }
@@ -338,14 +338,14 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
       val messages = configureMessageReader(handle)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
       }
 
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
       rest.zipWithIndex.foreach { case (host, hostIndex) =>
         messages.clear()
@@ -360,7 +360,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
         // expect fewer to be read on each pass
         val expectFirstN = N - hostIndex - 1
         eventually {
-          assert(messages === sentMessages.grouped(N).map { _.take(expectFirstN) }.flatten.toSet)
+          assert(messages == sentMessages.grouped(N).map { _.take(expectFirstN) }.flatten.toSet)
         }
       }
     }
@@ -373,19 +373,19 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val messages = configureMessageReader(handle)
       val error = handle.error.sync()
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
       }
 
-      assert(messages.size === 0) // cluster not ready
-      assert(error.isDefined === false)
+      assert(messages.size == 0) // cluster not ready
+      assert(error.isDefined == false)
 
       va.update(Addr.Bound(hosts: _*))
 
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
     }
   }
@@ -397,8 +397,8 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val error = handle.error.sync()
       va.update(Addr.Bound())
 
-      assert(error.isDefined === true)
-      assert(Await.result(error) === AllHandlesDiedException)
+      assert(error.isDefined == true)
+      assert(Await.result(error) == AllHandlesDiedException)
     }
   }
 
@@ -410,8 +410,8 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val error = handle.error.sync()
       va.update(Addr.Failed(ex))
 
-      assert(error.isDefined === true)
-      assert(Await.result(error) === ex)
+      assert(error.isDefined == true)
+      assert(Await.result(error) == ex)
     }
   }
 
@@ -421,14 +421,14 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val handle = MultiReader(cluster, "the_queue").clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
 
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
     }
   }
@@ -440,7 +440,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val handle = MultiReader(cluster, "the_queue").clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
@@ -448,7 +448,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
       // 0, 3, 6 ...
       eventually {
-        assert(messages === sentMessages.grouped(N).map { _.head }.toSet)
+        assert(messages == sentMessages.grouped(N).map { _.head }.toSet)
       }
       messages.clear()
 
@@ -456,7 +456,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
       // 1, 2, 4, 5, ...
       eventually {
-        assert(messages === sentMessages.grouped(N).map { _.tail }.flatten.toSet)
+        assert(messages == sentMessages.grouped(N).map { _.tail }.flatten.toSet)
       }
     }
   }
@@ -469,14 +469,14 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
       val messages = configureMessageReader(handle)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
 
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
 
       rest.reverse.zipWithIndex.foreach { case (host, hostIndex) =>
@@ -491,7 +491,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
         // expect fewer to be read on each pass
         val expectFirstN = N - hostIndex - 1
         eventually {
-          assert(messages === sentMessages.grouped(N).map { _.take(expectFirstN) }.flatten.toSet)
+          assert(messages == sentMessages.grouped(N).map { _.take(expectFirstN) }.flatten.toSet)
         }
       }
     }
@@ -505,19 +505,19 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val messages = configureMessageReader(handle)
       val errors = (handle.error ?)
       val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
-      assert(messages.size === 0)
+      assert(messages.size == 0)
 
       sentMessages.zipWithIndex foreach { case (m, i) =>
         Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
 
-      assert(messages.size === 0) // cluster not ready
-      assert(errors.isDefined === false)
+      assert(messages.size == 0) // cluster not ready
+      assert(errors.isDefined == false)
 
       hosts.foreach { host => cluster.add(host) }
 
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
     }
   }
@@ -529,8 +529,8 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val e = (handle.error ?)
       hosts.foreach { host => cluster.del(host) }
 
-      assert(e.isDefined === true)
-      assert(Await.result(e) === AllHandlesDiedException)
+      assert(e.isDefined == true)
+      assert(Await.result(e) == AllHandlesDiedException)
     }
   }
 
@@ -547,7 +547,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
         Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
       messages.clear()
 
@@ -557,7 +557,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
         Await.result(services(i % services.size).apply(Set(Buf.Utf8("the_queue"), Time.now, Buf.Utf8(m))))
       }
       eventually {
-        assert(messages === sentMessages.toSet)
+        assert(messages == sentMessages.toSet)
       }
     }
   }

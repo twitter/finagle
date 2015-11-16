@@ -104,13 +104,13 @@ class HttpClientDispatcherTest extends FunSuite {
     assert(!c.isDefined)
     req.writer.write(Buf.Utf8("a"))
     out.read() flatMap { c => out.write(c) }
-    assert(Await.result(c) === Some(Buf.Utf8("a")))
+    assert(Await.result(c) == Some(Buf.Utf8("a")))
 
     val cc = res.reader.read(Int.MaxValue)
     assert(!cc.isDefined)
     req.writer.write(Buf.Utf8("some other thing"))
     out.read() flatMap { c => out.write(c) }
-    assert(Await.result(cc) === Some(Buf.Utf8("some other thing")))
+    assert(Await.result(cc) == Some(Buf.Utf8("some other thing")))
 
     val last = res.reader.read(Int.MaxValue)
     assert(!last.isDefined)
@@ -135,7 +135,7 @@ class HttpClientDispatcherTest extends FunSuite {
     Await.result(out.read())
     out.write(httpRes)
     val res = Await.result(f)
-    assert(res.httpResponse === httpRes)
+    assert(res.httpResponse == httpRes)
   }
 
   test("chunked") {
@@ -150,11 +150,11 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c) === Some(Buf.Utf8("hello")))
+    assert(Await.result(c) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write(chunk("world"))
-    assert(Await.result(cc) === Some(Buf.Utf8("world")))
+    assert(Await.result(cc) == Some(Buf.Utf8("world")))
 
     out.write(HttpChunk.LAST_CHUNK)
     assert(Await.result(reader.read(Int.MaxValue)).isEmpty)
@@ -173,7 +173,7 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val c = reader.read(Int.MaxValue)
     out.write(chunk("hello"))
-    assert(Await.result(c) === Some(Buf.Utf8("hello")))
+    assert(Await.result(c) == Some(Buf.Utf8("hello")))
 
     val cc = reader.read(Int.MaxValue)
     out.write("something else")
@@ -195,10 +195,10 @@ class HttpClientDispatcherTest extends FunSuite {
     
     val f = disp(req)
     val g = req.writer.write(Buf.Utf8(".."))
-    assert(transport.status === Status.Open)
+    assert(transport.status == Status.Open)
     assert(!g.isDefined)
     f.raise(new Exception)
-    assert(transport.status === Status.Closed)
+    assert(transport.status == Status.Closed)
 
     assert(!g.isDefined)
     // Simulate what a real transport would do:
@@ -226,9 +226,9 @@ class HttpClientDispatcherTest extends FunSuite {
 
     val f = disp(req)
 
-    assert(transport.status === Status.Open)
+    assert(transport.status == Status.Open)
     f.raise(new Exception)
-    assert(transport.status === Status.Closed)
+    assert(transport.status == Status.Closed)
 
     // Simulate what a real transport would do:
     assert(transport.ops.isEmpty)
@@ -262,9 +262,9 @@ class HttpClientDispatcherTest extends FunSuite {
     // Buffer up for write.
     Await.result(req.writer.write(Buf.Utf8("..")))
 
-    assert(transport.status === Status.Open)
+    assert(transport.status == Status.Open)
     f.raise(new Exception)
-    assert(transport.status === Status.Closed)
+    assert(transport.status == Status.Closed)
 
     // Simulate what a real transport would do:
     assert(transport.ops.isEmpty)

@@ -42,23 +42,23 @@ class DefaultPoolTest extends FunSuite {
 
     new DefaultPoolHelper {
       val c1 = Await.result(factory())
-      assert(sr.gauges(Seq("pool_cached"))() === 0)
-      assert(sr.gauges(Seq("pool_size"))() === 1)
+      assert(sr.gauges(Seq("pool_cached"))() == 0)
+      assert(sr.gauges(Seq("pool_size"))() == 1)
       val c2 = Await.result(factory())
-      assert(sr.gauges(Seq("pool_cached"))() === 0)
-      assert(sr.gauges(Seq("pool_size"))() === 2)
+      assert(sr.gauges(Seq("pool_cached"))() == 0)
+      assert(sr.gauges(Seq("pool_size"))() == 2)
       val c3 = Await.result(factory())
-      assert(sr.gauges(Seq("pool_cached"))() === 0)
-      assert(sr.gauges(Seq("pool_size"))() === 3)
+      assert(sr.gauges(Seq("pool_cached"))() == 0)
+      assert(sr.gauges(Seq("pool_size"))() == 3)
       c1.close()
-      assert(sr.gauges(Seq("pool_cached"))() === 1)
-      assert(sr.gauges(Seq("pool_size"))() === 2)
+      assert(sr.gauges(Seq("pool_cached"))() == 1)
+      assert(sr.gauges(Seq("pool_size"))() == 2)
       c2.close()
-      assert(sr.gauges(Seq("pool_cached"))() === 1)
-      assert(sr.gauges(Seq("pool_size"))() === 2)
+      assert(sr.gauges(Seq("pool_cached"))() == 1)
+      assert(sr.gauges(Seq("pool_size"))() == 2)
       c3.close()
-      assert(sr.gauges(Seq("pool_cached"))() === 1)
-      assert(sr.gauges(Seq("pool_size"))() === 2)
+      assert(sr.gauges(Seq("pool_cached"))() == 1)
+      assert(sr.gauges(Seq("pool_size"))() == 2)
     }
   }
 
@@ -76,9 +76,9 @@ class DefaultPoolTest extends FunSuite {
       val c6 = Await.result(factory())
 
       // should not throw exceptions
-      assert(Await.result(c4(())) === ())
-      assert(Await.result(c5(())) === ())
-      assert(Await.result(c6(())) === ())
+      assert(Await.result(c4(())) == ())
+      assert(Await.result(c5(())) == ())
+      assert(Await.result(c6(())) == ())
     }
   }
 }

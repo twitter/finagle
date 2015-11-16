@@ -15,31 +15,31 @@ class ShowTest extends FunSuite {
   test("encode errors - ERROR") {
     val error = MemcacheError(new NonexistentCommand("No such command"))
     val res = responseToEncoding.encode(null, null, error)
-    assert(res.getClass === classOf[Tokens])
+    assert(res.getClass == classOf[Tokens])
     val tokens = res.asInstanceOf[Tokens]
-    assert(tokens.tokens.size === 1)
+    assert(tokens.tokens.size == 1)
     val Buf.Utf8(result) = tokens.tokens.head
-    assert(result === "ERROR")
+    assert(result == "ERROR")
   }
 
   test("encode errors - CLIENT_ERROR") {
     val error = MemcacheError(new ClientError("Invalid Input"))
     val res = responseToEncoding.encode(null, null, error)
-    assert(res.getClass === classOf[Tokens])
+    assert(res.getClass == classOf[Tokens])
     val tokens = res.asInstanceOf[Tokens]
-    assert(tokens.tokens.size === 2)
+    assert(tokens.tokens.size == 2)
     val Buf.Utf8(result) = tokens.tokens.head
-    assert(result === "CLIENT_ERROR")
+    assert(result == "CLIENT_ERROR")
   }
 
   test("encode errors - SERVER_ERROR") {
     val error = MemcacheError(new ServerError("Out of Memory"))
     val res = responseToEncoding.encode(null, null, error)
-    assert(res.getClass === classOf[Tokens])
+    assert(res.getClass == classOf[Tokens])
     val tokens = res.asInstanceOf[Tokens]
-    assert(tokens.tokens.size === 2)
+    assert(tokens.tokens.size == 2)
 
     val Buf.Utf8(result) = tokens.tokens.head
-    assert(result === "SERVER_ERROR")
+    assert(result == "SERVER_ERROR")
   }
 }

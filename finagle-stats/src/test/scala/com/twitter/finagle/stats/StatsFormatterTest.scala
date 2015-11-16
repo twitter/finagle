@@ -25,32 +25,32 @@ class StatsFormatterTest extends FunSuite {
     val formatted = formatter(values)
 
     // remove stddev as it is not supported
-    assert(formatted === metrics.sample().asScala.filterKeys(!_.endsWith("stddev")))
+    assert(formatted == metrics.sample().asScala.filterKeys(!_.endsWith("stddev")))
 
-    assert(formatted("histo1.p50") === 50)
-    assert(formatted("histo1.p90") === 90)
-    assert(formatted("histo1.p9990") === 100)
-    assert(formatted("histo1.p9999") === 100)
+    assert(formatted("histo1.p50") == 50)
+    assert(formatted("histo1.p90") == 90)
+    assert(formatted("histo1.p9990") == 100)
+    assert(formatted("histo1.p9999") == 100)
 
-    assert(formatted("histo1.count") === 101)
-    assert(formatted("histo1.max") === 100)
-    assert(formatted("histo1.min") === 0)
-    assert(formatted("histo1.avg") === 50)
+    assert(formatted("histo1.count") == 101)
+    assert(formatted("histo1.max") == 100)
+    assert(formatted("histo1.min") == 0)
+    assert(formatted("histo1.avg") == 50)
   }
 
   test("Ostrich") {
     val formatter = StatsFormatter.Ostrich
     val formatted = formatter(values)
 
-    assert(formatted("histo1.p50") === 50)
-    assert(formatted("histo1.p90") === 90)
-    assert(formatted("histo1.p999") === 100)
-    assert(formatted("histo1.p9999") === 100)
+    assert(formatted("histo1.p50") == 50)
+    assert(formatted("histo1.p90") == 90)
+    assert(formatted("histo1.p999") == 100)
+    assert(formatted("histo1.p9999") == 100)
 
-    assert(formatted("histo1.count") === 101)
-    assert(formatted("histo1.maximum") === 100)
-    assert(formatted("histo1.minimum") === 0)
-    assert(formatted("histo1.average") === 50)
+    assert(formatted("histo1.count") == 101)
+    assert(formatted("histo1.maximum") == 100)
+    assert(formatted("histo1.minimum") == 0)
+    assert(formatted("histo1.average") == 50)
   }
 
 }

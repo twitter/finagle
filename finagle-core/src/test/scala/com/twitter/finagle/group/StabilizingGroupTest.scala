@@ -40,19 +40,19 @@ class StabilizingGroupTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      assert(stableGroup() === sourceGroup())
+      assert(stableGroup() == sourceGroup())
 
       sourceGroup.update(sourceGroup() - 10)
-      assert(limboSize === 1)
+      assert(limboSize == 1)
       tc.advance(grace)
       timer.tick()
-      assert(stableGroup() === sourceGroup())
+      assert(stableGroup() == sourceGroup())
 
       sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
-      assert(limboSize === 4)
+      assert(limboSize == 4)
       tc.advance(grace)
       timer.tick()
-      assert(stableGroup() === sourceGroup())
+      assert(stableGroup() == sourceGroup())
     }
   }
 
@@ -62,23 +62,23 @@ class StabilizingGroupTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      assert(stableGroup() === sourceGroup())
+      assert(stableGroup() == sourceGroup())
 
       healthStatus.mkUnhealthy()
-      assert(stableGroup() === sourceGroup())
+      assert(stableGroup() == sourceGroup())
       sourceGroup.update(sourceGroup() - 10)
       assert(stableGroup() != sourceGroup())
-      assert(stableGroup() === (1 to 10).toSet)
-      assert(limboSize === 1)
+      assert(stableGroup() == (1 to 10).toSet)
+      assert(limboSize == 1)
       sourceGroup.update(sourceGroup() -- Set(1,2,3,4))
       assert(stableGroup() != sourceGroup())
-      assert(stableGroup() === (1 to 10).toSet)
-      assert(limboSize === 5)
+      assert(stableGroup() == (1 to 10).toSet)
+      assert(limboSize == 5)
 
       healthStatus.mkHealthy()
       tc.advance(grace)
       timer.tick()
-      assert(stableGroup() === sourceGroup())
+      assert(stableGroup() == sourceGroup())
     }
   }
 
@@ -88,24 +88,24 @@ class StabilizingGroupTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      assert(healthStat === Healthy.id)
-      assert(stableGroup() === sourceGroup())
+      assert(healthStat == Healthy.id)
+      assert(stableGroup() == sourceGroup())
 
       healthStatus.mkUnhealthy()
-      assert(healthStat === Unhealthy.id)
+      assert(healthStat == Unhealthy.id)
       sourceGroup.update(sourceGroup() -- (1 to 10).toSet)
 
       tc.advance(grace)
       timer.tick()
-      assert(stableGroup() === (1 to 10).toSet)
+      assert(stableGroup() == (1 to 10).toSet)
 
       healthStatus.mkHealthy()
-      assert(healthStat === Healthy.id)
+      assert(healthStat == Healthy.id)
       sourceGroup.update(sourceGroup() ++ Set(1,2,3,4))
 
       tc.advance(grace)
       timer.tick()
-      assert(stableGroup() === Set(1,2,3,4))
+      assert(stableGroup() == Set(1,2,3,4))
     }
   }
 
@@ -121,7 +121,7 @@ class StabilizingGroupTest extends FunSuite {
       sourceGroup() += 5
       tc.advance(grace)
       timer.tick()
-      assert(stableGroup() === Set(5))
+      assert(stableGroup() == Set(5))
     }
   }
 }

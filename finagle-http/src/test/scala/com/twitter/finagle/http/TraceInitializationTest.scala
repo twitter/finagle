@@ -18,7 +18,7 @@ class TraceInitializationTest extends FunSuite {
   def req = RequestBuilder().url("http://foo/this/is/a/uri/path").buildGet()
 
   def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]) {
-    assert(records.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
+    assert(records.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
   /**
@@ -45,7 +45,7 @@ class TraceInitializationTest extends FunSuite {
       Annotation.ServerSend(),
       Annotation.ClientRecv()))
 
-    assert(tracer.map(_.traceId).toSet.size === 1)
+    assert(tracer.map(_.traceId).toSet.size == 1)
   }
 
   test("TraceId is propagated through the protocol") {
@@ -102,7 +102,7 @@ class TraceInitializationTest extends FunSuite {
           Await.result(client(req))
         }
 
-        assert(tracer.map(_.traceId).toSet.size === 2)
+        assert(tracer.map(_.traceId).toSet.size == 2)
       } finally client.close()
     } finally server.close()
   }

@@ -22,11 +22,11 @@ class PHPMemCacheClientTest extends FunSuite with MockitoSugar {
     val context = new Context
     import context._
 
-    assert(phpMemCacheClient.clientOf("apple")    === (client3))
-    assert(phpMemCacheClient.clientOf("banana")   === (client1))
-    assert(phpMemCacheClient.clientOf("cow")      === (client3))
-    assert(phpMemCacheClient.clientOf("dog")      === (client2))
-    assert(phpMemCacheClient.clientOf("elephant") === (client2))
+    assert(phpMemCacheClient.clientOf("apple")    == (client3))
+    assert(phpMemCacheClient.clientOf("banana")   == (client1))
+    assert(phpMemCacheClient.clientOf("cow")      == (client3))
+    assert(phpMemCacheClient.clientOf("dog")      == (client2))
+    assert(phpMemCacheClient.clientOf("elephant") == (client2))
   }
 
   test("release") {

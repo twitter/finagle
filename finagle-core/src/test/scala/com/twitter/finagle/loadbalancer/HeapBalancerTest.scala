@@ -57,9 +57,9 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     val newFactory = new LoadedFactory("new")
 
     def assertGauge(name: String, value: Int) =
-      assert(statsReceiver.gauges(Seq(name))() === value.toFloat)
+      assert(statsReceiver.gauges(Seq(name))() == value.toFloat)
     def assertCounter(name: String, value: Int) =
-      assert(statsReceiver.counters(Seq(name)) === value.toFloat)
+      assert(statsReceiver.counters(Seq(name)) == value.toFloat)
   }
 
   test("balancer with empty cluster has Closed status") {
@@ -70,7 +70,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
       new NoBrokersAvailableException,
       new Random
     )
-    assert(b.status === Status.Closed)
+    assert(b.status == Status.Closed)
   }
 
   for(status <- Seq(Status.Closed, Status.Busy, Status.Open)) {
@@ -86,7 +86,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
         new NoBrokersAvailableException,
         new Random
       )
-      assert(b.status === status)
+      assert(b.status == status)
     }
   }
 
@@ -95,15 +95,15 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     import ctx._
 
     val made = Seq.fill(N) { Await.result(b()) }
-    for (f <- factories) assert(f.load === 1)
+    for (f <- factories) assert(f.load == 1)
     val made2 = Seq.fill(N) { Await.result(b()) }
-    for (f <- factories) assert(f.load === 2)
+    for (f <- factories) assert(f.load == 2)
 
     val s = made(0)
     val f = Await.result(s(()))
-    assert(f.load === 2)
+    assert(f.load == 2)
     s.close()
-    assert(f.load === 1)
+    assert(f.load == 1)
 
     // f is now least-loaded
     val f1 = Await.result(Await.result(b())(()))
@@ -120,10 +120,10 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
     for (_ <- 0 until 2*(N-2)) b()
 
-    assert(factories(0).load === 1)
-    assert(factories(1).load === 1)
+    assert(factories(0).load == 1)
+    assert(factories(1).load == 1)
 
-    for (f <- factories drop 2) assert(f.load === 3)
+    for (f <- factories drop 2) assert(f.load == 3)
   }
 
   test("handle dynamic groups") {
@@ -132,24 +132,24 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
 
     // initially N factories, load them twice
     val made = Seq.fill(N*2) { Await.result(b()) }
-    for (f <- factories) assert(f.load === 2)
+    for (f <- factories) assert(f.load == 2)
 
     // add newFactory to the heap balancer. Initially it has
     // load 0, so the next two make()() should both pick
     // newFactory
     group() += newFactory
     Await.result(b())
-    assert(newFactory.load === 1)
+    assert(newFactory.load == 1)
     Await.result(b())
-    assert(newFactory.load === 2)
+    assert(newFactory.load == 2)
 
     // remove newFactory from the heap balancer.
     // Further calls to make()() should not affect the
     // load on newFactory
     group() -= newFactory
     val made2 = Seq.fill(N) { Await.result(b()) }
-    for (f <- factories) assert(f.load === 3)
-    assert(newFactory.load === 2)
+    for (f <- factories) assert(f.load == 3)
+    assert(newFactory.load == 2)
   }
 
   test("safely remove a host from group before releasing it") {
@@ -159,11 +159,11 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     val made = Seq.fill(N) { Await.result(b()) }
     group() += newFactory
     val made2 = Await.result(b())
-    for (f <- factories :+ newFactory) assert(f.load === 1)
+    for (f <- factories :+ newFactory) assert(f.load == 1)
 
     group() -= newFactory
     made2.close()
-    assert(newFactory.load === 0)
+    assert(newFactory.load == 0)
   }
 
   test("close a factory when removed") {
@@ -231,7 +231,7 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
       f.setStatus(Status.Closed)
     for (_ <- 0 until 100*N) b()
     for (f <- factories)
-      assert(f.load === 101)
+      assert(f.load == 101)
   }
 
   test("balance somewhat evenly between two non-loaded hosts") {
@@ -251,11 +251,11 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     }
 
     // Assert that all two nodes were chosen
-    assert(results.keys.size === 2)
+    assert(results.keys.size == 2)
     val calls = results.values.toArray
     // ensure the distribution is fair (because the rng is deterministic)
-    assert(calls(0) === calls(1))
-    assert(calls.sum === N)
+    assert(calls(0) == calls(1))
+    assert(calls.sum == N)
   }
 
   test("recover nonhealthy services when they become available again") {
@@ -268,10 +268,10 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     for (_ <- 0 until 100*N) b()
     val f0 = factories(0)
     f0.setStatus(Status.Open)
-    for (_ <- 0 until 100) assert(Await.result(Await.result(b()).apply(())) === f0)
+    for (_ <- 0 until 100) assert(Await.result(Await.result(b()).apply(())) == f0)
 
-    assert(f0.load === 201)
-    for (f <- factories drop 1) assert(f.load === 101)
+    assert(f0.load == 201)
+    for (f <- factories drop 1) assert(f.load == 101)
   }
 
   test("properly remove a nonhealthy service") {
@@ -281,13 +281,13 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     for (_ <- 0 until N) b()
     factories(1).setStatus(Status.Closed)
     for (_ <- 0 until N) b()
-    assert(factories(1).load === 1)
+    assert(factories(1).load == 1)
 
     factories(1).setStatus(Status.Open)
     group() -= factories(1)
 
     for (_ <- 0 until N) b()
-    assert(factories(1).load === 1)
+    assert(factories(1).load == 1)
   }
 
   test("disable/enable multiple ServiceFactories") {
@@ -335,19 +335,19 @@ class HeapBalancerTest extends FunSuite with MockitoSugar with AssertionsForJUni
     factories(1).setStatus(Status.Closed)
 
     for (_ <- 0 until 1000) b()
-    assert(factories(0).load === 502)
-    assert(factories(1).load === 502)
+    assert(factories(0).load == 502)
+    assert(factories(1).load == 502)
 
     factories(1).setStatus(Status.Open)
 
     for (_ <- 0 until 1000) b()
-    assert(factories(0).load === 502)
-    assert(factories(1).load === 1502)
+    assert(factories(0).load == 502)
+    assert(factories(1).load == 1502)
 
     group() -= factories(1)
 
     for (_ <- 0 until 1000) b()
-    assert(factories(0).load === 1502)
-    assert(factories(1).load === 1502)
+    assert(factories(0).load == 1502)
+    assert(factories(1).load == 1502)
   }
 }

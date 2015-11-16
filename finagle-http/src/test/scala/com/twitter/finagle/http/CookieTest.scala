@@ -22,17 +22,17 @@ class CookieTest extends FunSuite {
     cookie.isDiscard  = false
     cookie.isSecure   = true
 
-    assert(cookie.name        === "name")
-    assert(cookie.comment     === "hello")
-    assert(cookie.commentUrl  === "hello.com")
-    assert(cookie.domain      === ".twitter.com")
-    assert(cookie.maxAge      === 100.seconds)
-    assert(cookie.path        === "/1/statuses/show")
-    assert(cookie.ports       === Set(1, 2, 3))
-    assert(cookie.value       === "value2")
-    assert(cookie.version     === 1)
-    assert(cookie.httpOnly    === true)
-    assert(cookie.isDiscard   === false)
-    assert(cookie.isSecure    === true)
+    assert(cookie.name        == "name")
+    assert(cookie.comment     == "hello")
+    assert(cookie.commentUrl  == "hello.com")
+    assert(cookie.domain      == ".twitter.com")
+    assert(cookie.maxAge      == 100.seconds)
+    assert(cookie.path        == "/1/statuses/show")
+    assert(cookie.ports       == Set(1, 2, 3))
+    assert(cookie.value       == "value2")
+    assert(cookie.version     == 1)
+    assert(cookie.httpOnly    == true)
+    assert(cookie.isDiscard   == false)
+    assert(cookie.isSecure    == true)
   }
 }

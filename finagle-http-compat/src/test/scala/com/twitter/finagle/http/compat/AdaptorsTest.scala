@@ -93,15 +93,15 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     forAll(arbRequest) { case (in: Request, body: String) =>
       if (in.isChunked) {
         val exc = intercept[Exception] { Await.result(NettyAdaptor.in(in)) }
-        assert(NettyAdaptor.NoStreaming === exc)
+        assert(NettyAdaptor.NoStreaming == exc)
       } else {
         val out = Await.result(NettyAdaptor.in(in))
-        assert(out.getProtocolVersion === from(in.version))
-        assert(out.getMethod === from(in.method))
-        assert(out.getUri === in.getUri)
-        assert(out.headers === in.headers)
-        assert(out.isChunked === in.isChunked)
-        assert(out.getContent === in.getContent)
+        assert(out.getProtocolVersion == from(in.version))
+        assert(out.getMethod == from(in.method))
+        assert(out.getUri == in.getUri)
+        assert(out.headers == in.headers)
+        assert(out.isChunked == in.isChunked)
+        assert(out.getContent == in.getContent)
       }
     }
   }
@@ -110,14 +110,14 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     forAll(arbNettyResponse) { case (in: HttpResponse, body: String) =>
       if (in.isChunked) {
         val exc = intercept[Exception] { Await.result(NettyAdaptor.out(in)) }
-        assert(NettyAdaptor.NoStreaming === exc)
+        assert(NettyAdaptor.NoStreaming == exc)
       } else {
         val out = Await.result(NettyAdaptor.out(in))
-        assert(out.version === from(in.getProtocolVersion))
-        assert(out.status === from(in.getStatus))
-        assert(out.headers === in.headers)
-        assert(out.isChunked === in.isChunked)
-        assert(out.getContent === in.getContent)
+        assert(out.version == from(in.getProtocolVersion))
+        assert(out.status == from(in.getStatus))
+        assert(out.headers == in.headers)
+        assert(out.isChunked == in.isChunked)
+        assert(out.getContent == in.getContent)
       }
     }
   }
@@ -126,15 +126,15 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     forAll(arbNettyRequest) { case (in: HttpRequest, body: String) =>
       if (in.isChunked) {
         val exc = intercept[Exception] { Await.result(NettyClientAdaptor.in(in)) }
-        assert(NettyClientAdaptor.NoStreaming === exc)
+        assert(NettyClientAdaptor.NoStreaming == exc)
       } else {
         val out = Await.result(NettyClientAdaptor.in(in))
-        assert(out.version === from(in.getProtocolVersion))
-        assert(out.method === from(in.getMethod))
-        assert(out.getUri === in.getUri)
-        assert(out.headers === in.headers)
-        assert(out.isChunked === in.isChunked)
-        assert(out.getContent === in.getContent)
+        assert(out.version == from(in.getProtocolVersion))
+        assert(out.method == from(in.getMethod))
+        assert(out.getUri == in.getUri)
+        assert(out.headers == in.headers)
+        assert(out.isChunked == in.isChunked)
+        assert(out.getContent == in.getContent)
       }
     }
   }
@@ -143,14 +143,14 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     forAll(arbResponse) { case (in: Response, body: String) =>
       if (in.isChunked) {
         val exc = intercept[Exception] { Await.result(NettyClientAdaptor.out(in)) }
-        assert(NettyClientAdaptor.NoStreaming === exc)
+        assert(NettyClientAdaptor.NoStreaming == exc)
       } else {
         val out = Await.result(NettyClientAdaptor.out(in))
-        assert(out.getProtocolVersion === from(in.version))
-        assert(out.getStatus === from(in.status))
-        assert(out.headers === in.headers)
-        assert(out.isChunked === in.isChunked)
-        assert(out.getContent === BufChannelBuffer(in.content))
+        assert(out.getProtocolVersion == from(in.version))
+        assert(out.getStatus == from(in.status))
+        assert(out.headers == in.headers)
+        assert(out.isChunked == in.isChunked)
+        assert(out.getContent == BufChannelBuffer(in.content))
       }
     }
   }

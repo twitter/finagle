@@ -124,7 +124,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       for ((innerKey, value) <- inner) {
         val target = client.bAdd(StringToChannelBuffer(outerKey), StringToChannelBuffer(innerKey),
           StringToChannelBuffer(value))
-        assert(Await.result(target) === 1, "BADD failed for " + outerKey + " " + innerKey)
+        assert(Await.result(target) == 1, "BADD failed for " + outerKey + " " + innerKey)
       }
     }
 
@@ -134,7 +134,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   def testBcard(client: Client, dict: mutable.HashMap[String, mutable.HashMap[String, String]]) {
     for ((outerKey, inner) <- dict) {
       val target = client.bCard(StringToChannelBuffer(outerKey))
-      assert(inner.size === Await.result(target),
+      assert(inner.size == Await.result(target),
         "BCARD failed for " + outerKey + " expected " + inner.size + " got " + Await.result(target))
       }
 
@@ -146,7 +146,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       for ((innerKey, value) <- inner) {
         val target = client.bGet(StringToChannelBuffer(outerKey), StringToChannelBuffer(innerKey))
         val targetVal = CBToString(Await.result(target).get)
-        assert(value === targetVal,
+        assert(value == targetVal,
           "BGET failed for " + outerKey + " expected " + value + " got " + targetVal)
       }
     }
@@ -159,7 +159,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       for ((innerKey, value) <- inner) {
         val target = client.bRem(StringToChannelBuffer(outerKey),
           Seq(StringToChannelBuffer(innerKey)))
-        assert(Await.result(target) === 1, "BREM failed for " + outerKey + " " + innerKey)
+        assert(Await.result(target) == 1, "BREM failed for " + outerKey + " " + innerKey)
         inner.remove(innerKey)
       }
     }
@@ -301,7 +301,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     exp: List[(String, String)],
     got: Seq[(ChannelBuffer, ChannelBuffer)]
   ) {
-    assert(got.size === exp.size,
+    assert(got.size == exp.size,
       "BRANGE failed for " + outerKey + " expected size " + exp.size + " got size " + got.size)
 
     for (i <- 0 until exp.size) {
@@ -309,9 +309,9 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
       val gotKey = CBToString(got(i)._1)
       val expVal = exp(i)._2
       val gotVal = CBToString(got(i)._2)
-      assert(exp(i)._1 === CBToString(got(i)._1),
+      assert(exp(i)._1 == CBToString(got(i)._1),
         "Key mismatch for outerKey " + outerKey + " expected " + expKey + "got " + gotKey)
-      assert(exp(i)._2 === CBToString(got(i)._2),
+      assert(exp(i)._2 == CBToString(got(i)._2),
         "Value mismatch for outerKey " + outerKey + " expected " + expVal + "got " + gotVal)
     }
   }

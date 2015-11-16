@@ -17,7 +17,7 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
   test("Correctly set and get transaction", RedisTest, ClientTest) {
     withRedisClient { client =>
       val txResult = Await.result(client.transaction(Seq(Set(foo, bar), Set(baz, boo))))
-      assert(ReplyFormat.toString(txResult.toList) === Seq("OK", "OK"))
+      assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "OK"))
     }
   }
 
@@ -25,7 +25,7 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val txResult = Await.result(client.transaction(Seq(HSet(foo, bar, baz), HSet(foo, boo, moo),
         HMGet(foo, Seq(bar, boo)))))
-      assert(ReplyFormat.toString(txResult.toList) === Seq("1", "1", "baz", "moo"))
+      assert(ReplyFormat.toString(txResult.toList) == Seq("1", "1", "baz", "moo"))
     }
   }
 
@@ -59,14 +59,14 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
       Await.result(client.set(foo, boo))
       Await.result(client.unwatch())
       val txResult = Await.result(client.transaction(Seq(Get(foo))))
-      assert(ReplyFormat.toString(txResult.toList) === Seq("boo"))
+      assert(ReplyFormat.toString(txResult.toList) == Seq("boo"))
     }
   }
 
   test("Correctly perform a set followed by get on the same key", RedisTest, ClientTest) {
     withRedisClient { client =>
       val txResult = Await.result(client.transaction(Seq(Set(foo, bar), Get(foo))))
-      assert(ReplyFormat.toString(txResult.toList) === Seq("OK", "bar"))
+      assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "bar"))
     }
   }
 }

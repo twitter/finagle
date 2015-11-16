@@ -19,11 +19,11 @@ class TracingTest extends FunSuite {
 
       val dummyService = new Service[Request, Response] {
         def apply(request: Request) = {
-          assert(request.headers.get(Header.TraceId) === traceId.traceId.toString)
-          assert(request.headers.get(Header.SpanId) === traceId.spanId.toString)
-          assert(request.headers.contains(Header.ParentSpanId) === false)
-          assert(request.headers.get(Header.Sampled).toBoolean === traceId.sampled.get)
-          assert(request.headers.get(Header.Flags).toLong === traceId.flags.toLong)
+          assert(request.headers.get(Header.TraceId) == traceId.traceId.toString)
+          assert(request.headers.get(Header.SpanId) == traceId.spanId.toString)
+          assert(request.headers.contains(Header.ParentSpanId) == false)
+          assert(request.headers.get(Header.Sampled).toBoolean == traceId.sampled.get)
+          assert(request.headers.get(Header.Flags).toLong == traceId.flags.toLong)
 
           Future.value(Response())
         }
@@ -37,17 +37,17 @@ class TracingTest extends FunSuite {
 
   test("record only path of url") {
     val stripped = stripParameters("/1/lists/statuses.json?count=50&super_secret=ohyeah")
-    assert(stripped === "/1/lists/statuses.json")
+    assert(stripped == "/1/lists/statuses.json")
 
     val invalid = stripParameters("\\")
-    assert(invalid === "\\") // request path doesn't throw exceptions if url is invalid
+    assert(invalid == "\\") // request path doesn't throw exceptions if url is invalid
   }
 
   test("parse header") {
     val dummyService = new Service[Request, Response] {
       def apply(request: Request) = {
-        assert(Trace.id === traceId)
-        assert(Trace.id.flags === flags)
+        assert(Trace.id == traceId)
+        assert(Trace.id.flags == flags)
         Future.value(Response())
       }
     }
@@ -79,7 +79,7 @@ class TracingTest extends FunSuite {
   test("survive bad flags entry") {
     val dummyService = new Service[Request, Response] {
       def apply(request: Request) = {
-        assert(Trace.id.flags === Flags())
+        assert(Trace.id.flags == Flags())
         Future.value(Response())
       }
     }
@@ -95,7 +95,7 @@ class TracingTest extends FunSuite {
   test("survive no flags entry") {
     val dummyService = new Service[Request, Response] {
       def apply(request: Request) = {
-        assert(Trace.id.flags === Flags())
+        assert(Trace.id.flags == Flags())
         Future.value(Response())
       }
     }

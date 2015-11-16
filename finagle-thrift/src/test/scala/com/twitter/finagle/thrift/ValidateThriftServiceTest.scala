@@ -48,7 +48,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
     buf().writeMessageBegin(new TMessage("ok123", TMessageType.REPLY, 0))
     buf().writeMessageEnd()
     val res = validate(req)
-    assert(res.isDefined === false)
+    assert(res.isDefined == false)
     verify(service).apply(req)
     p.setValue(buf.toArray)
     assert(res.isDefined)
@@ -78,7 +78,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
       assert(validate.isAvailable)
       val f = validate(req)
       assert(f.isDefined)
-      assert(Await.result(f) === arr)
+      assert(Await.result(f) == arr)
       assert(!validate.isAvailable)
       val resp = validate(req).poll
 
@@ -110,7 +110,7 @@ class ValidateThriftServiceTest extends FunSuite with MockitoSugar {
       assert(validate.isAvailable)
       val f = validate(req)
       assert(f.isDefined)
-      assert(Await.result(f) === arr)
+      assert(Await.result(f) == arr)
       assert(validate.isAvailable)
       assert(validate(req).poll match {
         case Some(Return(_)) => true

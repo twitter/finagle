@@ -13,13 +13,13 @@ final class ConnectionClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the SELECT command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.select(1)) === ((): Unit))
+      assert(Await.result(client.select(1)) == ((): Unit))
     }
   }
 
   test("Correctly perform the QUIT command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.quit()) === ((): Unit))
+      assert(Await.result(client.quit()) == ((): Unit))
     }
   }
 }

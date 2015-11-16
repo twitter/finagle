@@ -25,7 +25,7 @@ class InterpreterTest extends FunSuite {
     interpreter(Delete(key))
     interpreter(Set(key, 0, Time.epoch, value))
 
-    assert(interpreter(Get(Seq(key))) === Values(Seq(Value(key, value))))
+    assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value))))
   }
 
   test("correctly perform the GETS & CAS commands") {
@@ -34,20 +34,20 @@ class InterpreterTest extends FunSuite {
     val value2 = Buf.Utf8("value2")
     val value3 = Buf.Utf8("value3")
     interpreter(Set(key, 0, Time.epoch, value1))
-    assert(interpreter(Get(Seq(key))) === Values(Seq(Value(key, value1))))
+    assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value1))))
     val hashValue1 = interpreter(Gets(Seq(key)))
       .asInstanceOf[Values]
       .values
       .last
       .casUnique
-    assert(interpreter(Gets(Seq(key))) === Values(Seq(Value(key, value1, hashValue1))))
+    assert(interpreter(Gets(Seq(key))) == Values(Seq(Value(key, value1, hashValue1))))
 
     assert(interpreter(Cas(key, 0, Time.epoch, value2, hashValue1.get)) == Stored())
     assert(interpreter(Cas(key, 0, Time.epoch, value3, hashValue1.get)) == NotStored())
   }
 
   test("correctly perform the QUIT command") {
-    assert(interpreter(Quit()) === NoOp())
+    assert(interpreter(Quit()) == NoOp())
   }
 
   test("correctly perform the EXPIRY command") {
@@ -60,26 +60,26 @@ class InterpreterTest extends FunSuite {
       interpreter(Set(key, 0, now + 10.seconds, value)) // set with an expiry...
       interpreter(Set(noExpiry, 0, Time.epoch, value)) // set without an expiry...
       atomicMap.lock(key) { data =>
-        assert(data.contains(key) === true)
+        assert(data.contains(key) == true)
       }
 
       info("verify we can retrieve it up until the expiry")
       control.advance(9.seconds)
-      assert(interpreter(Get(Seq(key))) === Values(Seq(Value(key, value))))
-      assert(interpreter(Get(Seq(noExpiry))) === Values(Seq(Value(noExpiry, value))))
+      assert(interpreter(Get(Seq(key))) == Values(Seq(Value(key, value))))
+      assert(interpreter(Get(Seq(noExpiry))) == Values(Seq(Value(noExpiry, value))))
 
       info("verify it's not accessible after the expiry")
       control.advance(1.second)
-      assert(interpreter(Get(Seq(key))) === Values(Seq()))
+      assert(interpreter(Get(Seq(key))) == Values(Seq()))
 
       info("and verify that the entry is cleaned up from the underlying map")
       atomicMap.lock(key) { data =>
-        assert(data.contains(key) === false)
+        assert(data.contains(key) == false)
       }
 
       info("but the value without an expiry should still be accessible (even minutes later)")
       control.advance(1.hour)
-      assert(interpreter(Get(Seq(noExpiry))) === Values(Seq(Value(noExpiry, value))))
+      assert(interpreter(Get(Seq(noExpiry))) == Values(Seq(Value(noExpiry, value))))
     }
   }
 }

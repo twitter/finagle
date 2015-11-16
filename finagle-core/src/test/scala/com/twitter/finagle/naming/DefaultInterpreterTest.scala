@@ -17,7 +17,7 @@ class DefaultInterpreterTest extends FunSuite {
 
   def assertEval(dtab: Dtab, path: String, expected: Name.Bound*) {
     DefaultInterpreter.bind(dtab, Path.read(path)).sample().eval match {
-      case Some(actual) => assert(actual.map(_.addr.sample) === expected.map(_.addr.sample).toSet)
+      case Some(actual) => assert(actual.map(_.addr.sample) == expected.map(_.addr.sample).toSet)
       case _ => assert(false)
     }
   }

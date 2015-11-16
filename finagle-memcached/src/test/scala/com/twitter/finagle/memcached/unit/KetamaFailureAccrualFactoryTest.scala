@@ -64,7 +64,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       }
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
-      assert(broker.recv.sync().isDefined === false)
+      assert(broker.recv.sync().isDefined == false)
 
       // skips dispatch
       intercept[FailureAccrualException] {
@@ -78,11 +78,11 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       // revives after duration
       assert(factory.isAvailable)
       assert(service.isAvailable)
-      assert(broker.recv.sync().isDefined === false)
+      assert(broker.recv.sync().isDefined == false)
 
       when(underlyingService(123)) thenReturn Future.value(123)
 
-      assert(Await.result(service(123)) === 123)
+      assert(Await.result(service(123)) == 123)
 
       // failures # is reset to 0
       intercept[Exception] {
@@ -117,7 +117,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       }
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
-      assert(broker.recv.sync().isDefined === false)
+      assert(broker.recv.sync().isDefined == false)
 
       // skips dispatch after consecutive failures
       intercept[FailureAccrualException] {
@@ -150,7 +150,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
       // ejects
       val recv = broker.recv.sync()
-      assert(Await.result(recv) === NodeMarkedDead(key))
+      assert(Await.result(recv) == NodeMarkedDead(key))
 
       timeControl.advance(10.seconds)
       timer.tick()
@@ -166,7 +166,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       assert(factory.isAvailable)
       assert(service.isAvailable)
       val recv2 = broker.recv.sync()
-      assert(Await.result(recv2) === NodeRevived(key))
+      assert(Await.result(recv2) == NodeRevived(key))
     }
   }
 
@@ -184,7 +184,7 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       import h._
 
       def assertReponse(rep: Future[Int]) {
-        if (rep.isReturn) assert(Await.result(service(123)) === rep.get)
+        if (rep.isReturn) assert(Await.result(service(123)) == rep.get)
         else intercept[Exception](Await.result(service(123)))
       }
 

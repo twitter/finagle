@@ -61,6 +61,6 @@ class ValidateNaiveTimeoutFilter extends FunSuite {
         timer
       )
     gen.execute()
-    assert(num === total)
+    assert(num == total)
   }
 }

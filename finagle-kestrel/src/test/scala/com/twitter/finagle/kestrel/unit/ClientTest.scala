@@ -53,15 +53,15 @@ class ClientTest extends FunSuite with MockitoSugar {
       verify(client).read("foo")
 
       val f = (h.messages ?)
-      assert(f.isDefined === false)
+      assert(f.isDefined == false)
 
       val m = msg(0)
 
       messages ! m
-      assert(f.isDefined === true)
-      assert(Await.result(f) === m)
+      assert(f.isDefined == true)
+      assert(Await.result(f) == m)
 
-      assert((h.messages ?).isDefined === false)
+      assert((h.messages ?).isDefined == false)
     }
   }
 
@@ -71,7 +71,7 @@ class ClientTest extends FunSuite with MockitoSugar {
       verify(client).read("foo")
       val m = msg(0)
       messages ! m
-      assert((h.messages ??) === m)
+      assert((h.messages ??) == m)
 
       val messages2 = new Broker[ReadMessage]
       val error2 = new Broker[Throwable]
@@ -88,12 +88,12 @@ class ClientTest extends FunSuite with MockitoSugar {
 
       // new messages must make it
       val f = (h.messages ?)
-      assert(f.isDefined === false)
+      assert(f.isDefined == false)
 
       val m2 = msg(2)
       messages2 ! m2
-      assert(f.isDefined === true)
-      assert(Await.result(f) === m2)
+      assert(f.isDefined == true)
+      assert(Await.result(f) == m2)
     }
   }
 
@@ -113,13 +113,13 @@ class ClientTest extends FunSuite with MockitoSugar {
           tc.advance(delay)
           timer.tick()
           verify(client, times(i + 2)).read("foo")
-          assert(errf.isDefined === false)
+          assert(errf.isDefined == false)
         }
 
         error ! new Exception("final sad panda")
 
-        assert(errf.isDefined === true)
-        assert(Await.result(errf) === OutOfRetriesException)
+        assert(errf.isDefined == true)
+        assert(Await.result(errf) == OutOfRetriesException)
       }
     }
   }
@@ -156,9 +156,9 @@ class ClientTest extends FunSuite with MockitoSugar {
 
       val rh = client.read(queueName)
 
-      assert(wasInterrupted === false)
+      assert(wasInterrupted == false)
       rh.close()
-      assert(wasInterrupted === true)
+      assert(wasInterrupted == true)
     }
   }
 
@@ -180,8 +180,8 @@ class ClientTest extends FunSuite with MockitoSugar {
 
     val rh = client.read(queueName)
 
-    assert(wasInterrupted === false)
+    assert(wasInterrupted == false)
     rh.close()
-    assert(wasInterrupted === true)
+    assert(wasInterrupted == true)
   }
 }

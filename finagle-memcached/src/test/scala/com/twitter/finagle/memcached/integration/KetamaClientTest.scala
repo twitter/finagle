@@ -40,11 +40,11 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
       .build()
 
     Await.result(client.delete("foo"))
-    assert(Await.result(client.get("foo")) === None)
+    assert(Await.result(client.get("foo")) == None)
 
     Await.result(client.set("foo", Buf.Utf8("bar")))
     val Buf.Utf8(res) = Await.result(client.get("foo")).get
-    assert(res === "bar")
+    assert(res == "bar")
   }
 
   test("using Name doesn't blow up") {
@@ -52,10 +52,10 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
     val client = KetamaClientBuilder().dest(name).build()
 
     Await.result(client.delete("foo"))
-    assert(Await.result(client.get("foo")) === None)
+    assert(Await.result(client.get("foo")) == None)
     Await.result(client.set("foo", Buf.Utf8("bar")))
     val Buf.Utf8(res) = Await.result(client.get("foo")).get
-    assert(res === "bar")
+    assert(res == "bar")
   }
 
   test("using Group[InetSocketAddress] doesn't blow up") {
@@ -65,10 +65,10 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
       .build()
 
     Await.result(client.delete("foo"))
-    assert(Await.result(client.get("foo")) === None)
+    assert(Await.result(client.get("foo")) == None)
     Await.result(client.set("foo", Buf.Utf8("bar")))
     val Buf.Utf8(res) = Await.result(client.get("foo")).get
-    assert(res === "bar")
+    assert(res == "bar")
   }
 
   test("using custom keys doesn't blow up") {
@@ -77,11 +77,11 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
       .build()
 
     Await.result(client.delete("foo"))
-    assert(Await.result(client.get("foo")) === None)
+    assert(Await.result(client.get("foo")) == None)
     Await.result(client.set("foo", Buf.Utf8("bar")))
 
     val Buf.Utf8(res) = Await.result(client.get("foo")).get
-    assert(res === "bar")
+    assert(res == "bar")
   }
 
   test("even in future pool") {
@@ -93,6 +93,6 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
       _ => client.get("foo")
     }
 
-    assert(Await.result(futureResult) === None)
+    assert(Await.result(futureResult) == None)
   }
 }

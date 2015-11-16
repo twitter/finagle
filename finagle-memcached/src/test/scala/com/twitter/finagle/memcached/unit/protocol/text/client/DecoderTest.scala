@@ -23,7 +23,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     import context._
 
     val buffer = "STORED\r\n"
-    assert(decoder.decode(null, null, buffer) === Tokens(Seq(Buf.Utf8("STORED"))))
+    assert(decoder.decode(null, null, buffer) == Tokens(Seq(Buf.Utf8("STORED"))))
   }
 
   test("decode tokens with partial delimiter") {
@@ -31,7 +31,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     import context._
 
     val buffer = "STORED\r"
-    assert(decoder.decode(null, null, buffer) === null)
+    assert(decoder.decode(null, null, buffer) == null)
   }
 
   test("decode tokens without delimiter") {
@@ -39,7 +39,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     import context._
 
     val buffer = "STORED"
-    assert(decoder.decode(null, null, buffer) === null)
+    assert(decoder.decode(null, null, buffer) == null)
   }
 
   test("decode data") {
@@ -53,7 +53,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     decoder.decode(null, null, buffer)
     decoder.decode(null, null, buffer)
     decoder.decode(null, null, buffer)
-    assert(decoder.decode(null, null, buffer) === ValueLines(Seq(
+    assert(decoder.decode(null, null, buffer) == ValueLines(Seq(
       TokensWithData(Seq("VALUE", "foo", "0", "1") map { Buf.Utf8(_) }, Buf.Utf8("1")),
       TokensWithData(Seq("VALUE", "bar", "0", "2") map { Buf.Utf8(_) }, Buf.Utf8("12")))))
   }
@@ -69,7 +69,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     decoder.decode(null, null, buffer)
     decoder.decode(null, null, buffer)
     decoder.decode(null, null, buffer)
-    assert(decoder.decode(null, null, buffer) === ValueLines(Seq(
+    assert(decoder.decode(null, null, buffer) == ValueLines(Seq(
       TokensWithData(Seq("VALUE", "foo", "20", "1") map { Buf.Utf8(_) }, Buf.Utf8("1")),
       TokensWithData(Seq("VALUE", "bar", "10", "2") map { Buf.Utf8(_) }, Buf.Utf8("12")))))
   }
@@ -79,7 +79,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     import context._
 
     val buffer = "END\r\n"
-    assert(decoder.decode(null, null, buffer) === ValueLines(Seq[TokensWithData]()))
+    assert(decoder.decode(null, null, buffer) == ValueLines(Seq[TokensWithData]()))
   }
 
   test("decode stats") {
@@ -91,7 +91,7 @@ class DecoderTest extends FunSuite with MockitoSugar {
     decoder.decode(null, null, buffer)
     decoder.decode(null, null, buffer)
     val lines = decoder.decode(null, null, buffer)
-    assert(lines === StatLines(Seq(
+    assert(lines == StatLines(Seq(
       Tokens(Seq("STAT", "items:1:number", "1") map { Buf.Utf8(_) }),
       Tokens(Seq("STAT", "items:1:age", "1468") map { Buf.Utf8(_) }),
       Tokens(Seq("ITEM", "foo", "[5", "b;", "1322514067", "s]") map { Buf.Utf8(_) })

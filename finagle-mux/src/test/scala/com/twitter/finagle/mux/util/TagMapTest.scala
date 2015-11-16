@@ -14,14 +14,14 @@ class TagMapTest extends FunSpec with OneInstancePerTest {
 
       it("should maintain mappings between tags and elems") {
         for (i <- range)
-          assert(ints.map(-i) === Some(i))
+          assert(ints.map(-i) == Some(i))
         for (i <- range)
-          assert(ints.unmap(i) === Some(-i))
+          assert(ints.unmap(i) == Some(-i))
       }
 
       it("should iterate over the mapping") {
         for (i <- range)
-          assert(ints.map(-i) === Some(i))
+          assert(ints.map(-i) == Some(i))
 
         assert(ints.sameElements(range map (i => (i, -i))))
 
@@ -33,7 +33,7 @@ class TagMapTest extends FunSpec with OneInstancePerTest {
 
         // Works in the presence of sharing the underlying
         // TagSet.
-        assert(set.acquire() === Some(3+range.start))
+        assert(set.acquire() == Some(3+range.start))
         assert(ints.sameElements(range collect {
           case i if i != 3+range.start && i != 8+range.start => (i, -i)
         }))

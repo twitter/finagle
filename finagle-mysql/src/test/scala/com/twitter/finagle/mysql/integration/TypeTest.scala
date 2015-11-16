@@ -39,7 +39,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
 
     val ps = c.prepare("SELECT * FROM `numeric`")
     val binaryrows = Await.result(ps.select()(identity))
-    assert(binaryrows.size === 1)
+    assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows(0)
 
     testRow(textEncoded)
@@ -50,28 +50,28 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
     val rowType = row.getClass.getName
     test("extract %s from %s".format("tinyint", rowType)) {
       row("tinyint") match {
-        case Some(ByteValue(b)) => assert(b === 2)
+        case Some(ByteValue(b)) => assert(b == 2)
         case v => fail("expected ByteValue but got %s".format(v))
       }
     }
 
     test("extract %s from %s".format("smallint", rowType)) {
       row("smallint") match {
-        case Some(ShortValue(s)) => assert(s === 1)
+        case Some(ShortValue(s)) => assert(s == 1)
         case v => fail("expected ShortValue but got %s".format(v))
       }
     }
 
     test("extract %s from %s".format("mediumint", rowType)) {
       row("mediumint") match {
-        case Some(IntValue(i)) => assert(i === 3)
+        case Some(IntValue(i)) => assert(i == 3)
         case v => fail("expected IntValue but got %s".format(v))
       }
     }
 
     test("extract %s from %s".format("int", rowType)) {
       row("int") match {
-        case Some(IntValue(i)) => assert(i === 4)
+        case Some(IntValue(i)) => assert(i == 4)
         case v => fail("expected IntValue but got %s".format(v))
       }
     }
@@ -101,7 +101,7 @@ class NumericTypeTest extends FunSuite with IntegrationClient {
 
     test("extract %s from %s".format("decimal", rowType)) {
       row("decimal") match {
-        case Some(BigDecimalValue(bd)) => assert(bd === BigDecimal(1.61803398875))
+        case Some(BigDecimalValue(bd)) => assert(bd == BigDecimal(1.61803398875))
         case v => fail("expected BigDecimalValue but got %s".format(v))
       }
     }
@@ -152,7 +152,7 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
 
     val ps = c.prepare("SELECT * FROM `blobs`")
     val binaryrows = Await.result(ps.select()(identity))
-    assert(binaryrows.size === 1)
+    assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows(0)
 
     testRow(textEncoded)
@@ -163,84 +163,84 @@ class BlobTypeTest extends FunSuite with IntegrationClient {
     val rowType = row.getClass.getName
     test("extract %s from %s".format("char", rowType)) {
       row("char") match {
-        case Some(StringValue(s)) => assert(s === "a")
+        case Some(StringValue(s)) => assert(s == "a")
         case a => fail("Expected StringValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("varchar", rowType)) {
       row("varchar") match {
-        case Some(StringValue(s)) => assert(s === "b")
+        case Some(StringValue(s)) => assert(s == "b")
         case a => fail("Expected StringValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("tinytext", rowType)) {
       row("tinytext") match {
-        case Some(StringValue(s)) => assert(s === "c")
+        case Some(StringValue(s)) => assert(s == "c")
         case a => fail("Expected StringValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("text", rowType)) {
       row("text") match {
-        case Some(StringValue(s)) => assert(s === "d")
+        case Some(StringValue(s)) => assert(s == "d")
         case a => fail("Expected StringValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("mediumtext", rowType)) {
       row("mediumtext") match {
-        case Some(StringValue(s)) => assert(s === "e")
+        case Some(StringValue(s)) => assert(s == "e")
         case a => fail("Expected StringValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("tinyblob", rowType)) {
       row("tinyblob") match {
-        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList === List(0x66))
+        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList == List(0x66))
         case a => fail("Expected RawValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("mediumblob", rowType)) {
       row("mediumblob") match {
-        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList === List(0x67))
+        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList == List(0x67))
         case a => fail("Expected RawValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("blob", rowType)) {
       row("blob") match {
-        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList === List(0x68))
+        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList == List(0x68))
         case a => fail("Expected RawValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("binary", rowType)) {
       row("binary") match {
-        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList === List(0x69, 0x70))
+        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList == List(0x69, 0x70))
         case a => fail("Expected RawValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("varbinary", rowType)) {
       row("varbinary") match {
-        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList === List(0x6A))
+        case Some(RawValue(_, _, _, bytes)) => assert(bytes.toList == List(0x6A))
         case a => fail("Expected RawValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("enum", rowType)) {
       row("enum") match {
-        case Some(StringValue(s)) => assert(s === "small")
+        case Some(StringValue(s)) => assert(s == "small")
         case a => fail("Expected StringValue but got %s".format(a))
       }
     }
 
     test("extract %s from %s".format("set", rowType)) {
       row("set") match {
-        case Some(StringValue(s)) => assert(s === "1")
+        case Some(StringValue(s)) => assert(s == "1")
         case a => fail("Expected StringValue but got %s".format(a))
       }
     }
@@ -274,7 +274,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
 
     val ps = c.prepare("SELECT * FROM `datetime`")
     val binaryrows = Await.result(ps.select()(identity))
-    assert(binaryrows.size === 1)
+    assert(binaryrows.size == 1)
     val binaryEncoded = binaryrows(0)
 
     testRow(textEncoded)
@@ -285,7 +285,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
     val rowType = row.getClass.getName
     test("extract %s from %s".format("date", rowType)) {
       row("date") match {
-        case Some(DateValue(d)) => assert(d.toString() === "2013-11-02")
+        case Some(DateValue(d)) => assert(d.toString() == "2013-11-02")
         case a => fail("Expected DateValue but got %s".format(a))
       }
     }
@@ -299,7 +299,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
         row(repr) match {
           case Some(timestampValueLocal(t)) =>
             val timestamp = java.sql.Timestamp.valueOf("2013-11-02 19:56:" + secs)
-            assert(t === timestamp)
+            assert(t == timestamp)
           case a => fail("Expected TimestampValue but got %s".format(a))
         }
       }
@@ -310,7 +310,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
             val format = TwitterDateFormat("yyyy-MM-dd HH:mm:ss")
             format.setTimeZone(TimeZone.getTimeZone("UTC"))
             val timestamp = new Timestamp(format.parse("2013-11-02 19:56:" + secs).getTime)
-            assert(t === timestamp)
+            assert(t == timestamp)
           case a => fail("Expected TimestampValue but got %s".format(a))
         }
       }
@@ -321,7 +321,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
             val format = TwitterDateFormat("yyyy-MM-dd HH:mm:ss")
             format.setTimeZone(TimeZone.getTimeZone("EST"))
             val timestamp = new Timestamp(format.parse("2013-11-02 19:56:" + secs).getTime)
-            assert(t === timestamp)
+            assert(t == timestamp)
           case a => fail("Expected TimestampValue but got %s".format(a))
         }
       }
@@ -336,7 +336,7 @@ class DateTimeTypeTest extends FunSuite with IntegrationClient {
 
     test("extract %s from %s".format("year", rowType)) {
       row("year") match {
-        case Some(ShortValue(s)) => assert(s === 2013)
+        case Some(ShortValue(s)) => assert(s == 2013)
         case a => fail("Expected ShortValue but got %s".format(a))
       }
     }

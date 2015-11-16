@@ -71,7 +71,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
       val e = intercept[SourcedException] {
         Await.result(f)
       }
-      assert(e.serviceName === name)
+      assert(e.serviceName == name)
     }
   }
 
@@ -164,7 +164,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         Await.result(f2)
       }
 
-      assert(statsReceiver.stats(Seq(name, "request_latency_ms")) ===
+      assert(statsReceiver.stats(Seq(name, "request_latency_ms")) ==
         (Seq(dur, dur) map (_.inMillis)))
     }
   }
@@ -175,7 +175,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
       val svc = client.newService(dest, "test")
       val f = svc.close()
       eventually { assert(f.isDefined) }
-      assert(Await.result(f) === ())
+      assert(Await.result(f) == ())
     }
   }
 
@@ -192,7 +192,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
       val svc = client.newService(dest, "test")
       assert(!closed, "client closed too early")
       val f = svc.close()
-      eventually { assert(f.poll === Some(Return(()))) }
+      eventually { assert(f.poll == Some(Return(()))) }
       assert(closed, "client not closed")
     }
   }
@@ -233,7 +233,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
   test("DefaultClient should handle failureAccrual default") {
     new DefaultFailureAccrualHelper {
       0 until 10 foreach { service(_) }
-      assert(statsReceiver.counters(Seq("failure_accrual", "removals")) === 1)
+      assert(statsReceiver.counters(Seq("failure_accrual", "removals")) == 1)
     }
   }
 
@@ -253,10 +253,10 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
 
       Time.withCurrentTimeFrozen { control =>
         0 until 10 foreach { service(_) }
-        assert(statsReceiver.counters(Seq("failure_accrual", "removals")) === 1)
+        assert(statsReceiver.counters(Seq("failure_accrual", "removals")) == 1)
         control.advance(4.seconds)
         timer.tick()
-        assert(statsReceiver.counters.get(Seq("failure_accrual", "revivals")) === None)
+        assert(statsReceiver.counters.get(Seq("failure_accrual", "revivals")) == None)
       }
     }
   }

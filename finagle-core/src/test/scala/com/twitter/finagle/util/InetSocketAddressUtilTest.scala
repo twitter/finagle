@@ -25,14 +25,14 @@ class InetSocketAddressUtilTest extends FunSuite {
       val ipv6any = InetAddress.getByName("::0")
       val ipv6AnySockAddr= new InetSocketAddress(ipv6any, port1)
 
-      assert(InetSocketAddressUtil.toPublic(mySockAddr) === mySockAddr)
-      assert(InetSocketAddressUtil.toPublic(sock) === mySockAddr)
-      assert(InetSocketAddressUtil.toPublic(ipv6AnySockAddr) === mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(mySockAddr) == mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(sock) == mySockAddr)
+      assert(InetSocketAddressUtil.toPublic(ipv6AnySockAddr) == mySockAddr)
 
       // It's ok if this test fails due to some future change, I just want to highlight it
       // to whoever re-implements toPublic in case they change the behavior
-      assert(InetSocketAddressUtil.toPublic(loopbackSockAddr) === loopbackSockAddr)
-      assert(InetSocketAddressUtil.toPublic(ipv6LoSockAddr) === ipv6LoSockAddr)
+      assert(InetSocketAddressUtil.toPublic(loopbackSockAddr) == loopbackSockAddr)
+      assert(InetSocketAddressUtil.toPublic(ipv6LoSockAddr) == ipv6LoSockAddr)
     }
     catch {
       // this could happen if you don't have a resolvable hostname or a public ip
@@ -47,8 +47,8 @@ class InetSocketAddressUtilTest extends FunSuite {
     //   intercept[UnknownHostException] { InetSocketAddressUtil.resolveHostPorts(Seq(("gobble-d-gook", port1))) }
     // }
 
-    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1))) === Set(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1), ("127.0.0.1", port2))) ===
+    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1))) == Set(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.resolveHostPorts(Seq(("127.0.0.1", port1), ("127.0.0.1", port2))) ==
       Set(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
   }
 
@@ -57,17 +57,17 @@ class InetSocketAddressUtilTest extends FunSuite {
     assert(InetSocketAddressUtil.parseHosts(",").isEmpty)
     intercept[IllegalArgumentException] { InetSocketAddressUtil.parseHosts("gobble-d-gook") }
 
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) === Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) === Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + ",") === Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts(",127.0.0.1:" + port1 + ",") === Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + " ") === Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts(" 127.0.0.1:" + port1 + " ") === Seq(new InetSocketAddress("127.0.0.1", port1)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + ",127.0.0.1:" + port2) ===
+    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) == Seq(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1) == Seq(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + ",") == Seq(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.parseHosts(",127.0.0.1:" + port1 + ",") == Seq(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + " ") == Seq(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.parseHosts(" 127.0.0.1:" + port1 + " ") == Seq(new InetSocketAddress("127.0.0.1", port1)))
+    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + ",127.0.0.1:" + port2) ==
       Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
-    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + " 127.0.0.1:" + port2) ===
+    assert(InetSocketAddressUtil.parseHosts("127.0.0.1:" + port1 + " 127.0.0.1:" + port2) ==
       Seq(new InetSocketAddress("127.0.0.1", port1), new InetSocketAddress("127.0.0.1", port2)))
 
-    assert(InetSocketAddressUtil.parseHosts(":" + port1) === Seq(new InetSocketAddress("0.0.0.0", port1)))
+    assert(InetSocketAddressUtil.parseHosts(":" + port1) == Seq(new InetSocketAddress("0.0.0.0", port1)))
   }
 }

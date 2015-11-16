@@ -63,7 +63,7 @@ class NameTreeTest extends FunSuite {
     val trees = Seq.fill(100) { newTree(2) }
     for (tree <- trees)
       try {
-        assert(NameTree.read(tree.show) === tree)
+        assert(NameTree.read(tree.show) == tree)
       } catch {
         case NonFatal(exc) =>
           fail("Exception %s while parsing %s: %s".format(
@@ -103,8 +103,8 @@ class NameTreeTest extends FunSuite {
         set map { el: String => Path.read(el) }
       }
 
-      assert(NameTree.read(tree).eval === expect)
-      assert(NameTree.read(tree).simplified.eval === expect)
+      assert(NameTree.read(tree).eval == expect)
+      assert(NameTree.read(tree).simplified.eval == expect)
     }
   }
 }

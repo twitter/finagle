@@ -35,7 +35,7 @@ class FailFastFactoryTest extends FunSuite
     val p, q, r = new Promise[Service[Int, Int]]
     when(underlying()).thenReturn(p)
     val pp = failfast()
-    assert(pp.isDefined === false)
+    assert(pp.isDefined == false)
     assert(failfast.isAvailable)
     assert(timer.tasks.isEmpty)
   }
@@ -46,7 +46,7 @@ class FailFastFactoryTest extends FunSuite
       import ctx._
 
       p() = Return(service)
-      assert(pp.poll === Some(Return(service)))
+      assert(pp.poll == Some(Return(service)))
     }
   }
 
@@ -58,7 +58,7 @@ class FailFastFactoryTest extends FunSuite
       p() = Throw(new Exception)
       verify(underlying).apply()
       assert(!failfast.isAvailable)
-      assert(stats.counters.get(Seq("marked_dead")) === Some(1))
+      assert(stats.counters.get(Seq("marked_dead")) == Some(1))
     }
   }
 
@@ -68,7 +68,7 @@ class FailFastFactoryTest extends FunSuite
       import ctx._
       p() = Throw(new Exception)
 
-      assert(timer.tasks.size === 1)
+      assert(timer.tasks.size == 1)
       tc.set(timer.tasks(0).when)
       timer.tick()
       verify(underlying, times(2)).apply()
@@ -91,7 +91,7 @@ class FailFastFactoryTest extends FunSuite
       q() = Return(service)
       assert(timer.tasks.isEmpty)
       assert(failfast.isAvailable)
-      assert(stats.counters.get(Seq("marked_available")) === Some(1))
+      assert(stats.counters.get(Seq("marked_available")) == Some(1))
     }
   }
 
@@ -100,14 +100,14 @@ class FailFastFactoryTest extends FunSuite
       val ctx = newCtx()
       import ctx._
 
-      assert(failfast.status === Status.Open)
+      assert(failfast.status == Status.Open)
       p() = Throw(new Exception)
       assert(failfast.status == Status.Busy)
 
       tc.set(timer.tasks(0).when)
       when(underlying()).thenReturn(Future.value(service))
       timer.tick()
-      assert(failfast.status === Status.Open)
+      assert(failfast.status == Status.Open)
     }
   }
 
@@ -140,7 +140,7 @@ class FailFastFactoryTest extends FunSuite
       verify(underlying, times(2)).apply()
       q() = Return(service)
       when(underlying()).thenReturn(r)
-      assert(failfast().poll === None)
+      assert(failfast().poll == None)
       r() = Return(service)
       assert {
         failfast().poll match {
@@ -157,13 +157,13 @@ class FailFastFactoryTest extends FunSuite
       import ctx._
       p() = Throw(new Exception)
 
-      assert(timer.tasks.size === 1)
+      assert(timer.tasks.size == 1)
       assert(!failfast.isAvailable)
       verify(underlying, never()).close()
       failfast.close()
       verify(underlying).close()
       assert(timer.tasks.isEmpty)
-      assert(failfast.status === underlying.status)
+      assert(failfast.status == underlying.status)
 
       val status = underlying.status match {
         case Status.Open => Status.Closed
@@ -171,7 +171,7 @@ class FailFastFactoryTest extends FunSuite
         case status => fail(s"bad status $status")
       }
       when(underlying.status).thenReturn(status)
-      assert(failfast.status === underlying.status)
+      assert(failfast.status == underlying.status)
     }
   }
 
@@ -184,8 +184,8 @@ class FailFastFactoryTest extends FunSuite
       val e = new Exception
       p() = Throw(e)
 
-      assert(pp.poll === Some(Throw(e)))
-      assert(pp2.poll === Some(Throw(e)))
+      assert(pp.poll == Some(Throw(e)))
+      assert(pp2.poll == Some(Throw(e)))
 
       val ffe = intercept[FailedFastException] {
         failfast().poll.get.get
@@ -207,7 +207,7 @@ class FailFastFactoryTest extends FunSuite
         ctx.failfast().poll match {
           case Some(Throw(ex: FailedFastException)) => {
             ex.serviceName = "threadOne"
-            assert(beat === 0)
+            assert(beat == 0)
           }
           case _ => throw new Exception
         }
@@ -220,7 +220,7 @@ class FailFastFactoryTest extends FunSuite
         ctx.p() = Throw(new Exception)
         ctx.failfast().poll match {
           case Some(Throw(ex: FailedFastException)) => {
-            assert(ex.serviceName === SourcedException.UnspecifiedServiceName)
+            assert(ex.serviceName == SourcedException.UnspecifiedServiceName)
           }
           case _ => throw new Exception
         }
@@ -228,7 +228,7 @@ class FailFastFactoryTest extends FunSuite
       }
 
       whenFinished {
-        assert(threadCompletionCount.get === 2)
+        assert(threadCompletionCount.get == 2)
       }
     }
   }

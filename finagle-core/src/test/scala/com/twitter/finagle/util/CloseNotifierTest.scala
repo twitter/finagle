@@ -21,7 +21,7 @@ class CloseNotifierTest extends FunSuite {
     }
 
     closing.setDone()
-    assert(invocations === (1 to 10).toList)
+    assert(invocations == (1 to 10).toList)
   }
 
   test("CloseNotifier should invoke onClose handler immediately if close event already happened") {

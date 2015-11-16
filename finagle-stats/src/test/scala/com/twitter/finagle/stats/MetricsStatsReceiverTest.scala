@@ -24,7 +24,7 @@ class MetricsStatsReceiverTest extends FunSuite with GeneratorDrivenPropertyChec
     val x = 1.5f
     // gauges are weakly referenced by the registry so we need to keep a strong reference
     val g = rootReceiver.addGauge("my_gauge")(x)
-    assert(readInRoot("my_gauge") === x)
+    assert(readInRoot("my_gauge") == x)
   }
 
   test("cumulative gauge is working") {
@@ -34,7 +34,7 @@ class MetricsStatsReceiverTest extends FunSuite with GeneratorDrivenPropertyChec
     val g1 = rootReceiver.addGauge("my_cumulative_gauge")(x)
     val g2 = rootReceiver.addGauge("my_cumulative_gauge")(y)
     val g3 = rootReceiver.addGauge("my_cumulative_gauge")(z)
-    assert(readInRoot("my_cumulative_gauge") === x + y + z)
+    assert(readInRoot("my_cumulative_gauge") == x + y + z)
   }
 
   test("Ensure that we throw an exception with a counter and a gauge when rollup collides") {
@@ -63,7 +63,7 @@ class MetricsStatsReceiverTest extends FunSuite with GeneratorDrivenPropertyChec
 
   test("store and read counter into the root StatsReceiver") {
     rootReceiver.counter("my_counter").incr()
-    assert(readInRoot("my_counter") === 1)
+    assert(readInRoot("my_counter") == 1)
   }
 
   test("separate gauge/stat/metric between detached Metrics and root Metrics") {

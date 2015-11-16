@@ -29,7 +29,7 @@ class LatencyHistogramTest extends FunSuite
         val actual = histo.quantile(q)
         val ideal = sorted(q * N / 100)
         if (epsilon == 0)
-          assert(actual === ideal)
+          assert(actual == ideal)
         else
           actual.toDouble should be(ideal.toDouble +- epsilon)
       }

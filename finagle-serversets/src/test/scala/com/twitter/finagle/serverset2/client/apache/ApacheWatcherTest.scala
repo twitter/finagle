@@ -37,14 +37,14 @@ class ApacheWatcherTest extends FlatSpec
     (EventType.NodeDeleted, NodeEvent.Deleted))
 
   "ApacheWatcher" should "start in the pending state" in {
-    assert(watcher.state() === WatchState.Pending)
+    assert(watcher.state() == WatchState.Pending)
   }
 
   "ApacheWatcher" should "handle session events" in {
     for (ks <- sessionEvents.keys) {
       val satisfied = watcher.state.changes.filter(_ == WatchState.SessionState(sessionEvents(ks))).toFuture
       watcher.process(new WatchedEvent(EventType.None, ks, path))
-      assert(Await.result(satisfied) === WatchState.SessionState(sessionEvents(ks)))
+      assert(Await.result(satisfied) == WatchState.SessionState(sessionEvents(ks)))
     }
   }
 
@@ -53,8 +53,8 @@ class ApacheWatcherTest extends FlatSpec
       if (ev != EventType.None) {
         val determined = watcher.state.changes.filter(_ == WatchState.Determined(nodeEvents(ev))).toFuture
         watcher.process(new WatchedEvent(ev, KeeperState.SyncConnected, path))
-        assert(Await.result(determined) === WatchState.Determined(nodeEvents(ev)))
-        assert(statsReceiver.counter(ApacheNodeEvent(ev).name)() === 1)      }
+        assert(Await.result(determined) == WatchState.Determined(nodeEvents(ev)))
+        assert(statsReceiver.counter(ApacheNodeEvent(ev).name)() == 1)      }
     }
   }
 
@@ -65,8 +65,8 @@ class ApacheWatcherTest extends FlatSpec
     for (ks <- KeeperState.values) {
       val satisfied = statsWatcher.changes.filter(_ == WatchState.SessionState(sessionEvents(ks))).toFuture
       watcher.process(new WatchedEvent(EventType.None, ks, path))
-      assert(Await.result(satisfied) === WatchState.SessionState(sessionEvents(ks)))
-      assert(statsReceiver.counter(ApacheSessionState(ks).name)() === 1)
+      assert(Await.result(satisfied) == WatchState.SessionState(sessionEvents(ks)))
+      assert(statsReceiver.counter(ApacheSessionState(ks).name)() == 1)
     }
   }
 }

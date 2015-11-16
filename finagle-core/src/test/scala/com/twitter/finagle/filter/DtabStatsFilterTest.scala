@@ -22,7 +22,7 @@ class DtabStatsFilterTest extends FunSuite with AssertionsForJUnit {
     }
 
     val stat = statsReceiver.stat("prefix", "dtab", "size")
-    assert(stat() === Nil)
+    assert(stat() == Nil)
   }
 
   test("non-empty Dtab.local") {
@@ -37,6 +37,6 @@ class DtabStatsFilterTest extends FunSuite with AssertionsForJUnit {
     }
 
     val stat = statsReceiver.stat("prefix", "dtab", "size")
-    assert(stat() === List(3.0))
+    assert(stat() == List(3.0))
   }
 }

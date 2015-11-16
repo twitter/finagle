@@ -9,21 +9,21 @@ class MapHeaderMapTest extends FunSuite {
 
   test("empty map") {
     val map = MapHeaderMap()
-    assert(map.get("key") === None)
-    assert(map.getAll("key").isEmpty === true)
-    assert(map.iterator.isEmpty === true)
+    assert(map.get("key") == None)
+    assert(map.getAll("key").isEmpty == true)
+    assert(map.iterator.isEmpty == true)
   }
 
   test("map basics") {
     val map = MapHeaderMap("a" -> "1", "b" -> "2", "a" -> "3")
 
-    assert(map.get("a") === Some("1"))
-    assert(map.getAll("a").toList === List("1", "3"))
-    assert(map.iterator.toList.sorted === List(("a" -> "1"), ("a" -> "3"), ("b" -> "2")))
+    assert(map.get("a") == Some("1"))
+    assert(map.getAll("a").toList == List("1", "3"))
+    assert(map.iterator.toList.sorted == List(("a" -> "1"), ("a" -> "3"), ("b" -> "2")))
 
-    assert(map.keys.toList.sorted === List("a", "b"))
-    assert(map.keySet.toList.sorted === List("a", "b"))
-    assert(map.keysIterator.toList.sorted === List("a", "b"))
+    assert(map.keys.toList.sorted == List("a", "b"))
+    assert(map.keySet.toList.sorted == List("a", "b"))
+    assert(map.keysIterator.toList.sorted == List("a", "b"))
   }
 
   test("+=") {
@@ -32,9 +32,9 @@ class MapHeaderMapTest extends FunSuite {
     map += "b" -> "2"
     map += "a" -> "3"
 
-    assert(map.get("a") === Some("3"))
-    assert(map.getAll("a").toList === List("3"))
-    assert(map.iterator.toList.sorted === List(("a" -> "3"), ("b" -> "2")))
+    assert(map.get("a") == Some("3"))
+    assert(map.getAll("a").toList == List("3"))
+    assert(map.iterator.toList.sorted == List(("a" -> "3"), ("b" -> "2")))
   }
 
   test("add") {
@@ -43,21 +43,21 @@ class MapHeaderMapTest extends FunSuite {
     map.add("b", "2")
     map.add("a", "3")
 
-    assert(map.get("a") === Some("1"))
-    assert(map.getAll("a").toList === List("1", "3"))
-    assert(map.iterator.toList.sorted === List(("a" -> "1"), ("a" -> "3"), ("b" -> "2")))
+    assert(map.get("a") == Some("1"))
+    assert(map.getAll("a").toList == List("1", "3"))
+    assert(map.iterator.toList.sorted == List(("a" -> "1"), ("a" -> "3"), ("b" -> "2")))
   }
 
   test("set") {
     val map = MapHeaderMap()
     map.set("a", "1")
-    assert(map.get("a") === Some("1"))
+    assert(map.get("a") == Some("1"))
     map.set("b", "2")
     map.set("a", "3")
 
-    assert(map.get("a") === Some("3"))
-    assert(map.getAll("a").toList === List("3"))
-    assert(map.iterator.toList.sorted === List(("a" -> "3"), ("b" -> "2")))
+    assert(map.get("a") == Some("3"))
+    assert(map.getAll("a").toList == List("3"))
+    assert(map.iterator.toList.sorted == List(("a" -> "3"), ("b" -> "2")))
   }
 
   test("-=") {
@@ -65,9 +65,9 @@ class MapHeaderMapTest extends FunSuite {
     map -= "a"
     map -= "b"
 
-    assert(map.get("a") === None)
-    assert(map.getAll("a").isEmpty === true)
-    assert(map.iterator.isEmpty === true)
+    assert(map.get("a") == None)
+    assert(map.getAll("a").isEmpty == true)
+    assert(map.iterator.isEmpty == true)
     map -= "a" // this is legal
   }
 }

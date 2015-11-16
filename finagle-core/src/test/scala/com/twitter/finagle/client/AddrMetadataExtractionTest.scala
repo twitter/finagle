@@ -26,7 +26,7 @@ class AddrMetadataExtractionTest extends FunSuite with AssertionsForJUnit {
         val description = "Verify that the metadata was set properly"
 
         def make(param: AddrMetadata, next: ServiceFactory[String, String]) = {
-          assert(expected === param.metadata)
+          assert(expected == param.metadata)
           ServiceFactory.const(Service.mk[String, String](Future.value))
         }
       }

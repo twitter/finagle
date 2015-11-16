@@ -79,8 +79,8 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
 
   test("name parser") {
     val (name, regType, domain) = MDNS.parse("dots.in.the.name._finagle._tcp.local.")
-    assert(name === "dots.in.the.name")
-    assert(regType === "_finagle._tcp")
-    assert(domain === "local")
+    assert(name == "dots.in.the.name")
+    assert(regType == "_finagle._tcp")
+    assert(domain == "local")
   }
 }

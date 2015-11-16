@@ -67,18 +67,18 @@ class StabilizingAddrTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      assert(stabilized === Addr.Bound(addrs()))
+      assert(stabilized == Addr.Bound(addrs()))
 
       addrs() -= s9
 
-      assert(limboSize === 1)
+      assert(limboSize == 1)
       tc.advance(grace)
       timer.tick()
-      assert(stabilized === Addr.Bound(addrs()))
+      assert(stabilized == Addr.Bound(addrs()))
 
       addrs() = addrs() - s1 - s2 - s3 - s4
-      assert(limboSize === 4)
-      assert(stabilized === Addr.Bound(addrs() + s1 + s2 + s3 + s4))
+      assert(limboSize == 4)
+      assert(stabilized == Addr.Bound(addrs() + s1 + s2 + s3 + s4))
       tc.advance(grace)
       timer.tick()
       assertStable()
@@ -97,12 +97,12 @@ class StabilizingAddrTest extends FunSuite {
       assertStable()
       addrs() -= s10
       assert(stabilized != Addr.Bound(addrs()))
-      assert(stabilized === Addr.Bound(allAddrs))
-      assert(limboSize === 1)
+      assert(stabilized == Addr.Bound(allAddrs))
+      assert(limboSize == 1)
       addrs() = addrs() -- Set(s1, s2, s3, s4)
       assert(stabilized != Addr.Bound(addrs()))
-      assert(stabilized === Addr.Bound(allAddrs))
-      assert(limboSize === 5)
+      assert(stabilized == Addr.Bound(allAddrs))
+      assert(limboSize == 5)
 
       healthStatus.mkHealthy()
       tc.advance(grace)
@@ -117,19 +117,19 @@ class StabilizingAddrTest extends FunSuite {
       import ctx._
 
       healthStatus.mkHealthy()
-      assert(healthStat === Healthy.id)
+      assert(healthStat == Healthy.id)
       assertStable()
 
       healthStatus.mkUnhealthy()
-      assert(healthStat === Unhealthy.id)
+      assert(healthStat == Unhealthy.id)
       addrs() = Set.empty
 
       tc.advance(grace)
       timer.tick()
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
 
       healthStatus.mkHealthy()
-      assert(healthStat === Healthy.id)
+      assert(healthStat == Healthy.id)
       addrs() = Set(s1, s2, s3, s4)
 
       tc.advance(grace)
@@ -163,10 +163,10 @@ class StabilizingAddrTest extends FunSuite {
 
       assertStable()
       addrs.broker !! Addr.Neg
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
       tc.advance(grace)
       timer.tick()
-      assert(stabilized === Addr.Neg)
+      assert(stabilized == Addr.Neg)
     }
   }
 
@@ -181,15 +181,15 @@ class StabilizingAddrTest extends FunSuite {
       addrs() = Set(s1, s2)
       tc.advance(grace / 2)
       timer.tick()
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
       addrs.broker !! Addr.Neg
-      assert(stabilized === Addr.Bound(allAddrs))
+      assert(stabilized == Addr.Bound(allAddrs))
       tc.advance(grace / 2)
       timer.tick()
-      assert(stabilized === Addr.Bound(Set(s1, s2)))
+      assert(stabilized == Addr.Bound(Set(s1, s2)))
       tc.advance(grace / 2)
       timer.tick()
-      assert(stabilized === Addr.Neg)
+      assert(stabilized == Addr.Neg)
 
       addrs() = Set(s1, s2)
       assertStable()

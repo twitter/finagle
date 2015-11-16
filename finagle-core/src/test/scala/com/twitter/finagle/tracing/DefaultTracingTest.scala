@@ -34,7 +34,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
   }
 
   def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
-    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
+    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
   /**
@@ -54,8 +54,8 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
     Await.result(f(serverTracer, clientTracer)("foo"), 1.second)
 
-    assert(serverTracer.map(_.traceId).toSet.size === 1)
-    assert(clientTracer.map(_.traceId).toSet.size === 1)
+    assert(serverTracer.map(_.traceId).toSet.size == 1)
+    assert(clientTracer.map(_.traceId).toSet.size == 1)
 
     assertAnnotationsInOrder(combinedTracer.toSeq, Seq(
       Annotation.ServiceName("theClient"),

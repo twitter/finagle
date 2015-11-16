@@ -25,12 +25,12 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     ctx.let(a, "ok") {
       ran += 1
       assert(ctx.contains(a))
-      assert(ctx.get(a) === Some("ok"))
+      assert(ctx.get(a) == Some("ok"))
       assert(ctx.getOrElse(a, StrFn) == "ok")
-      assert(ctx(a) === "ok")
+      assert(ctx(a) == "ok")
     }
 
-    assert(ran === 1)
+    assert(ran == 1)
   }
 
   test("Context.let binds, shadows") {
@@ -39,8 +39,8 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     ctx.let(env) {
       ran += 1
       assert(ctx.contains(a))
-      assert(ctx.get(a) === Some("ok"))
-      assert(ctx(a) === "ok")
+      assert(ctx.get(a) == Some("ok"))
+      assert(ctx(a) == "ok")
       assert(ctx.getOrElse(a, StrFn) == "ok")
       assert(!ctx.contains(b))
 
@@ -48,33 +48,33 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
       ctx.let(env) {
         ran *= 3
         assert(ctx.contains(a))
-        assert(ctx.get(a) === Some("ok1"))
+        assert(ctx.get(a) == Some("ok1"))
         assert(ctx.getOrElse(a, StrFn) == "ok1")
-        assert(ctx(a) === "ok1")
+        assert(ctx(a) == "ok1")
         assert(!ctx.contains(b))
       }
     }
 
-    assert(ran === 3)
+    assert(ran == 3)
   }
 
   test("Shadowing binds") {
     var ranInner, ranOuter = 0
     ctx.let(b, 1) {
       ranOuter += 1
-      assert(ctx(b) === 1)
+      assert(ctx(b) == 1)
       assert(ctx.getOrElse(b, IntFn) == 1)
       ctx.let(b, 2) {
         ranInner += 1
-        assert(ctx(b) === 2)
+        assert(ctx(b) == 2)
         assert(ctx.getOrElse(b, IntFn) == 2)
       }
-      assert(ranInner === 1)
-      assert(ctx(b) === 1)
+      assert(ranInner == 1)
+      assert(ctx(b) == 1)
       assert(ctx.getOrElse(b, IntFn) == 1)
     }
-    assert(ranOuter === 1)
-    assert(ranInner === 1)
+    assert(ranOuter == 1)
+    assert(ranInner == 1)
     assert(ctx.getOrElse(b, IntFn) == DefaultInt)
   }
 
@@ -82,20 +82,20 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     var ranInner, ranOuter = 0
     ctx.let(a, "ok", b, 1) {
       ranOuter += 1
-      assert(ctx(b) === 1)
+      assert(ctx(b) == 1)
       ctx.letClear(b) {
         ranInner += 1
         assert(ctx.contains(a))
-        assert(ctx(a) === "ok")
+        assert(ctx(a) == "ok")
 
         assert(!ctx.contains(b))
         assert(ctx.get(b).isEmpty)
         assert(ctx.getOrElse(b, IntFn) == DefaultInt)
         intercept[NoSuchElementException] { ctx(b) }
       }
-      assert(ranInner === 1)
+      assert(ranInner == 1)
     }
-    assert(ranOuter === 1)
+    assert(ranOuter == 1)
   }
 
   test("Empty Context") {
@@ -118,6 +118,6 @@ class ContextTest extends FunSuite with AssertionsForJUnit {
     assert(!f.isDefined)
     p.setDone()
     assert(f.isDefined)
-    assert(Await.result(f) === "ok")
+    assert(Await.result(f) == "ok")
   }
 }

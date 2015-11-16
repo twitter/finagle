@@ -30,7 +30,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
 
     assert(!f.isDefined)
     p.setValue("ok: one")
-    assert(f.poll === Some(Return("ok: one")))
+    assert(f.poll == Some(Return("ok: one")))
   }
 
   test("ClientDispatcher should dispatch requests one-at-a-time") {
@@ -52,13 +52,13 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
 
     when(trans.read()) thenReturn p1
     p0.setValue("ok: one")
-    assert(f0.poll === Some(Return("ok: one")))
+    assert(f0.poll == Some(Return("ok: one")))
     verify(trans, times(2)).write(any[String])
     verify(trans, times(2)).read()
 
     assert(!f1.isDefined)
     p1.setValue("ok: two")
-    assert(p1.poll === Some(Return("ok: two")))
+    assert(p1.poll == Some(Return("ok: two")))
   }
 
   test("ClientDispatcher should interrupt when close transport and cancel pending requests") {
@@ -78,7 +78,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
     val intr = new Exception
     f0.raise(intr)
     verify(trans).close()
-    assert(f0.poll === Some(Throw(intr)))
+    assert(f0.poll == Some(Throw(intr)))
   }
 
   test("ClientDispatcher should interrupt when ignore pending") {
@@ -102,8 +102,8 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
     assert(!f1.isDefined)
 
     p0.setValue("ok")
-    assert(f0.poll === Some(Return("ok")))
-    assert(f1.poll === Some(Throw(Failure(intr, Failure.Interrupted))))
+    assert(f0.poll == Some(Return("ok")))
+    assert(f1.poll == Some(Throw(Failure(intr, Failure.Interrupted))))
     verify(trans).write(any[String])
   }
 
@@ -120,7 +120,7 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
 
     val result: Throwable = resultOpt.get.asInstanceOf[Throw[String]].e
     assert(result.isInstanceOf[WriteException])
-    assert(result.getCause === exc)
+    assert(result.getCause == exc)
   }
 
 }

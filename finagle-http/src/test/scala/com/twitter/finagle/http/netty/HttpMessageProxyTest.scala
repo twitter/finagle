@@ -12,6 +12,6 @@ class HttpMessageProxyTest extends FunSuite {
     val proxy = new HttpMessageProxy {
       final val httpMessage = message
     }
-    assert(proxy.getProtocolVersion === HttpVersion.HTTP_1_1)
+    assert(proxy.getProtocolVersion == HttpVersion.HTTP_1_1)
   }
 }

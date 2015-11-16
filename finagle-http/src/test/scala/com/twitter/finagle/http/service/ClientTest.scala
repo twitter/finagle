@@ -59,10 +59,10 @@ class ClientTest extends FunSuite {
       val client = clientBuilder.build()
       try {
         // No failures have happened yet.
-        assert(client.isAvailable === true)
+        assert(client.isAvailable == true)
         val future = client(Request(Version.Http11, Method.Get, "/"))
         val resolved = Try(Await.result(future, 1.second))
-        assert(resolved.isThrow === true)
+        assert(resolved.isThrow == true)
         val Throw(cause) = resolved
         intercept[ChannelClosedException] {throw cause}
       } finally client.close()
@@ -78,10 +78,10 @@ class ClientTest extends FunSuite {
       try {
         val future = client(Request(Version.Http11, Method.Get, "/"))
         val resolved = Try(Await.result(future, 1.second))
-        assert(resolved.isThrow === true)
+        assert(resolved.isThrow == true)
         val Throw(cause) = resolved
         intercept[ChannelClosedException] {throw cause}
-        assert(counter === 1)
+        assert(counter == 1)
       } finally client.close()
     }
   }

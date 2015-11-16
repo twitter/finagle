@@ -46,13 +46,13 @@ class ClientTest extends FunSuite {
 
     leaseClient { (client, transport, issue, ctl) =>
       assert(transport.status == Status.Open)
-      assert(client.status === Status.Open)
+      assert(client.status == Status.Open)
       issue(1.millisecond)
       ctl.advance(2.milliseconds)
       assert(client.status == Status.Busy)
       assert(transport.status == Status.Open)
       issue(Tlease.MaxLease)
-      assert(client.status === Status.Open)
+      assert(client.status == Status.Open)
     }
   }
 
@@ -84,13 +84,13 @@ class ClientTest extends FunSuite {
       val Message.Rdrain(newTag) = rdrain
 
       assert(client.client.status == Status.Busy)
-      assert(newTag === tag + 1)
+      assert(newTag == tag + 1)
 
       client.respond(Message.RdispatchOk(tag, contexts,
         ChannelBuffers.copiedBuffer(buf.toString(Charset.forName("UTF-8")).reverse, Charsets.Utf8)))
 
       val Some(Return(result)) = f.poll
-      assert(result === Response(Buf.Utf8("KO")))
+      assert(result == Response(Buf.Utf8("KO")))
 
       val f2 = client(req)
       f2.poll match {
@@ -100,10 +100,10 @@ class ClientTest extends FunSuite {
         case _ => fail()
       }
 
-      assert(client.read().poll === None)
+      assert(client.read().poll == None)
 
       // At this point, we're fully drained.
-      assert(client.client.status === Status.Closed)
+      assert(client.client.status == Status.Closed)
     }
   }
 
@@ -118,7 +118,7 @@ class ClientTest extends FunSuite {
       val Some(Return(treq)) = client.read().poll
       val Message.Tdispatch(tag, _, _, _, _) = treq
 
-      assert(client.client.status === Status.Open)
+      assert(client.client.status == Status.Open)
       client.respond(Message.Tdrain(tag + 1))
 
       val drained = client.read()
@@ -126,7 +126,7 @@ class ClientTest extends FunSuite {
       val Some(Return(rdrain)) = drained.poll
       val Message.Rdrain(newTag) = rdrain
 
-      assert(newTag === tag + 1)
+      assert(newTag == tag + 1)
       assert(client.client.status == Status.Busy)
     }
   }

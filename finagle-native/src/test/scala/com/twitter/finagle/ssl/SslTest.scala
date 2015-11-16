@@ -42,7 +42,7 @@ class SslTest extends FunSuite {
       certChainInput.setupCADirPath.toFile // working dir
     )
     process.waitFor()
-    assert(process.exitValue === 0)
+    assert(process.exitValue == 0)
   } catch {
     case e: java.io.IOException =>
       println("IOException: I/O error in running setupCA script: " +
@@ -189,14 +189,14 @@ class SslTest extends FunSuite {
       process.getOutputStream.close()
 
       process.waitFor()
-      assert(process.exitValue === 0)
+      assert(process.exitValue == 0)
 
       // look for text "Verify return code: 0 (ok)" on stdout
       val out = process.getInputStream
       val outBuf = new Array[Byte](out.available)
       out.read(outBuf)
       val outBufStr = new String(outBuf)
-      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) === Some("""Verify return code: 0 (ok)"""))
+      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) == Some("""Verify return code: 0 (ok)"""))
     } catch {
       case ex: java.io.IOException =>
         println("Test skipped: running openssl failed" +
