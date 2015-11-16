@@ -24,19 +24,31 @@ object RetryingService {
 /**
  * A [[com.twitter.finagle.Filter]] that coordinates retries of subsequent
  * [[com.twitter.finagle.Service Services]]. Successful and exceptional
- * responses can can be classified as retryable via the retryPolicy
+ * responses can be classified as retryable via the retryPolicy
  * [[com.twitter.finagle.service.RetryPolicy]] argument.
+ *
+ * @param retryBudget the budget that is [[RetryBudget.tryWithdraw() withdrawn from]]
+ * for retries.
  *
  * @note consider using a [[Timer]] with high resolution so that there is
  * less correlation between retries. For example [[HighResTimer.Default]].
  */
-class RetryFilter[Req, Rep] private[finagle] (
+class RetryFilter[Req, Rep](
     retryPolicy: RetryPolicy[(Req, Try[Rep])],
     timer: Timer,
     statsReceiver: StatsReceiver,
     retryBudget: RetryBudget)
   extends Filter[Req, Rep, Req, Rep] {
 
+  /**
+   * A [[com.twitter.finagle.Filter]] that coordinates retries of subsequent
+   * [[com.twitter.finagle.Service Services]]. Successful and exceptional
+   * responses can can be classified as retryable via the retryPolicy
+   * [[com.twitter.finagle.service.RetryPolicy]] argument.
+   *
+   * @note consider using a [[Timer]] with high resolution so that there is
+   * less correlation between retries. For example [[HighResTimer.Default]].
+   */
   def this(
     retryPolicy: RetryPolicy[(Req, Try[Rep])],
     timer: Timer,
@@ -45,7 +57,7 @@ class RetryFilter[Req, Rep] private[finagle] (
     retryPolicy,
     timer,
     statsReceiver,
-    RetryBudget.Infinite
+    RetryBudget()
   )
 
   private[this] val retriesStat = statsReceiver.stat("retries")
@@ -123,13 +135,16 @@ object RetryFilter {
  * classified as retryable via the retryPolicy argument
  * [[com.twitter.finagle.service.RetryPolicy]].
  *
+ * @param retryBudget the budget that is [[RetryBudget.tryWithdraw() withdrawn from]]
+ * for retries.
+ *
  * @note consider using a [[Timer]] with high resolution so that there is
  * less correlation between retries. For example [[HighResTimer.Default]].
  *
  * @see [[RetryFilter]] for a version that allows for retries on "successful"
  * responses as well as failures.
  */
-final class RetryExceptionsFilter[Req, Rep] private[finagle] (
+final class RetryExceptionsFilter[Req, Rep](
     retryPolicy: RetryPolicy[Try[Nothing]],
     timer: Timer,
     statsReceiver: StatsReceiver,
@@ -140,6 +155,19 @@ final class RetryExceptionsFilter[Req, Rep] private[finagle] (
     statsReceiver,
     retryBudget)
 {
+
+  /**
+   * A [[com.twitter.finagle.Filter]] that coordinates retries of subsequent
+   * [[com.twitter.finagle.Service Services]]. Exceptional responses can can be
+   * classified as retryable via the retryPolicy argument
+   * [[com.twitter.finagle.service.RetryPolicy]].
+   *
+   * @note consider using a [[Timer]] with high resolution so that there is
+   * less correlation between retries. For example [[HighResTimer.Default]].
+   *
+   * @see [[RetryFilter]] for a version that allows for retries on "successful"
+   * responses as well as failures.
+   */
   def this(
     retryPolicy: RetryPolicy[Try[Nothing]],
     timer: Timer,
@@ -148,7 +176,7 @@ final class RetryExceptionsFilter[Req, Rep] private[finagle] (
     retryPolicy,
     timer,
     statsReceiver,
-    RetryBudget.Infinite
+    RetryBudget()
   )
 }
 

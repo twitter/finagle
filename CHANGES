@@ -31,6 +31,11 @@ Runtime Behavior Changes
     `requeue/budget_exhausted` have moved under retries. They are now `retries/requeues`,
     `retries/budget` and `retries/budget_exhausted`. ``RB_ID=760213``
 
+  * finagle-core: `c.t.f.service.RetryFilter` and `c.t.f.service.RetryExceptionsFilter`
+    now default to using a `RetryBudget` to mitigate retry amplification on downstream
+    services. The previous behavior can be achieved by explicitly passing in
+    `RetryBudget.Infinite`. ``RB_ID=766302``
+
   * finagle-http: Unhandled exceptions from user defined HTTP services are now converted
     into very basic 500 responses so clients talking to those services see standard HTTP
     responses instead of a dropped connection. ``RB_ID=755846``
