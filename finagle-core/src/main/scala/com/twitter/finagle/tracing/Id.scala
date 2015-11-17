@@ -155,6 +155,5 @@ final case class TraceId(
   override def hashCode(): Int =
     ids.hashCode()
 
-  override def toString =
-    "%s.%s<:%s".format(traceId, spanId, parentId)
+  override def toString = s"$traceId.$spanId<:$parentId"
 }

@@ -28,8 +28,7 @@ case class Record(
     timestamp: Time,
     annotation: Annotation,
     duration: Option[Duration]) {
-  override def toString: String = "%s %s] %s".format(
-    RecordTimeFormat.format(timestamp), traceId, annotation)
+  override def toString: String = s"${RecordTimeFormat.format(timestamp)} $traceId] $annotation"
 }
 
 sealed trait Annotation
