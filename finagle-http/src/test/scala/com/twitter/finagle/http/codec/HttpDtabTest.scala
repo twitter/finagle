@@ -141,4 +141,26 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     for (h <- headers)
       assert(!m.headers.contains(h), h+" was not removed from headers")
   }
+
+  test("strip(msg)") {
+    val dtabHeaders = Seq(
+        ("Dtab-Local", "/srv=>/$/nil"),
+        ("X-Dtab-00-A", "/srv#/prod/local/role"),
+        ("X-Dtab-00-B", "/$/fail"),
+        ("X-Dtab-01-A", "/srv/local"),
+        ("X-Dtab-01-B", "/srv/other")
+      )
+    val allHeaders = dtabHeaders :+ (("Accept", "application/json"))
+
+    val message = allHeaders.foldLeft(newMsg()) {
+      (m, h) =>
+        m.headers.set(h._1, h._2)
+        m
+    }
+
+    val foundHeaders = HttpDtab.strip(message)
+
+    assert(dtabHeaders == foundHeaders)
+  }
 }
+

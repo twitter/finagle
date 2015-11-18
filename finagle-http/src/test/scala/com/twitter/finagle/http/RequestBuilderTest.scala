@@ -1,6 +1,5 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
 import java.net.URL
 import org.junit.runner.RunWith

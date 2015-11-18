@@ -6,7 +6,6 @@ import com.twitter.finagle.http.Message
 import com.twitter.util.{Throw, Try, Return}
 import java.nio.charset.Charset
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.JavaConverters._
 
 /**
  * Dtab serialization for Http. Dtabs are encoded into Http
@@ -49,13 +48,13 @@ object HttpDtab {
     Failure("Invalid name: "+name, cause)
 
   private def decodePath(b64path: String): Try[Path] =
-    b64Decode(b64path) match {
-      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64path))
-      case Throw(e) => Throw(e)
-      case Return(pathStr) =>
-        Try(Path.read(pathStr)) rescue {
-          case iae: IllegalArgumentException => Throw(pathFailure(pathStr, iae))
-        }
+      b64Decode(b64path) match {
+        case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64path))
+        case Throw(e) => Throw(e)
+        case Return(pathStr) =>
+          Try(Path.read(pathStr)).rescue {
+            case iae: IllegalArgumentException => Throw(pathFailure(pathStr, iae))
+          }
     }
 
   private def decodeName(b64name: String): Try[NameTree[Path]] =
@@ -63,7 +62,7 @@ object HttpDtab {
       case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64name))
       case Throw(e) => Throw(e)
       case Return(nameStr) =>
-        Try(NameTree.read(nameStr)) rescue {
+        Try(NameTree.read(nameStr)).rescue {
           case iae: IllegalArgumentException => Throw(nameFailure(nameStr, iae))
         }
     }
@@ -74,19 +73,50 @@ object HttpDtab {
     bKey(bKey.length - 1) == 'b' &&
     aKey.substring(0, aKey.length - 1) == bKey.substring(0, bKey.length - 1)
 
+  private def isDtabHeader(hdr: (String,String)): Boolean =
+    hdr._1.equalsIgnoreCase(Header) ||
+    hdr._1.regionMatches(true, 0, Prefix, 0, Prefix.length)
+
+
   private val EmptyReturn = Return(Dtab.empty)
 
-  def clear(msg: Message) {
-    val names = msg.headers.names.iterator()
-    msg.headers.remove(Header)
-    while (names.hasNext) {
-      val n = names.next()
-      if (n.toLowerCase startsWith Prefix)
-        msg.headers.remove(n)
+  /**
+   * Strip out and return a sequence of all Dtab-related headers in the given message.
+   *
+   * @return a Seq[(String, String)] containing the dtab header entries found.
+   */
+  private[http] def strip(msg: Message): Seq[(String, String)] = {
+    var headerArr: ArrayBuffer[(String, String)] = null
+    val headerIt = msg.headerMap.iterator
+    while (headerIt.hasNext) {
+      val header = headerIt.next()
+      if (isDtabHeader(header)) {
+        if (headerArr == null)
+          headerArr = new ArrayBuffer[(String, String)]()
+        headerArr += header
+        msg.headerMap -= header._1
+      }
+    }
+    if (headerArr == null) Nil
+    else headerArr
+  }
+
+  /**
+   * Clear all Dtab-related headers from the given message.
+   */
+  def clear(msg: Message): Unit = {
+    val headerIt = msg.headerMap.iterator
+    while (headerIt.hasNext) {
+      val header = headerIt.next()
+      if (isDtabHeader(header))
+        msg.headerMap -= header._1
     }
   }
 
-  def write(dtab: Dtab, msg: Message) {
+  /**
+   * Write X-Dtab header pairs into the given message.
+   */
+  def write(dtab: Dtab, msg: Message): Unit = {
     if (dtab.isEmpty)
       return
 
@@ -98,14 +128,16 @@ object HttpDtab {
     for ((Dentry(prefix, dst), i) <- dtab.zipWithIndex) {
       // TODO: now that we have a proper Dtab grammar,
       // should just embed this directly instead.
-      msg.headers.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
-      msg.headers.set(Prefix+indexstr(i)+"-B", b64Encode(dst.show))
+      msg.headerMap.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
+      msg.headerMap.set(Prefix+indexstr(i)+"-B", b64Encode(dst.show))
     }
   }
 
   /**
    * Parse old-style X-Dtab pairs and then new-style Dtab-Local headers,
    * Dtab-Local taking precedence.
+   *
+   * @return a Try[Dtab] which keeps the created Dtab if reading in worked.
    */
   def read(msg: Message): Try[Dtab] =
     for {
@@ -122,9 +154,9 @@ object HttpDtab {
    * N.B. Comma is not a showable character in Paths nor is it meaningful in Dtabs.
    */
   private def readDtabLocal(msg: Message): Try[Dtab] =
-    if (!msg.headers.contains(Header)) EmptyReturn else Try {
-      val headers = msg.headers().getAll(Header).asScala
-      val dentries = headers.view flatMap(_ split ',') flatMap(Dtab.read(_))
+    if(!msg.headerMap.contains(Header)) EmptyReturn else Try {
+      val headers = msg.headerMap.getAll(Header)
+      val dentries = headers.view.flatMap(_ split ',').flatMap(Dtab.read(_))
       Dtab(dentries.toIndexedSeq)
     }
 
@@ -136,10 +168,10 @@ object HttpDtab {
   private def readXDtabPairs(msg: Message): Try[Dtab] = {
     // Common case: no actual overrides.
     var keys: ArrayBuffer[String] = null
-    val headers = msg.headers.iterator()
-    while (headers.hasNext()) {
-      val key = headers.next().getKey().toLowerCase
-      if (key startsWith Prefix) {
+    val headers = msg.headerMap.iterator
+    while (headers.hasNext) {
+      val key = headers.next()._1.toLowerCase
+      if (key.startsWith(Prefix)) {
         if (keys == null) keys = ArrayBuffer[String]()
         keys += key
       }
@@ -166,8 +198,8 @@ object HttpDtab {
 
       val tryDentry =
         for {
-          path <- decodePath(msg.headers.get(prefix))
-          name <- decodeName(msg.headers.get(dest))
+          path <- decodePath(msg.headerMap(prefix))
+          name <- decodeName(msg.headerMap(dest))
         } yield Dentry(path,  name)
 
       dentries(i) =
