@@ -13,6 +13,9 @@ New Features
   * finagle-core: `c.t.f.Server` now has a `serveAndAnnounce` method that accepts a `SocketAddress`
     as an address. ``RB_ID=758862``
 
+  * finagle-core: `c.t.f.service.Retries` now supports adding delay between each automatic retry.
+    This is configured via the Retries.Budget. ``RB_ID=768883``
+
   * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
     method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
 

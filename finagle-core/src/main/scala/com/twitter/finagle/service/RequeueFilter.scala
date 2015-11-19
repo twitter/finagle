@@ -1,8 +1,9 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
+import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.Future
+import com.twitter.util.{Timer, Duration, Future}
 
 /**
  * Requeues service application failures that are encountered in modules below it.
@@ -11,6 +12,10 @@ import com.twitter.util.Future
  * Requeues are also rate-limited according to our retry budget in the [[RetryBudget]].
  *
  * @param retryBudget Maintains our requeue budget.
+ *
+ * @param retryBackoffs Stream of backoffs to use before each retry. (e.g. the
+ *                      first element is used to delay the first retry, 2nd for
+ *                      the second retry and so on)
  *
  * @param statsReceiver for stats reporting, typically scoped to ".../retries/"
  *
@@ -21,12 +26,18 @@ import com.twitter.util.Future
  * computed as a percentage of `retryBudget.balance`.
  * Used to prevent a single request from using up a disproportionate amount of the budget.
  * Must be non-negative.
+ *
+ * @param timer Timer used to schedule retries
+ * @note consider using a [[Timer]] with high resolution so there is
+ * less correlation between retries. For example [[HighResTimer.Default]]
  */
 private[finagle] class RequeueFilter[Req, Rep](
     retryBudget: RetryBudget,
+    retryBackoffs: Stream[Duration],
     statsReceiver: StatsReceiver,
     canRetry: () => Boolean,
-    maxRetriesPerReq: Double)
+    maxRetriesPerReq: Double,
+    timer: Timer)
   extends SimpleFilter[Req, Rep] {
 
   require(maxRetriesPerReq >= 0,
@@ -38,15 +49,30 @@ private[finagle] class RequeueFilter[Req, Rep](
   private[this] def applyService(
     req: Req,
     service: Service[Req, Rep],
-    retriesRemaining: Int
+    retriesRemaining: Int,
+    backoffs: Stream[Duration]
   ): Future[Rep] = {
     service(req).rescue {
       case exc@RetryPolicy.RetryableWriteException(_) =>
         if (!canRetry()) {
           Future.exception(exc)
         } else if (retriesRemaining > 0 && retryBudget.tryWithdraw()) {
-          requeueCounter.incr()
-          applyService(req, service, retriesRemaining - 1)
+          backoffs match {
+            case Duration.Zero #:: rest =>
+              // no delay between retries. Retry immediately.
+              requeueCounter.incr()
+              applyService(req, service, retriesRemaining - 1, rest)
+            case delay #:: rest =>
+              // Delay and then retry.
+              timer.doLater(delay) {
+                requeueCounter.incr()
+                applyService(req, service, retriesRemaining - 1, rest)
+              }.flatten
+            case _ =>
+              // Schedule has run out of entries. Budget is empty.
+              budgetExhaustCounter.incr()
+              Future.exception(exc)
+          }
         } else {
           if (retriesRemaining > 0)
             budgetExhaustCounter.incr()
@@ -58,6 +84,6 @@ private[finagle] class RequeueFilter[Req, Rep](
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     retryBudget.deposit()
     val maxRetries = Math.ceil(maxRetriesPerReq * retryBudget.balance).toInt
-    applyService(req, service, maxRetries)
+    applyService(req, service, maxRetries, retryBackoffs)
   }
 }

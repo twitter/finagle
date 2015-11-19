@@ -630,6 +630,19 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(Retries.Budget(budget))
 
   /**
+   * The [[RetryBudget budget]] is shared across requests and governs
+   * the number of retries that can be made. When used for requeues,
+   * includes a stream of delays used to delay each retry.
+   *
+   * Helps prevent clients from overwhelming the downstream service.
+   *
+   * @see [[retryPolicy]] for per-request rules on which failures are
+   * eligible for retries.
+   */
+  def retryBudget(budget: RetryBudget, backoffSchedule: Stream[Duration]): This =
+    configured(Retries.Budget(budget, backoffSchedule))
+
+  /**
    * Sets the TCP send buffer size.
    */
   def sendBufferSize(value: Int): This =
