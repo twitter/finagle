@@ -76,9 +76,11 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     ): Service[mux.Request, mux.Response] = {
       val param.Stats(sr) = params[param.Stats]
       val param.Label(name) = params[param.Label]
-      val FailureDetector.Param(failDetectorConfig) = params[FailureDetector.Param]
+
+      val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
       val msgTrans = transport.map(Message.encode, Message.decode)
-      new mux.ClientDispatcher(name, msgTrans, sr.scope("mux"), failDetectorConfig)
+      val session = new mux.ClientSession(msgTrans, detectorConfig, name, sr.scope("mux"))
+      mux.ClientDispatcher.newRequestResponse(session)
     }
   }
 

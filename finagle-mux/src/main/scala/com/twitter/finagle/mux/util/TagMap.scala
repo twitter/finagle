@@ -41,6 +41,7 @@ private[mux] object TagMap {
       fastSize: Int = 256
   ): TagMap[T] = new TagMap[T] {
     require(fastSize >= 0)
+    require(set.range.start >= 0)
     private[this] val fast = new Array[T](fastSize)
     private[this] val fallback = new HashMap[Int, T]
     private[this] val fastOff = set.range.start
@@ -49,52 +50,55 @@ private[mux] object TagMap {
     private[this] def setFast(tag: Int, el: T) { fast(tag-fastOff) = el }
 
     def map(el: T): Option[Int] = synchronized {
-      set.acquire() map { tag =>
-        if (inFast(tag))
-          setFast(tag, el)
-        else
-          fallback.put(tag, el)
+      set.acquire().map { tag =>
+        if (inFast(tag)) setFast(tag, el)
+        else fallback.put(tag, el)
         tag
       }
     }
 
     def maybeRemap(tag: Int, newEl: T): Option[T] = synchronized {
-      if (!contains(tag)) return None
+      if (!inRange(tag)) return None
 
-      val oldEl = if (inFast(tag)) {
+      if (inFast(tag)) {
         val oldEl = getFast(tag)
         setFast(tag, newEl)
-        oldEl
-      } else {
+        Option(oldEl)
+      } else if (fallback.containsKey(tag)) {
         val oldEl = fallback.remove(tag)
         fallback.put(tag, newEl)
-        oldEl
+        Some(oldEl)
+      } else {
+        None
       }
-
-      Some(oldEl)
     }
 
     def unmap(tag: Int): Option[T] = synchronized {
+      if (!inRange(tag)) return None
+
       val res = if (inFast(tag)) {
         val el = getFast(tag)
         setFast(tag, null.asInstanceOf[T])
         Option(el)
-      } else
-        Option(fallback.remove(tag))
+      } else if (fallback.containsKey(tag)) {
+        Some(fallback.remove(tag))
+      } else {
+        None
+      }
 
       set.release(tag)
       res
     }
 
     def get(tag: Int): Option[T] = synchronized {
-      if (inFast(tag))
-        Option(getFast(tag))
-      else
-        Option(fallback.get(tag))
+      if (!inRange(tag)) return None
+
+      if (inFast(tag)) Option(getFast(tag))
+      else Option(fallback.get(tag))
     }
 
-    private[this] def contains(tag: Int) =
-      (inFast(tag) && getFast(tag) != null) || fallback.containsKey(tag)
+    private[this] def inRange(tag: Int): Boolean =
+      tag >= set.range.start && tag <= set.range.end
 
     def iterator: Iterator[(Int, T)] = set.iterator flatMap { tag =>
       synchronized {

@@ -1,5 +1,6 @@
 package com.twitter.finagle.mux
 
+import com.twitter.conversions.time._
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.Lessor
@@ -39,7 +40,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   with IntegrationPatience {
   val tracer = new BufferingTracer
 
-  class Ctx {
+  class Ctx(config: FailureDetector.Config = FailureDetector.NullConfig) {
     import Message.{encode, decode}
 
     val clientToServer = new AsyncQueue[Message]
@@ -56,7 +57,11 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       }
 
     val service = mock[Service[Request, Response]]
-    val client = new ClientDispatcher("test", clientTransport, NullStatsReceiver, FailureDetector.GlobalFlagConfig)
+
+    val session = new ClientSession(
+      clientTransport, config, "test", NullStatsReceiver)
+    val client = ClientDispatcher.newRequestResponse(session)
+
     val nping = new AtomicInteger(0)
     val pingReq, pingRep = new Latch
     def ping() = {
@@ -71,7 +76,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
         case Message.Tdispatch(tag, _, _, _, _) if !canDispatch =>
           Future.value(Message.Rerr(tag, "Tdispatch not enabled"))
         case Message.Tping(tag) =>
-          ping() before Future.value(Message.Rping(tag))
+          ping().before { Future.value(Message.Rping(tag)) }
         case req => service(req)
       }
     }
@@ -124,31 +129,16 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("server responds to pings") {
-    sessionFailureDetector.let("none") {
-      val ctx = new Ctx
-      import ctx._
-
-      for (i <- 0 until 5) {
-        assert(nping.get == i)
-        val pinged = client.ping()
-        assert(!pinged.isDone)
-        assert(nping.get == i+1)
-        pingRep.flip()
-        assert(pinged.isDone)
-      }
-    }
-  }
-
-  test("concurrent pings") {
-    sessionFailureDetector.let("none") {
-      val ctx = new Ctx
-      import ctx._
-
-      val pinged = (client.ping() join client.ping()).unit
+    val ctx = new Ctx
+    import ctx._
+    for (i <- 0 until 5) {
+      assert(nping.get == i)
+      val pinged = session.ping()
       assert(!pinged.isDone)
-      assert(nping.get == 2)
       pingRep.flip()
+      Await.result(pinged, 30.seconds)
       assert(pinged.isDone)
+      assert(nping.get == i+1)
     }
   }
 
@@ -269,30 +259,29 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("failure detection") {
-    sessionFailureDetector.let("threshold:10.milliseconds:2") {
-      val ctx = new Ctx
-      import ctx._
+    val config = FailureDetector.ThresholdConfig(10.milliseconds)
+    val ctx = new Ctx(config)
+    import ctx._
 
-      assert(nping.get == 1)
-      assert(client.status == Status.Busy)
+    assert(nping.get == 1)
+    assert(client.status == Status.Busy)
+    pingRep.flip()
+    Status.awaitOpen(client.status)
+
+    // This is technically racy, but would require a pretty
+    // pathological test environment.
+    assert(client.status == Status.Open)
+    eventually { assert(client.status == Status.Busy) }
+
+    // Now begin replying.
+    def loop(): Future[Unit] = {
+      val f = pingReq.get
       pingRep.flip()
-      Status.awaitOpen(client.status)
-
-      // This is technically racy, but would require a pretty
-      // pathological test environment.
+      f.before(loop())
+    }
+    loop()
+    eventually {
       assert(client.status == Status.Open)
-      eventually { assert(client.status == Status.Busy) }
-
-      // Now begin replying.
-      def loop(): Future[Unit] = {
-        val f = pingReq.get
-        pingRep.flip()
-        f before loop()
-      }
-      loop()
-      eventually {
-        assert(client.status == Status.Open)
-      }
     }
   }
 }

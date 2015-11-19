@@ -259,8 +259,8 @@ private[twitter] class ServerDispatcher(
     case Message.Rdrain(1) if state.get == State.Draining =>
       tracker.drain()
 
-    case m@Message.Tmessage(tag) =>
-      val msg = Message.Rerr(tag, f"Did not understand Tmessage ${m.typ}%d")
+    case m: Message =>
+      val msg = Message.Rerr(m.tag, f"Did not understand Tmessage ${m.typ}%d")
       write(msg)
   }
 

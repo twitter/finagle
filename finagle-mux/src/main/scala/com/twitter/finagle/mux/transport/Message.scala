@@ -282,7 +282,7 @@ private[twitter] object Message {
    * use it, since a client can only have one outstanding ping per
    * tag.
    */
-  final class PreEncodedTPing extends Message {
+  final class PreEncodedTping extends Message {
     def typ = ???
     def tag = ???
 
@@ -548,7 +548,7 @@ private[twitter] object Message {
   }
 
   def encode(msg: Message): ChannelBuffer = msg match {
-    case m: PreEncodedTPing => msg.buf
+    case m: PreEncodedTping => msg.buf
     case m: Message =>
       if (m.tag < MarkerTag || (m.tag & ~TagMSB) > MaxTag)
         throw new BadMessageException("invalid tag number %d".format(m.tag))

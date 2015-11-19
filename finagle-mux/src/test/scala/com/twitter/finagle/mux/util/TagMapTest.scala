@@ -1,46 +1,64 @@
 package com.twitter.finagle.mux.util
 
 import org.junit.runner.RunWith
+import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{OneInstancePerTest, FunSpec}
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class TagMapTest extends FunSpec with OneInstancePerTest {
-  def test(range: Range, fastSize: Int) {
-    describe("TagMap[range=%d until %d by %d, fastSize=%d]".format(
-        range.start, range.end, range.step, fastSize)) {
-      val set = TagSet(range)
+class TagMapTest extends FunSuite with GeneratorDrivenPropertyChecks {
+
+  val min = 8
+  val max = 10000
+
+  implicit val genTagSet: Arbitrary[TagSet] =
+    Arbitrary(for {
+      start <- Gen.choose(0, max)
+      end <- Gen.choose(start, max-min)
+    } yield TagSet(start to end+min))
+
+  test("map tags to elems") {
+    forAll { set: TagSet =>
+      val range = set.range
       val ints = TagMap[java.lang.Integer](set)
-
-      it("should maintain mappings between tags and elems") {
-        for (i <- range)
-          assert(ints.map(-i) == Some(i))
-        for (i <- range)
-          assert(ints.unmap(i) == Some(-i))
-      }
-
-      it("should iterate over the mapping") {
-        for (i <- range)
-          assert(ints.map(-i) == Some(i))
-
-        assert(ints.sameElements(range map (i => (i, -i))))
-
-        ints.unmap(3+range.start)
-        ints.unmap(8+range.start)
-        assert(ints.sameElements(range collect {
-          case i if i != 3+range.start && i != 8+range.start => (i, -i)
-        }))
-
-        // Works in the presence of sharing the underlying
-        // TagSet.
-        assert(set.acquire() == Some(3+range.start))
-        assert(ints.sameElements(range collect {
-          case i if i != 3+range.start && i != 8+range.start => (i, -i)
-        }))
-      }
+      for (i <- range) assert(ints.map(-i) == Some(i))
+      for (i <- range) assert(ints.unmap(i) == Some(-i))
     }
   }
 
-  for (range <- Seq(Range(0, 10), Range(10, 20)); fast <- Seq(0, 1, 5, 10))
-    test(range, fast)
+  test("ignore tags outside its range") {
+    forAll { set: TagSet =>
+      val range = set.range
+      val right = range.last+1
+      val ints = TagMap[java.lang.Integer](set)
+      assert(ints.unmap(right) == None)
+      val left = range.start-1
+      assert(ints.unmap(left) == None)
+    }
+  }
+
+  test("iterate over the mapping") {
+    forAll { set: TagSet =>
+      val range = set.range
+      val ints = TagMap[java.lang.Integer](set)
+
+      for (i <- range) assert(ints.map(-i) == Some(i))
+
+      assert(ints.sameElements(range.map { i => (i, -i) }))
+
+      ints.unmap(3+range.start)
+      ints.unmap(8+range.start)
+      assert(ints.sameElements(range.collect {
+        case i if i != 3+range.start && i != 8+range.start => (i, -i)
+      }))
+
+      // Works in the presence of sharing the underlying
+      // TagSet.
+      assert(set.acquire() == Some(3+range.start))
+      assert(ints.sameElements(range.collect {
+        case i if i != 3+range.start && i != 8+range.start => (i, -i)
+      }))
+    }
+  }
 }
