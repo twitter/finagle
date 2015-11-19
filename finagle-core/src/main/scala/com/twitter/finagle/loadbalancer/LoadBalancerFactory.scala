@@ -196,7 +196,7 @@ object LoadBalancerFactory {
             log.fine(s"$label: name resolution is pending")
           }
           Activity.Pending
-      })
+      }: Var[Activity.State[Set[SocketAddress]]])
 
       // Instead of simply creating a newBalancer here, we defer to the
       // traffic distributor to interpret `WeightedSocketAddresses`.

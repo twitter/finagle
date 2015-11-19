@@ -260,7 +260,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
     weightClasses.foldLeft(init) {
       case (_, Activity.Ok(wcs)) if wcs.isEmpty =>
         // Defer the handling of an empty destination set to `newBalancer`
-        val emptyBal = newBalancer(Activity(Var(Activity.Ok(Set.empty))))
+        val emptyBal = newBalancer(Activity(Var(Activity.Ok(Set.empty[ServiceFactory[Req, Rep]]))))
         updateMeanWeight(wcs)
         pending.updateIfEmpty(Return(emptyBal))
         emptyBal
