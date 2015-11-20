@@ -19,6 +19,10 @@ object Finagle extends Build {
   val scroogeVersion = "4.2.0" + suffix
 
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
+  val netty4Libs = Seq(
+    "io.netty" % "netty-handler" % "4.1.0.Beta7",
+    "io.netty" % "netty-transport" % "4.1.0.Beta7"
+  )
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
   val jacksonLibs = Seq(
@@ -168,7 +172,7 @@ object Finagle extends Build {
       )
   ) aggregate(
     // Core, support.
-    finagleCore, finagleTest, finagleStats,
+    finagleCore, finagleTest, finagleStats, finagleNetty4,
     finagleZipkin, finagleServersets, finagleCacheResolver,
     finagleException, finagleCommonsStats,
     finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
@@ -216,6 +220,17 @@ object Finagle extends Build {
       util("stats"),
       "com.twitter" % "jsr166e" % "1.0.0")
   ).dependsOn(finagleTest % "test")
+
+  lazy val finagleNetty4 = Project(
+    id = "finagle-netty4",
+    base = file("finagle-netty4"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-netty4",
+    libraryDependencies ++= Seq(util("core")),
+    libraryDependencies ++= netty4Libs
+  ).dependsOn(finagleCore)
 
   lazy val finagleOstrich4 = Project(
     id = "finagle-ostrich4",

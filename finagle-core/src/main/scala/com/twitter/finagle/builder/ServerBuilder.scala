@@ -17,8 +17,6 @@ import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.util
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.logging.Level
 import javax.net.ssl.SSLEngine
 import org.jboss.netty.channel.ServerChannelFactory
 import scala.annotation.implicitNotFound
@@ -318,6 +316,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def bindTo(address: SocketAddress): ServerBuilder[Req, Rep, HasCodec, Yes, HasName] =
     configured(BindTo(address))
 
+  @deprecated("use com.twitter.finagle.netty3.numWorkers flag instead", "2015-11-18")
   def channelFactory(cf: ServerChannelFactory): This =
     configured(Netty3Listener.ChannelFactory(cf))
 

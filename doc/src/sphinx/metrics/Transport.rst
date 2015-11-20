@@ -33,6 +33,9 @@ ChannelStatsHandler
 **connects**
   a counter of the total number of successful connections made
 
+**closes**
+  a counter of the total number of channel close operations
+
 **connection_duration**
   a histogram of the duration of the lifetime of a connection
 
