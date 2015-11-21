@@ -15,7 +15,8 @@ import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalComma
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
-import com.twitter.finagle.service.{FailFastFactory, FailureAccrualFactory}
+import com.twitter.finagle.service.{Backoff, FailFastFactory, FailureAccrualFactory}
+import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -163,13 +164,17 @@ object Memcached extends finagle.Client[Command, Response]
   }
 
   object Client {
+
+    private[this] val defaultFailureAccrualPolicy = () => FailureAccrualPolicy.consecutiveFailures(
+      100, Backoff.const(1.second))
+
     /**
      * Default stack parameters used for memcached client. We change the
      * load balancer to `p2cPeakEwma` as we have experience improved tail
      * latencies when coupled with the pipelining dispatcher.
      */
     val defaultParams: Stack.Params = StackClient.defaultParams +
-      FailureAccrualFactory.Param(100, () => 1.second) +
+      FailureAccrualFactory.Param(defaultFailureAccrualPolicy) +
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
       finagle.param.ProtocolLibrary("memcached")

@@ -79,6 +79,11 @@ Breaking API Changes
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-core: FailureAccrualFactory now uses a FailureAccrualPolicy to determine when to
+    mark an endpoint dead. The default policy, FailureAccrualPolicy.consecutiveFailures(),
+    mimicks existing functionality, and FailureAccrualPolicy.successRate() operates on the
+    exponentially weighted average success rate over a window of requests.``RB_ID=756921``
+
   * finagle-thrift: `c.t.f.ThriftRichClient` scoped stats label is now threaded
     properly through `newServiceIface` ``RB_ID=760157``
 
@@ -97,7 +102,7 @@ New Features
     InetResolver by caching successful DNS lookups indefinitely. It's scheme is 'fixedinet'.
     This is used by clients or resolvers that do not want or expect
     host->ip map changes (such as the zk2 resolver and twemcache client).
-    ``RB=753712``
+    ``RB_ID=753712``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

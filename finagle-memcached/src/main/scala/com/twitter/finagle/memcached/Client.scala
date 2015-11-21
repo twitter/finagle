@@ -12,6 +12,7 @@ import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.{text, _}
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
 import com.twitter.finagle.service.{Backoff, FailedService, FailureAccrualFactory}
+import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
 import com.twitter.io.{Buf, Charsets}
@@ -701,12 +702,12 @@ private[finagle] object KetamaFailureAccrualFactory {
         _stats: finagle.param.Stats,
         next: ServiceFactory[Req, Rep]
       ) = failureAccrual match {
-          case Param.Configured(numFailures, markDeadFor) =>
+          case Param.Configured(policy) =>
             val Memcached.param.EjectFailedHost(ejectFailedHost) = _ejectFailedHost
             val finagle.param.Timer(timer) = _timer
             val finagle.param.Stats(stats) = _stats
-            new KetamaFailureAccrualFactory[Req, Rep](next, numFailures, markDeadFor,
-              timer, key, healthBroker, ejectFailedHost, stats)
+            new KetamaFailureAccrualFactory[Req, Rep](next, policy(), timer, key,
+              healthBroker, ejectFailedHost, stats)
 
           case Param.Replaced(f) =>
             val param.Timer(timer) = _timer
@@ -724,8 +725,7 @@ private[finagle] object KetamaFailureAccrualFactory {
  */
 private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
-    numFailures: Int,
-    markDeadFor: Stream[Duration],
+    failureAccrualPolicy: FailureAccrualPolicy,
     timer: Timer,
     key: KetamaClientKey,
     healthBroker: Broker[NodeHealth],
@@ -733,48 +733,11 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     statsReceiver: StatsReceiver)
   extends FailureAccrualFactory[Req, Rep](
     underlying,
-    numFailures,
-    markDeadFor,
+    failureAccrualPolicy,
     timer,
     statsReceiver)
 {
   import FailureAccrualFactory._
-  def this(
-    underlying: ServiceFactory[Req, Rep],
-    numFailures: Int,
-    markDeadFor: () => Duration,
-    timer: Timer,
-    key: KetamaClientKey,
-    healthBroker: Broker[NodeHealth],
-    ejectFailedHost: Boolean,
-    statsReceiver: StatsReceiver
-  ) = this(
-    underlying,
-    numFailures,
-    Backoff.fromFunction(markDeadFor),
-    timer,
-    key,
-    healthBroker,
-    ejectFailedHost,
-    statsReceiver)
-
-  def this(
-    underlying: ServiceFactory[Req, Rep],
-    numFailures: Int,
-    markDeadFor: Duration,
-    timer: Timer,
-    key: KetamaClientKey,
-    healthBroker: Broker[NodeHealth],
-    ejectFailedHost: Boolean
-  ) = this(
-    underlying,
-    numFailures,
-    Backoff.const(markDeadFor),
-    timer,
-    key,
-    healthBroker,
-    ejectFailedHost,
-    ClientStatsReceiver.scope("memcached_client"))
 
   def this(
     underlying: ServiceFactory[Req, Rep],
@@ -786,8 +749,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     ejectFailedHost: Boolean
   ) = this(
     underlying,
-    numFailures,
-    Backoff.fromFunction(markDeadFor),
+    FailureAccrualPolicy.consecutiveFailures(numFailures, Backoff.fromFunction(markDeadFor)),
     timer,
     key,
     healthBroker,
@@ -810,8 +772,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     case Throw(e) => false
   }
 
-  override def markDead() {
-    super.markDead()
+  override protected def didMarkDead() {
     if (ejectFailedHost) healthBroker ! NodeMarkedDead(key)
   }
 
@@ -824,7 +785,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
     getState match {
-      case Alive(_, _) | ProbeOpen(_)  => super.apply(conn)
+      case Alive | ProbeOpen  => super.apply(conn)
       // One finagle client presents one node on the Ketama ring,
       // the load balancer has one cache client. When the client
       // is in a busy state, continuing to dispatch requests is likely

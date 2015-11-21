@@ -37,6 +37,7 @@ import com.twitter.finagle.service.Retries;
 import com.twitter.finagle.service.RetryBudgets;
 import com.twitter.finagle.service.RetryPolicy;
 import com.twitter.finagle.service.TimeoutFilter;
+import com.twitter.finagle.service.exp.FailureAccrualPolicies;
 import com.twitter.finagle.socks.SocksProxyFlags;
 import com.twitter.finagle.ssl.Engine;
 import com.twitter.finagle.stats.NullStatsReceiver;
@@ -93,6 +94,8 @@ public class StackParamCompilationTest {
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
           .configured(new FailFastFactory.FailFast(true).mk())
         .configured(FailureAccrualFactory.Param(10, Duration.Bottom()).mk())
+        .configured(FailureAccrualFactory.Param(FailureAccrualPolicies.newConsecutiveFailuresPolicy(
+          3, Duration.fromSeconds(0))).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())

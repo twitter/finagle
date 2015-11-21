@@ -7,6 +7,7 @@ import com.twitter.finagle.Memcached
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.service._
+import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.WriteException
 import com.twitter.util.{Time, Await}
@@ -23,8 +24,10 @@ class MemcachedTest extends FunSuite
   with IntegrationPatience
 {
   test("Memcached.Client has expected stack and params") {
+    val markDeadFor = Backoff.const(1.second)
+    val failureAccrualPolicy = FailureAccrualPolicy.consecutiveFailures(20, markDeadFor)
     val client = Memcached.client
-      .configured(FailureAccrualFactory.Param(20, () => 1.second))
+      .configured(FailureAccrualFactory.Param(failureAccrualPolicy))
       .configured(Transporter.ConnectTimeout(100.milliseconds))
       .configured(TimeoutFilter.Param(200.milliseconds))
       .configured(TimeoutFactory.Param(200.milliseconds))
@@ -35,9 +38,10 @@ class MemcachedTest extends FunSuite
     assert(stack.contains(SingletonPool.role))
 
     val params = client.params
-    val FailureAccrualFactory.Param.Configured(numFailures, markDeadFor) = params[FailureAccrualFactory.Param]
-    assert(numFailures == 20)
-    assert(markDeadFor.take(10).force.toSeq == (0 until 10 map { _ => 1.second }))
+
+    val FailureAccrualFactory.Param.Configured(policy) = params[FailureAccrualFactory.Param]
+    assert(policy() == failureAccrualPolicy)
+    assert(markDeadFor.take(10).force.toSeq === (0 until 10 map { _ => 1.second }))
     assert(params[Transporter.ConnectTimeout] == Transporter.ConnectTimeout(100.milliseconds))
     assert(params[Memcached.param.EjectFailedHost] == Memcached.param.EjectFailedHost(false))
     assert(params[FailFastFactory.FailFast] == FailFastFactory.FailFast(false))

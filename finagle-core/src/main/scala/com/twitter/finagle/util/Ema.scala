@@ -42,6 +42,14 @@ private[finagle] class Ema(window: Long) {
    * control your own clock, since the current value depends on it.
    */
   def last: Double = synchronized { ema }
+
+  /**
+   * Reset the average to 0 and erase all observations.
+   */
+  def reset(): Unit = synchronized {
+    time = Long.MinValue
+    ema = 0
+  }
 }
 
 private[finagle] object Ema {
