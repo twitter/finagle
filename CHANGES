@@ -22,12 +22,16 @@ New Features
   * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
     method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
 
+  * finagle-http: `c.t.f.http.exp.Multipart` now supports both in-memory and on-disk file uploads.
+    ``RB_ID=RB_ID=769889``
+
   * finagle-stats: Added `c.t.f.stats` now has a `statsFilterFile` flag which will read a blacklist
     of regex, newline-separated values. It will be used along with the `statsFilter` flag for stats
     filtering. ``RB_ID=764914``
 
 Deprecations
 ~~~~~~~~~~~~
+
   * finagle-core: the #channelFactory method of `c.t.f.builder.ServerBuilder` has been deprecated
     in favor of the `c.t.f.netty3.numWorkers` flag. ``RB_ID=718688``
 
@@ -67,6 +71,11 @@ Breaking API Changes
 
   * finagle-core: Replaced `c.t.f.builder.ClientConfig.Retries` with
     `c.t.f.service.Retries.Policy`. ``RB_ID=760213``
+
+  * finagle-http: `c.t.f.http.exp.Multipart.decodeNonChunked` has been removed from
+    the public API. Use `c.t.f.http.Request.multipart` instead. Also
+    `c.t.f.http.exp.Multipart.FileUpload` is no longer a case class, but base trait
+    for `Multipart.InMemoryFileUpload` and `Multipart.OnDiskFileUpload`. ``RB_ID=769889``
 
   * finagle-mux: `c.t.f.FailureDetector.apply` method is changed to private scope,
     to reduce API surface area. Using `FailureDetector.Config` is enough to config

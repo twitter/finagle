@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
+import com.twitter.finagle.http.exp.Multipart
 import com.twitter.finagle.http.netty.{HttpRequestProxy, Bijections}
 import com.twitter.io.{Charsets, Reader}
 import java.net.{InetAddress, InetSocketAddress}
@@ -9,7 +10,6 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
-import scala.annotation.varargs
 import scala.beans.BeanProperty
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
@@ -26,7 +26,7 @@ abstract class Request extends Message with HttpRequestProxy {
   /**
    * Arbitrary user-defined context associated with this request object.
    * [[com.twitter.collection.RecordSchema.Record RecordSchema.Record]] is
-   * used here, rather than [[com.twitter.finagle.Context Context]] or similar
+   * used here, rather than [[com.twitter.finagle.context.Context Context]] or similar
    * out-of-band mechanisms, to make the connection between the request and its
    * associated context explicit.
    */
@@ -35,18 +35,53 @@ abstract class Request extends Message with HttpRequestProxy {
 
   def isRequest = true
 
+  /**
+   * Returns a [[ParamMap]] instance, which maintains query string and url-encoded
+   * params associated with this request.
+   */
   def params: ParamMap = _params
   private[this] lazy val _params: ParamMap = new RequestParamMap(this)
 
-  def method: Method           = from(getMethod)
+  /**
+   * Returns an _optional_ [[Multipart]] instance, which maintains the
+   * `multipart/form-data` content of this non-chunked, POST request. If
+   * this requests is either streaming or non-POST, this method returns
+   * `None`.
+   *
+   * Note: This method is a part of an experimental API for handling
+   * multipart HTTP data and it will likely be changed in future in order
+   * to support streaming requests.
+   */
+  def multipart: Option[Multipart] = _multipart
+  private[this] lazy val _multipart: Option[Multipart] =
+    if (!isChunked && method == Method.Post)
+      Some(Multipart.decodeNonChunked(this))
+    else None
+
+  /**
+   * Returns the HTTP method of this request.
+   */
+  def method: Method = from(getMethod())
+
+  /**
+   * Sets the HTTP method of this request to the given `method`.
+   */
   def method_=(method: Method) = setMethod(from(method))
-  def uri: String                  = getUri()
-  def uri_=(uri: String)           { setUri(uri) }
+
+  /**
+   * Returns the URI of this request.
+   */
+  def uri: String = getUri()
+
+  /**
+   * Set the URI of this request to the given `uri`.
+   */
+  def uri_=(uri: String) = setUri(uri)
 
   /** Path from URI. */
   @BeanProperty
   def path: String = {
-    val u = getUri
+    val u = uri
     u.indexOf('?') match {
       case -1 => u
       case n  => u.substring(0, n)
@@ -169,7 +204,7 @@ abstract class Request extends Message with HttpRequestProxy {
     bytes
   }
 
-  override def toString =
+  override def toString: String =
     "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
 }
 
@@ -204,7 +239,7 @@ object Request {
   /**
    * Create an HTTP/1.1 GET Request from query string parameters.
    *
-   * @params params a list of key-value pairs representing the query string.
+   * @param params a list of key-value pairs representing the query string.
    */
   @varargs
   def apply(params: Tuple2[String, String]*): Request =
@@ -213,7 +248,7 @@ object Request {
   /**
    * Create an HTTP/1.1 GET Request from URI and query string parameters.
    *
-   * @params params a list of key-value pairs representing the query string.
+   * @param params a list of key-value pairs representing the query string.
    */
   def apply(uri: String, params: Tuple2[String, String]*): Request = {
     val encoder = new QueryStringEncoder(uri)
