@@ -61,7 +61,7 @@ Runtime Behavior Changes
   * finagle-serversets: The `c.t.f.serverset2.Zk2Resolver` now surfaces `Addr.Pending`
     when it detects that its underlying ZooKeeper client is unhealthy. Unhealthy is defined
     as non-connected for greater than its 'unhealthyWindow' (which defaults to 5 minutes).
-    ``RB_ID=`760771`
+    ``RB_ID=760771``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
