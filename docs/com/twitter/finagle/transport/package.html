@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>transport - com.twitter.finagle.transport</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>transport</h1>
+        <h1>transport</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,10 +77,14 @@
       <span class="symbol">
         <a href="QueueTransport.html"><span class="name">QueueTransport</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.transport.QueueTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.transport.QueueTransport.Out">Out</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <code>Transport</code> interface to a pair of queues (one for reading, one
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.package@QueueTransport[In,Out]extendsTransport[In,Out]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <code>Transport</code> interface to a pair of queues (one for reading, one
 for writing); useful for testing.</p>
-    </li><li name="com.twitter.finagle.transport.Transport" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.transport.Transport" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Transport[In,Out]extendsClosable"></a>
       <a id="Transport[In,Out]:Transport[In,Out]"></a>
       <h4 class="signature">
@@ -83,9 +95,17 @@ for writing); useful for testing.</p>
       <span class="symbol">
         <a href="Transport.html"><span class="name">Transport</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A transport is a representation of a stream of objects that may be
-read from and written to asynchronously.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.package@Transport[In,Out]extendsClosable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A transport is a representation of a stream of objects that may be
+read from and written to asynchronously.</p><div class="fullcomment"><div class="comment cmt"><p>A transport is a representation of a stream of objects that may be
+read from and written to asynchronously. Transports are connected
+to some endpoint, typically via a channel pipeline that performs
+encoding and decoding.
+</p></div></div>
     </li><li name="com.twitter.finagle.transport.TransportFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="TransportFactoryextendsAnyRef"></a>
       <a id="TransportFactory:TransportFactory"></a>
@@ -95,10 +115,14 @@ read from and written to asynchronously.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="TransportFactory.html"><span class="name">TransportFactory</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="TransportFactory.html"><span class="name">TransportFactory</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A factory for transports: they are specially encoded as to be
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.package@TransportFactoryextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A factory for transports: they are specially encoded as to be
 polymorphic.</p>
     </li></ol>
             </div>
@@ -118,8 +142,12 @@ polymorphic.</p>
       <span class="symbol">
         <a href="Transport$.html"><span class="name">Transport</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">A collection of <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s useful for configuring
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.package@Transport" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A collection of <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">com.twitter.finagle.Stack.Param</a>'s useful for configuring
 a <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">com.twitter.finagle.transport.Transport</a>.</p>
     </li></ol>
             </div>
@@ -146,6 +174,7 @@ a <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Tr
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

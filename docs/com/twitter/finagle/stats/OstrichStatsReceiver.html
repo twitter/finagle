@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>OstrichStatsReceiver - com.twitter.finagle.stats.OstrichStatsReceiver</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,15 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <img alt="Class" src="../../../../lib/class_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.stats">stats</a></p>
-        <h1>OstrichStatsReceiver</h1>
+        <h1>OstrichStatsReceiver</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="com.twitter.finagle.stats">package stats</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -41,7 +51,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -67,7 +77,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -90,7 +99,11 @@
       <span class="symbol">
         <span class="name">OstrichStatsReceiver</span><span class="params">(<span name="repr">repr: <span class="extype" name="com.twitter.ostrich.stats.StatsCollection">StatsCollection</span></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@&lt;init&gt;(repr:com.twitter.ostrich.stats.StatsCollection):com.twitter.finagle.stats.OstrichStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;():com.twitter.finagle.stats.OstrichStatsReceiver"></a>
@@ -103,7 +116,11 @@
       <span class="symbol">
         <span class="name">OstrichStatsReceiver</span><span class="params">()</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@&lt;init&gt;():com.twitter.finagle.stats.OstrichStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(repr:com.twitter.ostrich.stats.StatsCollection,delimiter:String):com.twitter.finagle.stats.OstrichStatsReceiver"></a>
@@ -114,9 +131,13 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">OstrichStatsReceiver</span><span class="params">(<span name="repr">repr: <span class="extype" name="com.twitter.ostrich.stats.StatsCollection">StatsCollection</span> = <span class="symbol">com.twitter.ostrich.stats.Stats</span></span>, <span name="delimiter">delimiter: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;/&quot;</span></span>)</span>
+        <span class="name">OstrichStatsReceiver</span><span class="params">(<span name="repr">repr: <span class="extype" name="com.twitter.ostrich.stats.StatsCollection">StatsCollection</span> = <span class="symbol"><span class="name"><a href="../../../package.html">Stats</a></span></span></span>, <span name="delimiter">delimiter: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;/&quot;</span></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@&lt;init&gt;(repr:com.twitter.ostrich.stats.StatsCollection,delimiter:String):com.twitter.finagle.stats.OstrichStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -128,19 +149,6 @@
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -149,10 +157,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -162,24 +174,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -188,10 +191,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges#addGauge" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addGauge(name:String*)(f:=&gt;Float):com.twitter.finagle.stats.Gauge"></a>
       <a id="addGauge(String*)(⇒Float):Gauge"></a>
@@ -201,9 +208,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Gauge" class="extype" target="_top">Gauge</a></span>
+        <span class="name">addGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Gauge" class="extype" target="_top">Gauge</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@addGauge(name:String*)(f:=&gt;Float):com.twitter.finagle.stats.Gauge" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiverWithCumulativeGauges → StatsReceiver</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -216,7 +227,11 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -227,9 +242,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -248,7 +267,11 @@
       <span class="symbol">
         <span class="name">counter</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Counter" class="extype" target="_top">Counter</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@counter(name:String*):com.twitter.finagle.stats.Counter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.OstrichStatsReceiver">OstrichStatsReceiver</a> → StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#counter0" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="counter0(name:String):com.twitter.finagle.stats.Counter"></a>
@@ -261,7 +284,11 @@
       <span class="symbol">
         <span class="name">counter0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Counter" class="extype" target="_top">Counter</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@counter0(name:String):com.twitter.finagle.stats.Counter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#delimiter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="delimiter:String"></a>
@@ -274,7 +301,11 @@
       <span class="symbol">
         <span class="name">delimiter</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@delimiter:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#deregisterGauge" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deregisterGauge(name:Seq[String]):Unit"></a>
@@ -285,9 +316,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">deregisterGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">deregisterGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@deregisterGauge(name:Seq[String]):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.OstrichStatsReceiver">OstrichStatsReceiver</a> → StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
@@ -298,9 +333,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -311,9 +350,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -324,9 +367,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -345,7 +392,11 @@
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -356,9 +407,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -369,9 +424,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#isNull" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isNull:Boolean"></a>
@@ -382,9 +441,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isNull</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isNull</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@isNull:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -395,9 +458,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -408,9 +475,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -421,9 +492,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges#numUnderlying" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="numUnderlying(name:String*):Int"></a>
@@ -434,9 +509,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">numUnderlying</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">numUnderlying</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@numUnderlying(name:String*):Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#provideGauge" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="provideGauge(name:String*)(f:=&gt;Float):Unit"></a>
@@ -447,9 +526,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">provideGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">provideGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@provideGauge(name:String*)(f:=&gt;Float):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#registerGauge" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="registerGauge(name:Seq[String],f:=&gt;Float):Unit"></a>
@@ -460,10 +543,31 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">registerGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">registerGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@registerGauge(name:Seq[String],f:=&gt;Float):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.OstrichStatsReceiver">OstrichStatsReceiver</a> → StatsReceiverWithCumulativeGauges</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges#registerLargeGaugeLinter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="registerLargeGaugeLinter(rules:com.twitter.util.lint.Rules):Unit"></a>
+      <a id="registerLargeGaugeLinter(Rules):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">registerLargeGaugeLinter</span><span class="params">(<span name="rules">rules: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.lint.Rules" class="extype" target="_top">Rules</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@registerLargeGaugeLinter(rules:com.twitter.util.lint.Rules):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#repr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="repr:com.twitter.ostrich.stats.StatsCollection"></a>
       <a id="repr:StatsCollection"></a>
@@ -475,7 +579,11 @@
       <span class="symbol">
         <span class="name">repr</span><span class="result">: <span class="extype" name="com.twitter.ostrich.stats.StatsCollection">StatsCollection</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@repr:com.twitter.ostrich.stats.StatsCollection" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.OstrichStatsReceiver">OstrichStatsReceiver</a> → StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#scope" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="scope(namespace:String):com.twitter.finagle.stats.StatsReceiver"></a>
@@ -488,7 +596,11 @@
       <span class="symbol">
         <span class="name">scope</span><span class="params">(<span name="namespace">namespace: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@scope(namespace:String):com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#scopeSuffix" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="scopeSuffix(suffix:String):com.twitter.finagle.stats.StatsReceiver"></a>
@@ -501,7 +613,11 @@
       <span class="symbol">
         <span class="name">scopeSuffix</span><span class="params">(<span name="suffix">suffix: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@scopeSuffix(suffix:String):com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#stat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stat(name:String*):com.twitter.finagle.stats.Stat"></a>
@@ -514,7 +630,11 @@
       <span class="symbol">
         <span class="name">stat</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@stat(name:String*):com.twitter.finagle.stats.Stat" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.OstrichStatsReceiver">OstrichStatsReceiver</a> → StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#stat0" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stat0(name:String):com.twitter.finagle.stats.Stat"></a>
@@ -527,7 +647,11 @@
       <span class="symbol">
         <span class="name">stat0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@stat0(name:String):com.twitter.finagle.stats.Stat" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -540,7 +664,11 @@
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.OstrichStatsReceiver#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -553,7 +681,11 @@
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.OstrichStatsReceiver">OstrichStatsReceiver</a> → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -564,9 +696,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -583,9 +719,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -602,9 +742,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -630,7 +774,11 @@
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.time instead">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@time[T](name:String*)(f:=&gt;T):T" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -646,7 +794,11 @@
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.time instead">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@time[T](unit:java.util.concurrent.TimeUnit,name:String*)(f:=&gt;T):T" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -662,7 +814,11 @@
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.time instead">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@time[T](unit:java.util.concurrent.TimeUnit,stat:com.twitter.finagle.stats.Stat)(f:=&gt;T):T" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -678,7 +834,11 @@
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.timeFuture instead">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@timeFuture[T](name:String*)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -694,7 +854,11 @@
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.timeFuture instead">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@timeFuture[T](unit:java.util.concurrent.TimeUnit,name:String*)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -710,7 +874,11 @@
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.timeFuture instead">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.OstrichStatsReceiver@timeFuture[T](unit:java.util.concurrent.TimeUnit,stat:com.twitter.finagle.stats.Stat)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -725,9 +893,9 @@
             </div><div class="parent" name="com.twitter.finagle.stats.StatsReceiver">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -744,6 +912,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>protocol - com.twitter.finagle.kestrel.protocol</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.kestrel">kestrel</a></p>
-        <h1>protocol</h1>
+        <h1>protocol</h1><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -67,9 +75,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Abort.html"><span class="name">Abort</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Abort.html"><span class="name">Abort</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@AbortextendsGetCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Close" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CloseextendsGetCommandwithProductwithSerializable"></a>
@@ -80,9 +92,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Close.html"><span class="name">Close</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Close.html"><span class="name">Close</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@CloseextendsGetCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.CloseAndOpen" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CloseAndOpenextendsGetCommandwithProductwithSerializable"></a>
@@ -93,9 +109,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CloseAndOpen.html"><span class="name">CloseAndOpen</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="CloseAndOpen.html"><span class="name">CloseAndOpen</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@CloseAndOpenextendsGetCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Command" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CommandextendsAnyRef"></a>
@@ -106,9 +126,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Command.html"><span class="name">Command</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Command.html"><span class="name">Command</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@CommandextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Delete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DeleteextendsCommandwithProductwithSerializable"></a>
@@ -119,9 +143,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Delete.html"><span class="name">Delete</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Delete.html"><span class="name">Delete</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@DeleteextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Deleted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DeletedextendsResponsewithProductwithSerializable"></a>
@@ -132,9 +160,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Deleted.html"><span class="name">Deleted</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Deleted.html"><span class="name">Deleted</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@DeletedextendsResponsewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.DumpConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DumpConfigextendsCommandwithProductwithSerializable"></a>
@@ -145,9 +177,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DumpConfig.html"><span class="name">DumpConfig</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DumpConfig.html"><span class="name">DumpConfig</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@DumpConfigextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.DumpStats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DumpStatsextendsCommandwithProductwithSerializable"></a>
@@ -158,9 +194,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DumpStats.html"><span class="name">DumpStats</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DumpStats.html"><span class="name">DumpStats</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@DumpStatsextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ErrorextendsResponsewithProductwithSerializable"></a>
@@ -171,9 +211,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Error.html"><span class="name">Error</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@ErrorextendsResponsewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Flush" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FlushextendsCommandwithProductwithSerializable"></a>
@@ -184,9 +228,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Flush.html"><span class="name">Flush</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Flush.html"><span class="name">Flush</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@FlushextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.FlushAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FlushAllextendsCommandwithProductwithSerializable"></a>
@@ -197,9 +245,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FlushAll.html"><span class="name">FlushAll</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="FlushAll.html"><span class="name">FlushAll</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@FlushAllextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Get" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GetextendsGetCommandwithProductwithSerializable"></a>
@@ -210,9 +262,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@GetextendsGetCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.GetCommand" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="GetCommandextendsCommand"></a>
@@ -225,7 +281,11 @@
       <span class="symbol">
         <a href="GetCommand.html"><span class="name">GetCommand</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@GetCommandextendsCommand" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Kestrel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KestrelextendsCodecFactory[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response]"></a>
@@ -238,7 +298,11 @@
       <span class="symbol">
         <a href="Kestrel.html"><span class="name">Kestrel</span></a><span class="result"> extends <a href="../../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@KestrelextendsCodecFactory[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.NotFound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NotFoundextendsResponsewithProductwithSerializable"></a>
@@ -249,9 +313,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NotFound.html"><span class="name">NotFound</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NotFound.html"><span class="name">NotFound</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@NotFoundextendsResponsewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Open" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="OpenextendsGetCommandwithProductwithSerializable"></a>
@@ -262,9 +330,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Open.html"><span class="name">Open</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Open.html"><span class="name">Open</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@OpenextendsGetCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Peek" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PeekextendsGetCommandwithProductwithSerializable"></a>
@@ -275,9 +347,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Peek.html"><span class="name">Peek</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Peek.html"><span class="name">Peek</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timeout">timeout: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="GetCommand.html" class="extype" name="com.twitter.finagle.kestrel.protocol.GetCommand">GetCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@PeekextendsGetCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Reload" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ReloadextendsCommandwithProductwithSerializable"></a>
@@ -288,9 +364,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Reload.html"><span class="name">Reload</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Reload.html"><span class="name">Reload</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@ReloadextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Response" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ResponseextendsAnyRef"></a>
@@ -301,9 +381,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@ResponseextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Set" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SetextendsCommandwithProductwithSerializable"></a>
@@ -314,9 +398,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="queueName">queueName: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@SetextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.ShutDown" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ShutDownextendsCommandwithProductwithSerializable"></a>
@@ -327,9 +415,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ShutDown.html"><span class="name">ShutDown</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ShutDown.html"><span class="name">ShutDown</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@ShutDownextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StatsextendsCommandwithProductwithSerializable"></a>
@@ -340,9 +432,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@StatsextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Stored" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StoredextendsResponsewithProductwithSerializable"></a>
@@ -353,9 +449,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stored.html"><span class="name">Stored</span></a><span class="params">()</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@StoredextendsResponsewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Value" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ValueextendsProductwithSerializable"></a>
@@ -366,9 +466,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Value.html"><span class="name">Value</span></a><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Value.html"><span class="name">Value</span></a><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@ValueextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Values" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ValuesextendsResponsewithProductwithSerializable"></a>
@@ -379,9 +483,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Values.html"><span class="name">Values</span></a><span class="params">(<span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<a href="Value.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Value">Value</a>]</span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Values.html"><span class="name">Values</span></a><span class="params">(<span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<a href="Value.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Value">Value</a>]</span>)</span><span class="result"> extends <a href="Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@ValuesextendsResponsewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Version" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="VersionextendsCommandwithProductwithSerializable"></a>
@@ -392,9 +500,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Version.html"><span class="name">Version</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Version.html"><span class="name">Version</span></a><span class="params">()</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@VersionextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -414,7 +526,11 @@
       <span class="symbol">
         <a href="CommandToEncoding$.html"><span class="name">CommandToEncoding</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@CommandToEncoding" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.Kestrel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Kestrel"></a>
@@ -427,7 +543,11 @@
       <span class="symbol">
         <a href="Kestrel$.html"><span class="name">Kestrel</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@Kestrel" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol.ResponseToEncoding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ResponseToEncoding"></a>
@@ -440,7 +560,11 @@
       <span class="symbol">
         <a href="ResponseToEncoding$.html"><span class="name">ResponseToEncoding</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.kestrel.protocol.package@ResponseToEncoding" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -467,6 +591,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>exp - com.twitter.finagle.mux.lease.exp</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.mux">mux</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.mux.lease">lease</a></p>
-        <h1>exp</h1>
+        <h1>exp</h1><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -88,7 +96,7 @@ to stop sending requests that it guesses will soon fail (for leases that will
 soon expire).</p><p>NB: large parts of this package might suddenly end up in util-jvm
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -114,7 +122,6 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -128,7 +135,7 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.mux.lease.exp.DedupingLogsReceiver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.mux.lease.exp.DedupingLogsReceiver" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DedupingLogsReceiverextendsLogsReceiver"></a>
       <a id="DedupingLogsReceiver:DedupingLogsReceiver"></a>
       <h4 class="signature">
@@ -139,8 +146,14 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
       <span class="symbol">
         <a href="DedupingLogsReceiver.html"><span class="name">DedupingLogsReceiver</span></a><span class="result"> extends <a href="LogsReceiver.html" class="extype" name="com.twitter.finagle.mux.lease.exp.LogsReceiver">LogsReceiver</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">This is not threadsafe.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@DedupingLogsReceiverextendsLogsReceiver" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This is not threadsafe.</p><div class="fullcomment"><div class="comment cmt"><p>This is not threadsafe.
+The assumption is that this is only used in a single-threaded context.
+</p></div></div>
     </li><li name="com.twitter.finagle.mux.lease.exp.GarbageCollectorAddable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GarbageCollectorAddableextendsAnyRef"></a>
       <a id="GarbageCollectorAddable:GarbageCollectorAddable"></a>
@@ -150,9 +163,13 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="package$$GarbageCollectorAddable.html"><span class="name">GarbageCollectorAddable</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="package$$GarbageCollectorAddable.html"><span class="name">GarbageCollectorAddable</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@GarbageCollectorAddableextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.lease.exp.LogsReceiver" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="LogsReceiverextendsAnyRef"></a>
@@ -163,9 +180,13 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="LogsReceiver.html"><span class="name">LogsReceiver</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="LogsReceiver.html"><span class="name">LogsReceiver</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@LogsReceiverextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -185,7 +206,11 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
       <span class="symbol">
         <a href="NullLogsReceiver$.html"><span class="name">NullLogsReceiver</span></a><span class="result"> extends <a href="LogsReceiver.html" class="extype" name="com.twitter.finagle.mux.lease.exp.LogsReceiver">LogsReceiver</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@NullLogsReceiver" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.lease.exp.drainerDebug" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="drainerDebug"></a>
@@ -196,9 +221,13 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="drainerDebug$.html"><span class="name">drainerDebug</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <a href="drainerDebug$.html"><span class="name">drainerDebug</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@drainerDebug" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.lease.exp.drainerDiscountRange" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="drainerDiscountRange"></a>
@@ -211,7 +240,11 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
       <span class="symbol">
         <a href="drainerDiscountRange$.html"><span class="name">drainerDiscountRange</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a>)]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@drainerDiscountRange" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.lease.exp.drainerEnabled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="drainerEnabled"></a>
@@ -222,9 +255,13 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="drainerEnabled$.html"><span class="name">drainerEnabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <a href="drainerEnabled$.html"><span class="name">drainerEnabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@drainerEnabled" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.lease.exp.drainerPercentile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="drainerPercentile"></a>
@@ -235,11 +272,15 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="drainerPercentile$.html"><span class="name">drainerPercentile</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
+        <a href="drainerPercentile$.html"><span class="name">drainerPercentile</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@drainerPercentile" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.mux.lease.exp.package#gcMxBeanToGc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mux.lease.exp#gcMxBeanToGc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="gcMxBeanToGc(coll:java.lang.management.GarbageCollectorMXBean):com.twitter.finagle.mux.lease.exp.package.GarbageCollectorAddable"></a>
       <a id="gcMxBeanToGc(GarbageCollectorMXBean):GarbageCollectorAddable"></a>
       <h4 class="signature">
@@ -250,7 +291,11 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
       <span class="symbol">
         <span class="name">gcMxBeanToGc</span><span class="params">(<span name="coll">coll: <span class="extype" name="java.lang.management.GarbageCollectorMXBean">GarbageCollectorMXBean</span></span>)</span><span class="result">: <a href="package$$GarbageCollectorAddable.html" class="extype" name="com.twitter.finagle.mux.lease.exp.GarbageCollectorAddable">GarbageCollectorAddable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@gcMxBeanToGc(coll:java.lang.management.GarbageCollectorMXBean):com.twitter.finagle.mux.lease.exp.package.GarbageCollectorAddable" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.lease.exp.nackOnExpiredLease" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="nackOnExpiredLease"></a>
@@ -261,9 +306,13 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="nackOnExpiredLease$.html"><span class="name">nackOnExpiredLease</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <a href="nackOnExpiredLease$.html"><span class="name">nackOnExpiredLease</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.mux.lease.exp.package@nackOnExpiredLease" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -275,9 +324,9 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -294,6 +343,7 @@ soon expire).</p><p>NB: large parts of this package might suddenly end up in uti
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

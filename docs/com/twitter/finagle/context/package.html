@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>context - com.twitter.finagle.context</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>context</h1>
+        <h1>context</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -58,7 +66,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.context.Context" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.context.Context" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ContextextendsAnyRef"></a>
       <a id="Context:Context"></a>
       <h4 class="signature">
@@ -67,11 +75,19 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Context.html"><span class="name">Context</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Context.html"><span class="name">Context</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A context contains a number of let-delimited bindings.</p>
-    </li><li name="com.twitter.finagle.context.LocalContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.package@ContextextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A context contains a number of let-delimited bindings.</p><div class="fullcomment"><div class="comment cmt"><p>A context contains a number of let-delimited bindings. Bindings
+are indexed by type Key[A] in a typesafe manner. Later bindings
+shadow earlier ones.</p><p>Note that the implementation of context maintains all bindings
+in a linked list; context lookup requires a linear search.
+</p></div></div>
+    </li><li name="com.twitter.finagle.context.LocalContext" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LocalContextextendsContext"></a>
       <a id="LocalContext:LocalContext"></a>
       <h4 class="signature">
@@ -82,9 +98,16 @@
       <span class="symbol">
         <a href="LocalContext.html"><span class="name">LocalContext</span></a><span class="result"> extends <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A type of context that is local to the process.</p>
-    </li><li name="com.twitter.finagle.context.MarshalledContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.package@LocalContextextendsContext" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A type of context that is local to the process.</p><div class="fullcomment"><div class="comment cmt"><p>A type of context that is local to the process. The type of Key is
+also unique (generative) to each instance of this context, so that keys
+cannot be used across different instances of this context type.
+</p></div></div>
+    </li><li name="com.twitter.finagle.context.MarshalledContext" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MarshalledContextextendsContext"></a>
       <a id="MarshalledContext:MarshalledContext"></a>
       <h4 class="signature">
@@ -95,9 +118,19 @@
       <span class="symbol">
         <a href="MarshalledContext.html"><span class="name">MarshalledContext</span></a><span class="result"> extends <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A marshalled context contains bindings that may be
-marshalled and sent across process boundaries.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.package@MarshalledContextextendsContext" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A marshalled context contains bindings that may be
+marshalled and sent across process boundaries.</p><div class="fullcomment"><div class="comment cmt"><p>A marshalled context contains bindings that may be
+marshalled and sent across process boundaries. A set
+of marshalled bindings may be restored in the local
+environment. Thus we can use marshalled contexts to
+propagate a set of bindings across a whole request
+tree.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -116,8 +149,12 @@ marshalled and sent across process boundaries.</p>
       <span class="symbol">
         <a href="Contexts$.html"><span class="name">Contexts</span></a>
       </span>
-      </h4>
-      <p class="comment cmt"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">com.twitter.finagle.context.Context</a>s that are managed by Finagle.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.package@Contexts" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">com.twitter.finagle.context.Context</a>s that are managed by Finagle.</p>
     </li></ol>
             </div>
 
@@ -143,6 +180,7 @@ marshalled and sent across process boundaries.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

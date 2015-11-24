@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart &mdash; Finagle 6.29.0 documentation</title>
+    <title>Quickstart &mdash; Finagle 6.30.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.29.0',
+        VERSION:     '6.30.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.29.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.30.0 documentation" href="index.html" />
     <link rel="next" title="Concurrent Programming with Futures" href="Futures.html" />
     <link rel="prev" title="User’s guide" href="index.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,14 +57,14 @@
         <li class="right" >
           <a href="index.html" title="User’s guide"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="quickstart">
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
@@ -89,7 +89,7 @@ name := &quot;quickstart&quot;
 
 version := &quot;1.0&quot;
 
-libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-httpx&quot; % &quot;6.29.0&quot;
+libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;6.30.0&quot;
 </pre>
 <p>Any file in this directory will now be compiled by <cite>sbt</cite>. In order to simplify
 installation, we recommend that you use the bootstrap <cite>sbt</cite> script available
@@ -102,54 +102,54 @@ $ chmod u+rx code/sbt
 <div class="section" id="a-minimal-http-server">
 <h2>A minimal HTTP server<a class="headerlink" href="#a-minimal-http-server" title="Permalink to this headline">¶</a></h2>
 <p>We&#8217;ll need to import a few things into our namespace.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Httpx</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.httpx</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
 </pre></div>
 </div>
 <p><cite>Service</cite> is the interface used to represent a server or a client
-(<a class="reference internal" href="ServicesAndFilters.html"><em>about which more later</em></a>). <cite>Httpx</cite> is Finagle&#8217;s HTTP
+(<a class="reference internal" href="ServicesAndFilters.html"><em>about which more later</em></a>). <cite>Http</cite> is Finagle&#8217;s HTTP
 client and server.</p>
 <p>Next, we&#8217;ll define a <cite>Service</cite> to serve our HTTP requests:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">httpx.Request</span>, <span class="kt">httpx.Response</span><span class="o">]</span> <span class="o">{</span>
-  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">httpx.Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">httpx.Response</span><span class="o">]</span> <span class="k">=</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">http.Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span>
     <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span>
-      <span class="n">httpx</span><span class="o">.</span><span class="nc">Response</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="n">version</span><span class="o">,</span> <span class="n">httpx</span><span class="o">.</span><span class="nc">Status</span><span class="o">.</span><span class="nc">Ok</span><span class="o">)</span>
+      <span class="n">http</span><span class="o">.</span><span class="nc">Response</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="n">version</span><span class="o">,</span> <span class="n">http</span><span class="o">.</span><span class="nc">Status</span><span class="o">.</span><span class="nc">Ok</span><span class="o">)</span>
     <span class="o">)</span>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>Services are functions from a request type (<cite>com.twitter.finagle.httpx.Request</cite>)
-to a <cite>Future</cite> of a response type (<cite>com.twitter.finagle.httpx.Response</cite>).
+<p>Services are functions from a request type (<cite>com.twitter.finagle.http.Request</cite>)
+to a <cite>Future</cite> of a response type (<cite>com.twitter.finagle.http.Response</cite>).
 Put another way: given a <em>request</em>, we must promise a <em>response</em> some
 time in the future. In this case, we just return a trivial HTTP-200
 response immediately (through <cite>Future.value</cite>), using the same
 version of HTTP with which the request was dispatched.</p>
 <p>Now that we&#8217;ve defined our <cite>Service</cite>, we&#8217;ll need to export
 it. We use Finagle&#8217;s Http server for this:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Httpx</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>The <cite>serve</cite> method takes a <em>bind target</em> (which port to expose the
 server) and the service itself. The server is responsible for
 listening for incoming connections, translating the HTTP wire protocol
-into <cite>com.twitter.finagle.httpx.Request</cite> objects, and translating
-our <cite>com.twitter.finagle.httpx.Response</cite> object back into its wire
+into <cite>com.twitter.finagle.http.Request</cite> objects, and translating
+our <cite>com.twitter.finagle.http.Response</cite> object back into its wire
 format, sending replies back to the client.</p>
 <p>The complete server:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Httpx</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.httpx</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
 
 <span class="k">object</span> <span class="nc">Server</span> <span class="k">extends</span> <span class="nc">App</span> <span class="o">{</span>
-  <span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">httpx.Request</span>, <span class="kt">httpx.Response</span><span class="o">]</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">httpx.Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">httpx.Response</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">http.Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span>
       <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span>
-        <span class="n">httpx</span><span class="o">.</span><span class="nc">Response</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="n">version</span><span class="o">,</span> <span class="n">httpx</span><span class="o">.</span><span class="nc">Status</span><span class="o">.</span><span class="nc">Ok</span><span class="o">)</span>
+        <span class="n">http</span><span class="o">.</span><span class="nc">Response</span><span class="o">(</span><span class="n">req</span><span class="o">.</span><span class="n">version</span><span class="o">,</span> <span class="n">http</span><span class="o">.</span><span class="nc">Status</span><span class="o">.</span><span class="nc">Ok</span><span class="o">)</span>
       <span class="o">)</span>
   <span class="o">}</span>
-  <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Httpx</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
   <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
 <span class="o">}</span>
 </pre></div>
@@ -170,41 +170,41 @@ $
 <h2>Using clients<a class="headerlink" href="#using-clients" title="Permalink to this headline">¶</a></h2>
 <p>In our server example, we define a <cite>Service</cite> to respond to requests.
 Clients work the other way around: we&#8217;re given a <cite>Service</cite> to <em>use</em>. Just as we
-exported services with the <cite>Httpx.serve</cite>, method, we can <em>import</em> them
-with a <cite>Httpx.newService</cite>, giving us an instance of
-<cite>Service[httpx.Request, httpx.Response]</cite>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">httpx.Request</span>, <span class="kt">httpx.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Httpx</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.scala-lang.org:80&quot;</span><span class="o">)</span>
+exported services with the <cite>Http.serve</cite>, method, we can <em>import</em> them
+with a <cite>Http.newService</cite>, giving us an instance of
+<cite>Service[http.Request, http.Response]</cite>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.scala-lang.org:80&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p><cite>client</cite> is a <cite>Service</cite> to which we can dispatch an <cite>httpx.Request</cite>
-and in return receive a <cite>Future[httpx.Response]</cite> — the promise of an
-<cite>httpx.Response</cite> (or an error) some time in the future. We furnish
+<p><cite>client</cite> is a <cite>Service</cite> to which we can dispatch an <cite>http.Request</cite>
+and in return receive a <cite>Future[http.Response]</cite> — the promise of an
+<cite>http.Response</cite> (or an error) some time in the future. We furnish
 <cite>newService</cite> with the <em>target</em> of the client: the host or set of hosts
 to which requests are dispatched.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">httpx</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">httpx</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
 <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="k">=</span> <span class="s">&quot;www.scala-lang.org&quot;</span>
-<span class="k">val</span> <span class="n">response</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">httpx.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">response</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>Now that we have <cite>response</cite>, a <cite>Future[httpx.Response]</cite>, we can register
+<p>Now that we have <cite>response</cite>, a <cite>Future[http.Response]</cite>, we can register
 a callback to notify us when the result is ready:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">resp</span><span class="k">:</span> <span class="kt">httpx.Response</span> <span class="o">=&gt;</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">resp</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
   <span class="n">println</span><span class="o">(</span><span class="s">&quot;GET success: &quot;</span> <span class="o">+</span> <span class="n">resp</span><span class="o">)</span>
 <span class="o">}</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">response</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>Completing the client:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Httpx</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.httpx</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
 
 <span class="k">object</span> <span class="nc">Client</span> <span class="k">extends</span> <span class="nc">App</span> <span class="o">{</span>
-  <span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">httpx.Request</span>, <span class="kt">httpx.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Httpx</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.scala-lang.org:80&quot;</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">httpx</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">httpx</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.scala-lang.org:80&quot;</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
   <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="k">=</span> <span class="s">&quot;www.scala-lang.org&quot;</span>
-  <span class="k">val</span> <span class="n">response</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">httpx.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
-  <span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">resp</span><span class="k">:</span> <span class="kt">httpx.Response</span> <span class="o">=&gt;</span>
+  <span class="k">val</span> <span class="n">response</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
+  <span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">resp</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
     <span class="n">println</span><span class="o">(</span><span class="s">&quot;GET success: &quot;</span> <span class="o">+</span> <span class="n">resp</span><span class="o">)</span>
   <span class="o">}</span>
   <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">response</span><span class="o">)</span>
@@ -223,16 +223,16 @@ GET success: Response(&quot;Http11 Status(200)&quot;)
 <p>Now we&#8217;re ready to create an HTTP proxy! Notice the symmetry above:
 servers <em>provide</em> a <cite>Service</cite>, while a client <em>uses</em> it. Indeed, an HTTP
 proxy can be constructed by just replacing the service we defined with
-one that was imported with a <cite>Httpx.newService</cite>:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Httpx</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.httpx.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+one that was imported with a <cite>Http.newService</cite>:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Http</span><span class="o">,</span> <span class="nc">Service</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">com.twitter.util.Await</span>
 
 <span class="k">object</span> <span class="nc">Proxy</span> <span class="k">extends</span> <span class="nc">App</span> <span class="o">{</span>
   <span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">Httpx</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.google.com:80&quot;</span><span class="o">)</span>
+    <span class="nc">Http</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.google.com:80&quot;</span><span class="o">)</span>
 
-  <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Httpx</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">client</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">client</span><span class="o">)</span>
   <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span>
 <span class="o">}</span>
 </pre></div>
@@ -255,7 +255,7 @@ X-Content-Type-Options: nosniff
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>LocalContext - com.twitter.finagle.context.LocalContext</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,15 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../lib/class_big.png" />
+        <img alt="Class" src="../../../../lib/class_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.context">context</a></p>
-        <h1>LocalContext</h1>
+        <h1>LocalContext</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="com.twitter.finagle.context">package context</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -44,7 +54,7 @@ also unique (generative) to each instance of this context, so that keys
 cannot be used across different instances of this context type.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -70,7 +80,6 @@ cannot be used across different instances of this context type.
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -93,14 +102,18 @@ cannot be used across different instances of this context type.
       <span class="symbol">
         <span class="name">LocalContext</span><span class="params">()</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@&lt;init&gt;():com.twitter.finagle.context.LocalContext" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.context.Context.Bound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.context.Context.Bound" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Bound[A]extendsContext.this.EnvwithProductwithSerializable"></a>
       <a id="Bound[A]:Bound[A]"></a>
       <h4 class="signature">
@@ -109,12 +122,18 @@ cannot be used across different instances of this context type.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Context$Bound.html"><span class="name">Bound</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Context$Bound.html"><span class="name">Bound</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.Bound.A">A</span></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">An environment with <code>key</code> bound to <code>value</code>; lookups for other keys
-are forwarded to <code>next</code>.</p>
-    </li><li name="com.twitter.finagle.context.Context.Cleared" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.Context@Bound[A]extendsContext.this.EnvwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An environment with <code>key</code> bound to <code>value</code>; lookups for other keys
+are forwarded to <code>next</code>.</p><div class="fullcomment"><div class="comment cmt"><p>An environment with <code>key</code> bound to <code>value</code>; lookups for other keys
+are forwarded to <code>next</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.context.Context.Cleared" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Cleared[A]extendsContext.this.EnvwithProductwithSerializable"></a>
       <a id="Cleared[A]:Cleared[A]"></a>
       <h4 class="signature">
@@ -123,10 +142,16 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Context$Cleared.html"><span class="name">Cleared</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Cleared.A">A</span>]</span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Context$Cleared.html"><span class="name">Cleared</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="next">next: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="key">key: <a href="Context.html#Key[A]" class="extmbr" name="com.twitter.finagle.context.Context.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.Cleared.A">A</span>]</span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">An environment without <code>key</code>.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.Context@Cleared[A]extendsContext.this.EnvwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An environment without <code>key</code>.</p><div class="fullcomment"><div class="comment cmt"><p>An environment without <code>key</code>. Lookups for other keys
+are forwarded to <code>next</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li><li name="com.twitter.finagle.context.Context.Env" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="EnvextendsAnyRef"></a>
       <a id="Env:Env"></a>
@@ -136,11 +161,15 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Context$Env.html"><span class="name">Env</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Context$Env.html"><span class="name">Env</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.Context@EnvextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.LocalContext.Key" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.context.LocalContext.Key" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Key[A]extendsAnyRef"></a>
       <a id="Key[A]:Key[A]"></a>
       <h4 class="signature">
@@ -149,11 +178,15 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LocalContext$Key.html"><span class="name">Key</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="LocalContext$Key.html"><span class="name">Key</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.context.LocalContext">LocalContext</a> → <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context.OrElse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@Key[A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.context.Context.OrElse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OrElseextendsContext.this.EnvwithProductwithSerializable"></a>
       <a id="OrElse:OrElse"></a>
       <h4 class="signature">
@@ -162,10 +195,15 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Context$OrElse.html"><span class="name">OrElse</span></a><span class="params">(<span name="left">left: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="right">right: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Context$OrElse.html"><span class="name">OrElse</span></a><span class="params">(<span name="left">left: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>, <span name="right">right: <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>)</span><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Concatenate two environments with left-hand side precedence.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.Context@OrElseextendsContext.this.EnvwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Concatenate two environments with left-hand side precedence.</p><div class="fullcomment"><div class="comment cmt"><p>Concatenate two environments with left-hand side precedence.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -174,19 +212,6 @@ are forwarded to <code>next</code>.</p>
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -195,10 +220,14 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -208,24 +237,15 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -234,11 +254,15 @@ are forwarded to <code>next</code>.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.context.Context.Empty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.context.Context.Empty" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Empty"></a>
       <a id="Empty:Empty"></a>
       <h4 class="signature">
@@ -249,8 +273,13 @@ are forwarded to <code>next</code>.</p>
       <span class="symbol">
         <a href="Context$Empty$.html"><span class="name">Empty</span></a><span class="result"> extends <a href="Context$Env.html" class="extype" name="com.twitter.finagle.context.Context.Env">Env</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">An empty environment.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.Context@Empty" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An empty environment.</p><div class="fullcomment"><div class="comment cmt"><p>An empty environment. No keys are present.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li><li name="com.twitter.finagle.context.Context#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply[A](key:Context.this.Key[A]):A"></a>
       <a id="apply[A](Key[A]):A"></a>
@@ -262,7 +291,11 @@ are forwarded to <code>next</code>.</p>
       <span class="symbol">
         <span class="name">apply</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.apply.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.apply.A">A</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@apply[A](key:Context.this.Key[A]):A" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Retrieve the current definition of a key.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current definition of a key.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
@@ -270,9 +303,8 @@ are forwarded to <code>next</code>.</p>
       <span class="symbol">&quot;If the key does not exist&quot;</span>
     </span>)</span>
               
-        </dd><dt>Exceptions thrown</dt><dd><span class="cmt">NoSuchElementException<p>when the key is undefined
-in the current request-local context.
-</p></span></dd></dl></div>
+        </dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="NoSuchElementException"><code>NoSuchElementException</code></span> when the key is undefined
+in the current request-local context.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -284,7 +316,11 @@ in the current request-local context.
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -295,9 +331,13 @@ in the current request-local context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -314,9 +354,13 @@ in the current request-local context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">contains</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.contains.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">contains</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.contains.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@contains[A](key:Context.this.Key[A]):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Tells whether <code>key</code> is defined in the current request-local
 context.</p><div class="fullcomment"><div class="comment cmt"><p>Tells whether <code>key</code> is defined in the current request-local
 context.
@@ -330,9 +374,13 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -343,9 +391,13 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -356,9 +408,13 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -375,9 +431,13 @@ context.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>
+        <span class="name">get</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="com.twitter.finagle.context.Context.get.A">A</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@get[A](key:Context.this.Key[A]):Option[A]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Retrieve the current definition of a key, but only
 if it is defined in the current request-local context.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current definition of a key, but only
 if it is defined in the current request-local context.
@@ -393,7 +453,11 @@ if it is defined in the current request-local context.
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.context.Context#getOrElse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getOrElse[A](key:Context.this.Key[A],orElse:()=&gt;A):A"></a>
@@ -406,7 +470,11 @@ if it is defined in the current request-local context.
       <span class="symbol">
         <span class="name">getOrElse</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="key">key: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.getOrElse.A">A</span>]</span>, <span name="orElse">orElse: () ⇒ <span class="extype" name="com.twitter.finagle.context.Context.getOrElse.A">A</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.getOrElse.A">A</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@getOrElse[A](key:Context.this.Key[A],orElse:()=&gt;A):A" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Retrieve the current definition of a key if it is defined.</p><div class="fullcomment"><div class="comment cmt"><p>Retrieve the current definition of a key if it is defined.
 If it is not defined, <code>orElse</code> is evaluated and returned.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
@@ -419,9 +487,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -432,9 +504,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.context.Context#let" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="let[A,B,R](key1:Context.this.Key[A],value1:A,key2:Context.this.Key[B],value2:B)(fn:=&gt;R):R"></a>
@@ -447,7 +523,11 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       <span class="symbol">
         <span class="name">let</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>, <span name="R">R</span>]</span><span class="params">(<span name="key1">key1: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span>]</span>, <span name="value1">value1: <span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span></span>, <span name="key2">key2: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.let.B">B</span>]</span>, <span name="value2">value2: <span class="extype" name="com.twitter.finagle.context.Context.let.B">B</span></span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@let[A,B,R](key1:Context.this.Key[A],value1:A,key2:Context.this.Key[B],value2:B)(fn:=&gt;R):R" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Bind two keys and values in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Bind two keys and values in the scope of <code>fn</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li><li name="com.twitter.finagle.context.Context#let" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -461,7 +541,11 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       <span class="symbol">
         <span class="name">let</span><span class="tparams">[<span name="A">A</span>, <span name="R">R</span>]</span><span class="params">(<span name="key">key: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span>]</span>, <span name="value">value: <span class="extype" name="com.twitter.finagle.context.Context.let.A">A</span></span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.let.R">R</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@let[A,R](key:Context.this.Key[A],value:A)(fn:=&gt;R):R" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Bind <code>value</code> to <code>key</code> in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Bind <code>value</code> to <code>key</code> in the scope of <code>fn</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li><li name="com.twitter.finagle.context.Context#letClear" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -475,7 +559,11 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       <span class="symbol">
         <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="keys">keys: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[_]*</span>)</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@letClear[R](keys:Context.this.Key[_]*)(fn:=&gt;R):R" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Unbind the passed-in keys, in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Unbind the passed-in keys, in the scope of <code>fn</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -487,9 +575,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.context.LocalContext#newKey" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="newKey[A]():LocalContext.this.Key[A]"></a>
@@ -502,7 +594,11 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       <span class="symbol">
         <span class="name">newKey</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">()</span><span class="result">: <a href="LocalContext$Key.html" class="extype" name="com.twitter.finagle.context.LocalContext.Key">Key</a>[<span class="extype" name="com.twitter.finagle.context.LocalContext.newKey.A">A</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@newKey[A]():LocalContext.this.Key[A]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A java-friendly key constructor.</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -513,9 +609,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -526,9 +626,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -541,7 +645,11 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -554,7 +662,11 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -565,9 +677,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -584,9 +700,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -603,9 +723,13 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.LocalContext@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -625,9 +749,9 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
         <div class="parent" name="com.twitter.finagle.context.Context">
               <h3>Inherited from <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -644,6 +768,7 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

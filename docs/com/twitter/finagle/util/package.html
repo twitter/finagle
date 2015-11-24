@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>util - com.twitter.finagle.util</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>util</h1>
+        <h1>util</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -41,7 +49,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -67,7 +75,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -81,7 +88,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.util.AsyncLatch" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.util.AsyncLatch" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="AsyncLatchextendsAnyRef"></a>
       <a id="AsyncLatch:AsyncLatch"></a>
       <h4 class="signature">
@@ -90,11 +97,24 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="AsyncLatch.html"><span class="name">AsyncLatch</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="AsyncLatch.html"><span class="name">AsyncLatch</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A construct providing latched, asynchronous execution of side-effecting
-functions.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@AsyncLatchextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A construct providing latched, asynchronous execution of side-effecting
+functions.</p><div class="fullcomment"><div class="comment cmt"><p>A construct providing latched, asynchronous execution of side-effecting
+functions. <a href="AsyncLatch.html#await(f:=&gt;Unit):Unit" class="extmbr" name="com.twitter.finagle.util.AsyncLatch#await">com.twitter.finagle.util.AsyncLatch#await</a> does not block, but
+the execution of functions passed to it may be delayed. That is, because the
+latch guarantees serial, non-concurrent execution, functions passed to
+<code>await</code> may have to wait until both of the following conditions are met:</p><p>1. No other functions are being executed
+2. The latch's count is zero</p><p>Thus, calling <a href="AsyncLatch.html#incr():Int" class="extmbr" name="com.twitter.finagle.util.AsyncLatch#incr">com.twitter.finagle.util.AsyncLatch#incr</a> will cause
+subsequent functions passed to <a href="AsyncLatch.html#await(f:=&gt;Unit):Unit" class="extmbr" name="com.twitter.finagle.util.AsyncLatch#await">com.twitter.finagle.util.AsyncLatch#await</a>
+to be delayed until the count is decremented to zero. Once the count is zero,
+functions are executed in the order that they are provided to <code>await</code>.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.Chan" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Chan[-T]extendsAnyRef"></a>
       <a id="Chan[-T]:Chan[T]"></a>
@@ -104,9 +124,13 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Chan.html"><span class="name">Chan</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Chan.html"><span class="name">Chan</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Chan[-T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.CloseNotifier" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CloseNotifierextendsAnyRef"></a>
@@ -117,11 +141,15 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="CloseNotifier.html"><span class="name">CloseNotifier</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="CloseNotifier.html"><span class="name">CloseNotifier</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Allows resources to register their handlers to be invoked when service is closing.</p>
-    </li><li name="com.twitter.finagle.util.ConcurrentRingBuffer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@CloseNotifierextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Allows resources to register their handlers to be invoked when service is closing.</p>
+    </li><li name="com.twitter.finagle.util.ConcurrentRingBuffer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConcurrentRingBuffer[T]extendsAnyRef"></a>
       <a id="ConcurrentRingBuffer[T]:ConcurrentRingBuffer[T]"></a>
       <h4 class="signature">
@@ -130,10 +158,22 @@ functions.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ConcurrentRingBuffer.html"><span class="name">ConcurrentRingBuffer</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="ConcurrentRingBuffer.html"><span class="name">ConcurrentRingBuffer</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A simple, lock-free, non-blocking ring buffer.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@ConcurrentRingBuffer[T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A simple, lock-free, non-blocking ring buffer.</p><div class="fullcomment"><div class="comment cmt"><p>A simple, lock-free, non-blocking ring buffer.</p><p>This differs from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.RingBuffer" class="extype" target="_top">com.twitter.util.RingBuffer</a> in that it is
+simpler (fewer features), and is fully concurrent (and hence also
+threadsafe). This should probably be  moved into util at some
+point.</p><p><b>Note:</b> For very high-rate usages, sizing buffers by powers of
+two may be advantageous.</p><p><b>Caveats:</b> References are kept to old entries until they are
+overwritten again. You can get around this by storing nullable
+references (though this would require another allocation for each
+item).
+</p></div></div>
     </li><li name="com.twitter.finagle.util.ConcurrentRingBufferBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConcurrentRingBufferBenchextendsStdBenchAnnotations"></a>
       <a id="ConcurrentRingBufferBench:ConcurrentRingBufferBench"></a>
@@ -145,7 +185,11 @@ functions.</p>
       <span class="symbol">
         <a href="ConcurrentRingBufferBench.html"><span class="name">ConcurrentRingBufferBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@ConcurrentRingBufferBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@State</span><span class="args">()</span>
               
@@ -161,9 +205,13 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Drv.html"><span class="name">Drv</span></a><span class="result"> extends (<a href="Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <a href="Drv.html"><span class="name">Drv</span></a><span class="result"> extends (<a href="Rng.html" class="extype" name="com.twitter.finagle.util.Rng">Rng</a>) ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Drvextendscom.twitter.finagle.util.Rng=&gt;Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.InetAddressUtilBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="InetAddressUtilBenchextendsStdBenchAnnotations"></a>
@@ -176,7 +224,11 @@ functions.</p>
       <span class="symbol">
         <a href="InetAddressUtilBench.html"><span class="name">InetAddressUtilBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@InetAddressUtilBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@State</span><span class="args">()</span>
               
@@ -192,11 +244,15 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="OnReady.html"><span class="name">OnReady</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="OnReady.html"><span class="name">OnReady</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A base type for something that signals its readiness asynchronously.</p>
-    </li><li name="com.twitter.finagle.util.Proc" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@OnReadyextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A base type for something that signals its readiness asynchronously.</p>
+    </li><li name="com.twitter.finagle.util.Proc" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Proc[-T]extendsChan[T]"></a>
       <a id="Proc[-T]:Proc[T]"></a>
       <h4 class="signature">
@@ -207,8 +263,15 @@ functions.</p>
       <span class="symbol">
         <a href="Proc.html"><span class="name">Proc</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <a href="Chan.html" class="extype" name="com.twitter.finagle.util.Chan">Chan</a>[<span class="extype" name="com.twitter.finagle.util.Proc.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A Proc is a process that can receive messages.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Proc[-T]extendsChan[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A Proc is a process that can receive messages.</p><div class="fullcomment"><div class="comment cmt"><p>A Proc is a process that can receive messages. Procs guarantee
+that exactly one message is delivered at a time, and that they are
+delivered in the order received.</p><p>They can be thought of as featherweight actors.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.ReporterFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ReporterFactoryextends(String,Option[java.net.SocketAddress])=&gt;com.twitter.util.Monitor"></a>
       <a id="ReporterFactory:ReporterFactory"></a>
@@ -218,11 +281,15 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ReporterFactory.html"><span class="name">ReporterFactory</span></a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
+        <a href="ReporterFactory.html"><span class="name">ReporterFactory</span></a><span class="result"> extends (<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@ReporterFactoryextends(String,Option[java.net.SocketAddress])=&gt;com.twitter.util.Monitor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.util.Ring" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.util.Ring" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RingextendsAnyRef"></a>
       <a id="Ring:Ring"></a>
       <h4 class="signature">
@@ -231,11 +298,27 @@ functions.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Ring.html"><span class="name">Ring</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Ring.html"><span class="name">Ring</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Class <code>Ring</code> implements a hash ring.</p>
-    </li><li name="com.twitter.finagle.util.Rng" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@RingextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Class <code>Ring</code> implements a hash ring.</p><div class="fullcomment"><div class="comment cmt"><p>Class <code>Ring</code> implements a hash ring. Given an array mapping
+indices to positions, the ring supplies the reverse mapping: to
+which index does a position belong?</p><p>Its distinguishing feature is that <code>Ring</code> can pick random
+positions in a range. (And then map them to their corresponding
+indices.) Ring can also pick without replacement two elements from
+a range.</p><pre><span class="kw">val</span> r = <span class="kw">new</span> Ring(<span class="std">Array</span>(<span class="num">1</span>,<span class="num">5</span>,<span class="num">20</span>))
+r(<span class="num">0</span>)  == <span class="num">0</span>
+r(<span class="num">1</span>)  == <span class="num">0</span>
+r(<span class="num">2</span>)  == <span class="num">1</span>
+r(<span class="num">5</span>)  == <span class="num">1</span>
+r(<span class="num">6</span>)  == <span class="num">2</span>
+r(<span class="num">20</span>) == <span class="num">2</span>
+r(<span class="num">21</span>) == <span class="num">0</span> <span class="cmt">// Wraps around; it's a ring!</span></pre></div></div>
+    </li><li name="com.twitter.finagle.util.Rng" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RngextendsAnyRef"></a>
       <a id="Rng:Rng"></a>
       <h4 class="signature">
@@ -244,10 +327,17 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Rng.html"><span class="name">Rng</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Rng.html"><span class="name">Rng</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A random number generator.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@RngextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A random number generator.</p><div class="fullcomment"><div class="comment cmt"><p>A random number generator. Java's divergent interfaces
+forces our hand here: ThreadLocalRandom does not conform
+to java.util.Random. We bridge this gap.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.Showable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Showable[-T]extendsAnyRef"></a>
       <a id="Showable[-T]:Showable[T]"></a>
@@ -257,12 +347,16 @@ functions.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Showable.html"><span class="name">Showable</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Showable.html"><span class="name">Showable</span></a><span class="tparams">[<span name="T">-T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Trait showable is a type-class for showing parsable
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Showable[-T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Trait showable is a type-class for showing parsable
 representations of objects.</p>
-    </li><li name="com.twitter.finagle.util.StackRegistry" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.util.StackRegistry" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="StackRegistryextendsAnyRef"></a>
       <a id="StackRegistry:StackRegistry"></a>
       <h4 class="signature">
@@ -271,25 +365,19 @@ representations of objects.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="StackRegistry.html"><span class="name">StackRegistry</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="StackRegistry.html"><span class="name">StackRegistry</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A registry that allows the registration of a string identifier with a
-a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a> and its params.</p>
-    </li><li name="com.twitter.finagle.util.TimerFromNettyTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="TimerFromNettyTimerextendsTimer"></a>
-      <a id="TimerFromNettyTimer:TimerFromNettyTimer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="TimerFromNettyTimer.html"><span class="name">TimerFromNettyTimer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Implements a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a> in terms of a
-<span class="extype" name="org.jboss.netty.util.Timer">org.jboss.netty.util.Timer</span>.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@StackRegistryextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A registry that allows the registration of a string identifier with a
+a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a> and its params.</p><div class="fullcomment"><div class="comment cmt"><p>A registry that allows the registration of a string identifier with a
+a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a> and its params. This is especially useful
+in keeping a process global registry of Finagle clients and servers for
+dynamic introspection.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -308,7 +396,11 @@ a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.tw
       <span class="symbol">
         <a href="ByteArrays$.html"><span class="name">ByteArrays</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@ByteArrays" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.CloseNotifier" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CloseNotifier"></a>
@@ -321,9 +413,13 @@ a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.tw
       <span class="symbol">
         <a href="CloseNotifier$.html"><span class="name">CloseNotifier</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@CloseNotifier" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.util.package#DefaultLogger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.util#DefaultLogger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DefaultLogger:java.util.logging.Logger"></a>
       <a id="DefaultLogger:Logger"></a>
       <h4 class="signature">
@@ -334,7 +430,11 @@ a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.tw
       <span class="symbol">
         <span class="name">DefaultLogger</span><span class="result">: <span class="extype" name="java.util.logging.Logger">Logger</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@DefaultLogger:java.util.logging.Logger" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.DefaultMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DefaultMonitor"></a>
@@ -347,9 +447,13 @@ a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.tw
       <span class="symbol">
         <a href="DefaultMonitor$.html"><span class="name">DefaultMonitor</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@DefaultMonitor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.util.DefaultTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.util.DefaultTimer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultTimer"></a>
       <a id="DefaultTimer:DefaultTimer"></a>
       <h4 class="signature">
@@ -358,10 +462,15 @@ a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.tw
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultTimer$.html"><span class="name">DefaultTimer</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">HashedWheelTimer</span></span>
+        <a href="DefaultTimer$.html"><span class="name">DefaultTimer</span></a>
       </span>
-      </h4>
-      
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@DefaultTimer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Retained for compatibility.</p><div class="fullcomment"><div class="comment cmt"><p>Retained for compatibility. Prefer <a href="HashedWheelTimer$.html" class="extype" name="com.twitter.finagle.util.HashedWheelTimer">HashedWheelTimer</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.Drv" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Drv"></a>
       <a id="Drv:Drv"></a>
@@ -373,8 +482,12 @@ a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.tw
       <span class="symbol">
         <a href="Drv$.html"><span class="name">Drv</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Create discrete random variables representing arbitrary distributions.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Drv" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Create discrete random variables representing arbitrary distributions.</p>
     </li><li name="com.twitter.finagle.util.ExitGuard" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ExitGuard"></a>
       <a id="ExitGuard:ExitGuard"></a>
@@ -386,9 +499,34 @@ a <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.tw
       <span class="symbol">
         <a href="ExitGuard$.html"><span class="name">ExitGuard</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">ExitGuard prevents the process from exiting normally by use of a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@ExitGuard" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">ExitGuard prevents the process from exiting normally by use of a
 nondaemon thread whenever there is at least one guarder.</p>
+    </li><li name="com.twitter.finagle.util.HashedWheelTimer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HashedWheelTimer"></a>
+      <a id="HashedWheelTimer:HashedWheelTimer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HashedWheelTimer$.html"><span class="name">HashedWheelTimer</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@HashedWheelTimer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A HashedWheelTimer that uses <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">org.jboss.netty.util.HashedWheelTimer</span> under
+the hood.</p><div class="fullcomment"><div class="comment cmt"><p>A HashedWheelTimer that uses <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">org.jboss.netty.util.HashedWheelTimer</span> under
+the hood. Prefer using a single instance per application, the default
+instance is <a href="HashedWheelTimer$.html#Default:com.twitter.util.Timer" class="extmbr" name="com.twitter.finagle.util.HashedWheelTimer#Default">Default</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.InetSocketAddressUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InetSocketAddressUtil"></a>
       <a id="InetSocketAddressUtil:InetSocketAddressUtil"></a>
@@ -400,9 +538,13 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="InetSocketAddressUtil$.html"><span class="name">InetSocketAddressUtil</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@InetSocketAddressUtil" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.util.LoadService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.util.LoadService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LoadService"></a>
       <a id="LoadService:LoadService"></a>
       <h4 class="signature">
@@ -413,8 +555,14 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="LoadService$.html"><span class="name">LoadService</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Load a singleton class in the manner of <span class="extype" name="java.util.ServiceLoader">java.util.ServiceLoader</span>.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@LoadService" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Load a singleton class in the manner of <span class="extype" name="java.util.ServiceLoader">java.util.ServiceLoader</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Load a singleton class in the manner of <span class="extype" name="java.util.ServiceLoader">java.util.ServiceLoader</span>. It is
+more resilient to varying Java packaging configurations than ServiceLoader.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.LoadedReporterFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LoadedReporterFactory"></a>
       <a id="LoadedReporterFactory:LoadedReporterFactory"></a>
@@ -426,7 +574,11 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="LoadedReporterFactory$.html"><span class="name">LoadedReporterFactory</span></a><span class="result"> extends <a href="ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@LoadedReporterFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.NullReporterFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullReporterFactory"></a>
@@ -439,7 +591,11 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="NullReporterFactory$.html"><span class="name">NullReporterFactory</span></a><span class="result"> extends <a href="ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@NullReporterFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.Proc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Proc"></a>
@@ -452,7 +608,28 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="Proc$.html"><span class="name">Proc</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Proc" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.util.Ring" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Ring"></a>
+      <a id="Ring:Ring"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Ring$.html"><span class="name">Ring</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Ring" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.Rng" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Rng"></a>
@@ -465,8 +642,12 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="Rng$.html"><span class="name">Rng</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">See <a href="Rngs$.html" class="extype" name="com.twitter.finagle.util.Rngs">Rngs</a> for Java compatible APIs.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Rng" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">See <a href="Rngs$.html" class="extype" name="com.twitter.finagle.util.Rngs">Rngs</a> for Java compatible APIs.</p>
     </li><li name="com.twitter.finagle.util.Rngs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Rngs"></a>
       <a id="Rngs:Rngs"></a>
@@ -478,8 +659,12 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="Rngs$.html"><span class="name">Rngs</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Java compatible forwarders.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Rngs" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Java compatible forwarders.</p>
     </li><li name="com.twitter.finagle.util.Showable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Showable"></a>
       <a id="Showable:Showable"></a>
@@ -491,7 +676,11 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="Showable$.html"><span class="name">Showable</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@Showable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.util.StackRegistry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StackRegistry"></a>
@@ -504,8 +693,30 @@ nondaemon thread whenever there is at least one guarder.</p>
       <span class="symbol">
         <a href="StackRegistry$.html"><span class="name">StackRegistry</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@StackRegistry" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
+    </li><li name="com.twitter.finagle.util.loadServiceDenied" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="loadServiceDenied"></a>
+      <a id="loadServiceDenied:loadServiceDenied"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="loadServiceDenied$.html"><span class="name">loadServiceDenied</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@loadServiceDenied" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A deny list of implementations to ignore.</p><div class="fullcomment"><div class="comment cmt"><p>A deny list of implementations to ignore. Keys are the fully qualified class names.
+Any other implementations that are found via <code>LoadService.apply</code> are eligible to be used.</p><p>As an example, here's how to filter out <code>OstrichStatsReceiver</code> and <code>CommonsStatsReceiver</code>:</p><pre>-com.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.CommonsStatsReceiver</pre></div></div>
     </li><li name="com.twitter.finagle.util.loadServiceIgnoredPaths" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="loadServiceIgnoredPaths"></a>
       <a id="loadServiceIgnoredPaths:loadServiceIgnoredPaths"></a>
@@ -515,9 +726,13 @@ nondaemon thread whenever there is at least one guarder.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="loadServiceIgnoredPaths$.html"><span class="name">loadServiceIgnoredPaths</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.collection.Seq" class="extype" target="_top">Seq</a>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+        <a href="loadServiceIgnoredPaths$.html"><span class="name">loadServiceIgnoredPaths</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.package@loadServiceIgnoredPaths" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -529,9 +744,9 @@ nondaemon thread whenever there is at least one guarder.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -548,6 +763,7 @@ nondaemon thread whenever there is at least one guarder.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

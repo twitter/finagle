@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>NameTree - com.twitter.finagle.NameTree</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="value">
       <div id="definition">
-        <a href="NameTree.html" title="Go to companion"><img src="../../../lib/object_to_trait_big.png" /></a>
+        <a href="NameTree.html" title="See companion trait"><img alt="Object/Trait" src="../../../lib/object_to_trait_big.png" /></a>
         <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1><a href="NameTree.html" title="Go to companion">NameTree</a></h1>
+        <h1><a href="NameTree.html" title="See companion trait">NameTree</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="NameTree.html" title="See companion trait">trait NameTree</a>
+            | <a href="package.html" class="extype" name="com.twitter.finagle">package finagle</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -44,7 +56,7 @@
 as binding and evaluation routines.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -70,7 +82,6 @@ as binding and evaluation routines.
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -93,10 +104,14 @@ as binding and evaluation routines.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Alt.html"><span class="name">Alt</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Alt.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Alt.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NameTree$$Alt.html"><span class="name">Alt</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Alt.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Alt.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Alt[+T]extendsNameTree[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing
 fallback; it is evaluated by picking the first nonnegative
 (evaluated) subtree.</p>
     </li><li name="com.twitter.finagle.NameTree.Leaf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -108,11 +123,15 @@ fallback; it is evaluated by picking the first nonnegative
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Leaf.html"><span class="name">Leaf</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="value">value: <span class="extype" name="com.twitter.finagle.NameTree.Leaf.T">T</span></span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Leaf.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NameTree$$Leaf.html"><span class="name">Leaf</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="value">value: <span class="extype" name="com.twitter.finagle.NameTree.Leaf.T">T</span></span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Leaf.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Leaf[+T]extendsNameTree[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.NameTree.Union" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.NameTree.Union" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Union[+T]extendsNameTree[T]withProductwithSerializable"></a>
       <a id="Union[+T]:Union[T]"></a>
       <h4 class="signature">
@@ -121,11 +140,22 @@ fallback; it is evaluated by picking the first nonnegative
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Union.html"><span class="name">Union</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree$$Weighted.html" class="extype" name="com.twitter.finagle.NameTree.Weighted">Weighted</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NameTree$$Union.html"><span class="name">Union</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="trees">trees: <a href="NameTree$$Weighted.html" class="extype" name="com.twitter.finagle.NameTree.Weighted">Weighted</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>]*</span>)</span><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Union.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing a
-weighted union of trees.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Union[+T]extendsNameTree[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing a
+weighted union of trees.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> representing a
+weighted union of trees. It is evaluated by returning the union
+of its (recursively evaluated) children, leaving corresponding
+weights unchanged. When all children are negative, the Union
+itself evaluates negative.</p><p>NameTree gives no semantics to weights (they are interpreted
+higher in the stack) except to simplify away single-child Unions
+regardless of weight.
+</p></div></div>
     </li><li name="com.twitter.finagle.NameTree.Weighted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Weighted[+T]extendsProductwithSerializable"></a>
       <a id="Weighted[+T]:Weighted[T]"></a>
@@ -135,9 +165,13 @@ weighted union of trees.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Weighted.html"><span class="name">Weighted</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="weight">weight: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a></span>, <span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Weighted.T">T</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NameTree$$Weighted.html"><span class="name">Weighted</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="params">(<span name="weight">weight: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Double" class="extype" target="_top">Double</a></span>, <span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.Weighted.T">T</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Weighted[+T]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -147,19 +181,6 @@ weighted union of trees.</p>
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -168,10 +189,14 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -181,24 +206,15 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -207,10 +223,14 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree.Alt" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Alt"></a>
       <a id="Alt:Alt"></a>
@@ -220,9 +240,13 @@ weighted union of trees.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Alt$.html"><span class="name">Alt</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NameTree$$Alt$.html"><span class="name">Alt</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Alt" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.NameTree.Empty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Empty"></a>
@@ -233,10 +257,14 @@ weighted union of trees.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Empty$.html"><span class="name">Empty</span></a><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
+        <a href="NameTree$$Empty$.html"><span class="name">Empty</span></a><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">An empty <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Empty" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An empty <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p>
     </li><li name="com.twitter.finagle.NameTree.Fail" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Fail"></a>
       <a id="Fail:Fail"></a>
@@ -246,10 +274,14 @@ weighted union of trees.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Fail$.html"><span class="name">Fail</span></a><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
+        <a href="NameTree$$Fail$.html"><span class="name">Fail</span></a><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A failing <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Fail" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A failing <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p>
     </li><li name="com.twitter.finagle.NameTree.Neg" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Neg"></a>
       <a id="Neg:Neg"></a>
@@ -259,10 +291,14 @@ weighted union of trees.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Neg$.html"><span class="name">Neg</span></a><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
+        <a href="NameTree$$Neg$.html"><span class="name">Neg</span></a><span class="result"> extends <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A negative <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Neg" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A negative <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>.</p>
     </li><li name="com.twitter.finagle.NameTree.Union" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Union"></a>
       <a id="Union:Union"></a>
@@ -272,9 +308,13 @@ weighted union of trees.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Union$.html"><span class="name">Union</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NameTree$$Union$.html"><span class="name">Union</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Union" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.NameTree.Weighted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Weighted"></a>
@@ -285,9 +325,13 @@ weighted union of trees.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NameTree$$Weighted$.html"><span class="name">Weighted</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NameTree$$Weighted$.html"><span class="name">Weighted</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@Weighted" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -300,7 +344,11 @@ weighted union of trees.</p>
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -311,9 +359,13 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -330,9 +382,13 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -343,9 +399,13 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree#equiv" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="equiv[T]:Equiv[com.twitter.finagle.NameTree[T]]"></a>
@@ -358,7 +418,11 @@ weighted union of trees.</p>
       <span class="symbol">
         <span class="name">equiv</span><span class="tparams">[<span name="T">T</span>]</span><span class="result">: <span class="extype" name="scala.Equiv">Equiv</span>[<a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.equiv.T">T</span>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@equiv[T]:Equiv[com.twitter.finagle.NameTree[T]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -369,9 +433,13 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -390,7 +458,11 @@ weighted union of trees.</p>
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -401,9 +473,13 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -414,9 +490,13 @@ weighted union of trees.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree#map" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="map[T,U](f:T=&gt;U)(tree:com.twitter.finagle.NameTree[T]):com.twitter.finagle.NameTree[U]"></a>
@@ -429,7 +509,11 @@ weighted union of trees.</p>
       <span class="symbol">
         <span class="name">map</span><span class="tparams">[<span name="T">T</span>, <span name="U">U</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.NameTree.map.T">T</span>) ⇒ <span class="extype" name="com.twitter.finagle.NameTree.map.U">U</span></span>)</span><span class="params">(<span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.map.T">T</span>]</span>)</span><span class="result">: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.map.U">U</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@map[T,U](f:T=&gt;U)(tree:com.twitter.finagle.NameTree[T]):com.twitter.finagle.NameTree[U]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Rewrite the paths in a tree for values defined by the given
 partial function.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -441,9 +525,13 @@ partial function.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -454,9 +542,13 @@ partial function.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -467,9 +559,13 @@ partial function.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree#read" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="read(s:String):com.twitter.finagle.NameTree[com.twitter.finagle.Path]"></a>
@@ -482,7 +578,11 @@ partial function.</p>
       <span class="symbol">
         <span class="name">read</span><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@read(s:String):com.twitter.finagle.NameTree[com.twitter.finagle.Path]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Parse a <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> from a string
 with concrete syntax</p><div class="fullcomment"><div class="comment cmt"><p>Parse a <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> from a string
 with concrete syntax</p><pre>tree       ::= name
@@ -494,9 +594,8 @@ with concrete syntax</p><pre>tree       ::= name
 name       ::= path | <span class="lit">'!'</span> | <span class="lit">'~'</span> | <span class="lit">'$'</span>
 
 weight     ::= [<span class="num">0</span>-<span class="num">9</span>]*\.?[<span class="num">0</span>-<span class="num">9</span>]+</pre><p>For example:</p><pre>/foo &amp; /bar | /baz | $</pre><p>parses in to the <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a></p><pre>Alt(Union(Leaf(Path(foo)),Leaf(Path(bar))),Leaf(Path(baz)),Empty)</pre><p>The production <code>path</code> is documented at <a href="Path$.html" class="extype" name="com.twitter.finagle.Path">Path.read</a>.
-</p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt">IllegalArgumentException<p>when the string does not
-represent a valid name tree.
-</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Exceptions thrown</dt><dd><span class="cmt"><p><span class="extype" name="IllegalArgumentException"><code>IllegalArgumentException</code></span> when the string does not
+represent a valid name tree.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.NameTree#show" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="show[T](tree:com.twitter.finagle.NameTree[T])(implicitevidence$1:com.twitter.finagle.util.Showable[T]):String"></a>
       <a id="show[T](NameTree[T])(Showable[T]):String"></a>
@@ -508,7 +607,11 @@ represent a valid name tree.
       <span class="symbol">
         <span class="name">show</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.show.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="util/Showable.html" class="extype" name="com.twitter.finagle.util.Showable">Showable</a>[<span class="extype" name="com.twitter.finagle.NameTree.show.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@show[T](tree:com.twitter.finagle.NameTree[T])(implicitevidence$1:com.twitter.finagle.util.Showable[T]):String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A string parseable by <a href="#read(s:String):com.twitter.finagle.NameTree[com.twitter.finagle.Path]" class="extmbr" name="com.twitter.finagle.NameTree#read">NameTree.read</a>.</p>
     </li><li name="com.twitter.finagle.NameTree#simplify" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="simplify[T](tree:com.twitter.finagle.NameTree[T]):com.twitter.finagle.NameTree[T]"></a>
@@ -521,7 +624,11 @@ represent a valid name tree.
       <span class="symbol">
         <span class="name">simplify</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tree">tree: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.simplify.T">T</span>]</span>)</span><span class="result">: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<span class="extype" name="com.twitter.finagle.NameTree.simplify.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@simplify[T](tree:com.twitter.finagle.NameTree[T]):com.twitter.finagle.NameTree[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Simplify the given <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>,
 yielding a new <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a> which
 is evaluation-equivalent.</p>
@@ -536,7 +643,11 @@ is evaluation-equivalent.</p>
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -549,7 +660,11 @@ is evaluation-equivalent.</p>
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@toString():String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -560,9 +675,13 @@ is evaluation-equivalent.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -579,9 +698,13 @@ is evaluation-equivalent.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -598,9 +721,13 @@ is evaluation-equivalent.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.NameTree$@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -618,9 +745,9 @@ is evaluation-equivalent.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -637,6 +764,7 @@ is evaluation-equivalent.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../lib/template.js"></script>
+
+
     </body>
       </html>

@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>Client - com.twitter.finagle.Mux.Client</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="Mux$$Client$.html" title="Go to companion"><img src="../../../lib/class_to_object_big.png" /></a>
+        <a href="Mux$$Client$.html" title="See companion object"><img alt="Class/Object" src="../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a></p>
-        <h1><a href="Mux$$Client$.html" title="Go to companion">Client</a></h1>
+        <h1><a href="Mux$$Client$.html" title="See companion object">Client</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Mux$$Client$.html" title="See companion object">object Client</a>
+            | <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">package Mux</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -35,13 +47,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol">Mux.this.Client.stack</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name="com.twitter.finagle.client.StackClient.defaultParams.+[com.twitter.finagle.param.ProtocolLibrary](com.twitter.finagle.param.ProtocolLibrary.apply(&quot;mux&quot;))(param.this.ProtocolLibrary.param)">...</span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackClient.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>], <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]], <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]], <a href="Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>], <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <a href="client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]], <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]], <a href="Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -67,7 +79,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -88,9 +99,13 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol">Mux.this.Client.stack</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name="com.twitter.finagle.client.StackClient.defaultParams.+[com.twitter.finagle.param.ProtocolLibrary](com.twitter.finagle.param.ProtocolLibrary.apply(&quot;mux&quot;))(param.this.ProtocolLibrary.param)">...</span></span>)</span>
+        <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Client$.html">Client.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackClient.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@&lt;init&gt;(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.Mux.Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -108,7 +123,11 @@
       <span class="symbol">
         <span class="name">In</span><span class="result"> = <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@In=org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The type we write into the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we write into the transport.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client.Out" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -122,7 +141,11 @@
       <span class="symbol">
         <span class="name">Out</span><span class="result"> = <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@Out=org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The type we read out of the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we read out of the transport.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li></ol>
@@ -133,19 +156,6 @@
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -154,10 +164,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -167,24 +181,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -193,10 +198,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -208,7 +217,11 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -219,9 +232,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -240,7 +257,11 @@
       <span class="symbol">
         <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.client.StdStackClient.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.configured.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Creates a new StackClient with parameter <code>p</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with parameter <code>p</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Stack.Parameterized#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -254,7 +275,11 @@
       <span class="symbol">
         <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="psp">psp: (<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>, <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>])</span>)</span><span class="result">: <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):T" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client#copy1" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="copy1(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.Mux.Client"></a>
@@ -267,7 +292,11 @@
       <span class="symbol">
         <span class="name">copy1</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="#stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]">this.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="#params:com.twitter.finagle.Stack.Params">this.params</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@copy1(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.Mux.Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A copy constructor in lieu of defining StackClient as a
 case class.</p><div class="fullcomment"><div class="comment cmt"><p>A copy constructor in lieu of defining StackClient as a
 case class.
@@ -283,7 +312,11 @@ case class.
       <span class="symbol">
         <span class="name">endpointer</span><span class="result">: <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@endpointer:com.twitter.finagle.Stackable[com.twitter.finagle.ServiceFactory[Req,Rep]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A stackable module that creates new <code>Transports</code> (via transporter)
 when applied.</p><div class="fullcomment"><div class="comment cmt"><p>A stackable module that creates new <code>Transports</code> (via transporter)
 when applied.
@@ -297,9 +330,13 @@ when applied.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#filtered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="filtered(filter:com.twitter.finagle.Filter[Req,Rep,Req,Rep]):This"></a>
@@ -312,7 +349,11 @@ when applied.
       <span class="symbol">
         <span class="name">filtered</span><span class="params">(<span name="filter">filter: <a href="Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@filtered(filter:com.twitter.finagle.Filter[Req,Rep,Req,Rep]):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Prepends <code>filter</code> to the top of the client.</p><div class="fullcomment"><div class="comment cmt"><p>Prepends <code>filter</code> to the top of the client. That is, after materializing
 the client (newClient/newService) <code>filter</code> will be the first element which
 requests flow through. This is a familiar chaining combinator for filters and
@@ -328,9 +369,13 @@ services but instead wrap the resulting service with a rich API.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -349,7 +394,11 @@ services but instead wrap the resulting service with a rich API.
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -360,9 +409,13 @@ services but instead wrap the resulting service with a rich API.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -373,9 +426,13 @@ services but instead wrap the resulting service with a rich API.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
@@ -388,7 +445,11 @@ services but instead wrap the resulting service with a rich API.
       <span class="symbol">
         <span class="name">newClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label0">label0: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newClient(dest:com.twitter.finagle.Name,label0:String):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -402,7 +463,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newClient(dest:String,label:String):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -416,7 +481,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newClient(dest:String):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client#newDispatcher" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -430,14 +499,17 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newDispatcher(transport:com.twitter.finagle.transport.Transport[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Defines a dispatcher, a function which reconciles the stream based
 <code>Transport</code> with a Request/Response oriented <code>Service</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a dispatcher, a function which reconciles the stream based
 <code>Transport</code> with a Request/Response oriented <code>Service</code>.
 Together with a <code>Transporter</code>, it forms the foundation of a
 finagle client. Concrete implementations are expected to specify this.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a>
-</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.Service[Req,Rep]"></a>
       <a id="newService(Name,String):Service[Request,Response]"></a>
@@ -449,7 +521,11 @@ finagle client. Concrete implementations are expected to specify this.
       <span class="symbol">
         <span class="name">newService</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newService(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -463,7 +539,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newService</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newService(dest:String,label:String):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -477,7 +557,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newService</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newService(dest:String):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client#newTransporter" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -491,7 +575,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newTransporter</span><span class="params">()</span><span class="result">: <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="#In=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.Mux.Client.In">In</a>, <a href="#Out=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.Mux.Client.Out">Out</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newTransporter():com.twitter.finagle.client.Transporter[Client.this.In,Client.this.Out]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Defines a typed <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a typed <a href="client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a> for this client.
 Concrete StackClient implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a> → <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
@@ -504,9 +592,13 @@ Concrete StackClient implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -517,9 +609,13 @@ Concrete StackClient implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client#params" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="params:com.twitter.finagle.Stack.Params"></a>
@@ -532,7 +628,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name">params</span><span class="result">: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@params:com.twitter.finagle.Stack.Params" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The current parameter map.</p><div class="fullcomment"><div class="comment cmt"><p>The current parameter map.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Client#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]"></a>
@@ -545,7 +645,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The current stack.</p><div class="fullcomment"><div class="comment cmt"><p>The current stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -558,7 +662,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#transformed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="transformed(f:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>
@@ -571,7 +679,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name">transformed</span><span class="params">(<span name="f">f: (<a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]) ⇒ <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@transformed(f:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]=&gt;com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Creates a new StackClient with <code>f</code> applied to <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>f</code> applied to <code>stack</code>.</p><p>For expert users only.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StackClient#transformed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -585,7 +697,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name">transformed</span><span class="params">(<span name="t">t: <a href="Stack$$Transformer.html" class="extype" name="com.twitter.finagle.Stack.Transformer">Transformer</a></span>)</span><span class="result">: <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@transformed(t:com.twitter.finagle.Stack.Transformer):com.twitter.finagle.client.StackClient[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Transform the stack using the given <code>Transformer</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transform the stack using the given <code>Transformer</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -597,9 +713,13 @@ Concrete StackClient implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -616,9 +736,13 @@ Concrete StackClient implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -635,9 +759,13 @@ Concrete StackClient implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -656,7 +784,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name">withParams</span><span class="params">(<span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@withParams(params:com.twitter.finagle.Stack.Params):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -670,7 +802,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A new StackClient with the provided stack.</p><div class="fullcomment"><div class="comment cmt"><p>A new StackClient with the provided stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a></dd></dl></div>
     </li></ol>
             </div>
@@ -690,7 +826,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newClient</span><span class="params">(<span name="dest">dest: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newClient(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -706,7 +846,11 @@ Concrete StackClient implementations are expected to specify this.
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newService</span><span class="params">(<span name="dest">dest: <a href="Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Client@newService(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -717,13 +861,13 @@ Concrete StackClient implementations are expected to specify this.
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
             </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
             </div><div class="parent" name="com.twitter.finagle.client.StdStackClient">
               <h3>Inherited from <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Client">Client</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.client.StackClient">
@@ -737,9 +881,9 @@ Concrete StackClient implementations are expected to specify this.
             </div><div class="parent" name="com.twitter.finagle.Client">
               <h3>Inherited from <a href="Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -756,6 +900,7 @@ Concrete StackClient implementations are expected to specify this.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../lib/template.js"></script>
+
+
     </body>
       </html>

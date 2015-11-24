@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>benchmark - com.twitter.finagle.benchmark</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>benchmark</h1>
+        <h1>benchmark</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,7 +77,11 @@
       <span class="symbol">
         <a href="DefaultClientBenchmark.html"><span class="name">DefaultClientBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@DefaultClientBenchmarkextendsSimpleBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.benchmark.DefaultServerBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DefaultServerBenchmarkextendsSimpleBenchmark"></a>
@@ -82,7 +94,11 @@
       <span class="symbol">
         <a href="DefaultServerBenchmark.html"><span class="name">DefaultServerBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@DefaultServerBenchmarkextendsSimpleBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.benchmark.EchoService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EchoService[T]extendsService[T,T]"></a>
@@ -95,9 +111,13 @@
       <span class="symbol">
         <a href="EchoService.html"><span class="name">EchoService</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.benchmark.EchoService.T">T</span>, <span class="extype" name="com.twitter.finagle.benchmark.EchoService.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@EchoService[T]extendsService[T,T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.benchmark.FixedNumReadsTransport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.benchmark.FixedNumReadsTransport" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FixedNumReadsTransport[In,Out]extendsTransport[In,Out]"></a>
       <a id="FixedNumReadsTransport[In,Out]:FixedNumReadsTransport[In,Out]"></a>
       <h4 class="signature">
@@ -108,8 +128,15 @@
       <span class="symbol">
         <a href="FixedNumReadsTransport.html"><span class="name">FixedNumReadsTransport</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.benchmark.FixedNumReadsTransport.In">In</span>, <span class="extype" name="com.twitter.finagle.benchmark.FixedNumReadsTransport.Out">Out</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A Transport that allows a fixed number of reads.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@FixedNumReadsTransport[In,Out]extendsTransport[In,Out]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A Transport that allows a fixed number of reads.</p><div class="fullcomment"><div class="comment cmt"><p>A Transport that allows a fixed number of reads. The output value of a read
+is a constant provided by readVal. Writes to the transport are simply
+dropped.
+</p></div></div>
     </li><li name="com.twitter.finagle.benchmark.IsTracingBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IsTracingBenchmarkextendsSimpleBenchmark"></a>
       <a id="IsTracingBenchmark:IsTracingBenchmark"></a>
@@ -121,9 +148,13 @@
       <span class="symbol">
         <a href="IsTracingBenchmark.html"><span class="name">IsTracingBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@IsTracingBenchmarkextendsSimpleBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.benchmark.LoadGeneratorListener" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.benchmark.LoadGeneratorListener" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LoadGeneratorListenerextendsListener[Int,Int]"></a>
       <a id="LoadGeneratorListener:LoadGeneratorListener"></a>
       <h4 class="signature">
@@ -132,10 +163,17 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LoadGeneratorListener.html"><span class="name">LoadGeneratorListener</span></a><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
+        <a href="LoadGeneratorListener.html"><span class="name">LoadGeneratorListener</span></a><span class="result"> extends <a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A load generator that implements Listener.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@LoadGeneratorListenerextendsListener[Int,Int]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A load generator that implements Listener.</p><div class="fullcomment"><div class="comment cmt"><p>A load generator that implements Listener.
+Calling loadGen() opens a new FixedNumReadsTransport which is then serviced
+by serveTransport provided by the earlier listen() call.
+</p></div></div>
     </li><li name="com.twitter.finagle.benchmark.ParserUtils" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ParserUtilsextendsSimpleBenchmark"></a>
       <a id="ParserUtils:ParserUtils"></a>
@@ -147,7 +185,11 @@
       <span class="symbol">
         <a href="ParserUtils.html"><span class="name">ParserUtils</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@ParserUtilsextendsSimpleBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.benchmark.StdBenchAnnotations" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="StdBenchAnnotationsextendsAnyRef"></a>
@@ -158,9 +200,13 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="StdBenchAnnotations.html"><span class="name">StdBenchAnnotations</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="StdBenchAnnotations.html"><span class="name">StdBenchAnnotations</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@StdBenchAnnotationsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@Fork</span><span class="args">()</span>
               
@@ -184,7 +230,11 @@
       <span class="symbol">
         <a href="TracingFilterBenchmark.html"><span class="name">TracingFilterBenchmark</span></a><span class="result"> extends <span class="extype" name="com.google.caliper.SimpleBenchmark">SimpleBenchmark</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@TracingFilterBenchmarkextendsSimpleBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -204,7 +254,11 @@
       <span class="symbol">
         <a href="EchoBridge$.html"><span class="name">EchoBridge</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@EchoBridge" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.benchmark.TestClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TestClient"></a>
@@ -215,9 +269,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TestClient$.html"><span class="name">TestClient</span></a><span class="result"> extends <a href="../client/DefaultClient.html" class="extype" name="com.twitter.finagle.client.DefaultClient">DefaultClient</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
+        <a href="TestClient$.html"><span class="name">TestClient</span></a><span class="result"> extends <a href="../client/DefaultClient.html" class="extype" name="com.twitter.finagle.client.DefaultClient">DefaultClient</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@TestClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.benchmark.thriftscala" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="thriftscala"></a>
@@ -230,7 +288,11 @@
       <span class="symbol">
         <a href="thriftscala/package.html"><span class="name">thriftscala</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.benchmark.package@thriftscala" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -257,6 +319,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

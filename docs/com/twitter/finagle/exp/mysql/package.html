@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>mysql - com.twitter.finagle.exp.mysql</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.exp">exp</a></p>
-        <h1>mysql</h1>
+        <h1>mysql</h1><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -58,7 +66,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.exp.mysql.BinaryEncodedRow" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.exp.mysql.BinaryEncodedRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BinaryEncodedRowextendsRow"></a>
       <a id="BinaryEncodedRow:BinaryEncodedRow"></a>
       <h4 class="signature">
@@ -69,9 +77,16 @@
       <span class="symbol">
         <a href="BinaryEncodedRow.html"><span class="name">BinaryEncodedRow</span></a><span class="result"> extends <a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Defines a Row where the data is presumed to be encoded with the
-mysql binary protocol.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@BinaryEncodedRowextendsRow" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Defines a Row where the data is presumed to be encoded with the
+mysql binary protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a Row where the data is presumed to be encoded with the
+mysql binary protocol.
+<a href="http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html" target="_blank">http://dev.mysql.com/doc/internals/en/binary-protocol-resultset-row.html</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.ByteValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ByteValueextendsValuewithProductwithSerializable"></a>
       <a id="ByteValue:ByteValue"></a>
@@ -81,9 +96,13 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ByteValue.html"><span class="name">ByteValue</span></a><span class="params">(<span name="b">b: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ByteValue.html"><span class="name">ByteValue</span></a><span class="params">(<span name="b">b: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ByteValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.CanBeParameter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CanBeParameter[-A]extendsAnyRef"></a>
@@ -94,9 +113,13 @@ mysql binary protocol.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="CanBeParameter.html"><span class="name">CanBeParameter</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="CanBeParameter.html"><span class="name">CanBeParameter</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@CanBeParameter[-A]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.Capability" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CapabilityextendsProductwithSerializable"></a>
@@ -107,9 +130,13 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Capability.html"><span class="name">Capability</span></a><span class="params">(<span name="mask">mask: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Capability.html"><span class="name">Capability</span></a><span class="params">(<span name="mask">mask: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@CapabilityextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.Client" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ClientextendsClosable"></a>
@@ -122,9 +149,13 @@ mysql binary protocol.</p>
       <span class="symbol">
         <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ClientextendsClosable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.ClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.ClientDispatcher" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ClientDispatcherextendsGenSerialClientDispatcher[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result,com.twitter.finagle.exp.mysql.transport.Packet,com.twitter.finagle.exp.mysql.transport.Packet]"></a>
       <a id="ClientDispatcher:ClientDispatcher"></a>
       <h4 class="signature">
@@ -135,9 +166,17 @@ mysql binary protocol.</p>
       <span class="symbol">
         <a href="ClientDispatcher.html"><span class="name">ClientDispatcher</span></a><span class="result"> extends <a href="../../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>, <a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A ClientDispatcher that implements the mysql client/server protocol.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.CloseRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ClientDispatcherextendsGenSerialClientDispatcher[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result,com.twitter.finagle.exp.mysql.transport.Packet,com.twitter.finagle.exp.mysql.transport.Packet]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A ClientDispatcher that implements the mysql client/server protocol.</p><div class="fullcomment"><div class="comment cmt"><p>A ClientDispatcher that implements the mysql client/server protocol.
+For a detailed exposition of the client/server protocol refer to:
+<a href="http://dev.mysql.com/doc/internals/en/client-server-protocol.html" target="_blank">http://dev.mysql.com/doc/internals/en/client-server-protocol.html</a></p><p>Note, the mysql protocol does not support any form of multiplexing so
+requests are dispatched serially and concurrent requests are queued.
+</p></div></div>
+    </li><li name="com.twitter.finagle.exp.mysql.CloseRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CloseRequestextendsCommandRequestwithProductwithSerializable"></a>
       <a id="CloseRequest:CloseRequest"></a>
       <h4 class="signature">
@@ -146,10 +185,17 @@ mysql binary protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="CloseRequest.html"><span class="name">CloseRequest</span></a><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="CloseRequest.html"><span class="name">CloseRequest</span></a><span class="params">(<span name="stmtId">stmtId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A CloseRequest deallocates a prepared statement on the server.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@CloseRequestextendsCommandRequestwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A CloseRequest deallocates a prepared statement on the server.</p><div class="fullcomment"><div class="comment cmt"><p>A CloseRequest deallocates a prepared statement on the server.
+No response is sent back to the client.
+<a href="http://dev.mysql.com/doc/internals/en/com-stmt-close.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-close.html</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.CommandRequest" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CommandRequestextendsRequest"></a>
       <a id="CommandRequest:CommandRequest"></a>
@@ -161,8 +207,12 @@ mysql binary protocol.</p>
       <span class="symbol">
         <a href="CommandRequest.html"><span class="name">CommandRequest</span></a><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A command request is a request initiated by the client
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@CommandRequestextendsRequest" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A command request is a request initiated by the client
 and has a cmd byte associated with it.</p>
     </li><li name="com.twitter.finagle.exp.mysql.Decoder" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Decoder[T&lt;:com.twitter.finagle.exp.mysql.Result]extendscom.twitter.finagle.exp.mysql.transport.Packet=&gt;com.twitter.util.Try[T]"></a>
@@ -175,8 +225,12 @@ and has a cmd byte associated with it.</p>
       <span class="symbol">
         <a href="Decoder.html"><span class="name">Decoder</span></a><span class="tparams">[<span name="T">T &lt;: <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a></span>]</span><span class="result"> extends (<a href="transport/Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.exp.mysql.Decoder.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A decoder for Results contained in a single packet.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Decoder[T&lt;:com.twitter.finagle.exp.mysql.Result]extendscom.twitter.finagle.exp.mysql.transport.Packet=&gt;com.twitter.util.Try[T]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A decoder for Results contained in a single packet.</p>
     </li><li name="com.twitter.finagle.exp.mysql.DoubleValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DoubleValueextendsValuewithProductwithSerializable"></a>
       <a id="DoubleValue:DoubleValue"></a>
@@ -186,9 +240,13 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DoubleValue.html"><span class="name">DoubleValue</span></a><span class="params">(<span name="d">d: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DoubleValue.html"><span class="name">DoubleValue</span></a><span class="params">(<span name="d">d: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@DoubleValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.EOF" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EOFextendsResultwithProductwithSerializable"></a>
@@ -199,9 +257,13 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="EOF.html"><span class="name">EOF</span></a><span class="params">(<span name="warnings">warnings: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="serverStatus">serverStatus: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="EOF.html"><span class="name">EOF</span></a><span class="params">(<span name="warnings">warnings: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="serverStatus">serverStatus: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@EOFextendsResultwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ErrorextendsResultwithProductwithSerializable"></a>
@@ -212,11 +274,15 @@ and has a cmd byte associated with it.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Error.html"><span class="name">Error</span></a><span class="params">(<span name="code">code: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ErrorextendsResultwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.ExecuteRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.ExecuteRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ExecuteRequestextendsCommandRequest"></a>
       <a id="ExecuteRequest:ExecuteRequest"></a>
       <h4 class="signature">
@@ -227,9 +293,16 @@ and has a cmd byte associated with it.</p>
       <span class="symbol">
         <a href="ExecuteRequest.html"><span class="name">ExecuteRequest</span></a><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Uses the binary protocol to build an execute request for
-a prepared statement.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ExecuteRequestextendsCommandRequest" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Uses the binary protocol to build an execute request for
+a prepared statement.</p><div class="fullcomment"><div class="comment cmt"><p>Uses the binary protocol to build an execute request for
+a prepared statement.
+<a href="http://dev.mysql.com/doc/internals/en/com-stmt-execute.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-execute.html</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.Field" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FieldextendsResultwithProductwithSerializable"></a>
       <a id="Field:Field"></a>
@@ -239,9 +312,13 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="db">db: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="table">table: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origTable">origTable: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origName">origName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="displayLength">displayLength: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="fieldType">fieldType: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="decimals">decimals: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Field.html"><span class="name">Field</span></a><span class="params">(<span name="catalog">catalog: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="db">db: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="table">table: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origTable">origTable: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="origName">origName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="displayLength">displayLength: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="fieldType">fieldType: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="decimals">decimals: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@FieldextendsResultwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.FloatValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FloatValueextendsValuewithProductwithSerializable"></a>
@@ -252,11 +329,15 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FloatValue.html"><span class="name">FloatValue</span></a><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="FloatValue.html"><span class="name">FloatValue</span></a><span class="params">(<span name="f">f: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@FloatValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.Handshake" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.Handshake" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Handshakeextendscom.twitter.finagle.exp.mysql.HandshakeInit=&gt;com.twitter.util.Try[com.twitter.finagle.exp.mysql.HandshakeResponse]withProductwithSerializable"></a>
       <a id="Handshake:Handshake"></a>
       <h4 class="signature">
@@ -265,12 +346,24 @@ a prepared statement.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Handshake.html"><span class="name">Handshake</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">scala.None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a> = <span class="symbol">Capability.baseCap</span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="defval" name="com.twitter.finagle.exp.mysql.Charset.Utf8_general_ci">...</span></span>, <span name="maxPacketSize">maxPacketSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(1).gigabyte">...</span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Handshake.html"><span class="name">Handshake</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a> = <span class="symbol"><span class="name"><a href="Capability$.html">Capability.baseCap</a></span></span></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a> = <span class="symbol"><span class="name"><a href="../../../../package.html">Utf8_general_ci</a></span></span></span>, <span name="maxPacketSize">maxPacketSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../../package.html">1.gigabyte</a></span></span></span>)</span><span class="result"> extends (<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="HandshakeResponse.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeResponse">HandshakeResponse</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Bridges a server handshake (HandshakeInit) with a
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Handshakeextendscom.twitter.finagle.exp.mysql.HandshakeInit=&gt;com.twitter.util.Try[com.twitter.finagle.exp.mysql.HandshakeResponse]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Bridges a server handshake (HandshakeInit) with a
 client handshake (HandshakeResponse) using the given
-parameters.</p>
+parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Bridges a server handshake (HandshakeInit) with a
+client handshake (HandshakeResponse) using the given
+parameters. This facilitates the connection phase of
+the mysql protocol.
+</p></div><dl class="paramcmts block"><dt class="param">username</dt><dd class="cmt"><p>MySQL username used to login.</p></dd><dt class="param">password</dt><dd class="cmt"><p>MySQL password used to login.</p></dd><dt class="param">database</dt><dd class="cmt"><p>initial database to use for the session.</p></dd><dt class="param">clientCap</dt><dd class="cmt"><p>The capability this client has.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>default character established with the server.</p></dd><dt class="param">maxPacketSize</dt><dd class="cmt"><p>max size of a command packet that the
+client intends to send to the server. The largest possible
+packet that can be transmitted to or from a MySQL 5.5 server or
+client is 1GB.</p></dd><dt>returns</dt><dd class="cmt"><p>A Try[HandshakeResponse] that encodes incompatibility
+with the server.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.mysql.HandshakeInit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HandshakeInitextendsResultwithProductwithSerializable"></a>
       <a id="HandshakeInit:HandshakeInit"></a>
@@ -280,11 +373,15 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="threadId">threadId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="status">status: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="HandshakeInit.html"><span class="name">HandshakeInit</span></a><span class="params">(<span name="protocol">protocol: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a></span>, <span name="version">version: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="threadId">threadId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="status">status: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@HandshakeInitextendsResultwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.HandshakeResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.HandshakeResponse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HandshakeResponseextendsRequestwithProductwithSerializable"></a>
       <a id="HandshakeResponse:HandshakeResponse"></a>
       <h4 class="signature">
@@ -293,10 +390,18 @@ parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeResponse.html"><span class="name">HandshakeResponse</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="maxPacketSize">maxPacketSize: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="HandshakeResponse.html"><span class="name">HandshakeResponse</span></a><span class="params">(<span name="username">username: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="password">password: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="database">database: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="clientCap">clientCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="salt">salt: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>, <span name="serverCap">serverCap: <a href="Capability.html" class="extype" name="com.twitter.finagle.exp.mysql.Capability">Capability</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="maxPacketSize">maxPacketSize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Client response sent during connection phase.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@HandshakeResponseextendsRequestwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Client response sent during connection phase.</p><div class="fullcomment"><div class="comment cmt"><p>Client response sent during connection phase.
+Responsible for encoding credentials used to
+authenticate a session.
+<a href="http://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41" target="_blank">http://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse41</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.IncompatibleServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IncompatibleServerErrorextendsException"></a>
       <a id="IncompatibleServerError:IncompatibleServerError"></a>
@@ -308,8 +413,12 @@ parameters.</p>
       <span class="symbol">
         <a href="IncompatibleServerError.html"><span class="name">IncompatibleServerError</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">A base class for exceptions related to client incompatibility with an
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@IncompatibleServerErrorextendsException" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A base class for exceptions related to client incompatibility with an
 upstream MySQL server.</p>
     </li><li name="com.twitter.finagle.exp.mysql.IntValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IntValueextendsValuewithProductwithSerializable"></a>
@@ -320,9 +429,13 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="IntValue.html"><span class="name">IntValue</span></a><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="IntValue.html"><span class="name">IntValue</span></a><span class="params">(<span name="i">i: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@IntValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.LongValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LongValueextendsValuewithProductwithSerializable"></a>
@@ -333,9 +446,13 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LongValue.html"><span class="name">LongValue</span></a><span class="params">(<span name="l">l: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="LongValue.html"><span class="name">LongValue</span></a><span class="params">(<span name="l">l: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@LongValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.LostSyncException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LostSyncExceptionextendsRuntimeExceptionwithProductwithSerializable"></a>
@@ -346,9 +463,13 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="LostSyncException.html"><span class="name">LostSyncException</span></a><span class="params">(<span name="underlying">underlying: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result"> extends <span class="extype" name="scala.RuntimeException">RuntimeException</span> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@LostSyncExceptionextendsRuntimeExceptionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.OK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="OKextendsResultwithProductwithSerializable"></a>
@@ -359,11 +480,15 @@ upstream MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="OK.html"><span class="name">OK</span></a><span class="params">(<span name="affectedRows">affectedRows: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="insertId">insertId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="serverStatus">serverStatus: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="warningCount">warningCount: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="OK.html"><span class="name">OK</span></a><span class="params">(<span name="affectedRows">affectedRows: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="insertId">insertId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="serverStatus">serverStatus: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="warningCount">warningCount: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@OKextendsResultwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.Parameter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.Parameter" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ParameterextendsAnyRef"></a>
       <a id="Parameter:Parameter"></a>
       <h4 class="signature">
@@ -372,11 +497,17 @@ upstream MySQL server.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Parameter.html"><span class="name">Parameter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Parameter.html"><span class="name">Parameter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence <code>CanBeParameter[A]</code> is
-available in scope.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ParameterextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence <code>CanBeParameter[A]</code> is
+available in scope.</p><div class="fullcomment"><div class="comment cmt"><p>A value of type <code>A</code> can implicitly convert to a <code>Parameter</code> if an evidence <code>CanBeParameter[A]</code> is
+available in scope. This type is not to be instantiated in any other manner.
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.PrepareOK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PrepareOKextendsResultwithProductwithSerializable"></a>
       <a id="PrepareOK:PrepareOK"></a>
@@ -386,11 +517,15 @@ available in scope.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="id">id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="numOfCols">numOfCols: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="numOfParams">numOfParams: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="warningCount">warningCount: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="columns">columns: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">immutable.this.Nil</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PrepareOK.html"><span class="name">PrepareOK</span></a><span class="params">(<span name="id">id: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="numOfCols">numOfCols: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="numOfParams">numOfParams: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="warningCount">warningCount: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="columns">columns: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">Nil</span></span>, <span name="params">params: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] = <span class="symbol">Nil</span></span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@PrepareOKextendsResultwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.PrepareRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.PrepareRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PrepareRequestextendsSimpleCommandRequestwithProductwithSerializable"></a>
       <a id="PrepareRequest:PrepareRequest"></a>
       <h4 class="signature">
@@ -399,11 +534,18 @@ available in scope.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PrepareRequest.html"><span class="name">PrepareRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Allocates a prepared statement on the server from the
-passed in query string.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@PrepareRequestextendsSimpleCommandRequestwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Allocates a prepared statement on the server from the
+passed in query string.</p><div class="fullcomment"><div class="comment cmt"><p>Allocates a prepared statement on the server from the
+passed in query string.
+<a href="http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-prepare.html</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.PreparedStatement" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="PreparedStatementextendsAnyRef"></a>
       <a id="PreparedStatement:PreparedStatement"></a>
@@ -413,13 +555,17 @@ passed in query string.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="PreparedStatement.html"><span class="name">PreparedStatement</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A PreparedStatement represents a parameterized
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@PreparedStatementextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A PreparedStatement represents a parameterized
 sql statement which may be applied concurrently
 with varying parameters.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.QueryRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.QueryRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="QueryRequestextendsSimpleCommandRequestwithProductwithSerializable"></a>
       <a id="QueryRequest:QueryRequest"></a>
       <h4 class="signature">
@@ -428,12 +574,19 @@ with varying parameters.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="QueryRequest.html"><span class="name">QueryRequest</span></a><span class="params">(<span name="sqlStatement">sqlStatement: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A QueryRequest is used to send the server a text-based query that
-is executed immediately.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.RawValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@QueryRequestextendsSimpleCommandRequestwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A QueryRequest is used to send the server a text-based query that
+is executed immediately.</p><div class="fullcomment"><div class="comment cmt"><p>A QueryRequest is used to send the server a text-based query that
+is executed immediately.
+<a href="http://dev.mysql.com/doc/internals/en/com-query.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-query.html</a>
+</p></div></div>
+    </li><li name="com.twitter.finagle.exp.mysql.RawValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RawValueextendsValuewithProductwithSerializable"></a>
       <a id="RawValue:RawValue"></a>
       <h4 class="signature">
@@ -442,12 +595,19 @@ is executed immediately.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RawValue.html"><span class="name">RawValue</span></a><span class="params">(<span name="typ">typ: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="isBinary">isBinary: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="RawValue.html"><span class="name">RawValue</span></a><span class="params">(<span name="typ">typ: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="charset">charset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="isBinary">isBinary: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]</span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A RawValue contains the raw bytes that represent
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@RawValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A RawValue contains the raw bytes that represent
 a value and enough meta data to decode the
-bytes.</p>
+bytes.</p><div class="fullcomment"><div class="comment cmt"><p>A RawValue contains the raw bytes that represent
+a value and enough meta data to decode the
+bytes.
+</p></div><dl class="paramcmts block"><dt class="param">typ</dt><dd class="cmt"><p>The mysql type code for this value.</p></dd><dt class="param">charset</dt><dd class="cmt"><p>The charset encoding of the bytes.</p></dd><dt class="param">isBinary</dt><dd class="cmt"><p>Disambiguates between the text and binary protocol.</p></dd><dt class="param">bytes</dt><dd class="cmt"><p>The raw bytes for this value.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.mysql.Request" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestextendsAnyRef"></a>
       <a id="Request:Request"></a>
@@ -457,9 +617,13 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@RequestextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.Result" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ResultextendsAnyRef"></a>
@@ -470,9 +634,13 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Result.html"><span class="name">Result</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Result.html"><span class="name">Result</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ResultextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.ResultSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ResultSetextendsResultwithProductwithSerializable"></a>
@@ -483,11 +651,15 @@ bytes.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ResultSet.html"><span class="name">ResultSet</span></a><span class="params">(<span name="fields">fields: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>]</span>, <span name="rows">rows: <span class="extype" name="scala.Seq">Seq</span>[<a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a>]</span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ResultSet.html"><span class="name">ResultSet</span></a><span class="params">(<span name="fields">fields: <span class="extype" name="scala.Seq">Seq</span>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>]</span>, <span name="rows">rows: <span class="extype" name="scala.Seq">Seq</span>[<a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a>]</span>)</span><span class="result"> extends <a href="Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ResultSetextendsResultwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.Row" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.Row" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RowextendsAnyRef"></a>
       <a id="Row:Row"></a>
       <h4 class="signature">
@@ -496,10 +668,17 @@ bytes.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Row.html"><span class="name">Row</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Row.html"><span class="name">Row</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A <code>Row</code> makes it easy to extract <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a>'s from a mysql row.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@RowextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <code>Row</code> makes it easy to extract <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a>'s from a mysql row.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>Row</code> makes it easy to extract <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a>'s from a mysql row.
+Specific <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a>'s based on mysql column name can be accessed
+via the <code>apply</code> method.
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.ServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerErrorextendsExceptionwithProductwithSerializable"></a>
       <a id="ServerError:ServerError"></a>
@@ -509,10 +688,14 @@ bytes.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="code">code: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="code">code: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="sqlState">sqlState: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A catch-all exception class for errors returned from the upstream
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ServerErrorextendsExceptionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A catch-all exception class for errors returned from the upstream
 MySQL server.</p>
     </li><li name="com.twitter.finagle.exp.mysql.ShortValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ShortValueextendsValuewithProductwithSerializable"></a>
@@ -523,9 +706,13 @@ MySQL server.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ShortValue.html"><span class="name">ShortValue</span></a><span class="params">(<span name="s">s: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ShortValue.html"><span class="name">ShortValue</span></a><span class="params">(<span name="s">s: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ShortValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.SimpleCommandRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SimpleCommandRequestextendsCommandRequest"></a>
@@ -538,10 +725,14 @@ MySQL server.</p>
       <span class="symbol">
         <a href="SimpleCommandRequest.html"><span class="name">SimpleCommandRequest</span></a><span class="result"> extends <a href="CommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.CommandRequest">CommandRequest</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Defines a request that encodes the command byte and
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@SimpleCommandRequestextendsCommandRequest" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Defines a request that encodes the command byte and
 associated data into a packet.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.StringEncodedRow" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.StringEncodedRow" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="StringEncodedRowextendsRow"></a>
       <a id="StringEncodedRow:StringEncodedRow"></a>
       <h4 class="signature">
@@ -552,9 +743,16 @@ associated data into a packet.</p>
       <span class="symbol">
         <a href="StringEncodedRow.html"><span class="name">StringEncodedRow</span></a><span class="result"> extends <a href="Row.html" class="extype" name="com.twitter.finagle.exp.mysql.Row">Row</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Defines a row where the data is presumed to be encoded with the mysql
-text-based protocol.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@StringEncodedRowextendsRow" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Defines a row where the data is presumed to be encoded with the mysql
+text-based protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a row where the data is presumed to be encoded with the mysql
+text-based protocol.
+<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow" target="_blank">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::ResultsetRow</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.StringValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StringValueextendsValuewithProductwithSerializable"></a>
       <a id="StringValue:StringValue"></a>
@@ -564,9 +762,13 @@ text-based protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="StringValue.html"><span class="name">StringValue</span></a><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="StringValue.html"><span class="name">StringValue</span></a><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@StringValueextendsValuewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.TimestampValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TimestampValueextendsInjectable[java.sql.Timestamp]withExtractable[java.sql.Timestamp]"></a>
@@ -579,8 +781,12 @@ text-based protocol.</p>
       <span class="symbol">
         <a href="TimestampValue.html"><span class="name">TimestampValue</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.exp.mysql.Injectable">Injectable</span>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>] with <span class="extype" name="com.twitter.finagle.exp.mysql.Extractable">Extractable</span>[<span class="extype" name="java.sql.Timestamp">Timestamp</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">An injector/extractor of <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> values.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@TimestampValueextendsInjectable[java.sql.Timestamp]withExtractable[java.sql.Timestamp]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An injector/extractor of <span class="extype" name="java.sql.Timestamp">java.sql.Timestamp</span> values.</p>
     </li><li name="com.twitter.finagle.exp.mysql.Transactions" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="TransactionsextendsAnyRef"></a>
       <a id="Transactions:Transactions"></a>
@@ -590,11 +796,15 @@ text-based protocol.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Transactions.html"><span class="name">Transactions</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Transactions.html"><span class="name">Transactions</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@TransactionsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.UseRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.UseRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="UseRequestextendsSimpleCommandRequestwithProductwithSerializable"></a>
       <a id="UseRequest:UseRequest"></a>
       <h4 class="signature">
@@ -603,10 +813,16 @@ text-based protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="UseRequest.html"><span class="name">UseRequest</span></a><span class="params">(<span name="dbName">dbName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="UseRequest.html"><span class="name">UseRequest</span></a><span class="params">(<span name="dbName">dbName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A UseRequest is used to change the default schema of the connection.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@UseRequestextendsSimpleCommandRequestwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A UseRequest is used to change the default schema of the connection.</p><div class="fullcomment"><div class="comment cmt"><p>A UseRequest is used to change the default schema of the connection.
+<a href="http://dev.mysql.com/doc/internals/en/com-init-db.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-init-db.html</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.Value" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ValueextendsAnyRef"></a>
       <a id="Value:Value"></a>
@@ -616,10 +832,14 @@ text-based protocol.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Value.html"><span class="name">Value</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Defines a Value ADT that represents the domain of values
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ValueextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Defines a Value ADT that represents the domain of values
 received from a mysql server.</p>
     </li></ol>
             </div>
@@ -639,7 +859,11 @@ received from a mysql server.</p>
       <span class="symbol">
         <a href="BigDecimalValue$.html"><span class="name">BigDecimalValue</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.exp.mysql.Injectable">Injectable</span>[<span class="extype" name="scala.BigDecimal">BigDecimal</span>] with <span class="extype" name="com.twitter.finagle.exp.mysql.Extractable">Extractable</span>[<span class="extype" name="scala.BigDecimal">BigDecimal</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@BigDecimalValue" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.CanBeParameter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CanBeParameter"></a>
@@ -652,7 +876,11 @@ received from a mysql server.</p>
       <span class="symbol">
         <a href="CanBeParameter$.html"><span class="name">CanBeParameter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@CanBeParameter" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.Capability" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Capability"></a>
@@ -663,9 +891,13 @@ received from a mysql server.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Capability$.html"><span class="name">Capability</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Capability$.html"><span class="name">Capability</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Capability" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.Charset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Charset"></a>
@@ -678,7 +910,11 @@ received from a mysql server.</p>
       <span class="symbol">
         <a href="Charset$.html"><span class="name">Charset</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Charset" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Client"></a>
@@ -691,7 +927,11 @@ received from a mysql server.</p>
       <span class="symbol">
         <a href="Client$.html"><span class="name">Client</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Client" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.ClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ClientDispatcher"></a>
@@ -704,7 +944,11 @@ received from a mysql server.</p>
       <span class="symbol">
         <a href="ClientDispatcher$.html"><span class="name">ClientDispatcher</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ClientDispatcher" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.CloseStatementOK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CloseStatementOK"></a>
@@ -717,8 +961,12 @@ received from a mysql server.</p>
       <span class="symbol">
         <a href="CloseStatementOK$.html"><span class="name">CloseStatementOK</span></a><span class="result"> extends <a href="OK.html" class="extype" name="com.twitter.finagle.exp.mysql.OK">OK</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Used internally to synthesize a response from
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@CloseStatementOK" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Used internally to synthesize a response from
 the server when sending a prepared statement
 CloseRequest
 </p>
@@ -733,7 +981,11 @@ CloseRequest
       <span class="symbol">
         <a href="Command$.html"><span class="name">Command</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Command" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.DateValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DateValue"></a>
@@ -746,9 +998,13 @@ CloseRequest
       <span class="symbol">
         <a href="DateValue$.html"><span class="name">DateValue</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.exp.mysql.Injectable">Injectable</span>[<span class="extype" name="java.sql.Date">Date</span>] with <span class="extype" name="com.twitter.finagle.exp.mysql.Extractable">Extractable</span>[<span class="extype" name="java.sql.Date">Date</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@DateValue" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.EOF" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.EOF" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EOF"></a>
       <a id="EOF:EOF"></a>
       <h4 class="signature">
@@ -757,11 +1013,18 @@ CloseRequest
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="EOF$.html"><span class="name">EOF</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="EOF.html" class="extype" name="com.twitter.finagle.exp.mysql.EOF">EOF</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="EOF$.html"><span class="name">EOF</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="EOF.html" class="extype" name="com.twitter.finagle.exp.mysql.EOF">EOF</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Represents and EOF result received from the server which
-contains any warnings and the server status.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@EOF" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents and EOF result received from the server which
+contains any warnings and the server status.</p><div class="fullcomment"><div class="comment cmt"><p>Represents and EOF result received from the server which
+contains any warnings and the server status.
+<a href="http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet" target="_blank">http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-EOF_Packet</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.EmptyValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EmptyValue"></a>
       <a id="EmptyValue:EmptyValue"></a>
@@ -771,11 +1034,15 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="EmptyValue$.html"><span class="name">EmptyValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@EmptyValue" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.Error" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.Error" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Error"></a>
       <a id="Error:Error"></a>
       <h4 class="signature">
@@ -784,10 +1051,16 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Error$.html"><span class="name">Error</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Error.html" class="extype" name="com.twitter.finagle.exp.mysql.Error">Error</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Error$.html"><span class="name">Error</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Error.html" class="extype" name="com.twitter.finagle.exp.mysql.Error">Error</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Represents the Error Packet received from the server and the data sent along with it.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Error" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents the Error Packet received from the server and the data sent along with it.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the Error Packet received from the server and the data sent along with it.
+<a href="http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet" target="_blank">http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-ERR_Packet</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.ExecuteRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ExecuteRequest"></a>
       <a id="ExecuteRequest:ExecuteRequest"></a>
@@ -799,9 +1072,13 @@ contains any warnings and the server status.</p>
       <span class="symbol">
         <a href="ExecuteRequest$.html"><span class="name">ExecuteRequest</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ExecuteRequest" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.Field" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.Field" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Field"></a>
       <a id="Field:Field"></a>
       <h4 class="signature">
@@ -810,10 +1087,18 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Field$.html"><span class="name">Field</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Field$.html"><span class="name">Field</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="Field.html" class="extype" name="com.twitter.finagle.exp.mysql.Field">Field</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Represents the column meta-data associated with a query.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Field" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents the column meta-data associated with a query.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the column meta-data associated with a query.
+Sent during ResultSet transmission and as part of the
+meta-data associated with a Row.
+<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41" target="_blank">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-Protocol::ColumnDefinition41</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.Handshake" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Handshake"></a>
       <a id="Handshake:Handshake"></a>
@@ -823,11 +1108,15 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Handshake$.html"><span class="name">Handshake</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Handshake" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.HandshakeInit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.HandshakeInit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HandshakeInit"></a>
       <a id="HandshakeInit:HandshakeInit"></a>
       <h4 class="signature">
@@ -836,10 +1125,16 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HandshakeInit$.html"><span class="name">HandshakeInit</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="HandshakeInit$.html"><span class="name">HandshakeInit</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="HandshakeInit.html" class="extype" name="com.twitter.finagle.exp.mysql.HandshakeInit">HandshakeInit</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">First result received from the server as part of the connection phase.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@HandshakeInit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">First result received from the server as part of the connection phase.</p><div class="fullcomment"><div class="comment cmt"><p>First result received from the server as part of the connection phase.
+<a href="http://dev.mysql.com/doc/internals/en/connection-phase-packets.html" target="_blank">http://dev.mysql.com/doc/internals/en/connection-phase-packets.html</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.IncompatibleCharset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IncompatibleCharset"></a>
       <a id="IncompatibleCharset:IncompatibleCharset"></a>
@@ -849,10 +1144,14 @@ contains any warnings and the server status.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="IncompatibleCharset$.html"><span class="name">IncompatibleCharset</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="IncompatibleCharset$.html"><span class="name">IncompatibleCharset</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that the server to which the client is connected is configured to use
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@IncompatibleCharset" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that the server to which the client is connected is configured to use
 a charset that the client is incompatible with.</p>
     </li><li name="com.twitter.finagle.exp.mysql.IncompatibleVersion" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IncompatibleVersion"></a>
@@ -863,10 +1162,14 @@ a charset that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="IncompatibleVersion$.html"><span class="name">IncompatibleVersion</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="IncompatibleVersion$.html"><span class="name">IncompatibleVersion</span></a><span class="result"> extends <a href="IncompatibleServerError.html" class="extype" name="com.twitter.finagle.exp.mysql.IncompatibleServerError">IncompatibleServerError</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that the server to which the client is connected is running
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@IncompatibleVersion" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that the server to which the client is connected is running
 a version of MySQL that the client is incompatible with.</p>
     </li><li name="com.twitter.finagle.exp.mysql.NullValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullValue"></a>
@@ -877,11 +1180,15 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullValue$.html"><span class="name">NullValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="NullValue$.html"><span class="name">NullValue</span></a><span class="result"> extends <a href="Value.html" class="extype" name="com.twitter.finagle.exp.mysql.Value">Value</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@NullValue" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.OK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.OK" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OK"></a>
       <a id="OK:OK"></a>
       <h4 class="signature">
@@ -890,10 +1197,17 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="OK$.html"><span class="name">OK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="OK.html" class="extype" name="com.twitter.finagle.exp.mysql.OK">OK</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="OK$.html"><span class="name">OK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="OK.html" class="extype" name="com.twitter.finagle.exp.mysql.OK">OK</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Represents the OK Packet received from the server.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@OK" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents the OK Packet received from the server.</p><div class="fullcomment"><div class="comment cmt"><p>Represents the OK Packet received from the server. It is sent
+to indicate that a command has completed succesfully.
+<a href="http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet" target="_blank">http://dev.mysql.com/doc/internals/en/generic-response-packets.html#packet-OK_Packet</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.Parameter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Parameter"></a>
       <a id="Parameter:Parameter"></a>
@@ -905,9 +1219,13 @@ a version of MySQL that the client is incompatible with.</p>
       <span class="symbol">
         <a href="Parameter$.html"><span class="name">Parameter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Parameter" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.PingRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.PingRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PingRequest"></a>
       <a id="PingRequest:PingRequest"></a>
       <h4 class="signature">
@@ -916,11 +1234,17 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PingRequest$.html"><span class="name">PingRequest</span></a><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PingRequest$.html"><span class="name">PingRequest</span></a><span class="result"> extends <a href="SimpleCommandRequest.html" class="extype" name="com.twitter.finagle.exp.mysql.SimpleCommandRequest">SimpleCommandRequest</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A request to check if the server is alive.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.PrepareOK" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@PingRequest" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A request to check if the server is alive.</p><div class="fullcomment"><div class="comment cmt"><p>A request to check if the server is alive.
+<a href="http://dev.mysql.com/doc/internals/en/com-ping.html" target="_blank">http://dev.mysql.com/doc/internals/en/com-ping.html</a>
+</p></div></div>
+    </li><li name="com.twitter.finagle.exp.mysql.PrepareOK" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PrepareOK"></a>
       <a id="PrepareOK:PrepareOK"></a>
       <h4 class="signature">
@@ -929,13 +1253,21 @@ a version of MySQL that the client is incompatible with.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PrepareOK$.html"><span class="name">PrepareOK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="PrepareOK.html" class="extype" name="com.twitter.finagle.exp.mysql.PrepareOK">PrepareOK</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PrepareOK$.html"><span class="name">PrepareOK</span></a><span class="result"> extends <a href="Decoder.html" class="extype" name="com.twitter.finagle.exp.mysql.Decoder">Decoder</a>[<a href="PrepareOK.html" class="extype" name="com.twitter.finagle.exp.mysql.PrepareOK">PrepareOK</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Meta data returned from the server in response to
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@PrepareOK" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Meta data returned from the server in response to
 a prepared statement initialization request
-COM_STMT_PREPARE.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.ResultSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+COM_STMT_PREPARE.</p><div class="fullcomment"><div class="comment cmt"><p>Meta data returned from the server in response to
+a prepared statement initialization request
+COM_STMT_PREPARE.
+<a href="http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK" target="_blank">http://dev.mysql.com/doc/internals/en/com-stmt-prepare-response.html#packet-COM_STMT_PREPARE_OK</a>
+</p></div></div>
+    </li><li name="com.twitter.finagle.exp.mysql.ResultSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ResultSet"></a>
       <a id="ResultSet:ResultSet"></a>
       <h4 class="signature">
@@ -944,11 +1276,20 @@ COM_STMT_PREPARE.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ResultSet$.html"><span class="name">ResultSet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ResultSet$.html"><span class="name">ResultSet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Resultset returned from the server containing field definitions and
-rows.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@ResultSet" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Resultset returned from the server containing field definitions and
+rows.</p><div class="fullcomment"><div class="comment cmt"><p>Resultset returned from the server containing field definitions and
+rows. The rows can be binary encoded (for prepared statements)
+or text encoded (for regular queries).
+<a href="http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset" target="_blank">http://dev.mysql.com/doc/internals/en/com-query-response.html#packet-ProtocolText::Resultset</a>
+<a href="http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html" target="_blank">http://dev.mysql.com/doc/internals/en/binary-protocol-resultset.html</a>
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.Type" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Type"></a>
       <a id="Type:Type"></a>
@@ -960,7 +1301,11 @@ rows.</p>
       <span class="symbol">
         <a href="Type$.html"><span class="name">Type</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@Type" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.transport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="transport"></a>
@@ -973,7 +1318,11 @@ rows.</p>
       <span class="symbol">
         <a href="transport/package.html"><span class="name">transport</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@transport" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -982,7 +1331,7 @@ rows.</p>
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.exp.mysql.TimestampValue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.exp.mysql.TimestampValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="TimestampValue"></a>
       <a id="TimestampValue:TimestampValue"></a>
       <h4 class="signature">
@@ -993,8 +1342,17 @@ rows.</p>
       <span class="symbol">
         <a href="TimestampValue$.html"><span class="name deprecated" title="Deprecated: (Since version 6.20.2)">TimestampValue</span></a><span class="result"> extends <a href="TimestampValue.html" class="extype" name="com.twitter.finagle.exp.mysql.TimestampValue">TimestampValue</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Extracts a value in UTC.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.exp.mysql.package@TimestampValue" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Extracts a value in UTC.</p><div class="fullcomment"><div class="comment cmt"><p>Extracts a value in UTC. To use a different time zone, create an instance of
+<a href="TimestampValue.html" class="extype" name="com.twitter.finagle.exp.mysql.TimestampValue">com.twitter.finagle.exp.mysql.TimestampValue</a>.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.20.2)</i></p></dd></dl></div>
     </li></ol>
             </div>
         </div>
@@ -1016,6 +1374,7 @@ rows.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>transport - com.twitter.finagle.exp.mysql.transport</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.exp">exp</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.exp.mysql">mysql</a></p>
-        <h1>transport</h1>
+        <h1>transport</h1><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -67,11 +75,15 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Buffer.html"><span class="name">Buffer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Buffer.html"><span class="name">Buffer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferReader" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferReader" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="BufferReaderextendsBuffer"></a>
       <a id="BufferReader:BufferReader"></a>
       <h4 class="signature">
@@ -82,10 +94,20 @@
       <span class="symbol">
         <a href="BufferReader.html"><span class="name">BufferReader</span></a><span class="result"> extends <a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Provides convenient methods for reading
-data in a packet body.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferReaderextendsBuffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Provides convenient methods for reading
+data in a packet body.</p><div class="fullcomment"><div class="comment cmt"><p>Provides convenient methods for reading
+data in a packet body. All data is decoded
+in little endian byte order in accordance with
+the mysql protocol. Operations are side-effecting,
+that is, all operations increase the offset
+into the underlying buffer.
+</p></div></div>
+    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="BufferWriterextendsBuffer"></a>
       <a id="BufferWriter:BufferWriter"></a>
       <h4 class="signature">
@@ -96,10 +118,20 @@ data in a packet body.</p>
       <span class="symbol">
         <a href="BufferWriter.html"><span class="name">BufferWriter</span></a><span class="result"> extends <a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Provides convenient methods for writing the
-data in a mysql packet body.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.transport.Packet" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferWriterextendsBuffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Provides convenient methods for writing the
+data in a mysql packet body.</p><div class="fullcomment"><div class="comment cmt"><p>Provides convenient methods for writing the
+data in a mysql packet body. All data is encoded
+in little endian byte order in accordance with
+the mysql protocol. Operations are side-effecting,
+that is, all operations increase the offset
+into the underlying buffer.
+</p></div></div>
+    </li><li name="com.twitter.finagle.exp.mysql.transport.Packet" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="PacketextendsAnyRef"></a>
       <a id="Packet:Packet"></a>
       <h4 class="signature">
@@ -108,11 +140,18 @@ data in a mysql packet body.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Packet.html"><span class="name">Packet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Packet.html"><span class="name">Packet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A logical packet exchanged between the mysql
-server and client.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@PacketextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A logical packet exchanged between the mysql
+server and client.</p><div class="fullcomment"><div class="comment cmt"><p>A logical packet exchanged between the mysql
+server and client. A packet consists of a header
+(size, sequence number) and a body.
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.transport.PacketEncoder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PacketEncoderextendsSimpleChannelDownstreamHandler"></a>
       <a id="PacketEncoder:PacketEncoder"></a>
@@ -124,9 +163,13 @@ server and client.</p>
       <span class="symbol">
         <a href="PacketEncoder.html"><span class="name">PacketEncoder</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelDownstreamHandler">SimpleChannelDownstreamHandler</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@PacketEncoderextendsSimpleChannelDownstreamHandler" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.transport.PacketFrameDecoder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.PacketFrameDecoder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PacketFrameDecoderextendsFrameDecoder"></a>
       <a id="PacketFrameDecoder:PacketFrameDecoder"></a>
       <h4 class="signature">
@@ -137,9 +180,16 @@ server and client.</p>
       <span class="symbol">
         <a href="PacketFrameDecoder.html"><span class="name">PacketFrameDecoder</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.frame.FrameDecoder">FrameDecoder</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">Decodes logical MySQL packets that could be fragmented across
-frames.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@PacketFrameDecoderextendsFrameDecoder" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Decodes logical MySQL packets that could be fragmented across
+frames.</p><div class="fullcomment"><div class="comment cmt"><p>Decodes logical MySQL packets that could be fragmented across
+frames. MySQL packets are a length encoded set of bytes written
+in little endian byte order.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -147,7 +197,7 @@ frames.</p>
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.exp.mysql.transport.Buffer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.exp.mysql.transport.Buffer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Buffer"></a>
       <a id="Buffer:Buffer"></a>
       <h4 class="signature">
@@ -158,9 +208,17 @@ frames.</p>
       <span class="symbol">
         <a href="Buffer$.html"><span class="name">Buffer</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">The Buffer interfaces provide convenience methods for reading/writing
-a logical packet exchanged between a mysql client and server.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@Buffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The Buffer interfaces provide convenience methods for reading/writing
+a logical packet exchanged between a mysql client and server.</p><div class="fullcomment"><div class="comment cmt"><p>The Buffer interfaces provide convenience methods for reading/writing
+a logical packet exchanged between a mysql client and server.
+Additionally, a buffer is guaranteed to be read from and written to
+in little endian byte order, which conforms to the mysql spec.
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.transport.BufferReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="BufferReader"></a>
       <a id="BufferReader:BufferReader"></a>
@@ -172,7 +230,11 @@ a logical packet exchanged between a mysql client and server.</p>
       <span class="symbol">
         <a href="BufferReader$.html"><span class="name">BufferReader</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferReader" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="BufferWriter"></a>
@@ -185,7 +247,11 @@ a logical packet exchanged between a mysql client and server.</p>
       <span class="symbol">
         <a href="BufferWriter$.html"><span class="name">BufferWriter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferWriter" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql.transport.MysqlClientPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MysqlClientPipelineFactory"></a>
@@ -198,10 +264,14 @@ a logical packet exchanged between a mysql client and server.</p>
       <span class="symbol">
         <a href="MysqlClientPipelineFactory$.html"><span class="name">MysqlClientPipelineFactory</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">A Netty3 pipeline that is responsible for framing network
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@MysqlClientPipelineFactory" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A Netty3 pipeline that is responsible for framing network
 traffic in terms of mysql logical packets.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.transport.MysqlTransporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.mysql.transport.MysqlTransporter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MysqlTransporter"></a>
       <a id="MysqlTransporter:MysqlTransporter"></a>
       <h4 class="signature">
@@ -212,9 +282,16 @@ traffic in terms of mysql logical packets.</p>
       <span class="symbol">
         <a href="MysqlTransporter$.html"><span class="name">MysqlTransporter</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet].</p>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@MysqlTransporter" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Responsible for the transport layer plumbing required to produce
+a Transporter[Packet, Packet].</p><div class="fullcomment"><div class="comment cmt"><p>Responsible for the transport layer plumbing required to produce
+a Transporter[Packet, Packet]. The current implementation uses
+Netty3.
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.transport.Packet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Packet"></a>
       <a id="Packet:Packet"></a>
@@ -226,7 +303,11 @@ a Transporter[Packet, Packet].</p>
       <span class="symbol">
         <a href="Packet$.html"><span class="name">Packet</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@Packet" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -253,6 +334,7 @@ a Transporter[Packet, Packet].</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

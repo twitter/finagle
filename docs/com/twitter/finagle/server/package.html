@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>server - com.twitter.finagle.server</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>server</h1>
+        <h1>server</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -41,7 +49,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -67,7 +75,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -81,7 +88,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.server.DefaultServer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.server.DefaultServer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultServer[Req,Rep,In,Out]extendsServer[Req,Rep]withProductwithSerializable"></a>
       <a id="DefaultServer[Req,Rep,In,Out]:DefaultServer[Req,Rep,In,Out]"></a>
       <h4 class="signature">
@@ -90,11 +97,25 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DefaultServer.html"><span class="name">DefaultServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="listener">listener: <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.In">In</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Out">Out</span>]</span>, <span name="serviceTransport">serviceTransport: (<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.In">In</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Out">Out</span>], <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>, <span name="requestTimeout">requestTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="maxConcurrentRequests">maxConcurrentRequests: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">scala.Int.MaxValue</span></span>, <span name="cancelOnHangup">cancelOnHangup: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="prepare">prepare: (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>] = <span class="defval" name="((sf: com.twitter.finagle.ServiceFactory[Req,Rep]) =&gt; sf)">...</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="defval" name="com.twitter.finagle.util.DefaultTimer.twitter">...</span></span>, <span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a> = <span class="defval" name="com.twitter.finagle.util.DefaultMonitor">...</span></span>, <span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span> = <span class="defval" name="com.twitter.finagle.util.`package`.DefaultLogger">...</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.ServerStatsReceiver">...</span></span>, <span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> = <span class="defval" name="com.twitter.finagle.tracing.DefaultTracer">...</span></span>, <span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a> = <span class="defval" name="com.twitter.finagle.util.LoadedReporterFactory">...</span></span>, <span name="newTraceInitializer">newTraceInitializer: <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]] = <span class="defval" name="com.twitter.finagle.tracing.TraceInitializerFilter.serverModule[Req, Rep]">...</span></span>)</span><span class="result"> extends <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DefaultServer.html"><span class="name">DefaultServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="listener">listener: <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.In">In</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Out">Out</span>]</span>, <span name="serviceTransport">serviceTransport: (<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.In">In</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Out">Out</span>], <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>, <span name="requestTimeout">requestTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="maxConcurrentRequests">maxConcurrentRequests: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">Int.MaxValue</span></span>, <span name="cancelOnHangup">cancelOnHangup: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="prepare">prepare: (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>] = <span class="defval" name="(sf: ServiceFactory[Req, Rep]) =&gt; sf">...</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>, <span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultMonitor</a></span></span></span>, <span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultLogger</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">ServerStatsReceiver</a></span></span></span>, <span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTracer</a></span></span></span>, <span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a> = <span class="symbol"><span class="name"><a href="../../../package.html">LoadedReporterFactory</a></span></span></span>, <span name="newTraceInitializer">newTraceInitializer: <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]] = <span class="defval" name='<span class="name"><a href="../../../package.html">TraceInitializerFilter.serverModule[Req, Rep]</a></span>'>...</span></span>)</span><span class="result"> extends <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">The default Server implementation.</p>
-    </li><li name="com.twitter.finagle.server.Listener" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@DefaultServer[Req,Rep,In,Out]extendsServer[Req,Rep]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The default Server implementation.</p><div class="fullcomment"><div class="comment cmt"><p>The default Server implementation. It is given a Listener (eg.
+<a href="../netty3/Netty3Listener.html" class="extype" name="com.twitter.finagle.netty3.Netty3Listener">com.twitter.finagle.netty3.Netty3Listener</a>) and a function,
+serveTransport, that binds a transport and a service. It will then
+dispatch requests onto a standard service stack parameterized as
+described below.
+</p></div><dl class="paramcmts block"><dt class="param">listener</dt><dd class="cmt"><p>The Listener from which to accept new typed
+Transports.</p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum amount of time the server is
+allowed to handle a request. If the timeout expires, the server
+will cancel the future and terminate the client connection.</p></dd><dt class="param">maxConcurrentRequests</dt><dd class="cmt"><p>The maximum number of concurrent
+requests the server is willing to handle.</p></dd><dt class="param">cancelOnHangup</dt><dd class="cmt"><p>Enabled by default. If disabled,
+exceptions on the transport do not propagate to the transport.</p></dd><dt class="param">prepare</dt><dd class="cmt"><p>Prepare the given <code>ServiceFactory</code> before use.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.server.Listener" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Listener[In,Out]extendsAnyRef"></a>
       <a id="Listener[In,Out]:Listener[In,Out]"></a>
       <h4 class="signature">
@@ -103,11 +124,20 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Listener.html"><span class="name">Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Listener.html"><span class="name">Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Listeners provide a method, <code>listen</code>, to expose a server on the
-the given SocketAddress.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@Listener[In,Out]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Listeners provide a method, <code>listen</code>, to expose a server on the
+the given SocketAddress.</p><div class="fullcomment"><div class="comment cmt"><p>Listeners provide a method, <code>listen</code>, to expose a server on the
+the given SocketAddress. <code>serveTransport</code> is called for each new
+connection. It is furnished with a typed <code>Transport</code> representing
+this connection.</p><p>The returned <code>ListeningServer</code> is used to inspect the server, and
+is also used to shut it down.
+</p></div></div>
     </li><li name="com.twitter.finagle.server.StackBasedServer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StackBasedServer[Req,Rep]extendsServer[Req,Rep]withStack.Parameterized[com.twitter.finagle.server.StackBasedServer[Req,Rep]]"></a>
       <a id="StackBasedServer[Req,Rep]:StackBasedServer[Req,Rep]"></a>
@@ -119,8 +149,12 @@ the given SocketAddress.</p>
       <span class="symbol">
         <a href="StackBasedServer.html"><span class="name">StackBasedServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="com.twitter.finagle.server.StackBasedServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StackBasedServer.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<span class="extype" name="com.twitter.finagle.server.StackBasedServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StackBasedServer.Rep">Rep</span>]]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a> that is
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@StackBasedServer[Req,Rep]extendsServer[Req,Rep]withStack.Parameterized[com.twitter.finagle.server.StackBasedServer[Req,Rep]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a> that is
 parameterized.</p>
     </li><li name="com.twitter.finagle.server.StackServer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StackServer[Req,Rep]extendsStackBasedServer[Req,Rep]withStack.Parameterized[com.twitter.finagle.server.StackServer[Req,Rep]]"></a>
@@ -133,8 +167,12 @@ parameterized.</p>
       <span class="symbol">
         <a href="StackServer.html"><span class="name">StackServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<span class="extype" name="com.twitter.finagle.server.StackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StackServer.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StackServer.Rep">Rep</span>]]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that composes a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@StackServer[Req,Rep]extendsStackBasedServer[Req,Rep]withStack.Parameterized[com.twitter.finagle.server.StackServer[Req,Rep]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that composes a
 <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a>.</p>
     </li><li name="com.twitter.finagle.server.StdStackServer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]"></a>
@@ -147,12 +185,16 @@ parameterized.</p>
       <span class="symbol">
         <a href="StdStackServer.html"><span class="name">StdStackServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>]</span><span class="result"> extends <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A standard template implementation for
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A standard template implementation for
 <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">com.twitter.finagle.server.StackServer</a>.</p>
     </li><li name="com.twitter.finagle.server.Transformer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="Transformer[Req,Rep]:(ServiceFactory[Req,Rep])⇒ServiceFactory[Req,Rep]"></a>
+      <a id="Transformer[Req,Rep]:Transformer[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
@@ -161,7 +203,11 @@ parameterized.</p>
       <span class="symbol">
         <span class="name">Transformer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> = (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.Transformer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.Transformer.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.Transformer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.Transformer.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -181,8 +227,12 @@ parameterized.</p>
       <span class="symbol">
         <a href="Listener$.html"><span class="name">Listener</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">A collection of <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Params</a> useful for configuring
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@Listener" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A collection of <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Params</a> useful for configuring
 a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>.</p>
     </li><li name="com.twitter.finagle.server.NullListener" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullListener"></a>
@@ -193,10 +243,14 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullListener$.html"><span class="name">NullListener</span></a><span class="result"> extends <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
+        <a href="NullListener$.html"><span class="name">NullListener</span></a><span class="result"> extends <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">An empty Listener that can be used as a placeholder.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@NullListener" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An empty Listener that can be used as a placeholder.</p>
     </li><li name="com.twitter.finagle.server.StackServer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StackServer"></a>
       <a id="StackServer:StackServer"></a>
@@ -208,7 +262,11 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
       <span class="symbol">
         <a href="StackServer$.html"><span class="name">StackServer</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@StackServer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -220,9 +278,9 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -239,6 +297,7 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

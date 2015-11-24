@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>Stack - com.twitter.finagle.Stack</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="value">
       <div id="definition">
-        <a href="Stack.html" title="Go to companion"><img src="../../../lib/object_to_trait_big.png" /></a>
+        <a href="Stack.html" title="See companion trait"><img alt="Object/Trait" src="../../../lib/object_to_trait_big.png" /></a>
         <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1><a href="Stack.html" title="Go to companion">Stack</a></h1>
+        <h1><a href="Stack.html" title="See companion trait">Stack</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Stack.html" title="See companion trait">trait Stack</a>
+            | <a href="package.html" class="extype" name="com.twitter.finagle">package finagle</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -40,10 +52,9 @@
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="package$$stack$.html#nilStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.stack#nilStack">stack.nilStack</a> for starting construction of an
-empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>s.
-</p></span></dd></dl><div class="toggleContainer block">
+empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>s.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -69,7 +80,6 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -83,7 +93,7 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.Stack.Head" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.Stack.Head" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="HeadextendsAnyRef"></a>
       <a id="Head:Head"></a>
       <h4 class="signature">
@@ -92,10 +102,16 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Head.html"><span class="name">Head</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Stack$$Head.html"><span class="name">Head</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Trait encompassing all associated metadata of a stack element.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@HeadextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Trait encompassing all associated metadata of a stack element.</p><div class="fullcomment"><div class="comment cmt"><p>Trait encompassing all associated metadata of a stack element.
+<a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackables</a> extend this trait.
+</p></div></div>
     </li><li name="com.twitter.finagle.Stack.Leaf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Leaf[T]extendsStack[T]withProductwithSerializable"></a>
       <a id="Leaf[T]:Leaf[T]"></a>
@@ -105,11 +121,15 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Leaf.html"><span class="name">Leaf</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="t">t: <span class="extype" name="com.twitter.finagle.Stack.Leaf.T">T</span></span>)</span><span class="result"> extends <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Leaf.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stack$$Leaf.html"><span class="name">Leaf</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="t">t: <span class="extype" name="com.twitter.finagle.Stack.Leaf.T">T</span></span>)</span><span class="result"> extends <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Leaf.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A static stack element; necessarily the last.</p>
-    </li><li name="com.twitter.finagle.Stack.Module" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Leaf[T]extendsStack[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A static stack element; necessarily the last.</p>
+    </li><li name="com.twitter.finagle.Stack.Module" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Module[T]extendsStackable[T]"></a>
       <a id="Module[T]:Module[T]"></a>
       <h4 class="signature">
@@ -120,8 +140,24 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module.html"><span class="name">Module</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A convenience class to construct stackable modules.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module[T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A convenience class to construct stackable modules.</p><div class="fullcomment"><div class="comment cmt"><p>A convenience class to construct stackable modules. This variant
+operates over stacks and the entire parameter map. The <code>ModuleN</code> variants
+may be more convenient for most definitions as they operate over <code>T</code> types
+and the parameter extraction is derived from type parameters.</p><pre><span class="kw">def</span> myNode = <span class="kw">new</span> Module[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>](<span class="lit">"myelem"</span>) {
+  <span class="kw">val</span> role = <span class="lit">"Multiplier"</span>
+  <span class="kw">val</span> description = <span class="lit">"Multiplies values by a multiplier"</span>
+  <span class="kw">val</span> parameters = <span class="std">Seq</span>(implicitly[Stack.Param[Multiplied]])
+  <span class="kw">def</span> make(params: Params, next: Stack[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>]): Stack[<span class="std">Int</span><span class="kw">=&gt;</span><span class="std">Int</span>] = {
+    <span class="kw">val</span> Multiplier(m) = params[Multiplier]
+    <span class="kw">if</span> (m == <span class="num">1</span>) next <span class="cmt">// It's a no-op, skip it.</span>
+    <span class="kw">else</span> Stack.Leaf(<span class="lit">"multiply"</span>, i <span class="kw">=&gt;</span> next.make(params)(i)*m)
+  }
+}</pre></div></div>
     </li><li name="com.twitter.finagle.Stack.Module0" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Module0[T]extendsStackable[T]"></a>
       <a id="Module0[T]:Module0[T]"></a>
@@ -133,8 +169,12 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module0.html"><span class="name">Module0</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module0.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A module of 0 parameters.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module0[T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module of 0 parameters.</p>
     </li><li name="com.twitter.finagle.Stack.Module1" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Module1[P1,T]extendsStackable[T]"></a>
       <a id="Module1[P1,T]:Module1[P1,T]"></a>
@@ -146,8 +186,12 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module1.html"><span class="name">Module1</span></a><span class="tparams">[<span name="P1">P1</span>, <span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module1.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A module of 1 parameter.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module1[P1,T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module of 1 parameter.</p>
     </li><li name="com.twitter.finagle.Stack.Module2" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Module2[P1,P2,T]extendsStackable[T]"></a>
       <a id="Module2[P1,P2,T]:Module2[P1,P2,T]"></a>
@@ -159,8 +203,12 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module2.html"><span class="name">Module2</span></a><span class="tparams">[<span name="P1">P1</span>, <span name="P2">P2</span>, <span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module2.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A module of 2 parameters.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module2[P1,P2,T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module of 2 parameters.</p>
     </li><li name="com.twitter.finagle.Stack.Module3" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Module3[P1,P2,P3,T]extendsStackable[T]"></a>
       <a id="Module3[P1,P2,P3,T]:Module3[P1,P2,P3,T]"></a>
@@ -172,8 +220,12 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module3.html"><span class="name">Module3</span></a><span class="tparams">[<span name="P1">P1</span>, <span name="P2">P2</span>, <span name="P3">P3</span>, <span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module3.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A module of 3 parameters.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module3[P1,P2,P3,T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module of 3 parameters.</p>
     </li><li name="com.twitter.finagle.Stack.Module4" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Module4[P1,P2,P3,P4,T]extendsStackable[T]"></a>
       <a id="Module4[P1,P2,P3,P4,T]:Module4[P1,P2,P3,P4,T]"></a>
@@ -185,8 +237,12 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module4.html"><span class="name">Module4</span></a><span class="tparams">[<span name="P1">P1</span>, <span name="P2">P2</span>, <span name="P3">P3</span>, <span name="P4">P4</span>, <span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module4.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A module of 4 parameters.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module4[P1,P2,P3,P4,T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module of 4 parameters.</p>
     </li><li name="com.twitter.finagle.Stack.Module5" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Module5[P1,P2,P3,P4,P5,T]extendsStackable[T]"></a>
       <a id="Module5[P1,P2,P3,P4,P5,T]:Module5[P1,P2,P3,P4,P5,T]"></a>
@@ -198,8 +254,12 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module5.html"><span class="name">Module5</span></a><span class="tparams">[<span name="P1">P1</span>, <span name="P2">P2</span>, <span name="P3">P3</span>, <span name="P4">P4</span>, <span name="P5">P5</span>, <span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module5.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A module of 5 parameters.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module5[P1,P2,P3,P4,P5,T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module of 5 parameters.</p>
     </li><li name="com.twitter.finagle.Stack.Module6" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Module6[P1,P2,P3,P4,P5,P6,T]extendsStackable[T]"></a>
       <a id="Module6[P1,P2,P3,P4,P5,P6,T]:Module6[P1,P2,P3,P4,P5,P6,T]"></a>
@@ -211,8 +271,12 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <span class="symbol">
         <a href="Stack$$Module6.html"><span class="name">Module6</span></a><span class="tparams">[<span name="P1">P1</span>, <span name="P2">P2</span>, <span name="P3">P3</span>, <span name="P4">P4</span>, <span name="P5">P5</span>, <span name="P6">P6</span>, <span name="T">T</span>]</span><span class="result"> extends <a href="Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<span class="extype" name="com.twitter.finagle.Stack.Module6.T">T</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A module of 6 parameters.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Module6[P1,P2,P3,P4,P5,P6,T]extendsStackable[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module of 6 parameters.</p>
     </li><li name="com.twitter.finagle.Stack.Node" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Node[T]extendsStack[T]withProductwithSerializable"></a>
       <a id="Node[T]:Node[T]"></a>
@@ -222,12 +286,16 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Node.html"><span class="name">Node</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="mk">mk: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>, <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]) ⇒ <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]</span>, <span name="next">next: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]</span>)</span><span class="result"> extends <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stack$$Node.html"><span class="name">Node</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="head">head: <a href="Stack$$Head.html" class="extype" name="com.twitter.finagle.Stack.Head">Head</a></span>, <span name="mk">mk: (<a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>, <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]) ⇒ <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]</span>, <span name="next">next: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>]</span>)</span><span class="result"> extends <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<span class="extype" name="com.twitter.finagle.Stack.Node.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Nodes materialize by transforming the underlying stack in
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Node[T]extendsStack[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Nodes materialize by transforming the underlying stack in
 some way.</p>
-    </li><li name="com.twitter.finagle.Stack.Param" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Stack.Param" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Param[P]extendsAnyRef"></a>
       <a id="Param[P]:Param[P]"></a>
       <h4 class="signature">
@@ -236,11 +304,26 @@ some way.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Param.html"><span class="name">Param</span></a><span class="tparams">[<span name="P">P</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Stack$$Param.html"><span class="name">Param</span></a><span class="tparams">[<span name="P">P</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A typeclass representing P-typed elements, eligible as
-parameters for stack configuration.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Param[P]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A typeclass representing P-typed elements, eligible as
+parameters for stack configuration.</p><div class="fullcomment"><div class="comment cmt"><p>A typeclass representing P-typed elements, eligible as
+parameters for stack configuration. Note that the typeclass
+instance itself is used as the key in parameter maps; thus
+typeclasses should be persistent:</p><pre><span class="kw">case</span> <span class="kw">class</span> Multiplier(i: <span class="std">Int</span>) {
+  <span class="kw">def</span> mk(): (Multipler, Stack.Param[Multipler]) =
+    (<span class="kw">this</span>, Multiplier.param)
+}
+<span class="kw">object</span> Multiplier {
+  <span class="kw">implicit</span> <span class="kw">val</span> param = Stack.Param(Multiplier(<span class="num">123</span>))
+}</pre><p>The <code>mk()</code> function together with <code>Parameterized.configured</code>
+provides a convenient Java interface.
+</p></div></div>
     </li><li name="com.twitter.finagle.Stack.Parameterized" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Parameterized[+T]extendsAnyRef"></a>
       <a id="Parameterized[+T]:Parameterized[T]"></a>
@@ -250,10 +333,14 @@ parameters for stack configuration.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Parameterized.html"><span class="name">Parameterized</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Stack$$Parameterized.html"><span class="name">Parameterized</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A mix-in for describing an object that is parameterized.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Parameterized[+T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A mix-in for describing an object that is parameterized.</p>
     </li><li name="com.twitter.finagle.Stack.Params" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ParamsextendsIterable[(com.twitter.finagle.Stack.Param[_],Any)]"></a>
       <a id="Params:Params"></a>
@@ -263,11 +350,15 @@ parameters for stack configuration.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Params.html"><span class="name">Params</span></a><span class="result"> extends <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[_], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>)]</span>
+        <a href="Stack$$Params.html"><span class="name">Params</span></a><span class="result"> extends <span class="extype" name="scala.Iterable">Iterable</span>[(<a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[_], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>)]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A parameter map.</p>
-    </li><li name="com.twitter.finagle.Stack.Role" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@ParamsextendsIterable[(com.twitter.finagle.Stack.Param[_],Any)]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A parameter map.</p>
+    </li><li name="com.twitter.finagle.Stack.Role" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RoleextendsProductwithSerializable"></a>
       <a id="Role:Role"></a>
       <h4 class="signature">
@@ -276,10 +367,17 @@ parameters for stack configuration.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Role.html"><span class="name">Role</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stack$$Role.html"><span class="name">Role</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Base trait for Stack roles.</p>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@RoleextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Base trait for Stack roles.</p><div class="fullcomment"><div class="comment cmt"><p>Base trait for Stack roles. A stack's role is indicative of its
+functionality. Roles provide a way to group similarly-purposed stacks and
+slot stack elements into specific usages.</p><p>TODO: CSL-869
+</p></div></div>
     </li><li name="com.twitter.finagle.Stack.Transformable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Transformable[+T]extendsAnyRef"></a>
       <a id="Transformable[+T]:Transformable[T]"></a>
@@ -289,11 +387,15 @@ parameters for stack configuration.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Transformable.html"><span class="name">Transformable</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Stack$$Transformable.html"><span class="name">Transformable</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Transformable[+T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.Stack.Transformer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Stack.Transformer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="TransformerextendsAnyRef"></a>
       <a id="Transformer:Transformer"></a>
       <h4 class="signature">
@@ -302,12 +404,20 @@ parameters for stack configuration.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Transformer.html"><span class="name">Transformer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Stack$$Transformer.html"><span class="name">Transformer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Encodes transformations for stacks of
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@TransformerextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Encodes transformations for stacks of
 <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactories</a> of
-arbitrary <code>Req</code> and <code>Rep</code> types.</p>
+arbitrary <code>Req</code> and <code>Rep</code> types.</p><div class="fullcomment"><div class="comment cmt"><p>Encodes transformations for stacks of
+<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactories</a> of
+arbitrary <code>Req</code> and <code>Rep</code> types. Such transformations must be
+indifferent to these types in order to typecheck.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -316,19 +426,6 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -337,10 +434,14 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -350,24 +451,15 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -376,10 +468,14 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Stack.Leaf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Leaf"></a>
       <a id="Leaf:Leaf"></a>
@@ -389,9 +485,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Leaf$.html"><span class="name">Leaf</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stack$$Leaf$.html"><span class="name">Leaf</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Leaf" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.Stack.Node" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Node"></a>
@@ -402,9 +502,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Stack$$Node$.html"><span class="name">Node</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stack$$Node$.html"><span class="name">Node</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Node" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.Stack.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Param"></a>
@@ -417,7 +521,11 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
       <span class="symbol">
         <a href="Stack$$Param$.html"><span class="name">Param</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Param" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.Stack.Params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Params"></a>
@@ -430,7 +538,11 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
       <span class="symbol">
         <a href="Stack$$Params$.html"><span class="name">Params</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@Params" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -443,7 +555,11 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -454,9 +570,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -473,9 +593,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -486,9 +610,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -499,9 +627,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -520,7 +652,11 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -531,9 +667,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -544,9 +684,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -557,9 +701,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -570,9 +718,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -583,9 +735,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -598,7 +754,11 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -611,7 +771,11 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@toString():String" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -622,9 +786,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -641,9 +809,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -660,9 +832,13 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Stack$@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -680,9 +856,9 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -699,6 +875,7 @@ arbitrary <code>Req</code> and <code>Rep</code> types.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../lib/template.js"></script>
+
+
     </body>
       </html>

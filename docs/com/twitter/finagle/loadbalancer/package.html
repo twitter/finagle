@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>loadbalancer - com.twitter.finagle.loadbalancer</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>loadbalancer</h1>
+        <h1>loadbalancer</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,7 +77,11 @@
       <span class="symbol">
         <a href="ApertureBalancerBench.html"><span class="name">ApertureBalancerBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@ApertureBalancerBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@State</span><span class="args">()</span>
               
@@ -87,8 +99,12 @@
       <span class="symbol">
         <a href="HeapBalancer.html"><span class="name">HeapBalancer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Rep">Rep</span>] with <a href="../util/OnReady.html" class="extype" name="com.twitter.finagle.util.OnReady">OnReady</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@HeapBalancer[Req,Rep]extendsServiceFactory[Req,Rep]withOnReady" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An efficient load balancer that operates on Activity[Set[ServiceFactory[Req, Rep]]].</p>
     </li><li name="com.twitter.finagle.loadbalancer.HeapBalancerBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HeapBalancerBenchextendsStdBenchAnnotations"></a>
       <a id="HeapBalancerBench:HeapBalancerBench"></a>
@@ -100,14 +116,18 @@
       <span class="symbol">
         <a href="HeapBalancerBench.html"><span class="name">HeapBalancerBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@HeapBalancerBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@State</span><span class="args">()</span>
               
                 <span class="name">@Threads</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="LoadBalancerFactoryextendsAnyRef"></a>
       <a id="LoadBalancerFactory:LoadBalancerFactory"></a>
       <h4 class="signature">
@@ -116,11 +136,17 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A thin interface around a Balancer's contructor that allows Finagle to pass in
-context from the stack to the balancers at construction time.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@LoadBalancerFactoryextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A thin interface around a Balancer's contructor that allows Finagle to pass in
+context from the stack to the balancers at construction time.</p><div class="fullcomment"><div class="comment cmt"><p>A thin interface around a Balancer's contructor that allows Finagle to pass in
+context from the stack to the balancers at construction time.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> for a collection of available balancers.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.P2CBalancerBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="P2CBalancerBenchextendsStdBenchAnnotations"></a>
       <a id="P2CBalancerBench:P2CBalancerBench"></a>
@@ -132,7 +158,11 @@ context from the stack to the balancers at construction time.</p>
       <span class="symbol">
         <a href="P2CBalancerBench.html"><span class="name">P2CBalancerBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@P2CBalancerBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@State</span><span class="args">()</span>
               
@@ -157,7 +187,11 @@ context from the stack to the balancers at construction time.</p>
       <span class="symbol">
         <a href="Aperture$.html"><span class="name">Aperture</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@Aperture" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.loadbalancer.BalancerBench" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="BalancerBench"></a>
@@ -170,9 +204,13 @@ context from the stack to the balancers at construction time.</p>
       <span class="symbol">
         <a href="BalancerBench$.html"><span class="name">BalancerBench</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@BalancerBench" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.loadbalancer.Balancers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Balancers"></a>
       <a id="Balancers:Balancers"></a>
       <h4 class="signature">
@@ -183,9 +221,16 @@ context from the stack to the balancers at construction time.</p>
       <span class="symbol">
         <a href="Balancers$.html"><span class="name">Balancers</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Constructor methods for various load balancers.</p>
-    </li><li name="com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@Balancers" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Constructor methods for various load balancers.</p><div class="fullcomment"><div class="comment cmt"><p>Constructor methods for various load balancers. The methods take balancer
+specific parameters and return a <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> that allows you
+to easily inject a balancer into the Finagle stack via client configuration.
+</p></div></div>
+    </li><li name="com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConcurrentLoadBalancerFactory"></a>
       <a id="ConcurrentLoadBalancerFactory:ConcurrentLoadBalancerFactory"></a>
       <h4 class="signature">
@@ -196,9 +241,17 @@ context from the stack to the balancers at construction time.</p>
       <span class="symbol">
         <a href="ConcurrentLoadBalancerFactory$.html"><span class="name">ConcurrentLoadBalancerFactory</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">A load balancer that balances among multiple connections,
-useful for managing concurrency in pipelining protocols.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@ConcurrentLoadBalancerFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A load balancer that balances among multiple connections,
+useful for managing concurrency in pipelining protocols.</p><div class="fullcomment"><div class="comment cmt"><p>A load balancer that balances among multiple connections,
+useful for managing concurrency in pipelining protocols.</p><p>Each endpoint can open multiple connections. For N endpoints,
+each opens M connections, load balancer balances among N*M
+options. Thus, it increases concurrency of each endpoint.
+</p></div></div>
     </li><li name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DefaultBalancerFactory"></a>
       <a id="DefaultBalancerFactory:DefaultBalancerFactory"></a>
@@ -210,7 +263,11 @@ useful for managing concurrency in pipelining protocols.</p>
       <span class="symbol">
         <a href="DefaultBalancerFactory$.html"><span class="name">DefaultBalancerFactory</span></a><span class="result"> extends <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@DefaultBalancerFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.loadbalancer.HeapBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HeapBalancer"></a>
@@ -223,7 +280,11 @@ useful for managing concurrency in pipelining protocols.</p>
       <span class="symbol">
         <a href="HeapBalancer$.html"><span class="name">HeapBalancer</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@HeapBalancer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.loadbalancer.LoadBalancerFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LoadBalancerFactory"></a>
@@ -236,7 +297,11 @@ useful for managing concurrency in pipelining protocols.</p>
       <span class="symbol">
         <a href="LoadBalancerFactory$.html"><span class="name">LoadBalancerFactory</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@LoadBalancerFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="exp"></a>
@@ -249,7 +314,11 @@ useful for managing concurrency in pipelining protocols.</p>
       <span class="symbol">
         <a href="exp/package.html"><span class="name">exp</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@exp" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.loadbalancer.perHostStats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="perHostStats"></a>
@@ -260,9 +329,13 @@ useful for managing concurrency in pipelining protocols.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <a href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@perHostStats" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -271,7 +344,7 @@ useful for managing concurrency in pipelining protocols.</p>
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.loadbalancer.defaultBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.loadbalancer.defaultBalancer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="defaultBalancer"></a>
       <a id="defaultBalancer:defaultBalancer"></a>
       <h4 class="signature">
@@ -282,8 +355,23 @@ useful for managing concurrency in pipelining protocols.</p>
       <span class="symbol">
         <a href="defaultBalancer$.html"><span class="name deprecated" title="Deprecated: (Since version 2015-06-15) Use com.twitter.finagle.loadbalancer.Balancers per-client.">defaultBalancer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">We expose the ability to configure balancers per-process via flags.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@defaultBalancer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">We expose the ability to configure balancers per-process via flags.</p><div class="fullcomment"><div class="comment cmt"><p>We expose the ability to configure balancers per-process via flags. However,
+this is generally not a good idea as Finagle processes usually contain many clients.
+This will likely go away in the future or be no-op and, therfore, should not be
+depended on. Instead, configure your balancers via the <code>configured</code> method on
+clients:</p><p>{{
+   val balancer = Balancers.aperture(...)
+   Protocol.configured(LoadBalancerFactory.Param(balancer))
+}}
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-06-15)</i> Use com.twitter.finagle.loadbalancer.Balancers per-client.</p></dd></dl></div>
     </li></ol>
             </div>
         </div>
@@ -305,6 +393,7 @@ useful for managing concurrency in pipelining protocols.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

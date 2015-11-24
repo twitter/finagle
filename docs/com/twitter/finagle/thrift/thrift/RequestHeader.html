@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>RequestHeader - com.twitter.finagle.thrift.thrift.RequestHeader</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../index.html';
@@ -24,9 +28,15 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../../../../lib/class_big.png" />
+        <img alt="Class" src="../../../../../lib/class_big.png" />
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.thrift">thrift</a>.<a href="package.html" class="extype" name="com.twitter.finagle.thrift.thrift">thrift</a></p>
-        <h1>RequestHeader</h1>
+        <h1>RequestHeader</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="com.twitter.finagle.thrift.thrift">package thrift</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -41,7 +51,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="java.lang.Cloneable">Cloneable</span>, <span class="extype" name="org.apache.thrift.TBase">TBase</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a>, <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span>], <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="java.lang.Cloneable">Cloneable</span>, <span class="extype" name="org.apache.thrift.TBase">TBase</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a>, <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span>], <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -67,7 +77,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -90,7 +99,11 @@
       <span class="symbol">
         <span class="name">RequestHeader</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@&lt;init&gt;(other:com.twitter.finagle.thrift.thrift.RequestHeader):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(trace_id:Long,span_id:Long,contexts:java.util.List[com.twitter.finagle.thrift.thrift.RequestContext]):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -101,9 +114,13 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">RequestHeader</span><span class="params">(<span name="trace_id">trace_id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="span_id">span_id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="contexts">contexts: <span class="extype" name="java.util.List">List</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thrift.RequestContext">RequestContext</a>]</span>)</span>
+        <span class="name">RequestHeader</span><span class="params">(<span name="trace_id">trace_id: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="span_id">span_id: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="contexts">contexts: <span class="extype" name="java.util.List">List</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thrift.RequestContext">RequestContext</a>]</span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@&lt;init&gt;(trace_id:Long,span_id:Long,contexts:java.util.List[com.twitter.finagle.thrift.thrift.RequestContext]):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;():com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -116,7 +133,11 @@
       <span class="symbol">
         <span class="name">RequestHeader</span><span class="params">()</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@&lt;init&gt;():com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -128,19 +149,6 @@
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -149,10 +157,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -162,24 +174,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@##():Int" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -188,10 +191,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#addToContexts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="addToContexts(elem:com.twitter.finagle.thrift.thrift.RequestContext):Unit"></a>
       <a id="addToContexts(RequestContext):Unit"></a>
@@ -201,9 +208,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addToContexts</span><span class="params">(<span name="elem">elem: <a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thrift.RequestContext">RequestContext</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">addToContexts</span><span class="params">(<span name="elem">elem: <a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thrift.RequestContext">RequestContext</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@addToContexts(elem:com.twitter.finagle.thrift.thrift.RequestContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#addToDelegations" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="addToDelegations(elem:com.twitter.finagle.thrift.thrift.Delegation):Unit"></a>
@@ -214,9 +225,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addToDelegations</span><span class="params">(<span name="elem">elem: <a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thrift.Delegation">Delegation</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">addToDelegations</span><span class="params">(<span name="elem">elem: <a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thrift.Delegation">Delegation</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@addToDelegations(elem:com.twitter.finagle.thrift.thrift.Delegation):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -229,7 +244,11 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#clear" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clear():Unit"></a>
@@ -240,9 +259,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clear</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">clear</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@clear():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -253,9 +276,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -272,9 +299,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">compareTo</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">compareTo</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@compareTo(other:com.twitter.finagle.thrift.thrift.RequestHeader):Int" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → Comparable</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#deepCopy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deepCopy():com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -287,7 +318,11 @@
       <span class="symbol">
         <span class="name">deepCopy</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@deepCopy():com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
@@ -298,9 +333,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#equals" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="equals(that:com.twitter.finagle.thrift.thrift.RequestHeader):Boolean"></a>
@@ -311,9 +350,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="that">that: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="that">that: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@equals(that:com.twitter.finagle.thrift.thrift.RequestHeader):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(that:Any):Boolean"></a>
@@ -324,9 +367,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@equals(that:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#fieldForId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fieldForId(fieldId:Int):com.twitter.finagle.thrift.thrift.RequestHeader._Fields"></a>
@@ -337,9 +384,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fieldForId</span><span class="params">(<span name="fieldId">fieldId: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>
+        <span class="name">fieldForId</span><span class="params">(<span name="fieldId">fieldId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@fieldForId(fieldId:Int):com.twitter.finagle.thrift.thrift.RequestHeader._Fields" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -350,9 +401,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -371,7 +426,11 @@
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getClient_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getClient_id():com.twitter.finagle.thrift.thrift.ClientId"></a>
@@ -384,7 +443,11 @@
       <span class="symbol">
         <span class="name">getClient_id</span><span class="params">()</span><span class="result">: <a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.thrift.ClientId">ClientId</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getClient_id():com.twitter.finagle.thrift.thrift.ClientId" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getContexts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getContexts():java.util.List[com.twitter.finagle.thrift.thrift.RequestContext]"></a>
@@ -397,7 +460,11 @@
       <span class="symbol">
         <span class="name">getContexts</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thrift.RequestContext">RequestContext</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getContexts():java.util.List[com.twitter.finagle.thrift.thrift.RequestContext]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getContextsIterator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getContextsIterator():java.util.Iterator[com.twitter.finagle.thrift.thrift.RequestContext]"></a>
@@ -410,7 +477,11 @@
       <span class="symbol">
         <span class="name">getContextsIterator</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thrift.RequestContext">RequestContext</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getContextsIterator():java.util.Iterator[com.twitter.finagle.thrift.thrift.RequestContext]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getContextsSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getContextsSize():Int"></a>
@@ -421,9 +492,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getContextsSize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">getContextsSize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getContextsSize():Int" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getDelegations" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getDelegations():java.util.List[com.twitter.finagle.thrift.thrift.Delegation]"></a>
@@ -436,7 +511,11 @@
       <span class="symbol">
         <span class="name">getDelegations</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.List">List</span>[<a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thrift.Delegation">Delegation</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getDelegations():java.util.List[com.twitter.finagle.thrift.thrift.Delegation]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getDelegationsIterator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getDelegationsIterator():java.util.Iterator[com.twitter.finagle.thrift.thrift.Delegation]"></a>
@@ -449,7 +528,11 @@
       <span class="symbol">
         <span class="name">getDelegationsIterator</span><span class="params">()</span><span class="result">: <span class="extype" name="java.util.Iterator">Iterator</span>[<a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thrift.Delegation">Delegation</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getDelegationsIterator():java.util.Iterator[com.twitter.finagle.thrift.thrift.Delegation]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getDelegationsSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getDelegationsSize():Int"></a>
@@ -460,9 +543,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getDelegationsSize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">getDelegationsSize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getDelegationsSize():Int" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getDest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getDest():String"></a>
@@ -475,7 +562,11 @@
       <span class="symbol">
         <span class="name">getDest</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getDest():String" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getFieldValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getFieldValue(field:com.twitter.finagle.thrift.thrift.RequestHeader._Fields):Object"></a>
@@ -486,9 +577,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getFieldValue</span><span class="params">(<span name="field">field: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">getFieldValue</span><span class="params">(<span name="field">field: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getFieldValue(field:com.twitter.finagle.thrift.thrift.RequestHeader._Fields):Object" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getFlags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getFlags():Long"></a>
@@ -499,9 +594,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getFlags</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+        <span class="name">getFlags</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getFlags():Long" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getParent_span_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getParent_span_id():Long"></a>
@@ -512,9 +611,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getParent_span_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+        <span class="name">getParent_span_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getParent_span_id():Long" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getSpan_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getSpan_id():Long"></a>
@@ -525,9 +628,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getSpan_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+        <span class="name">getSpan_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getSpan_id():Long" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#getTrace_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getTrace_id():Long"></a>
@@ -538,9 +645,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getTrace_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+        <span class="name">getTrace_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@getTrace_id():Long" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -551,9 +662,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -564,9 +679,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSampled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSampled():Boolean"></a>
@@ -577,9 +696,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSampled</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSampled</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSampled():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isSet(field:com.twitter.finagle.thrift.thrift.RequestHeader._Fields):Boolean"></a>
@@ -590,9 +713,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSet</span><span class="params">(<span name="field">field: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSet</span><span class="params">(<span name="field">field: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSet(field:com.twitter.finagle.thrift.thrift.RequestHeader._Fields):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetClient_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetClient_id():Boolean"></a>
@@ -603,9 +730,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetClient_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetClient_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetClient_id():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetContexts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetContexts():Boolean"></a>
@@ -616,9 +747,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetContexts</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetContexts</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetContexts():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetDelegations" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetDelegations():Boolean"></a>
@@ -629,9 +764,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetDelegations</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetDelegations</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetDelegations():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetDest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetDest():Boolean"></a>
@@ -642,9 +781,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetDest</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetDest</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetDest():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetFlags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetFlags():Boolean"></a>
@@ -655,9 +798,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetFlags</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetFlags</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetFlags():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetParent_span_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetParent_span_id():Boolean"></a>
@@ -668,9 +815,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetParent_span_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetParent_span_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetParent_span_id():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetSampled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetSampled():Boolean"></a>
@@ -681,9 +832,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetSampled</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetSampled</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetSampled():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetSpan_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetSpan_id():Boolean"></a>
@@ -694,9 +849,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetSpan_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetSpan_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetSpan_id():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#isSetTrace_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="isSetTrace_id():Boolean"></a>
@@ -707,9 +866,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSetTrace_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSetTrace_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@isSetTrace_id():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -720,9 +883,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -733,9 +900,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -746,9 +917,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#read" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="read(iprot:org.apache.thrift.protocol.TProtocol):Unit"></a>
@@ -759,9 +934,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">read</span><span class="params">(<span name="iprot">iprot: <span class="extype" name="org.apache.thrift.protocol.TProtocol">TProtocol</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">read</span><span class="params">(<span name="iprot">iprot: <span class="extype" name="org.apache.thrift.protocol.TProtocol">TProtocol</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@read(iprot:org.apache.thrift.protocol.TProtocol):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setClient_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setClient_id(client_id:com.twitter.finagle.thrift.thrift.ClientId):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -774,7 +953,11 @@
       <span class="symbol">
         <span class="name">setClient_id</span><span class="params">(<span name="client_id">client_id: <a href="ClientId.html" class="extype" name="com.twitter.finagle.thrift.thrift.ClientId">ClientId</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setClient_id(client_id:com.twitter.finagle.thrift.thrift.ClientId):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setClient_idIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setClient_idIsSet(value:Boolean):Unit"></a>
@@ -785,9 +968,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setClient_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setClient_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setClient_idIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setContexts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setContexts(contexts:java.util.List[com.twitter.finagle.thrift.thrift.RequestContext]):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -800,7 +987,11 @@
       <span class="symbol">
         <span class="name">setContexts</span><span class="params">(<span name="contexts">contexts: <span class="extype" name="java.util.List">List</span>[<a href="RequestContext.html" class="extype" name="com.twitter.finagle.thrift.thrift.RequestContext">RequestContext</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setContexts(contexts:java.util.List[com.twitter.finagle.thrift.thrift.RequestContext]):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setContextsIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setContextsIsSet(value:Boolean):Unit"></a>
@@ -811,9 +1002,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setContextsIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setContextsIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setContextsIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setDelegations" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setDelegations(delegations:java.util.List[com.twitter.finagle.thrift.thrift.Delegation]):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -826,7 +1021,11 @@
       <span class="symbol">
         <span class="name">setDelegations</span><span class="params">(<span name="delegations">delegations: <span class="extype" name="java.util.List">List</span>[<a href="Delegation.html" class="extype" name="com.twitter.finagle.thrift.thrift.Delegation">Delegation</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setDelegations(delegations:java.util.List[com.twitter.finagle.thrift.thrift.Delegation]):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setDelegationsIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setDelegationsIsSet(value:Boolean):Unit"></a>
@@ -837,9 +1036,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setDelegationsIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setDelegationsIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setDelegationsIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setDest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setDest(dest:String):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -852,7 +1055,11 @@
       <span class="symbol">
         <span class="name">setDest</span><span class="params">(<span name="dest">dest: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setDest(dest:String):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setDestIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setDestIsSet(value:Boolean):Unit"></a>
@@ -863,9 +1070,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setDestIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setDestIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setDestIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setFieldValue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setFieldValue(field:com.twitter.finagle.thrift.thrift.RequestHeader._Fields,value:Any):Unit"></a>
@@ -876,9 +1087,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setFieldValue</span><span class="params">(<span name="field">field: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setFieldValue</span><span class="params">(<span name="field">field: <span class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader._Fields">_Fields</span></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setFieldValue(field:com.twitter.finagle.thrift.thrift.RequestHeader._Fields,value:Any):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setFlags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setFlags(flags:Long):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -889,9 +1104,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setFlags</span><span class="params">(<span name="flags">flags: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
+        <span class="name">setFlags</span><span class="params">(<span name="flags">flags: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setFlags(flags:Long):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setFlagsIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setFlagsIsSet(value:Boolean):Unit"></a>
@@ -902,9 +1121,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setFlagsIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setFlagsIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setFlagsIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setParent_span_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setParent_span_id(parent_span_id:Long):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -915,9 +1138,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setParent_span_id</span><span class="params">(<span name="parent_span_id">parent_span_id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
+        <span class="name">setParent_span_id</span><span class="params">(<span name="parent_span_id">parent_span_id: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setParent_span_id(parent_span_id:Long):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setParent_span_idIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setParent_span_idIsSet(value:Boolean):Unit"></a>
@@ -928,9 +1155,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setParent_span_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setParent_span_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setParent_span_idIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setSampled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setSampled(sampled:Boolean):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -941,9 +1172,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setSampled</span><span class="params">(<span name="sampled">sampled: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
+        <span class="name">setSampled</span><span class="params">(<span name="sampled">sampled: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setSampled(sampled:Boolean):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setSampledIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setSampledIsSet(value:Boolean):Unit"></a>
@@ -954,9 +1189,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setSampledIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setSampledIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setSampledIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setSpan_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setSpan_id(span_id:Long):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -967,9 +1206,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setSpan_id</span><span class="params">(<span name="span_id">span_id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
+        <span class="name">setSpan_id</span><span class="params">(<span name="span_id">span_id: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setSpan_id(span_id:Long):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setSpan_idIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setSpan_idIsSet(value:Boolean):Unit"></a>
@@ -980,9 +1223,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setSpan_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setSpan_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setSpan_idIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setTrace_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setTrace_id(trace_id:Long):com.twitter.finagle.thrift.thrift.RequestHeader"></a>
@@ -993,9 +1240,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setTrace_id</span><span class="params">(<span name="trace_id">trace_id: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
+        <span class="name">setTrace_id</span><span class="params">(<span name="trace_id">trace_id: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setTrace_id(trace_id:Long):com.twitter.finagle.thrift.thrift.RequestHeader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#setTrace_idIsSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="setTrace_idIsSet(value:Boolean):Unit"></a>
@@ -1006,9 +1257,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setTrace_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setTrace_idIsSet</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@setTrace_idIsSet(value:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -1021,7 +1276,11 @@
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -1034,7 +1293,11 @@
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@toString():String" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetClient_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetClient_id():Unit"></a>
@@ -1045,9 +1308,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetClient_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetClient_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetClient_id():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetContexts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetContexts():Unit"></a>
@@ -1058,9 +1325,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetContexts</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetContexts</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetContexts():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetDelegations" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetDelegations():Unit"></a>
@@ -1071,9 +1342,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetDelegations</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetDelegations</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetDelegations():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetDest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetDest():Unit"></a>
@@ -1084,9 +1359,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetDest</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetDest</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetDest():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetFlags" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetFlags():Unit"></a>
@@ -1097,9 +1376,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetFlags</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetFlags</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetFlags():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetParent_span_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetParent_span_id():Unit"></a>
@@ -1110,9 +1393,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetParent_span_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetParent_span_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetParent_span_id():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetSampled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetSampled():Unit"></a>
@@ -1123,9 +1410,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetSampled</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetSampled</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetSampled():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetSpan_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetSpan_id():Unit"></a>
@@ -1136,9 +1427,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetSpan_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetSpan_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetSpan_id():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#unsetTrace_id" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsetTrace_id():Unit"></a>
@@ -1149,9 +1444,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unsetTrace_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unsetTrace_id</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@unsetTrace_id():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.thrift.thrift.RequestHeader#validate" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="validate():Unit"></a>
@@ -1162,9 +1461,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">validate</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">validate</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@validate():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -1175,9 +1478,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1194,9 +1501,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1213,9 +1524,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1232,9 +1547,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="oprot">oprot: <span class="extype" name="org.apache.thrift.protocol.TProtocol">TProtocol</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">write</span><span class="params">(<span name="oprot">oprot: <span class="extype" name="org.apache.thrift.protocol.TProtocol">TProtocol</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.thrift.thrift.RequestHeader@write(oprot:org.apache.thrift.protocol.TProtocol):Unit" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a> → TBase</dd></dl></div>
     </li></ol>
             </div>
@@ -1254,9 +1573,9 @@
             </div><div class="parent" name="java.lang.Comparable">
               <h3>Inherited from <span class="extype" name="java.lang.Comparable">Comparable</span>[<a href="" class="extype" name="com.twitter.finagle.thrift.thrift.RequestHeader">RequestHeader</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -1273,6 +1592,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

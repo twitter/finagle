@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>mux - com.twitter.finagle.mux</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>mux</h1>
+        <h1>mux</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -119,7 +127,7 @@ an indefinite lease. Adhering to the lease is optional, but the server may
 reject requests or provide degraded service should the lease expire. This is
 used by servers to implement features like garbage collection avoidance.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -145,7 +153,6 @@ used by servers to implement features like garbage collection avoidance.</p></di
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -159,7 +166,7 @@ used by servers to implement features like garbage collection avoidance.</p></di
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.mux.BadMessageException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.mux.BadMessageException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BadMessageExceptionextendsExceptionwithProductwithSerializable"></a>
       <a id="BadMessageException:BadMessageException"></a>
       <h4 class="signature">
@@ -168,11 +175,17 @@ used by servers to implement features like garbage collection avoidance.</p></di
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BadMessageException.html"><span class="name">BadMessageException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="BadMessageException.html"><span class="name">BadMessageException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that encoding or decoding of a Mux message failed.</p>
-    </li><li name="com.twitter.finagle.mux.ClientDiscardedRequestException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@BadMessageExceptionextendsExceptionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that encoding or decoding of a Mux message failed.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that encoding or decoding of a Mux message failed.
+Reason for failure should be provided by the <code>why</code> string.
+</p></div></div>
+    </li><li name="com.twitter.finagle.mux.ClientDiscardedRequestException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ClientDiscardedRequestExceptionextendsExceptionwithProductwithSerializable"></a>
       <a id="ClientDiscardedRequestException:ClientDiscardedRequestException"></a>
       <h4 class="signature">
@@ -181,10 +194,16 @@ used by servers to implement features like garbage collection avoidance.</p></di
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that a client requested that a given request be discarded.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@ClientDiscardedRequestExceptionextendsExceptionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that a client requested that a given request be discarded.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that a client requested that a given request be discarded.</p><p>This implies that the client issued a Tdiscarded message for a given tagged
+request, as per <a href="" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.mux.FailureDetectors" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailureDetectorsextendsObject"></a>
       <a id="FailureDetectors:FailureDetectors"></a>
@@ -194,9 +213,13 @@ used by servers to implement features like garbage collection avoidance.</p></di
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="FailureDetectors.html"><span class="name">FailureDetectors</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="FailureDetectors.html"><span class="name">FailureDetectors</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@FailureDetectorsextendsObject" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.Request" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestextendsAnyRef"></a>
@@ -207,10 +230,14 @@ used by servers to implement features like garbage collection avoidance.</p></di
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A mux request.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@RequestextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A mux request.</p>
     </li><li name="com.twitter.finagle.mux.Response" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ResponseextendsAnyRef"></a>
       <a id="Response:Response"></a>
@@ -220,11 +247,15 @@ used by servers to implement features like garbage collection avoidance.</p></di
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A mux response containing an immutable byte buffer.</p>
-    </li><li name="com.twitter.finagle.mux.ServerApplicationError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@ResponseextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A mux response containing an immutable byte buffer.</p>
+    </li><li name="com.twitter.finagle.mux.ServerApplicationError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerApplicationErrorextendsExceptionwithNoStacktracewithProductwithSerializable"></a>
       <a id="ServerApplicationError:ServerApplicationError"></a>
       <h4 class="signature">
@@ -233,12 +264,20 @@ used by servers to implement features like garbage collection avoidance.</p></di
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerApplicationError.html"><span class="name">ServerApplicationError</span></a><span class="params">(<span name="what">what: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ServerApplicationError.html"><span class="name">ServerApplicationError</span></a><span class="params">(<span name="what">what: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that the server encountered an error whilst processing the client's
-request.</p>
-    </li><li name="com.twitter.finagle.mux.ServerError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@ServerApplicationErrorextendsExceptionwithNoStacktracewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that the server encountered an error whilst processing the client's
+request.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that the server encountered an error whilst processing the client's
+request. In contrast to <a href="ServerError.html" class="extype" name="com.twitter.finagle.mux.ServerError">com.twitter.finagle.mux.ServerError</a>, a
+ServerApplicationError relates to server application failure rather than
+failure to interpret the request.
+</p></div></div>
+    </li><li name="com.twitter.finagle.mux.ServerError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerErrorextendsExceptionwithNoStacktracewithProductwithSerializable"></a>
       <a id="ServerError:ServerError"></a>
       <h4 class="signature">
@@ -247,10 +286,43 @@ request.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="what">what: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ServerError.html"><span class="name">ServerError</span></a><span class="params">(<span name="what">what: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="../NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that the server failed to interpret or act on the request.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@ServerErrorextendsExceptionwithNoStacktracewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that the server failed to interpret or act on the request.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that the server failed to interpret or act on the request. This
+could mean that the client sent a <a href="" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a> message type
+that the server is unable to process.
+</p></div></div>
+    </li><li name="com.twitter.finagle.mux.WindowedMaxBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="WindowedMaxBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="WindowedMaxBenchmark:WindowedMaxBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="WindowedMaxBenchmark.html"><span class="name">WindowedMaxBenchmark</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@WindowedMaxBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+                <span class="name">@Threads</span><span class="args">()</span>
+              
+                <span class="name">@Warmup</span><span class="args">()</span>
+              
+                <span class="name">@Measurement</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li></ol>
             </div>
 
@@ -269,8 +341,12 @@ request.</p>
       <span class="symbol">
         <a href="FailureDetector$.html"><span class="name">FailureDetector</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Companion object capable of creating a FailureDetector based on parameterized config.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@FailureDetector" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Companion object capable of creating a FailureDetector based on parameterized config.</p>
     </li><li name="com.twitter.finagle.mux.Request" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Request"></a>
       <a id="Request:Request"></a>
@@ -282,7 +358,11 @@ request.</p>
       <span class="symbol">
         <a href="Request$.html"><span class="name">Request</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@Request" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.Requests" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Requests"></a>
@@ -295,8 +375,12 @@ request.</p>
       <span class="symbol">
         <a href="Requests$.html"><span class="name">Requests</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">For java compatibility</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@Requests" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">For java compatibility</p>
     </li><li name="com.twitter.finagle.mux.Response" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Response"></a>
       <a id="Response:Response"></a>
@@ -308,7 +392,11 @@ request.</p>
       <span class="symbol">
         <a href="Response$.html"><span class="name">Response</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@Response" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.Responses" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Responses"></a>
@@ -321,8 +409,29 @@ request.</p>
       <span class="symbol">
         <a href="Responses$.html"><span class="name">Responses</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">For java compatibility</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@Responses" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">For java compatibility</p>
+    </li><li name="com.twitter.finagle.mux.WindowedMaxBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="WindowedMaxBenchmark"></a>
+      <a id="WindowedMaxBenchmark:WindowedMaxBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="WindowedMaxBenchmark$.html"><span class="name">WindowedMaxBenchmark</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@WindowedMaxBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.mux.gracefulShutdownEnabled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="gracefulShutdownEnabled"></a>
       <a id="gracefulShutdownEnabled:gracefulShutdownEnabled"></a>
@@ -332,9 +441,13 @@ request.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="gracefulShutdownEnabled$.html"><span class="name">gracefulShutdownEnabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <a href="gracefulShutdownEnabled$.html"><span class="name">gracefulShutdownEnabled</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@gracefulShutdownEnabled" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.mux.lease" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="lease"></a>
@@ -347,9 +460,13 @@ request.</p>
       <span class="symbol">
         <a href="lease/package.html"><span class="name">lease</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@lease" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.mux.sessionFailureDetector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.mux.sessionFailureDetector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sessionFailureDetector"></a>
       <a id="sessionFailureDetector:sessionFailureDetector"></a>
       <h4 class="signature">
@@ -360,9 +477,16 @@ request.</p>
       <span class="symbol">
         <a href="sessionFailureDetector$.html"><span class="name">sessionFailureDetector</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">GlobalFlag to configure FailureDetection used only in the
-absence of any app-specified config.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@sessionFailureDetector" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">GlobalFlag to configure FailureDetection used only in the
+absence of any app-specified config.</p><div class="fullcomment"><div class="comment cmt"><p>GlobalFlag to configure FailureDetection used only in the
+absence of any app-specified config. This is the default (legacy)
+behavior.
+</p></div></div>
     </li><li name="com.twitter.finagle.mux.stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stats"></a>
       <a id="stats:stats"></a>
@@ -374,7 +498,11 @@ absence of any app-specified config.</p>
       <span class="symbol">
         <a href="stats/package.html"><span class="name">stats</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@stats" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -386,9 +514,9 @@ absence of any app-specified config.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -405,6 +533,7 @@ absence of any app-specified config.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

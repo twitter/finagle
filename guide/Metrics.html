@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.29.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.30.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.29.0',
+        VERSION:     '6.30.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.29.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.30.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,14 +57,14 @@
         <li class="right" >
           <a href="Extending.html" title="Extending Finagle"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="metrics">
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
@@ -107,12 +107,6 @@ been thrown from this service</dd>
 <dt><strong>sourcedfailures</strong></dt>
 <dd>a counter of the number of times any SourcedException or sourced Failure has
 been thrown</dd>
-<dt><strong>transit_latency_ms</strong></dt>
-<dd>a stat that attempts to measure (walltime) transit times between hops, e.g.,
-from client to server. Not supported by all protocols.</dd>
-<dt><strong>deadline_budget_ms</strong></dt>
-<dd>a stat accounting for the (implied) amount of time remaining for this request,
-for example from a deadline or timeout. Not supported by all protocols.</dd>
 </dl>
 </div>
 <div class="section" id="statsfactorywrapper">
@@ -128,12 +122,18 @@ specific exception</dd>
 this entails establishing a connection or waiting for a connection from a pool</dd>
 </dl>
 </div>
-<div class="section" id="handletimefilter">
-<h3>HandletimeFilter<a class="headerlink" href="#handletimefilter" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="serverstatsfilter">
+<h3>ServerStatsFilter<a class="headerlink" href="#serverstatsfilter" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>handletime_us</strong></dt>
 <dd>a histogram of the time it takes to handle the request in microseconds
 NB: does not include the time to respond</dd>
+<dt><strong>transit_latency_ms</strong></dt>
+<dd>a stat that attempts to measure (walltime) transit times between hops, e.g.,
+from client to server. Not supported by all protocols.</dd>
+<dt><strong>deadline_budget_ms</strong></dt>
+<dd>a stat accounting for the (implied) amount of time remaining for this request,
+for example from a deadline or timeout. Not supported by all protocols.</dd>
 </dl>
 </div>
 <div class="section" id="defaultserver">
@@ -175,17 +175,17 @@ primarily to decide whether a host is available to make new connections to in th
 <h3>Timer<a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>finagle/timer/pending_tasks</strong></dt>
-<dd>a stat of the number of pending tasks to run for <tt class="docutils literal"><span class="pre">DefaultTimer.twitter</span></tt></dd>
+<dd>a stat of the number of pending tasks to run for <code class="docutils literal"><span class="pre">DefaultTimer.twitter</span></code></dd>
 <dt><strong>finagle/timer/deviation_ms</strong></dt>
 <dd>a stat of the deviation in milliseconds of tasks scheduled on
-<tt class="docutils literal"><span class="pre">DefaultTimer.twitter</span></tt> from their expected time.</dd>
+<code class="docutils literal"><span class="pre">DefaultTimer.twitter</span></code> from their expected time.</dd>
 </dl>
 </div>
 <div class="section" id="clientregistry">
 <h3>ClientRegistry<a class="headerlink" href="#clientregistry" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>finagle/clientregistry/size</strong></dt>
-<dd>a gauge of the current number of clients in the <tt class="docutils literal"><span class="pre">ClientRegistry</span></tt></dd>
+<dd>a gauge of the current number of clients in the <code class="docutils literal"><span class="pre">ClientRegistry</span></code></dd>
 </dl>
 </div>
 </div>
@@ -561,7 +561,7 @@ controlled by a dynamic budget.</p>
 </div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
-<p id="mux-stats">These stats pertain to <a class="reference internal" href="Protocols.html#mux"><em>Mux</em></a>.</p>
+<p id="mux-stats">These stats pertain to <a class="reference internal" href="Protocols.html#mux"><span>Mux</span></a>.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
 <dd>the number of times the server has initiated session draining</dd>
@@ -603,7 +603,7 @@ based failure detection. They only apply to the mux protocol.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -622,7 +622,7 @@ based failure detection. They only apply to the mux protocol.</p>
 <li><a class="reference internal" href="#public">Public</a><ul>
 <li><a class="reference internal" href="#statsfilter">StatsFilter</a></li>
 <li><a class="reference internal" href="#statsfactorywrapper">StatsFactoryWrapper</a></li>
-<li><a class="reference internal" href="#handletimefilter">HandletimeFilter</a></li>
+<li><a class="reference internal" href="#serverstatsfilter">ServerStatsFilter</a></li>
 <li><a class="reference internal" href="#defaultserver">DefaultServer</a></li>
 </ul>
 </li>

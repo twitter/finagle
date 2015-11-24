@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>kestrel - com.twitter.finagle.kestrel</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>kestrel</h1>
+        <h1>kestrel</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -67,11 +75,15 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A friendly Kestrel client Interface.</p>
-    </li><li name="com.twitter.finagle.kestrel.ClientBase" visbl="prt" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ClientextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A friendly Kestrel client Interface.</p>
+    </li><li name="com.twitter.finagle.kestrel.ClientBase" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ClientBase[CommandExecutor&lt;:com.twitter.util.Closable,Reply,ItemId]extendsClient"></a>
       <a id="ClientBase[CommandExecutor&lt;:Closable,Reply,ItemId]:ClientBase[CommandExecutor,Reply,ItemId]"></a>
       <h4 class="signature">
@@ -82,9 +94,14 @@
       <span class="symbol">
         <a href="ClientBase.html"><span class="name">ClientBase</span></a><span class="tparams">[<span name="CommandExecutor">CommandExecutor &lt;: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>, <span name="Reply">Reply</span>, <span name="ItemId">ItemId</span>]</span><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.kestrel.Client">Client</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Common base class for clients using different protocols</p>
-    </li><li name="com.twitter.finagle.kestrel.CommandExecutorFactory" visbl="prt" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ClientBase[CommandExecutor&lt;:com.twitter.util.Closable,Reply,ItemId]extendsClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Common base class for clients using different protocols</p><div class="fullcomment"><div class="comment cmt"><p>Common base class for clients using different protocols</p></div><dl class="paramcmts block"><dt class="tparam">CommandExecutor</dt><dd class="cmt"><p>the type that executes commands using some protocol</p></dd><dt class="tparam">Reply</dt><dd class="cmt"><p>the type of reply that {{CommandExecutor}} returns</p></dd><dt class="tparam">ItemId</dt><dd class="cmt"><p>the type used by {{CommandExecutor}} to identify returned
+               items</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.kestrel.CommandExecutorFactory" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="CommandExecutorFactory[U]extendsClosable"></a>
       <a id="CommandExecutorFactory[U]:CommandExecutorFactory[U]"></a>
       <h4 class="signature">
@@ -95,9 +112,14 @@
       <span class="symbol">
         <a href="CommandExecutorFactory.html"><span class="name">CommandExecutorFactory</span></a><span class="tparams">[<span name="U">U</span>]</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Factory of command executors for <a href="ClientBase.html" class="extype" name="com.twitter.finagle.kestrel.ClientBase">com.twitter.finagle.kestrel.ClientBase</a></p>
-    </li><li name="com.twitter.finagle.kestrel.ConnectedClient" visbl="prt" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@CommandExecutorFactory[U]extendsClosable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Factory of command executors for <a href="ClientBase.html" class="extype" name="com.twitter.finagle.kestrel.ClientBase">com.twitter.finagle.kestrel.ClientBase</a></p><div class="fullcomment"><div class="comment cmt"><p>Factory of command executors for <a href="ClientBase.html" class="extype" name="com.twitter.finagle.kestrel.ClientBase">com.twitter.finagle.kestrel.ClientBase</a></p></div><dl class="paramcmts block"><dt class="tparam">U</dt><dd class="cmt"><p>the type used to execute commands in
+          <a href="ClientBase.html#read(processResponse:Reply=&gt;com.twitter.util.Try[Option[(com.twitter.io.Buf,ItemId)]],openCommand:CommandExecutor=&gt;com.twitter.util.Future[Reply],closeAndOpenCommand:ItemId=&gt;(CommandExecutor=&gt;com.twitter.util.Future[Reply]),abortCommand:ItemId=&gt;(CommandExecutor=&gt;com.twitter.util.Future[Reply])):com.twitter.finagle.kestrel.ReadHandle" class="extmbr" name="com.twitter.finagle.kestrel.ClientBase#read">com.twitter.finagle.kestrel.ClientBase.read</a></p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.kestrel.ConnectedClient" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConnectedClientextendsClientBase[com.twitter.finagle.Service[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response],com.twitter.finagle.kestrel.protocol.Response,Unit]"></a>
       <a id="ConnectedClient:ConnectedClient"></a>
       <h4 class="signature">
@@ -106,11 +128,16 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ConnectedClient.html"><span class="name">ConnectedClient</span></a><span class="result"> extends <a href="ClientBase.html" class="extype" name="com.twitter.finagle.kestrel.ClientBase">ClientBase</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>], <a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <a href="ConnectedClient.html"><span class="name">ConnectedClient</span></a><span class="result"> extends <a href="ClientBase.html" class="extype" name="com.twitter.finagle.kestrel.ClientBase">ClientBase</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>], <a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A Client representing a single TCP connection to a single server.</p>
-    </li><li name="com.twitter.finagle.kestrel.FinagledClientFactory" visbl="prt" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ConnectedClientextendsClientBase[com.twitter.finagle.Service[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response],com.twitter.finagle.kestrel.protocol.Response,Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A Client representing a single TCP connection to a single server.</p><div class="fullcomment"><div class="comment cmt"><p>A Client representing a single TCP connection to a single server.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.kestrel.FinagledClientFactory" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FinagledClientFactoryextendsCommandExecutorFactory[com.twitter.finagle.kestrel.FinagledClosableClient]"></a>
       <a id="FinagledClientFactory:FinagledClientFactory"></a>
       <h4 class="signature">
@@ -121,9 +148,13 @@
       <span class="symbol">
         <a href="FinagledClientFactory.html"><span class="name">FinagledClientFactory</span></a><span class="result"> extends <a href="CommandExecutorFactory.html" class="extype" name="com.twitter.finagle.kestrel.CommandExecutorFactory">CommandExecutorFactory</a>[<a href="FinagledClosableClient.html" class="extype" name="com.twitter.finagle.kestrel.FinagledClosableClient">FinagledClosableClient</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">Wrapper factory for creating FinagledClosableClients</p>
-    </li><li name="com.twitter.finagle.kestrel.FinagledClosableClient" visbl="prt" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@FinagledClientFactoryextendsCommandExecutorFactory[com.twitter.finagle.kestrel.FinagledClosableClient]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Wrapper factory for creating FinagledClosableClients</p><div class="fullcomment"><div class="comment cmt"><p>Wrapper factory for creating FinagledClosableClients</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.twitter.finagle.kestrel.FinagledClosableClient" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FinagledClosableClientextendsKestrel.FinagledClientwithClosable"></a>
       <a id="FinagledClosableClient:FinagledClosableClient"></a>
       <h4 class="signature">
@@ -134,8 +165,12 @@
       <span class="symbol">
         <a href="FinagledClosableClient.html"><span class="name">FinagledClosableClient</span></a><span class="result"> extends <a href="net/lag/kestrel/thriftscala/Kestrel$$FinagledClient.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledClient">FinagledClient</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Extends FinagledClient with Closable</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@FinagledClosableClientextendsKestrel.FinagledClientwithClosable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Extends FinagledClient with Closable</p><div class="fullcomment"><div class="comment cmt"><p>Extends FinagledClient with Closable</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.Interpreter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InterpreterextendsStateMachine"></a>
       <a id="Interpreter:Interpreter"></a>
@@ -147,7 +182,11 @@
       <span class="symbol">
         <a href="Interpreter.html"><span class="name">Interpreter</span></a><span class="result"> extends <span class="extype" name="com.twitter.util.StateMachine">StateMachine</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@InterpreterextendsStateMachine" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.InterpreterService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InterpreterServiceextendsService[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response]"></a>
@@ -160,7 +199,11 @@
       <span class="symbol">
         <a href="InterpreterService.html"><span class="name">InterpreterService</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@InterpreterServiceextendsService[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.MultiReaderBuilder" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="MultiReaderBuilder[Req,Rep,Builder]extendsAnyRef"></a>
@@ -171,10 +214,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MultiReaderBuilder.html"><span class="name">MultiReaderBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="Builder">Builder</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="MultiReaderBuilder.html"><span class="name">MultiReaderBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="Builder">Builder</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderBuilder[Req,Rep,Builder]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances.</p>
     </li><li name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcache" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MultiReaderBuilderMemcacheextendsMultiReaderBuilderMemcacheBase[com.twitter.finagle.kestrel.MultiReaderBuilderMemcache]"></a>
       <a id="MultiReaderBuilderMemcache:MultiReaderBuilderMemcache"></a>
@@ -186,8 +233,12 @@
       <span class="symbol">
         <a href="MultiReaderBuilderMemcache.html"><span class="name">MultiReaderBuilderMemcache</span></a><span class="result"> extends <a href="MultiReaderBuilderMemcacheBase.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase">MultiReaderBuilderMemcacheBase</a>[<a href="MultiReaderBuilderMemcache.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcache">MultiReaderBuilderMemcache</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances using
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderBuilderMemcacheextendsMultiReaderBuilderMemcacheBase[com.twitter.finagle.kestrel.MultiReaderBuilderMemcache]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances using
 Kestrel's memcache protocol.</p>
     </li><li name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="MultiReaderBuilderMemcacheBase[Builder]extendsMultiReaderBuilder[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response,Builder]"></a>
@@ -200,7 +251,11 @@ Kestrel's memcache protocol.</p>
       <span class="symbol">
         <a href="MultiReaderBuilderMemcacheBase.html"><span class="name">MultiReaderBuilderMemcacheBase</span></a><span class="tparams">[<span name="Builder">Builder</span>]</span><span class="result"> extends <a href="MultiReaderBuilder.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilder">MultiReaderBuilder</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Command">Command</a>, <a href="protocol/Response.html" class="extype" name="com.twitter.finagle.kestrel.protocol.Response">Response</a>, <span class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase.Builder">Builder</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderBuilderMemcacheBase[Builder]extendsMultiReaderBuilder[com.twitter.finagle.kestrel.protocol.Command,com.twitter.finagle.kestrel.protocol.Response,Builder]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.MultiReaderBuilderThrift" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MultiReaderBuilderThriftextendsMultiReaderBuilder[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte],com.twitter.finagle.kestrel.MultiReaderBuilderThrift]"></a>
@@ -211,10 +266,14 @@ Kestrel's memcache protocol.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="MultiReaderBuilderThrift.html"><span class="name">MultiReaderBuilderThrift</span></a><span class="result"> extends <a href="MultiReaderBuilder.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilder">MultiReaderBuilder</a>[<a href="../thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="MultiReaderBuilderThrift.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderThrift">MultiReaderBuilderThrift</a>]</span>
+        <a href="MultiReaderBuilderThrift.html"><span class="name">MultiReaderBuilderThrift</span></a><span class="result"> extends <a href="MultiReaderBuilder.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilder">MultiReaderBuilder</a>[<a href="../thrift/ThriftClientRequest.html" class="extype" name="com.twitter.finagle.thrift.ThriftClientRequest">ThriftClientRequest</a>, <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <a href="MultiReaderBuilderThrift.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderThrift">MultiReaderBuilderThrift</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances using
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderBuilderThriftextendsMultiReaderBuilder[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte],com.twitter.finagle.kestrel.MultiReaderBuilderThrift]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Factory for <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> instances using
 Kestrel's thrift protocol.</p>
     </li><li name="com.twitter.finagle.kestrel.MultiReaderConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MultiReaderConfig[Req,Rep]extendsProductwithSerializable"></a>
@@ -225,12 +284,16 @@ Kestrel's thrift protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MultiReaderConfig.html"><span class="name">MultiReaderConfig</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="MultiReaderConfig.html"><span class="name">MultiReaderConfig</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Multi reader configuration settings
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderConfig[Req,Rep]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Multi reader configuration settings
 </p>
-    </li><li name="com.twitter.finagle.kestrel.ReadHandle" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.kestrel.ReadHandle" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ReadHandleextendsAnyRef"></a>
       <a id="ReadHandle:ReadHandle"></a>
       <h4 class="signature">
@@ -239,10 +302,23 @@ Kestrel's thrift protocol.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ReadHandle.html"><span class="name">ReadHandle</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="ReadHandle.html"><span class="name">ReadHandle</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">An ongoing transactional read (from {{read}}).</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ReadHandleextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An ongoing transactional read (from {{read}}).</p><div class="fullcomment"><div class="comment cmt"><p>An ongoing transactional read (from {{read}}).</p><p>A common usage pattern is to attach asynchronous handlers to <code>messages</code> and <code>error</code>
+by invoking <code>Offer.foreach</code> on them. For example:</p><pre><span class="kw">val</span> readHandle: ReadHandle = ...
+readHandle.messages.foreach { msg <span class="kw">=&gt;</span>
+  <span class="kw">try</span> {
+    System.out.println(msg.bytes.toString(<span class="lit">"UTF-8"</span>))
+  } <span class="kw">finally</span> {
+    msg.ack() <span class="cmt">// if we don't do this, no more msgs will come to us</span>
+  }
+}
+readHandle.error.foreach { System.error.println(<span class="lit">"zomg! got an error "</span> + _.getMessage) }</pre></div></div>
     </li><li name="com.twitter.finagle.kestrel.ReadMessage" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ReadMessageextendsProductwithSerializable"></a>
       <a id="ReadMessage:ReadMessage"></a>
@@ -252,10 +328,14 @@ Kestrel's thrift protocol.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ReadMessage.html"><span class="name">ReadMessage</span></a><span class="params">(<span name="bytes">bytes: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="ack">ack: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>, <span name="abort">abort: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a>] = <span class="defval" name="com.twitter.concurrent.Offer.const[Unit]({<br/>&amp;nbsp;&amp;nbsp;  scala.Unit;<br/>&amp;nbsp;&amp;nbsp;  ()<br/>&amp;nbsp;&amp;nbsp;})">...</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ReadMessage.html"><span class="name">ReadMessage</span></a><span class="params">(<span name="bytes">bytes: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="ack">ack: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>, <span name="abort">abort: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.Offer" class="extype" target="_top">Offer</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>] = <span class="symbol"><span class="name"><a href="../../../package.html">Offer.const(Unit)</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A message that has been read: consists of the message itself, and
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ReadMessageextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A message that has been read: consists of the message itself, and
 an offer to acknowledge.</p>
     </li><li name="com.twitter.finagle.kestrel.Server" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerextendsAnyRef"></a>
@@ -266,11 +346,15 @@ an offer to acknowledge.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Server.html"><span class="name">Server</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Server.html"><span class="name">Server</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ServerextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.kestrel.ThriftConnectedClient" visbl="prt" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.kestrel.ThriftConnectedClient" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftConnectedClientextendsClientBase[com.twitter.finagle.kestrel.FinagledClosableClient,Seq[com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item],Long]"></a>
       <a id="ThriftConnectedClient:ThriftConnectedClient"></a>
       <h4 class="signature">
@@ -279,10 +363,15 @@ an offer to acknowledge.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftConnectedClient.html"><span class="name">ThriftConnectedClient</span></a><span class="result"> extends <a href="ClientBase.html" class="extype" name="com.twitter.finagle.kestrel.ClientBase">ClientBase</a>[<a href="FinagledClosableClient.html" class="extype" name="com.twitter.finagle.kestrel.FinagledClosableClient">FinagledClosableClient</a>, <span class="extype" name="scala.Seq">Seq</span>[<a href="net/lag/kestrel/thriftscala/Item.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item">Item</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a>]</span>
+        <a href="ThriftConnectedClient.html"><span class="name">ThriftConnectedClient</span></a><span class="result"> extends <a href="ClientBase.html" class="extype" name="com.twitter.finagle.kestrel.ClientBase">ClientBase</a>[<a href="FinagledClosableClient.html" class="extype" name="com.twitter.finagle.kestrel.FinagledClosableClient">FinagledClosableClient</a>, <span class="extype" name="scala.Seq">Seq</span>[<a href="net/lag/kestrel/thriftscala/Item.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item">Item</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A Client representing a single TCP connection to a single server using thrift.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ThriftConnectedClientextendsClientBase[com.twitter.finagle.kestrel.FinagledClosableClient,Seq[com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item],Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A Client representing a single TCP connection to a single server using thrift.</p><div class="fullcomment"><div class="comment cmt"><p>A Client representing a single TCP connection to a single server using thrift.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ClusterMultiReaderBuilderextendsMultiReaderBuilderMemcacheBase[com.twitter.finagle.kestrel.ClusterMultiReaderBuilder]"></a>
       <a id="ClusterMultiReaderBuilder:ClusterMultiReaderBuilder"></a>
@@ -294,7 +383,11 @@ an offer to acknowledge.</p>
       <span class="symbol">
         <a href="ClusterMultiReaderBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderBuilderMemcache instead">ClusterMultiReaderBuilder</span></a><span class="result"> extends <a href="MultiReaderBuilderMemcacheBase.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcacheBase">MultiReaderBuilderMemcacheBase</a>[<a href="ClusterMultiReaderBuilder.html" class="extype" name="com.twitter.finagle.kestrel.ClusterMultiReaderBuilder">ClusterMultiReaderBuilder</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ClusterMultiReaderBuilderextendsMultiReaderBuilderMemcacheBase[com.twitter.finagle.kestrel.ClusterMultiReaderBuilder]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -308,9 +401,13 @@ an offer to acknowledge.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ClusterMultiReaderConfig.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderConfig[Req, Rep] instead">ClusterMultiReaderConfig</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ClusterMultiReaderConfig.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderConfig[Req, Rep] instead">ClusterMultiReaderConfig</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ClusterMultiReaderConfigextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -333,8 +430,12 @@ an offer to acknowledge.</p>
       <span class="symbol">
         <a href="AllHandlesDiedException$.html"><span class="name">AllHandlesDiedException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that all <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandles</a>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@AllHandlesDiedException" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that all <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">ReadHandles</a>
 that are backing a given <a href="MultiReader$.html" class="extype" name="com.twitter.finagle.kestrel.MultiReader">com.twitter.finagle.kestrel.MultiReader</a> have
 died.</p>
     </li><li name="com.twitter.finagle.kestrel.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -348,7 +449,11 @@ died.</p>
       <span class="symbol">
         <a href="Client$.html"><span class="name">Client</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.ConnectedClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ConnectedClient"></a>
@@ -361,9 +466,13 @@ died.</p>
       <span class="symbol">
         <a href="ConnectedClient$.html"><span class="name">ConnectedClient</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ConnectedClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.kestrel.MultiReaderMemcache" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.kestrel.MultiReaderMemcache" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MultiReaderMemcache"></a>
       <a id="MultiReaderMemcache:MultiReaderMemcache"></a>
       <h4 class="signature">
@@ -374,10 +483,29 @@ died.</p>
       <span class="symbol">
         <a href="MultiReaderMemcache$.html"><span class="name">MultiReaderMemcache</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
-style using Kestrel's memcache protocol.</p>
-    </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderMemcache" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style using Kestrel's memcache protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style using Kestrel's memcache protocol.  The load balancing is simple,
+and falls out naturally from the user of the {{Offer}} mechanism: When
+there are multiple available messages, round-robin across them.  Otherwise,
+wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
+<span class="kw">val</span> va: Var[Addr] = name.bind()
+<span class="kw">val</span> readHandle =
+  MultiReaderMemcache(va, <span class="lit">"the-queue"</span>)
+    .clientBuilder(
+      ClientBuilder()
+        .codec(MultiReaderMemcache.codec)
+        .requestTimeout(<span class="num">1.</span>minute)
+        .connectTimeout(<span class="num">1.</span>minute)
+        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
+    .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
+    .build()</pre></div></div>
+    </li><li name="com.twitter.finagle.kestrel.MultiReaderThrift" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MultiReaderThrift"></a>
       <a id="MultiReaderThrift:MultiReaderThrift"></a>
       <h4 class="signature">
@@ -388,9 +516,33 @@ style using Kestrel's memcache protocol.</p>
       <span class="symbol">
         <a href="MultiReaderThrift$.html"><span class="name">MultiReaderThrift</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
-style using Kestrel's memcache protocol.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReaderThrift" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style using Kestrel's memcache protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style using Kestrel's memcache protocol.  The load balancing is simple,
+and falls out naturally from the user of the {{Offer}} mechanism: When
+there are multiple available messages, round-robin across them.  Otherwise,
+wait for the first message to arrive.</p><p>Example with a custom client builder:</p><pre><span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
+<span class="kw">val</span> va: Var[Addr] = name.bind()
+<span class="kw">val</span> readHandle =
+  MultiReaderThrift(va, <span class="lit">"the-queue"</span>)
+    .clientBuilder(
+      ClientBuilder()
+        .codec(MultiReaderThrift.codec(ClientId(<span class="lit">"myClientName"</span>))
+        .requestTimeout(<span class="num">1.</span>minute)
+        .connectTimeout(<span class="num">1.</span>minute)
+        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
+    .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
+    .build()</pre><p>Example without a customer client builder so clientId passed to apply</p><pre><span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
+<span class="kw">val</span> va: Var[Addr] = name.bind()
+<span class="kw">val</span> readHandle =
+  MultiReaderThrift(va, <span class="lit">"the-queue"</span>, ClientId(<span class="lit">"myClientName"</span>))
+    .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
+    .build()</pre></div></div>
     </li><li name="com.twitter.finagle.kestrel.OutOfRetriesException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="OutOfRetriesException"></a>
       <a id="OutOfRetriesException:OutOfRetriesException"></a>
@@ -402,8 +554,12 @@ style using Kestrel's memcache protocol.</p>
       <span class="symbol">
         <a href="OutOfRetriesException$.html"><span class="name">OutOfRetriesException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that a <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> has exceeded its
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@OutOfRetriesException" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that a <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> has exceeded its
 retry budget.</p>
     </li><li name="com.twitter.finagle.kestrel.ReadClosedException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ReadClosedException"></a>
@@ -416,8 +572,12 @@ retry budget.</p>
       <span class="symbol">
         <a href="ReadClosedException$.html"><span class="name">ReadClosedException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that a <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> has been closed.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ReadClosedException" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that a <a href="ReadHandle.html" class="extype" name="com.twitter.finagle.kestrel.ReadHandle">com.twitter.finagle.kestrel.ReadHandle</a> has been closed.</p>
     </li><li name="com.twitter.finagle.kestrel.ReadHandle" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ReadHandle"></a>
       <a id="ReadHandle:ReadHandle"></a>
@@ -429,7 +589,11 @@ retry budget.</p>
       <span class="symbol">
         <a href="ReadHandle$.html"><span class="name">ReadHandle</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@ReadHandle" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.java" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="java"></a>
@@ -442,7 +606,11 @@ retry budget.</p>
       <span class="symbol">
         <a href="java/package.html"><span class="name">java</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@java" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.net" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="net"></a>
@@ -455,7 +623,11 @@ retry budget.</p>
       <span class="symbol">
         <a href="net/package.html"><span class="name">net</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@net" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.kestrel.protocol" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="protocol"></a>
@@ -468,7 +640,11 @@ retry budget.</p>
       <span class="symbol">
         <a href="protocol/package.html"><span class="name">protocol</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@protocol" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -477,7 +653,7 @@ retry budget.</p>
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.kestrel.MultiReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.kestrel.MultiReader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MultiReader"></a>
       <a id="MultiReader:MultiReader"></a>
       <h4 class="signature">
@@ -488,9 +664,31 @@ retry budget.</p>
       <span class="symbol">
         <a href="MultiReader$.html"><span class="name deprecated" title="Deprecated: (Since version 6.15.1) Use MultiReaderMemcache or MultiReaderThrift instead">MultiReader</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
-style.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.package@MultiReader" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style.</p><div class="fullcomment"><div class="comment cmt"><p>Read from multiple clients in round-robin fashion, &quot;grabby hands&quot;
+style.  The load balancing is simple, and falls out naturally from
+the user of the {{Offer}} mechanism: When there are multiple
+available messages, round-robin across them.  Otherwise, wait for
+the first message to arrive.</p><p>Var[Addr] example:</p><pre><span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
+<span class="kw">val</span> va: Var[Addr] = name.bind()
+<span class="kw">val</span> readHandle =
+  MultiReader(va, <span class="lit">"the-queue"</span>)
+    .clientBuilder(
+      ClientBuilder()
+        .codec(Kestrel())
+        .requestTimeout(<span class="num">1.</span>minute)
+        .connectTimeout(<span class="num">1.</span>minute)
+        .hostConnectionLimit(<span class="num">1</span>) <span class="cmt">/* etc... but do not set hosts or build */</span>)
+    .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
+    .build()</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.15.1)</i> Use MultiReaderMemcache or MultiReaderThrift instead</p></dd></dl></div>
     </li></ol>
             </div>
         </div>
@@ -512,6 +710,7 @@ style.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

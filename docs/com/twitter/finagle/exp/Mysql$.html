@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>Mysql - com.twitter.finagle.exp.Mysql</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,15 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/object_big.png" />
+        <img alt="Object" src="../../../../lib/object_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.exp">exp</a></p>
-        <h1>Mysql</h1>
+        <h1>Mysql</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="com.twitter.finagle.exp">package exp</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -41,12 +51,12 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"></div><dl class="attributes block"> <div class="block">Example:
                <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client = Mysql.client
-.withCredentials(<span class="lit">"<username>"</span>, <span class="lit">"<password>"</span>)
-.withDatabase(<span class="lit">"<db>"</span>)
-.newRichClient(<span class="lit">"inet!localhost:3306"</span>)</pre></li></ol>
+  .withCredentials(<span class="lit">"<username>"</span>, <span class="lit">"<password>"</span>)
+  .withDatabase(<span class="lit">"<db>"</span>)
+  .newRichClient(<span class="lit">"inet!localhost:3306"</span>)</pre></li></ol>
             </div></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a>, <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a>, <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -72,7 +82,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -86,7 +95,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.exp.Mysql.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.exp.Mysql.Client" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ClientextendsStdStackClient[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result,com.twitter.finagle.exp.Mysql.Client]withMysqlRichClientwithProductwithSerializable"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
@@ -95,11 +104,25 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Mysql$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]] = <span class="defval" name="com.twitter.finagle.client.StackClient.newStack[com.twitter.finagle.exp.mysql.Request, com.twitter.finagle.exp.mysql.Result].replace(com.twitter.finagle.tracing.ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)">...</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name="com.twitter.finagle.client.StackClient.defaultParams.+[com.twitter.finagle.client.DefaultPool.Param](com.twitter.finagle.client.DefaultPool.Param.apply(0, 1, 0, com.twitter.util.Duration.Top, scala.Int.MaxValue))(DefaultPool.this.Param.param).+[com.twitter.finagle.param.ProtocolLibrary](com.twitter.finagle.param.ProtocolLibrary.apply(&quot;mysql&quot;))(param.this.ProtocolLibrary.param)">...</span></span>)</span><span class="result"> extends <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Mysql$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]] = <span class="defval" name='<span class="name"><a href="MySqlClientTracingFilter$.html">StackClient.newStack
+      .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)</a></span>'>...</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="../param/ProtocolLibrary$.html">StackClient.defaultParams + DefaultPool.Param(
+        low = 0, high = 1, bufferSize = 0,
+        idleTime = Duration.Top,
+        maxWaiters = Int.MaxValue) +
+      ProtocolLibrary(&quot;mysql&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Implements a mysql client in terms of a
-<span class="extype" name="com.twitter.finagle.StackClient">com.twitter.finagle.StackClient</span>.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@ClientextendsStdStackClient[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result,com.twitter.finagle.exp.Mysql.Client]withMysqlRichClientwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Implements a mysql client in terms of a
+<span class="extype" name="com.twitter.finagle.StackClient">com.twitter.finagle.StackClient</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Implements a mysql client in terms of a
+<span class="extype" name="com.twitter.finagle.StackClient">com.twitter.finagle.StackClient</span>. The client inherits a wealth
+of features from finagle including connection pooling and load
+balancing.</p><p>Additionally, this class provides methods for constructing a rich
+client which exposes a rich mysql api.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -108,19 +131,6 @@
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -129,10 +139,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -142,24 +156,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -168,10 +173,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -183,7 +192,11 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.exp.Mysql#client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="client:com.twitter.finagle.exp.Mysql.Client"></a>
@@ -196,7 +209,11 @@
       <span class="symbol">
         <span class="name">client</span><span class="result">: <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@client:com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -207,9 +224,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -226,9 +247,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -239,9 +264,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -252,9 +281,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -273,7 +306,11 @@
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -284,9 +321,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -297,9 +338,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -310,9 +355,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.exp.Mysql#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.ServiceFactory[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result]"></a>
@@ -325,7 +374,11 @@
       <span class="symbol">
         <span class="name">newClient</span><span class="params">(<span name="dest">dest: <a href="../Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.ServiceFactory[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql">Mysql</a> → <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -339,7 +392,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newClient(dest:String,label:String):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -353,7 +410,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newClient(dest:String):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.MysqlRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -367,7 +428,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.exp.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.exp.mysql.Transactions">Transactions</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newRichClient(dest:String):com.twitter.finagle.exp.mysql.Clientwithcom.twitter.finagle.exp.mysql.Transactions" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
 destination described by <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>RichClient</code> connected to the logical
 destination described by <code>dest</code>.
@@ -383,7 +448,11 @@ destination described by <code>dest</code>.
       <span class="symbol">
         <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="../Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="mysql/Client.html" class="extype" name="com.twitter.finagle.exp.mysql.Client">mysql.Client</a> with <a href="mysql/Transactions.html" class="extype" name="com.twitter.finagle.exp.mysql.Transactions">Transactions</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.exp.mysql.Clientwithcom.twitter.finagle.exp.mysql.Transactions" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Creates a new <code>RichClient</code> connected to the logical
 destination described by <code>dest</code> with the assigned
 <code>label</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new <code>RichClient</code> connected to the logical
@@ -401,7 +470,11 @@ destination described by <code>dest</code> with the assigned
       <span class="symbol">
         <span class="name">newService</span><span class="params">(<span name="dest">dest: <a href="../Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newService(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.Service[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.</p><p>Argument <code>label</code> is used to assign a label to this client.
 The label is used to display stats, etc.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql">Mysql</a> → <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -415,7 +488,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newService</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newService(dest:String,label:String):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Client#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -429,7 +506,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">newService</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newService(dest:String):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -441,9 +522,13 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -454,9 +539,13 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -469,7 +558,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -482,7 +575,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -493,9 +590,13 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -512,9 +613,13 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -531,9 +636,13 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -559,7 +668,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 6.22.0) Use client.configured">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.exp.Mysql.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.exp.Mysql.configured.P">P</span>]</span>)</span><span class="result">: <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@configured[P](p:P)(implicitevidence$1:com.twitter.finagle.Stack.Param[P]):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A client configured with parameter p.</p><div class="fullcomment"><div class="comment cmt"><p>A client configured with parameter p.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
@@ -576,7 +689,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newClient</span><span class="params">(<span name="dest">dest: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newClient(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -592,7 +709,11 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 6.7.x) Use destination names">newService</span><span class="params">(<span name="dest">dest: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@newService(dest:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -606,9 +727,13 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 6.22.0) Use client.withCharset">withCharset</span><span class="params">(<span name="charset">charset: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result">: <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 6.22.0) Use client.withCharset">withCharset</span><span class="params">(<span name="charset">charset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Short" class="extype" target="_top">Short</a></span>)</span><span class="result">: <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@withCharset(charset:Short):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The default character set used when establishing
 a new session.</p><div class="fullcomment"><div class="comment cmt"><p>The default character set used when establishing
 a new session.
@@ -627,7 +752,11 @@ a new session.
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 6.22.0) Use client.withCredentials">withCredentials</span><span class="params">(<span name="u">u: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="p">p: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@withCredentials(u:String,p:String):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The credentials to use when authenticating a new session.</p><div class="fullcomment"><div class="comment cmt"><p>The credentials to use when authenticating a new session.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
@@ -644,7 +773,11 @@ a new session.
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 6.22.0) Use client.withDatabase">withDatabase</span><span class="params">(<span name="db">db: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Mysql$$Client.html" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$@withDatabase(db:String):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Database to use when this client establishes a new session.</p><div class="fullcomment"><div class="comment cmt"><p>Database to use when this client establishes a new session.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
@@ -660,9 +793,9 @@ a new session.
             </div><div class="parent" name="com.twitter.finagle.Client">
               <h3>Inherited from <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -679,6 +812,7 @@ a new session.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

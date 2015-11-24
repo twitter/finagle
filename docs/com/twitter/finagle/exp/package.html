@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>exp - com.twitter.finagle.exp</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>exp</h1>
+        <h1>exp</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -43,7 +51,7 @@
 stabilized (moved elsewhere) at any time.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -69,7 +77,6 @@ stabilized (moved elsewhere) at any time.
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -83,7 +90,7 @@ stabilized (moved elsewhere) at any time.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.exp.BackupRequestFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.exp.BackupRequestFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="BackupRequestFilter[Req,Rep]:BackupRequestFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -94,9 +101,27 @@ stabilized (moved elsewhere) at any time.
       <span class="symbol">
         <a href="BackupRequestFilter.html"><span class="name">BackupRequestFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.BackupRequestFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">Issue a backup request after a threshold time has elapsed, useful
-for curtailing tail latencies in distributed systems.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Issue a backup request after a threshold time has elapsed, useful
+for curtailing tail latencies in distributed systems.</p><div class="fullcomment"><div class="comment cmt"><p>Issue a backup request after a threshold time has elapsed, useful
+for curtailing tail latencies in distributed systems. See [1] for details.</p><p>Several stats are exported through the given stats receiver exposing
+the filter's operating behavior:</p><ul><li>counter <code>timeouts</code> indicates the number of original requests
+   that timed out and subsequently caused a backup request to
+   be issued;</li><li>counter <code>won</code> indicates the number of original requests that won,
+   including those that didn't actually race with a backup;</li><li>counter <code>lost</code> indicates the number of original requests that lost
+   a race with their corresponding backup request, and finally</li><li>gauge <code>cutoff_ms</code> indicates the current backup request cutoff value
+   in milliseconds.</li></ul><p>[1]: Dean, J. and Barroso, L.A. (2013), The Tail at Scale,
+Communications of the ACM, Vol. 56 No. 2, Pages 74-80,
+http://cacm.acm.org/magazines/2013/2/160173-the-tail-at-scale/fulltext
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>A filter alone cannot guarantee that a request is dispatched
+onto a different endpoint from the original. Eventually, this
+should be implemented as a sort of queueing policy.</p></span>, <span class="cmt"><p>Care must be taken to ensure that application of this filter
+preserves semantics since a request may be issued twice (ie. they
+are idempotent).</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.DarkTrafficFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="DarkTrafficFilter[Req,Rep]:DarkTrafficFilter[Req,Rep]"></a>
@@ -108,9 +133,13 @@ for curtailing tail latencies in distributed systems.</p>
       <span class="symbol">
         <a href="DarkTrafficFilter.html"><span class="name">DarkTrafficFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">Forwards dark traffic to the given service when the given function returns true for a request.</p>
-    </li><li name="com.twitter.finagle.exp.ForwardingWarmUpFilter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Forwards dark traffic to the given service when the given function returns true for a request.</p>
+    </li><li name="com.twitter.finagle.exp.ForwardingWarmUpFilter" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ForwardingWarmUpFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="ForwardingWarmUpFilter[Req,Rep]:ForwardingWarmUpFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -121,8 +150,16 @@ for curtailing tail latencies in distributed systems.</p>
       <span class="symbol">
         <a href="ForwardingWarmUpFilter.html"><span class="name">ForwardingWarmUpFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A filter that forwards thrift requests to a specified service.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@ForwardingWarmUpFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A filter that forwards thrift requests to a specified service.</p><div class="fullcomment"><div class="comment cmt"><p>A filter that forwards thrift requests to a specified service. It enables a smooth
+start of processing the requests by slowly increasing the percentage of requests
+that are being processed and lowering the amount of requests that are being
+forwarded.
+</p></div></div>
     </li><li name="com.twitter.finagle.exp.LatencyHistogramBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LatencyHistogramBenchextendsStdBenchAnnotations"></a>
       <a id="LatencyHistogramBench:LatencyHistogramBench"></a>
@@ -134,7 +171,11 @@ for curtailing tail latencies in distributed systems.</p>
       <span class="symbol">
         <a href="LatencyHistogramBench.html"><span class="name">LatencyHistogramBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@LatencyHistogramBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@State</span><span class="args">()</span>
               
@@ -150,10 +191,14 @@ for curtailing tail latencies in distributed systems.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Supplements a <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> with convenient
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@MysqlRichClientextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Supplements a <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> with convenient
 builder methods for constructing a mysql client.</p>
     </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftForwardingWarmUpFilterextendsForwardingWarmUpFilter[Array[Byte],Array[Byte]]"></a>
@@ -164,9 +209,13 @@ builder methods for constructing a mysql client.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ThriftForwardingWarmUpFilter.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends <a href="ForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter">ForwardingWarmUpFilter</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <a href="ThriftForwardingWarmUpFilter.html"><span class="name">ThriftForwardingWarmUpFilter</span></a><span class="result"> extends <a href="ForwardingWarmUpFilter.html" class="extype" name="com.twitter.finagle.exp.ForwardingWarmUpFilter">ForwardingWarmUpFilter</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@ThriftForwardingWarmUpFilterextendsForwardingWarmUpFilter[Array[Byte],Array[Byte]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -186,7 +235,11 @@ builder methods for constructing a mysql client.</p>
       <span class="symbol">
         <a href="BackupRequestFilter$.html"><span class="name">BackupRequestFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@BackupRequestFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.MySqlClientTracingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MySqlClientTracingFilter"></a>
@@ -199,9 +252,13 @@ builder methods for constructing a mysql client.</p>
       <span class="symbol">
         <a href="MySqlClientTracingFilter$.html"><span class="name">MySqlClientTracingFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@MySqlClientTracingFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.exp.Mysql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.exp.Mysql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Mysql"></a>
       <a id="Mysql:Mysql"></a>
       <h4 class="signature">
@@ -212,8 +269,17 @@ builder methods for constructing a mysql client.</p>
       <span class="symbol">
         <a href="Mysql$.html"><span class="name">Mysql</span></a><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a></span>
       </span>
-      </h4>
-      <p class="comment cmt"></p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@Mysql" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client = Mysql.client
+  .withCredentials(<span class="lit">"<username>"</span>, <span class="lit">"<password>"</span>)
+  .withDatabase(<span class="lit">"<db>"</span>)
+  .newRichClient(<span class="lit">"inet!localhost:3306"</span>)</pre></li></ol>
+            </div></dl></div>
     </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftForwardingWarmUpFilter"></a>
       <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
@@ -225,7 +291,11 @@ builder methods for constructing a mysql client.</p>
       <span class="symbol">
         <a href="ThriftForwardingWarmUpFilter$.html"><span class="name">ThriftForwardingWarmUpFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@ThriftForwardingWarmUpFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.mysql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="mysql"></a>
@@ -238,7 +308,11 @@ builder methods for constructing a mysql client.</p>
       <span class="symbol">
         <a href="mysql/package.html"><span class="name">mysql</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@mysql" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.exp.scheduler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="scheduler"></a>
@@ -251,7 +325,11 @@ builder methods for constructing a mysql client.</p>
       <span class="symbol">
         <a href="scheduler$.html"><span class="name">scheduler</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@scheduler" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -263,9 +341,9 @@ builder methods for constructing a mysql client.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -282,6 +360,7 @@ builder methods for constructing a mysql client.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

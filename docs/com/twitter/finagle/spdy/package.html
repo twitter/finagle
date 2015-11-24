@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>spdy - com.twitter.finagle.spdy</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>spdy</h1>
+        <h1>spdy</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.spdy.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,7 +77,11 @@
       <span class="symbol">
         <a href="AnnotateSpdyStreamId.html"><span class="name">AnnotateSpdyStreamId</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.spdy.package@AnnotateSpdyStreamIdextendsSimpleFilter[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.spdy.GenerateSpdyStreamId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GenerateSpdyStreamIdextendsSimpleFilter[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
@@ -82,7 +94,11 @@
       <span class="symbol">
         <a href="GenerateSpdyStreamId.html"><span class="name">GenerateSpdyStreamId</span></a><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.spdy.package@GenerateSpdyStreamIdextendsSimpleFilter[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.spdy.Spdy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SpdyextendsCodecFactory[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]withProductwithSerializable"></a>
@@ -93,9 +109,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Spdy.html"><span class="name">Spdy</span></a><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="defval" name="org.jboss.netty.handler.codec.spdy.SpdyVersion.SPDY_3_1">...</span></span>, <span name="_enableHeaderCompression">_enableHeaderCompression: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(16384).bytes">...</span></span>, <span name="_maxRequestSize">_maxRequestSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>, <span name="_maxResponseSize">_maxResponseSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="defval" name="com.twitter.conversions.storage.intToStorageUnitableWholeNumber(5).megabytes">...</span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Spdy.html"><span class="name">Spdy</span></a><span class="params">(<span name="_version">_version: <span class="extype" name="org.jboss.netty.handler.codec.spdy.SpdyVersion">SpdyVersion</span> = <span class="symbol">SpdyVersion.SPDY_3_1</span></span>, <span name="_enableHeaderCompression">_enableHeaderCompression: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="_maxHeaderSize">_maxHeaderSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../package.html">16384.bytes</a></span></span></span>, <span name="_maxRequestSize">_maxRequestSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.megabytes</a></span></span></span>, <span name="_maxResponseSize">_maxResponseSize: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.megabytes</a></span></span></span>)</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.spdy.package@SpdyextendsCodecFactory[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.spdy.SpdyClientDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SpdyClientDispatcherextendsService[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]"></a>
@@ -108,7 +128,11 @@
       <span class="symbol">
         <a href="SpdyClientDispatcher.html"><span class="name">SpdyClientDispatcher</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span>, <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.spdy.package@SpdyClientDispatcherextendsService[org.jboss.netty.handler.codec.http.HttpRequest,org.jboss.netty.handler.codec.http.HttpResponse]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.spdy.SpdyServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SpdyServerDispatcherextendsClosable"></a>
@@ -121,7 +145,11 @@
       <span class="symbol">
         <a href="SpdyServerDispatcher.html"><span class="name">SpdyServerDispatcher</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.spdy.package@SpdyServerDispatcherextendsClosable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -139,9 +167,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Spdy$.html"><span class="name">Spdy</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Spdy$.html"><span class="name">Spdy</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.spdy.package@Spdy" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -168,6 +200,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

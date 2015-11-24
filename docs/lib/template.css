@@ -210,6 +210,7 @@ dl.attributes > dd {
   display: block;
   padding-left: 10em;
   margin-bottom: 5px;
+  min-height: 15px;
 }
 
 #template .values > h3 {
@@ -397,6 +398,49 @@ div.members > ol > li:last-child {
   margin-bottom: 5px;
 }
 
+#definition .morelinks {
+  text-align: right;
+  position: absolute;
+  top: 40px;
+  right: 10px;
+  width: 450px;
+}
+
+#definition .morelinks a {
+  color: #EBEBEB;
+}
+
+#template .members li .permalink {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+#definition .permalink {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+}
+
+#definition .permalink a {
+  color: #EBEBEB;
+}
+
+#template .members li .permalink,
+#definition .permalink a {
+  display: none;
+}
+
+#template .members li:hover .permalink,
+#definition:hover .permalink a {
+  display: block;
+}
+
+#template .members li .permalink a,
+#definition .permalink a {
+  text-decoration: none;
+  font-weight: bold;
+}
 
 /* Comments text formating */
 
@@ -626,6 +670,7 @@ div.fullcomment dl.paramcmts > dd {
   padding-left: 10px;
   margin-bottom: 5px;
   margin-left: 70px;
+  min-height: 15px;
 }
 
 /* Members filter tool */

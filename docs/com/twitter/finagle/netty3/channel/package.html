@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>channel - com.twitter.finagle.netty3.channel</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></p>
-        <h1>channel</h1>
+        <h1>channel</h1><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,9 +77,13 @@
       <span class="symbol">
         <a href="BrokerChannelHandler.html"><span class="name">BrokerChannelHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@BrokerChannelHandlerextendsSimpleChannelHandler" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.netty3.channel.ChannelStatsHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.netty3.channel.ChannelStatsHandler" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ChannelStatsHandlerextendsSimpleChannelHandlerwithConnectionLifecycleHandler"></a>
       <a id="ChannelStatsHandler:ChannelStatsHandler"></a>
       <h4 class="signature">
@@ -82,9 +94,17 @@
       <span class="symbol">
         <a href="ChannelStatsHandler.html"><span class="name">ChannelStatsHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span> with <span class="extype" name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler">ConnectionLifecycleHandler</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">A <span class="extype" name="org.jboss.netty.channel.ChannelHandler">org.jboss.netty.channel.ChannelHandler</span> that tracks channel/connection
-statistics.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@ChannelStatsHandlerextendsSimpleChannelHandlerwithConnectionLifecycleHandler" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <span class="extype" name="org.jboss.netty.channel.ChannelHandler">org.jboss.netty.channel.ChannelHandler</span> that tracks channel/connection
+statistics.</p><div class="fullcomment"><div class="comment cmt"><p>A <span class="extype" name="org.jboss.netty.channel.ChannelHandler">org.jboss.netty.channel.ChannelHandler</span> that tracks channel/connection
+statistics. The handler is meant to be shared by all
+<span class="extype" name="org.jboss.netty.channel.Channel">Channels</span> within a Finagle client or
+server in order to consolidate statistics across a number of channels.
+</p></div></div>
     </li><li name="com.twitter.finagle.netty3.channel.IdleChannelHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IdleChannelHandlerextendsIdleStateAwareChannelHandler"></a>
       <a id="IdleChannelHandler:IdleChannelHandler"></a>
@@ -96,9 +116,13 @@ statistics.</p>
       <span class="symbol">
         <a href="IdleChannelHandler.html"><span class="name">IdleChannelHandler</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler">IdleStateAwareChannelHandler</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">This handler closes a channel if it receives an IDLE event.</p>
-    </li><li name="com.twitter.finagle.netty3.channel.IdleConnectionFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@IdleChannelHandlerextendsIdleStateAwareChannelHandler" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This handler closes a channel if it receives an IDLE event.</p>
+    </li><li name="com.twitter.finagle.netty3.channel.IdleConnectionFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="IdleConnectionFilter[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a>
       <a id="IdleConnectionFilter[Req,Rep]:IdleConnectionFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -109,9 +133,21 @@ statistics.</p>
       <span class="symbol">
         <a href="IdleConnectionFilter.html"><span class="name">IdleConnectionFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.netty3.channel.IdleConnectionFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.netty3.channel.IdleConnectionFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">Filter responsible for tracking idle connection, it will refuse requests and try to close idle
-connections based on the number of active connections.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@IdleConnectionFilter[Req,Rep]extendsServiceFactoryProxy[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Filter responsible for tracking idle connection, it will refuse requests and try to close idle
+connections based on the number of active connections.</p><div class="fullcomment"><div class="comment cmt"><p>Filter responsible for tracking idle connection, it will refuse requests and try to close idle
+connections based on the number of active connections.</p><p>Each time a message from a new connection arrive (based on nb of connections):
+- if below low watermark: accept the connection.
+- if above low watermark: collect (close) idle connections, but accept the connection.
+- if above high watermark: collect (close) idle connections, and refuse/accept the
+  connection depending if we managed to close an idle connection.</p><p>NB: the connection is tracked after the server response, so that the server processing time is
+not count in the idle timeout.</p><p>Note: this will not properly handle multiple outstanding messages per connection and should not
+be used for duplex protocols such as finagle-mux.
+</p></div></div>
     </li><li name="com.twitter.finagle.netty3.channel.LeftFoldUpstreamHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LeftFoldUpstreamHandlerextendsAnyRef"></a>
       <a id="LeftFoldUpstreamHandler:LeftFoldUpstreamHandler"></a>
@@ -121,9 +157,13 @@ connections based on the number of active connections.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LeftFoldUpstreamHandler.html"><span class="name">LeftFoldUpstreamHandler</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="LeftFoldUpstreamHandler.html"><span class="name">LeftFoldUpstreamHandler</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@LeftFoldUpstreamHandlerextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.netty3.channel.OpenConnectionsThresholds" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="OpenConnectionsThresholdsextendsProductwithSerializable"></a>
@@ -134,9 +174,13 @@ connections based on the number of active connections.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="OpenConnectionsThresholds.html"><span class="name">OpenConnectionsThresholds</span></a><span class="params">(<span name="lowWaterMark">lowWaterMark: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="highWaterMark">highWaterMark: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="idleTimeout">idleTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="OpenConnectionsThresholds.html"><span class="name">OpenConnectionsThresholds</span></a><span class="params">(<span name="lowWaterMark">lowWaterMark: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="highWaterMark">highWaterMark: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="idleTimeout">idleTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@OpenConnectionsThresholdsextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -156,7 +200,11 @@ connections based on the number of active connections.</p>
       <span class="symbol">
         <a href="IdleConnectionFilter$.html"><span class="name">IdleConnectionFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@IdleConnectionFilter" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -183,6 +231,7 @@ connections based on the number of active connections.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

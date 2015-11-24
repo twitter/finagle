@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>MetricsStatsReceiver - com.twitter.finagle.stats.MetricsStatsReceiver</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="MetricsStatsReceiver$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <a href="MetricsStatsReceiver$.html" title="See companion object"><img alt="Class/Object" src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.stats">stats</a></p>
-        <h1><a href="MetricsStatsReceiver$.html" title="Go to companion">MetricsStatsReceiver</a></h1>
+        <h1><a href="MetricsStatsReceiver$.html" title="See companion object">MetricsStatsReceiver</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="MetricsStatsReceiver$.html" title="See companion object">object MetricsStatsReceiver</a>
+            | <a href="package.html" class="extype" name="com.twitter.finagle.stats">package stats</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -46,11 +58,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
 20 seconds before this value will be aggregated in the exported metrics.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
-          <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="ImmediateMetricsStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.ImmediateMetricsStatsReceiver">ImmediateMetricsStatsReceiver</a></div>
-        </div></div>
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="ImmediateMetricsStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.ImmediateMetricsStatsReceiver">ImmediateMetricsStatsReceiver</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -75,7 +87,6 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -98,7 +109,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">MetricsStatsReceiver</span><span class="params">()</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@&lt;init&gt;():com.twitter.finagle.stats.MetricsStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(registry:com.twitter.common.metrics.Metrics):com.twitter.finagle.stats.MetricsStatsReceiver"></a>
@@ -111,7 +126,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">MetricsStatsReceiver</span><span class="params">(<span name="registry">registry: <span class="extype" name="com.twitter.common.metrics.Metrics">Metrics</span></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@&lt;init&gt;(registry:com.twitter.common.metrics.Metrics):com.twitter.finagle.stats.MetricsStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(registry:com.twitter.common.metrics.Metrics,sink:com.twitter.util.events.Sink):com.twitter.finagle.stats.MetricsStatsReceiver"></a>
@@ -124,7 +143,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">MetricsStatsReceiver</span><span class="params">(<span name="registry">registry: <span class="extype" name="com.twitter.common.metrics.Metrics">Metrics</span></span>, <span name="sink">sink: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.events.Sink" class="extype" target="_top">Sink</a></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@&lt;init&gt;(registry:com.twitter.common.metrics.Metrics,sink:com.twitter.util.events.Sink):com.twitter.finagle.stats.MetricsStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(registry:com.twitter.common.metrics.Metrics,sink:com.twitter.util.events.Sink,histogramFactory:String=&gt;com.twitter.common.metrics.HistogramInterface):com.twitter.finagle.stats.MetricsStatsReceiver"></a>
@@ -137,7 +160,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">MetricsStatsReceiver</span><span class="params">(<span name="registry">registry: <span class="extype" name="com.twitter.common.metrics.Metrics">Metrics</span></span>, <span name="sink">sink: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.events.Sink" class="extype" target="_top">Sink</a></span>, <span name="histogramFactory">histogramFactory: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="com.twitter.common.metrics.HistogramInterface">HistogramInterface</span></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@&lt;init&gt;(registry:com.twitter.common.metrics.Metrics,sink:com.twitter.util.events.Sink,histogramFactory:String=&gt;com.twitter.common.metrics.HistogramInterface):com.twitter.finagle.stats.MetricsStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -149,19 +176,6 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -170,10 +184,14 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -183,24 +201,15 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -209,11 +218,15 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges#addGauge" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#addGauge" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="addGauge(name:String*)(f:=&gt;Float):com.twitter.finagle.stats.Gauge"></a>
       <a id="addGauge(String*)(⇒Float):Gauge"></a>
       <h4 class="signature">
@@ -222,10 +235,14 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">addGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Gauge" class="extype" target="_top">Gauge</a></span>
+        <span class="name">addGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Gauge" class="extype" target="_top">Gauge</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiverWithCumulativeGauges → StatsReceiver</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@addGauge(name:String*)(f:=&gt;Float):com.twitter.finagle.stats.Gauge" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiverWithCumulativeGauges → StatsReceiver</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -237,7 +254,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -248,9 +269,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -269,7 +294,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">counter</span><span class="params">(<span name="names">names: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Counter" class="extype" target="_top">Counter</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@counter(names:String*):com.twitter.finagle.stats.Counter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create and register a counter inside the underlying Metrics library
 </p><div class="fullcomment"><div class="comment cmt"><p>Create and register a counter inside the underlying Metrics library
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiver</dd></dl></div>
@@ -284,7 +313,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">counter0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Counter" class="extype" target="_top">Counter</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@counter0(name:String):com.twitter.finagle.stats.Counter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#deregisterGauge" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="deregisterGauge(names:Seq[String]):Unit"></a>
@@ -295,9 +328,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">deregisterGauge</span><span class="params">(<span name="names">names: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">deregisterGauge</span><span class="params">(<span name="names">names: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@deregisterGauge(names:Seq[String]):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
@@ -308,9 +345,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -321,9 +362,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -334,9 +379,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -355,7 +404,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -366,9 +419,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -379,9 +436,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#isNull" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isNull:Boolean"></a>
@@ -392,9 +453,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isNull</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isNull</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@isNull:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -405,9 +470,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -418,9 +487,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -431,9 +504,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges#numUnderlying" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="numUnderlying(name:&lt;?&gt;):Int"></a>
@@ -444,9 +521,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">numUnderlying</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">numUnderlying</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@numUnderlying(name:String*):Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#provideGauge" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="provideGauge(name:String*)(f:=&gt;Float):Unit"></a>
@@ -457,9 +538,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">provideGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">provideGauge</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@provideGauge(name:String*)(f:=&gt;Float):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#registerGauge" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="registerGauge(names:Seq[String],f:=&gt;Float):Unit"></a>
@@ -470,10 +555,31 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">registerGauge</span><span class="params">(<span name="names">names: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">registerGauge</span><span class="params">(<span name="names">names: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Float" class="extype" target="_top">Float</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@registerGauge(names:Seq[String],f:=&gt;Float):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiverWithCumulativeGauges</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges#registerLargeGaugeLinter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="registerLargeGaugeLinter(rules:&lt;?&gt;):Unit"></a>
+      <a id="registerLargeGaugeLinter(Rules):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">registerLargeGaugeLinter</span><span class="params">(<span name="rules">rules: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.lint.Rules" class="extype" target="_top">Rules</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@registerLargeGaugeLinter(rules:com.twitter.util.lint.Rules):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiverWithCumulativeGauges</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#registry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="registry:com.twitter.common.metrics.Metrics"></a>
       <a id="registry:Metrics"></a>
@@ -485,7 +591,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">registry</span><span class="result">: <span class="extype" name="com.twitter.common.metrics.Metrics">Metrics</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@registry:com.twitter.common.metrics.Metrics" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#repr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="repr:com.twitter.finagle.stats.MetricsStatsReceiver"></a>
@@ -498,7 +608,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">repr</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@repr:com.twitter.finagle.stats.MetricsStatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#scope" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="scope(namespace:String):com.twitter.finagle.stats.StatsReceiver"></a>
@@ -511,7 +625,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">scope</span><span class="params">(<span name="namespace">namespace: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@scope(namespace:String):com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiver#scopeSuffix" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="scopeSuffix(suffix:&lt;?&gt;):com.twitter.finagle.stats.StatsReceiver"></a>
@@ -524,7 +642,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">scopeSuffix</span><span class="params">(<span name="suffix">suffix: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@scopeSuffix(suffix:String):com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#stat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stat(names:String*):com.twitter.finagle.stats.Stat"></a>
@@ -537,7 +659,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">stat</span><span class="params">(<span name="names">names: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@stat(names:String*):com.twitter.finagle.stats.Stat" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create and register a stat (histogram) inside the underlying Metrics library
 </p><div class="fullcomment"><div class="comment cmt"><p>Create and register a stat (histogram) inside the underlying Metrics library
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → StatsReceiver</dd></dl></div>
@@ -552,7 +678,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">stat0</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@stat0(name:String):com.twitter.finagle.stats.Stat" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -565,7 +695,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -578,7 +712,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -589,9 +727,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -608,9 +750,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -627,9 +773,13 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -655,7 +805,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.time instead">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@time[T](name:String*)(f:=&gt;T):T" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -671,7 +825,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.time instead">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@time[T](unit:java.util.concurrent.TimeUnit,name:String*)(f:=&gt;T):T" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -687,7 +845,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.time instead">time</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.stats.StatsReceiver.time.T">T</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@time[T](unit:java.util.concurrent.TimeUnit,stat:com.twitter.finagle.stats.Stat)(f:=&gt;T):T" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -703,7 +865,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.timeFuture instead">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@timeFuture[T](name:String*)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -719,7 +885,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.timeFuture instead">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="name">name: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@timeFuture[T](unit:java.util.concurrent.TimeUnit,name:String*)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -735,7 +905,11 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2015-2-22) Use Stat.timeFuture instead">timeFuture</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="unit">unit: <span class="extype" name="java.util.concurrent.TimeUnit">TimeUnit</span></span>, <span name="stat">stat: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.Stat" class="extype" target="_top">Stat</a></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.stats.StatsReceiver.timeFuture.T">T</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@timeFuture[T](unit:java.util.concurrent.TimeUnit,stat:com.twitter.finagle.stats.Stat)(f:=&gt;com.twitter.util.Future[T]):com.twitter.util.Future[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiver</dd><dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -750,9 +924,9 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
             </div><div class="parent" name="com.twitter.finagle.stats.StatsReceiver">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -769,6 +943,7 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

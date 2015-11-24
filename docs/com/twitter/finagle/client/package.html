@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>client - com.twitter.finagle.client</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>client</h1>
+        <h1>client</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -41,7 +49,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -67,7 +75,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -81,7 +88,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.client.DefaultClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.client.DefaultClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultClient[Req,Rep]extendsClient[Req,Rep]withProductwithSerializable"></a>
       <a id="DefaultClient[Req,Rep]:DefaultClient[Req,Rep]"></a>
       <h4 class="signature">
@@ -90,13 +97,28 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DefaultClient.html"><span class="name">DefaultClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpointer">endpointer: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]</span>, <span name="pool">pool: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] = <span class="defval" name="DefaultPool.apply[Req, Rep](DefaultPool.apply$default$1[Req, Rep], DefaultPool.apply$default$2[Req, Rep], DefaultPool.apply$default$3[Req, Rep], DefaultPool.apply$default$4[Req, Rep], DefaultPool.apply$default$5[Req, Rep], DefaultPool.apply$default$6[Req, Rep])">...</span></span>, <span name="maxIdletime">maxIdletime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="maxLifetime">maxLifetime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="requestTimeout">requestTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="failFast">failFast: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="failureAccrual">failureAccrual: (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] = <span class="defval" name="{<br/>&amp;nbsp;&amp;nbsp;  final class $anon extends AnyRef with com.twitter.finagle.client.DefaultClient.UninitializedFailureAccrual with com.twitter.finagle.ServiceFactory[Req,Rep] =&gt; com.twitter.finagle.ServiceFactory[Req,Rep] {<br/>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;    def &lt;init&gt;(): anonymous class $anon = {<br/>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;      $anon.super.&lt;init&gt;();<br/>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;      ()<br/>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;    };<br/>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;    def apply(f: com.twitter.finagle.ServiceFactory[Req,Rep]): com.twitter.finagle.ServiceFactory[Req,Rep] = f<br/>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;  };<br/>&amp;nbsp;&amp;nbsp;  new $anon()<br/>&amp;nbsp;&amp;nbsp;}">...</span></span>, <span name="serviceTimeout">serviceTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="defval" name="com.twitter.finagle.util.DefaultTimer.twitter">...</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.ClientStatsReceiver">...</span></span>, <span name="hostStatsReceiver">hostStatsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="defval" name="com.twitter.finagle.stats.NullStatsReceiver">...</span></span>, <span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> = <span class="defval" name="com.twitter.finagle.tracing.DefaultTracer">...</span></span>, <span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a> = <span class="defval" name="com.twitter.finagle.util.DefaultMonitor">...</span></span>, <span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a> = <span class="defval" name="com.twitter.finagle.util.LoadedReporterFactory">...</span></span>, <span name="loadBalancer">loadBalancer: <a href="../loadbalancer/LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> = <span class="defval" name="com.twitter.finagle.loadbalancer.DefaultBalancerFactory">...</span></span>, <span name="newTraceInitializer">newTraceInitializer: <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]] = <span class="defval" name="com.twitter.finagle.tracing.TraceInitializerFilter.clientModule[Req, Rep]">...</span></span>)</span><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DefaultClient.html"><span class="name">DefaultClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpointer">endpointer: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]</span>, <span name="pool">pool: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="#Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]" class="extmbr" name="com.twitter.finagle.client.Transformer">Transformer</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] = <span class="symbol"><span class="name"><a href="DefaultPool$.html">DefaultPool[Req, Rep]()</a></span></span></span>, <span name="maxIdletime">maxIdletime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="maxLifetime">maxLifetime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="requestTimeout">requestTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="failFast">failFast: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">true</span></span>, <span name="failureAccrual">failureAccrual: <a href="#Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]" class="extmbr" name="com.twitter.finagle.client.Transformer">Transformer</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] = <span class="defval" name="new DefaultClient.UninitializedFailureAccrual with Transformer[Req,Rep] {<br/>&amp;nbsp;&amp;nbsp;        def apply(f: ServiceFactory[Req, Rep]) = f<br/>&amp;nbsp;&amp;nbsp;    }">...</span></span>, <span name="serviceTimeout">serviceTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">ClientStatsReceiver</a></span></span></span>, <span name="hostStatsReceiver">hostStatsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> = <span class="symbol"><span class="name"><a href="../../../package.html">NullStatsReceiver</a></span></span></span>, <span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTracer</a></span></span></span>, <span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultMonitor</a></span></span></span>, <span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a> = <span class="symbol"><span class="name"><a href="../../../package.html">LoadedReporterFactory</a></span></span></span>, <span name="loadBalancer">loadBalancer: <a href="../loadbalancer/LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultBalancerFactory</a></span></span></span>, <span name="newTraceInitializer">newTraceInitializer: <a href="../Stackable.html" class="extype" name="com.twitter.finagle.Stackable">Stackable</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>]] = <span class="defval" name='<span class="name"><a href="../../../package.html">TraceInitializerFilter.clientModule[Req, Rep]</a></span>'>...</span></span>)</span><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.client.DefaultClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultClient.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A default client implementation that does load balancing and
-connection pooling.</p>
-    </li><li name="com.twitter.finagle.client.DefaultPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DefaultPool[Req,Rep]extendscom.twitter.finagle.stats.StatsReceiver=&gt;(com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep])withProductwithSerializable"></a>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@DefaultClient[Req,Rep]extendsClient[Req,Rep]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A default client implementation that does load balancing and
+connection pooling.</p><div class="fullcomment"><div class="comment cmt"><p>A default client implementation that does load balancing and
+connection pooling. The only required argument is a binder,
+responsible for binding concrete endpoints (named by
+SocketAddresses).
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>A name identifying the client.</p></dd><dt class="param">endpointer</dt><dd class="cmt"><p>A function used to create a ServiceFactory
+to a concrete endpoint.</p></dd><dt class="param">pool</dt><dd class="cmt"><p>The pool used to cache idle service (connection).</p></dd><dt class="param">maxIdletime</dt><dd class="cmt"><p>The maximum time for which any <code>Service</code> is
+permitted to be idle.</p></dd><dt class="param">maxLifetime</dt><dd class="cmt"><p>The maximum lifetime for any <code>Service</code></p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum time that any request is allowed
+to take.</p></dd><dt class="param">failFast</dt><dd class="cmt"><p>When enabled, installs a fail-fast module. See
+<span class="extype" name="com.twitter.finagle.service.FailFastFactory">com.twitter.finagle.service.FailFastFactory</span></p></dd><dt class="param">failureAccrual</dt><dd class="cmt"><p>A failure accruing mechanism. Used to
+gauge the health of the ServiceFactory. By default this uses
+<span class="extype" name="com.twitter.finagle.client.DefaultClient.defaultFailureAccrual">com.twitter.finagle.client.DefaultClient.defaultFailureAccrual</span></p></dd><dt class="param">serviceTimeout</dt><dd class="cmt"><p>The maximum amount of time allowed for
+acquiring a service. Defaults to infinity.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.client.DefaultPool" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DefaultPool[Req,Rep]extendscom.twitter.finagle.stats.StatsReceiver=&gt;com.twitter.finagle.client.Transformer[Req,Rep]withProductwithSerializable"></a>
       <a id="DefaultPool[Req,Rep]:DefaultPool[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -104,11 +126,25 @@ connection pooling.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="DefaultPool.html"><span class="name">DefaultPool</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="low">low: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">0</span></span>, <span name="high">high: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">scala.Int.MaxValue</span></span>, <span name="bufferSize">bufferSize: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">0</span></span>, <span name="idleTime">idleTime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="maxWaiters">maxWaiters: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">scala.Int.MaxValue</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="defval" name="com.twitter.finagle.util.DefaultTimer.twitter">...</span></span>)</span><span class="result"> extends (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultPool.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.DefaultPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultPool.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DefaultPool.html"><span class="name">DefaultPool</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="low">low: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">0</span></span>, <span name="high">high: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">Int.MaxValue</span></span>, <span name="bufferSize">bufferSize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">0</span></span>, <span name="idleTime">idleTime: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="maxWaiters">maxWaiters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">Int.MaxValue</span></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a> = <span class="symbol"><span class="name"><a href="../../../package.html">DefaultTimer.twitter</a></span></span></span>)</span><span class="result"> extends (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="#Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]" class="extmbr" name="com.twitter.finagle.client.Transformer">Transformer</a>[<span class="extype" name="com.twitter.finagle.client.DefaultPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.DefaultPool.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Create a watermark pool backed by a caching pool.</p>
-    </li><li name="com.twitter.finagle.client.StackBasedClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@DefaultPool[Req,Rep]extendscom.twitter.finagle.stats.StatsReceiver=&gt;com.twitter.finagle.client.Transformer[Req,Rep]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Create a watermark pool backed by a caching pool.</p><div class="fullcomment"><div class="comment cmt"><p>Create a watermark pool backed by a caching pool. This is the
+default pooling setup of Finagle.
+</p></div><dl class="paramcmts block"><dt class="param">low</dt><dd class="cmt"><p>The low watermark used in the Watermark pool. If there
+is sufficient request concurrency, no fewer connections will be
+maintained by the pool.</p></dd><dt class="param">high</dt><dd class="cmt"><p>The high watermark. The pool will not maintain more
+connections than this.</p></dd><dt class="param">bufferSize</dt><dd class="cmt"><p>Specifies the size of the lock-free buffer in front of
+the pool configuration. Skipped if 0.</p></dd><dt class="param">idleTime</dt><dd class="cmt"><p>The amount of idle time for which a connection is
+cached. This is applied to connections that number greater than
+the low watermark but fewer than the high.</p></dd><dt class="param">maxWaiters</dt><dd class="cmt"><p>The maximum number of connection requests that
+are queued when the connection concurrency exceeds the high
+watermark.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.client.StackBasedClient" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="StackBasedClient[Req,Rep]extendsClient[Req,Rep]withStack.Parameterized[com.twitter.finagle.client.StackBasedClient[Req,Rep]]withStack.Transformable[com.twitter.finagle.client.StackBasedClient[Req,Rep]]"></a>
       <a id="StackBasedClient[Req,Rep]:StackBasedClient[Req,Rep]"></a>
       <h4 class="signature">
@@ -119,9 +155,16 @@ connection pooling.</p>
       <span class="symbol">
         <a href="StackBasedClient.html"><span class="name">StackBasedClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<span class="extype" name="com.twitter.finagle.client.StackBasedClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackBasedClient.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<span class="extype" name="com.twitter.finagle.client.StackBasedClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackBasedClient.Rep">Rep</span>]] with <a href="../Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<span class="extype" name="com.twitter.finagle.client.StackBasedClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackBasedClient.Rep">Rep</span>]]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> that may have its
-<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a> transformed.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@StackBasedClient[Req,Rep]extendsClient[Req,Rep]withStack.Parameterized[com.twitter.finagle.client.StackBasedClient[Req,Rep]]withStack.Transformable[com.twitter.finagle.client.StackBasedClient[Req,Rep]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> that may have its
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a> transformed.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> that may have its
+<a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a> transformed.</p><p>A <code>StackBasedClient</code> is weaker than a <code>StackClient</code> in that the
+specific <code>Req</code>, <code>Rep</code> types of its stack are not exposed.
+</p></div></div>
     </li><li name="com.twitter.finagle.client.StackClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StackClient[Req,Rep]extendsStackBasedClient[Req,Rep]withStack.Parameterized[com.twitter.finagle.client.StackClient[Req,Rep]]withStack.Transformable[com.twitter.finagle.client.StackClient[Req,Rep]]"></a>
       <a id="StackClient[Req,Rep]:StackClient[Req,Rep]"></a>
@@ -133,8 +176,12 @@ connection pooling.</p>
       <span class="symbol">
         <a href="StackClient.html"><span class="name">StackClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]] with <a href="../Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StackClient.Rep">Rep</span>]]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> that composes a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@StackClient[Req,Rep]extendsStackBasedClient[Req,Rep]withStack.Parameterized[com.twitter.finagle.client.StackClient[Req,Rep]]withStack.Transformable[com.twitter.finagle.client.StackClient[Req,Rep]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> that composes a
 <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>.</p>
     </li><li name="com.twitter.finagle.client.StdStackClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StdStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.StdStackClient[Req,Rep,This]]extendsStackClient[Req,Rep]"></a>
@@ -147,12 +194,16 @@ connection pooling.</p>
       <span class="symbol">
         <a href="StdStackClient.html"><span class="name">StdStackClient</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.This">This</span>]</span>]</span><span class="result"> extends <a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.StdStackClient.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">The standard template implementation for
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@StdStackClient[Req,Rep,This&lt;:com.twitter.finagle.client.StdStackClient[Req,Rep,This]]extendsStackClient[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The standard template implementation for
 <a href="StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>.</p>
     </li><li name="com.twitter.finagle.client.Transformer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="Transformer[Req,Rep]:(ServiceFactory[Req,Rep])⇒ServiceFactory[Req,Rep]"></a>
+      <a id="Transformer[Req,Rep]:Transformer[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
@@ -161,9 +212,13 @@ connection pooling.</p>
       <span class="symbol">
         <span class="name">Transformer</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> = (<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.Transformer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.Transformer.Rep">Rep</span>]) ⇒ <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.client.Transformer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.client.Transformer.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@Transformer[Req,Rep]=com.twitter.finagle.ServiceFactory[Req,Rep]=&gt;com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Transform a service factory stack.</p>
-    </li><li name="com.twitter.finagle.client.Transporter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.client.Transporter" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Transporter[In,Out]extendsAnyRef"></a>
       <a id="Transporter[In,Out]:Transporter[In,Out]"></a>
       <h4 class="signature">
@@ -172,11 +227,19 @@ connection pooling.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Transporter.html"><span class="name">Transporter</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Transporter.html"><span class="name">Transporter</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Transporters are simple functions from a <code>SocketAddress</code> to a
-<code>Future[Transport[In, Out]]</code>.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@Transporter[In,Out]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Transporters are simple functions from a <code>SocketAddress</code> to a
+<code>Future[Transport[In, Out]]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Transporters are simple functions from a <code>SocketAddress</code> to a
+<code>Future[Transport[In, Out]]</code>. They represent a transport layer session from a
+client to a server. Transporters are symmetric to the server-side
+<a href="../server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a>.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -195,8 +258,12 @@ connection pooling.</p>
       <span class="symbol">
         <a href="AddrMetadataExtraction$.html"><span class="name">AddrMetadataExtraction</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Extraction of <a href="../Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">com.twitter.finagle.Addr.Metadata</a> from a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@AddrMetadataExtraction" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Extraction of <a href="../Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">com.twitter.finagle.Addr.Metadata</a> from a
 <span class="extype" name="com.twitter.finagle.factory.LoadBalancerFactory.Dest">com.twitter.finagle.factory.LoadBalancerFactory.Dest</span>
 </p>
     </li><li name="com.twitter.finagle.client.Bridge" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -210,7 +277,11 @@ connection pooling.</p>
       <span class="symbol">
         <a href="Bridge$.html"><span class="name">Bridge</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@Bridge" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.client.DefaultClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DefaultClient"></a>
@@ -221,9 +292,13 @@ connection pooling.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultClient$.html"><span class="name">DefaultClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DefaultClient$.html"><span class="name">DefaultClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@DefaultClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.client.DefaultPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DefaultPool"></a>
@@ -234,11 +309,15 @@ connection pooling.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultPool$.html"><span class="name">DefaultPool</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="DefaultPool$.html"><span class="name">DefaultPool</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@DefaultPool" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.client.LatencyCompensation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.client.LatencyCompensation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LatencyCompensation"></a>
       <a id="LatencyCompensation:LatencyCompensation"></a>
       <h4 class="signature">
@@ -249,9 +328,18 @@ connection pooling.</p>
       <span class="symbol">
         <a href="LatencyCompensation$.html"><span class="name">LatencyCompensation</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Latency compensation enables the modification of connection and
-request timeouts on a per-endpoint basis.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@LatencyCompensation" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Latency compensation enables the modification of connection and
+request timeouts on a per-endpoint basis.</p><div class="fullcomment"><div class="comment cmt"><p>Latency compensation enables the modification of connection and
+request timeouts on a per-endpoint basis.  For instance, if a
+client has both network-local and trans-continental endpoints, a
+reasonable latency compensator might add the speed-of-light penalty
+when communicating with distant endpoints.
+</p></div></div>
     </li><li name="com.twitter.finagle.client.StackClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StackClient"></a>
       <a id="StackClient:StackClient"></a>
@@ -263,9 +351,13 @@ request timeouts on a per-endpoint basis.</p>
       <span class="symbol">
         <a href="StackClient$.html"><span class="name">StackClient</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@StackClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.client.StatsScoping" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.client.StatsScoping" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="StatsScoping"></a>
       <a id="StatsScoping:StatsScoping"></a>
       <h4 class="signature">
@@ -276,9 +368,16 @@ request timeouts on a per-endpoint basis.</p>
       <span class="symbol">
         <a href="StatsScoping$.html"><span class="name">StatsScoping</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Stats scoping enabled the modification of the StatsReceiver scoping on a
-per-endpoint basis.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@StatsScoping" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Stats scoping enabled the modification of the StatsReceiver scoping on a
+per-endpoint basis.</p><div class="fullcomment"><div class="comment cmt"><p>Stats scoping enabled the modification of the StatsReceiver scoping on a
+per-endpoint basis.  For instance, if a client has endpoints in multiple
+zones, a scoper might add a per-zone scope.
+</p></div></div>
     </li><li name="com.twitter.finagle.client.Transporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Transporter"></a>
       <a id="Transporter:Transporter"></a>
@@ -290,8 +389,12 @@ per-endpoint basis.</p>
       <span class="symbol">
         <a href="Transporter$.html"><span class="name">Transporter</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">A collection of <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Params</a> useful for configuring
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.client.package@Transporter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A collection of <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Stack.Params</a> useful for configuring
 a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">com.twitter.finagle.client.Transporter</a>.</p>
     </li></ol>
             </div>
@@ -303,9 +406,9 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -322,6 +425,7 @@ a <a href="Transporter.html" class="extype" name="com.twitter.finagle.client.Tra
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

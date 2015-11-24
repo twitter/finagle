@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>service - com.twitter.finagle.service</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>service</h1>
+        <h1>service</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,9 +77,13 @@
       <span class="symbol">
         <a href="ConstantService.html"><span class="name">ConstantService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.ConstantService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ConstantService.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> that returns a constant result.</p>
-    </li><li name="com.twitter.finagle.service.DelayedFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ConstantService[Req,Rep]extendsService[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> that returns a constant result.</p>
+    </li><li name="com.twitter.finagle.service.DelayedFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DelayedFactory[Req,Rep]extendsServiceFactory[Req,Rep]"></a>
       <a id="DelayedFactory[Req,Rep]:DelayedFactory[Req,Rep]"></a>
       <h4 class="signature">
@@ -82,10 +94,18 @@
       <span class="symbol">
         <a href="DelayedFactory.html"><span class="name">DelayedFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.DelayedFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.DelayedFactory.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A factory that won't satisfy the service future until an underlying service factory
-is ready.</p>
-    </li><li name="com.twitter.finagle.service.ExpiringService" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@DelayedFactory[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A factory that won't satisfy the service future until an underlying service factory
+is ready.</p><div class="fullcomment"><div class="comment cmt"><p>A factory that won't satisfy the service future until an underlying service factory
+is ready.</p><p><code>close</code> closes the underlying service factory, which means that it won't be
+satisfied until after the underlying future has been satisfied.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Implicitly masks the underlying future from interrupts.
+Promises are detached on interruption.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.ExpiringService" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ExpiringService[Req,Rep]extendsServiceProxy[Req,Rep]"></a>
       <a id="ExpiringService[Req,Rep]:ExpiringService[Req,Rep]"></a>
       <h4 class="signature">
@@ -96,9 +116,17 @@ is ready.</p>
       <span class="symbol">
         <a href="ExpiringService.html"><span class="name">ExpiringService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>[<span class="extype" name="com.twitter.finagle.service.ExpiringService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ExpiringService.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A service wrapper that expires the self service after a
-certain amount of idle time.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ExpiringService[Req,Rep]extendsServiceProxy[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A service wrapper that expires the self service after a
+certain amount of idle time.</p><div class="fullcomment"><div class="comment cmt"><p>A service wrapper that expires the self service after a
+certain amount of idle time. By default, expiring calls
+<code><code>.close()<i> on the self channel, but this action is
+customizable.
+</i></code></code></p></div></div>
     </li><li name="com.twitter.finagle.service.FailedService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailedServiceextendsConstantService[Any,Nothing]"></a>
       <a id="FailedService:FailedService"></a>
@@ -108,10 +136,14 @@ certain amount of idle time.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="FailedService.html"><span class="name">FailedService</span></a><span class="result"> extends <a href="ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
+        <a href="FailedService.html"><span class="name">FailedService</span></a><span class="result"> extends <a href="ConstantService.html" class="extype" name="com.twitter.finagle.service.ConstantService">ConstantService</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> that fails with a constant Throwable.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@FailedServiceextendsConstantService[Any,Nothing]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> that fails with a constant Throwable.</p>
     </li><li name="com.twitter.finagle.service.FailingFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailingFactory[Req,Rep]extendsServiceFactory[Req,Rep]"></a>
       <a id="FailingFactory[Req,Rep]:FailingFactory[Req,Rep]"></a>
@@ -123,9 +155,13 @@ certain amount of idle time.</p>
       <span class="symbol">
         <a href="FailingFactory.html"><span class="name">FailingFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailingFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailingFactory.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that fails to construct services.</p>
-    </li><li name="com.twitter.finagle.service.FailureAccrualFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@FailingFactory[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that fails to construct services.</p>
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FailureAccrualFactory[Req,Rep]extendsServiceFactory[Req,Rep]"></a>
       <a id="FailureAccrualFactory[Req,Rep]:FailureAccrualFactory[Req,Rep]"></a>
       <h4 class="signature">
@@ -136,9 +172,16 @@ certain amount of idle time.</p>
       <span class="symbol">
         <a href="FailureAccrualFactory.html"><span class="name">FailureAccrualFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its parameterization.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@FailureAccrualFactory[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
+itself unavailable when deemed unhealthy according to its parameterization.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
+itself unavailable when deemed unhealthy according to its parameterization.</p><p>TODO: treat different failures differently (eg. connect failures
+vs. not), enable different backoff strategies.
+</p></div></div>
     </li><li name="com.twitter.finagle.service.KetamaShardingServiceBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KetamaShardingServiceBuilder[Req,Rep]extendsProductwithSerializable"></a>
       <a id="KetamaShardingServiceBuilder[Req,Rep]:KetamaShardingServiceBuilder[Req,Rep]"></a>
@@ -148,9 +191,13 @@ itself unavailable when deemed unhealthy according to its parameterization.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaShardingServiceBuilder.html"><span class="name">KetamaShardingServiceBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_nodes">_nodes: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.hashing.KetamaNode" class="extype" target="_top">KetamaNode</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Rep">Rep</span>]]]] = <span class="symbol">scala.None</span></span>, <span name="_hash">_hash: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a>]] = <span class="symbol">scala.None</span></span>, <span name="_numReps">_numReps: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">160</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="KetamaShardingServiceBuilder.html"><span class="name">KetamaShardingServiceBuilder</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="_nodes">_nodes: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.hashing.KetamaNode" class="extype" target="_top">KetamaNode</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Rep">Rep</span>]]]] = <span class="symbol">None</span></span>, <span name="_hash">_hash: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="com.twitter.finagle.service.KetamaShardingServiceBuilder.Req">Req</span>) ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a>]] = <span class="symbol">None</span></span>, <span name="_numReps">_numReps: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">160</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@KetamaShardingServiceBuilder[Req,Rep]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.LocalRateLimitingStrategy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LocalRateLimitingStrategy[Req]extendsReq=&gt;com.twitter.util.Future[Boolean]"></a>
@@ -161,11 +208,15 @@ itself unavailable when deemed unhealthy according to its parameterization.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LocalRateLimitingStrategy.html"><span class="name">LocalRateLimitingStrategy</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.LocalRateLimitingStrategy.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <a href="LocalRateLimitingStrategy.html"><span class="name">LocalRateLimitingStrategy</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.LocalRateLimitingStrategy.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">Strategy responsible for tracking requests and computing rate per client.</p>
-    </li><li name="com.twitter.finagle.service.OptionallyServableFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@LocalRateLimitingStrategy[Req]extendsReq=&gt;com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Strategy responsible for tracking requests and computing rate per client.</p>
+    </li><li name="com.twitter.finagle.service.OptionallyServableFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OptionallyServableFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="OptionallyServableFilter[Req,Rep]:OptionallyServableFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -176,9 +227,17 @@ itself unavailable when deemed unhealthy according to its parameterization.</p>
       <span class="symbol">
         <a href="OptionallyServableFilter.html"><span class="name">OptionallyServableFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.service.OptionallyServableFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.OptionallyServableFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that uses an argument function to predicate
-whether or not to apply the subsequent <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@OptionallyServableFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that uses an argument function to predicate
+whether or not to apply the subsequent <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that uses an argument function to predicate
+whether or not to apply the subsequent <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>. In
+cases where the function returns false, a the filter fails with a
+<a href="../NotServableException.html" class="extype" name="com.twitter.finagle.NotServableException">com.twitter.finagle.NotServableException</a>.
+</p></div></div>
     </li><li name="com.twitter.finagle.service.RateLimitingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RateLimitingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="RateLimitingFilter[Req,Rep]:RateLimitingFilter[Req,Rep]"></a>
@@ -190,10 +249,14 @@ whether or not to apply the subsequent <a href="../Service.html" class="extype" 
       <span class="symbol">
         <a href="RateLimitingFilter.html"><span class="name">RateLimitingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.service.RateLimitingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RateLimitingFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that accepts or refuses requests based on a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RateLimitingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that accepts or refuses requests based on a
 rate limiting strategy.</p>
-    </li><li name="com.twitter.finagle.service.RetryExceptionsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.RetryExceptionsFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RetryExceptionsFilter[Req,Rep]extendsRetryFilter[Req,Rep]"></a>
       <a id="RetryExceptionsFilter[Req,Rep]:RetryExceptionsFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -204,10 +267,20 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="RetryExceptionsFilter.html"><span class="name">RetryExceptionsFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="RetryFilter.html" class="extype" name="com.twitter.finagle.service.RetryFilter">RetryFilter</a>[<span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p>
-    </li><li name="com.twitter.finagle.service.RetryFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryExceptionsFilter[Req,Rep]extendsRetryFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>. Exceptional responses can can be
+classified as retryable via the retryPolicy argument
+<a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">com.twitter.finagle.service.RetryPolicy</a>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>consider using a <span class="extype" name="Timer">Timer</span> with high resolution so that there is
+less correlation between retries. For example <span class="extype" name="HighResTimer.Default">HighResTimer.Default</span>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="RetryFilter.html" class="extype" name="com.twitter.finagle.service.RetryFilter">RetryFilter</a> for a version that allows for retries on &quot;successful&quot;
+responses as well as failures.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RetryFilter[Req,Rep]extendsFilter[Req,Rep,Req,Rep]"></a>
       <a id="RetryFilter[Req,Rep]:RetryFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -218,10 +291,19 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="RetryFilter.html"><span class="name">RetryFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.service.RetryFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.service.RetryFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p>
-    </li><li name="com.twitter.finagle.service.RetryPolicy" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryFilter[Req,Rep]extendsFilter[Req,Rep,Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>. Successful and exceptional
+responses can can be classified as retryable via the retryPolicy
+<a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">com.twitter.finagle.service.RetryPolicy</a> argument.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>consider using a <span class="extype" name="Timer">Timer</span> with high resolution so that there is
+less correlation between retries. For example <span class="extype" name="HighResTimer.Default">HighResTimer.Default</span>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryPolicy" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RetryPolicy[-A]extendsA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]"></a>
       <a id="RetryPolicy[-A]:RetryPolicy[A]"></a>
       <h4 class="signature">
@@ -230,11 +312,19 @@ rate limiting strategy.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="RetryPolicy.html"><span class="name">RetryPolicy</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>])]</span>
+        <a href="RetryPolicy.html"><span class="name">RetryPolicy</span></a><span class="tparams">[<span name="A">-A</span>]</span><span class="result"> extends (<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.RetryPolicy.A">A</span>])]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A function defining retry behavior for a given value type <code>A</code>.</p>
-    </li><li name="com.twitter.finagle.service.ShardingService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryPolicy[-A]extendsA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A function defining retry behavior for a given value type <code>A</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A function defining retry behavior for a given value type <code>A</code>.</p><p>The <span class="extype" name="Function1">Function1</span> returns <span class="extype" name="None">None</span> if no more retries should be made
+and <span class="extype" name="Some">Some</span> if another retry should happen. The returned <code>Some</code> has
+a <span class="extype" name="Duration">Duration</span> field for how long to wait for the next retry as well
+as the next <code>RetryPolicy</code> to use.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="SimpleRetryPolicy.html" class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy">SimpleRetryPolicy</a> for a Java friendly API.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.ShardingService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ShardingService[Req,Rep]extendsService[Req,Rep]"></a>
       <a id="ShardingService[Req,Rep]:ShardingService[Req,Rep]"></a>
       <h4 class="signature">
@@ -245,9 +335,25 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="ShardingService.html"><span class="name">ShardingService</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.ShardingService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ShardingService.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">ShardingService takes a <code>Distributor</code> where the handle is a service.</p>
-    </li><li name="com.twitter.finagle.service.SimpleRetryPolicy" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ShardingService[Req,Rep]extendsService[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">ShardingService takes a <code>Distributor</code> where the handle is a service.</p><div class="fullcomment"><div class="comment cmt"><p>ShardingService takes a <code>Distributor</code> where the handle is a service.
+It uses the distributor to distribute requests *only* when the hash function returns Some[Long].
+If None is returned, it throws <code>NotShardableException</code>.
+If the underlying service for a particular shard is not available, <code>NotServableException</code> is thrown.
+Example:
+  val serviceFactory =
+    KetamaShardingServiceBuilder()
+      .nodes(services) // services is of type Seq[(String, Service[Req,Rep])]
+      .withHash { req =&gt; Some(hashCodeOfSomething)}
+      .buildFactory()
+  val service = serviceFactory()
+  service(req) // where req is a Req and may have ShardableRequest mixed in
+</p></div></div>
+    </li><li name="com.twitter.finagle.service.SimpleRetryPolicy" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="SimpleRetryPolicy[A]extendsRetryPolicy[A]withA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]"></a>
       <a id="SimpleRetryPolicy[A]:SimpleRetryPolicy[A]"></a>
       <h4 class="signature">
@@ -256,11 +362,17 @@ rate limiting strategy.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
+        <a href="SimpleRetryPolicy.html"><span class="name">SimpleRetryPolicy</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>] with (<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>) ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[(<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>, <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<span class="extype" name="com.twitter.finagle.service.SimpleRetryPolicy.A">A</span>])]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A retry policy abstract class.</p>
-    </li><li name="com.twitter.finagle.service.SingletonFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@SimpleRetryPolicy[A]extendsRetryPolicy[A]withA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A retry policy abstract class.</p><div class="fullcomment"><div class="comment cmt"><p>A retry policy abstract class. This is convenient to use for Java programmers. Simply implement
+the two abstract methods <code>shouldRetry</code> and <code>backoffAt</code> and you're good to go!
+</p></div></div>
+    </li><li name="com.twitter.finagle.service.SingletonFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SingletonFactory[Req,Rep]extendsServiceFactory[Req,Rep]"></a>
       <a id="SingletonFactory[Req,Rep]:SingletonFactory[Req,Rep]"></a>
       <h4 class="signature">
@@ -271,10 +383,19 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="SingletonFactory.html"><span class="name">SingletonFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.SingletonFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.SingletonFactory.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that produces
-<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a> identical to the argument <code>service</code>.</p>
-    </li><li name="com.twitter.finagle.service.StatsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@SingletonFactory[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that produces
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a> identical to the argument <code>service</code>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that produces
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a> identical to the argument <code>service</code>.</p><p>Note that this factory builds new <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>,
+so the &quot;singleton&quot; <code>service</code> argument is not shared by reference. This
+differs from <a href="../ServiceFactory$.html#const[Req,Rep](service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ServiceFactory[Req,Rep]" class="extmbr" name="com.twitter.finagle.ServiceFactory#const">com.twitter.finagle.ServiceFactory#const</a> in that <code>const</code>
+proxies all requests to the same <code>service</code> rather than creating new objects.
+</p></div></div>
+    </li><li name="com.twitter.finagle.service.StatsFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="StatsFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="StatsFilter[Req,Rep]:StatsFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -285,8 +406,19 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="StatsFilter.html"><span class="name">StatsFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.service.StatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">StatsFilter reports request statistics to the given receiver.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@StatsFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">StatsFilter reports request statistics to the given receiver.</p><div class="fullcomment"><div class="comment cmt"><p>StatsFilter reports request statistics to the given receiver.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The innocent bystander may find the semantics with respect
+to backup requests a bit puzzling; they are entangled in legacy.
+&quot;requests&quot; counts the total number of requests: subtracting
+&quot;success&quot; from this produces the failure count. However, this
+doesn't allow for &quot;shadow&quot; requests to be accounted for in
+&quot;requests&quot;. This is why we don't increment &quot;requests&quot; on backup
+request failures.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.StatsServiceFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StatsServiceFactory[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a>
       <a id="StatsServiceFactory[Req,Rep]:StatsServiceFactory[Req,Rep]"></a>
@@ -298,7 +430,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="StatsServiceFactory.html"><span class="name">StatsServiceFactory</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.service.StatsServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.StatsServiceFactory.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@StatsServiceFactory[Req,Rep]extendsServiceFactoryProxy[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.TimeoutFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TimeoutFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
@@ -311,8 +447,12 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="TimeoutFilter.html"><span class="name">TimeoutFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.service.TimeoutFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.TimeoutFilter.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a global timeout to requests.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@TimeoutFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a global timeout to requests.</p>
     </li></ol>
             </div>
 
@@ -320,7 +460,7 @@ rate limiting strategy.</p>
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.service.Backoff" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.service.Backoff" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Backoff"></a>
       <a id="Backoff:Backoff"></a>
       <h4 class="signature">
@@ -331,8 +471,15 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="Backoff$.html"><span class="name">Backoff</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Implements various backoff strategies.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@Backoff" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Implements various backoff strategies.</p><div class="fullcomment"><div class="comment cmt"><p>Implements various backoff strategies.</p><p>Strategies are defined by a <code>Stream[Duration]</code> and are intended for use
+with <a href="RetryFilter$.html#apply[Req,Rep](backoffs:Stream[com.twitter.util.Duration],statsReceiver:com.twitter.finagle.stats.StatsReceiver)(shouldRetry:PartialFunction[(Req,com.twitter.util.Try[Rep]),Boolean])(implicittimer:com.twitter.util.Timer):com.twitter.finagle.service.RetryFilter[Req,Rep]" class="extmbr" name="com.twitter.finagle.service.RetryFilter#apply">RetryFilter.apply</a> and <a href="RetryPolicy$.html#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">RetryPolicy.backoff</a> to determine
+the duration after which a request is to be retried.
+</p></div></div>
     </li><li name="com.twitter.finagle.service.DelayedFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DelayedFactory"></a>
       <a id="DelayedFactory:DelayedFactory"></a>
@@ -344,7 +491,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="DelayedFactory$.html"><span class="name">DelayedFactory</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@DelayedFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.ExpiringService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ExpiringService"></a>
@@ -357,7 +508,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="ExpiringService$.html"><span class="name">ExpiringService</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ExpiringService" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.FailFastFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailFastFactory"></a>
@@ -370,7 +525,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="FailFastFactory$.html"><span class="name">FailFastFactory</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@FailFastFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailureAccrualFactory"></a>
@@ -383,7 +542,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="FailureAccrualFactory$.html"><span class="name">FailureAccrualFactory</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@FailureAccrualFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.NilService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NilService"></a>
@@ -396,8 +559,12 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="NilService$.html"><span class="name">NilService</span></a><span class="result"> extends <a href="FailedService.html" class="extype" name="com.twitter.finagle.service.FailedService">FailedService</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A static <span class="extype" name="com.twitter.finagle.FailedService">com.twitter.finagle.FailedService</span> object.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@NilService" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A static <span class="extype" name="com.twitter.finagle.FailedService">com.twitter.finagle.FailedService</span> object.</p>
     </li><li name="com.twitter.finagle.service.RetryExceptionsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryExceptionsFilter"></a>
       <a id="RetryExceptionsFilter:RetryExceptionsFilter"></a>
@@ -409,7 +576,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="RetryExceptionsFilter$.html"><span class="name">RetryExceptionsFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryExceptionsFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.RetryFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryFilter"></a>
@@ -422,7 +593,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="RetryFilter$.html"><span class="name">RetryFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.RetryPolicy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryPolicy"></a>
@@ -435,7 +610,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="RetryPolicy$.html"><span class="name">RetryPolicy</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.JavaSingleton" class="extype" target="_top">JavaSingleton</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryPolicy" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.RetryingService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryingService"></a>
@@ -448,7 +627,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="RetryingService$.html"><span class="name">RetryingService</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryingService" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.StatsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StatsFilter"></a>
@@ -461,7 +644,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="StatsFilter$.html"><span class="name">StatsFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@StatsFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.service.TimeoutFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TimeoutFilter"></a>
@@ -474,7 +661,11 @@ rate limiting strategy.</p>
       <span class="symbol">
         <a href="TimeoutFilter$.html"><span class="name">TimeoutFilter</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@TimeoutFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -501,6 +692,7 @@ rate limiting strategy.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

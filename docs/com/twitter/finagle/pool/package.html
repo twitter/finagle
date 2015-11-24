@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>pool - com.twitter.finagle.pool</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>pool</h1>
+        <h1>pool</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,7 +77,11 @@
       <span class="symbol">
         <a href="BufferingPool.html"><span class="name">BufferingPool</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.pool.BufferingPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.BufferingPool.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package@BufferingPool[Req,Rep]extendsServiceFactoryProxy[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.pool.PoolBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PoolBenchextendsStdBenchAnnotations"></a>
@@ -82,14 +94,18 @@
       <span class="symbol">
         <a href="PoolBench.html"><span class="name">PoolBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package@PoolBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@Threads</span><span class="args">()</span>
               
                 <span class="name">@State</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.pool.SingletonPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.pool.SingletonPool" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SingletonPool[Req,Rep]extendsServiceFactory[Req,Rep]"></a>
       <a id="SingletonPool[Req,Rep]:SingletonPool[Req,Rep]"></a>
       <h4 class="signature">
@@ -100,10 +116,18 @@
       <span class="symbol">
         <a href="SingletonPool.html"><span class="name">SingletonPool</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.SingletonPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.SingletonPool.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">A pool that maintains at most one service from the underlying
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package@SingletonPool[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A pool that maintains at most one service from the underlying
 ServiceFactory -- concurrent leases share the same, cached
-service.</p>
+service.</p><div class="fullcomment"><div class="comment cmt"><p>A pool that maintains at most one service from the underlying
+ServiceFactory -- concurrent leases share the same, cached
+service. A new Service is established whenever the service factory
+fails or the current service has become unavailable.
+</p></div></div>
     </li><li name="com.twitter.finagle.pool.SingletonPoolBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SingletonPoolBenchextendsStdBenchAnnotations"></a>
       <a id="SingletonPoolBench:SingletonPoolBench"></a>
@@ -115,14 +139,18 @@ service.</p>
       <span class="symbol">
         <a href="SingletonPoolBench.html"><span class="name">SingletonPoolBench</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package@SingletonPoolBenchextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@Threads</span><span class="args">()</span>
               
                 <span class="name">@State</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.pool.WatermarkPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.pool.WatermarkPool" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="WatermarkPool[Req,Rep]extendsServiceFactory[Req,Rep]"></a>
       <a id="WatermarkPool[Req,Rep]:WatermarkPool[Req,Rep]"></a>
       <h4 class="signature">
@@ -133,9 +161,21 @@ service.</p>
       <span class="symbol">
         <a href="WatermarkPool.html"><span class="name">WatermarkPool</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.pool.WatermarkPool.Req">Req</span>, <span class="extype" name="com.twitter.finagle.pool.WatermarkPool.Rep">Rep</span>]</span>
       </span>
-      </h4>
-      <p class="comment cmt">The watermark pool is an object pool with low &amp; high
-watermarks.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package@WatermarkPool[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The watermark pool is an object pool with low &amp; high
+watermarks.</p><div class="fullcomment"><div class="comment cmt"><p>The watermark pool is an object pool with low &amp; high
+watermarks. It keeps the number of services from a given service
+factory in a certain range.</p><p>This behaves as follows: the pool will persist up to
+the low watermark number of items (as long as they have been
+created), and won't start queueing requests until the high
+watermark has been reached. Put another way: up to <code>lowWatermark'
+items may persist indefinitely, while there are at no times more
+than </code>highWatermark' items in concurrent existence.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -154,7 +194,11 @@ watermarks.</p>
       <span class="symbol">
         <a href="PoolBench$.html"><span class="name">PoolBench</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package@PoolBench" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.pool.WatermarkPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="WatermarkPool"></a>
@@ -167,7 +211,11 @@ watermarks.</p>
       <span class="symbol">
         <a href="WatermarkPool$.html"><span class="name">WatermarkPool</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.pool.package@WatermarkPool" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -194,6 +242,7 @@ watermarks.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>param - com.twitter.finagle.param</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>param</h1>
+        <h1>param</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -43,7 +51,7 @@
 finagle clients and servers.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -69,7 +77,6 @@ finagle clients and servers.
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -83,7 +90,7 @@ finagle clients and servers.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.param.ExceptionStatsHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.param.ExceptionStatsHandler" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ExceptionStatsHandlerextendsProductwithSerializable"></a>
       <a id="ExceptionStatsHandler:ExceptionStatsHandler"></a>
       <h4 class="signature">
@@ -92,12 +99,42 @@ finagle clients and servers.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ExceptionStatsHandler.html"><span class="name">ExceptionStatsHandler</span></a><span class="params">(<span name="categorizer">categorizer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">stats.ExceptionStatsHandler</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ExceptionStatsHandler.html"><span class="name">ExceptionStatsHandler</span></a><span class="params">(<span name="categorizer">categorizer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">stats.ExceptionStatsHandler</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@ExceptionStatsHandlerextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a
 <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">com.twitter.finagle.stats.ExceptionStatsHandler</a> throughout finagle servers
-and clients.</p>
+and clients.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a
+<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">com.twitter.finagle.stats.ExceptionStatsHandler</a> throughout finagle servers
+and clients.</p><p>NB: Since the default for failures is to be scoped under &quot;failures&quot;, if you
+set the default to be in another scope, it may be difficult for engineers
+unfamiliar with your stats to understand your service's key metrics.
+</p></div></div>
+    </li><li name="com.twitter.finagle.param.HighResTimer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HighResTimerextendsProductwithSerializable"></a>
+      <a id="HighResTimer:HighResTimer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="HighResTimer.html"><span class="name">HighResTimer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">util.Timer</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@HighResTimerextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a>
+such that tasks are run tighter to their schedule.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a>
+such that tasks are run tighter to their schedule.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is expected that the resolution should be sub-10 milliseconds.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Timer.html" class="extype" name="com.twitter.finagle.param.Timer">Timer</a> for a configuration that is appropriate for
+  tasks that do not need fine-grained scheduling.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.Label" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LabelextendsProductwithSerializable"></a>
       <a id="Label:Label"></a>
@@ -107,10 +144,14 @@ and clients.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Label.html"><span class="name">Label</span></a><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Label.html"><span class="name">Label</span></a><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a label used to identify finagle
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@LabelextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a label used to identify finagle
 clients and servers.</p>
     </li><li name="com.twitter.finagle.param.Logger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LoggerextendsProductwithSerializable"></a>
@@ -121,10 +162,14 @@ clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Logger.html"><span class="name">Logger</span></a><span class="params">(<span name="log">log: <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Logger.html"><span class="name">Logger</span></a><span class="params">(<span name="log">log: <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@LoggerextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a <span class="extype" name="java.util.logging.Logger">java.util.logging.Logger</span>
 used throughout finagle clients and servers.</p>
     </li><li name="com.twitter.finagle.param.Monitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MonitorextendsProductwithSerializable"></a>
@@ -135,10 +180,14 @@ used throughout finagle clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Monitor.html"><span class="name">Monitor</span></a><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Monitor.html"><span class="name">Monitor</span></a><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">com.twitter.util.Monitor</a>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@MonitorextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">com.twitter.util.Monitor</a>
 throughout finagle servers and clients.</p>
     </li><li name="com.twitter.finagle.param.ProtocolLibrary" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ProtocolLibraryextendsProductwithSerializable"></a>
@@ -149,10 +198,14 @@ throughout finagle servers and clients.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ProtocolLibrary.html"><span class="name">ProtocolLibrary</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ProtocolLibrary.html"><span class="name">ProtocolLibrary</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a client library name used to identify
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@ProtocolLibraryextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a client library name used to identify
 which client library a client is using.</p>
     </li><li name="com.twitter.finagle.param.Reporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ReporterextendsProductwithSerializable"></a>
@@ -163,10 +216,14 @@ which client library a client is using.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Reporter.html"><span class="name">Reporter</span></a><span class="params">(<span name="reporter">reporter: <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">ReporterFactory</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@ReporterextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a
 <a href="../util/ReporterFactory.html" class="extype" name="com.twitter.finagle.util.ReporterFactory">com.twitter.finagle.util.ReporterFactory</a> throughout finagle servers and
 clients.</p>
     </li><li name="com.twitter.finagle.param.Stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -178,13 +235,17 @@ clients.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stats.html"><span class="name">Stats</span></a><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@StatsextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a
 <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">com.twitter.finagle.stats.StatsReceiver</a> throughout finagle
 clients and servers.</p>
-    </li><li name="com.twitter.finagle.param.Timer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.param.Timer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="TimerextendsProductwithSerializable"></a>
       <a id="Timer:Timer"></a>
       <h4 class="signature">
@@ -193,11 +254,20 @@ clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Timer.html"><span class="name">Timer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">util.Timer</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Timer.html"><span class="name">Timer</span></a><span class="params">(<span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">util.Timer</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a> used
-throughout finagle clients and servers.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@TimerextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a> used
+throughout finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a> used
+throughout finagle clients and servers.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="HighResTimer.html" class="extype" name="com.twitter.finagle.param.HighResTimer">HighResTimer</a> for a configuration that needs a more
+  fine-grained timer as this is typically implemented via a
+  &quot;hashed wheel timer&quot; which is optimized for approximated
+  I/O timeout scheduling.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.Tracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TracerextendsProductwithSerializable"></a>
       <a id="Tracer:Tracer"></a>
@@ -207,10 +277,14 @@ throughout finagle clients and servers.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Tracer.html"><span class="name">Tracer</span></a><span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Tracer.html"><span class="name">Tracer</span></a><span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A class eligible for configuring a
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@TracerextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A class eligible for configuring a
 <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">com.twitter.finagle.tracing.Tracer</a> throughout finagle servers
 and clients.</p>
     </li></ol>
@@ -229,9 +303,30 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ExceptionStatsHandler$.html"><span class="name">ExceptionStatsHandler</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ExceptionStatsHandler$.html"><span class="name">ExceptionStatsHandler</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@ExceptionStatsHandler" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.param.HighResTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HighResTimer"></a>
+      <a id="HighResTimer:HighResTimer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HighResTimer$.html"><span class="name">HighResTimer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@HighResTimer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.Label" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Label"></a>
@@ -242,9 +337,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Label$.html"><span class="name">Label</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Label$.html"><span class="name">Label</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@Label" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.Logger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Logger"></a>
@@ -255,9 +354,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Logger$.html"><span class="name">Logger</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Logger$.html"><span class="name">Logger</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@Logger" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.Monitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Monitor"></a>
@@ -268,9 +371,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Monitor$.html"><span class="name">Monitor</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Monitor$.html"><span class="name">Monitor</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@Monitor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.ProtocolLibrary" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ProtocolLibrary"></a>
@@ -281,9 +388,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="ProtocolLibrary$.html"><span class="name">ProtocolLibrary</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ProtocolLibrary$.html"><span class="name">ProtocolLibrary</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@ProtocolLibrary" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.Reporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Reporter"></a>
@@ -294,9 +405,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Reporter$.html"><span class="name">Reporter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Reporter$.html"><span class="name">Reporter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@Reporter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.Stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Stats"></a>
@@ -307,9 +422,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Stats$.html"><span class="name">Stats</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Stats$.html"><span class="name">Stats</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@Stats" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.Timer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Timer"></a>
@@ -320,9 +439,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Timer$.html"><span class="name">Timer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Timer$.html"><span class="name">Timer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@Timer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.param.Tracer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Tracer"></a>
@@ -333,9 +456,13 @@ and clients.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Tracer$.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Tracer$.html"><span class="name">Tracer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.package@Tracer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -347,9 +474,9 @@ and clients.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -366,6 +493,7 @@ and clients.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

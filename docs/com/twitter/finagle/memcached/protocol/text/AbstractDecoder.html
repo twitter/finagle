@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>AbstractDecoder - com.twitter.finagle.memcached.protocol.text.AbstractDecoder</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="AbstractDecoder$.html" title="Go to companion"><img src="../../../../../../lib/class_to_object_big.png" /></a>
+        <a href="AbstractDecoder$.html" title="See companion object"><img alt="Class/Object" src="../../../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.memcached">memcached</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.memcached.protocol">protocol</a>.<a href="package.html" class="extype" name="com.twitter.finagle.memcached.protocol.text">text</a></p>
-        <h1><a href="AbstractDecoder$.html" title="Go to companion">AbstractDecoder</a></h1>
+        <h1><a href="AbstractDecoder$.html" title="See companion object">AbstractDecoder</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="AbstractDecoder$.html" title="See companion object">object AbstractDecoder</a>
+            | <a href="package.html" class="extype" name="com.twitter.finagle.memcached.protocol.text">package text</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -41,11 +53,11 @@
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="org.jboss.netty.handler.codec.frame.FrameDecoder">FrameDecoder</span>, <span class="extype" name="org.jboss.netty.channel.LifeCycleAwareChannelHandler">LifeCycleAwareChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.SimpleChannelUpstreamHandler">SimpleChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.jboss.netty.handler.codec.frame.FrameDecoder">FrameDecoder</span>, <span class="extype" name="org.jboss.netty.channel.LifeCycleAwareChannelHandler">LifeCycleAwareChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.SimpleChannelUpstreamHandler">SimpleChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
-          <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="client/Decoder.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.client.Decoder">Decoder</a>, <a href="server/Decoder.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.server.Decoder">Decoder</a></div>
-        </div></div>
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="server/Decoder.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.server.Decoder">Decoder</a>, <a href="client/Decoder.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.client.Decoder">Decoder</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -70,7 +82,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -93,7 +104,11 @@
       <span class="symbol">
         <span class="name">AbstractDecoder</span><span class="params">()</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@&lt;init&gt;():com.twitter.finagle.memcached.protocol.text.AbstractDecoder" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -111,9 +126,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">awaitData</span><span class="params">(<span name="tokens">tokens: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="bytesNeeded">bytesNeeded: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">awaitData</span><span class="params">(<span name="tokens">tokens: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="bytesNeeded">bytesNeeded: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@awaitData(tokens:Seq[org.jboss.netty.buffer.ChannelBuffer],bytesNeeded:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../package.html" class="extype" name="com.twitter.finagle.memcached">com.twitter.finagle.memcached</a>] </dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#decode" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="decode(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.Channel,x$3:org.jboss.netty.buffer.ChannelBuffer):Object"></a>
@@ -124,9 +143,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decode</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span></span>, <span name="arg2">arg2: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">decode</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span></span>, <span name="arg2">arg2: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@decode(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.Channel,x$3:org.jboss.netty.buffer.ChannelBuffer):Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -143,9 +166,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">start</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">start</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@start():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../package.html" class="extype" name="com.twitter.finagle.memcached">com.twitter.finagle.memcached</a>] </dd></dl></div>
     </li></ol>
             </div>
@@ -153,19 +180,6 @@
         <div id="values" class="values members">
               <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -174,10 +188,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -187,24 +205,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@##():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -213,10 +222,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#actualReadableBytes" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="actualReadableBytes():Int"></a>
       <a id="actualReadableBytes():Int"></a>
@@ -226,9 +239,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">actualReadableBytes</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">actualReadableBytes</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@actualReadableBytes():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#afterAdd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="afterAdd(x$1:org.jboss.netty.channel.ChannelHandlerContext):Unit"></a>
@@ -239,9 +256,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">afterAdd</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">afterAdd</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@afterAdd(x$1:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder → LifeCycleAwareChannelHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -258,9 +279,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">afterRemove</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">afterRemove</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@afterRemove(x$1:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder → LifeCycleAwareChannelHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -279,7 +304,11 @@
       <span class="symbol">
         <span class="name">appendToCumulation</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@appendToCumulation(x$1:org.jboss.netty.buffer.ChannelBuffer):org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -292,7 +321,11 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#beforeAdd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="beforeAdd(x$1:org.jboss.netty.channel.ChannelHandlerContext):Unit"></a>
@@ -303,9 +336,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">beforeAdd</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">beforeAdd</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@beforeAdd(x$1:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder → LifeCycleAwareChannelHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -322,9 +359,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">beforeRemove</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">beforeRemove</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@beforeRemove(x$1:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder → LifeCycleAwareChannelHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -341,9 +382,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelBound</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">channelBound</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@channelBound(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -360,9 +405,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelClosed</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">channelClosed</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@channelClosed(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder → SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -379,9 +428,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelConnected</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">channelConnected</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@channelConnected(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -398,9 +451,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelDisconnected</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">channelDisconnected</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@channelDisconnected(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder → SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -417,9 +474,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelInterestChanged</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">channelInterestChanged</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@channelInterestChanged(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -436,9 +497,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelOpen</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">channelOpen</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@channelOpen(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.protocol.text.AbstractDecoder">AbstractDecoder</a> → SimpleChannelUpstreamHandler</dd></dl></div>
     </li><li name="org.jboss.netty.channel.SimpleChannelUpstreamHandler#channelUnbound" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="channelUnbound(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
@@ -449,9 +514,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">channelUnbound</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">channelUnbound</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@channelUnbound(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -468,9 +537,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">childChannelClosed</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">childChannelClosed</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@childChannelClosed(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChildChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -487,9 +560,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">childChannelOpen</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">childChannelOpen</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChildChannelStateEvent">ChildChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@childChannelOpen(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChildChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -506,9 +583,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cleanup</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">cleanup</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelStateEvent">ChannelStateEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@cleanup(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -525,9 +606,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -544,9 +629,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decodeData</span><span class="params">(<span name="bytesNeeded">bytesNeeded: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="params">(<span name="continue">continue: (<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>) ⇒ <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>)</span><span class="result">: <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>
+        <span class="name">decodeData</span><span class="params">(<span name="bytesNeeded">bytesNeeded: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="params">(<span name="continue">continue: (<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>) ⇒ <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>)</span><span class="result">: <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@decodeData(bytesNeeded:Int,buffer:org.jboss.netty.buffer.ChannelBuffer)(continue:org.jboss.netty.buffer.ChannelBuffer=&gt;com.twitter.finagle.memcached.protocol.text.Decoding):com.twitter.finagle.memcached.protocol.text.Decoding" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#decodeLast" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="decodeLast(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.Channel,x$3:org.jboss.netty.buffer.ChannelBuffer):Object"></a>
@@ -557,9 +646,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decodeLast</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span></span>, <span name="arg2">arg2: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">decodeLast</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span></span>, <span name="arg2">arg2: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@decodeLast(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.Channel,x$3:org.jboss.netty.buffer.ChannelBuffer):Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -576,12 +669,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decodeLine</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="needsData">needsData: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="params">(<span name="continue">continue: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>)</span><span class="result">: <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>
+        <span class="name">decodeLine</span><span class="params">(<span name="buffer">buffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="needsData">needsData: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="params">(<span name="continue">continue: (<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]) ⇒ <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>)</span><span class="result">: <a href="Decoding.html" class="extype" name="com.twitter.finagle.memcached.protocol.text.Decoding">Decoding</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@decodeLine(buffer:org.jboss.netty.buffer.ChannelBuffer,needsData:Seq[org.jboss.netty.buffer.ChannelBuffer]=&gt;Int)(continue:Seq[org.jboss.netty.buffer.ChannelBuffer]=&gt;com.twitter.finagle.memcached.protocol.text.Decoding):com.twitter.finagle.memcached.protocol.text.Decoding" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">needsData</dt><dd class="cmt"><p>return the number of bytes needed, or <code>-1</code> if no more bytes
-                 are necessary.
-</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+                 are necessary.</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -591,9 +687,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -604,9 +704,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.protocol.text.AbstractDecoder#exceptionCaught" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exceptionCaught(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ExceptionEvent):Unit"></a>
@@ -617,9 +721,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">exceptionCaught</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ExceptionEvent">ExceptionEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">exceptionCaught</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="e">e: <span class="extype" name="org.jboss.netty.channel.ExceptionEvent">ExceptionEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@exceptionCaught(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ExceptionEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.protocol.text.AbstractDecoder">AbstractDecoder</a> → FrameDecoder → SimpleChannelUpstreamHandler</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#extractFrame" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="extractFrame(x$1:org.jboss.netty.buffer.ChannelBuffer,x$2:Int,x$3:Int):org.jboss.netty.buffer.ChannelBuffer"></a>
@@ -630,9 +738,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">extractFrame</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="arg2">arg2: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+        <span class="name">extractFrame</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="arg2">arg2: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@extractFrame(x$1:org.jboss.netty.buffer.ChannelBuffer,x$2:Int,x$3:Int):org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -643,9 +755,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -664,7 +780,11 @@
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#getMaxCumulationBufferCapacity" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getMaxCumulationBufferCapacity():Int"></a>
@@ -675,9 +795,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getMaxCumulationBufferCapacity</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">getMaxCumulationBufferCapacity</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@getMaxCumulationBufferCapacity():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#getMaxCumulationBufferComponents" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getMaxCumulationBufferComponents():Int"></a>
@@ -688,9 +812,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getMaxCumulationBufferComponents</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">getMaxCumulationBufferComponents</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@getMaxCumulationBufferComponents():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.channel.SimpleChannelUpstreamHandler#handleUpstream" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="handleUpstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit"></a>
@@ -701,9 +829,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">handleUpstream</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelEvent">ChannelEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">handleUpstream</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelEvent">ChannelEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@handleUpstream(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler → ChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -720,9 +852,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#internalBuffer" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="internalBuffer():org.jboss.netty.buffer.ChannelBuffer"></a>
@@ -735,7 +871,11 @@
       <span class="symbol">
         <span class="name">internalBuffer</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@internalBuffer():org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -746,9 +886,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#isUnfold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isUnfold():Boolean"></a>
@@ -759,9 +903,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isUnfold</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isUnfold</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@isUnfold():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#messageReceived" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="messageReceived(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.MessageEvent):Unit"></a>
@@ -772,9 +920,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">messageReceived</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.MessageEvent">MessageEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">messageReceived</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.MessageEvent">MessageEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@messageReceived(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.MessageEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder → SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -791,9 +943,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#newCumulationBuffer" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newCumulationBuffer(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:Int):org.jboss.netty.buffer.ChannelBuffer"></a>
@@ -804,9 +960,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newCumulationBuffer</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+        <span class="name">newCumulationBuffer</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@newCumulationBuffer(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:Int):org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -817,9 +977,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -830,9 +994,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#replace" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="replace(x$1:String,x$2:org.jboss.netty.channel.ChannelHandler):Unit"></a>
@@ -843,9 +1011,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">replace</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">replace</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="java.lang.String">String</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@replace(x$1:String,x$2:org.jboss.netty.channel.ChannelHandler):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#setMaxCumulationBufferCapacity" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setMaxCumulationBufferCapacity(x$1:Int):Unit"></a>
@@ -856,9 +1028,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setMaxCumulationBufferCapacity</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setMaxCumulationBufferCapacity</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@setMaxCumulationBufferCapacity(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#setMaxCumulationBufferComponents" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setMaxCumulationBufferComponents(x$1:Int):Unit"></a>
@@ -869,9 +1045,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setMaxCumulationBufferComponents</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setMaxCumulationBufferComponents</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@setMaxCumulationBufferComponents(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#setUnfold" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setUnfold(x$1:Boolean):Unit"></a>
@@ -882,9 +1062,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setUnfold</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">setUnfold</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@setUnfold(x$1:Boolean):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -897,7 +1081,11 @@
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
@@ -910,7 +1098,11 @@
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@toString():String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#unfoldAndFireMessageReceived" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="unfoldAndFireMessageReceived(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:java.net.SocketAddress,x$3:Any):Unit"></a>
@@ -921,9 +1113,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">unfoldAndFireMessageReceived</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="arg2">arg2: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">unfoldAndFireMessageReceived</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="arg2">arg2: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@unfoldAndFireMessageReceived(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:java.net.SocketAddress,x$3:Any):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="org.jboss.netty.handler.codec.frame.FrameDecoder#updateCumulation" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="updateCumulation(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.buffer.ChannelBuffer):org.jboss.netty.buffer.ChannelBuffer"></a>
@@ -936,7 +1132,11 @@
       <span class="symbol">
         <span class="name">updateCumulation</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@updateCumulation(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.buffer.ChannelBuffer):org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../org$jboss$netty$handler$codec$frame.html" class="extype" name="org.jboss.netty.handler.codec.frame">org.jboss.netty.handler.codec.frame</a>] </dd><dt>Definition Classes</dt><dd>FrameDecoder</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -947,9 +1147,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -966,9 +1170,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -985,9 +1193,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1004,9 +1216,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeComplete</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.WriteCompletionEvent">WriteCompletionEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">writeComplete</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="org.jboss.netty.channel.WriteCompletionEvent">WriteCompletionEvent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.memcached.protocol.text.AbstractDecoder@writeComplete(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.WriteCompletionEvent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SimpleChannelUpstreamHandler</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1034,9 +1250,9 @@
             </div><div class="parent" name="org.jboss.netty.channel.ChannelHandler">
               <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -1053,6 +1269,7 @@
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

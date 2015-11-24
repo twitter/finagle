@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>Netty3Transporter - com.twitter.finagle.netty3.Netty3Transporter</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="Netty3Transporter$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <a href="Netty3Transporter$.html" title="See companion object"><img alt="Class/Object" src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.netty3">netty3</a></p>
-        <h1><a href="Netty3Transporter$.html" title="Go to companion">Netty3Transporter</a></h1>
+        <h1><a href="Netty3Transporter$.html" title="See companion object">Netty3Transporter</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Netty3Transporter$.html" title="See companion object">object Netty3Transporter</a>
+            | <a href="package.html" class="extype" name="com.twitter.finagle.netty3">package netty3</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -35,7 +47,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3Transporter</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="newChannel">newChannel: (<span class="extype" name="org.jboss.netty.channel.ChannelPipeline">ChannelPipeline</span>) ⇒ <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span> = <span class="defval" name="{<br/>&amp;nbsp;&amp;nbsp;  ((x$1: org.jboss.netty.channel.ChannelPipeline) =&gt; Netty3Transporter.channelFactory.newChannel(x$1))<br/>&amp;nbsp;&amp;nbsp;}">...</span></span>, <span name="newTransport">newTransport: (<span class="extype" name="org.jboss.netty.channel.Channel">Channel</span>) ⇒ <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>] = <span class="defval" name="((ch: org.jboss.netty.channel.Channel) =&gt; new com.twitter.finagle.netty3.transport.ChannelTransport[Nothing,Nothing](ch).cast[In, Out])">...</span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3TransporterTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig">Netty3TransporterTLSConfig</a>] = <span class="symbol">scala.None</span></span>, <span name="httpProxy">httpProxy: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol">scala.None</span></span>, <span name="socksProxy">socksProxy: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="defval" name="com.twitter.finagle.socks.SocksProxyFlags.socksProxy">...</span></span>, <span name="socksUsernameAndPassword">socksUsernameAndPassword: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)] = <span class="defval" name="com.twitter.finagle.socks.SocksProxyFlags.socksUsernameAndPassword">...</span></span>, <span name="channelReaderTimeout">channelReaderTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="channelWriterTimeout">channelWriterTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">scala.None</span></span>, <span name="channelOptions">channelOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name="Netty3Transporter.defaultChannelOptions">...</span></span>, <span name="httpProxyCredentials">httpProxyCredentials: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>] = <span class="symbol">scala.None</span></span>)</span><span class="result"> extends (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Netty3Transporter</span><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="newChannel">newChannel: (<span class="extype" name="org.jboss.netty.channel.ChannelPipeline">ChannelPipeline</span>) ⇒ <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span> = <span class="defval" name='<span class="name"><a href="Netty3Transporter$.html">Netty3Transporter.channelFactory.newChannel</a></span>'>...</span></span>, <span name="newTransport">newTransport: (<span class="extype" name="org.jboss.netty.channel.Channel">Channel</span>) ⇒ <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>] = <span class="defval" name='<span class="name"><a href="../transport/Transport.html#cast[In1,Out1]:com.twitter.finagle.transport.Transport[In1,Out1]">(ch: Channel) =&gt; new ChannelTransport(ch).cast[In, Out]</a></span>'>...</span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3TransporterTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig">Netty3TransporterTLSConfig</a>] = <span class="symbol">None</span></span>, <span name="httpProxy">httpProxy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol">None</span></span>, <span name="socksProxy">socksProxy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol"><span class="name"><a href="../../../package.html">SocksProxyFlags.socksProxy</a></span></span></span>, <span name="socksUsernameAndPassword">socksUsernameAndPassword: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)] = <span class="defval" name='<span class="name"><a href="../../../package.html">SocksProxyFlags.socksUsernameAndPassword</a></span>'>...</span></span>, <span name="channelReaderTimeout">channelReaderTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelWriterTimeout">channelWriterTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">None</span></span>, <span name="channelOptions">channelOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name='<span class="name"><a href="Netty3Transporter$.html">Netty3Transporter.defaultChannelOptions</a></span>'>...</span></span>, <span name="httpProxyCredentials">httpProxyCredentials: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -43,27 +55,17 @@
 address), provides a typed transport for communicating with this
 endpoint.
 </p></div><dl class="paramcmts block"><dt class="tparam">In</dt><dd class="cmt"><p>the type of requests. The given pipeline must consume
-<code>Req</code>-typed objects
-</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of replies. The given pipeline must produce
-objects of this type.
-</p></dd><dt class="param">pipelineFactory</dt><dd class="cmt"><p>the pipeline factory that implements the
+<code>Req</code>-typed objects</p></dd><dt class="tparam">Out</dt><dd class="cmt"><p>the type of replies. The given pipeline must produce
+objects of this type.</p></dd><dt class="param">pipelineFactory</dt><dd class="cmt"><p>the pipeline factory that implements the
 the <i>Codec</i>: it must input (downstream) <i>In</i> objects,
-and output (upstream) <i>Out</i> objects.
-</p></dd><dt class="param">newChannel</dt><dd class="cmt"><p>A function used to create a new netty3 channel,
-given a pipeline.
-</p></dd><dt class="param">newTransport</dt><dd class="cmt"><p>Create a new transport, given a channel.
-</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>If defined, use SSL with the given configuration
-</p></dd><dt class="param">channelReaderTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
-may be read-idle.
-</p></dd><dt class="param">channelWriterTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
-may be write-idle.
-</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>If defined, install the given snooper on
-each channel. Used for debugging.
-</p></dd><dt class="param">channelOptions</dt><dd class="cmt"><p>These netty channel options are applied to
-the channel prior to establishing a new connection.
-</p></dd></dl><div class="toggleContainer block">
+and output (upstream) <i>Out</i> objects.</p></dd><dt class="param">newChannel</dt><dd class="cmt"><p>A function used to create a new netty3 channel,
+given a pipeline.</p></dd><dt class="param">newTransport</dt><dd class="cmt"><p>Create a new transport, given a channel.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>If defined, use SSL with the given configuration</p></dd><dt class="param">channelReaderTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
+may be read-idle.</p></dd><dt class="param">channelWriterTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
+may be write-idle.</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>If defined, install the given snooper on
+each channel. Used for debugging.</p></dd><dt class="param">channelOptions</dt><dd class="cmt"><p>These netty channel options are applied to
+the channel prior to establishing a new connection.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a>, (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -89,7 +91,6 @@ the channel prior to establishing a new connection.
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -110,25 +111,21 @@ the channel prior to establishing a new connection.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Netty3Transporter</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="newChannel">newChannel: (<span class="extype" name="org.jboss.netty.channel.ChannelPipeline">ChannelPipeline</span>) ⇒ <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span> = <span class="defval" name="{<br/>&amp;nbsp;&amp;nbsp;  ((x$1: org.jboss.netty.channel.ChannelPipeline) =&gt; Netty3Transporter.channelFactory.newChannel(x$1))<br/>&amp;nbsp;&amp;nbsp;}">...</span></span>, <span name="newTransport">newTransport: (<span class="extype" name="org.jboss.netty.channel.Channel">Channel</span>) ⇒ <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>] = <span class="defval" name="((ch: org.jboss.netty.channel.Channel) =&gt; new com.twitter.finagle.netty3.transport.ChannelTransport[Nothing,Nothing](ch).cast[In, Out])">...</span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3TransporterTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig">Netty3TransporterTLSConfig</a>] = <span class="symbol">scala.None</span></span>, <span name="httpProxy">httpProxy: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol">scala.None</span></span>, <span name="socksProxy">socksProxy: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="defval" name="com.twitter.finagle.socks.SocksProxyFlags.socksProxy">...</span></span>, <span name="socksUsernameAndPassword">socksUsernameAndPassword: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)] = <span class="defval" name="com.twitter.finagle.socks.SocksProxyFlags.socksUsernameAndPassword">...</span></span>, <span name="channelReaderTimeout">channelReaderTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="channelWriterTimeout">channelWriterTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol">com.twitter.util.Duration.Top</span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">scala.None</span></span>, <span name="channelOptions">channelOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name="Netty3Transporter.defaultChannelOptions">...</span></span>, <span name="httpProxyCredentials">httpProxyCredentials: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>] = <span class="symbol">scala.None</span></span>)</span>
+        <span class="name">Netty3Transporter</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="pipelineFactory">pipelineFactory: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>, <span name="newChannel">newChannel: (<span class="extype" name="org.jboss.netty.channel.ChannelPipeline">ChannelPipeline</span>) ⇒ <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span> = <span class="defval" name='<span class="name"><a href="Netty3Transporter$.html">Netty3Transporter.channelFactory.newChannel</a></span>'>...</span></span>, <span name="newTransport">newTransport: (<span class="extype" name="org.jboss.netty.channel.Channel">Channel</span>) ⇒ <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>] = <span class="defval" name='<span class="name"><a href="../transport/Transport.html#cast[In1,Out1]:com.twitter.finagle.transport.Transport[In1,Out1]">(ch: Channel) =&gt; new ChannelTransport(ch).cast[In, Out]</a></span>'>...</span></span>, <span name="tlsConfig">tlsConfig: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3TransporterTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig">Netty3TransporterTLSConfig</a>] = <span class="symbol">None</span></span>, <span name="httpProxy">httpProxy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol">None</span></span>, <span name="socksProxy">socksProxy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>] = <span class="symbol"><span class="name"><a href="../../../package.html">SocksProxyFlags.socksProxy</a></span></span></span>, <span name="socksUsernameAndPassword">socksUsernameAndPassword: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)] = <span class="defval" name='<span class="name"><a href="../../../package.html">SocksProxyFlags.socksUsernameAndPassword</a></span>'>...</span></span>, <span name="channelReaderTimeout">channelReaderTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelWriterTimeout">channelWriterTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>, <span name="channelSnooper">channelSnooper: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>] = <span class="symbol">None</span></span>, <span name="channelOptions">channelOptions: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>] = <span class="defval" name='<span class="name"><a href="Netty3Transporter$.html">Netty3Transporter.defaultChannelOptions</a></span>'>...</span></span>, <span name="httpProxyCredentials">httpProxyCredentials: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>] = <span class="symbol">None</span></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@&lt;init&gt;(name:String,pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory,newChannel:org.jboss.netty.channel.ChannelPipeline=&gt;org.jboss.netty.channel.Channel,newTransport:org.jboss.netty.channel.Channel=&gt;com.twitter.finagle.transport.Transport[In,Out],tlsConfig:Option[com.twitter.finagle.netty3.Netty3TransporterTLSConfig],httpProxy:Option[java.net.SocketAddress],socksProxy:Option[java.net.SocketAddress],socksUsernameAndPassword:Option[(String,String)],channelReaderTimeout:com.twitter.util.Duration,channelWriterTimeout:com.twitter.util.Duration,channelSnooper:Option[com.twitter.finagle.netty3.ChannelSnooper],channelOptions:Map[String,Object],httpProxyCredentials:Option[com.twitter.finagle.client.Transporter.Credentials]):com.twitter.finagle.netty3.Netty3Transporter[In,Out]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">pipelineFactory</dt><dd class="cmt"><p>the pipeline factory that implements the
 the <i>Codec</i>: it must input (downstream) <i>In</i> objects,
-and output (upstream) <i>Out</i> objects.
-</p></dd><dt class="param">newChannel</dt><dd class="cmt"><p>A function used to create a new netty3 channel,
-given a pipeline.
-</p></dd><dt class="param">newTransport</dt><dd class="cmt"><p>Create a new transport, given a channel.
-</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>If defined, use SSL with the given configuration
-</p></dd><dt class="param">channelReaderTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
-may be read-idle.
-</p></dd><dt class="param">channelWriterTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
-may be write-idle.
-</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>If defined, install the given snooper on
-each channel. Used for debugging.
-</p></dd><dt class="param">channelOptions</dt><dd class="cmt"><p>These netty channel options are applied to
-the channel prior to establishing a new connection.
-</p></dd></dl></div>
+and output (upstream) <i>Out</i> objects.</p></dd><dt class="param">newChannel</dt><dd class="cmt"><p>A function used to create a new netty3 channel,
+given a pipeline.</p></dd><dt class="param">newTransport</dt><dd class="cmt"><p>Create a new transport, given a channel.</p></dd><dt class="param">tlsConfig</dt><dd class="cmt"><p>If defined, use SSL with the given configuration</p></dd><dt class="param">channelReaderTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
+may be read-idle.</p></dd><dt class="param">channelWriterTimeout</dt><dd class="cmt"><p>The amount of time for which a channel
+may be write-idle.</p></dd><dt class="param">channelSnooper</dt><dd class="cmt"><p>If defined, install the given snooper on
+each channel. Used for debugging.</p></dd><dt class="param">channelOptions</dt><dd class="cmt"><p>These netty channel options are applied to
+the channel prior to establishing a new connection.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -139,19 +136,6 @@ the channel prior to establishing a new connection.
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -160,10 +144,14 @@ the channel prior to establishing a new connection.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -173,24 +161,15 @@ the channel prior to establishing a new connection.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -199,10 +178,14 @@ the channel prior to establishing a new connection.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(addr:java.net.SocketAddress,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]"></a>
       <a id="apply(SocketAddress,StatsReceiver):Future[Transport[In,Out]]"></a>
@@ -214,7 +197,11 @@ the channel prior to establishing a new connection.
       <span class="symbol">
         <span class="name">apply</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@apply(addr:java.net.SocketAddress,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.util.Future[com.twitter.finagle.transport.Transport[In,Out]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.Netty3Transporter">Netty3Transporter</a> → Function2</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
@@ -227,7 +214,11 @@ the channel prior to establishing a new connection.
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#channelOptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="channelOptions:Map[String,Object]"></a>
@@ -238,9 +229,13 @@ the channel prior to establishing a new connection.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">channelOptions</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>
+        <span class="name">channelOptions</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@channelOptions:Map[String,Object]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">These netty channel options are applied to
 the channel prior to establishing a new connection.</p>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#channelReaderTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -254,7 +249,11 @@ the channel prior to establishing a new connection.</p>
       <span class="symbol">
         <span class="name">channelReaderTimeout</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@channelReaderTimeout:com.twitter.util.Duration" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The amount of time for which a channel
 may be read-idle.</p>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#channelSnooper" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -266,13 +265,16 @@ may be read-idle.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">channelSnooper</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>]</span>
+        <span class="name">channelSnooper</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="ChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelSnooper">ChannelSnooper</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@channelSnooper:Option[com.twitter.finagle.netty3.ChannelSnooper]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">If defined, install the given snooper on
 each channel.</p><div class="fullcomment"><div class="comment cmt"><p>If defined, install the given snooper on
-each channel. Used for debugging.
-</p></div></div>
+each channel. Used for debugging.</p></div></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#channelStatsHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="channelStatsHandler(statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.jboss.netty.channel.ChannelHandler"></a>
       <a id="channelStatsHandler(StatsReceiver):ChannelHandler"></a>
@@ -284,7 +286,11 @@ each channel. Used for debugging.
       <span class="symbol">
         <span class="name">channelStatsHandler</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@channelStatsHandler(statsReceiver:com.twitter.finagle.stats.StatsReceiver):org.jboss.netty.channel.ChannelHandler" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#channelWriterTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="channelWriterTimeout:com.twitter.util.Duration"></a>
@@ -297,7 +303,11 @@ each channel. Used for debugging.
       <span class="symbol">
         <span class="name">channelWriterTimeout</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@channelWriterTimeout:com.twitter.util.Duration" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The amount of time for which a channel
 may be write-idle.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -309,9 +319,13 @@ may be write-idle.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -330,7 +344,11 @@ may be write-idle.</p>
       <span class="symbol">
         <span class="name">curried</span><span class="result">: (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>) ⇒ (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@curried:T1=&gt;(T2=&gt;R)" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
@@ -344,9 +362,13 @@ may be write-idle.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -357,9 +379,13 @@ may be write-idle.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -378,7 +404,11 @@ may be write-idle.</p>
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#httpProxy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="httpProxy:Option[java.net.SocketAddress]"></a>
@@ -389,9 +419,13 @@ may be write-idle.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">httpProxy</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
+        <span class="name">httpProxy</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@httpProxy:Option[java.net.SocketAddress]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#httpProxyCredentials" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="httpProxyCredentials:Option[com.twitter.finagle.client.Transporter.Credentials]"></a>
@@ -402,9 +436,13 @@ may be write-idle.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">httpProxyCredentials</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>]</span>
+        <span class="name">httpProxyCredentials</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@httpProxyCredentials:Option[com.twitter.finagle.client.Transporter.Credentials]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -415,9 +453,13 @@ may be write-idle.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#name" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="name:String"></a>
@@ -430,7 +472,11 @@ may be write-idle.</p>
       <span class="symbol">
         <span class="name">name</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@name:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -441,9 +487,13 @@ may be write-idle.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#newChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="newChannel:org.jboss.netty.channel.ChannelPipeline=&gt;org.jboss.netty.channel.Channel"></a>
@@ -456,7 +506,11 @@ may be write-idle.</p>
       <span class="symbol">
         <span class="name">newChannel</span><span class="result">: (<span class="extype" name="org.jboss.netty.channel.ChannelPipeline">ChannelPipeline</span>) ⇒ <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@newChannel:org.jboss.netty.channel.ChannelPipeline=&gt;org.jboss.netty.channel.Channel" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A function used to create a new netty3 channel,
 given a pipeline.</p>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#newTransport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -470,7 +524,11 @@ given a pipeline.</p>
       <span class="symbol">
         <span class="name">newTransport</span><span class="result">: (<span class="extype" name="org.jboss.netty.channel.Channel">Channel</span>) ⇒ <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@newTransport:org.jboss.netty.channel.Channel=&gt;com.twitter.finagle.transport.Transport[In,Out]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Create a new transport, given a channel.</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
@@ -481,9 +539,13 @@ given a pipeline.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -494,9 +556,13 @@ given a pipeline.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#pipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory"></a>
@@ -509,7 +575,11 @@ given a pipeline.</p>
       <span class="symbol">
         <span class="name">pipelineFactory</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@pipelineFactory:org.jboss.netty.channel.ChannelPipelineFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">the pipeline factory that implements the
 the <i>Codec</i>: it must input (downstream) <i>In</i> objects,
 and output (upstream) <i>Out</i> objects.</p>
@@ -522,9 +592,13 @@ and output (upstream) <i>Out</i> objects.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">socksProxy</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
+        <span class="name">socksProxy</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@socksProxy:Option[java.net.SocketAddress]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#socksUsernameAndPassword" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="socksUsernameAndPassword:Option[(String,String)]"></a>
@@ -535,9 +609,13 @@ and output (upstream) <i>Out</i> objects.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">socksUsernameAndPassword</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>
+        <span class="name">socksUsernameAndPassword</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[(<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@socksUsernameAndPassword:Option[(String,String)]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -550,7 +628,11 @@ and output (upstream) <i>Out</i> objects.</p>
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.netty3.Netty3Transporter#tlsConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tlsConfig:Option[com.twitter.finagle.netty3.Netty3TransporterTLSConfig]"></a>
@@ -561,11 +643,14 @@ and output (upstream) <i>Out</i> objects.</p>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">tlsConfig</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3TransporterTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig">Netty3TransporterTLSConfig</a>]</span>
+        <span class="name">tlsConfig</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="Netty3TransporterTLSConfig.html" class="extype" name="com.twitter.finagle.netty3.Netty3TransporterTLSConfig">Netty3TransporterTLSConfig</a>]</span>
       </span>
-      </h4>
-      <p class="shortcomment cmt">If defined, use SSL with the given configuration
-</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@tlsConfig:Option[com.twitter.finagle.netty3.Netty3TransporterTLSConfig]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">If defined, use SSL with the given configuration</p>
     </li><li name="scala.Function2#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -577,7 +662,11 @@ and output (upstream) <i>Out</i> objects.</p>
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.Function2#tupled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tupled:((T1,T2))=&gt;R"></a>
@@ -590,7 +679,11 @@ and output (upstream) <i>Out</i> objects.</p>
       <span class="symbol">
         <span class="name">tupled</span><span class="result">: ((<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>)) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@tupled:((T1,T2))=&gt;R" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2</dd><dt>Annotations</dt><dd>
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
@@ -604,9 +697,13 @@ and output (upstream) <i>Out</i> objects.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -623,9 +720,13 @@ and output (upstream) <i>Out</i> objects.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -642,9 +743,13 @@ and output (upstream) <i>Out</i> objects.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.Netty3Transporter@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -662,19 +767,19 @@ and output (upstream) <i>Out</i> objects.</p>
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
             </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
             </div><div class="parent" name="scala.Function2">
               <h3>Inherited from (<span class="extype" name="java.net.SocketAddress">SocketAddress</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.In">In</span>, <span class="extype" name="com.twitter.finagle.netty3.Netty3Transporter.Out">Out</span>]]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -691,6 +796,7 @@ and output (upstream) <i>Out</i> objects.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

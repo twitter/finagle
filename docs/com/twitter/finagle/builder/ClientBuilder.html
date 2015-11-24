@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>ClientBuilder - com.twitter.finagle.builder.ClientBuilder</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="ClientBuilder$.html" title="Go to companion"><img src="../../../../lib/class_to_object_big.png" /></a>
+        <a href="ClientBuilder$.html" title="See companion object"><img alt="Class/Object" src="../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.builder">builder</a></p>
-        <h1><a href="ClientBuilder$.html" title="Go to companion">ClientBuilder</a></h1>
+        <h1><a href="ClientBuilder$.html" title="See companion object">ClientBuilder</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="ClientBuilder$.html" title="See companion object">object ClientBuilder</a>
+            | <a href="package.html" class="extype" name="com.twitter.finagle.builder">package builder</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -35,21 +47,21 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ClientBuilder</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">ClientBuilder</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="HasCluster">HasCluster</span>, <span name="HasCodec">HasCodec</span>, <span name="HasHostConnectionLimit">HasHostConnectionLimit</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><p>Please see the
 <a href="http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6" target="_blank">Finagle user guide</a>
 for information on a newer set of client-construction APIs introduced in Finagle v6.</p><pre><span class="kw">val</span> client = ClientBuilder()
-.codec(Http)
-.hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
-.hostConnectionLimit(<span class="num">1</span>)
-.tcpConnectTimeout(<span class="num">1.</span>second)        <span class="cmt">// max time to spend establishing a TCP connection.</span>
-.retries(<span class="num">2</span>)                         <span class="cmt">// (1) per-request retries</span>
-.reportTo(<span class="kw">new</span> OstrichStatsReceiver) <span class="cmt">// export host-level load data to ostrich</span>
-.logger(Logger.getLogger(<span class="lit">"http"</span>))
-.build()</pre><p>The <code>ClientBuilder</code> requires the definition of <code>cluster</code>, <code>codec</code>,
+  .codec(Http)
+  .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
+  .hostConnectionLimit(<span class="num">1</span>)
+  .tcpConnectTimeout(<span class="num">1.</span>second)        <span class="cmt">// max time to spend establishing a TCP connection.</span>
+  .retries(<span class="num">2</span>)                         <span class="cmt">// (1) per-request retries</span>
+  .reportTo(<span class="kw">new</span> OstrichStatsReceiver) <span class="cmt">// export host-level load data to ostrich</span>
+  .logger(Logger.getLogger(<span class="lit">"http"</span>))
+  .build()</pre><p>The <code>ClientBuilder</code> requires the definition of <code>cluster</code>, <code>codec</code>,
 and <code>hostConnectionLimit</code>. In Scala, these are statically type
 checked, and in Java the lack of any of the above causes a runtime
 error.</p><p>The <code>build</code> method uses an implicit argument to statically
@@ -57,15 +69,15 @@ typecheck the builder (to ensure completeness, see above). The Java
 compiler cannot provide such implicit, so we provide a separate
 function in Java to accomplish this. Thus, the Java code for the
 above is</p><pre>Service&lt;HttpRequest, HttpResponse&gt; service =
-ClientBuilder.safeBuild(
-  ClientBuilder.get()
-    .codec(<span class="kw">new</span> Http())
-    .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
-    .hostConnectionLimit(<span class="num">1</span>)
-    .tcpConnectTimeout(<span class="num">1.</span>second)
-    .retries(<span class="num">2</span>)
-    .reportTo(<span class="kw">new</span> OstrichStatsReceiver())
-    .logger(Logger.getLogger(<span class="lit">"http"</span>)))</pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ClientBuilder</code>
+ ClientBuilder.safeBuild(
+   ClientBuilder.get()
+     .codec(<span class="kw">new</span> Http())
+     .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
+     .hostConnectionLimit(<span class="num">1</span>)
+     .tcpConnectTimeout(<span class="num">1.</span>second)
+     .retries(<span class="num">2</span>)
+     .reportTo(<span class="kw">new</span> OstrichStatsReceiver())
+     .logger(Logger.getLogger(<span class="lit">"http"</span>)))</pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ClientBuilder</code>
 verifies the builder dynamically, resulting in a runtime error
 instead of a compiler error.</p><h3>Defaults</h3><p>The following defaults are applied to clients constructed via ClientBuilder,
 unless overridden with the corresponding method. These defaults were chosen
@@ -77,7 +89,7 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    of <code>false</code> is used</li><li><code>readerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>writerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>sendBufferSize</code>, <code>recvBufferSize</code>: OS-defined default value
 </li></ul></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -103,7 +115,6 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -128,7 +139,11 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
       <span class="symbol">
         <span class="name">FullySpecifiedConfig</span><span class="result"> = <span class="extype" name="com.twitter.finagle.builder.ClientConfig">ClientConfig</span>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@FullySpecifiedConfig=com.twitter.finagle.builder.ClientConfig.FullySpecified[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.builder.ClientBuilder.This" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]"></a>
@@ -141,7 +156,11 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
       <span class="symbol">
         <span class="name">This</span><span class="result"> = <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.builder.ClientBuilder.ThisConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThisConfig=com.twitter.finagle.builder.ClientConfig[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]"></a>
@@ -154,7 +173,11 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
       <span class="symbol">
         <span class="name">ThisConfig</span><span class="result"> = <span class="extype" name="com.twitter.finagle.builder.ClientConfig">ClientConfig</span>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@ThisConfig=com.twitter.finagle.builder.ClientConfig[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -164,19 +187,6 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -185,10 +195,14 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -198,24 +212,15 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@##():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -224,10 +229,14 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -239,7 +248,11 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#baseDtab" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="baseDtab(baseDtab:()=&gt;com.twitter.finagle.Dtab):ClientBuilder.this.This"></a>
@@ -252,7 +265,11 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
       <span class="symbol">
         <span class="name">baseDtab</span><span class="params">(<span name="baseDtab">baseDtab: () ⇒ <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@baseDtab(baseDtab:()=&gt;com.twitter.finagle.Dtab):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The base <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> used to interpret logical
 destinations for this client.</p><div class="fullcomment"><div class="comment cmt"><p>The base <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> used to interpret logical
 destinations for this client. (This is given as a function to
@@ -269,7 +286,11 @@ permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dt
       <span class="symbol">
         <span class="name">build</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="com.twitter.finagle.builder.ClientConfigEvidence">ClientConfigEvidence</span>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@build()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Construct a Service.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#buildFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="buildFactory()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
@@ -282,7 +303,11 @@ permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dt
       <span class="symbol">
         <span class="name">buildFactory</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="com.twitter.finagle.builder.ClientConfigEvidence">ClientConfigEvidence</span>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@buildFactory()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Construct a ServiceFactory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a ServiceFactory. This is useful for stateful protocols
 (e.g., those that support transactions or authentication).
 </p></div></div>
@@ -297,7 +322,11 @@ permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dt
       <span class="symbol">
         <span class="name">channelFactory</span><span class="params">(<span name="cf">cf: <span class="extype" name="org.jboss.netty.channel.ChannelFactory">ChannelFactory</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@channelFactory(cf:org.jboss.netty.channel.ChannelFactory):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Use the given channel factory instead of the default.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given channel factory instead of the default. Note that
 when using a non-default ChannelFactory, finagle can't
 meaningfully reference count factory usage, and so the caller is
@@ -312,9 +341,13 @@ responsible for calling <code>releaseExternalResources()</code>.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -333,7 +366,11 @@ responsible for calling <code>releaseExternalResources()</code>.
       <span class="symbol">
         <span class="name">cluster</span><span class="params">(<span name="cluster">cluster: <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@cluster(cluster:com.twitter.finagle.builder.Cluster[java.net.SocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Specify a cluster directly.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a cluster directly.  A
 <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">com.twitter.finagle.builder.Cluster</a> defines a dynamic
 mechanism for specifying a set of endpoints to which this client
@@ -350,7 +387,11 @@ remains connected.
       <span class="symbol">
         <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codecFactory">codecFactory: (<a href="../ClientCodecConfig.html" class="extype" name="com.twitter.finagle.ClientCodecConfig">ClientCodecConfig</a>) ⇒ <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Rep1">Rep1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@codec[Req1,Rep1](codecFactory:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A variation of codec for codecs that support only client-codecs.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#codec" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="codec[Req1,Rep1](codecFactory:com.twitter.finagle.CodecFactory[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,HasHostConnectionLimit]"></a>
@@ -363,7 +404,11 @@ remains connected.
       <span class="symbol">
         <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codecFactory">codecFactory: <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Rep1">Rep1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@codec[Req1,Rep1](codecFactory:com.twitter.finagle.CodecFactory[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A variation of <code>codec</code> that supports codec factories.</p><div class="fullcomment"><div class="comment cmt"><p>A variation of <code>codec</code> that supports codec factories.  This is
 used by codecs that need dynamic construction, but should be
 transparent to the user.
@@ -379,7 +424,11 @@ transparent to the user.
       <span class="symbol">
         <span class="name">codec</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="codec">codec: <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.codec.Rep1">Rep1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@codec[Req1,Rep1](codec:com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Specify the codec.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the codec. The codec implements the network protocol
 used by the client, and consequently determines the <code>Req</code> and <code>Rep</code>
 type variables. One of the codec variations is required.
@@ -395,7 +444,11 @@ type variables. One of the codec variations is required.
       <span class="symbol">
         <span class="name">connectTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@connectTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The connect timeout is the timeout applied to the acquisition of
 a Service.</p><div class="fullcomment"><div class="comment cmt"><p>The connect timeout is the timeout applied to the acquisition of
 a Service.  This includes both queueing time (eg.  because we
@@ -416,9 +469,13 @@ timing out.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">daemon</span><span class="params">(<span name="daemonize">daemonize: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">daemon</span><span class="params">(<span name="daemonize">daemonize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@daemon(daemonize:Boolean):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">When true, the client is daemonized.</p><div class="fullcomment"><div class="comment cmt"><p>When true, the client is daemonized. As with java threads, a
 process can exit only when all remaining clients are daemonized.
 False by default.
@@ -434,7 +491,11 @@ False by default.
       <span class="symbol">
         <span class="name">dest</span><span class="params">(<span name="name">name: <a href="../Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@dest(name:com.twitter.finagle.Name):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The logical destination of requests dispatched through this
 client.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#dest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -448,7 +509,11 @@ client.</p>
       <span class="symbol">
         <span class="name">dest</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@dest(addr:String):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The logical destination of requests dispatched through this
 client, as evaluated by a resolver.</p><div class="fullcomment"><div class="comment cmt"><p>The logical destination of requests dispatched through this
 client, as evaluated by a resolver. If the name evaluates a
@@ -463,9 +528,13 @@ label, this replaces the builder's current name.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a>
@@ -476,9 +545,13 @@ label, this replaces the builder's current name.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#exceptionCategorizer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exceptionCategorizer(exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler):ClientBuilder.this.This"></a>
@@ -491,14 +564,17 @@ label, this replaces the builder's current name.
       <span class="symbol">
         <span class="name">exceptionCategorizer</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@exceptionCategorizer(exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Provide an alternative to putting all request exceptions under
 a &quot;failures&quot; stat.</p><div class="fullcomment"><div class="comment cmt"><p>Provide an alternative to putting all request exceptions under
 a &quot;failures&quot; stat.  Typical implementations may report any
 cancellations or validation errors separately so success rate
 considers only valid non cancelled requests.
-</p></div><dl class="paramcmts block"><dt class="param">exceptionStatsHandler</dt><dd class="cmt"><p>function to record failure details.
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">exceptionStatsHandler</dt><dd class="cmt"><p>function to record failure details.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#expHostConnectionBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="expHostConnectionBufferSize(size:Int):ClientBuilder.this.This"></a>
       <a id="expHostConnectionBufferSize(Int):This"></a>
@@ -508,9 +584,13 @@ considers only valid non cancelled requests.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">expHostConnectionBufferSize</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">expHostConnectionBufferSize</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@expHostConnectionBufferSize(size:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Experimental option to buffer <code>size</code> connections from the pool.</p><div class="fullcomment"><div class="comment cmt"><p>Experimental option to buffer <code>size</code> connections from the pool.
 The buffer is fast and lock-free, reducing contention for
 services with very high requests rates. The buffer size should
@@ -518,8 +598,7 @@ be sized roughly to the expected concurrency. Buffers sized by
 power-of-twos may be faster due to the use of modular
 arithmetic.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This will be integrated into the mainline pool, at
-which time the experimental option will go away.
-</p></span></dd></dl></div>
+which time the experimental option will go away.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#failFast" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="failFast(enabled:Boolean):ClientBuilder.this.This"></a>
       <a id="failFast(Boolean):This"></a>
@@ -529,9 +608,13 @@ which time the experimental option will go away.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">failFast</span><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">failFast</span><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@failFast(enabled:Boolean):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Marks a host dead on connection failure.</p><div class="fullcomment"><div class="comment cmt"><p>Marks a host dead on connection failure. The host remains dead
 until we successfully connect. Intermediate connection attempts
 *are* respected, but host availability is turned off during the
@@ -548,7 +631,11 @@ reconnection period.
       <span class="symbol">
         <span class="name">failureAccrualFactory</span><span class="params">(<span name="factory">factory: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a>) ⇒ <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@failureAccrualFactory(factory:com.twitter.util.Timer=&gt;com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Completely replaces the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> from the underlying stack
 with the <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a> returned from the given function <code>factory</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Completely replaces the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> from the underlying stack
 with the <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitter.finagle.ServiceFactoryWrapper">ServiceFactoryWrapper</a> returned from the given function <code>factory</code>.</p><p>To completely disable <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> use <code>noFailureAccrual</code>.
@@ -562,9 +649,13 @@ with the <a href="../ServiceFactoryWrapper.html" class="extype" name="com.twitte
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">failureAccrualParams</span><span class="params">(<span name="pair">pair: (<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>)</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">failureAccrualParams</span><span class="params">(<span name="pair">pair: (<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>)</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@failureAccrualParams(pair:(Int,com.twitter.util.Duration)):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Use the given parameters for failure accrual.</p><div class="fullcomment"><div class="comment cmt"><p>Use the given parameters for failure accrual.  The first parameter
 is the number of *successive* failures that are required to mark
 a host failed.  The second parameter specifies how long the host
@@ -579,9 +670,13 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -600,7 +695,11 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#group" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="group(group:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
@@ -613,7 +712,11 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
       <span class="symbol">
         <span class="name">group</span><span class="params">(<span name="group">group: <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@group(group:com.twitter.finagle.Group[java.net.SocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
@@ -624,9 +727,13 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionCoresize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="hostConnectionCoresize(value:Int):ClientBuilder.this.This"></a>
@@ -637,9 +744,13 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionCoresize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">hostConnectionCoresize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionCoresize(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The core size of the connection pool: the pool is not shrinked below this limit.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionIdleTime" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="hostConnectionIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
@@ -652,7 +763,11 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
       <span class="symbol">
         <span class="name">hostConnectionIdleTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The amount of time a connection is allowed to linger (when it
 otherwise would have been closed by the pool) before being
 closed.</p>
@@ -665,9 +780,13 @@ closed.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionLimit</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
+        <span class="name">hostConnectionLimit</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionLimit(value:Int):com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,com.twitter.finagle.builder.ClientConfig.Yes]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The maximum number of connections that are allowed per host.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum number of connections that are allowed per host.
 Required.  Finagle guarantees to never have more active
 connections than this limit.
@@ -683,7 +802,11 @@ connections than this limit.
       <span class="symbol">
         <span class="name">hostConnectionMaxIdleTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The maximum time a connection is allowed to linger unused.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxLifeTime" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="hostConnectionMaxLifeTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
@@ -696,7 +819,11 @@ connections than this limit.
       <span class="symbol">
         <span class="name">hostConnectionMaxLifeTime</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxLifeTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The maximum time a connection is allowed to exist, regardless of occupancy.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxWaiters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="hostConnectionMaxWaiters(nWaiters:Int):ClientBuilder.this.This"></a>
@@ -707,9 +834,13 @@ connections than this limit.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostConnectionMaxWaiters</span><span class="params">(<span name="nWaiters">nWaiters: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">hostConnectionMaxWaiters</span><span class="params">(<span name="nWaiters">nWaiters: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hostConnectionMaxWaiters(nWaiters:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The maximum queue size for the connection pool.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="hosts(address:java.net.SocketAddress):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
@@ -722,7 +853,11 @@ connections than this limit.
       <span class="symbol">
         <span class="name">hosts</span><span class="params">(<span name="address">address: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hosts(address:java.net.SocketAddress):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A convenience method for specifying a one-host
 <span class="extype" name="java.net.SocketAddress">java.net.SocketAddress</span> client.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -736,7 +871,11 @@ connections than this limit.
       <span class="symbol">
         <span class="name">hosts</span><span class="params">(<span name="addrs">addrs: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hosts(addrs:Seq[java.net.SocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A variant of {{hosts}} that takes a sequence of
 <span class="extype" name="java.net.SocketAddress">java.net.SocketAddress</span> instead.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -750,14 +889,17 @@ connections than this limit.
       <span class="symbol">
         <span class="name">hosts</span><span class="params">(<span name="hostnamePortCombinations">hostnamePortCombinations: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hosts(hostnamePortCombinations:String):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Specify the set of hosts to connect this client to.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the set of hosts to connect this client to.  Requests
 will be load balanced across these.  This is a shorthand form for
 specifying a cluster.</p><p>One of the {{hosts}} variations or direct specification of the
 cluster (via {{cluster}}) is required.
 </p></div><dl class="paramcmts block"><dt class="param">hostnamePortCombinations</dt><dd class="cmt"><p>comma-separated &quot;host:port&quot;
-string.
-</p></dd></dl></div>
+string.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#httpProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="httpProxy(httpProxy:java.net.SocketAddress):ClientBuilder.this.This"></a>
       <a id="httpProxy(SocketAddress):This"></a>
@@ -769,7 +911,11 @@ string.
       <span class="symbol">
         <span class="name">httpProxy</span><span class="params">(<span name="httpProxy">httpProxy: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@httpProxy(httpProxy:java.net.SocketAddress):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Make connections via the given HTTP proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given HTTP proxy.
 If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
 </p></div></div>
@@ -784,7 +930,11 @@ If this is defined concurrently with socksProxy, the order in which they are app
       <span class="symbol">
         <span class="name">httpProxyUsernameAndPassword</span><span class="params">(<span name="credentials">credentials: <a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@httpProxyUsernameAndPassword(credentials:com.twitter.finagle.client.Transporter.Credentials):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">For the http proxy use these <span class="extype" name="Credentials">Credentials</span> for authentication.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -795,9 +945,13 @@ If this is defined concurrently with socksProxy, the order in which they are app
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#keepAlive" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="keepAlive(value:Boolean):ClientBuilder.this.This"></a>
@@ -808,9 +962,13 @@ If this is defined concurrently with socksProxy, the order in which they are app
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">keepAlive</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">keepAlive</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@keepAlive(value:Boolean):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Apply TCP keepAlive (<code>SO_KEEPALIVE</code> socket option).</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#loadBalancer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="loadBalancer(loadBalancer:com.twitter.finagle.loadbalancer.LoadBalancerFactory):ClientBuilder.this.This"></a>
@@ -823,7 +981,11 @@ If this is defined concurrently with socksProxy, the order in which they are app
       <span class="symbol">
         <span class="name">loadBalancer</span><span class="params">(<span name="loadBalancer">loadBalancer: <a href="../loadbalancer/LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@loadBalancer(loadBalancer:com.twitter.finagle.loadbalancer.LoadBalancerFactory):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Specify a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a load balancer.  The load balancer implements
 a strategy for choosing one from a set of hosts to service a request
 </p></div></div>
@@ -838,7 +1000,11 @@ a strategy for choosing one from a set of hosts to service a request
       <span class="symbol">
         <span class="name">logger</span><span class="params">(<span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@logger(logger:java.util.logging.Logger):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Log very detailed debug information to the given logger.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#monitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="monitor(mFactory:String=&gt;com.twitter.util.Monitor):ClientBuilder.this.This"></a>
@@ -851,7 +1017,11 @@ a strategy for choosing one from a set of hosts to service a request
       <span class="symbol">
         <span class="name">monitor</span><span class="params">(<span name="mFactory">mFactory: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@monitor(mFactory:String=&gt;com.twitter.util.Monitor):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.builder.ClientBuilder#name" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="name(value:String):ClientBuilder.this.This"></a>
@@ -864,7 +1034,11 @@ a strategy for choosing one from a set of hosts to service a request
       <span class="symbol">
         <span class="name">name</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@name(value:String):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Give a meaningful name to the client.</p><div class="fullcomment"><div class="comment cmt"><p>Give a meaningful name to the client. Required.
 </p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -876,9 +1050,13 @@ a strategy for choosing one from a set of hosts to service a request
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#noFailureAccrual" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="noFailureAccrual:ClientBuilder.this.This"></a>
@@ -891,7 +1069,11 @@ a strategy for choosing one from a set of hosts to service a request
       <span class="symbol">
         <span class="name">noFailureAccrual</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@noFailureAccrual:ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><p>To replace the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> use <code>failureAccrualFactory</code>.
 </p></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -903,9 +1085,13 @@ a strategy for choosing one from a set of hosts to service a request
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -916,9 +1102,13 @@ a strategy for choosing one from a set of hosts to service a request
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="params:com.twitter.finagle.Stack.Params"></a>
@@ -931,7 +1121,11 @@ a strategy for choosing one from a set of hosts to service a request
       <span class="symbol">
         <span class="name">params</span><span class="result">: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@params:com.twitter.finagle.Stack.Params" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
@@ -944,7 +1138,11 @@ a strategy for choosing one from a set of hosts to service a request
       <span class="symbol">
         <span class="name">readerIdleTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The maximum time a connection may have received no data.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#recvBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="recvBufferSize(value:Int):ClientBuilder.this.This"></a>
@@ -955,9 +1153,13 @@ a strategy for choosing one from a set of hosts to service a request
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">recvBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">recvBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@recvBufferSize(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Sets the TCP recv buffer size.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#reportHostStats" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This"></a>
@@ -970,7 +1172,11 @@ a strategy for choosing one from a set of hosts to service a request
       <span class="symbol">
         <span class="name">reportHostStats</span><span class="params">(<span name="receiver">receiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Report per host stats to the given <code>StatsReceiver</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Report per host stats to the given <code>StatsReceiver</code>.
 The statsReceiver will be scoped per client, like this:
 client/connect_latency_ms_max/0.0.0.0:64754
@@ -986,13 +1192,15 @@ client/connect_latency_ms_max/0.0.0.0:64754
       <span class="symbol">
         <span class="name">reportTo</span><span class="params">(<span name="receiver">receiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@reportTo(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Report stats to the given <code>StatsReceiver</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Report stats to the given <code>StatsReceiver</code>.  This will report
 verbose global statistics and counters, that in turn may be
 exported to monitoring applications.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Per hosts statistics will <b>NOT</b> be exported to this receiver
-</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#reportHostStats">ClientBuilder.reportHostStats</a>
-</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Per hosts statistics will <b>NOT</b> be exported to this receiver</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#reportHostStats">ClientBuilder.reportHostStats</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#requestTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="requestTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="requestTimeout(Duration):This"></a>
@@ -1004,7 +1212,11 @@ exported to monitoring applications.
       <span class="symbol">
         <span class="name">requestTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@requestTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The request timeout is the time given to a *single* request (if
 there are retries, they each get a fresh request timeout).</p><div class="fullcomment"><div class="comment cmt"><p>The request timeout is the time given to a *single* request (if
 there are retries, they each get a fresh request timeout).  The
@@ -1021,21 +1233,23 @@ the request and the receipt of the response.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">retries</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">retries</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@retries(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Retry (some) failed requests up to <code>value - 1</code> times.</p><div class="fullcomment"><div class="comment cmt"><p>Retry (some) failed requests up to <code>value - 1</code> times.</p><p>Retries are only done if the request failed with something
 known to be safe to retry. This includes <a href="../WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteExceptions</a>
-and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>s that are marked <a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">restartable</a>.
+and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>s that are marked <a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">restartable</a>.</p><p>The configured policy has jittered backoffs between retries.
 </p></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>the maximum number of attempts (including retries) that
              can be made.</p><ul><li>A value of <code>1</code> means one attempt and no retries
              on failure.</li><li>A value of <code>2</code> means one attempt and then a
-             single retry if the failure is known to be safe to retry.
-</li></ul></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
+             single retry if the failure is known to be safe to retry.</li></ul></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
       application level failures. This is particularly important for
-      codecs that include exceptions, such as <code>Thrift</code>.</p><p>      This is only applicable to service-builds (<code>build()</code>).
-</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="../service/RetryPolicy$.html#tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#tries">com.twitter.finagle.service.RetryPolicy.tries</a>
-</p></span></dd></dl></div>
+      codecs that include exceptions, such as <code>Thrift</code>.
+      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="../service/RetryPolicy$.html#tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#tries">com.twitter.finagle.service.RetryPolicy.tries</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#retryPolicy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This"></a>
       <a id="retryPolicy(RetryPolicy[Try[Nothing]]):This"></a>
@@ -1045,14 +1259,18 @@ and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">retryPolicy</span><span class="params">(<span name="value">value: <a href="../service/RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">retryPolicy</span><span class="params">(<span name="value">value: <a href="../service/RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
       application level failures. This is particularly important for
-      codecs that include exceptions, such as <code>Thrift</code>.</p><p>      This is only applicable to service-builds (<code>build()</code>).
-</p></span></dd></dl></div>
+      codecs that include exceptions, such as <code>Thrift</code>.
+      This is only applicable to service-builds (<code>build()</code>).</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="sendBufferSize(value:Int):ClientBuilder.this.This"></a>
       <a id="sendBufferSize(Int):This"></a>
@@ -1062,9 +1280,13 @@ and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sendBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">sendBufferSize</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@sendBufferSize(value:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Sets the TCP send buffer size.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#socksProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socksProxy(socksProxy:Option[java.net.SocketAddress]):ClientBuilder.this.This"></a>
@@ -1075,9 +1297,13 @@ and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@socksProxy(socksProxy:Option[java.net.SocketAddress]):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Make connections via the given SOCKS proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given SOCKS proxy.
 If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
 </p></div></div>
@@ -1092,7 +1318,11 @@ If this is defined concurrently with httpProxy, the order in which they are appl
       <span class="symbol">
         <span class="name">socksUsernameAndPassword</span><span class="params">(<span name="credentials">credentials: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@socksUsernameAndPassword(credentials:(String,String)):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">For the socks proxy use this username for authentication.</p><div class="fullcomment"><div class="comment cmt"><p>For the socks proxy use this username for authentication.
 socksPassword and socksProxy must be set as well
 </p></div></div>
@@ -1107,7 +1337,11 @@ socksPassword and socksProxy must be set as well
       <span class="symbol">
         <span class="name">stack</span><span class="tparams">[<span name="Req1">Req1</span>, <span name="Rep1">Rep1</span>]</span><span class="params">(<span name="client">client: <a href="../client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Rep1">Rep1</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Req1">Req1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.stack.Rep1">Rep1</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCluster">HasCluster</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@stack[Req1,Rep1](client:com.twitter.finagle.client.StackBasedClient[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,com.twitter.finagle.builder.ClientConfig.Yes]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Overrides the stack and <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> that will be used
 by this builder.</p><div class="fullcomment"><div class="comment cmt"><p>Overrides the stack and <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> that will be used
 by this builder.
@@ -1119,8 +1353,7 @@ discretion of <code>client</code> itself and the protocol implementation. For ex
 the Mux protocol has no use for most connection pool parameters (e.g.
 <code>hostConnectionLimit</code>). Thus when configuring
 <a href="../ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">com.twitter.finagle.ThriftMux</a> clients (via <span class="extype" name="stack(ThriftMux.client)">stack(ThriftMux.client)</span>),
-such connection pool parameters will not be applied.
-</p></dd></dl></div>
+such connection pool parameters will not be applied.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -1132,7 +1365,11 @@ such connection pool parameters will not be applied.
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tcpConnectTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tcpConnectTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
@@ -1145,7 +1382,11 @@ such connection pool parameters will not be applied.
       <span class="symbol">
         <span class="name">tcpConnectTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tcpConnectTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Specify the TCP connection timeout.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#timeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="timeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
@@ -1158,7 +1399,11 @@ such connection pool parameters will not be applied.
       <span class="symbol">
         <span class="name">timeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@timeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Total request timeout.</p><div class="fullcomment"><div class="comment cmt"><p>Total request timeout.  This timeout is applied from the issuance
 of a request (through <code>service(request)</code>) until the
 satisfaction of that reply future.  No request will take longer
@@ -1173,9 +1418,13 @@ than this.</p><p>Applicable only to service-builds (<code>build()</code>)
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tls</span><span class="params">(<span name="sslContext">sslContext: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>, <span name="hostname">hostname: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">tls</span><span class="params">(<span name="sslContext">sslContext: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>, <span name="hostname">hostname: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tls(sslContext:javax.net.ssl.SSLContext,hostname:Option[String]):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Encrypt the connection with SSL.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  The Engine to use can be passed into the client.
 This allows the user to use client certificates
 SSL Hostname Validation is performed, on the passed in hostname
@@ -1191,7 +1440,11 @@ SSL Hostname Validation is performed, on the passed in hostname
       <span class="symbol">
         <span class="name">tls</span><span class="params">(<span name="sslContext">sslContext: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tls(sslContext:javax.net.ssl.SSLContext):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Encrypt the connection with SSL.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  The Engine to use can be passed into the client.
 This allows the user to use client certificates
 No SSL Hostname Validation is performed
@@ -1207,7 +1460,11 @@ No SSL Hostname Validation is performed
       <span class="symbol">
         <span class="name">tls</span><span class="params">(<span name="hostname">hostname: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tls(hostname:String):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Encrypt the connection with SSL.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  Hostname verification will be
 provided against the given hostname.
 </p></div></div>
@@ -1222,7 +1479,11 @@ provided against the given hostname.
       <span class="symbol">
         <span class="name">tlsWithoutValidation</span><span class="params">()</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tlsWithoutValidation():ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Do not perform TLS validation.</p><div class="fullcomment"><div class="comment cmt"><p>Do not perform TLS validation. Probably dangerous.
 </p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1236,7 +1497,11 @@ provided against the given hostname.
       <span class="symbol">
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@toString():String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> → AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tracer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tracer(t:com.twitter.finagle.tracing.Tracer):ClientBuilder.this.This"></a>
@@ -1249,7 +1514,11 @@ provided against the given hostname.
       <span class="symbol">
         <span class="name">tracer</span><span class="params">(<span name="t">t: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tracer(t:com.twitter.finagle.tracing.Tracer):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Specifies a tracer that receives trace events.</p><div class="fullcomment"><div class="comment cmt"><p>Specifies a tracer that receives trace events.
 See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.tracing">com.twitter.finagle.tracing</a> for details.
 </p></div></div>
@@ -1262,12 +1531,15 @@ See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.t
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">trafficClass</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name">trafficClass</span><span class="params">(<span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@trafficClass(value:Option[Int]):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Configures the traffic class.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the traffic class.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Transporter.TrafficClass">Transporter.TrafficClass</span>
-</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="Transporter.TrafficClass">Transporter.TrafficClass</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#unsafeBuild" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unsafeBuild():com.twitter.finagle.Service[Req,Rep]"></a>
       <a id="unsafeBuild():Service[Req,Rep]"></a>
@@ -1279,7 +1551,11 @@ See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.t
       <span class="symbol">
         <span class="name">unsafeBuild</span><span class="params">()</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@unsafeBuild():com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Construct a Service, with runtime checks for builder
 completeness.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#unsafeBuildFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -1293,7 +1569,11 @@ completeness.</p>
       <span class="symbol">
         <span class="name">unsafeBuildFactory</span><span class="params">()</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@unsafeBuildFactory():com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Construct a ServiceFactory, with runtime checks for builder
 completeness.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1305,9 +1585,13 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1324,9 +1608,13 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1343,9 +1631,13 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -1364,7 +1656,11 @@ completeness.</p>
       <span class="symbol">
         <span class="name">writerIdleTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@writerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The maximum time a connection may not have sent any data.</p>
     </li></ol>
             </div>
@@ -1384,7 +1680,11 @@ completeness.</p>
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ClientConfig[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ClientConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@build(THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:=:=[ClientBuilder.this.ThisConfig,ClientBuilder.this.FullySpecifiedConfig]):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -1400,7 +1700,11 @@ completeness.</p>
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">buildFactory</span><span class="params">(<span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ClientConfig[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ClientConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@buildFactory(THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:=:=[ClientBuilder.this.ThisConfig,ClientBuilder.this.FullySpecifiedConfig]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -1416,7 +1720,11 @@ completeness.</p>
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use tcpConnectTimeout instead">connectionTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@connectionTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -1430,9 +1738,13 @@ completeness.</p>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.3.10)">expFailFast</span><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 5.3.10)">expFailFast</span><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@expFailFast(enabled:Boolean):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -1448,7 +1760,11 @@ completeness.</p>
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 2014-12-02) Use socksProxy(socksProxy: Option[SocketAddress])">socksProxy</span><span class="params">(<span name="socksProxy">socksProxy: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@socksProxy(socksProxy:java.net.SocketAddress):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
@@ -1464,23 +1780,31 @@ completeness.</p>
       <span class="symbol">
         <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="t">t: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tracerFactory(t:com.twitter.finagle.tracing.Tracer):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use tracer() instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tracerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tracerFactory(factory:()=&gt;com.twitter.finagle.tracing.Tracer):ClientBuilder.this.This"></a>
-      <a id="tracerFactory(()⇒Tracer):This"></a>
+      <a id="tracerFactory(factory:com.twitter.finagle.tracing.Tracer.Factory):ClientBuilder.this.This"></a>
+      <a id="tracerFactory(Factory):This"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="factory">factory: () ⇒ <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="factory">factory: <a href="../tracing/Tracer$.html#Factory=()=&gt;com.twitter.finagle.tracing.Tracer" class="extmbr" name="com.twitter.finagle.tracing.Tracer.Factory">Factory</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tracerFactory(factory:com.twitter.finagle.tracing.Tracer.Factory):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Specifies a tracer that receives trace events.</p><div class="fullcomment"><div class="comment cmt"><p>Specifies a tracer that receives trace events.
 See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.tracing">com.twitter.finagle.tracing</a> for details.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
@@ -1493,9 +1817,9 @@ See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.t
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -1512,6 +1836,7 @@ See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.t
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

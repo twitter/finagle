@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>stream - com.twitter.finagle.stream</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>stream</h1>
+        <h1>stream</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -46,7 +54,7 @@ reasons.</p><p>Finagle-stream sessions are also <code><code>one-shot</code></cod
 exactly one stream. The session terminates together with the stream.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -72,7 +80,6 @@ exactly one stream. The session terminates together with the stream.
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -95,10 +102,14 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="package$$Header.html"><span class="name">Header</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="package$$Header.html"><span class="name">Header</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">HTTP header encoded as a string pair.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@HeaderextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">HTTP header encoded as a string pair.</p>
     </li><li name="com.twitter.finagle.stream.RequestType" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RequestType[Req]extendsAnyRef"></a>
       <a id="RequestType[Req]:RequestType[Req]"></a>
@@ -108,9 +119,13 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="package$$RequestType.html"><span class="name">RequestType</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="package$$RequestType.html"><span class="name">RequestType</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@RequestType[Req]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stream.Stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Stream[Req]extendsCodecFactory[Req,com.twitter.finagle.stream.StreamResponse]"></a>
@@ -123,7 +138,11 @@ exactly one stream. The session terminates together with the stream.
       <span class="symbol">
         <a href="Stream.html"><span class="name">Stream</span></a><span class="tparams">[<span name="Req">Req</span>]</span><span class="result"> extends <a href="../CodecFactory.html" class="extype" name="com.twitter.finagle.CodecFactory">CodecFactory</a>[<span class="extype" name="com.twitter.finagle.stream.Stream.Req">Req</span>, <a href="StreamResponse.html" class="extype" name="com.twitter.finagle.stream.StreamResponse">StreamResponse</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@Stream[Req]extendsCodecFactory[Req,com.twitter.finagle.stream.StreamResponse]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stream.StreamRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StreamRequestextendsProductwithSerializable"></a>
@@ -134,9 +153,13 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="StreamRequest.html"><span class="name">StreamRequest</span></a><span class="params">(<span name="method">method: <a href="StreamRequest$$Method.html" class="extype" name="com.twitter.finagle.stream.StreamRequest.Method">Method</a></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="version">version: <a href="package$$Version.html" class="extype" name="com.twitter.finagle.stream.Version">Version</a> = <span class="defval" name="stream.this.`package`.Version.apply(1, 1)">...</span></span>, <span name="headers">headers: <span class="extype" name="scala.Seq">Seq</span>[<a href="package$$Header.html" class="extype" name="com.twitter.finagle.stream.Header">Header</a>] = <span class="symbol">immutable.this.Nil</span></span>, <span name="body">body: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a> = <span class="symbol">com.twitter.io.Buf.Empty</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="StreamRequest.html"><span class="name">StreamRequest</span></a><span class="params">(<span name="method">method: <a href="StreamRequest$$Method.html" class="extype" name="com.twitter.finagle.stream.StreamRequest.Method">Method</a></span>, <span name="uri">uri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="version">version: <a href="package$$Version.html" class="extype" name="com.twitter.finagle.stream.Version">Version</a> = <span class="symbol">Version(1, 1)</span></span>, <span name="headers">headers: <span class="extype" name="scala.Seq">Seq</span>[<a href="package$$Header.html" class="extype" name="com.twitter.finagle.stream.Header">Header</a>] = <span class="symbol">Nil</span></span>, <span name="body">body: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Buf.Empty</a></span></span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@StreamRequestextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stream.StreamResponse" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StreamResponseextendsAnyRef"></a>
@@ -147,9 +170,13 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="StreamResponse.html"><span class="name">StreamResponse</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="StreamResponse.html"><span class="name">StreamResponse</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@StreamResponseextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stream.Version" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="VersionextendsProductwithSerializable"></a>
@@ -160,10 +187,14 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="package$$Version.html"><span class="name">Version</span></a><span class="params">(<span name="major">major: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="minor">minor: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="package$$Version.html"><span class="name">Version</span></a><span class="params">(<span name="major">major: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="minor">minor: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Represents the HTTP version.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@VersionextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents the HTTP version.</p>
     </li></ol>
             </div>
 
@@ -182,8 +213,12 @@ exactly one stream. The session terminates together with the stream.
       <span class="symbol">
         <a href="package$$EOF$.html"><span class="name">EOF</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicates that a stream has ended.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@EOF" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that a stream has ended.</p>
     </li><li name="com.twitter.finagle.stream.Header" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Header"></a>
       <a id="Header:Header"></a>
@@ -195,7 +230,11 @@ exactly one stream. The session terminates together with the stream.
       <span class="symbol">
         <a href="package$$Header$.html"><span class="name">Header</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@Header" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stream.Stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Stream"></a>
@@ -208,7 +247,11 @@ exactly one stream. The session terminates together with the stream.
       <span class="symbol">
         <a href="Stream$.html"><span class="name">Stream</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@Stream" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stream.StreamRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StreamRequest"></a>
@@ -219,9 +262,13 @@ exactly one stream. The session terminates together with the stream.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="StreamRequest$.html"><span class="name">StreamRequest</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="StreamRequest$.html"><span class="name">StreamRequest</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@StreamRequest" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.stream.StreamResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StreamResponse"></a>
@@ -234,9 +281,13 @@ exactly one stream. The session terminates together with the stream.
       <span class="symbol">
         <a href="StreamResponse$.html"><span class="name">StreamResponse</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@StreamResponse" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.stream.package#streamRequestType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.stream#streamRequestType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="streamRequestType:com.twitter.finagle.stream.package.RequestType[com.twitter.finagle.stream.StreamRequest]"></a>
       <a id="streamRequestType:RequestType[StreamRequest]"></a>
       <h4 class="signature">
@@ -247,7 +298,11 @@ exactly one stream. The session terminates together with the stream.
       <span class="symbol">
         <span class="name">streamRequestType</span><span class="result">: <a href="package$$RequestType.html" class="extype" name="com.twitter.finagle.stream.RequestType">RequestType</a>[<a href="StreamRequest.html" class="extype" name="com.twitter.finagle.stream.StreamRequest">StreamRequest</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stream.package@streamRequestType:com.twitter.finagle.stream.package.RequestType[com.twitter.finagle.stream.StreamRequest]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -259,9 +314,9 @@ exactly one stream. The session terminates together with the stream.
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -278,6 +333,7 @@ exactly one stream. The session terminates together with the stream.
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>replication - com.twitter.finagle.memcached.replication</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.memcached">memcached</a></p>
-        <h1>replication</h1>
+        <h1>replication</h1><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -52,7 +60,7 @@ cache replicas. In a more complicate caching scenario, this simple/naive replica
 not be applicable.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -78,7 +86,6 @@ not be applicable.
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -92,7 +99,7 @@ not be applicable.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.memcached.replication.BaseReplicationClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.memcached.replication.BaseReplicationClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BaseReplicationClientextendsAnyRef"></a>
       <a id="BaseReplicationClient:BaseReplicationClient"></a>
       <h4 class="signature">
@@ -101,10 +108,16 @@ not be applicable.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="BaseReplicationClient.html"><span class="name">BaseReplicationClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="BaseReplicationClient.html"><span class="name">BaseReplicationClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Base replication client.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@BaseReplicationClientextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Base replication client.</p><div class="fullcomment"><div class="comment cmt"><p>Base replication client. This client manages a list of base memcached clients representing
+cache replicas. All replication API returns ReplicationStatus object indicating the underlying
+replicas consistency state.</p></div></div>
     </li><li name="com.twitter.finagle.memcached.replication.ConsistentReplication" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ConsistentReplication[T]extendsReplicationStatus[T]withProductwithSerializable"></a>
       <a id="ConsistentReplication[T]:ConsistentReplication[T]"></a>
@@ -114,10 +127,14 @@ not be applicable.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ConsistentReplication.html"><span class="name">ConsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="result">result: <span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span></span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ConsistentReplication.html"><span class="name">ConsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="result">result: <span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span></span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.ConsistentReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicating a consistent state across all replicas, which comes with the agreed consistent result;
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@ConsistentReplication[T]extendsReplicationStatus[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicating a consistent state across all replicas, which comes with the agreed consistent result;
 </p>
     </li><li name="com.twitter.finagle.memcached.replication.FailedReplication" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailedReplication[T]extendsReplicationStatus[T]withProductwithSerializable"></a>
@@ -128,10 +145,14 @@ not be applicable.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FailedReplication.html"><span class="name">FailedReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="failureSeq">failureSeq: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.util.Throw">Throw</span>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="FailedReplication.html"><span class="name">FailedReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="failureSeq">failureSeq: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="com.twitter.util.Throw">Throw</span>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">indicating a failed state from all replicas, which comes with a sequence of failures from
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@FailedReplication[T]extendsReplicationStatus[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">indicating a failed state from all replicas, which comes with a sequence of failures from
 all replicas;
 </p>
     </li><li name="com.twitter.finagle.memcached.replication.InconsistentReplication" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -143,10 +164,14 @@ all replicas;
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="InconsistentReplication.html"><span class="name">InconsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="resultSeq">resultSeq: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="InconsistentReplication.html"><span class="name">InconsistentReplication</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="resultSeq">resultSeq: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>]]</span>)</span><span class="result"> extends <a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="com.twitter.finagle.memcached.replication.InconsistentReplication.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Indicating an inconsistent state across all replicas, which comes with a sequence of result
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@InconsistentReplication[T]extendsReplicationStatus[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicating an inconsistent state across all replicas, which comes with a sequence of result
 from all replicas; each replica's result can be either Return[T] or Throw[T]
 </p>
     </li><li name="com.twitter.finagle.memcached.replication.RCasUnique" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -158,9 +183,13 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RCasUnique.html"><span class="name">RCasUnique</span></a><span class="params">(<span name="uniques">uniques: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="RCasUnique.html"><span class="name">RCasUnique</span></a><span class="params">(<span name="uniques">uniques: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@RCasUniqueextendsReplicaCasUniquewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.replication.ReplicaCasUnique" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ReplicaCasUniqueextendsAnyRef"></a>
@@ -171,10 +200,14 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ReplicaCasUnique.html"><span class="name">ReplicaCasUnique</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="ReplicaCasUnique.html"><span class="name">ReplicaCasUnique</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Wrapping underlying replicas cas unique values for replication purpose.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@ReplicaCasUniqueextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Wrapping underlying replicas cas unique values for replication purpose.</p>
     </li><li name="com.twitter.finagle.memcached.replication.ReplicationStatus" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ReplicationStatus[T]extendsAnyRef"></a>
       <a id="ReplicationStatus[T]:ReplicationStatus[T]"></a>
@@ -184,9 +217,13 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ReplicationStatus.html"><span class="name">ReplicationStatus</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="ReplicationStatus.html"><span class="name">ReplicationStatus</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@ReplicationStatus[T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.replication.SCasUnique" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SCasUniqueextendsReplicaCasUniquewithProductwithSerializable"></a>
@@ -197,9 +234,13 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SCasUnique.html"><span class="name">SCasUnique</span></a><span class="params">(<span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="SCasUnique.html"><span class="name">SCasUnique</span></a><span class="params">(<span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="ReplicaCasUnique.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicaCasUnique">ReplicaCasUnique</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@SCasUniqueextendsReplicaCasUniquewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.replication.SimpleReplicationClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SimpleReplicationClientextendsClient"></a>
@@ -212,9 +253,13 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
       <span class="symbol">
         <a href="SimpleReplicationClient.html"><span class="name">SimpleReplicationClient</span></a><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@SimpleReplicationClientextendsClient" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.memcached.replication.SimpleReplicationFailure" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.replication.SimpleReplicationFailure" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SimpleReplicationFailureextendsThrowablewithProductwithSerializable"></a>
       <a id="SimpleReplicationFailure:SimpleReplicationFailure"></a>
       <h4 class="signature">
@@ -223,10 +268,20 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SimpleReplicationFailure.html"><span class="name">SimpleReplicationFailure</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Throwable">Throwable</span> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="SimpleReplicationFailure.html"><span class="name">SimpleReplicationFailure</span></a><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Throwable">Throwable</span> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Simple replication client wrapper that's compatible with base memcached client.</p>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@SimpleReplicationFailureextendsThrowablewithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Simple replication client wrapper that's compatible with base memcached client.</p><div class="fullcomment"><div class="comment cmt"><p>Simple replication client wrapper that's compatible with base memcached client.
+This simple replication client handles inconsistent state across underlying replicas in a
+naive way:
+- operation would succeed only if it succeeds on all replicas
+- inconsistent data across replicas will be treated as key missing
+- any replica's failure will make the operation throw
+</p></div></div>
     </li></ol>
             </div>
 
@@ -245,8 +300,12 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
       <span class="symbol">
         <a href="ReplicationClient$.html"><span class="name">ReplicationClient</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Replication client helper
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.package@ReplicationClient" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Replication client helper
 </p>
     </li></ol>
             </div>
@@ -258,9 +317,9 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -277,6 +336,7 @@ from all replicas; each replica's result can be either Return[T] or Throw[T]
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

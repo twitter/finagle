@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>client - com.twitter.finagle.serverset2.client</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.serverset2">serverset2</a></p>
-        <h1>client</h1>
+        <h1>client</h1><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -69,8 +77,12 @@
       <span class="symbol">
         <a href="NullZooKeeperClient.html"><span class="name">NullZooKeeperClient</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperClient">ZooKeeperClient</span></span>
       </span>
-      </h4>
-      <p class="comment cmt">Provide a Null client, useful as an initial value for a wrapper that
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperClientextendsZooKeeperClient" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Provide a Null client, useful as an initial value for a wrapper that
 re-establishes a ZooKeeper connection on SessionExpiration, as
 ZooKeeperClient is designed for single session operation.</p>
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
@@ -84,7 +96,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperMulti.html"><span class="name">NullZooKeeperMulti</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperMulti">ZooKeeperMulti</span> with <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperMultiextendsZooKeeperMultiwithNullZooKeeperClient" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRW" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperRWextendsZooKeeperRWwithNullZooKeeperReaderwithNullZooKeeperWriter"></a>
@@ -97,7 +113,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperRW.html"><span class="name">NullZooKeeperRW</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperRW">ZooKeeperRW</span> with <a href="NullZooKeeperReader.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperReader">NullZooKeeperReader</a> with <a href="NullZooKeeperWriter.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter">NullZooKeeperWriter</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperRWextendsZooKeeperRWwithNullZooKeeperReaderwithNullZooKeeperWriter" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRWMulti" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperRWMultiextendsZooKeeperRWMultiwithNullZooKeeperReaderwithNullZooKeeperWriterwithNullZooKeeperMulti"></a>
@@ -110,7 +130,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperRWMulti.html"><span class="name">NullZooKeeperRWMulti</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperRWMulti">ZooKeeperRWMulti</span> with <a href="NullZooKeeperReader.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperReader">NullZooKeeperReader</a> with <a href="NullZooKeeperWriter.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter">NullZooKeeperWriter</a> with <a href="NullZooKeeperMulti.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti">NullZooKeeperMulti</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperRWMultiextendsZooKeeperRWMultiwithNullZooKeeperReaderwithNullZooKeeperWriterwithNullZooKeeperMulti" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperReader" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperReaderextendsZooKeeperReaderwithNullZooKeeperClient"></a>
@@ -123,7 +147,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperReader.html"><span class="name">NullZooKeeperReader</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperReader">ZooKeeperReader</span> with <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperReaderextendsZooKeeperReaderwithNullZooKeeperClient" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperWriterextendsZooKeeperWriterwithNullZooKeeperClient"></a>
@@ -136,7 +164,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperWriter.html"><span class="name">NullZooKeeperWriter</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.serverset2.client.ZooKeeperWriter">ZooKeeperWriter</span> with <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperWriterextendsZooKeeperWriterwithNullZooKeeperClient" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.StateTracker" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StateTrackerextendsClosable"></a>
@@ -149,7 +181,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="StateTracker.html"><span class="name">StateTracker</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@StateTrackerextendsClosable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -169,7 +205,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperClient$.html"><span class="name">NullZooKeeperClient</span></a><span class="result"> extends <a href="NullZooKeeperClient.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperClient">NullZooKeeperClient</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperClient" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperMulti"></a>
@@ -182,7 +222,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperMulti$.html"><span class="name">NullZooKeeperMulti</span></a><span class="result"> extends <a href="NullZooKeeperMulti.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperMulti">NullZooKeeperMulti</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperMulti" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRW" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperRW"></a>
@@ -195,7 +239,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperRW$.html"><span class="name">NullZooKeeperRW</span></a><span class="result"> extends <a href="NullZooKeeperRW.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperRW">NullZooKeeperRW</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperRW" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperRWMulti" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperRWMulti"></a>
@@ -208,7 +256,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperRWMulti$.html"><span class="name">NullZooKeeperRWMulti</span></a><span class="result"> extends <a href="NullZooKeeperRWMulti.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperRWMulti">NullZooKeeperRWMulti</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperRWMulti" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperReader"></a>
@@ -221,7 +273,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperReader$.html"><span class="name">NullZooKeeperReader</span></a><span class="result"> extends <a href="NullZooKeeperReader.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperReader">NullZooKeeperReader</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperReader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NullZooKeeperWriter"></a>
@@ -234,7 +290,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="NullZooKeeperWriter$.html"><span class="name">NullZooKeeperWriter</span></a><span class="result"> extends <a href="NullZooKeeperWriter.html" class="extype" name="com.twitter.finagle.serverset2.client.NullZooKeeperWriter">NullZooKeeperWriter</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@NullZooKeeperWriter" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.SessionStats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SessionStats"></a>
@@ -247,7 +307,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="SessionStats$.html"><span class="name">SessionStats</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@SessionStats" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.serverset2.client.ZooKeeperReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ZooKeeperReader"></a>
@@ -260,7 +324,11 @@ ZooKeeperClient is designed for single session operation.</p>
       <span class="symbol">
         <a href="ZooKeeperReader$.html"><span class="name">ZooKeeperReader</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.serverset2.client.package@ZooKeeperReader" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -287,6 +355,7 @@ ZooKeeperClient is designed for single session operation.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../../lib/template.js"></script>
+
+
     </body>
       </html>

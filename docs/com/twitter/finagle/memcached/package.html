@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>memcached - com.twitter.finagle.memcached</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
@@ -24,9 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../../../../lib/package_big.png" />
+        <img alt="Package" src="../../../../lib/package_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a></p>
-        <h1>memcached</h1>
+        <h1>memcached</h1><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -67,10 +75,14 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A friendly client to talk to a Memcached server.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@BaseClient[T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A friendly client to talk to a Memcached server.</p>
     </li><li name="com.twitter.finagle.memcached.Client" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ClientextendsBaseClient[com.twitter.io.Buf]"></a>
       <a id="Client:Client"></a>
@@ -82,7 +94,11 @@
       <span class="symbol">
         <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ClientextendsBaseClient[com.twitter.io.Buf]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.ClientAdaptor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ClientAdaptor[T]extendsBaseClient[T]withProxy"></a>
@@ -93,11 +109,15 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ClientAdaptor.html"><span class="name">ClientAdaptor</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<span class="extype" name="com.twitter.finagle.memcached.ClientAdaptor.T">T</span>] with <span class="extype" name="scala.Proxy">Proxy</span></span>
+        <a href="ClientAdaptor.html"><span class="name">ClientAdaptor</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a>[<span class="extype" name="com.twitter.finagle.memcached.ClientAdaptor.T">T</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Proxy" class="extype" target="_top">Proxy</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ClientAdaptor[T]extendsBaseClient[T]withProxy" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.memcached.ConnectedClient" visbl="prt" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.ConnectedClient" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConnectedClientextendsClient"></a>
       <a id="ConnectedClient:ConnectedClient"></a>
       <h4 class="signature">
@@ -108,8 +128,13 @@
       <span class="symbol">
         <a href="ConnectedClient.html"><span class="name">ConnectedClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A Client connected to an individual Memcached server.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ConnectedClientextendsClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A Client connected to an individual Memcached server.</p><div class="fullcomment"><div class="comment cmt"><p>A Client connected to an individual Memcached server.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.Entry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="EntryextendsProductwithSerializable"></a>
       <a id="Entry:Entry"></a>
@@ -119,9 +144,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@EntryextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.FailureAccrualException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailureAccrualExceptionextendsRequestException"></a>
@@ -134,7 +163,11 @@
       <span class="symbol">
         <a href="FailureAccrualException.html"><span class="name">FailureAccrualException</span></a><span class="result"> extends <a href="../RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@FailureAccrualExceptionextendsRequestException" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.GetResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GetResultextendsProductwithSerializable"></a>
@@ -145,9 +178,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetResult.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetResult.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@GetResultextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.GetsResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GetsResultextendsProductwithSerializable"></a>
@@ -158,9 +195,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetsResult.html"><span class="name">GetsResult</span></a><span class="params">(<span name="getResult">getResult: <a href="GetResult.html" class="extype" name="com.twitter.finagle.memcached.GetResult">GetResult</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetsResult.html"><span class="name">GetsResult</span></a><span class="params">(<span name="getResult">getResult: <a href="GetResult.html" class="extype" name="com.twitter.finagle.memcached.GetResult">GetResult</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@GetsResultextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.Interpreter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InterpreterextendsAnyRef"></a>
@@ -171,10 +212,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Interpreter.html"><span class="name">Interpreter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Interpreter.html"><span class="name">Interpreter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Evaluates a given Memcached operation and returns the result.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@InterpreterextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Evaluates a given Memcached operation and returns the result.</p>
     </li><li name="com.twitter.finagle.memcached.InterpreterService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InterpreterServiceextendsService[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]"></a>
       <a id="InterpreterService:InterpreterService"></a>
@@ -186,7 +231,11 @@
       <span class="symbol">
         <a href="InterpreterService.html"><span class="name">InterpreterService</span></a><span class="result"> extends <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@InterpreterServiceextendsService[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.KetamaClientKey" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="KetamaClientKeyextendsAnyRef"></a>
@@ -197,11 +246,15 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClientKeyextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.memcached.MockClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.MockClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MockClientextendsClient"></a>
       <a id="MockClient:MockClient"></a>
       <h4 class="signature">
@@ -212,8 +265,13 @@
       <span class="symbol">
         <a href="MockClient.html"><span class="name">MockClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Map-based mock client for testing</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@MockClientextendsClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Map-based mock client for testing</p><div class="fullcomment"><div class="comment cmt"><p>Map-based mock client for testing</p><p>Note: expiry and flags are ignored on update operations.
+</p></div></div>
     </li><li name="com.twitter.finagle.memcached.PHPMemCacheClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PHPMemCacheClientextendsPartitionedClient"></a>
       <a id="PHPMemCacheClient:PHPMemCacheClient"></a>
@@ -225,8 +283,12 @@
       <span class="symbol">
         <a href="PHPMemCacheClient.html"><span class="name">PHPMemCacheClient</span></a><span class="result"> extends <a href="PartitionedClient.html" class="extype" name="com.twitter.finagle.memcached.PartitionedClient">PartitionedClient</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">PHP memcache-client (memcache.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@PHPMemCacheClientextendsPartitionedClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">PHP memcache-client (memcache.so) compatible client.</p>
     </li><li name="com.twitter.finagle.memcached.PHPMemCacheClientBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PHPMemCacheClientBuilderextendsProductwithSerializable"></a>
       <a id="PHPMemCacheClientBuilder:PHPMemCacheClientBuilder"></a>
@@ -236,11 +298,15 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PHPMemCacheClientBuilder.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_hashName">_hashName: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PHPMemCacheClientBuilder.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_hashName">_hashName: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Builder for memcache-client (memcache.</p>
-    </li><li name="com.twitter.finagle.memcached.PartitionedClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@PHPMemCacheClientBuilderextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Builder for memcache-client (memcache.so) compatible client.</p>
+    </li><li name="com.twitter.finagle.memcached.PartitionedClient" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="PartitionedClientextendsClient"></a>
       <a id="PartitionedClient:PartitionedClient"></a>
       <h4 class="signature">
@@ -251,10 +317,16 @@
       <span class="symbol">
         <a href="PartitionedClient.html"><span class="name">PartitionedClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A partitioned client is a client that delegates to an actual client based on
-the key value.</p>
-    </li><li name="com.twitter.finagle.memcached.PoolingReadRepairClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@PartitionedClientextendsClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A partitioned client is a client that delegates to an actual client based on
+the key value.</p><div class="fullcomment"><div class="comment cmt"><p>A partitioned client is a client that delegates to an actual client based on
+the key value.  Subclasses implement clientOf to choose the Client.
+</p></div></div>
+    </li><li name="com.twitter.finagle.memcached.PoolingReadRepairClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PoolingReadRepairClientextendsClient"></a>
       <a id="PoolingReadRepairClient:PoolingReadRepairClient"></a>
       <h4 class="signature">
@@ -265,8 +337,14 @@ the key value.</p>
       <span class="symbol">
         <a href="PoolingReadRepairClient.html"><span class="name">PoolingReadRepairClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">This class is designed to support replicated memcached setups.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@PoolingReadRepairClientextendsClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This class is designed to support replicated memcached setups.</p><div class="fullcomment"><div class="comment cmt"><p>This class is designed to support replicated memcached setups.  It supports a limited
+subset of operations (just get, set, and delete).
+</p></div></div>
     </li><li name="com.twitter.finagle.memcached.ProxyClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ProxyClientextendsClient"></a>
       <a id="ProxyClient:ProxyClient"></a>
@@ -278,7 +356,11 @@ the key value.</p>
       <span class="symbol">
         <a href="ProxyClient.html"><span class="name">ProxyClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ProxyClientextendsClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.RubyMemCacheClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RubyMemCacheClientextendsPartitionedClient"></a>
@@ -291,8 +373,12 @@ the key value.</p>
       <span class="symbol">
         <a href="RubyMemCacheClient.html"><span class="name">RubyMemCacheClient</span></a><span class="result"> extends <a href="PartitionedClient.html" class="extype" name="com.twitter.finagle.memcached.PartitionedClient">PartitionedClient</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Ruby memcache-client (MemCache) compatible client.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@RubyMemCacheClientextendsPartitionedClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Ruby memcache-client (MemCache) compatible client.</p>
     </li><li name="com.twitter.finagle.memcached.RubyMemCacheClientBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RubyMemCacheClientBuilderextendsProductwithSerializable"></a>
       <a id="RubyMemCacheClientBuilder:RubyMemCacheClientBuilder"></a>
@@ -302,10 +388,14 @@ the key value.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RubyMemCacheClientBuilder.html"><span class="name">RubyMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="RubyMemCacheClientBuilder.html"><span class="name">RubyMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Builder for memcache-client (MemCache) compatible client.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@RubyMemCacheClientBuilderextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Builder for memcache-client (MemCache) compatible client.</p>
     </li><li name="com.twitter.finagle.memcached.TwemcacheClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="TwemcacheClientextendsClient"></a>
       <a id="TwemcacheClient:TwemcacheClient"></a>
@@ -317,9 +407,13 @@ the key value.</p>
       <span class="symbol">
         <a href="TwemcacheClient.html"><span class="name">TwemcacheClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@TwemcacheClientextendsClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.memcached.TwemcacheConnectedClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.TwemcacheConnectedClient" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="TwemcacheConnectedClientextendsTwemcacheClient"></a>
       <a id="TwemcacheConnectedClient:TwemcacheConnectedClient"></a>
       <h4 class="signature">
@@ -330,9 +424,15 @@ the key value.</p>
       <span class="symbol">
         <a href="TwemcacheConnectedClient.html"><span class="name">TwemcacheConnectedClient</span></a><span class="result"> extends <a href="TwemcacheClient.html" class="extype" name="com.twitter.finagle.memcached.TwemcacheClient">TwemcacheClient</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Twemcache commands implementation.</p>
-    </li><li name="com.twitter.finagle.memcached.TwemcachePartitionedClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@TwemcacheConnectedClientextendsTwemcacheClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Twemcache commands implementation.</p><div class="fullcomment"><div class="comment cmt"><p>Twemcache commands implementation.
+This trait can only be mixed into a memcache client implementation as extension.
+</p></div></div>
+    </li><li name="com.twitter.finagle.memcached.TwemcachePartitionedClient" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="TwemcachePartitionedClientextendsTwemcacheClient"></a>
       <a id="TwemcachePartitionedClient:TwemcachePartitionedClient"></a>
       <h4 class="signature">
@@ -343,9 +443,15 @@ the key value.</p>
       <span class="symbol">
         <a href="TwemcachePartitionedClient.html"><span class="name">TwemcachePartitionedClient</span></a><span class="result"> extends <a href="TwemcacheClient.html" class="extype" name="com.twitter.finagle.memcached.TwemcacheClient">TwemcacheClient</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">Twemcache commands implemenation for a partitioned client.</p>
-    </li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@TwemcachePartitionedClientextendsTwemcacheClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Twemcache commands implemenation for a partitioned client.</p><div class="fullcomment"><div class="comment cmt"><p>Twemcache commands implemenation for a partitioned client.
+This trait can only be mixed into a ParitionedClient that is delegating twemcache compatible clients.
+</p></div></div>
+    </li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ZookeeperStateMonitorextendsAnyRef"></a>
       <a id="ZookeeperStateMonitor:ZookeeperStateMonitor"></a>
       <h4 class="signature">
@@ -354,11 +460,22 @@ the key value.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ZookeeperStateMonitor.html"><span class="name">ZookeeperStateMonitor</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="ZookeeperStateMonitor.html"><span class="name">ZookeeperStateMonitor</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">A zk monitor trait that assists with monitoring a given zk path for any node data change,
-in which the provided zk data handling implementation will be invoked.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ZookeeperStateMonitorextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A zk monitor trait that assists with monitoring a given zk path for any node data change,
+in which the provided zk data handling implementation will be invoked.</p><div class="fullcomment"><div class="comment cmt"><p>A zk monitor trait that assists with monitoring a given zk path for any node data change,
+in which the provided zk data handling implementation will be invoked.</p><p>This monitor will maintain a queue so that every work item triggered by zk event will be
+processed in an order with a back off policy. It also set-up a zookeeper connection watcher
+by default to re-set the data change watcher even during zk re-connect.</p><p>The monitor will set-up all watcher properly kick off the loop to process future event;
+you can also invoke loadZKData() in your class anytime to force reading zk data and apply it.</p><p>Example use cases are:
+- zookeeper based CachePoolCluster uses this to monitor cache pool members change
+- zookeeper based MigrationClient uses this ot monitor migration state transitioning
+</p></div></div>
     </li><li name="com.twitter.finagle.memcached.KetamaClientBuilder" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="KetamaClientBuilderextendsProductwithSerializable"></a>
       <a id="KetamaClientBuilder:KetamaClientBuilder"></a>
@@ -368,14 +485,18 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2015-02-22) Use the com.twitter.finagle.Memcached builder">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="KetamaClientBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2015-02-22) Use the com.twitter.finagle.Memcached builder">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClientBuilderextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-02-22)</i> Use the <code>com.twitter.finagle.Memcached builder</code></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.Server" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.Server" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerextendsAnyRef"></a>
       <a id="Server:Server"></a>
       <h4 class="signature">
@@ -384,10 +505,18 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Server.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Moved into test">Server</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Server.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Moved into test">Server</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
-      <p class="comment cmt">An in-process memcached server.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ServerextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An in-process memcached server.</p><div class="fullcomment"><div class="comment cmt"><p>An in-process memcached server.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Moved into test</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -406,7 +535,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="Client$.html"><span class="name">Client</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.GetResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GetResult"></a>
@@ -417,9 +550,13 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="GetResult$.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetResult$.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@GetResult" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.KetamaClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KetamaClient"></a>
@@ -432,7 +569,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="KetamaClient$.html"><span class="name">KetamaClient</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.KetamaClientBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KetamaClientBuilder"></a>
@@ -443,9 +584,13 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientBuilder$.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="KetamaClientBuilder$.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClientBuilder" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.KetamaClientKey" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KetamaClientKey"></a>
@@ -458,7 +603,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="KetamaClientKey$.html"><span class="name">KetamaClientKey</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClientKey" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.PHPMemCacheClientBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PHPMemCacheClientBuilder"></a>
@@ -469,9 +618,13 @@ in which the provided zk data handling implementation will be invoked.</p>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PHPMemCacheClientBuilder$.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PHPMemCacheClientBuilder$.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@PHPMemCacheClientBuilder" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.PartitionedClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PartitionedClient"></a>
@@ -484,7 +637,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="PartitionedClient$.html"><span class="name">PartitionedClient</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@PartitionedClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.TwemcacheClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TwemcacheClient"></a>
@@ -497,7 +654,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="TwemcacheClient$.html"><span class="name">TwemcacheClient</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@TwemcacheClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ZookeeperStateMonitor"></a>
@@ -510,7 +671,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="ZookeeperStateMonitor$.html"><span class="name">ZookeeperStateMonitor</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ZookeeperStateMonitor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="exp"></a>
@@ -523,7 +688,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="exp/package.html"><span class="name">exp</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@exp" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.java" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="java"></a>
@@ -536,7 +705,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="java/package.html"><span class="name">java</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@java" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.migration" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="migration"></a>
@@ -549,7 +722,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="migration/package.html"><span class="name">migration</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@migration" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li><li name="com.twitter.finagle.memcached.protocol" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="protocol"></a>
@@ -562,9 +739,13 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="protocol/package.html"><span class="name">protocol</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@protocol" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
-    </li><li name="com.twitter.finagle.memcached.replication" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.memcached.replication" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="replication"></a>
       <a id="replication:replication"></a>
       <h4 class="signature">
@@ -575,8 +756,23 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="replication/package.html"><span class="name">replication</span></a>
       </span>
-      </h4>
-      <p class="comment cmt">Package replication implements a base cache client that can manage multiple cache replicas.</p>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@replication" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Package replication implements a base cache client that can manage multiple cache replicas.</p><div class="fullcomment"><div class="comment cmt"><p>Package replication implements a base cache client that can manage multiple cache replicas.</p><p>The base replication client will forward cache command to all replicas, as well as collect and
+aggregate each replica's response into a ReplicationStatus object representing the replication
+consistency. The BaseReplicationClient will not handle the consistency between replicas in anyway,
+but only to report its view of the replication state. For instance, BaseReplicationClient provides
+interfaces similar to generic memcache client but always returns ReplicationStatus object which
+can be one of these three forms:</p><ul><li>ConsistentReplication, indicating a consistent state across all replicas</li><li>InconsistentReplication, indicating an inconsistent state across all replicas</li><li>FailedReplication, indicating a failure state</li></ul><p>By checking the returned ReplicationStatus object, one can tell the cache replication status and
+then handle it with application specific logic.</p><p>In addition to a base replication client, a simple replication client wrapper that's compatible
+with generic cache client interface is also provided. The SimpleReplicationClient only supports
+a subset of all memcached commands for now, and will succeed only if the command succeed on all
+cache replicas. In a more complicate caching scenario, this simple/naive replication client may
+not be applicable.
+</p></div></div>
     </li><li name="com.twitter.finagle.memcached.util" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="util"></a>
       <a id="util:util"></a>
@@ -588,7 +784,11 @@ in which the provided zk data handling implementation will be invoked.</p>
       <span class="symbol">
         <a href="util/package.html"><span class="name">util</span></a>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@util" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -615,6 +815,7 @@ in which the provided zk data handling implementation will be invoked.</p>
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../../lib/template.js"></script>
+
+
     </body>
       </html>

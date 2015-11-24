@@ -1,5 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html >
 <html>
         <head>
           <title>Server - com.twitter.finagle.Memcached.Server</title>
@@ -9,6 +8,11 @@
           
       <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
       <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../index.html';
@@ -24,9 +28,17 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="Memcached$$Server$.html" title="Go to companion"><img src="../../../lib/class_to_object_big.png" /></a>
+        <a href="Memcached$$Server$.html" title="See companion object"><img alt="Class/Object" src="../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a></p>
-        <h1><a href="Memcached$$Server$.html" title="Go to companion">Server</a></h1>
+        <h1><a href="Memcached$$Server$.html" title="See companion object">Server</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Memcached$$Server$.html" title="See companion object">object Server</a>
+            | <a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">package Memcached</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       </div>
 
       <h4 id="signature" class="signature">
@@ -35,13 +47,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="defval" name="com.twitter.finagle.server.StackServer.newStack[com.twitter.finagle.memcached.protocol.Command, com.twitter.finagle.memcached.protocol.Response]">...</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol">Memcached.this.Server.defaultParams</span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="../../package.html">StackServer.newStack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Memcached$$Server$.html">Server.defaultParams</a></span></span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>], <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>], <a href="server/StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>], <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]], <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>], <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>], <a href="server/StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>], <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]], <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -67,7 +79,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -88,9 +99,13 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="defval" name="com.twitter.finagle.server.StackServer.newStack[com.twitter.finagle.memcached.protocol.Command, com.twitter.finagle.memcached.protocol.Response]">...</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol">Memcached.this.Server.defaultParams</span></span>)</span>
+        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="../../package.html">StackServer.newStack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Memcached$$Server$.html">Server.defaultParams</a></span></span></span>)</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@&lt;init&gt;(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.Memcached.Server" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       
     </li></ol>
             </div>
@@ -108,7 +123,11 @@
       <span class="symbol">
         <span class="name">In</span><span class="result"> = <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@In=com.twitter.finagle.memcached.protocol.Response" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The type we write into the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we write into the transport.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server.Out" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -122,7 +141,11 @@
       <span class="symbol">
         <span class="name">Out</span><span class="result"> = <a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@Out=com.twitter.finagle.memcached.protocol.Command" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The type we read out of the transport.</p><div class="fullcomment"><div class="comment cmt"><p>The type we read out of the transport.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd></dl></div>
     </li></ol>
@@ -133,19 +156,6 @@
         <div id="values" class="values members">
               <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="!=(x$1:AnyRef):Boolean"></a>
-      <a id="!=(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
       <h4 class="signature">
@@ -154,10 +164,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <a id="##():Int"></a>
@@ -167,24 +181,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="==(x$1:AnyRef):Boolean"></a>
-      <a id="==(AnyRef):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
-      </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Any#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>
       <h4 class="signature">
@@ -193,10 +198,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -208,7 +217,11 @@
       <span class="symbol">
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -219,9 +232,13 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -240,7 +257,11 @@
       <span class="symbol">
         <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="p">p: <span class="extype" name="com.twitter.finagle.server.StdStackServer.configured.P">P</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.configured.P">P</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Stack.Parameterized#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):T"></a>
@@ -253,7 +274,11 @@
       <span class="symbol">
         <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="psp">psp: (<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>, <a href="Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.Stack.Parameterized.configured.P">P</span>])</span>)</span><span class="result">: <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):T" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#copy1" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="copy1(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.Memcached.Server"></a>
@@ -266,7 +291,11 @@
       <span class="symbol">
         <span class="name">copy1</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="#stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]">this.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="#params:com.twitter.finagle.Stack.Params">this.params</a></span></span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@copy1(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.Memcached.Server" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A copy constructor in lieu of defining StackServer as a
 case class.</p><div class="fullcomment"><div class="comment cmt"><p>A copy constructor in lieu of defining StackServer as a
 case class.
@@ -280,9 +309,13 @@ case class.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -293,9 +326,13 @@ case class.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -314,7 +351,11 @@ case class.
       <span class="symbol">
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -325,9 +366,13 @@ case class.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -338,9 +383,13 @@ case class.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#newDispatcher" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[Server.this.In,Server.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]):com.twitter.util.Closable"></a>
@@ -353,14 +402,17 @@ case class.
       <span class="symbol">
         <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=com.twitter.finagle.memcached.protocol.Response" class="extmbr" name="com.twitter.finagle.Memcached.Server.In">In</a>, <a href="#Out=com.twitter.finagle.memcached.protocol.Command" class="extmbr" name="com.twitter.finagle.Memcached.Server.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@newDispatcher(transport:com.twitter.finagle.transport.Transport[Server.this.In,Server.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]):com.twitter.util.Closable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Defines a dispatcher, a function which binds a transport to a
 <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a dispatcher, a function which binds a transport to a
 <a href="Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>. Together with a <code>Listener</code>, it
 forms the foundation of a finagle server. Concrete implementations
 are expected to specify this.
-</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a>
-</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">com.twitter.finagle.dispatch.GenSerialServerDispatcher</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#newListener" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newListener():com.twitter.finagle.server.Listener[Server.this.In,Server.this.Out]"></a>
       <a id="newListener():Listener[In,Out]"></a>
@@ -372,7 +424,11 @@ are expected to specify this.
       <span class="symbol">
         <span class="name">newListener</span><span class="params">()</span><span class="result">: <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="#In=com.twitter.finagle.memcached.protocol.Response" class="extmbr" name="com.twitter.finagle.Memcached.Server.In">In</a>, <a href="#Out=com.twitter.finagle.memcached.protocol.Command" class="extmbr" name="com.twitter.finagle.Memcached.Server.Out">Out</a>]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@newListener():com.twitter.finagle.server.Listener[Server.this.In,Server.this.Out]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Defines a typed <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a> for this server.</p><div class="fullcomment"><div class="comment cmt"><p>Defines a typed <a href="server/Listener.html" class="extype" name="com.twitter.finagle.server.Listener">com.twitter.finagle.server.Listener</a> for this server.
 Concrete StackServer implementations are expected to specify this.
 </p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a></dd></dl></div>
@@ -385,9 +441,13 @@ Concrete StackServer implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -398,9 +458,13 @@ Concrete StackServer implementations are expected to specify this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#params" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="params:com.twitter.finagle.Stack.Params"></a>
@@ -413,7 +477,11 @@ Concrete StackServer implementations are expected to specify this.
       <span class="symbol">
         <span class="name">params</span><span class="result">: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@params:com.twitter.finagle.Stack.Params" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The current parameter map used in this StackServer</p><div class="fullcomment"><div class="comment cmt"><p>The current parameter map used in this StackServer</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#serve" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serve(addr:java.net.SocketAddress,factory:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
@@ -426,7 +494,11 @@ Concrete StackServer implementations are expected to specify this.
       <span class="symbol">
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="factory">factory: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serve(addr:java.net.SocketAddress,factory:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
 </p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
@@ -441,7 +513,11 @@ Concrete StackServer implementations are expected to specify this.
       <span class="symbol">
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serve(addr:String,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
 </p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
@@ -456,7 +532,11 @@ Concrete StackServer implementations are expected to specify this.
       <span class="symbol">
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serve(addr:String,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
 </p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
@@ -471,7 +551,11 @@ Concrete StackServer implementations are expected to specify this.
       <span class="symbol">
         <span class="name">serve</span><span class="params">(<span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serve(addr:java.net.SocketAddress,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code>
 </p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
@@ -486,7 +570,11 @@ Concrete StackServer implementations are expected to specify this.
       <span class="symbol">
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serveAndAnnounce(name:String,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -500,7 +588,11 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serveAndAnnounce(name:String,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -514,7 +606,11 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serveAndAnnounce(name:String,addr:String,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -528,7 +624,11 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@serveAndAnnounce(name:String,addr:String,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Memcached.Server#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -542,7 +642,11 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <span class="name">stack</span><span class="result">: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]]</span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">The current stack used in this StackServer.</p><div class="fullcomment"><div class="comment cmt"><p>The current stack used in this StackServer.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -555,7 +659,11 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
@@ -566,9 +674,13 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -585,9 +697,13 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -604,9 +720,13 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
@@ -625,7 +745,11 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <span class="name">withParams</span><span class="params">(<span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@withParams(params:com.twitter.finagle.Stack.Params):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackServer with <code>params</code> used to configure this StackServer's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a> → <a href="Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -639,7 +763,11 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <span class="symbol">
         <span class="name">withStack</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a></span>
       </span>
-      </h4>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$$Server@withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
       <p class="shortcomment cmt">A new StackServer with the provided Stack.</p><div class="fullcomment"><div class="comment cmt"><p>A new StackServer with the provided Stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a> → <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a></dd></dl></div>
     </li></ol>
             </div>
@@ -651,13 +779,13 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
             </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
             </div><div class="parent" name="com.twitter.finagle.server.StdStackServer">
               <h3>Inherited from <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.server.StackServer">
@@ -669,9 +797,9 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
             </div><div class="parent" name="com.twitter.finagle.Server">
               <h3>Inherited from <a href="Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.10.5/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
@@ -688,6 +816,7 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       <div id="tooltip"></div>
 
       <div id="footer">  </div>
-      <script defer="defer" type="text/javascript" id="jquery-js" src="../../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../../lib/template.js"></script>
+
+
     </body>
       </html>
