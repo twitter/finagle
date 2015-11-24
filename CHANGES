@@ -63,6 +63,9 @@ Runtime Behavior Changes
     as non-connected for greater than its 'unhealthyWindow' (which defaults to 5 minutes).
     ``RB_ID=760771``
 
+  * finagle-serversets: The `c.t.f.serverset2.ZkSession` now uses an unbounded semaphore to
+    limit to 100 outstanding zookeeper requests at any one moment. ``RB_ID=771399``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

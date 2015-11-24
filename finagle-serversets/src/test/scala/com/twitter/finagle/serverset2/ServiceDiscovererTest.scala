@@ -51,7 +51,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
   test("New observation do not cause reads; entries are cached") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver, ForeverEpoch)
+    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk, NullStatsReceiver)), NullStatsReceiver, ForeverEpoch)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
 
@@ -76,7 +76,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
   test("Removed entries are removed from cache") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscovererWithExposedCache(Var.value(new ZkSession(watchedZk)), NullStatsReceiver)
+    val sd = new ServiceDiscovererWithExposedCache(Var.value(new ZkSession(watchedZk, NullStatsReceiver)), NullStatsReceiver)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val cache = sd.cache
@@ -122,7 +122,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
   test("Consecutive observations do not cause reads; entries are cached") {
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk)), NullStatsReceiver, ForeverEpoch)
+    val sd = new ServiceDiscoverer(Var.value(new ZkSession(watchedZk, NullStatsReceiver)), NullStatsReceiver, ForeverEpoch)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val f2 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
@@ -150,13 +150,13 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar {
     implicit val timer = new MockTimer
     val fakeWatchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val watchedZkVar = new ReadWriteVar(new ZkSession(fakeWatchedZk))
+    val watchedZkVar = new ReadWriteVar(new ZkSession(fakeWatchedZk, NullStatsReceiver))
     val sd = new ServiceDiscoverer(watchedZkVar, NullStatsReceiver, ForeverEpoch)
 
     val f1 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
     val f2 = sd("/foo/bar").states.filter(_ != Activity.Pending).toFuture()
 
-    watchedZkVar.update(new ZkSession(watchedZk))
+    watchedZkVar.update(new ZkSession(watchedZk, NullStatsReceiver))
 
     val ew@ExistsWatch("/foo/bar") = watchedZk.value.opq(0)
     val ewwatchv = Var[WatchState](WatchState.Pending)

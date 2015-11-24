@@ -1,8 +1,10 @@
 package com.twitter.finagle.serverset2
 
+import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.Rng
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
@@ -17,7 +19,10 @@ import com.twitter.util._
  * with [[com.twitter.util.Future Futures]]; watches and session states are
  * represented with a [[com.twitter.util.Var]].
  */
-private[serverset2] class ZkSession(watchedZk: Watched[ZooKeeperReader])(implicit timer: Timer) {
+private[serverset2] class ZkSession(
+    watchedZk: Watched[ZooKeeperReader],
+    statsReceiver: StatsReceiver
+  )(implicit timer: Timer) {
   import ZkSession.randomizedDelay
   import ZkSession.logger
 
@@ -29,24 +34,43 @@ private[serverset2] class ZkSession(watchedZk: Watched[ZooKeeperReader])(implici
   private def retryBackoffs =
     (Backoff.exponential(10.milliseconds, 2) take 3) ++ Backoff.const(1.second)
 
+  // If the zookeeper cluster is under duress, there can be 100's of thousands of clients
+  // attempting to read and write at once. Limit to a (fairly large) concurrent request cap.
+  // Use a semaphore (versus explicit rate limiting) to approximate the throughput of the cluster.
+  // N.B. this semaphore has no max-waiters limit. This could lead to an OOME if the zk operations
+  // never complete. This is preferable to handling and re-queuing (via future.sleep etc)
+  // the error if an arbitrary max-limit is set.
+  private val limiter = new AsyncSemaphore(100)
+  private val waitersGauge = statsReceiver.addGauge("numWaiters") { limiter.numWaiters }
+
+  private def limit[T](f: => Future[T]): Future[T] =
+    limiter.acquire().flatMap { permit =>
+      f.ensure {
+        // don't release the permit until f is complete
+        permit.release()
+      }
+    }
+
   /**
    * Invoke a `Future[T]`-producing operation, retrying on
    * [[com.twitter.finagle.serverset2.client.KeeperException.ConnectionLoss]]
-   * according to a backoff schedule defined by [[retryBackoffs]].
+   * according to a backoff schedule defined by [[retryBackoffs]]. The operation itself
+   * will be limited by the session-level semaphore.
    */
   private def safeRetry[T](go: => Future[T]): Future[T] = {
-    def loop(backoffs: Stream[Duration]): Future[T] = go rescue {
-      case exc: KeeperException.ConnectionLoss =>
-        backoffs match {
-          case wait #:: rest =>
-            val jitterWait = randomizedDelay(wait)
-            logger.warning(s"ConnectionLoss to Zookeeper host. Retrying in $jitterWait ms")
-            Future.sleep(jitterWait) before loop(rest)
-          case _ =>
-            logger.error(s"ConnectionLoss. Out of retries - failing request with $exc")
-            Future.exception(exc)
-        }
-    }
+    def loop(backoffs: Stream[Duration]): Future[T] =
+      limit { go }.rescue {
+        case exc: KeeperException.ConnectionLoss =>
+          backoffs match {
+            case wait #:: rest =>
+              val jitterWait = randomizedDelay(wait)
+              logger.warning(s"ConnectionLoss to Zookeeper host. Retrying in $jitterWait")
+              Future.sleep(jitterWait) before loop(rest)
+            case _ =>
+              logger.error(s"ConnectionLoss. Out of retries - failing request with $exc")
+              Future.exception(exc)
+          }
+      }
 
     loop(retryBackoffs)
   }
@@ -190,7 +214,7 @@ private[serverset2] object ZkSession {
   /** A noop ZkSession. */
   val nil: ZkSession = {
     implicit val timer = Timer.Nil
-    new ZkSession(Watched(NullZooKeeperReader, Var(WatchState.Pending)))
+    new ZkSession(Watched(NullZooKeeperReader, Var(WatchState.Pending)), NullStatsReceiver)
   }
 
   val DefaultSessionTimeout = 10.seconds
@@ -209,14 +233,15 @@ private[serverset2] object ZkSession {
    */
   private[serverset2] def apply(
     hosts: String,
-    sessionTimeout: Duration = DefaultSessionTimeout
-  )(implicit timer: Timer): ZkSession = new ZkSession(
-    ClientBuilder()
-      .hosts(hosts)
-      .sessionTimeout(sessionTimeout)
-      .readOnlyOK()
-      .reader()
-  )
+    sessionTimeout: Duration = DefaultSessionTimeout,
+    statsReceiver: StatsReceiver
+  )(implicit timer: Timer): ZkSession =
+    new ZkSession(ClientBuilder()
+        .hosts(hosts)
+        .sessionTimeout(sessionTimeout)
+        .readOnlyOK()
+        .reader(),
+      statsReceiver)
 
   /**
    * Produce a `Var[ZkSession]` representing a ZooKeeper session that automatically
@@ -250,7 +275,7 @@ private[serverset2] object ZkSession {
         _ == WatchState.SessionState(SessionState.Expired)
       }.toFuture().unit.before {
         val jitter = randomizedDelay(backoff)
-        logger.error(s"Zookeeper session has expired. Reconnecting in $jitter ms")
+        logger.error(s"Zookeeper session has expired. Reconnecting in $jitter")
         Future.sleep(jitter)
       }.ensure { reconnect() }
     }
