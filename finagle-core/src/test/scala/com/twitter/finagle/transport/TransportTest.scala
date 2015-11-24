@@ -5,9 +5,7 @@ import com.twitter.io.{Reader, Buf}
 import com.twitter.util.{Await, Future, Promise, Time, Return, Throw}
 import com.twitter.concurrent.AsyncQueue
 import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
-import org.scalacheck.Prop.forAll
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks

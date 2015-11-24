@@ -19,6 +19,8 @@ New Features
   * finagle-netty4: Hello World. Introduce a `Listener` for Netty 4.1. This is still considered beta.
     ``RB_ID=718688``
 
+  * finagle-netty4: Introduce `ChannelTransport` for Netty 4.1. ``RB_ID=763435``
+
   * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
     method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
 
@@ -74,6 +76,9 @@ Breaking API Changes
 
   * finagle-core: Replaced `c.t.f.builder.ClientConfig.Retries` with
     `c.t.f.service.Retries.Policy`. ``RB_ID=760213``
+
+  * finagle-core: A deprecated `c.t.f.CancelledReadException` has been removed.
+    ``RB=763435``
 
   * finagle-http: `c.t.f.http.exp.Multipart.decodeNonChunked` has been removed from
     the public API. Use `c.t.f.http.Request.multipart` instead. Also

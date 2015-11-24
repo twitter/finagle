@@ -213,7 +213,7 @@ object Transport {
    * is complete, or else has failed.
    *
    * @note This deserves its own implementation, independently of
-   * using copyToWriter. In particular, in today's implemenation,
+   * using copyToWriter. In particular, in today's implementation,
    * the path of interrupts are a little convoluted; they would be
    * clarified by an independent implementation.
    */

@@ -28,6 +28,10 @@ class ChannelTransport[In, Out](ch: Channel)
   private[this] val readq = new AsyncQueue[Out]
   private[this] val failed = new AtomicBoolean(false)
 
+  private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
+    case e => fail(e)
+  }
+
   private[this] def fail(exc: Throwable) {
     if (!failed.compareAndSet(false, true))
       return
@@ -122,7 +126,7 @@ class ChannelTransport[In, Out](ch: Channel)
     // Note: We don't raise on readq.poll's future, because it doesn't set an
     // interrupt handler, but perhaps we should; and perhaps we should always
     // raise on the "other" side of the become indiscriminately in all cases.
-    p setInterruptHandler { case intr => fail(intr) }
+    p.setInterruptHandler(readInterruptHandler)
     p
   }
 

@@ -376,8 +376,11 @@ class TransportException extends Exception with SourcedException
  */
 class CancelledWriteException extends TransportException
 
-@deprecated("no longer used", "7.0.0")
-class CancelledReadException extends TransportException
+/**
+ * Indicates that a [[com.twitter.finagle.transport.Transport]] write associated
+ * with the request was dropped by the transport (usually to respect backpressure).
+ */
+class DroppedWriteException extends TransportException
 
 /**
  * A trait for exceptions related to a [[com.twitter.finagle.Service]].

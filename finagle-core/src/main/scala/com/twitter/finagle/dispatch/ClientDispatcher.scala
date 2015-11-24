@@ -3,7 +3,7 @@ package com.twitter.finagle.dispatch
 import com.twitter.concurrent.{AsyncSemaphore, Permit}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Status, Service, Failure, WriteException}
+import com.twitter.finagle.{Service, Failure, WriteException}
 import com.twitter.util.{Future, Time, Promise, Throw, Return}
 import java.net.InetSocketAddress
 
@@ -81,15 +81,14 @@ class SerialClientDispatcher[Req, Rep](trans: Transport[Req, Rep])
   extends GenSerialClientDispatcher[Req, Rep, Req, Rep](trans) {
   import GenSerialClientDispatcher.wrapWriteException
 
-  protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] = {
-    trans.write(req) rescue(
-      wrapWriteException
-    ) flatMap { unit =>
-      trans.read()
-    } respond {
-      p.updateIfEmpty(_)
-    }
-  }.unit
+  private[this] val readTheTransport: Unit => Future[Rep] = _ => trans.read()
+
+  protected def dispatch(req: Req, p: Promise[Rep]): Future[Unit] =
+    trans.write(req)
+      .rescue(wrapWriteException)
+      .flatMap(readTheTransport)
+      .respond(rep => p.updateIfEmpty(rep))
+      .unit
 
   protected def write(req: Req) = trans.write(req)
   protected def read(permit: Permit) = trans.read() ensure { permit.release() }
