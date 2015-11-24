@@ -5,7 +5,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.util.Rng
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -23,7 +22,6 @@ private[serverset2] class ZkSession(
     watchedZk: Watched[ZooKeeperReader],
     statsReceiver: StatsReceiver
   )(implicit timer: Timer) {
-  import ZkSession.randomizedDelay
   import ZkSession.logger
 
   /** The dynamic `WatchState` of this `ZkSession` instance. */
@@ -32,7 +30,7 @@ private[serverset2] class ZkSession(
   private val zkr: ZooKeeperReader = watchedZk.value
 
   private def retryBackoffs =
-    (Backoff.exponential(10.milliseconds, 2) take 3) ++ Backoff.const(1.second)
+    (Backoff.decorrelatedJittered(10.milliseconds, 1.second) take 3) ++ Backoff.const(1.second)
 
   // If the zookeeper cluster is under duress, there can be 100's of thousands of clients
   // attempting to read and write at once. Limit to a (fairly large) concurrent request cap.
@@ -63,9 +61,8 @@ private[serverset2] class ZkSession(
         case exc: KeeperException.ConnectionLoss =>
           backoffs match {
             case wait #:: rest =>
-              val jitterWait = randomizedDelay(wait)
-              logger.warning(s"ConnectionLoss to Zookeeper host. Retrying in $jitterWait")
-              Future.sleep(jitterWait) before loop(rest)
+              logger.warning(s"ConnectionLoss to Zookeeper host. Retrying in $wait")
+              Future.sleep(wait) before loop(rest)
             case _ =>
               logger.error(s"ConnectionLoss. Out of retries - failing request with $exc")
               Future.exception(exc)
@@ -218,11 +215,10 @@ private[serverset2] object ZkSession {
   }
 
   val DefaultSessionTimeout = 10.seconds
+  val DefaultBackoff = 5.seconds
 
   private val authUser = Identities.get().headOption getOrElse(("/null"))
   private val authInfo: String = "%s:%s".format(authUser, authUser)
-  private def randomizedDelay(minDelay: Duration): Duration =
-    minDelay + Duration.fromMilliseconds(Rng.threadLocal.nextInt(minDelay.inMilliseconds.toInt))
   private val logger = Logger("ZkSession")
 
   /**
@@ -249,14 +245,24 @@ private[serverset2] object ZkSession {
    * observation of the returned `Var[ZkSession]` is closed.
    */
   def retrying(
-      backoff: Duration,
+      backoff: Stream[Duration],
       newZkSession: () => ZkSession
   )(implicit timer: Timer): Var[ZkSession] = {
     val v = Var(ZkSession.nil)
 
     @volatile var closing = false
     @volatile var zkSession: ZkSession = ZkSession.nil
+    @volatile var remainingBackoff = backoff
 
+    def nextBackoff(): Duration = {
+      remainingBackoff match {
+        case value #:: rest =>
+          remainingBackoff = rest
+          value
+
+        case _ => DefaultBackoff
+      }
+    }
     def reconnect() {
       if (closing) return
 
@@ -274,7 +280,7 @@ private[serverset2] object ZkSession {
       zkSession.state.changes.filter {
         _ == WatchState.SessionState(SessionState.Expired)
       }.toFuture().unit.before {
-        val jitter = randomizedDelay(backoff)
+        val jitter = nextBackoff()
         logger.error(s"Zookeeper session has expired. Reconnecting in $jitter")
         Future.sleep(jitter)
       }.ensure { reconnect() }

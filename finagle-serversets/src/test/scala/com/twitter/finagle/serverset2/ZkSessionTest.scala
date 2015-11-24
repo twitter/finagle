@@ -1,10 +1,9 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.finagle.stats.NullStatsReceiver
-
-import collection.immutable
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
+import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
@@ -12,6 +11,7 @@ import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.collection.immutable
 
 sealed private trait ZkOp { type Res; val res = new Promise[Res] }
 private object ZkOp {
@@ -171,7 +171,7 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
     implicit val timer = new MockTimer
     val zkState: Var[WatchState] with Updatable[WatchState] = Var(WatchState.Pending)
     val watchedZk = Watched(new OpqueueZkReader(), zkState)
-    val zk = ZkSession.retrying(5.seconds, () => new ZkSession(watchedZk, NullStatsReceiver))
+    val zk = ZkSession.retrying(Backoff.constant(5.seconds), () => new ZkSession(watchedZk, NullStatsReceiver))
 
     zk.changes.respond {
       case _ => ()
