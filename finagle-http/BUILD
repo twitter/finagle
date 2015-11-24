@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-http',
   dependencies=[
     'finagle/finagle-http/src/main/scala',

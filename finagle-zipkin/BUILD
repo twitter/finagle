@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-zipkin',
   dependencies=[
     'finagle/finagle-zipkin/src/main/scala'

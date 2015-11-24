@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-testers',
   dependencies=[
     'finagle/finagle-testers/src/main/scala'

@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-memcached',
   dependencies=[
     'finagle/finagle-memcached/src/main/java',

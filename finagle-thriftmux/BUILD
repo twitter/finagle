@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-thriftmux',
   dependencies=[
     'finagle/finagle-thriftmux/src/main/scala'

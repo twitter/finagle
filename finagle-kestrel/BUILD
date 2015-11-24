@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-kestrel',
   dependencies=[
     'finagle/finagle-kestrel/src/main/java',

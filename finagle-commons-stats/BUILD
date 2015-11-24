@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-commons-stats',
   dependencies=[
     'finagle/finagle-commons-stats/src/main/scala'

@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-netty4',
   dependencies=[
     'finagle/finagle-netty4/src/main/scala'

@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-stream',
   dependencies=[
     'finagle/finagle-stream/src/main/scala'

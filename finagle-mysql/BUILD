@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-mysql',
   dependencies=[
     'finagle/finagle-mysql/src/main/scala'

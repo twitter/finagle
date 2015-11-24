@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-redis',
   dependencies=[
     'finagle/finagle-redis/src/main/scala'

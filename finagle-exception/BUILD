@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-exception',
   dependencies=[
     'finagle/finagle-exception/src/main/scala'
