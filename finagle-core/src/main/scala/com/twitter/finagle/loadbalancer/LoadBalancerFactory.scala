@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TrafficDistributor
 import com.twitter.finagle.stats._
-import com.twitter.util.{Activity, Var}
+import com.twitter.util.{Activity, Future, Time, Var}
 import java.net.SocketAddress
 import java.util.logging.{Level, Logger}
 
@@ -167,13 +167,38 @@ object LoadBalancerFactory {
 
         val composite = reporter(label, Some(sockaddr)) andThen monitor
 
-        val underlying = next.make(params +
-            Transporter.EndpointAddr(SocketAddresses.unwrap(sockaddr)) +
-            param.Stats(stats) +
-            param.Monitor(composite))
-
-        new ServiceFactoryProxy(underlying) {
-          override def toString = sockaddr.toString
+        // While constructing a single endpoint stack is fairly cheap,
+        // creating a large number of them can be expensive. On server
+        // set change, if the set of endpoints is large, and we
+        // initialized endpoint stacks eagerly, it could delay the load
+        // balancer readiness significantly. Instead, we spread that
+        // cost across requests by moving endpoint stack creation into
+        // service acquisition (apply method below).
+        new ServiceFactory[Req, Rep] {
+          var underlying: ServiceFactory[Req, Rep] = null
+          var isClosed = false
+          def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
+            synchronized {
+              if (isClosed) return Future.exception(new ServiceClosedException)
+              if (underlying == null) underlying = next.make(params +
+                Transporter.EndpointAddr(SocketAddresses.unwrap(sockaddr)) +
+                param.Stats(stats) +
+                param.Monitor(composite))
+            }
+            underlying(conn)
+          }
+          def close(deadline: Time): Future[Unit] = synchronized {
+            isClosed = true
+            if (underlying == null) Future.Done
+            else underlying.close(deadline)
+          }
+          override def status: Status = synchronized {
+            if (underlying == null)
+              if (!isClosed) Status.Open
+              else Status.Closed
+            else underlying.status
+          }
+          override def toString: String = sockaddr.toString
         }
       }
 
