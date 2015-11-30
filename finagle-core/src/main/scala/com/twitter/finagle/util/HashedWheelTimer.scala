@@ -103,6 +103,11 @@ object HashedWheelTimer {
   def apply(tickDuration: Duration, ticksPerWheel: Int): Timer =
     HashedWheelTimer(Executors.defaultThreadFactory(), tickDuration, ticksPerWheel)
 
+  /**
+   * Create a `HashedWheelTimer` based on a netty.HashedWheelTimer.
+   */
+  def apply(nettyTimer: netty.HashedWheelTimer): Timer = new HashedWheelTimer(nettyTimer)
+
   // Note: this uses the default `ticksPerWheel` size of 512 and 10 millisecond
   // ticks, which gives ~5100 milliseconds worth of scheduling. This should
   // suffice for most usage without having tasks scheduled for a later round.

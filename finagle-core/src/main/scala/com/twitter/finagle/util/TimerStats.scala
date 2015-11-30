@@ -8,7 +8,7 @@ import java.util
 import java.util.concurrent.TimeUnit
 import org.jboss.netty.{util => netty}
 
-private[util] object TimerStats {
+private[finagle] object TimerStats {
 
   private val log = Logger.get()
 
