@@ -59,4 +59,19 @@ object Listener {
     implicit val param = Stack.Param(TrafficClass(None))
   }
 
+  /**
+   * Configures TCP_NODELAY on the server socket
+   * @param b `true` disables Nagle's algorithm.
+   * @note This param only applies to netty's >= 4.
+   *      Netty 3's socket options are still configured by
+   *      the [[com.twitter.finagle.netty3.Netty3Listener]] instance.
+   */
+  case class NoDelay(b: Boolean) {
+    def mk(): (NoDelay, Stack.Param[NoDelay]) =
+      (this, NoDelay.param)
+  }
+
+  object NoDelay {
+    implicit val param = Stack.Param(NoDelay(true))
+  }
 }

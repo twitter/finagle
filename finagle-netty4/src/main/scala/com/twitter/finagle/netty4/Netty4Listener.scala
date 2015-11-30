@@ -3,11 +3,10 @@ package com.twitter.finagle.netty4
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
 import com.twitter.finagle.netty4.channel.{ServerBridge, Netty4ChannelInitializer}
-//import com.twitter.finagle.netty4.transport.SocketChannelTransport // CSL-2050
+import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util._
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
@@ -49,8 +48,8 @@ private[netty4] object PipelineInit {
  */
 case class Netty4Listener[In, Out](
     params: Stack.Params,
-    transportFactory: SocketChannel => Transport[In, Out] // CSL-2050 = new SocketChannelTransport[In, Out](_),
-    ) extends Listener[In, Out] {                         // todo: also, rm the transportFactory param
+    transportFactory: SocketChannel => Transport[In, Out] = new ChannelTransport[In, Out](_)
+  ) extends Listener[In, Out] {
 
   private[this] val PipelineInit(pipelineInit) = params[PipelineInit]
 
@@ -58,8 +57,9 @@ case class Netty4Listener[In, Out](
   private[this] val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
   private[this] val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
 
-  // listener params
+  // socket params
   private[this] val Listener.Backlog(backlog) = params[Listener.Backlog]
+  private[this] val Listener.NoDelay(noDelay) = params[Listener.NoDelay]
 
 
   /**
@@ -87,7 +87,7 @@ case class Netty4Listener[In, Out](
       val bootstrap = new ServerBootstrap()
       bootstrap.channel(classOf[NioServerSocketChannel])
       bootstrap.group(bossLoop, WorkerPool)
-      bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, true)
+      bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
       //bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT) //todo: investigate pooled allocator CSL-2089
       //bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
       bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, true)

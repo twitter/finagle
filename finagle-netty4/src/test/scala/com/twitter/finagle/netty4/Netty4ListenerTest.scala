@@ -71,8 +71,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
 
-  // ignore until CSL-2050
-  ignore("frames pipeline messages and bridges transports and service dispatchers (aka it works end-to-end)") {
+  test("frames pipeline messages and bridges transports and service dispatchers (aka it works end-to-end)") {
     val ctx = new StatsCtx { }
     import ctx._
 
@@ -85,10 +84,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     }
 
     val p = Params.empty + Label("test") + Stats(sr) + PipelineInit(StringServerInit)
-    val listener = Netty4Listener[String, String](
-        p,
-        transportFactory = ??? // CSL-2050 new SocketChannelTransport[String, String](_),
-      )
+    val listener = Netty4Listener[String, String](p)
 
     @volatile var observedRequest: Option[String] = None
 
