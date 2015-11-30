@@ -46,7 +46,7 @@ private[netty4] object PipelineInit {
  * @see [[com.twitter.finagle.transport.Transport]]
  * @see [[com.twitter.finagle.param]]
  */
-case class Netty4Listener[In, Out](
+private[finagle] case class Netty4Listener[In, Out](
     params: Stack.Params,
     transportFactory: SocketChannel => Transport[In, Out] = new ChannelTransport[In, Out](_)
   ) extends Listener[In, Out] {
