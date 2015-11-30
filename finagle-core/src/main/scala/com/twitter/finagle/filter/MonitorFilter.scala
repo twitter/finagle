@@ -26,10 +26,12 @@ private[finagle] object MonitorFilter {
  * according to the argument [[com.twitter.util.Monitor]].
  */
 class MonitorFilter[Req, Rep](monitor: Monitor) extends SimpleFilter[Req, Rep] {
+
+  private[this] val OnFailureFn: Throwable => Unit =
+    exc => monitor.handle(exc)
+
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
     Future.monitored {
       service(request)
-    } onFailure { exc =>
-      monitor.handle(exc)
-    }
+    }.onFailure(OnFailureFn)
 }
