@@ -10,7 +10,7 @@ import com.twitter.util.Try;
 /**
  * Just a compilation test for Java.
  */
-class RetryFilterCompilationTest {
+public class RetryFilterCompilationTest {
 
   @Test
   public void testRetryFilter() {
