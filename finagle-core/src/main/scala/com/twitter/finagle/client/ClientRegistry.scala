@@ -59,8 +59,9 @@ private[twitter] object ClientRegistry extends StackRegistry {
 }
 
 private[finagle] object RegistryEntryLifecycle {
+  val role = Stack.Role("RegistryEntryLifecycle")
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] = new Stack.Module[ServiceFactory[Req, Rep]] {
-    val role = Stack.Role("RegistryEntryLifecycle")
+    val role = RegistryEntryLifecycle.role
 
     val description: String = "Maintains the ClientRegistry for the stack"
     def parameters: Seq[Stack.Param[_]] = Seq(
