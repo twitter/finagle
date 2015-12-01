@@ -105,7 +105,7 @@ Bug Fixes
     properly through `newServiceIface` ``RB_ID=760157``
 
 6.30.0
-~~~~~~~
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -162,7 +162,7 @@ Breaking API Changes
     https://github.com/finagle/finagle-swift . ``RB_ID=752826``
 
 6.29.0
-~~~~~~
+------
 
 Deprecations
 ~~~~~~~~~~~~
