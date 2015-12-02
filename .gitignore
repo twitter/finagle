@@ -20,3 +20,10 @@ out/
 sbt-launch-0.7.5.jar
 sbt-launch.jar
 *.pyc
+.project
+.settings
+.classpath
+.cache-main
+.cache-tests
+.gitignore
+bin

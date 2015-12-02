@@ -90,6 +90,7 @@ object Commands {
   val QUIT              = "QUIT"
   val SLAVEOF           = "SLAVEOF"
   val CONFIG            = "CONFIG"
+  val SENTINEL          = "SENTINEL"
 
   // Hash Sets
   val HDEL              = "HDEL"
@@ -361,6 +362,7 @@ object CommandBytes {
   val QUIT              = StringToChannelBuffer("QUIT")
   val SLAVEOF           = StringToChannelBuffer("SLAVEOF")
   val CONFIG            = StringToChannelBuffer("CONFIG")
+  val SENTINEL          = StringToChannelBuffer("SENTINEL")
 
   // Hash Sets
   val HDEL              = StringToChannelBuffer("HDEL")

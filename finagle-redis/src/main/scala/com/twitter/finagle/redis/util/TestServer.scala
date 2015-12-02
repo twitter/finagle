@@ -17,23 +17,24 @@ object RedisCluster { self =>
   def address(i: Int) = instanceStack(i).address
   def addresses: Seq[Option[InetSocketAddress]] = instanceStack.map { i => i.address }
 
-  def hostAddresses(): String = {
+  def hostAddresses(from: Int = 0, until: Int = instanceStack.size): String = {
     require(instanceStack.length > 0)
-    addresses.map { address =>
+    addresses.slice(from, until).map { address =>
       val addy = address.get
       "%s:%d".format(addy.getHostName(), addy.getPort())
     }.sorted.mkString(",")
   }
 
-  def start(count: Int = 1) {
+  def start(count: Int = 1, mode: RedisMode = Standalone) {
     0 until count foreach { i =>
-      val instance = new ExternalRedis()
+      val instance = new ExternalRedis(mode)
       instance.start()
       instanceStack.push(instance)
     }
   }
   def stop() {
-    instanceStack.pop().stop()
+    while (instanceStack.nonEmpty) 
+      instanceStack.pop().stop()
   }
   def stopAll() {
     instanceStack.foreach { i => i.stop() }
@@ -48,7 +49,12 @@ object RedisCluster { self =>
   });
 }
 
-class ExternalRedis() {
+sealed trait RedisMode
+case object Standalone extends RedisMode
+case object Sentinel extends RedisMode
+case object Cluster extends RedisMode
+
+class ExternalRedis(mode: RedisMode = Standalone) {
   private[this] val rand = new Random
   private[this] var process: Option[Process] = None
   private[this] val forbiddenPorts = 6300.until(7300)
@@ -88,7 +94,11 @@ class ExternalRedis() {
   def start() {
     val port = address.get.getPort()
     val conf = createConfigFile(port).getAbsolutePath
-    val cmd: Seq[String] = Seq("redis-server", conf)
+    val cmd: Seq[String] = if (mode == Sentinel) {
+      Seq("redis-server", conf, "--sentinel")
+    } else {
+      Seq("redis-server", conf)
+    }
     val builder = new ProcessBuilder(cmd.toList)
     process = Some(builder.start())
     Thread.sleep(200)
