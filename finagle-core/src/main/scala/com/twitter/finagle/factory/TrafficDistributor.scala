@@ -46,11 +46,14 @@ private[finagle] object TrafficDistributor {
       size: Int)
 
   /**
-   * Folds and accumulates over an [[Activity]] based event `stream`.
-   * `Activity.Pending` and `Activity.Failed` states from the source
-   * `stream` take precedence.
+   * Folds and accumulates over an [[Activity]] based event `stream` while biasing
+   * for success by suppressing intermediate failures.
+   *
+   * Once we have seen data (via Activity.Ok), ignore Activity.Pending/Failed state
+   * changes and keep using stale data to prevent discarding possibly valid data
+   * if the updating activity is having transient failures.
    */
-  def scanLeft[T, U](
+  private def safelyScanLeft[T, U](
     init: U,
     stream: Event[Activity.State[T]]
   )(f: (U, T) => U): Event[Activity.State[U]] = {
@@ -59,6 +62,8 @@ private[finagle] object TrafficDistributor {
       case (Activity.Pending, Activity.Ok(update)) => Activity.Ok(f(init, update))
       case (Activity.Failed(_), Activity.Ok(update)) => Activity.Ok(f(init, update))
       case (Activity.Ok(state), Activity.Ok(update)) => Activity.Ok(f(state, update))
+      case (stale@Activity.Ok(state), Activity.Failed(_)) if init != state => stale
+      case (stale@Activity.Ok(state), Activity.Pending) if init != state => stale
       case (_, failed@Activity.Failed(_)) => failed
       case (_, pending@Activity.Pending) => pending
     }
@@ -139,7 +144,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
     sockaddrs: Event[Activity.State[Set[SocketAddress]]]
   ): Event[Activity.State[Set[WeightedFactory[Req, Rep]]]] = {
     val init = Map.empty[SocketAddress, WeightedFactory[Req, Rep]]
-    scanLeft(init, sockaddrs) {
+    safelyScanLeft(init, sockaddrs) {
       case (active, addrs) =>
         // Note, if an update contains multiple `WeightedSocketAddress` instances
         // with duplicate `addr` fields, only one of the instances and its associated
@@ -196,7 +201,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
     // Cache entries are balancer instances together with their backing collection
     // which is updatable. The entries are keyed by weight class.
     val init = Map.empty[Double, CachedBalancer[Req, Rep]]
-    scanLeft(init, endpoints) {
+    safelyScanLeft(init, endpoints) {
       case (balancers, activeSet) =>
         val weightedGroups: Map[Double, Set[WeightedFactory[Req, Rep]]] =
           activeSet.groupBy(_.weight)
@@ -274,11 +279,10 @@ private[finagle] class TrafficDistributor[Req, Rep](
         val failing = new FailingFactory[Req, Rep](e)
         pending.updateIfEmpty(Return(failing))
         failing
+
       case (staleState, Activity.Pending) =>
-        // This could create a new `DelayedFactory`, however, after an
-        // initial resolution, we prefer a stale set instead of queueing
-        // for resolution. That is, it's okay to serve requests on an
-        // outdated set.
+        // This should only happen on initialization and never be seen again
+        // due to the logic in safelyScanLeft.
         staleState
     }
 

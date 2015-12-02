@@ -53,6 +53,10 @@ Runtime Behavior Changes
     services. The previous behavior can be achieved by explicitly passing in
     `RetryBudget.Infinite`. ``RB_ID=766302``
 
+  * finagle-core: `c.t.f.factory.TrafficDistributor` now suppresses changes when a bound
+    address is updated from a valid set to an error. Instead, it continues using stale
+    data until it gets a successful update.
+
   * finagle-http: Unhandled exceptions from user defined HTTP services are now converted
     into very basic 500 responses so clients talking to those services see standard HTTP
     responses instead of a dropped connection. ``RB_ID=755846``

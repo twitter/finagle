@@ -293,10 +293,30 @@ class TrafficDistributorTest extends FunSuite {
     assert(Await.result(bal1(10)) == 10)
     assert(balancers.head.endpoints.sample() == resolved.map(SocketAddrFactory))
 
-    // propagate `Failed(_)` exception
+    // subsequent `Failed` will propagate stale state
     val exc = new Exception("failed activity")
     dest() = Activity.Failed(exc)
-    assert(exc == intercept[Exception] { Await.result(dist()) })
+    val bal2 = Await.result(dist())
+    assert(Await.result(bal2(10)) == 10)
+    assert(balancers.head.endpoints.sample() == resolved.map(SocketAddrFactory))
+  })
+
+  test("transitions to failure if failure comes first") (new Ctx {
+    val init: Activity.State[Set[SocketAddress]] = Activity.Pending
+    val dest = Var(init)
+    val dist = newDist(dest)
+
+    // Failure is only allowed as an initial state
+    dest() = Activity.Failed(new Exception)
+    intercept[Exception] { Await.result(dist())}
+
+    // now give it a good value and then make sure that
+    // failed never comes back.
+    dest() = Activity.Ok(Set(1).map(TestAddr))
+    Await.result(dist())
+
+    dest() = Activity.Failed(new Exception)
+    Await.result(dist())
   })
 
   // todo: move this to util-stats?
