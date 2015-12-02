@@ -64,7 +64,7 @@ private[serverset2] object ServiceDiscoverer {
  */
 private[serverset2] class ServiceDiscoverer(
   varZkSession: Var[ZkSession],
-  statsReceiver: StatsReceiver,
+  val statsReceiver: StatsReceiver,
   healthStabilizationEpoch: Epoch
 ) {
   import ServiceDiscoverer._

@@ -4,7 +4,7 @@ import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -235,9 +235,10 @@ private[serverset2] object ZkSession {
     new ZkSession(ClientBuilder()
         .hosts(hosts)
         .sessionTimeout(sessionTimeout)
+        .statsReceiver(DefaultStatsReceiver.scope("zkclient").scope(Zk2Resolver.statsOf(hosts)))
         .readOnlyOK()
         .reader(),
-      statsReceiver)
+      statsReceiver.scope(Zk2Resolver.statsOf(hosts)))
 
   /**
    * Produce a `Var[ZkSession]` representing a ZooKeeper session that automatically

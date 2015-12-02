@@ -32,6 +32,15 @@ private[serverset2] object Zk2Resolver {
     case Addr.Bound(set, _) => set.size
     case _ => 0
   }
+
+  /**
+   * The prefix to use for scoping stats of a ZK ensemble. The input
+   * string can be a long vip or coma separated set. The function keeps
+   * the first two components of the first hostname. Take at most 30
+   * characters out of that.
+   */
+  def statsOf(hostname: String): String =
+    hostname.takeWhile(_ != ',').split('.').take(2).mkString(".").take(30)
 }
 
 /**
@@ -75,10 +84,8 @@ class Zk2Resolver(
 
   // Cache of ServiceDiscoverer instances.
   private[this] val discoverers = Memoize.snappable[String, ServiceDiscoverer] { hosts =>
-    // scope the stats per zk host set
-    // (string can be a long vip or set, keep the first 30 chars which should be sufficient)
-    val hostPrefix = hosts.take(30)
-    val scopedStats = statsReceiver.scope(hostPrefix)
+    val scopedStats = statsReceiver.scope(statsOf(hosts))
+
 
     val varZkSession = ZkSession.retrying(
       ServiceDiscoverer.DefaultRetrying,
@@ -112,7 +119,7 @@ class Zk2Resolver(
     case (discoverer, path, endpointOption) =>
       val scoped = {
         val sr =
-          path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
+          path.split("/").filter(_.nonEmpty).foldLeft(discoverer.statsReceiver) {
             case (sr, ns) => sr.scope(ns)
           }
         sr.scope(s"endpoint=${endpointOption.getOrElse("default")}")
