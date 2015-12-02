@@ -23,7 +23,3 @@ sbt-launch.jar
 .project
 .settings
 .classpath
-.cache-main
-.cache-tests
-.gitignore
-bin
