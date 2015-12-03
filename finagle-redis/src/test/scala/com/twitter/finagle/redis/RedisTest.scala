@@ -73,8 +73,8 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
-    RedisCluster.start(count = count, mode = Standalone)
-    RedisCluster.start(count = sentinelCount, mode = Sentinel)
+    RedisCluster.start(count = count, mode = RedisMode.Standalone)
+    RedisCluster.start(count = sentinelCount, mode = RedisMode.Sentinel)
   }
   override def afterAll(): Unit = RedisCluster.stop()
 

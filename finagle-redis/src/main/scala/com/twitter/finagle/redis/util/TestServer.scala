@@ -25,7 +25,7 @@ object RedisCluster { self =>
     }.sorted.mkString(",")
   }
 
-  def start(count: Int = 1, mode: RedisMode = Standalone) {
+  def start(count: Int = 1, mode: RedisMode = RedisMode.Standalone) {
     0 until count foreach { i =>
       val instance = new ExternalRedis(mode)
       instance.start()
@@ -50,11 +50,12 @@ object RedisCluster { self =>
 }
 
 sealed trait RedisMode
-case object Standalone extends RedisMode
-case object Sentinel extends RedisMode
-case object Cluster extends RedisMode
-
-class ExternalRedis(mode: RedisMode = Standalone) {
+object RedisMode {
+  case object Standalone extends RedisMode
+  case object Sentinel extends RedisMode
+  case object Cluster extends RedisMode
+}
+class ExternalRedis(mode: RedisMode = RedisMode.Standalone) {
   private[this] val rand = new Random
   private[this] var process: Option[Process] = None
   private[this] val forbiddenPorts = 6300.until(7300)
@@ -94,7 +95,7 @@ class ExternalRedis(mode: RedisMode = Standalone) {
   def start() {
     val port = address.get.getPort()
     val conf = createConfigFile(port).getAbsolutePath
-    val cmd: Seq[String] = if (mode == Sentinel) {
+    val cmd: Seq[String] = if (mode == RedisMode.Sentinel) {
       Seq("redis-server", conf, "--sentinel")
     } else {
       Seq("redis-server", conf)

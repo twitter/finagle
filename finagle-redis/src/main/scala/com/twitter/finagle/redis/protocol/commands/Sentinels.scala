@@ -1,12 +1,10 @@
-package com.twitter.finagle.redis.protocol.commands
+package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.protocol.Commands._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.redis.ClientError
-
 import java.net.InetSocketAddress
-
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers
 
@@ -175,7 +173,7 @@ object Sentinel {
   def apply(args: Seq[Array[Byte]]): Sentinel = {
     val subCommandString = new String(trimList(args.headOption.toList, 1, "SENTINEL")(0)).toUpperCase
     val subCommand = subCommands.find { _.command == subCommandString }
-      .getOrElse(throw ClientError("Invalid Sentinel command " + subCommandString))
+      .getOrElse(throw ClientError(s"Invalid Sentinel command ${subCommandString}"))
     subCommand(args.tail)
   }
 }

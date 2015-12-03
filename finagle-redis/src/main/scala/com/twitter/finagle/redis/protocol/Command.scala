@@ -218,6 +218,7 @@ object Commands {
     QUIT              -> {_ => Quit},
     SLAVEOF           -> {SlaveOf(_)},
     CONFIG            -> {Config(_)},
+    SENTINEL          -> {Sentinel(_)},
 
     // hash sets
     HDEL              -> {HDel(_)},

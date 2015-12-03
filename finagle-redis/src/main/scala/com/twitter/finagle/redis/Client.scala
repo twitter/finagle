@@ -92,7 +92,8 @@ class BaseClient(service: Service[Command, Reply]) {
 
   /**
    * Returns information and statistics about the server
-   * @param section Optional parameter can be used to select a specific section of information
+   * @param section Optional parameter can be used to select a specific section of information. A
+   * list of available values can be found <a href="http://redis.io/commands/info">here</a>.
    * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
    */
   def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
@@ -134,10 +135,10 @@ class BaseClient(service: Service[Command, Reply]) {
   /**
    * Helper function to convert a Redis multi-bulk reply into a Map[String, String]
    */
-  private[redis] def returnMap(messages: Seq[ChannelBuffer]) = {
+  private[redis] def returnMap(messages: Seq[String]): Map[String, String] = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
     messages.grouped(2).collect {
-      case Seq(a, b) => (CBToString(a) -> CBToString(b))
+      case Seq(a, b) => (a, b)
     }.toMap
   }
 }

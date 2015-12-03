@@ -4,8 +4,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.redis.naggati.SentinelClientTest
 import com.twitter.finagle.redis.tags.{ RedisTest, ClientTest }
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{ Await, Duration, Future, Time }
-import com.twitter.finagle.redis.util.{ CBToString, StringToChannelBuffer, Sentinel }
+import com.twitter.util.{ Await, Awaitable, Duration, Future, Time }
+import com.twitter.finagle.redis.util.{ CBToString, StringToChannelBuffer }
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -27,6 +27,15 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
   val master0 = masterName(0)
   val master1 = masterName(1)
   val noSuchMaster = masterName(999)
+  val defaultTimeout = 1.second
+  
+  def ready[T <: Awaitable[_]](awaitable: T): T = {
+    Await.ready(awaitable, defaultTimeout)
+  }
+
+  def result[T](awaitable: Awaitable[T]): T = {
+    Await.result(awaitable, defaultTimeout)
+  }
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -35,7 +44,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       j <- 1 to slavesPerMaster
     } withRedisClient(i + masterCount * j) { client =>
       val (host, port) = hostAndPort(redisAddress(i))
-      Await.ready(client.slaveOf("127.0.0.1", port))
+      ready(client.slaveOf("127.0.0.1", port))
     }
   }
 
@@ -50,34 +59,34 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       else DefaultTimer.twitter.doLater(1.second) {
         println(Time.now - startTime)
         if (check) Future.value(true)
-        else checkLater
+        else checkLater()
       }.flatten
     }
-    assert(Await.result(checkLater))
+    assert(Await.result(checkLater, 25.seconds))
   }
 
   test("Correctly perform the MONITOR and MASTER/MASTERS command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       // No masters at the beginning
-      assert(Await.result(client.masters()) === Nil)
+      assert(result(client.masters()) == Nil)
 
       val expected = (0 until masterCount).map { i =>
         val name = masterName(i)
         val address = redisAddress(i)
-        Await.ready(client.monitor(name, address, sentinelCount + i))
+        ready(client.monitor(name, address, sentinelCount + i))
         (name -> (address.getHostString, address.getPort, sentinelCount + i))
       }.toMap
 
-      val masters = Await.result(client.masters())
+      val masters = result(client.masters())
         .map(m => m.name -> (m.ip, m.port, m.quorum))
         .toMap
-      assert(masters === expected)
+      assert(masters == expected)
 
       val oneByOne = expected.keys.map { name =>
-        val m = Await.result(client.master(name))
+        val m = result(client.master(name))
         (m.name -> (m.ip, m.port, m.quorum))
       }.toMap
-      assert(oneByOne === expected)
+      assert(oneByOne == expected)
     }
   }
 
@@ -85,20 +94,20 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
     val address = redisAddress(0)
     withSentinelClient(0) { client0 =>
       // Errors should be throw for unknown names
-      assert(Await.result(client0.sentinels(noSuchMaster).liftToTry).isThrow)
+      assert(result(client0.sentinels(noSuchMaster).liftToTry).isThrow)
       // SENTINALS return a list of OTHER sentinels
-      assert(Await.result(client0.sentinels(master0)).size === 0)
+      assert(result(client0.sentinels(master0)).size == 0)
 
       (1 to 2).foreach { i =>
         withSentinelClient(i) { client =>
-          Await.ready(client.monitor(master0, address, sentinelCount))
+          ready(client.monitor(master0, address, sentinelCount))
         }
       }
       waitUntil("Waiting the sentinel list to be updated ...") {
-        val otherSentinels = Await.result(client0.sentinels(master0))
+        val otherSentinels = result(client0.sentinels(master0))
         val actual = otherSentinels.map(_.port).toSet
         val expected = List(sentinelAddress(1).getPort, sentinelAddress(2).getPort).toSet
-        actual === expected
+        actual == expected
       }
     }
   }
@@ -106,10 +115,10 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
   test("Correctly perform the GET-MASTER-ADDRESS-BY-NAME command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       (0 until masterCount).map { i =>
-        assert(Await.result(client.getMasterAddrByName(noSuchMaster)).isEmpty)
-        val result = Await.result(client.getMasterAddrByName(masterName(i))).get
-        assert(result.getHostString == redisAddress(i).getHostString)
-        assert(result.getPort == redisAddress(i).getPort)
+        assert(result(client.getMasterAddrByName(noSuchMaster)).isEmpty)
+        val address = result(client.getMasterAddrByName(masterName(i))).get
+        assert(address.getHostString == redisAddress(i).getHostString)
+        assert(address.getPort == redisAddress(i).getPort)
       }
     }
   }
@@ -118,17 +127,17 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
   test("Correctly perform the CKQUORUM command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       // Errors should be throw for unknown names
-      assert(Await.result(client.ckquorum(noSuchMaster).liftToTry).isThrow)
+      assert(result(client.ckQuorum(noSuchMaster).liftToTry).isThrow)
 
-      Await.result(client.ckquorum(masterName(0)))
-      Await.result(client.ckquorum(masterName(1)).liftToTry).isThrow
+      result(client.ckQuorum(masterName(0)))
+      result(client.ckQuorum(masterName(1)).liftToTry).isThrow
     }
   }
 
   test("Correctly perform the SLAVES command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       // Errors should be throw for unknown names
-      assert(Await.result(client.slaves(noSuchMaster).liftToTry).isThrow)
+      assert(result(client.slaves(noSuchMaster).liftToTry).isThrow)
 
       val expected = (0 until masterCount).map { i =>
         masterName(i) -> (1 to slavesPerMaster).map { j =>
@@ -137,7 +146,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       }.toMap
 
       def slaves() = expected.keys.map { name =>
-        name -> Await.result(client.slaves(name))
+        name -> result(client.slaves(name))
           .map(s => s.port)
           .toSet
       }.toMap
@@ -152,14 +161,14 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
   test("Correctly perform the RESET command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       // Errors should be throw for unknown names
-      assert(Await.result(client.reset(noSuchMaster).liftToTry).isThrow)
+      assert(result(client.reset(noSuchMaster).liftToTry).isThrow)
 
-      def numberOfSlaves = Await.result(client.master(master1)).numSlaves
+      def numberOfSlaves = result(client.master(master1)).numSlaves
 
-      assert(numberOfSlaves === 2)
+      assert(numberOfSlaves == 2)
       stopRedis(count + sentinelCount - 1)
-      Await.ready(client.reset(master1))
-      waitUntil("Waiting the master to be reset ...")(numberOfSlaves === 1)
+      ready(client.reset(master1))
+      waitUntil("Waiting the master to be reset ...")(numberOfSlaves == 1)
     }
   }
 
@@ -167,28 +176,28 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
     withSentinelClient(0) { client =>
       val option = "down-after-milliseconds"
       // Errors should be throw for unknown names
-      assert(Await.result(client.set(noSuchMaster, option, "2000").liftToTry).isThrow)
+      assert(result(client.set(noSuchMaster, option, "2000").liftToTry).isThrow)
 
-      def currentValue = Await.result(client.master(master0)).downAfterMilliseconds
+      def currentValue = result(client.master(master0)).downAfterMilliseconds
 
       val oldValue = currentValue
       val newValue = oldValue + 1000
-      Await.ready(client.set(master0, option, newValue.toString))
-      assert(currentValue === newValue)
+      ready(client.set(master0, option, newValue.toString))
+      assert(currentValue == newValue)
     }
   }
 
   test("Correctly perform the FAILOVER command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       // Errors should be throw for unknown names
-      assert(Await.result(client.failover(noSuchMaster).liftToTry).isThrow)
+      assert(result(client.failover(noSuchMaster).liftToTry).isThrow)
 
-      def currentMasterPort = Await.result(client.getMasterAddrByName(master0))
+      def currentMasterPort = result(client.getMasterAddrByName(master0))
         .map(_.getPort)
         .get
 
       val oldValue = currentMasterPort
-      Await.ready(client.failover(master0))
+      ready(client.failover(master0))
       waitUntil("Waiting failover ...")(currentMasterPort !== oldValue)
     }
   }
@@ -196,18 +205,18 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
   test("Correctly perform the REMOVE command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       // Errors should be throw for unknown names
-      assert(Await.result(client.remove(noSuchMaster).liftToTry).isThrow)
+      assert(result(client.remove(noSuchMaster).liftToTry).isThrow)
 
-      Await.ready(client.remove(master0))
-      Await.result(client.master(master0).liftToTry).isThrow
-      val masterNames = Await.result(client.masters()).map(_.name)
-      assert(masterNames === List(masterName(1)))
+      ready(client.remove(master0))
+      result(client.master(master0).liftToTry).isThrow
+      val masterNames = result(client.masters()).map(_.name)
+      assert(masterNames == List(masterName(1)))
     }
   }
 
   test("Correctly perform the FLUSHCONFIG command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
-      val configFile = Await.result(client.info("server"))
+      val configFile = result(client.info("server"))
         .flatMap { cb =>
           val prefix = "config_file:"
           (cb: String).trim
@@ -218,7 +227,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
         }.get
       assert(configFile.delete())
       assert(!configFile.exists())
-      Await.ready(client.flushConfig())
+      ready(client.flushConfig())
       assert(configFile.exists())
     }
   }
