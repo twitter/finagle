@@ -2,6 +2,6 @@ name := "quickstart"
 
 version := "1.0"
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.11.7"
 
-libraryDependencies += "com.twitter" %% "finagle-http" % "6.30.0"
+libraryDependencies += "com.twitter" %% "finagle-http" % "6.31.0"
