@@ -95,6 +95,13 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
+    // This override allows java callers to use this method, working around
+    // https://issues.scala-lang.org/browse/SI-8905
+    override def configured[P](psp: (P, Stack.Param[P])): Client = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
+
     protected def newTransporter(): Transporter[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
       val codec = param.applyToCodec(params, http.Http())
@@ -171,8 +178,12 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
-    // This override allows java callers to use this method, working around https://issues.scala-lang.org/browse/SI-8905
-    override def configured[P](psp: (P, Stack.Param[P])): StackServer[Request, Response] = super.configured[P](psp)
+    // This override allows java callers to use this method, working around
+    // https://issues.scala-lang.org/browse/SI-8905
+    override def configured[P](psp: (P, Stack.Param[P])): Server = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
 
     protected def newListener(): Listener[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]

@@ -323,6 +323,14 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     withParams(params+p)
 
   /**
+   * Creates a new StackClient with parameter `psp._1` and Stack Param type `psp._2`.
+   */
+  override def configured[P](psp: (P, Stack.Param[P])): This = {
+    val (p, sp) = psp
+    configured(p)(sp)
+  }
+
+  /**
    * Creates a new StackClient with `params` used to configure this StackClient's `stack`.
    */
   def withParams(params: Stack.Params): This =

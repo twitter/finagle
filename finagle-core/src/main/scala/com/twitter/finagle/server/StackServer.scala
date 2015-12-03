@@ -144,8 +144,19 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    */
   protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]): Closable
 
+  /**
+   * Creates a new StackServer with parameter `p`.
+   */
   override def configured[P: Stack.Param](p: P): This =
     withParams(params+p)
+
+  /**
+   * Creates a new StackServer with parameter `psp._1` and Stack Param type `psp._2`.
+   */
+  override def configured[P](psp: (P, Stack.Param[P])): This = {
+    val (p, sp) = psp
+    configured(p)(sp)
+  }
 
   /**
    * Creates a new StackServer with `params` used to configure this StackServer's `stack`.
