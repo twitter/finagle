@@ -47,7 +47,7 @@ private[netty4] class Netty4ChannelInitializer(
       (None, None)
 
   val channelSnooper =
-    if (params[Transport.Verbose].b)
+    if (params[Transport.Verbose].enabled)
       Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
     else
       None

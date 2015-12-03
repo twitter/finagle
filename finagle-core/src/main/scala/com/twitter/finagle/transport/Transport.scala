@@ -141,12 +141,12 @@ object Transport {
    * $param the verbosity of a `Transport`. Transport activity is
    * written to [[com.twitter.finagle.param.Logger]].
    */
-  case class Verbose(b: Boolean) {
+  case class Verbose(enabled: Boolean) {
     def mk(): (Verbose, Stack.Param[Verbose]) =
       (this, Verbose.param)
   }
   object Verbose {
-    implicit val param = Stack.Param(Verbose(false))
+    implicit val param = Stack.Param(Verbose(enabled = false))
   }
 
   /**
@@ -172,11 +172,30 @@ object Transport {
   }
 
   /**
+   * $param the options (i.e., socket options) of a `Transport`.
+   *
+   * @param noDelay enables or disables `TCP_NODELAY` (Nagle's algorithm)
+   *                option on a transport socket (`noDelay = true` means
+   *                disabled). Default is `true` (disabled).
+   *
+   * @param reuseAddr enables or disables `SO_REUSEADDR` option on a
+   *                  transport socket. Default is `true`.
+   */
+  case class Options(noDelay: Boolean, reuseAddr: Boolean) {
+    def mk(): (Options, Stack.Param[Options]) = (this, Options.param)
+  }
+
+  object Options {
+    implicit val param: Stack.Param[Options] =
+      Stack.Param(Options(noDelay = true, reuseAddr = true))
+  }
+
+  /**
    * Serializes the object stream from a `Transport` into a
    * [[com.twitter.io.Writer]].
    *
    * The serialization function `f` can return `Future.None` to interrupt the
-   * stream to faciliate using the transport with multiple writers and vice
+   * stream to facilitate using the transport with multiple writers and vice
    * versa.
    *
    * Both transport and writer are unmanaged, the caller must close when

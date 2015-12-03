@@ -14,7 +14,8 @@ private[finagle] object ChannelRequestStatsHandler {
  * A channel stats handler that keeps per-connection request
  * statistics. This handler should be after the request codec in the
  * stack as it assumes messages are POJOs with request/responses.
- * @param statsReceiver
+ *
+ * @param statsReceiver the [[StatsReceiver]] to which stats are reported
  */
 private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
   extends ChannelInboundHandlerAdapter

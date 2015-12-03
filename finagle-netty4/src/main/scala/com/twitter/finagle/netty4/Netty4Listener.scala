@@ -56,11 +56,10 @@ private[finagle] case class Netty4Listener[In, Out](
   // transport params
   private[this] val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
   private[this] val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+  private[this] val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
 
-  // socket params
+  // listener params
   private[this] val Listener.Backlog(backlog) = params[Listener.Backlog]
-  private[this] val Listener.NoDelay(noDelay) = params[Listener.NoDelay]
-
 
   /**
    * Listen for connections and apply the `serveTransport` callback on connected [[Transport transports]].
@@ -90,7 +89,7 @@ private[finagle] case class Netty4Listener[In, Out](
       bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
       //bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT) //todo: investigate pooled allocator CSL-2089
       //bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-      bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, true)
+      bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
       bootstrap.option[JInt](ChannelOption.SO_LINGER, 0)
       backlog.foreach(bootstrap.option[JInt](ChannelOption.SO_BACKLOG, _))
       sendBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_SNDBUF, _))

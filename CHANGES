@@ -14,7 +14,15 @@ New Features
     as an address. ``RB_ID=758862``
 
   * finagle-core: `c.t.f.service.Retries` now supports adding delay between each automatic retry.
-    This is configured via the Retries.Budget. ``RB_ID=768883``
+    This is configured via the `Retries.Budget`. ``RB_ID=768883``
+
+  * finagle-core: FailureAccrualFactory now uses a FailureAccrualPolicy to determine when to
+    mark an endpoint dead. The default policy, FailureAccrualPolicy.consecutiveFailures(),
+    mimicks existing functionality, and FailureAccrualPolicy.successRate() operates on the
+    exponentially weighted average success rate over a window of requests.``RB_ID=756921``
+
+  * finagle-core: Introduce `c.t.f.transport.Transport.Options` to configure transport-level options
+    (i.e., socket options `TCP_NODELAY` and `SO_REUSEADDR`). ``RB_ID=773824``
 
   * finagle-netty4: Hello World. Introduce a `Listener` for Netty 4.1. This is still considered beta.
     ``RB_ID=718688``
@@ -99,11 +107,6 @@ Breaking API Changes
 
 Bug Fixes
 ~~~~~~~~~
-
-  * finagle-core: FailureAccrualFactory now uses a FailureAccrualPolicy to determine when to
-    mark an endpoint dead. The default policy, FailureAccrualPolicy.consecutiveFailures(),
-    mimicks existing functionality, and FailureAccrualPolicy.successRate() operates on the
-    exponentially weighted average success rate over a window of requests.``RB_ID=756921``
 
   * finagle-thrift: `c.t.f.ThriftRichClient` scoped stats label is now threaded
     properly through `newServiceIface` ``RB_ID=760157``

@@ -64,7 +64,7 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
       assert(transporter.channelOptions.get("connectTimeoutMillis").get ==
         inputParams[Transporter.ConnectTimeout].howlong.inMilliseconds +
         inputParams[LatencyCompensation.Compensation].howlong.inMilliseconds)
-      assert(transporter.channelSnooper.nonEmpty == inputParams[Transport.Verbose].b)
+      assert(transporter.channelSnooper.nonEmpty == inputParams[Transport.Verbose].enabled)
     }
 
     it("newPipeline handles unresolved InetSocketAddresses") {

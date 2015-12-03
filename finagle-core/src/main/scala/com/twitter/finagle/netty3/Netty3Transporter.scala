@@ -143,11 +143,12 @@ object Netty3Transporter {
       case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
       case _ => None
     }
+    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
 
     val opts = new mutable.HashMap[String, Object]()
     opts += "connectTimeoutMillis" -> ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
-    opts += "tcpNoDelay" -> java.lang.Boolean.TRUE
-    opts += "reuseAddress" -> java.lang.Boolean.TRUE
+    opts += "tcpNoDelay" -> (noDelay: java.lang.Boolean)
+    opts += "reuseAddress" -> (reuseAddr: java.lang.Boolean)
     for (v <- keepAlive) opts += "keepAlive" -> (v: java.lang.Boolean)
     for (s <- sendBufSize) opts += "sendBufferSize" -> (s: java.lang.Integer)
     for (s <- recvBufSize) opts += "receiveBufferSize" -> (s: java.lang.Integer)
