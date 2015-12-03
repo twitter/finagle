@@ -10,6 +10,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import java.io.File
 import java.net.InetAddress
 
 @Ignore
@@ -40,9 +41,10 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   private def masterName(i: Int) = "master" + i
 
-  private def waitUntil(deadline: Duration)(check: => Boolean) = {
+  private def waitUntil(msg: String)(check: => Boolean) = {
+    println(msg)
     val startTime = Time.now
-    val until = startTime + deadline
+    val until = startTime + 20.seconds
     def checkLater(): Future[Boolean] = {
       if (Time.now > until) Future.value(false)
       else DefaultTimer.twitter.doLater(1.second) {
@@ -92,7 +94,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
           Await.ready(client.monitor(master0, address, sentinelCount))
         }
       }
-      waitUntil(20.seconds) {
+      waitUntil("Waiting the sentinel list to be updated ...") {
         val otherSentinels = Await.result(client0.sentinels(master0))
         val actual = otherSentinels.map(_.port).toSet
         val expected = List(sentinelAddress(1).getPort, sentinelAddress(2).getPort).toSet
@@ -142,7 +144,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       // Sentinel PINGs masters every 10 seconds to get the latest slave list.
       // We keep checking the slave lists periodically, until it is updated
       // to the latest.
-      waitUntil(20.seconds)(slaves == expected)
+      waitUntil("Waiting the slave list to be updated ...")(slaves == expected)
     }
   }
 
@@ -156,7 +158,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       assert(numberOfSlaves === 2)
       stopRedis(count + sentinelCount - 1)
       Await.ready(client.reset(master1))
-      waitUntil(20.seconds)(numberOfSlaves === 1)
+      waitUntil("Waiting the master to be reset ...")(numberOfSlaves === 1)
     }
   }
 
@@ -186,7 +188,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
       val oldValue = currentMasterPort
       Await.ready(client.failover(master0))
-      waitUntil(20.seconds)(currentMasterPort !== oldValue)
+      waitUntil("Waiting failover ...")(currentMasterPort !== oldValue)
     }
   }
 
@@ -199,6 +201,24 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       Await.result(client.master(master0).liftToTry).isThrow
       val masterNames = Await.result(client.masters()).map(_.name)
       assert(masterNames === List(masterName(1)))
+    }
+  }
+
+  test("Correctly perform the FLUSHCONFIG command", RedisTest, ClientTest) {
+    withSentinelClient(0) { client =>
+      val configFile = Await.result(client.info("server"))
+        .flatMap { cb =>
+          val prefix = "config_file:"
+          (cb: String).trim
+            .split("\n")
+            .find(_.startsWith(prefix))
+            .map(_.substring(prefix.length))
+            .map(new java.io.File(_))
+        }.get
+      assert(configFile.delete())
+      assert(!configFile.exists())
+      Await.ready(client.flushConfig())
+      assert(configFile.exists())
     }
   }
 }

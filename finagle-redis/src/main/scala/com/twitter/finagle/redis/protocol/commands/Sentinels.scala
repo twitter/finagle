@@ -100,7 +100,7 @@ case class SentinelFlushConfig()
   extends Sentinel(SentinelFlushConfig.channelBuffer, Nil)
 
 object SentinelFlushConfig extends SentinelHelper {
-  val command = "CKQUORUM"
+  val command = "FLUSHCONFIG"
   def apply(args: Seq[Array[Byte]]): SentinelFlushConfig = {
     new SentinelFlushConfig()
   }
