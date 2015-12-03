@@ -114,6 +114,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
     }
   }
 
+  // CKQUORUM is introduced in redis 2.8.22. Please run this test with a newer redis server.
   test("Correctly perform the CKQUORUM command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
       // Errors should be throw for unknown names
