@@ -180,12 +180,21 @@ object Filter {
    * TypeAgnostic filters are like SimpleFilters but they leave the Rep and Req types unspecified
    * until `toFilter` is called.
    */
-  trait TypeAgnostic {
+  trait TypeAgnostic { self =>
     def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep]
 
-    def andThen(next: TypeAgnostic): TypeAgnostic = new TypeAgnostic {
-      def toFilter[Req, Rep] = toFilter[Req, Rep].andThen(next.toFilter[Req, Rep])
-    }
+    def andThen(next: TypeAgnostic): TypeAgnostic =
+      new TypeAgnostic {
+        def toFilter[Req, Rep] =
+          self.toFilter[Req, Rep].andThen(next.toFilter[Req, Rep])
+      }
+  }
+
+  object TypeAgnostic {
+    val Identity: TypeAgnostic =
+      new TypeAgnostic {
+        override def toFilter[Req, Rep]: Filter[Req, Rep, Req, Rep] = identity[Req, Rep]
+      }
   }
 
   def identity[Req, Rep]: SimpleFilter[Req, Rep] =
