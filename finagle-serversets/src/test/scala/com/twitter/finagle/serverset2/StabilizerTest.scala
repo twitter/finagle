@@ -120,6 +120,26 @@ class StabilizerTest extends FunSuite {
     assertStabilized(Addr.Bound(sa1))
   })
 
+  test("Removes are delayed while failures are observed on empty serversets") (new Ctx {
+    setVa(Addr.Neg)
+    assertStabilized(Addr.Neg)
+
+    pulse()
+    setVa(Addr.Failed(new Exception))
+
+    assertStabilized(Addr.Neg)
+
+    pulse()
+    assertStabilized(Addr.Neg)
+
+    pulse(); pulse(); pulse()
+    assertStabilized(Addr.Neg)
+
+    setVa(Addr.Bound(sa1))
+    pulse()
+    assertStabilized(Addr.Bound(sa1))
+  })
+
   test("Reflect additions while addrs are unstable") (new Ctx {
     setVa(Addr.Bound(sa1, sa2))
     assertStabilized(Addr.Bound(sa1, sa2))

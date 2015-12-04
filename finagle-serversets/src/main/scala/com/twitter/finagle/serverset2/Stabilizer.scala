@@ -71,8 +71,8 @@ private[serverset2] object Stabilizer {
 
   // Used for delaying removals
   private case class State(
-    limbo: Set[SocketAddress],
-    active: Set[SocketAddress],
+    limbo: Option[Set[SocketAddress]],
+    active: Option[Set[SocketAddress]],
     addr: Addr)
 
   // Used for batching updates
@@ -82,7 +82,7 @@ private[serverset2] object Stabilizer {
     next: Option[Addr],
     lastEmit: Time)
 
-  private val emptyState = State(Set.empty, Set.empty, Addr.Pending)
+  private val initState = State(None, None, Addr.Pending)
 
   /**
    * Stabilize the address relative to the supplied source of removalEpochs,
@@ -121,15 +121,18 @@ private[serverset2] object Stabilizer {
     // The updates to this stabilized address are then batched and
     // triggered at most once per batchEpoch.
 
-    val states: Event[State] = (va.changes select removalEpoch.event).foldLeft(emptyState) {
+    val states: Event[State] = (va.changes select removalEpoch.event).foldLeft(initState) {
       // Addr update
       case (st@State(limbo, active, last), Left(addr)) =>
         addr match {
           case Addr.Failed(_) =>
-            State(Set.empty, active++limbo, addr)
+            State(None, Some(active.getOrElse(Set.empty)++limbo.getOrElse(Set.empty)), addr)
 
           case Addr.Bound(bound, _) =>
-            State(limbo, merge(active, bound), addr)
+            State(limbo, Some(merge(active.getOrElse(Set.empty), bound)), addr)
+
+          case Addr.Neg if (active == None && limbo == None) =>
+            State(limbo, Some(Set.empty), addr)
 
           case addr =>
             // Any other address simply propagates the address while
@@ -143,10 +146,10 @@ private[serverset2] object Stabilizer {
       case (st@State(limbo, active, last), Right(())) =>
         last match {
           case Addr.Bound(bound, _) =>
-            State(active, bound, last)
+            State(active, Some(bound), last)
 
           case Addr.Neg =>
-            State(active, Set.empty, Addr.Neg)
+            State(active, Some(Set.empty), Addr.Neg)
 
           case Addr.Pending | Addr.Failed(_) =>
             // If the last address is nonbound, we ignore it and
@@ -158,9 +161,14 @@ private[serverset2] object Stabilizer {
     }
 
     val addrs = states.map { case State(limbo, active, last) =>
-      val all = merge(limbo, active)
-      if (all.nonEmpty) Addr.Bound(all)
-      else last
+      val all = merge(limbo.getOrElse(Set.empty), active.getOrElse(Set.empty))
+      if (all.nonEmpty) {
+        Addr.Bound(all)
+      } else if (limbo != None || active != None) {
+        Addr.Neg
+      } else {
+        last
+      }
     }
 
     // Trigger at most one change to state per batchEpoch
