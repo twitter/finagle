@@ -12,13 +12,9 @@ object SentinelClient {
    * Construct a sentinel client from a single host.
    * @param host a String of host:port combination.
    */
-  def apply(host: String): SentinelClient = SentinelClient(
-    ClientBuilder()
-      .hosts(host)
-      .hostConnectionLimit(1)
-      .codec(Redis())
-      .daemon(true)
-      .build())
+  def apply(host: String): SentinelClient = {
+    SentinelClient(com.twitter.finagle.Redis.newService(host))
+  }
 
   /**
    * Construct a sentinel client from a single Service.

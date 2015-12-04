@@ -4,8 +4,9 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.redis.naggati.SentinelClientTest
 import com.twitter.finagle.redis.tags.{ RedisTest, ClientTest }
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{ Await, Awaitable, Duration, Future, Time }
 import com.twitter.finagle.redis.util.{ CBToString, StringToChannelBuffer }
+import com.twitter.logging.Logger
+import com.twitter.util.{ Await, Awaitable, Duration, Future, Time }
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -17,6 +18,8 @@ import java.net.InetAddress
 @RunWith(classOf[JUnitRunner])
 final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
+  val log = Logger(getClass)
+  
   implicit def s2cb(s: String) = StringToChannelBuffer(s)
   implicit def cb2s(cb: ChannelBuffer) = CBToString(cb)
 
@@ -51,13 +54,13 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
   private def masterName(i: Int) = "master" + i
 
   private def waitUntil(msg: String)(check: => Boolean) = {
-    println(msg)
+    log.info(msg)
     val startTime = Time.now
     val until = startTime + 20.seconds
     def checkLater(): Future[Boolean] = {
       if (Time.now > until) Future.value(false)
       else DefaultTimer.twitter.doLater(1.second) {
-        println(Time.now - startTime)
+        log.info("%s", Time.now - startTime)
         if (check) Future.value(true)
         else checkLater()
       }.flatten
