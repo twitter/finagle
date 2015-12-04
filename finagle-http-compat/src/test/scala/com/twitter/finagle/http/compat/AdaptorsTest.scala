@@ -6,7 +6,7 @@ import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.io.{Buf, BufReader, Reader}
 import com.twitter.util.Await
 import java.net.{InetAddress, InetSocketAddress, URI}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpVersion, HttpRequest, HttpResponse}
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class AdaptorsTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import Arbitrary.arbitrary
   import Bijections._
 
@@ -79,14 +79,29 @@ class FiltersTest extends FunSuite with GeneratorDrivenPropertyChecks {
     (req, body)
   }
 
+  val arbNettyVersion =
+    Gen.oneOf(
+      HttpVersion.HTTP_1_0,
+      HttpVersion.HTTP_1_1,
+      new HttpVersion("SECURE-HTTP/1.4", true)
+    )
+
   val arbNettyResponse =
-    arbResponse map { case (r: Response, body: String) =>
-      (r.httpResponse, body)
+    for {
+      (resp, body)  <- arbResponse
+      version       <- arbNettyVersion
+    } yield {
+      resp.httpResponse.setProtocolVersion(version)
+      (resp.httpResponse, body)
     }
 
   val arbNettyRequest =
-    arbRequest map { case (r: Request, body: String) =>
-      (r.httpRequest, body)
+    for {
+      (req, body) <- arbRequest
+      version     <- arbNettyVersion
+    } yield {
+      req.setProtocolVersion(version)
+      (req.getHttpRequest, body)
     }
 
   test("netty: http request to netty") {

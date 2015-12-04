@@ -25,10 +25,15 @@ object Bijections {
     }
   }
 
+  // Note: netty 3's HttpVersion allows arbitrary protocol names so the bijection
+  // here is a lie since finagle-http's Version can only represent HTTP/1.0 and HTTP/1.1.
+  // However, netty 3 only decodes HTTP/1.0 and HTTP/1.1 messages so whatever came over
+  // the wire at least looks like HTTP/1.x, so we take a guess in the base case.
   implicit val versionFromNetty = new Injection[HttpVersion, Version] {
     def apply(v: HttpVersion) = v match {
       case HttpVersion.HTTP_1_1 => Version.Http11
       case HttpVersion.HTTP_1_0 => Version.Http10
+      case _ => Version.Http11
     }
   }
 

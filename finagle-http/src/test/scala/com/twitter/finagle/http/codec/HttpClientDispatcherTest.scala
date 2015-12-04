@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{TimeoutException, Dtab, Status, Failure}
+import com.twitter.finagle.{Dtab, Status}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.transport.{Transport, QueueTransport}
