@@ -182,7 +182,11 @@ to append a key-value.
 <span class="extype" name="com.twitter.finagle.http.codec.TextualContentCompressor">TextualContentCompressor</span> which will
 compress text-like content-types with the default compression level (6). Otherwise, use
 <span class="extype" name="org.jboss.netty.handler.codec.http.HttpContentCompressor">HttpContentCompressor</span> for all
-content-types with specified compression level.</p></dd><dt class="param">_streaming</dt><dd class="cmt"><p>Streaming allows applications to work with HTTP messages
+content-types with specified compression level.</p></dd><dt class="param">_maxRequestSize</dt><dd class="cmt"><p>The maximum size of the inbound request an HTTP server constructed with
+this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
+<code>Int.MaxValue</code> bytes). Use streaming/chunked requests to handle larger messages.</p></dd><dt class="param">_maxResponseSize</dt><dd class="cmt"><p>The maximum size of the inbound response an HTTP client constructed with
+this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
+<code>Int.MaxValue</code> bytes). Use streaming/chunked requests to handle larger messages.</p></dd><dt class="param">_streaming</dt><dd class="cmt"><p>Streaming allows applications to work with HTTP messages
 that have large (or infinite) content bodies. When this flag is set to
 <code>true</code>, the message content is available through a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Reader" class="extype" target="_top">com.twitter.io.Reader</a>,
 which gives the application a handle to the byte stream. If <code>false</code>, the

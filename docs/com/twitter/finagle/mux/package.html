@@ -166,27 +166,8 @@ used by servers to implement features like garbage collection avoidance.</p></di
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.mux.BadMessageException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="BadMessageExceptionextendsExceptionwithProductwithSerializable"></a>
-      <a id="BadMessageException:BadMessageException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="BadMessageException.html"><span class="name">BadMessageException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.mux.package@BadMessageExceptionextendsExceptionwithProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Indicates that encoding or decoding of a Mux message failed.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that encoding or decoding of a Mux message failed.
-Reason for failure should be provided by the <code>why</code> string.
-</p></div></div>
-    </li><li name="com.twitter.finagle.mux.ClientDiscardedRequestException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ClientDiscardedRequestExceptionextendsExceptionwithProductwithSerializable"></a>
+              <ol><li name="com.twitter.finagle.mux.ClientDiscardedRequestException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ClientDiscardedRequestExceptionextendsExceptionwithHasLogLevelwithProductwithSerializable"></a>
       <a id="ClientDiscardedRequestException:ClientDiscardedRequestException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -194,10 +175,10 @@ Reason for failure should be provided by the <code>why</code> string.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ClientDiscardedRequestException.html"><span class="name">ClientDiscardedRequestException</span></a><span class="params">(<span name="why">why: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.mux.package@ClientDiscardedRequestExceptionextendsExceptionwithProductwithSerializable" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@ClientDiscardedRequestExceptionextendsExceptionwithHasLogLevelwithProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -226,7 +207,7 @@ request, as per <a href="" class="extype" name="com.twitter.finagle.mux">com.twi
       <a id="Request:Request"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">sealed </span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
@@ -243,7 +224,7 @@ request, as per <a href="" class="extype" name="com.twitter.finagle.mux">com.twi
       <a id="Response:Response"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">sealed </span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
@@ -254,7 +235,7 @@ request, as per <a href="" class="extype" name="com.twitter.finagle.mux">com.twi
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A mux response containing an immutable byte buffer.</p>
+      <p class="shortcomment cmt">A mux response.</p>
     </li><li name="com.twitter.finagle.mux.ServerApplicationError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ServerApplicationErrorextendsExceptionwithNoStacktracewithProductwithSerializable"></a>
       <a id="ServerApplicationError:ServerApplicationError"></a>
@@ -484,8 +465,11 @@ that the server is unable to process.
     </span>
       <p class="shortcomment cmt">GlobalFlag to configure FailureDetection used only in the
 absence of any app-specified config.</p><div class="fullcomment"><div class="comment cmt"><p>GlobalFlag to configure FailureDetection used only in the
-absence of any app-specified config. This is the default (legacy)
-behavior.
+absence of any app-specified config. This is the default
+behavior.</p><p>Value of:
+&quot;none&quot;: turn off threshold failure detector
+&quot;threshold:minPeriod:threshold:win:closeTimeout&quot;:
+        use the specified configuration for failure detection
 </p></div></div>
     </li><li name="com.twitter.finagle.mux.stats" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stats"></a>
@@ -500,6 +484,23 @@ behavior.
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.mux.package@stats" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.mux.transport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="transport"></a>
+      <a id="transport:transport"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="transport/package.html"><span class="name">transport</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.mux.package@transport" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

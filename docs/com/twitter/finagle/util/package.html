@@ -436,7 +436,7 @@ dynamic introspection.
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.util.DefaultMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.util.DefaultMonitor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultMonitor"></a>
       <a id="DefaultMonitor:DefaultMonitor"></a>
       <h4 class="signature">
@@ -445,14 +445,16 @@ dynamic introspection.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultMonitor$.html"><span class="name">DefaultMonitor</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
+        <a href="DefaultMonitor$.html"><span class="name">DefaultMonitor</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">DefaultMonitor</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.util.package@DefaultMonitor" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">The default <span class="extype" name="Monitor">Monitor</span> to be used throughout Finagle.</p><div class="fullcomment"><div class="comment cmt"><p>The default <span class="extype" name="Monitor">Monitor</span> to be used throughout Finagle.</p><p>Mostly delegates to <span class="extype" name="RootMonitor">RootMonitor</span>, with the exception
+of <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">Failures</a> with a <code>Failure.logLevel</code> below <code>INFO</code>.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.DefaultTimer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DefaultTimer"></a>
       <a id="DefaultTimer:DefaultTimer"></a>
@@ -525,7 +527,7 @@ nondaemon thread whenever there is at least one guarder.</p>
       <p class="shortcomment cmt">A HashedWheelTimer that uses <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">org.jboss.netty.util.HashedWheelTimer</span> under
 the hood.</p><div class="fullcomment"><div class="comment cmt"><p>A HashedWheelTimer that uses <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">org.jboss.netty.util.HashedWheelTimer</span> under
 the hood. Prefer using a single instance per application, the default
-instance is <a href="HashedWheelTimer$.html#Default:com.twitter.util.Timer" class="extmbr" name="com.twitter.finagle.util.HashedWheelTimer#Default">Default</a>.
+instance is <a href="HashedWheelTimer$.html#Default:com.twitter.util.Timer" class="extmbr" name="com.twitter.finagle.util.HashedWheelTimer#Default">HashedWheelTimer.Default</a>.
 </p></div></div>
     </li><li name="com.twitter.finagle.util.InetSocketAddressUtil" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InetSocketAddressUtil"></a>
@@ -716,7 +718,11 @@ more resilient to varying Java packaging configurations than ServiceLoader.
       </a>
     </span>
       <p class="shortcomment cmt">A deny list of implementations to ignore.</p><div class="fullcomment"><div class="comment cmt"><p>A deny list of implementations to ignore. Keys are the fully qualified class names.
-Any other implementations that are found via <code>LoadService.apply</code> are eligible to be used.</p><p>As an example, here's how to filter out <code>OstrichStatsReceiver</code> and <code>CommonsStatsReceiver</code>:</p><pre>-com.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.CommonsStatsReceiver</pre></div></div>
+Any other implementations that are found via <code>LoadService.apply</code> are eligible to be used.</p><p>As an example, here's how to filter out <code>OstrichStatsReceiver</code>, <code>OstrichExporter</code> and
+<code>CommonsStatsReceiver</code> using a global flag:</p><pre>-Dcom.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.OstrichExporter,com.twitter.finagle.stats.CommonsStatsReceiver</pre><p>We need to pass the arguments as Java property values instead of as Java application
+arguments (regular TwitterServer flags) because <a href="LoadService$.html" class="extype" name="com.twitter.finagle.util.LoadService">LoadService</a> may be loaded before
+application arguments are parsed.
+</p></div></div>
     </li><li name="com.twitter.finagle.util.loadServiceIgnoredPaths" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="loadServiceIgnoredPaths"></a>
       <a id="loadServiceIgnoredPaths:loadServiceIgnoredPaths"></a>

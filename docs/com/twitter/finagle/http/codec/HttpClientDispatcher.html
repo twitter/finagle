@@ -49,8 +49,9 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Client dispatcher for HTTP.</p><p>The dispatcher modifies each request with Dtab encoding and streams chunked
-responses via <code>Reader</code>.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Client dispatcher for HTTP.</p><p>The dispatcher modifies each request with Dtab encoding from Dtab.local
+and streams chunked responses via <code>Reader</code>.  If the request already contains
+Dtab headers they will be stripped and an error will be logged.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="../../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>], <a href="../../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>

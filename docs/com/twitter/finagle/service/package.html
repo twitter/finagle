@@ -66,7 +66,24 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.service.ConstantService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.service.BackoffBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BackoffBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="BackoffBenchmark:BackoffBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BackoffBenchmark.html"><span class="name">BackoffBenchmark</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@BackoffBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.service.ConstantService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ConstantService[Req,Rep]extendsService[Req,Rep]"></a>
       <a id="ConstantService[Req,Rep]:ConstantService[Req,Rep]"></a>
       <h4 class="signature">
@@ -178,8 +195,8 @@ customizable.
       </a>
     </span>
       <p class="shortcomment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its parameterization.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its parameterization.</p><p>TODO: treat different failures differently (eg. connect failures
+itself unavailable when deemed unhealthy according to its parametrization.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
+itself unavailable when deemed unhealthy according to its parametrization.</p><p>TODO: treat different failures differently (eg. connect failures
 vs. not), enable different backoff strategies.
 </p></div></div>
     </li><li name="com.twitter.finagle.service.KetamaShardingServiceBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -256,6 +273,44 @@ cases where the function returns false, a the filter fails with a
     </span>
       <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that accepts or refuses requests based on a
 rate limiting strategy.</p>
+    </li><li name="com.twitter.finagle.service.RetryBudget" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="RetryBudgetextendsAnyRef"></a>
+      <a id="RetryBudget:RetryBudget"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="RetryBudget.html"><span class="name">RetryBudget</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryBudgetextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents a budget for retrying requests.</p><div class="fullcomment"><div class="comment cmt"><p>Represents a budget for retrying requests.</p><p>A retry budget is useful for attenuating the amplifying effects
+of many clients within a process retrying requests multiple
+times. This acts as a form of coordination between those retries.</p><p>Implementations must be thread-safe.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Retries$.html" class="extype" name="com.twitter.finagle.service.Retries">Retries</a> for how budgets get translated into
+<a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filters</a>.</p></span><span class="cmt"><p><a href="RetryBudget$.html#apply(ttl:com.twitter.util.Duration,minRetriesPerSec:Int,percentCanRetry:Double,nowMillis:()=&gt;Long):com.twitter.finagle.service.RetryBudget" class="extmbr" name="com.twitter.finagle.service.RetryBudget#apply">RetryBudget.apply</a> for creating instances.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryBudgets" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RetryBudgetsextendsObject"></a>
+      <a id="RetryBudgets:RetryBudgets"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RetryBudgets.html"><span class="name">RetryBudgets</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryBudgetsextendsObject" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.service.RetryExceptionsFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RetryExceptionsFilter[Req,Rep]extendsRetryFilter[Req,Rep]"></a>
       <a id="RetryExceptionsFilter[Req,Rep]:RetryExceptionsFilter[Req,Rep]"></a>
@@ -299,7 +354,7 @@ responses as well as failures.</p></span></dd></dl></div>
       <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
 <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
 <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>. Successful and exceptional
-responses can can be classified as retryable via the retryPolicy
+responses can be classified as retryable via the retryPolicy
 <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">com.twitter.finagle.service.RetryPolicy</a> argument.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>consider using a <span class="extype" name="Timer">Timer</span> with high resolution so that there is
 less correlation between retries. For example <span class="extype" name="HighResTimer.Default">HighResTimer.Default</span>.</p></span></dd></dl></div>
@@ -480,6 +535,23 @@ request failures.</p></span></dd></dl></div>
 with <a href="RetryFilter$.html#apply[Req,Rep](backoffs:Stream[com.twitter.util.Duration],statsReceiver:com.twitter.finagle.stats.StatsReceiver)(shouldRetry:PartialFunction[(Req,com.twitter.util.Try[Rep]),Boolean])(implicittimer:com.twitter.util.Timer):com.twitter.finagle.service.RetryFilter[Req,Rep]" class="extmbr" name="com.twitter.finagle.service.RetryFilter#apply">RetryFilter.apply</a> and <a href="RetryPolicy$.html#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">RetryPolicy.backoff</a> to determine
 the duration after which a request is to be retried.
 </p></div></div>
+    </li><li name="com.twitter.finagle.service.BackoffBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BackoffBenchmark"></a>
+      <a id="BackoffBenchmark:BackoffBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BackoffBenchmark$.html"><span class="name">BackoffBenchmark</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@BackoffBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.service.DelayedFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DelayedFactory"></a>
       <a id="DelayedFactory:DelayedFactory"></a>
@@ -565,6 +637,42 @@ the duration after which a request is to be retried.
       </a>
     </span>
       <p class="shortcomment cmt">A static <span class="extype" name="com.twitter.finagle.FailedService">com.twitter.finagle.FailedService</span> object.</p>
+    </li><li name="com.twitter.finagle.service.Retries" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Retries"></a>
+      <a id="Retries:Retries"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Retries$.html"><span class="name">Retries</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@Retries" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a> parameters and modules for configuring
+<b>which</b> and <b>how many</b> failed requests are retried for
+a client.</p>
+    </li><li name="com.twitter.finagle.service.RetryBudget" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RetryBudget"></a>
+      <a id="RetryBudget:RetryBudget"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RetryBudget$.html"><span class="name">RetryBudget</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@RetryBudget" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">See <a href="RetryBudgets.html" class="extype" name="com.twitter.finagle.service.RetryBudgets">RetryBudgets</a> for Java APIs.</p>
     </li><li name="com.twitter.finagle.service.RetryExceptionsFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryExceptionsFilter"></a>
       <a id="RetryExceptionsFilter:RetryExceptionsFilter"></a>
@@ -663,6 +771,23 @@ the duration after which a request is to be retried.
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.service.package@TimeoutFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.service.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exp"></a>
+      <a id="exp:exp"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="exp/package.html"><span class="name">exp</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@exp" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

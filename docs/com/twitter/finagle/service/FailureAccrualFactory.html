@@ -52,7 +52,7 @@
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its parameterization.</p><p>TODO: treat different failures differently (eg. connect failures
+itself unavailable when deemed unhealthy according to its parametrization.</p><p>TODO: treat different failures differently (eg. connect failures
 vs. not), enable different backoff strategies.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
@@ -359,6 +359,25 @@ Service, the user must call Service.close().
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#didMarkDead" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="didMarkDead():Unit"></a>
+      <a id="didMarkDead():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">didMarkDead</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@didMarkDead():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Called by FailureAccrualFactory after marking an endpoint dead.</p><div class="fullcomment"><div class="comment cmt"><p>Called by FailureAccrualFactory after marking an endpoint dead. Override
+this method to perform additional actions.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory#didSucceed" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="didSucceed():Unit"></a>
       <a id="didSucceed():Unit"></a>
@@ -575,23 +594,6 @@ only need to modify or operate on the underlying service.
       <p class="shortcomment cmt">Map created services.</p><div class="fullcomment"><div class="comment cmt"><p>Map created services. Useful for implementing common
 styles of factory wrappers.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#markDead" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="markDead():Unit"></a>
-      <a id="markDead():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">markDead</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@markDead():Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -643,6 +645,25 @@ styles of factory wrappers.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#startProbing" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="startProbing():Unit"></a>
+      <a id="startProbing():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">startProbing</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@startProbing():Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Enter 'Probing' state.</p><div class="fullcomment"><div class="comment cmt"><p>Enter 'Probing' state.
+The service must satisfy one request before accepting more.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="status:com.twitter.finagle.Status"></a>
       <a id="status:Status"></a>

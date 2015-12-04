@@ -135,6 +135,27 @@ lifecycle of a <code>Transport</code> and ensure that it remains relevant.
 to read a request.</p></dd><dt class="param">writeTimeout</dt><dd class="cmt"><p>A maximum duration a listener is allowed to
 write a response.</p></dd><dt class="param">keepAlive</dt><dd class="cmt"><p>An option indicating if the keepAlive is on or off.
 If None, the implementation default is used.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport.Options" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="OptionsextendsProductwithSerializable"></a>
+      <a id="Options:Options"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Transport$$Options.html"><span class="name">Options</span></a><span class="params">(<span name="noDelay">noDelay: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="reuseAddr">reuseAddr: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.Transport$@OptionsextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">$param the options (i.e., socket options) of a <code>Transport</code>.</p><div class="fullcomment"><div class="comment cmt"><p>$param the options (i.e., socket options) of a <code>Transport</code>.
+</p></div><dl class="paramcmts block"><dt class="param">noDelay</dt><dd class="cmt"><p>enables or disables <code>TCP_NODELAY</code> (Nagle's algorithm)
+               option on a transport socket (<code>noDelay = true</code> means
+               disabled). Default is <code>true</code> (disabled).</p></dd><dt class="param">reuseAddr</dt><dd class="cmt"><p>enables or disables <code>SO_REUSEADDR</code> option on a
+                 transport socket. Default is <code>true</code>.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.transport.Transport.TLSClientEngine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TLSClientEngineextendsProductwithSerializable"></a>
       <a id="TLSClientEngine:TLSClientEngine"></a>
@@ -178,7 +199,7 @@ If None, the implementation default is used.</p></dd></dl></div>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Transport$$Verbose.html"><span class="name">Verbose</span></a><span class="params">(<span name="b">b: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Transport$$Verbose.html"><span class="name">Verbose</span></a><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.transport.Transport$@VerboseextendsProductwithSerializable" title="Permalink" target="_top">
@@ -280,6 +301,23 @@ written to <a href="../param/Logger.html" class="extype" name="com.twitter.finag
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.transport.Transport.Options" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Options"></a>
+      <a id="Options:Options"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Transport$$Options$.html"><span class="name">Options</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.Transport$@Options" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.transport.Transport.TLSClientEngine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TLSClientEngine"></a>
       <a id="TLSClientEngine:TLSClientEngine"></a>
@@ -348,6 +386,27 @@ written to <a href="../param/Logger.html" class="extype" name="com.twitter.finag
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#cast" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cast[In1,Out1](trans:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.transport.Transport[In1,Out1]"></a>
+      <a id="cast[In1,Out1](Transport[Any,Any]):Transport[In1,Out1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cast</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="params">(<span name="trans">trans: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="result">: <a href="Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.transport.Transport.cast.In1">In1</span>, <span class="extype" name="com.twitter.finagle.transport.Transport.cast.Out1">Out1</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.transport.Transport$@cast[In1,Out1](trans:com.twitter.finagle.transport.Transport[Any,Any]):com.twitter.finagle.transport.Transport[In1,Out1]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Casts an object transport to <code>Transport[In1, Out1]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Casts an object transport to <code>Transport[In1, Out1]</code>. Note that this is
+generally unsafe: only do this when you know the cast is guaranteed safe.
+This is useful when coercing a netty object pipeline into a typed transport,
+for example.
+</p></div></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>

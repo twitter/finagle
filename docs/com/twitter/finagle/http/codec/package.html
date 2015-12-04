@@ -124,8 +124,9 @@ codec implementations are in {Server,Client}ConnectionManager.
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Client dispatcher for HTTP.</p><div class="fullcomment"><div class="comment cmt"><p>Client dispatcher for HTTP.</p><p>The dispatcher modifies each request with Dtab encoding and streams chunked
-responses via <code>Reader</code>.
+      <p class="shortcomment cmt">Client dispatcher for HTTP.</p><div class="fullcomment"><div class="comment cmt"><p>Client dispatcher for HTTP.</p><p>The dispatcher modifies each request with Dtab encoding from Dtab.local
+and streams chunked responses via <code>Reader</code>.  If the request already contains
+Dtab headers they will be stripped and an error will be logged.
 </p></div></div>
     </li><li name="com.twitter.finagle.http.codec.HttpServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HttpServerDispatcherextendsGenSerialServerDispatcher[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,Any,Any]"></a>

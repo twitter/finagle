@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &mdash; Finagle 6.30.0 documentation</title>
+    <title>Extending Finagle &mdash; Finagle 6.31.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.30.0',
+        VERSION:     '6.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.30.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.31.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,14 +57,14 @@
         <li class="right" >
           <a href="Protocols.html" title="Protocols"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="extending-finagle">
 <h1>Extending Finagle<a class="headerlink" href="#extending-finagle" title="Permalink to this headline">¶</a></h1>
@@ -98,7 +98,7 @@ sophisticated whole. For example, we define timeout behavior as a
 separate module; we then arrange to insert this module into the
 composite stack wherever timeout behavior is required. Some of the
 components included in Finagle&#8217;s clients are discussed in the
-<a class="reference internal" href="Clients.html#client-modules"><span>client documentation</span></a>.</p>
+<a class="reference internal" href="Clients.html#client-modules"><em>client documentation</em></a>.</p>
 <p>While we can imagine stacking such modules together in a manual
 fashion—for example, by building it bottoms-up, passing each
 <cite>ServiceFactory</cite> into the constructor of the next—this technique quickly
@@ -116,7 +116,7 @@ the connection pooling implementation or the load balancer.</li>
 <p>Traditionally, the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> and <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> performed this duty in
 the manner just described. While it worked well for a while, it
 ultimately proved inflexible. With the needs and requirements of the
-various protocol implementations like <a class="reference internal" href="Protocols.html#mux"><span>Mux&#8217;s</span></a>, as well as
+various protocol implementations like <a class="reference internal" href="Protocols.html#mux"><em>Mux&#8217;s</em></a>, as well as
 more sophisticated new features, the builders became unworkable
 monoliths.</p>
 <p><a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Stack">Stack</a> formalizes the concept of a
@@ -224,7 +224,7 @@ closing a transport.</p>
 <span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">listen</span><span class="o">(</span><span class="n">address</span><span class="o">)</span> <span class="o">{</span> <span class="n">serveTransport</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span>
 </pre></div>
 </div>
-<p>A nice consequence of using a <a class="reference internal" href="ServicesAndFilters.html#services"><span>Service</span></a> to process
+<p>A nice consequence of using a <a class="reference internal" href="ServicesAndFilters.html#services"><em>Service</em></a> to process
 data received over the transport is the ability to furnish our server with
 additional behavior via <a class="reference internal" href="ServicesAndFilters.html"><em>Filters</em></a>. This is exactly
 what Finagle&#8217;s default server implementation does.</p>
@@ -304,7 +304,7 @@ UTF-8 newline delimited protocol:</p>
 <div class="section" id="transporter">
 <h2>Transporter<a class="headerlink" href="#transporter" title="Permalink to this headline">¶</a></h2>
 <p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/clients/Transporter.scala">Transporter</a> is responsible for connecting
-a <a class="reference internal" href="#transport-interface"><span>Transport</span></a> to a peer—it establishes a session. Our client uses a
+a <a class="reference internal" href="#transport-interface"><em>Transport</em></a> to a peer—it establishes a session. Our client uses a
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/netty3/Netty3Transporter.scala">Netty3Transporter</a>, however
 the use of other Transporters is fully supported.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">protected</span> <span class="k">def</span> <span class="n">newTransporter</span><span class="o">()</span><span class="k">:</span> <span class="kt">Transporter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
@@ -413,9 +413,9 @@ with respect to Finagle&#8217;s connection pool.</td></tr>
 combines a <cite>Transporter</cite>, a <cite>Dispatcher</cite>, and a <cite>Stack</cite> to provide a robust,
 load balanced, resource-managed client. The default stack includes many
 features including
-<a class="reference internal" href="Clients.html#id3"><span>load balancing</span></a> over multiple hosts
-and <a class="reference internal" href="Clients.html#watermark-pool"><span>connection pooling</span></a> per host. See the section
-on <a class="reference internal" href="Clients.html#client-modules"><span>client modules</span></a> for more details.</p>
+<a class="reference internal" href="Clients.html#id3"><em>load balancing</em></a> over multiple hosts
+and <a class="reference internal" href="Clients.html#watermark-pool"><em>connection pooling</em></a> per host. See the section
+on <a class="reference internal" href="Clients.html#client-modules"><em>client modules</em></a> for more details.</p>
 <p>Putting together a <cite>StdStackClient</cite> is simple:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">case</span> <span class="k">class</span> <span class="nc">Client</span><span class="o">(</span>
   <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
@@ -455,7 +455,7 @@ allowing concurrent dispatches.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

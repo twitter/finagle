@@ -71,7 +71,7 @@ otherwise terminated.</p></div><div class="toggleContainer block">
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="server/DefaultServer.html" class="extype" name="com.twitter.finagle.server.DefaultServer">DefaultServer</a>, <a href="Http$.html" class="extype" name="com.twitter.finagle.Http">Http</a>, <a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a>, <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a>, <a href="Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>, <a href="ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>, <a href="server/StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>, <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>, <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>, <a href="benchmark/DefaultServerBenchmark$TestServer$.html" class="extype" name="com.twitter.finagle.benchmark.DefaultServerBenchmark.TestServer">TestServer</a>, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">Thrift</a>, <a href="ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a>, <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.ThriftMuxServer">ThriftMuxServer</a>, <a href="ThriftMuxServerLike.html" class="extype" name="com.twitter.finagle.ThriftMuxServerLike">ThriftMuxServerLike</a></div>
+            <div class="subClasses hiddenContent"><a href="server/DefaultServer.html" class="extype" name="com.twitter.finagle.server.DefaultServer">DefaultServer</a>, <a href="Http$.html" class="extype" name="com.twitter.finagle.Http">Http</a>, <a href="Memcached$.html" class="extype" name="com.twitter.finagle.Memcached">Memcached</a>, <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a>, <a href="Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="ThriftMux$$Server.html" class="extype" name="com.twitter.finagle.ThriftMux.Server">Server</a>, <a href="Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a>, <a href="server/StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>, <a href="server/StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>, <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>, <a href="Thrift$.html" class="extype" name="com.twitter.finagle.Thrift">Thrift</a>, <a href="ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">ThriftMux</a>, <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.ThriftMuxServer">ThriftMuxServer</a>, <a href="ThriftMuxServerLike.html" class="extype" name="com.twitter.finagle.ThriftMuxServerLike">ThriftMuxServerLike</a></div>
           </div></div>
         
 
@@ -506,6 +506,42 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Server@serveAndAnnounce(name:String,addr:String,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div></div>
+    </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
+      <a id="serveAndAnnounce(String,SocketAddress,Service[Req,Rep]):ListeningServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.Server.Req">Req</span>, <span class="extype" name="com.twitter.finagle.Server.Rep">Rep</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Server@serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div></div>
+    </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
+      <a id="serveAndAnnounce(String,SocketAddress,ServiceFactory[Req,Rep]):ListeningServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.Server.Req">Req</span>, <span class="extype" name="com.twitter.finagle.Server.Rep">Rep</span>]</span>)</span><span class="result">: <a href="ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Server@serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

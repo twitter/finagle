@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &mdash; Finagle 6.30.0 documentation</title>
+    <title>Servers &mdash; Finagle 6.31.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.30.0',
+        VERSION:     '6.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.30.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.31.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,14 +57,14 @@
         <li class="right" >
           <a href="ServicesAndFilters.html" title="Services &amp; Filters"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="servers">
 <h1>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h1>
@@ -75,33 +75,33 @@
 <span class="o">)</span><span class="k">:</span> <span class="kt">ListeningServer</span>
 </pre></div>
 </div>
-<p>When given a <cite>SocketAddress</cite> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span>ServiceFactory</span></a>, a server returns a handle
+<p>When given a <cite>SocketAddress</cite> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>, a server returns a handle
 to a <cite>ListeningServer</cite>. The handle allows for management of server resources. The interface comes with
 variants that allow for serving a simple <cite>Service</cite> as well. Typical usage takes the form
-<code class="docutils literal"><span class="pre">Protocol.serve(...)</span></code>, for example:</p>
+<tt class="docutils literal"><span class="pre">Protocol.serve(...)</span></tt>, for example:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">myService</span><span class="o">)</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span> <span class="c1">// waits until the server resources are released</span>
 </pre></div>
 </div>
 <p>However, <cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined
-via a thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><span>Thrift</span></a>
+via a thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><em>Thrift</em></a>
 for more details.</p>
 <div class="section" id="server-modules">
 <h2>Server Modules<a class="headerlink" href="#server-modules" title="Permalink to this headline">¶</a></h2>
 <p>Finagle servers are simple; they are designed to serve requests quickly. As such,
 Finagle minimally furnishes servers with additional behavior. More sophisticated
-behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><span>clients</span></a>. However, the server does come
+behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><em>clients</em></a>. However, the server does come
 with some useful modules to help owners observe and debug their servers. This includes
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">Monitoring</a>,
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/tracing/TraceInitializerFilter.scala">Tracing</a>,
 and <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">Stats</a>.
-Additionally, Finagle servers <a class="reference internal" href="FAQ.html#propagate-failure"><span>propagate failure</span></a>.</p>
+Additionally, Finagle servers <a class="reference internal" href="FAQ.html#propagate-failure"><em>propagate failure</em></a>.</p>
 </div>
 <div class="section" id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
 <p>Prior to <a class="reference internal" href="changelog.html"><em>6.x</em></a>, the <cite>ServerBuilder</cite> was the primary method for configuring
 the modules inside a Finagle server. We&#8217;ve moved away from this model for various
-<a class="reference internal" href="FAQ.html#configuring-finagle6"><span>reasons</span></a>.</p>
+<a class="reference internal" href="FAQ.html#configuring-finagle6"><em>reasons</em></a>.</p>
 </div>
 </div>
 
@@ -109,7 +109,7 @@ the modules inside a Finagle server. We&#8217;ve moved away from this model for 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

@@ -4,7 +4,7 @@
  *
  * Sphinx JavaScript utilties for the full-text search.
  *
- * :copyright: Copyright 2007-2015 by the Sphinx team, see AUTHORS.
+ * :copyright: Copyright 2007-2013 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
  */
@@ -330,13 +330,13 @@ var Search = {
           objectterms.push(tmp[i].toLowerCase());
       }
 
-      if ($u.indexOf(stopwords, tmp[i].toLowerCase()) != -1 || tmp[i].match(/^\d+$/) ||
+      if ($u.indexOf(stopwords, tmp[i]) != -1 || tmp[i].match(/^\d+$/) ||
           tmp[i] === "") {
         // skip this "word"
         continue;
       }
       // stem the word
-      var word = stemmer.stemWord(tmp[i].toLowerCase());
+      var word = stemmer.stemWord(tmp[i]).toLowerCase();
       var toAppend;
       // select the correct list
       if (word[0] == '-') {
@@ -439,7 +439,7 @@ var Search = {
                   dataType: "text",
                   complete: function(jqxhr, textstatus) {
                     var data = jqxhr.responseText;
-                    if (data !== '' && data !== undefined) {
+                    if (data !== '') {
                       listItem.append(Search.makeSearchSummary(data, searchterms, hlterms));
                     }
                     Search.output.append(listItem);
@@ -550,7 +550,7 @@ var Search = {
     for (i = 0; i < searchterms.length; i++) {
       var word = searchterms[i];
       // no match but word was a required one
-      if ((files = terms[word]) === undefined)
+      if (!(files = terms[word]))
         break;
       if (files.length === undefined) {
         files = [files];

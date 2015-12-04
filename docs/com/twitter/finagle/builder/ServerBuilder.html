@@ -339,23 +339,6 @@ or supports transactions).
       <p class="shortcomment cmt">Cancel pending futures whenever the the connection is shut down.</p><div class="fullcomment"><div class="comment cmt"><p>Cancel pending futures whenever the the connection is shut down.
 This defaults to true.
 </p></div></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#channelFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="channelFactory(cf:org.jboss.netty.channel.ServerChannelFactory):ServerBuilder.this.This"></a>
-      <a id="channelFactory(ServerChannelFactory):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelFactory</span><span class="params">(<span name="cf">cf: <span class="extype" name="org.jboss.netty.channel.ServerChannelFactory">ServerChannelFactory</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ServerBuilder@channelFactory(cf:org.jboss.netty.channel.ServerChannelFactory):ServerBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -1266,6 +1249,26 @@ or supports transactions).
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ServerBuilder#channelFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelFactory(cf:org.jboss.netty.channel.ServerChannelFactory):ServerBuilder.this.This"></a>
+      <a id="channelFactory(ServerChannelFactory):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2015-11-18) use com.twitter.finagle.netty3.numWorkers flag instead">channelFactory</span><span class="params">(<span name="cf">cf: <span class="extype" name="org.jboss.netty.channel.ServerChannelFactory">ServerChannelFactory</span></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ServerBuilder@channelFactory(cf:org.jboss.netty.channel.ServerChannelFactory):ServerBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-11-18)</i> use com.twitter.finagle.netty3.numWorkers flag instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#stack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stack[Req1,Rep1](mk:com.twitter.finagle.Stack.Params=&gt;com.twitter.finagle.Server[Req1,Rep1]):com.twitter.finagle.builder.ServerBuilder[Req1,Rep1,com.twitter.finagle.builder.ServerConfig.Yes,HasBindTo,HasName]"></a>
       <a id="stack[Req1,Rep1]((Params)⇒finagle.Server[Req1,Rep1]):ServerBuilder[Req1,Rep1,Yes,HasBindTo,HasName]"></a>

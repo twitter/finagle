@@ -108,24 +108,6 @@
       </a>
     </span>
       <p class="shortcomment cmt">Base type used to identify and configure the <span class="extype" name="FailureDetector">FailureDetector</span>.</p>
-    </li><li name="com.twitter.finagle.mux.FailureDetector.DarkModeConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DarkModeConfigextendsFailureDetector.ConfigwithProductwithSerializable"></a>
-      <a id="DarkModeConfig:DarkModeConfig"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="FailureDetector$$DarkModeConfig.html"><span class="name">DarkModeConfig</span></a><span class="params">(<span name="minPeriod">minPeriod: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.seconds</a></span></span></span>, <span name="threshold">threshold: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="windowSize">windowSize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">100</span></span>, <span name="closeThreshold">closeThreshold: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>)</span><span class="result"> extends <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.mux.FailureDetector$@DarkModeConfigextendsFailureDetector.ConfigwithProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Indicated to use the default ping frequency and mark busy threshold;
-but it just exports stats instead of actually marking an endpoint as busy.</p>
     </li><li name="com.twitter.finagle.mux.FailureDetector.Param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ParamextendsProductwithSerializable"></a>
       <a id="Param:Param"></a>
@@ -154,7 +136,7 @@ but it just exports stats instead of actually marking an endpoint as busy.</p>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FailureDetector$$ThresholdConfig.html"><span class="name">ThresholdConfig</span></a><span class="params">(<span name="minPeriod">minPeriod: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.seconds</a></span></span></span>, <span name="threshold">threshold: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="windowSize">windowSize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">100</span></span>, <span name="closeThreshold">closeThreshold: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>)</span><span class="result"> extends <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="FailureDetector$$ThresholdConfig.html"><span class="name">ThresholdConfig</span></a><span class="params">(<span name="minPeriod">minPeriod: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.seconds</a></span></span></span>, <span name="threshold">threshold: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="windowSize">windowSize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">100</span></span>, <span name="closeTimeout">closeTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>)</span><span class="result"> extends <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.mux.FailureDetector$@ThresholdConfigextendsFailureDetector.ConfigwithProductwithSerializable" title="Permalink" target="_top">
@@ -282,24 +264,6 @@ when creating a new detector
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.mux.FailureDetector#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(config:com.twitter.finagle.mux.FailureDetector.Config,ping:()=&gt;com.twitter.util.Future[Unit],close:()=&gt;com.twitter.util.Future[Unit],statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.mux.FailureDetector"></a>
-      <a id="apply(Config,()⇒Future[Unit],()⇒Future[Unit],StatsReceiver):FailureDetector"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="config">config: <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a></span>, <span name="ping">ping: () ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>, <span name="close">close: () ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.mux.FailureDetector">FailureDetector</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.mux.FailureDetector$@apply(config:com.twitter.finagle.mux.FailureDetector.Config,ping:()=&gt;com.twitter.util.Future[Unit],close:()=&gt;com.twitter.util.Future[Unit],statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.mux.FailureDetector" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Instantiate a new FailureDetector based on the config type
-</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>

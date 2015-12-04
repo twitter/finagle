@@ -200,26 +200,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.transport.Transport#cast" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="cast[In1,Out1]:com.twitter.finagle.transport.Transport[In1,Out1]"></a>
-      <a id="cast[In1,Out1]:Transport[In1,Out1]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">cast</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="result">: <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.transport.Transport.cast.In1">In1</span>, <span class="extype" name="com.twitter.finagle.transport.Transport.cast.Out1">Out1</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.HttpTransport@cast[In1,Out1]:com.twitter.finagle.transport.Transport[In1,Out1]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Cast this transport to <code>Transport[In1, Out1]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Cast this transport to <code>Transport[In1, Out1]</code>. Note that this is
-generally unsafe: only do this when you know the cast is
-guaranteed safe.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -420,6 +400,25 @@ guaranteed safe.
     </span>
       <p class="shortcomment cmt">The locally bound address of this transport.</p><div class="fullcomment"><div class="comment cmt"><p>The locally bound address of this transport.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpTransport">HttpTransport</a> → <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.transport.Transport#map" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="map[In1,Out1](f:In1=&gt;In,g:Out=&gt;Out1):com.twitter.finagle.transport.Transport[In1,Out1]"></a>
+      <a id="map[In1,Out1]((In1)⇒Any,(Any)⇒Out1):Transport[In1,Out1]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">map</span><span class="tparams">[<span name="In1">In1</span>, <span name="Out1">Out1</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.transport.Transport.map.In1">In1</span>) ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>, <span name="g">g: (<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>) ⇒ <span class="extype" name="com.twitter.finagle.transport.Transport.map.Out1">Out1</span></span>)</span><span class="result">: <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<span class="extype" name="com.twitter.finagle.transport.Transport.map.In1">In1</span>, <span class="extype" name="com.twitter.finagle.transport.Transport.map.Out1">Out1</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.http.HttpTransport@map[In1,Out1](f:In1=&gt;In,g:Out=&gt;Out1):com.twitter.finagle.transport.Transport[In1,Out1]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Maps this transport to <code>Transport[In1, Out2]</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Maps this transport to <code>Transport[In1, Out2]</code>. Note, exceptions
+in <code>f</code> and <code>g</code> are lifted to a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a>.
+</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The function applied to <code>write</code>s input.</p></dd><dt class="param">g</dt><dd class="cmt"><p>The function applied to the result of a <code>read</code></p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -491,6 +490,24 @@ guaranteed safe.
 same exception you would get if attempting to read or
 write on the Transport, but this allows clients to listen to
 close events.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpTransport">HttpTransport</a> → <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.HttpTransport#peerCertificate" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="peerCertificate:Option[java.security.cert.Certificate]"></a>
+      <a id="peerCertificate:Option[Certificate]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">peerCertificate</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.security.cert.Certificate">Certificate</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.http.HttpTransport@peerCertificate:Option[java.security.cert.Certificate]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The peer certificate if a TLS session is established.</p><div class="fullcomment"><div class="comment cmt"><p>The peer certificate if a TLS session is established.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.HttpTransport">HttpTransport</a> → <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.HttpTransport#read" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="read():com.twitter.util.Future[Any]"></a>

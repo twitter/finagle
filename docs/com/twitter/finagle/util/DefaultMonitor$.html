@@ -45,13 +45,15 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">DefaultMonitor</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>
+        <span class="name">DefaultMonitor</span><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">DefaultMonitor</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The default <span class="extype" name="Monitor">Monitor</span> to be used throughout Finagle.</p><p>Mostly delegates to <span class="extype" name="RootMonitor">RootMonitor</span>, with the exception
+of <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">Failures</a> with a <code>Failure.logLevel</code> below <code>INFO</code>.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.util.DefaultMonitor">DefaultMonitor</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -69,7 +71,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.util.DefaultMonitor"><span>DefaultMonitor</span></li><li class="in" name="com.twitter.util.Monitor"><span>Monitor</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.util.DefaultMonitor"><span>DefaultMonitor</span></li><li class="in" name="com.twitter.finagle.util.DefaultMonitor"><span>DefaultMonitor</span></li><li class="in" name="com.twitter.util.Monitor"><span>Monitor</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -326,7 +328,7 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultMonitor">DefaultMonitor</a> → Monitor</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultMonitor → Monitor</dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -455,14 +457,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.util.DefaultMonitor$@toString():String" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.util.DefaultMonitor">DefaultMonitor</a> → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>DefaultMonitor → AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.util.Monitor#tryHandle" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tryHandle(exc:Throwable):com.twitter.util.Try[Unit]"></a>
       <a id="tryHandle(Throwable):Try[Unit]"></a>
@@ -558,7 +560,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.util.Monitor">
+        <div class="parent" name="com.twitter.finagle.util.DefaultMonitor">
+              <h3>Inherited from <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">DefaultMonitor</span></h3>
+            </div><div class="parent" name="com.twitter.util.Monitor">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>

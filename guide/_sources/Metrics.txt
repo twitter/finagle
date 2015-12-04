@@ -110,6 +110,13 @@ These client stats help you keep track of connection churn.
 
 .. include:: metrics/Pooling.rst
 
+Retries
+-------
+
+.. _retries:
+
+.. include:: metrics/Retries.rst
+
 Transport
 ---------
 
@@ -120,16 +127,6 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 (e.g. Netty) internals.
 
 .. include:: metrics/Transport.rst
-
-Requeues
---------
-
-.. _requeues:
-
-These metrics show requeues (automatic retries) by the Finagle Stack. The number of retries are
-controlled by a dynamic budget.
-
-.. include:: metrics/Requeues.rst
 
 Mux
 ---

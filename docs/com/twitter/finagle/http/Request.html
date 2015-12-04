@@ -54,7 +54,7 @@
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Rich HttpRequest.</p><p>Use RequestProxy to create an even richer subclass.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</span>, <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>, <span class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Proxy" class="extype" target="_top">Proxy</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</span>, <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>, <span class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</span>, <span class="extype" name="scala.Proxy">Proxy</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
             <div class="subClasses hiddenContent"><a href="RequestProxy.html" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a></div>
@@ -731,7 +731,7 @@ In a response, it uses the Set-Cookie headers.
     </span>
       <p class="shortcomment cmt">Arbitrary user-defined context associated with this request object.</p><div class="fullcomment"><div class="comment cmt"><p>Arbitrary user-defined context associated with this request object.
 <a href="https://twitter.github.io/util/docs/index.html#com.twitter.collection.RecordSchema.Record" class="extype" target="_top">RecordSchema.Record</a> is
-used here, rather than <span class="extype" name="com.twitter.finagle.Context">Context</span> or similar
+used here, rather than <a href="../context/Context.html" class="extype" name="com.twitter.finagle.context.Context">Context</a> or similar
 out-of-band mechanisms, to make the connection between the request and its
 associated context explicit.
 </p></div></div>
@@ -1738,7 +1738,7 @@ preserved, though may not be appropriate for the new media type.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Returns the HTTP method of this request.</p>
     </li><li name="com.twitter.finagle.http.Request#method_=" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="method_=(method:com.twitter.finagle.http.Method):Unit"></a>
       <a id="method_=(Method):Unit"></a>
@@ -1755,7 +1755,31 @@ preserved, though may not be appropriate for the new media type.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Sets the HTTP method of this request to the given <code>method</code>.</p>
+    </li><li name="com.twitter.finagle.http.Request#multipart" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="multipart:Option[com.twitter.finagle.http.exp.Multipart]"></a>
+      <a id="multipart:Option[Multipart]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">multipart</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="exp/Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.http.Request@multipart:Option[com.twitter.finagle.http.exp.Multipart]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns an _optional_ <span class="extype" name="Multipart">Multipart</span> instance, which maintains the
+<code>multipart/form-data</code> content of this non-chunked, POST request.</p><div class="fullcomment"><div class="comment cmt"><p>Returns an _optional_ <span class="extype" name="Multipart">Multipart</span> instance, which maintains the
+<code>multipart/form-data</code> content of this non-chunked, POST request. If
+this requests is either streaming or non-POST, this method returns
+<code>None</code>.</p><p>Note: This method is a part of an experimental API for handling
+multipart HTTP data and it will likely be changed in future in order
+to support streaming requests.
+</p></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -1823,7 +1847,8 @@ preserved, though may not be appropriate for the new media type.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Returns a <a href="ParamMap.html" class="extype" name="com.twitter.finagle.http.ParamMap">ParamMap</a> instance, which maintains query string and url-encoded
+params associated with this request.</p>
     </li><li name="com.twitter.finagle.http.Request#path" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="path:String"></a>
       <a id="path:String"></a>
@@ -2256,7 +2281,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.http.Request@toString():String" title="Permalink" target="_top">
@@ -2280,7 +2305,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Returns the URI of this request.</p>
     </li><li name="com.twitter.finagle.http.Request#uri_=" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="uri_=(uri:String):Unit"></a>
       <a id="uri_=(String):Unit"></a>
@@ -2297,7 +2322,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Set the URI of this request to the given <code>uri</code>.</p>
     </li><li name="com.twitter.finagle.http.Message#userAgent" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="userAgent:Option[String]"></a>
       <a id="userAgent:Option[String]"></a>
@@ -2677,7 +2702,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
             </div><div class="parent" name="com.twitter.finagle.http.netty.HttpMessageProxy">
               <h3>Inherited from <span class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</span></h3>
             </div><div class="parent" name="scala.Proxy">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Proxy" class="extype" target="_top">Proxy</a></h3>
+              <h3>Inherited from <span class="extype" name="scala.Proxy">Proxy</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

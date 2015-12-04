@@ -53,7 +53,8 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a> used
 throughout finagle clients and servers.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="HighResTimer.html" class="extype" name="com.twitter.finagle.param.HighResTimer">HighResTimer</a> for a configuration that needs a more
+</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="HighResTimer.html" class="extype" name="com.twitter.finagle.param.HighResTimer">HighResTimer</a> for a configuration that needs a more
   fine-grained timer as this is typically implemented via a
   &quot;hashed wheel timer&quot; which is optimized for approximated
   I/O timeout scheduling.</p></span></dd></dl><div class="toggleContainer block">
@@ -95,7 +96,7 @@ throughout finagle clients and servers.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.param.Timer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.param.Timer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(timer:com.twitter.util.Timer):com.twitter.finagle.param.Timer"></a>
       <a id="&lt;init&gt;:Timer"></a>
       <h4 class="signature">
@@ -111,7 +112,8 @@ throughout finagle clients and servers.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -387,7 +389,8 @@ throughout finagle clients and servers.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

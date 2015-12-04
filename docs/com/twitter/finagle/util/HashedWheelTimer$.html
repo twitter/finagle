@@ -51,7 +51,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A HashedWheelTimer that uses <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">org.jboss.netty.util.HashedWheelTimer</span> under
 the hood. Prefer using a single instance per application, the default
-instance is <a href="#Default:com.twitter.util.Timer" class="extmbr" name="com.twitter.finagle.util.HashedWheelTimer#Default">Default</a>.
+instance is <a href="#Default:com.twitter.util.Timer" class="extmbr" name="com.twitter.finagle.util.HashedWheelTimer#Default">HashedWheelTimer.Default</a>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
@@ -203,6 +203,23 @@ without having tasks scheduled for a later round.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.util.HashedWheelTimer#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="apply(nettyTimer:org.jboss.netty.util.HashedWheelTimer):com.twitter.util.Timer"></a>
+      <a id="apply(org.jboss.netty.util.HashedWheelTimer):Timer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="nettyTimer">nettyTimer: <span class="extype" name="org.jboss.netty.util.HashedWheelTimer">org.jboss.netty.util.HashedWheelTimer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.util.HashedWheelTimer$@apply(nettyTimer:org.jboss.netty.util.HashedWheelTimer):com.twitter.util.Timer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Create a <code>HashedWheelTimer</code> based on a netty.HashedWheelTimer.</p>
     </li><li name="com.twitter.finagle.util.HashedWheelTimer#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(tickDuration:com.twitter.util.Duration,ticksPerWheel:Int):com.twitter.util.Timer"></a>
       <a id="apply(Duration,Int):Timer"></a>

@@ -96,7 +96,7 @@ responses as well as failures.</p></span></dd></dl><div class="toggleContainer b
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.service.RetryExceptionsFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.service.RetryExceptionsFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(retryPolicy:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]],timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.service.RetryExceptionsFilter[Req,Rep]"></a>
       <a id="&lt;init&gt;:RetryExceptionsFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -112,7 +112,32 @@ responses as well as failures.</p></span></dd></dl><div class="toggleContainer b
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that coordinates retries of subsequent
+<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Services</a>. Exceptional responses can can be
+classified as retryable via the retryPolicy argument
+<a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">com.twitter.finagle.service.RetryPolicy</a>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>consider using a <span class="extype" name="Timer">Timer</span> with high resolution so that there is
+less correlation between retries. For example <span class="extype" name="HighResTimer.Default">HighResTimer.Default</span>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="RetryFilter.html" class="extype" name="com.twitter.finagle.service.RetryFilter">RetryFilter</a> for a version that allows for retries on &quot;successful&quot;
+responses as well as failures.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.RetryExceptionsFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(retryPolicy:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]],timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,retryBudget:com.twitter.finagle.service.RetryBudget):com.twitter.finagle.service.RetryExceptionsFilter[Req,Rep]"></a>
+      <a id="&lt;init&gt;:RetryExceptionsFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">RetryExceptionsFilter</span><span class="params">(<span name="retryPolicy">retryPolicy: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Nothing" class="extype" target="_top">Nothing</a>]]</span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="retryBudget">retryBudget: <a href="RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.RetryExceptionsFilter@&lt;init&gt;(retryPolicy:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]],timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,retryBudget:com.twitter.finagle.service.RetryBudget):com.twitter.finagle.service.RetryExceptionsFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">retryBudget</dt><dd class="cmt"><p>the budget that is <span class="extype" name="RetryBudget.tryWithdraw()">withdrawn from</span>
+for retries.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -341,23 +366,6 @@ on a configuration file, for instance.
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.service.RetryFilter#dispatch" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="dispatch(req:Req,service:com.twitter.finagle.Service[Req,Rep],policy:com.twitter.finagle.service.RetryPolicy[(Req,com.twitter.util.Try[Rep])],count:Int):com.twitter.util.Future[Rep]"></a>
-      <a id="dispatch(Req,Service[Req,Rep],RetryPolicy[(Req,Try[Rep])],Int):Future[Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">dispatch</span><span class="params">(<span name="req">req: <span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Req">Req</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Rep">Rep</span>]</span>, <span name="policy">policy: <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">RetryPolicy</a>[(<span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Req">Req</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Rep">Rep</span>])]</span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">0</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.service.RetryExceptionsFilter.Rep">Rep</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.RetryExceptionsFilter@dispatch(req:Req,service:com.twitter.finagle.Service[Req,Rep],policy:com.twitter.finagle.service.RetryPolicy[(Req,com.twitter.util.Try[Rep])],count:Int):com.twitter.util.Future[Rep]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd><a href="RetryFilter.html" class="extype" name="com.twitter.finagle.service.RetryFilter">RetryFilter</a></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>

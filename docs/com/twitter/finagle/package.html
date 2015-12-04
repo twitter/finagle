@@ -641,6 +641,24 @@ e.g., to account for variable latencies in message deliveries.
 the paths that the entry applies to. <code>dst</code> describes the resulting
 tree for this prefix on lookup.
 </p></div></div>
+    </li><li name="com.twitter.finagle.DroppedWriteException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DroppedWriteExceptionextendsTransportException"></a>
+      <a id="DroppedWriteException:DroppedWriteException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DroppedWriteException.html"><span class="name">DroppedWriteException</span></a><span class="result"> extends <a href="TransportException.html" class="extype" name="com.twitter.finagle.TransportException">TransportException</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@DroppedWriteExceptionextendsTransportException" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that a <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">com.twitter.finagle.transport.Transport</a> write associated
+with the request was dropped by the transport (usually to respect backpressure).</p>
     </li><li name="com.twitter.finagle.Dtab" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DtabextendsIndexedSeq[com.twitter.finagle.Dentry]withProductwithSerializable"></a>
       <a id="Dtab:Dtab"></a>
@@ -724,7 +742,7 @@ connected have been marked as failed. See FailFastFactory for details on
 this behavior.
 </p></div></div>
     </li><li name="com.twitter.finagle.Failure" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="FailureextendsExceptionwithNoStacktrace"></a>
+      <a id="FailureextendsExceptionwithNoStacktracewithHasLogLevel"></a>
       <a id="Failure:Failure"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -732,10 +750,10 @@ this behavior.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Failure.html"><span class="name">Failure</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></span>
+        <a href="Failure.html"><span class="name">Failure</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@FailureextendsExceptionwithNoStacktrace" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@FailureextendsExceptionwithNoStacktracewithHasLogLevel" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -911,23 +929,6 @@ relinquishes resources that are associated with the server.
       </a>
     </span>
       <p class="shortcomment cmt">Factory methods to build a finagle-memcached client.</p>
-    </li><li name="com.twitter.finagle.MockTimer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MockTimerextendsTimer"></a>
-      <a id="MockTimer:MockTimer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="MockTimer.html"><span class="name">MockTimer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@MockTimerextendsTimer" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.twitter.finagle.MultipleAnnouncersPerSchemeException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MultipleAnnouncersPerSchemeExceptionextendsExceptionwithNoStacktrace"></a>
       <a id="MultipleAnnouncersPerSchemeException:MultipleAnnouncersPerSchemeException"></a>
@@ -1169,7 +1170,7 @@ hierarchically-addressed object.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ProxyAnnouncement.html"><span class="name">ProxyAnnouncement</span></a><span class="result"> extends <a href="Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Proxy" class="extype" target="_top">Proxy</a></span>
+        <a href="ProxyAnnouncement.html"><span class="name">ProxyAnnouncement</span></a><span class="result"> extends <a href="Announcement.html" class="extype" name="com.twitter.finagle.Announcement">Announcement</a> with <span class="extype" name="scala.Proxy">Proxy</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@ProxyAnnouncementextendsAnnouncementwithProxy" title="Permalink" target="_top">
@@ -1540,7 +1541,7 @@ that is unavailable. This constitutes a fail-stop condition.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ServiceProxy.html"><span class="name">ServiceProxy</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceProxy.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Proxy" class="extype" target="_top">Proxy</a></span>
+        <a href="ServiceProxy.html"><span class="name">ServiceProxy</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceProxy.Rep">Rep</span>] with <span class="extype" name="scala.Proxy">Proxy</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@ServiceProxy[-Req,+Rep]extendsService[Req,Rep]withProxy" title="Permalink" target="_top">
@@ -2004,26 +2005,6 @@ not have reached the other end.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.CancelledReadException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="CancelledReadExceptionextendsTransportException"></a>
-      <a id="CancelledReadException:CancelledReadException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="CancelledReadException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used">CancelledReadException</span></a><span class="result"> extends <a href="TransportException.html" class="extype" name="com.twitter.finagle.TransportException">TransportException</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@CancelledReadExceptionextendsTransportException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used</p></dd></dl></div>
     </li><li name="com.twitter.finagle.CodecException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CodecExceptionextendsException"></a>
       <a id="CodecException:CodecException"></a>
@@ -2186,7 +2167,7 @@ to assign labels to groups that ascribe meaning to them.
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ProxyServiceFactory.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.5) use ServiceFactoryProxy instead">ProxyServiceFactory</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Rep">Rep</span>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Proxy" class="extype" target="_top">Proxy</a></span>
+        <a href="ProxyServiceFactory.html"><span class="name deprecated" title="Deprecated: (Since version 6.7.5) use ServiceFactoryProxy instead">ProxyServiceFactory</span></a><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ProxyServiceFactory.Rep">Rep</span>] with <span class="extype" name="scala.Proxy">Proxy</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@ProxyServiceFactory[-Req,+Rep]extendsServiceFactory[Req,Rep]withProxy" title="Permalink" target="_top">
@@ -2361,7 +2342,7 @@ see <a href="ThriftMuxServer$.html" class="extype" name="com.twitter.finagle.Thr
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="BackupRequestLost$.html"><span class="name">BackupRequestLost</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></span>
+        <a href="BackupRequestLost$.html"><span class="name">BackupRequestLost</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@BackupRequestLost" title="Permalink" target="_top">
@@ -3636,6 +3617,25 @@ the netty3 event loop.</p><p>Note: when {{com.twitter.finagle.builder.ClientBuil
 package netty3 can move into its own package, so that only the
 (new-style) clients and servers that depend on netty3 bring it in.
 </p></div></div>
+    </li><li name="com.twitter.finagle.netty4" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="netty4"></a>
+      <a id="netty4:netty4"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="netty4/package.html"><span class="name">netty4</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@netty4" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Package netty4 implements the bottom finagle primitives:
+<a href="Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> and a client transport in terms of
+the netty4 event loop.</p>
     </li><li name="com.twitter.finagle.param" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="param"></a>
       <a id="param:param"></a>

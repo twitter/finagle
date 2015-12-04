@@ -55,17 +55,16 @@ serveTransport, that binds a transport and a service. It will then
 dispatch requests onto a standard service stack parameterized as
 described below.
 </p></div><dl class="paramcmts block"><dt class="param">listener</dt><dd class="cmt"><p>The Listener from which to accept new typed
-Transports.</p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum amount of time the server is
+Transports.</p></dd><dt class="param">serviceTransport</dt><dd class="cmt"><p>The function used to bind an accepted
+Transport with a Service. Requests read from the transport are
+dispatched onto the Service, with replies written back.</p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum amount of time the server is
 allowed to handle a request. If the timeout expires, the server
 will cancel the future and terminate the client connection.</p></dd><dt class="param">maxConcurrentRequests</dt><dd class="cmt"><p>The maximum number of concurrent
 requests the server is willing to handle.</p></dd><dt class="param">cancelOnHangup</dt><dd class="cmt"><p>Enabled by default. If disabled,
 exceptions on the transport do not propagate to the transport.</p></dd><dt class="param">prepare</dt><dd class="cmt"><p>Prepare the given <code>ServiceFactory</code> before use.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">finagle.Server</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="../benchmark/DefaultServerBenchmark$TestServer$.html" class="extype" name="com.twitter.finagle.benchmark.DefaultServerBenchmark.TestServer">TestServer</a></div>
-          </div></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -118,7 +117,9 @@ exceptions on the transport do not propagate to the transport.</p></dd><dt class
       </a>
     </span>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">listener</dt><dd class="cmt"><p>The Listener from which to accept new typed
-Transports.</p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum amount of time the server is
+Transports.</p></dd><dt class="param">serviceTransport</dt><dd class="cmt"><p>The function used to bind an accepted
+Transport with a Service. Requests read from the transport are
+dispatched onto the Service, with replies written back.</p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum amount of time the server is
 allowed to handle a request. If the timeout expires, the server
 will cancel the future and terminate the client connection.</p></dd><dt class="param">maxConcurrentRequests</dt><dd class="cmt"><p>The maximum number of concurrent
 requests the server is willing to handle.</p></dd><dt class="param">cancelOnHangup</dt><dd class="cmt"><p>Enabled by default. If disabled,
@@ -689,7 +690,43 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
     </span>
       <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
 when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.server.DefaultServer#serviceTransport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
+      <a id="serveAndAnnounce(String,SocketAddress,Service[Req,Rep]):ListeningServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.DefaultServer@serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Server#serveAndAnnounce" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer"></a>
+      <a id="serveAndAnnounce(String,SocketAddress,ServiceFactory[Req,Rep]):ListeningServer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serveAndAnnounce</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="addr">addr: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="service">service: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.server.DefaultServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.DefaultServer.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../ListeningServer.html" class="extype" name="com.twitter.finagle.ListeningServer">ListeningServer</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.DefaultServer@serveAndAnnounce(name:String,addr:java.net.SocketAddress,service:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ListeningServer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Serve <code>service</code> at <code>addr</code> and announce with <code>name</code>. Announcements will be removed
+when the service is closed. Omitting the <code>addr</code> will bind to an ephemeral port.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.server.DefaultServer#serviceTransport" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="serviceTransport:(com.twitter.finagle.transport.Transport[In,Out],com.twitter.finagle.Service[Req,Rep])=&gt;com.twitter.util.Closable"></a>
       <a id="serviceTransport:(Transport[In,Out],Service[Req,Rep])⇒Closable"></a>
       <h4 class="signature">
@@ -705,7 +742,10 @@ when the service is closed. Omitting the <code>addr</code> will bind to an ephem
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">The function used to bind an accepted
+Transport with a Service.</p><div class="fullcomment"><div class="comment cmt"><p>The function used to bind an accepted
+Transport with a Service. Requests read from the transport are
+dispatched onto the Service, with replies written back.</p></div></div>
     </li><li name="com.twitter.finagle.server.DefaultServer#stack" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]"></a>
       <a id="stack:Stack[ServiceFactory[Req,Rep]]"></a>

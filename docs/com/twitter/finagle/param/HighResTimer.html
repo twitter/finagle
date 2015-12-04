@@ -53,7 +53,8 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a>
 such that tasks are run tighter to their schedule.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is expected that the resolution should be sub-10 milliseconds.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Timer.html" class="extype" name="com.twitter.finagle.param.Timer">Timer</a> for a configuration that is appropriate for
+</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is expected that the resolution should be sub-10 milliseconds.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Timer.html" class="extype" name="com.twitter.finagle.param.Timer">Timer</a> for a configuration that is appropriate for
   tasks that do not need fine-grained scheduling.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
@@ -93,7 +94,7 @@ such that tasks are run tighter to their schedule.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.twitter.finagle.param.HighResTimer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.param.HighResTimer#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(timer:com.twitter.util.Timer):com.twitter.finagle.param.HighResTimer"></a>
       <a id="&lt;init&gt;:HighResTimer"></a>
       <h4 class="signature">
@@ -109,7 +110,8 @@ such that tasks are run tighter to their schedule.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -385,7 +387,8 @@ such that tasks are run tighter to their schedule.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

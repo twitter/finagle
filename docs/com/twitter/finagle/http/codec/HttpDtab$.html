@@ -186,7 +186,7 @@ Utf8 strings.
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Clear all Dtab-related headers from the given message.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -369,7 +369,7 @@ Utf8 strings.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.codec.HttpDtab#read" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.codec.HttpDtab#read" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="read(msg:com.twitter.finagle.http.Message):com.twitter.util.Try[com.twitter.finagle.Dtab]"></a>
       <a id="read(Message):Try[Dtab]"></a>
       <h4 class="signature">
@@ -386,7 +386,9 @@ Utf8 strings.
       </a>
     </span>
       <p class="shortcomment cmt">Parse old-style X-Dtab pairs and then new-style Dtab-Local headers,
-Dtab-Local taking precedence.</p>
+Dtab-Local taking precedence.</p><div class="fullcomment"><div class="comment cmt"><p>Parse old-style X-Dtab pairs and then new-style Dtab-Local headers,
+Dtab-Local taking precedence.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>a Try[Dtab] which keeps the created Dtab if reading in worked.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -506,7 +508,7 @@ Dtab-Local taking precedence.</p>
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Write X-Dtab header pairs into the given message.</p>
     </li></ol>
             </div>
 

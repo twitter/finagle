@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.30.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.31.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.30.0',
+        VERSION:     '6.31.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.30.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.31.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body role="document">
+  <body>
   
   
 
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,14 +57,14 @@
         <li class="right" >
           <a href="Extending.html" title="Extending Finagle"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="metrics">
 <h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
@@ -175,17 +175,17 @@ primarily to decide whether a host is available to make new connections to in th
 <h3>Timer<a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>finagle/timer/pending_tasks</strong></dt>
-<dd>a stat of the number of pending tasks to run for <code class="docutils literal"><span class="pre">DefaultTimer.twitter</span></code></dd>
+<dd>a stat of the number of pending tasks to run for <tt class="docutils literal"><span class="pre">DefaultTimer.twitter</span></tt></dd>
 <dt><strong>finagle/timer/deviation_ms</strong></dt>
 <dd>a stat of the deviation in milliseconds of tasks scheduled on
-<code class="docutils literal"><span class="pre">DefaultTimer.twitter</span></code> from their expected time.</dd>
+<tt class="docutils literal"><span class="pre">DefaultTimer.twitter</span></tt> from their expected time.</dd>
 </dl>
 </div>
 <div class="section" id="clientregistry">
 <h3>ClientRegistry<a class="headerlink" href="#clientregistry" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
 <dt><strong>finagle/clientregistry/size</strong></dt>
-<dd>a gauge of the current number of clients in the <code class="docutils literal"><span class="pre">ClientRegistry</span></code></dd>
+<dd>a gauge of the current number of clients in the <tt class="docutils literal"><span class="pre">ClientRegistry</span></tt></dd>
 </dl>
 </div>
 </div>
@@ -242,6 +242,9 @@ within an interval bound by the ZooKeeper session timeout.</dd>
 <dt><strong>size</strong></dt>
 <dd>A gauge tracking the total size of the live cluster, not including
 members in limbo.</dd>
+<dt><strong>zkHealth</strong></dt>
+<dd>A gauge tracking the health of the underlying zk client as seen by the resolver.
+Unknown(0), Healthy(1), Unhealthy(2), Probation(3)</dd>
 <dt><strong>observed_serversets</strong></dt>
 <dd>A gauge tracking the number of clusters whose membership status is
 <em>currently</em> been tracked within the process. This metric differs from
@@ -458,6 +461,38 @@ retry budget.</p>
 </dl>
 </div>
 </div>
+<div class="section" id="retries">
+<h2>Retries<a class="headerlink" href="#retries" title="Permalink to this headline">¶</a></h2>
+<p id="id2">These metrics track the retries of failed requests
+via the <cite>com.twitter.finagle.service.Retries</cite> module.</p>
+<p>Requeues represent requests that were automatically retried by Finagle.
+Only failures which are known to be safe are eligible to be requeued.
+The number of retries allowed are controlled by a dynamic budget, <cite>RetryBudget</cite>.</p>
+<p>For clients built using <cite>ClientBuilder</cite>, the <strong>retries</strong> stat represents retries
+handled by the configured <cite>RetryPolicy</cite>. Note that application level failures
+<strong>are not</strong> included, which is particularly important for protocols that include
+exceptions, such as Thrift. The number of retries allowed is controlled by the
+same dynamic budget used for requeues.</p>
+<p>Somewhat confusingly for clients created via <cite>ClientBuilder</cite> there
+are an additional set of metrics scoped to <cite>tries</cite> that come from <cite>StatsFilter</cite>.
+Those metrics represent logical requests, while the metrics below
+are for the  physical requests, including the retries. You can replicate
+this behavior for clients built with the <cite>Stack</cite> API by wrapping the service
+with a <cite>StatsFilter</cite> scoped to <cite>tries</cite>.</p>
+<dl class="docutils">
+<dt><strong>retries</strong></dt>
+<dd>a stat of the number of times requests are retried as per a policy
+defined by the <cite>RetryPolicy</cite> from a <cite>ClientBuilder</cite>.</dd>
+<dt><strong>retries/requeues</strong></dt>
+<dd>a counter of the number of times requests are requeued. Failed requests which are
+eligible for requeues are failures which are known to be safe&nbsp;—&nbsp;see
+<cite>com.twitter.finagle.service.RetryPolicy.RetryableWriteException</cite>.</dd>
+<dt><strong>retries/budget</strong></dt>
+<dd>a gauge of the currently available retry budget</dd>
+<dt><strong>retries/budget_exhausted</strong></dt>
+<dd>a counter of the number of times when the budget is exhausted</dd>
+</dl>
+</div>
 <div class="section" id="transport">
 <h2>Transport<a class="headerlink" href="#transport" title="Permalink to this headline">¶</a></h2>
 <p id="transport-stats">These metrics pertain to where the finagle abstraction ends and the bytes are sent over the wire.
@@ -497,6 +532,8 @@ this should be the number of timeouts when writing</dd>
 <dl class="docutils">
 <dt><strong>connects</strong></dt>
 <dd>a counter of the total number of successful connections made</dd>
+<dt><strong>closes</strong></dt>
+<dd>a counter of the total number of channel close operations</dd>
 <dt><strong>connection_duration</strong></dt>
 <dd>a histogram of the duration of the lifetime of a connection</dd>
 <dt><strong>connection_received_bytes</strong></dt>
@@ -546,22 +583,9 @@ watermark of connections full and no connections are idle.</dd>
 </dl>
 </div>
 </div>
-<div class="section" id="requeues">
-<h2>Requeues<a class="headerlink" href="#requeues" title="Permalink to this headline">¶</a></h2>
-<p id="id2">These metrics show requeues (automatic retries) by the Finagle Stack. The number of retries are
-controlled by a dynamic budget.</p>
-<dl class="docutils">
-<dt><strong>requeue/requeues</strong></dt>
-<dd>a counter of the number of times requests are requeued</dd>
-<dt><strong>requeue/budget</strong></dt>
-<dd>a gauge of the current available retry budget</dd>
-<dt><strong>requeue/budget_exhausted</strong></dt>
-<dd>a counter of the number of times when the budget is exhausted</dd>
-</dl>
-</div>
 <div class="section" id="mux">
 <h2>Mux<a class="headerlink" href="#mux" title="Permalink to this headline">¶</a></h2>
-<p id="mux-stats">These stats pertain to <a class="reference internal" href="Protocols.html#mux"><span>Mux</span></a>.</p>
+<p id="mux-stats">These stats pertain to <a class="reference internal" href="Protocols.html#mux"><em>Mux</em></a>.</p>
 <dl class="docutils">
 <dt><strong>&lt;server_label&gt;/mux/draining</strong></dt>
 <dd>the number of times the server has initiated session draining</dd>
@@ -603,7 +627,7 @@ based failure detection. They only apply to the mux protocol.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -672,6 +696,7 @@ based failure detection. They only apply to the mux protocol.</p>
 <li><a class="reference internal" href="#singletonpool">SingletonPool</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#retries">Retries</a></li>
 <li><a class="reference internal" href="#transport">Transport</a><ul>
 <li><a class="reference internal" href="#channelconnector">ChannelConnector</a></li>
 <li><a class="reference internal" href="#serverbridge">ServerBridge</a></li>
@@ -682,7 +707,6 @@ based failure detection. They only apply to the mux protocol.</p>
 <li><a class="reference internal" href="#thrift">Thrift</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#requeues">Requeues</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 <li><a class="reference internal" href="#threshold-failure-detector">Threshold Failure Detector</a><ul>
 <li><a class="reference internal" href="#thresholdfailuredetector">ThresholdFailureDetector</a></li>

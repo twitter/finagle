@@ -133,7 +133,8 @@ unfamiliar with your stats to understand your service's key metrics.
       <p class="shortcomment cmt">A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a>
 such that tasks are run tighter to their schedule.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a high resolution <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a>
 such that tasks are run tighter to their schedule.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is expected that the resolution should be sub-10 milliseconds.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Timer.html" class="extype" name="com.twitter.finagle.param.Timer">Timer</a> for a configuration that is appropriate for
+</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is expected that the resolution should be sub-10 milliseconds.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="Timer.html" class="extype" name="com.twitter.finagle.param.Timer">Timer</a> for a configuration that is appropriate for
   tasks that do not need fine-grained scheduling.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.Label" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LabelextendsProductwithSerializable"></a>
@@ -264,7 +265,8 @@ clients and servers.</p>
       <p class="shortcomment cmt">A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a> used
 throughout finagle clients and servers.</p><div class="fullcomment"><div class="comment cmt"><p>A class eligible for configuring a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">com.twitter.util.Timer</a> used
 throughout finagle clients and servers.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="HighResTimer.html" class="extype" name="com.twitter.finagle.param.HighResTimer">HighResTimer</a> for a configuration that needs a more
+</p></div><dl class="paramcmts block"><dt class="param">timer</dt><dd class="cmt"><p>it is a requirement that it propagates <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Local" class="extype" target="_top">Locals</a>
+ from scheduling time to execution time.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="HighResTimer.html" class="extype" name="com.twitter.finagle.param.HighResTimer">HighResTimer</a> for a configuration that needs a more
   fine-grained timer as this is typically implemented via a
   &quot;hashed wheel timer&quot; which is optimized for approximated
   I/O timeout scheduling.</p></span></dd></dl></div>

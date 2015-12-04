@@ -94,23 +94,57 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.http.exp.Multipart.FileUpload" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="FileUploadextendsProductwithSerializable"></a>
+              <ol><li name="com.twitter.finagle.http.exp.Multipart.FileUpload" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="FileUploadextendsAnyRef"></a>
       <a id="FileUpload:FileUpload"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Multipart$$FileUpload.html"><span class="name">FileUpload</span></a><span class="params">(<span name="content">content: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="contentType">contentType: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="fileName">fileName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="contentTransferEncoding">contentTransferEncoding: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Multipart$$FileUpload.html"><span class="name">FileUpload</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.http.exp.Multipart$@FileUploadextendsProductwithSerializable" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.http.exp.Multipart$@FileUploadextendsAnyRef" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A data type representing a multipart _file upload_.</p>
+      <p class="shortcomment cmt">A type representing a multipart _file upload_.</p>
+    </li><li name="com.twitter.finagle.http.exp.Multipart.InMemoryFileUpload" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InMemoryFileUploadextendsMultipart.FileUploadwithProductwithSerializable"></a>
+      <a id="InMemoryFileUpload:InMemoryFileUpload"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Multipart$$InMemoryFileUpload.html"><span class="name">InMemoryFileUpload</span></a><span class="params">(<span name="content">content: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="contentType">contentType: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="fileName">fileName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="contentTransferEncoding">contentTransferEncoding: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Multipart$$FileUpload.html" class="extype" name="com.twitter.finagle.http.exp.Multipart.FileUpload">FileUpload</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.http.exp.Multipart$@InMemoryFileUploadextendsMultipart.FileUploadwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A variant of <a href="Multipart$$FileUpload.html" class="extype" name="com.twitter.finagle.http.exp.Multipart.FileUpload">FileUpload</a> that is already in memory and represented as <span class="extype" name="Buf">Buf</span>.</p>
+    </li><li name="com.twitter.finagle.http.exp.Multipart.OnDiskFileUpload" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OnDiskFileUploadextendsMultipart.FileUploadwithProductwithSerializable"></a>
+      <a id="OnDiskFileUpload:OnDiskFileUpload"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Multipart$$OnDiskFileUpload.html"><span class="name">OnDiskFileUpload</span></a><span class="params">(<span name="content">content: <span class="extype" name="java.io.File">File</span></span>, <span name="contentType">contentType: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="fileName">fileName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="contentTransferEncoding">contentTransferEncoding: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Multipart$$FileUpload.html" class="extype" name="com.twitter.finagle.http.exp.Multipart.FileUpload">FileUpload</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.http.exp.Multipart$@OnDiskFileUploadextendsMultipart.FileUploadwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A variant of <a href="Multipart$$FileUpload.html" class="extype" name="com.twitter.finagle.http.exp.Multipart.FileUpload">FileUpload</a> that is stored on disk and represented as <span class="extype" name="File">File</span>.</p>
     </li></ol>
             </div>
 
@@ -209,28 +243,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.http.exp.Multipart#decodeNonChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="decodeNonChunked(request:com.twitter.finagle.http.Request):com.twitter.finagle.http.exp.Multipart"></a>
-      <a id="decodeNonChunked(Request):Multipart"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">decodeNonChunked</span><span class="params">(<span name="request">request: <a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a></span>)</span><span class="result">: <a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.http.exp.Multipart$@decodeNonChunked(request:com.twitter.finagle.http.Request):com.twitter.finagle.http.exp.Multipart" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Decodes the _non-chunked_ (a complete) HTTP <code>request</code> with <code>multipart/form-data</code>
-content type into an instance of <a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Decodes the _non-chunked_ (a complete) HTTP <code>request</code> with <code>multipart/form-data</code>
-content type into an instance of <a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a>.</p><p>**Note** that this method _mutates_ the given <code>request</code>. So it's not possible
-read the <a href="Multipart.html" class="extype" name="com.twitter.finagle.http.exp.Multipart">Multipart</a> data from the same request twice.</p><p>See <a href="https://groups.google.com/forum/#!topic/netty/NxT-4QzutI4" target="_blank">this Netty thread</a>
-for more details.
-</p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>

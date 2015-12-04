@@ -1249,7 +1249,51 @@ and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">
              single retry if the failure is known to be safe to retry.</li></ul></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
       application level failures. This is particularly important for
       codecs that include exceptions, such as <code>Thrift</code>.
-      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="../service/RetryPolicy$.html#tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#tries">com.twitter.finagle.service.RetryPolicy.tries</a></p></span></dd></dl></div>
+      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
+eligible for retries.</p></span><span class="cmt"><p><a href="../service/RetryPolicy$.html#tries(numTries:Int):com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#tries">com.twitter.finagle.service.RetryPolicy.tries</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#retryBudget" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This"></a>
+      <a id="retryBudget(RetryBudget,Stream[Duration]):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">retryBudget</span><span class="params">(<span name="budget">budget: <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>, <span name="backoffSchedule">backoffSchedule: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
+the number of retries that can be made.</p><div class="fullcomment"><div class="comment cmt"><p>The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
+the number of retries that can be made. When used for requeues,
+includes a stream of delays used to delay each retry.</p><p>Helps prevent clients from overwhelming the downstream service.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryPolicy">retryPolicy</a> for per-request rules on which failures are
+eligible for retries.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#retryBudget" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="retryBudget(budget:com.twitter.finagle.service.RetryBudget):ClientBuilder.this.This"></a>
+      <a id="retryBudget(RetryBudget):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">retryBudget</span><span class="params">(<span name="budget">budget: <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@retryBudget(budget:com.twitter.finagle.service.RetryBudget):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
+the number of retries that can be made.</p><div class="fullcomment"><div class="comment cmt"><p>The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
+the number of retries that can be made.</p><p>Helps prevent clients from overwhelming the downstream service.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryPolicy">retryPolicy</a> for per-request rules on which failures are
+eligible for retries.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#retryPolicy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This"></a>
       <a id="retryPolicy(RetryPolicy[Try[Nothing]]):This"></a>
@@ -1270,7 +1314,8 @@ and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
       application level failures. This is particularly important for
       codecs that include exceptions, such as <code>Thrift</code>.
-      This is only applicable to service-builds (<code>build()</code>).</p></span></dd></dl></div>
+      This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
+eligible for retries.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="sendBufferSize(value:Int):ClientBuilder.this.This"></a>
       <a id="sendBufferSize(Int):This"></a>

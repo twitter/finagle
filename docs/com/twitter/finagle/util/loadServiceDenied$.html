@@ -50,7 +50,11 @@
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A deny list of implementations to ignore. Keys are the fully qualified class names.
-Any other implementations that are found via <code>LoadService.apply</code> are eligible to be used.</p><p>As an example, here's how to filter out <code>OstrichStatsReceiver</code> and <code>CommonsStatsReceiver</code>:</p><pre>-com.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.CommonsStatsReceiver</pre></div><div class="toggleContainer block">
+Any other implementations that are found via <code>LoadService.apply</code> are eligible to be used.</p><p>As an example, here's how to filter out <code>OstrichStatsReceiver</code>, <code>OstrichExporter</code> and
+<code>CommonsStatsReceiver</code> using a global flag:</p><pre>-Dcom.twitter.finagle.util.loadServiceDenied=com.twitter.finagle.stats.OstrichStatsReceiver,com.twitter.finagle.stats.OstrichExporter,com.twitter.finagle.stats.CommonsStatsReceiver</pre><p>We need to pass the arguments as Java property values instead of as Java application
+arguments (regular TwitterServer flags) because <a href="LoadService$.html" class="extype" name="com.twitter.finagle.util.LoadService">LoadService</a> may be loaded before
+application arguments are parsed.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>

@@ -110,7 +110,9 @@ serveTransport, that binds a transport and a service. It will then
 dispatch requests onto a standard service stack parameterized as
 described below.
 </p></div><dl class="paramcmts block"><dt class="param">listener</dt><dd class="cmt"><p>The Listener from which to accept new typed
-Transports.</p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum amount of time the server is
+Transports.</p></dd><dt class="param">serviceTransport</dt><dd class="cmt"><p>The function used to bind an accepted
+Transport with a Service. Requests read from the transport are
+dispatched onto the Service, with replies written back.</p></dd><dt class="param">requestTimeout</dt><dd class="cmt"><p>The maximum amount of time the server is
 allowed to handle a request. If the timeout expires, the server
 will cancel the future and terminate the client connection.</p></dd><dt class="param">maxConcurrentRequests</dt><dd class="cmt"><p>The maximum number of concurrent
 requests the server is willing to handle.</p></dd><dt class="param">cancelOnHangup</dt><dd class="cmt"><p>Enabled by default. If disabled,

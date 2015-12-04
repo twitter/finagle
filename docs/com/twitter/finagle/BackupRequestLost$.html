@@ -45,7 +45,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">BackupRequestLost</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></span>
+        <span class="name">BackupRequestLost</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4>
       
@@ -54,7 +54,7 @@ their corresponding backup requests succeeded first. See
 <a href="exp/BackupRequestFilter.html" class="extype" name="com.twitter.finagle.exp.BackupRequestFilter">com.twitter.finagle.exp.BackupRequestFilter</a> for details.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a>, <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -72,7 +72,7 @@ their corresponding backup requests succeeded first. See
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.BackupRequestLost"><span>BackupRequestLost</span></li><li class="in" name="com.twitter.finagle.NoStacktrace"><span>NoStacktrace</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.BackupRequestLost"><span>BackupRequestLost</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.NoStacktrace"><span>NoStacktrace</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -432,6 +432,23 @@ their corresponding backup requests succeeded first. See
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.BackupRequestLost#logLevel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logLevel:com.twitter.logging.Level"></a>
+      <a id="logLevel:Level"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logLevel</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.Level" class="extype" target="_top">Level</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.BackupRequestLost$@logLevel:com.twitter.logging.Level" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.BackupRequestLost">BackupRequestLost</a> → HasLogLevel</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -663,7 +680,9 @@ their corresponding backup requests succeeded first. See
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.NoStacktrace">
+        <div class="parent" name="com.twitter.logging.HasLogLevel">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.NoStacktrace">
               <h3>Inherited from <a href="NoStacktrace.html" class="extype" name="com.twitter.finagle.NoStacktrace">NoStacktrace</a></h3>
             </div><div class="parent" name="java.lang.Exception">
               <h3>Inherited from <span class="extype" name="java.lang.Exception">Exception</span></h3>
