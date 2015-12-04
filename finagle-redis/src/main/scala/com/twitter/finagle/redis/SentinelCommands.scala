@@ -30,7 +30,7 @@ trait SentinelCommands { self: BaseClient =>
   /**
    * Show the state and info of the specified master.
    */
-  def master(name: ChannelBuffer): Future[MasterNode] =
+  def master(name: String): Future[MasterNode] =
     doRequest(SentinelMaster(name)) {
       case MBulkReply(messages) => Future.value(
         new MasterNode(returnMap(ReplyFormat.toString(messages))))
@@ -39,7 +39,7 @@ trait SentinelCommands { self: BaseClient =>
   /**
    * Show a list of slaves for this master, and their state.
    */
-  def slaves(name: ChannelBuffer): Future[List[SlaveNode]] =
+  def slaves(name: String): Future[List[SlaveNode]] =
     doRequest(SentinelSlaves(name)) {
       case MBulkReply(names) => Future.value(
         names.map {
@@ -52,7 +52,7 @@ trait SentinelCommands { self: BaseClient =>
   /**
    * Show a list of sentinel instances for this master, and their state.
    */
-  def sentinels(name: ChannelBuffer): Future[List[SentinelNode]] =
+  def sentinels(name: String): Future[List[SentinelNode]] =
     doRequest(SentinelSentinels(name)) {
       case MBulkReply(names) => Future.value(
         names.map {
@@ -67,7 +67,7 @@ trait SentinelCommands { self: BaseClient =>
    * is in progress or terminated successfully for this master it returns the
    * address and port of the promoted slave.
    */
-  def getMasterAddrByName(name: ChannelBuffer): Future[Option[InetSocketAddress]] =
+  def getMasterAddrByName(name: String): Future[Option[InetSocketAddress]] =
     doRequest(SentinelGetMasterAddrByName(name)) {
       case NilMBulkReply() =>
         Future.value(None)
@@ -82,7 +82,7 @@ trait SentinelCommands { self: BaseClient =>
   /**
    * Reset all the masters with matching name.
    */
-  def reset(pattern: ChannelBuffer): Future[Unit] =
+  def reset(pattern: String): Future[Unit] =
     doRequest(SentinelReset(pattern)) {
       case StatusReply(msg) => Future.Unit
     }
@@ -90,7 +90,7 @@ trait SentinelCommands { self: BaseClient =>
   /**
    * Force a failover.
    */
-  def failover(name: ChannelBuffer): Future[Unit] =
+  def failover(name: String): Future[Unit] =
     doRequest(SentinelFailover(name)) {
       case StatusReply(msg) => Future.Unit
     }
@@ -100,7 +100,7 @@ trait SentinelCommands { self: BaseClient =>
    * needed to failover a master, and the majority needed to authorize the
    * failover.
    */
-  def ckQuorum(name: ChannelBuffer): Future[String] =
+  def ckQuorum(name: String): Future[String] =
     doRequest(SentinelCkQuorum(name)) {
       case StatusReply(message) => Future.value(message)
     }
@@ -118,15 +118,15 @@ trait SentinelCommands { self: BaseClient =>
    * Tells the Sentinel to start monitoring a new master with the
    * specified name, ip, port, and quorum.
    */
-  def monitor(name: ChannelBuffer, addr: InetSocketAddress, quorum: Int): Future[Unit] =
-    doRequest(SentinelMonitor(name, addr, quorum)) {
+  def monitor(name: String, ip: String, port: Int, quorum: Int): Future[Unit] =
+    doRequest(SentinelMonitor(name, ip, port, quorum)) {
       case StatusReply(msg) => Future.Unit
     }
 
   /**
    * Remove the specified master.
    */
-  def remove(name: ChannelBuffer): Future[Unit] =
+  def remove(name: String): Future[Unit] =
     doRequest(SentinelRemove(name)) {
       case StatusReply(msg) => Future.Unit
     }
@@ -134,7 +134,7 @@ trait SentinelCommands { self: BaseClient =>
   /**
    * Change configuration parameters of a specific master.
    */
-  def set(name: ChannelBuffer, option: ChannelBuffer, value: ChannelBuffer): Future[Unit] =
+  def set(name: String, option: String, value: String): Future[Unit] =
     doRequest(SentinelSet(name, option, value)) {
       case StatusReply(msg) => Future.Unit
     }

@@ -218,7 +218,7 @@ object Commands {
     QUIT              -> {_ => Quit},
     SLAVEOF           -> {SlaveOf(_)},
     CONFIG            -> {Config(_)},
-    SENTINEL          -> {Sentinel(_)},
+    SENTINEL          -> {Sentinel.fromBytes(_)},
 
     // hash sets
     HDEL              -> {HDel(_)},
@@ -275,7 +275,7 @@ object Commands {
     _(args)
   }.getOrElse(throw ClientError("Unsupported command: " + cmd))
 
-  def trimList(list: Seq[Array[Byte]], count: Int, from: String = "") = {
+  def trimList[T](list: Seq[T], count: Int, from: String = ""): Seq[T] = {
     RequireClientProtocol(list != null, "%s Empty list found".format(from))
     RequireClientProtocol(
       list.length == count,

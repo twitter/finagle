@@ -5,164 +5,150 @@ import com.twitter.finagle.redis.protocol.Commands._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.redis.ClientError
 import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers
 
-case class SentinelMaster(name: ChannelBuffer)
-  extends Sentinel(SentinelMaster.channelBuffer, Seq(name))
+case class SentinelMaster(name: String)
+  extends Sentinel(SentinelMaster.command, Seq(name))
 
 object SentinelMaster extends SentinelHelper {
   val command = "MASTER"
-  def apply(args: Seq[Array[Byte]]): SentinelMaster = {
+  def apply(args: Seq[String]): SentinelMaster = {
     val name = trimList(args, 2, "SENTINEL MASTER")(0)
-    new SentinelMaster(ChannelBuffers.wrappedBuffer(name))
+    new SentinelMaster(name)
   }
 }
 
-case class SentinelMasters() extends Sentinel(SentinelMasters.channelBuffer, Nil)
+case class SentinelMasters() extends Sentinel(SentinelMasters.command, Nil)
 
 object SentinelMasters extends SentinelHelper {
   val command = "MASTERS"
-  def apply(args: Seq[Array[Byte]]): SentinelMasters = {
+  def apply(args: Seq[String]): SentinelMasters = {
     new SentinelMasters()
   }
 }
 
-case class SentinelSlaves(name: ChannelBuffer)
-  extends Sentinel(SentinelSlaves.channelBuffer, Seq(name))
+case class SentinelSlaves(name: String)
+  extends Sentinel(SentinelSlaves.command, Seq(name))
 
 object SentinelSlaves extends SentinelHelper {
   val command = "SLAVES"
-  def apply(args: Seq[Array[Byte]]): SentinelSlaves = {
+  def apply(args: Seq[String]): SentinelSlaves = {
     val name = trimList(args, 2, "SENTINEL SLAVES")(0)
-    new SentinelSlaves(ChannelBuffers.wrappedBuffer(name))
+    new SentinelSlaves(name)
   }
 }
 
-case class SentinelSentinels(name: ChannelBuffer)
-  extends Sentinel(SentinelSentinels.channelBuffer, Seq(name))
+case class SentinelSentinels(name: String)
+  extends Sentinel(SentinelSentinels.command, Seq(name))
 
 object SentinelSentinels extends SentinelHelper {
   val command = "SENTINELS"
-  def apply(args: Seq[Array[Byte]]): SentinelSentinels = {
+  def apply(args: Seq[String]): SentinelSentinels = {
     val name = trimList(args, 2, "SENTINEL SENTINELS")(0)
-    new SentinelSentinels(ChannelBuffers.wrappedBuffer(name))
+    new SentinelSentinels(name)
   }
 }
 
-case class SentinelGetMasterAddrByName(name: ChannelBuffer)
-  extends Sentinel(SentinelGetMasterAddrByName.channelBuffer, Seq(name))
+case class SentinelGetMasterAddrByName(name: String)
+  extends Sentinel(SentinelGetMasterAddrByName.command, Seq(name))
 
 object SentinelGetMasterAddrByName extends SentinelHelper {
   val command = "GET-MASTER-ADDR-BY-NAME"
-  def apply(args: Seq[Array[Byte]]): SentinelGetMasterAddrByName = {
+  def apply(args: Seq[String]): SentinelGetMasterAddrByName = {
     val name = trimList(args, 2, "SENTINEL GET-MASTER-ADDR-BY-NAME")(0)
-    new SentinelGetMasterAddrByName(ChannelBuffers.wrappedBuffer(name))
+    new SentinelGetMasterAddrByName(name)
   }
 }
 
-case class SentinelReset(pattern: ChannelBuffer)
-  extends Sentinel(SentinelReset.channelBuffer, Seq(pattern))
+case class SentinelReset(pattern: String)
+  extends Sentinel(SentinelReset.command, Seq(pattern))
 
 object SentinelReset extends SentinelHelper {
   val command = "RESET"
-  def apply(args: Seq[Array[Byte]]): SentinelReset = {
+  def apply(args: Seq[String]): SentinelReset = {
     val name = trimList(args, 2, "SENTINEL RESET")(0)
-    new SentinelReset(ChannelBuffers.wrappedBuffer(name))
+    new SentinelReset(name)
   }
 }
 
-case class SentinelFailover(name: ChannelBuffer)
-  extends Sentinel(SentinelFailover.channelBuffer, Seq(name))
+case class SentinelFailover(name: String)
+  extends Sentinel(SentinelFailover.command, Seq(name))
 
 object SentinelFailover extends SentinelHelper {
   val command = "FAILOVER"
-  def apply(args: Seq[Array[Byte]]): SentinelFailover = {
+  def apply(args: Seq[String]): SentinelFailover = {
     val name = trimList(args, 2, "SENTINEL FAILOVER")(0)
-    new SentinelFailover(ChannelBuffers.wrappedBuffer(name))
+    new SentinelFailover(name)
   }
 }
 
-case class SentinelCkQuorum(name: ChannelBuffer)
-  extends Sentinel(SentinelCkQuorum.channelBuffer, Seq(name))
+case class SentinelCkQuorum(name: String)
+  extends Sentinel(SentinelCkQuorum.command, Seq(name))
 
 object SentinelCkQuorum extends SentinelHelper {
   val command = "CKQUORUM"
-  def apply(args: Seq[Array[Byte]]): SentinelCkQuorum = {
+  def apply(args: Seq[String]): SentinelCkQuorum = {
     val name = trimList(args, 2, "SENTINEL CKQUORUM")(0)
-    new SentinelCkQuorum(ChannelBuffers.wrappedBuffer(name))
+    new SentinelCkQuorum(name)
   }
 }
 
 case class SentinelFlushConfig()
-  extends Sentinel(SentinelFlushConfig.channelBuffer, Nil)
+  extends Sentinel(SentinelFlushConfig.command, Nil)
 
 object SentinelFlushConfig extends SentinelHelper {
   val command = "FLUSHCONFIG"
-  def apply(args: Seq[Array[Byte]]): SentinelFlushConfig = {
+  def apply(args: Seq[String]): SentinelFlushConfig = {
     new SentinelFlushConfig()
   }
 }
 
-case class SentinelMonitor(name: ChannelBuffer, addr: InetSocketAddress, quorum: Int)
-  extends Sentinel(SentinelMonitor.channelBuffer, Seq(
-    name,
-    StringToChannelBuffer(addr.getHostString),
-    StringToChannelBuffer(addr.getPort.toString),
-    StringToChannelBuffer(quorum.toString)))
+case class SentinelMonitor(name: String, ip: String, port: Int, quorum: Int)
+  extends Sentinel(SentinelMonitor.command, Seq(name, ip, port.toString, quorum.toString))
 
 object SentinelMonitor extends SentinelHelper {
   val command = "MONITOR"
-  def apply(args: Seq[Array[Byte]]): SentinelMonitor = {
+  def apply(args: Seq[String]): SentinelMonitor = {
     trimList(args, 2, "SENTINEL MONITOR") match {
       case name :: ip :: port :: quorum :: Nil =>
-        new SentinelMonitor(
-          ChannelBuffers.wrappedBuffer(name),
-          InetSocketAddress.createUnresolved(
-            BytesToString(ip),
-            NumberFormat.toInt(BytesToString(port))),
-          NumberFormat.toInt(BytesToString(quorum)))
+        new SentinelMonitor(name, ip, port.toInt, quorum.toInt)
     }
   }
 }
 
-case class SentinelRemove(name: ChannelBuffer)
-  extends Sentinel(SentinelRemove.channelBuffer, Seq(name))
+case class SentinelRemove(name: String)
+  extends Sentinel(SentinelRemove.command, Seq(name))
 
 object SentinelRemove extends SentinelHelper {
   val command = "REMOVE"
-  def apply(args: Seq[Array[Byte]]): SentinelRemove = {
+  def apply(args: Seq[String]): SentinelRemove = {
     val list = trimList(args, 2, "SENTINEL REMOVE")
-    new SentinelRemove(ChannelBuffers.wrappedBuffer(list(0)))
+    new SentinelRemove(list(0))
   }
 }
 
-case class SentinelSet(name: ChannelBuffer, option: ChannelBuffer, value: ChannelBuffer)
-  extends Sentinel(SentinelSet.channelBuffer, Seq(name, option, value))
+case class SentinelSet(name: String, option: String, value: String)
+  extends Sentinel(SentinelSet.command, Seq(name, option, value))
 
 object SentinelSet extends SentinelHelper {
   val command = "SET"
-  def apply(args: Seq[Array[Byte]]): SentinelSet = {
+  def apply(args: Seq[String]): SentinelSet = {
     trimList(args, 2, "SENTINEL SET") match {
       case name :: option :: value :: Nil =>
-        new SentinelSet(
-          ChannelBuffers.wrappedBuffer(name),
-          ChannelBuffers.wrappedBuffer(option),
-          ChannelBuffers.wrappedBuffer(value))
+        new SentinelSet(name, option, value)
     }
   }
 }
 
 trait SentinelHelper {
   def command: String
-  def apply(args: Seq[Array[Byte]]): Sentinel
-  def channelBuffer: ChannelBuffer = StringToChannelBuffer(command)
-  def bytes: Array[Byte] = StringToBytes(command)
+  def apply(args: Seq[String]): Sentinel
 }
 
-abstract class Sentinel(sub: ChannelBuffer, args: Seq[ChannelBuffer]) extends Command {
+abstract class Sentinel(sub: String, args: Seq[String]) extends Command {
   def command = Commands.SENTINEL
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.SENTINEL, sub) ++ args)
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(
+      Seq(CommandBytes.SENTINEL, StringToChannelBuffer(sub)) ++
+        args.map(StringToChannelBuffer(_)))
 }
 
 object Sentinel {
@@ -170,8 +156,12 @@ object Sentinel {
   val subCommands: Seq[SentinelHelper] = Seq(
     SentinelMaster, SentinelMasters, SentinelMonitor, SentinelRemove, SentinelSet)
 
-  def apply(args: Seq[Array[Byte]]): Sentinel = {
-    val subCommandString = new String(trimList(args.headOption.toList, 1, "SENTINEL")(0)).toUpperCase
+  def fromBytes(args: Seq[Array[Byte]]): Sentinel = {
+    apply(args.map(new String(_)))
+  }
+    
+  def apply(args: Seq[String]): Sentinel = {
+    val subCommandString = trimList(args.headOption.toList, 1, "SENTINEL")(0).toUpperCase
     val subCommand = subCommands.find { _.command == subCommandString }
       .getOrElse(throw ClientError(s"Invalid Sentinel command ${subCommandString}"))
     subCommand(args.tail)

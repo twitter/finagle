@@ -76,7 +76,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       val expected = (0 until masterCount).map { i =>
         val name = masterName(i)
         val address = redisAddress(i)
-        ready(client.monitor(name, address, sentinelCount + i))
+        ready(client.monitor(name, address.getHostString, address.getPort, sentinelCount + i))
         (name -> (address.getHostString, address.getPort, sentinelCount + i))
       }.toMap
 
@@ -103,7 +103,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
       (1 to 2).foreach { i =>
         withSentinelClient(i) { client =>
-          ready(client.monitor(master0, address, sentinelCount))
+          ready(client.monitor(master0, address.getHostString, address.getPort, sentinelCount))
         }
       }
       waitUntil("Waiting the sentinel list to be updated ...") {
