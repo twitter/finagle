@@ -4,6 +4,7 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.protocol.Commands._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.redis.ClientError
+import com.twitter.io.Charsets
 import java.net.InetSocketAddress
 
 case class SentinelMaster(name: String)
@@ -139,7 +140,7 @@ object SentinelSet extends SentinelHelper {
   }
 }
 
-trait SentinelHelper {
+sealed trait SentinelHelper {
   def command: String
   def apply(args: Seq[String]): Sentinel
 }
@@ -157,7 +158,7 @@ object Sentinel {
     SentinelMaster, SentinelMasters, SentinelMonitor, SentinelRemove, SentinelSet)
 
   def fromBytes(args: Seq[Array[Byte]]): Sentinel = {
-    apply(args.map(new String(_)))
+    apply(args.map(new String(_, Charsets.Utf8)))
   }
     
   def apply(args: Seq[String]): Sentinel = {

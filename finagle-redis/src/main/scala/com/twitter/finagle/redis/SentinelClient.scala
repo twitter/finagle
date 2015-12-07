@@ -35,7 +35,7 @@ object SentinelClient {
     val downAfterMilliseconds: Int = props("down-after-milliseconds").toInt
   }
   
-  trait DataNode extends Node {
+  sealed trait DataNode extends Node {
     val infoRefresh: Long = props("info-refresh").toLong
     val roleReported: String = props("role-reported")
     val roleReportedTime: Long = props("role-reported-time").toLong    
