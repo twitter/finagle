@@ -1,5 +1,7 @@
 package com.twitter.finagle.filter
 
+import java.util.concurrent.RejectedExecutionException
+
 import com.twitter.concurrent.AsyncMeter
 import com.twitter.finagle.{Failure, Service, SimpleFilter}
 import com.twitter.util.{Future, Throw}
@@ -8,13 +10,23 @@ import com.twitter.util.{Future, Throw}
   * A [[com.twitter.finagle.Filter]] that rate limits requests to a fixed rate over time by
   * using the [[com.twitter.concurrent.AsyncMeter]] implementation. It can be used for slowing
   * down access to throttled resources. Requests that are unable to acquire a permit are failed
-  * immediately with a [[com.twitter.finagle.Failure]] that signals a restartable or
-  * idempotent process.
+  * immediately with a [[com.twitter.finagle.Failure]] that signals that the work was never done,
+  * so it's safe to reenqueue.
+  *
+  * NOTE: If you're just trying not to be overwhelmed, you almost certainly want to use
+  * [[com.twitter.finagle.filter.RequestSemaphoreFilter]] instead, because RequestMeterFilter
+  * doesn't work well with "real" resources that are sometimes faster or slower (like a service
+  * that you're depending on that sometimes slows when it takes bursty traffic). This is better for
+  * resources that are artificially bounded, like a rate-limited API.
   */
-class RequestMeterFilter[Req, Rep](meter: AsyncMeter, permits: Int = 1) extends SimpleFilter[Req, Rep] {
+class RequestMeterFilter[Req, Rep](meter: AsyncMeter) extends SimpleFilter[Req, Rep] {
   def apply(request: Req, service: Service[Req, Rep]) = {
-    meter.await(permits).transform {
-      case Throw(noPermit) => Future.exception(Failure.rejected(noPermit))
+    meter.await(1).transform {
+      case Throw(noPermit) => noPermit match {
+        case e: RejectedExecutionException =>
+          Future.exception(Failure.rejected(noPermit))
+        case e => Future.exception(e)
+      }
       case _ => service(request)
     }
   }

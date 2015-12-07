@@ -1,44 +1,84 @@
 package com.twitter.finagle.filter
 
+import java.util.concurrent.RejectedExecutionException
+
 import com.twitter.concurrent.AsyncMeter
 import com.twitter.conversions.time._
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Failure, Service}
-import com.twitter.util.{Await, Future}
+import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
+import org.mockito.Mockito.when
 
 @RunWith(classOf[JUnitRunner])
-class RequestMeterFilterTest extends FunSuite {
+class RequestMeterFilterTest extends FunSuite with MockitoSugar {
 
-  val timer = DefaultTimer.twitter
-  val meter = AsyncMeter.newMeter(1, 1 second, 1)(timer)
-
-  test("return service execution after getting a permit") {
-    val echoSvc = new Service[Int, Int] {
-      def apply(req: Int) = Future(req)
-    }
-    val svc = new RequestMeterFilter(meter) andThen echoSvc
-    assert(Await.result(svc(2)) == 2)
+  val echoSvc = new Service[Int, Int] {
+    def apply(req: Int) = Future(req)
   }
 
-  test("mark dropped requests as rejected") {
-    val neverSvc = new Service[Int, Int] {
-      def apply(req: Int) = Future.never
+  test("return service execution after getting a permit") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { ctl =>
+      val meter = AsyncMeter.newMeter(1, 1 second, 1)(timer)
+      val svc = new RequestMeterFilter(meter) andThen echoSvc
+
+      assert(Await.result(svc(1)) == 1)
     }
-    val svc = new RequestMeterFilter(meter, 2) andThen neverSvc
-    val f = intercept[Failure] { Await.result(svc(1)) }
-    assert(f.isFlagged(Failure.Restartable))
+  }
+
+  test("mark dropped requests as failed") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { ctl =>
+      val meter = AsyncMeter.newMeter(1, 1 second, 1)(timer)
+      val svc = new RequestMeterFilter(meter) andThen echoSvc
+
+      val f1 = svc(1)
+      assert(f1.isDefined)
+
+      val f2 = svc(2)
+      assert(!f2.isDefined)
+
+      val f3 = svc(3)
+      assert(f3.isDefined)
+      val failure = intercept[Failure] { Await.result(f3, 5.seconds) }
+      assert(failure.getCause.getClass == classOf[RejectedExecutionException])
+
+      ctl.advance(1.second)
+      timer.tick()
+
+      assert(f2.isDefined)
+    }
+  }
+
+  test("meter exceptions are not wrapped as rejected") {
+    val meter = mock[AsyncMeter]
+    when(meter.await(1)).thenReturn(Future.exception(new RuntimeException("Error!")))
+
+    Time.withCurrentTimeFrozen { ctl =>
+      val svc = new RequestMeterFilter(meter) andThen echoSvc
+
+      val f1 = svc(3)
+      assert(f1.isDefined)
+      val e = intercept[RuntimeException] { Await.result(f1, 5.seconds) }
+      assert(e.getMessage == "Error!")
+    }
   }
 
   test("service failures are not wrapped as rejected") {
+    val timer = new MockTimer
     val exc = new Exception("app exc")
     val excSvc = new Service[Int, Int] {
       def apply(req: Int) = Future.exception(exc)
     }
-    val svc = new RequestMeterFilter(meter) andThen excSvc
-    val e = intercept[Exception] { Await.result(svc(1)) }
-    assert(e == exc)
+    Time.withCurrentTimeFrozen { ctl =>
+      val meter = AsyncMeter.newMeter(1, 1 second, 1)(timer)
+      val svc = new RequestMeterFilter(meter) andThen excSvc
+      val e = intercept[Exception] { Await.result(svc(1)) }
+      assert(e == exc)
+    }
+
   }
 }
