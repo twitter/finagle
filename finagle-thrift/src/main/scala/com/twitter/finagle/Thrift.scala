@@ -144,6 +144,11 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
     override protected lazy val Stats(stats) = params[Stats]
 
+    override def configured[P](psp: (P, Stack.Param[P])): Client = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
+
     protected def newTransporter(): Transporter[In, Out] = {
       val pipeline =
         if (framed) ThriftClientFramedPipelineFactory
@@ -164,7 +169,6 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
   }
-
 
   val client = Client()
   
@@ -223,6 +227,11 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected type Out = Array[Byte]
 
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
+
+    override def configured[P](psp: (P, Stack.Param[P])): Server = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
 
     protected def newListener(): Listener[In, Out] = {
       val pipeline =
