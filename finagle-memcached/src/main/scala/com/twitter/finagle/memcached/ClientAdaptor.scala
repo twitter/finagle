@@ -21,8 +21,8 @@ class ClientAdaptor[T](
     self.prepend(key, flags, expiry, bijection.inverse(value))
   def replace(key: String, flags: Int, expiry: Time, value: T): Future[JBoolean] =
     self.replace(key, flags, expiry, bijection.inverse(value))
-  def cas(key: String, flags: Int, expiry: Time, value: T, casUnique: Buf): Future[JBoolean] =
-    self.cas(key, flags, expiry, bijection.inverse(value), casUnique)
+  def checkAndSet(key: String, flags: Int, expiry: Time, value: T, casUnique: Buf): Future[CasResult] =
+    self.checkAndSet(key, flags, expiry, bijection.inverse(value), casUnique)
 
   def getResult(keys: Iterable[String]): Future[GetResult]   = self.getResult(keys)
   def getsResult(keys: Iterable[String]): Future[GetsResult] = self.getsResult(keys)

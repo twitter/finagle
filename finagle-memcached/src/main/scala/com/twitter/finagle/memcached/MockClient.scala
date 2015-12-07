@@ -120,21 +120,22 @@ class MockClient(val map: mutable.Map[String, Buf]) extends Client {
    *
    * Note: expiry and flags are ignored.
    */
-  def cas(
+  def checkAndSet(
     key: String,
     flags: Int,
     expiry: Time,
     value: Buf,
     casUnique: Buf
-  ): Future[JBoolean] =
+  ): Future[CasResult] =
     Future.value(
       map.synchronized {
         map.get(key) match {
-          case Some(previousValue) if previousValue != value =>
+          case Some(previousValue) if Interpreter.generateCasUnique(previousValue) == casUnique =>
             map(key) = value
-            true
-          case _ =>
-            false
+            CasResult.Stored
+
+          case Some(_) => CasResult.Exists
+          case None    => CasResult.NotFound
         }
       }
     )

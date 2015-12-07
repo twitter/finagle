@@ -129,10 +129,18 @@ object GetResult {
   }
 }
 
+sealed trait CasResult
+object CasResult {
+  case object Stored extends CasResult
+  case object Exists extends CasResult
+  case object NotFound extends CasResult
+}
+
 /**
  * A friendly client to talk to a Memcached server.
  */
 trait BaseClient[T] {
+  import ClientConstants._
   def bufferToType(a: Buf): T
 
   /**
@@ -175,10 +183,56 @@ trait BaseClient[T] {
    * opaquely, but in reality it is a string-encoded u64.
    *
    * @return true if replaced, false if not
+   * @note this is superceded by `checkAndSet` which returns a higher fidelity
+   *       return value
    */
-  def cas(
+  @deprecated("BaseClient.cas deprecated in favor of checkAndSet", "2015-12-10")
+  final def cas(
     key: String, flags: Int, expiry: Time, value: T, casUnique: Buf
-  ): Future[JBoolean]
+  ): Future[JBoolean] =
+    checkAndSet(key, flags, expiry, value, casUnique).flatMap(CasFromCheckAndSet)
+
+  /**
+   * Perform a CAS operation on the key, only if the value has not
+   * changed since the value was last retrieved, and `casUnique`
+   * extracted from a `gets` command.  We treat the "cas unique" token
+   * opaquely, but in reality it is a string-encoded u64.
+   *
+   * @return true if replaced, false if not
+   * @note this is superceded by `checkAndSet` which returns a higher fidelity
+   *       return value
+   */
+  @deprecated("BaseClient.cas deprecated in favor of checkAndSet", "2015-12-10")
+  final def cas(key: String, value: T, casUnique: Buf): Future[JBoolean] =
+    cas(key, 0, Time.epoch, value, casUnique)
+
+  /**
+   * Perform a CAS operation on the key, only if the value has not
+   * changed since the value was last retrieved, and `casUnique`
+   * extracted from a `gets` command.  We treat the "cas unique" token
+   * opaquely, but in reality it is a string-encoded u64.
+   *
+   * @return [[Stored]] if the operation was successful, [[Exists]] if the
+   *        operation failed because someone else had changed the value,
+   *        or [[NotFound]] if the key was not found in the cache.
+   */
+  def checkAndSet(
+    key: String, flags: Int, expiry: Time, value: T, casUnique: Buf
+  ): Future[CasResult]
+
+  /**
+   * Perform a CAS operation on the key, only if the value has not changed
+   * since the value was last retrieved.  This is enforced by passing a
+   * `casUnique` token extracted from a `gets` command.  If the `casUnique`
+   * token matches the one on the server, the value is replaced.  We treat the
+   * "cas unique" token opaquely, but in reality it is a string-encoded u64.
+   *
+   * @return [[Stored]] if the operation was successful, [[Exists]] if the
+   *        operation failed because someone else had changed the value,
+   *        or [[NotFound]] if the key was not found in the cache.
+   */
+  def checkAndSet(key: String, value: T, casUnique: Buf): Future[CasResult] =
+    checkAndSet(key, 0, Time.epoch, value, casUnique)
 
   /**
    * Get a key from the server.
@@ -298,17 +352,6 @@ trait BaseClient[T] {
   def replace(key: String, value: T): Future[JBoolean] = replace(key, 0, Time.epoch, value)
 
   /**
-   * Perform a CAS operation on the key, only if the value has not
-   * changed since the value was last retrieved, and `casUnique`
-   * extracted from a `gets` command.  We treat the "cas unique" token
-   * opaquely, but in reality it is a string-encoded u64.
-   *
-   * @return true if replaced, false if not
-   */
-  def cas(key: String, value: T, casUnique: Buf): Future[JBoolean] =
-    cas(key, 0, Time.epoch, value, casUnique)
-
-  /**
    * Send a quit command to the server. Alternative to release, for
    * protocol compatability.
    * @return none
@@ -373,7 +416,8 @@ trait ProxyClient extends Client {
 
   def decr(key: String, delta: Long) = proxyClient.decr(key, delta)
 
-  def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) = proxyClient.cas(key, flags, expiry, value, casUnique)
+  def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
+    proxyClient.checkAndSet(key, flags, expiry, value, casUnique)
 
   def delete(key: String) = proxyClient.delete(key)
 
@@ -382,9 +426,19 @@ trait ProxyClient extends Client {
   def release() { proxyClient.release() }
 }
 
-private object ConnectedClient {
+private[memcached] object ClientConstants {
   val JavaTrue: Future[JBoolean] = Future.value(true)
   val JavaFalse: Future[JBoolean] = Future.value(false)
+
+  val FutureExists: Future[CasResult]   = Future.value(CasResult.Exists)
+  val FutureNotFound: Future[CasResult] = Future.value(CasResult.NotFound)
+  val FutureStored: Future[CasResult]   = Future.value(CasResult.Stored)
+
+  val CasFromCheckAndSet: CasResult => Future[JBoolean] = {
+    case CasResult.Stored   => JavaTrue
+    case CasResult.Exists   => JavaFalse
+    case CasResult.NotFound => JavaFalse
+  }
 }
 
 /**
@@ -393,7 +447,7 @@ private object ConnectedClient {
  * @param  service  the underlying Memcached Service.
  */
 protected class ConnectedClient(protected val service: Service[Command, Response]) extends Client {
-  import ConnectedClient._
+  import ClientConstants._
   import scala.collection.breakOut
 
   protected def rawGet(command: RetrievalCommand) = {
@@ -448,12 +502,12 @@ protected class ConnectedClient(protected val service: Service[Command, Response
     }
   }
 
-  def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf): Future[JBoolean] = {
+  def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf): Future[CasResult] = {
     try {
       service(Cas(key, flags, expiry, value, casUnique)).flatMap {
-        case Stored()   => JavaTrue
-        case Exists()   => JavaFalse
-        case NotFound() => JavaFalse
+        case Stored()   => FutureStored
+        case Exists()   => FutureExists
+        case NotFound() => FutureNotFound
         case Error(e)   => Future.exception(e)
         case _          => Future.exception(new IllegalStateException)
       }
@@ -623,8 +677,8 @@ trait PartitionedClient extends Client {
     clientOf(key).prepend(key, flags, expiry, value)
   def replace(key: String, flags: Int, expiry: Time, value: Buf) =
     clientOf(key).replace(key, flags, expiry, value)
-  def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
-    clientOf(key).cas(key, flags, expiry, value, casUnique)
+  def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
+    clientOf(key).checkAndSet(key, flags, expiry, value, casUnique)
 
   def delete(key: String)            = clientOf(key).delete(key)
   def incr(key: String, delta: Long) = clientOf(key).incr(key, delta)
@@ -940,9 +994,9 @@ private[finagle] class KetamaPartitionedClient(
 
   override def delete(key: String) = ready.interruptible before super.delete(key)
 
-  override def cas(key: String, flags: Int, expiry: Time,
+  override def checkAndSet(key: String, flags: Int, expiry: Time,
       value: Buf, casUnique: Buf) =
-    ready.interruptible before super.cas(key, flags, expiry, value, casUnique)
+    ready.interruptible before super.checkAndSet(key, flags, expiry, value, casUnique)
 
   override def add(key: String, flags: Int, expiry: Time, value: Buf) =
     ready.interruptible before super.add(key, flags, expiry, value)

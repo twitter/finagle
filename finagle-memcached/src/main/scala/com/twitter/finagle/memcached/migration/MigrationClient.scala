@@ -208,8 +208,8 @@ trait DarkWrite extends Client {
   }
 
   // cas operation does not migrate
-  abstract override def cas(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
-    super.cas(key, flags, expiry, value, casUnique)
+  abstract override def checkAndSet(key: String, flags: Int, expiry: Time, value: Buf, casUnique: Buf) =
+    super.checkAndSet(key, flags, expiry, value, casUnique)
 
   abstract override def delete(key: String) = {
     val result = super.delete(key)

@@ -5,7 +5,19 @@
 Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 6.x
------
+~~~~~~~
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-memcached: Added `c.t.f.memcached.BaseClient.checkAndSet` which exposes the difference
+    between a conflict and a not found result.
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-memcached: `c.t.f.memcached.BaseClient.cas` is deprecated in favor of the richer
+    `checkAndSet` method.
 
 6.31.0
 ~~~~~~~
