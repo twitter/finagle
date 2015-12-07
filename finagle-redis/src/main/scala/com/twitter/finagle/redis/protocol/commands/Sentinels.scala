@@ -155,7 +155,9 @@ abstract class Sentinel(sub: String, args: Seq[String]) extends Command {
 object Sentinel {
 
   val subCommands: Seq[SentinelHelper] = Seq(
-    SentinelMaster, SentinelMasters, SentinelMonitor, SentinelRemove, SentinelSet)
+    SentinelMaster, SentinelMasters, SentinelSlaves, SentinelSentinels, SentinelGetMasterAddrByName,
+    SentinelReset, SentinelFailover, SentinelCkQuorum, SentinelFlushConfig, SentinelMonitor,
+    SentinelRemove, SentinelSet)
 
   def fromBytes(args: Seq[Array[Byte]]): Sentinel = {
     apply(args.map(new String(_, Charsets.Utf8)))
