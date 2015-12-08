@@ -1,15 +1,15 @@
 package com.twitter.finagle.filter
 
-import java.util.concurrent.RejectedExecutionException
-
 import com.twitter.concurrent.AsyncMeter
 import com.twitter.finagle.{Failure, Service, SimpleFilter}
 import com.twitter.util.{Future, Throw}
 
+import java.util.concurrent.RejectedExecutionException
+
 /**
   * A [[com.twitter.finagle.Filter]] that rate limits requests to a fixed rate over time by
   * using the [[com.twitter.concurrent.AsyncMeter]] implementation. It can be used for slowing
-  * down access to throttled resources. Requests that are unable to acquire a permit are failed
+  * down access to throttled resources. Requests that cannot be enqueued to await a permit are failed
   * immediately with a [[com.twitter.finagle.Failure]] that signals that the work was never done,
   * so it's safe to reenqueue.
   *
