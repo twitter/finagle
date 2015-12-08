@@ -1,34 +1,80 @@
 package com.twitter.finagle.thrift;
 
-import scala.Tuple2;
-
 import org.apache.thrift.protocol.TBinaryProtocol;
+import org.junit.Test;
 
 import com.twitter.finagle.Thrift;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.param.Tracer;
 import com.twitter.finagle.tracing.NullTracer;
 import com.twitter.test.B;
+import com.twitter.test.SomeStruct;
+import com.twitter.util.Future;
 
-// Compilation test. Not actually for running.
 public class UseThrift {
 
-  static {
-    Thrift.newIface(":8000", B.ServiceIface.class);
-    Thrift.serveIface(":8000", null);
+  /**
+   * Tests Java usage of the Thrift client and server. The client and server API should be as
+   * accessible in Java as it is in Scala.
+   */
+  @Test
+  public void testClientServerCompilation() {
+    Thrift.newIface(":*", B.ServiceIface.class);
+    Thrift.serveIface(":*", new BServiceImpl());
 
     Thrift.client()
-        .withProtocolFactory(null)
-        .configured(Tuple2.apply(Label.apply("test"), Label.param()))
+        .withProtocolFactory(new TBinaryProtocol.Factory())
+        .configured(Label.apply("test").mk())
         .withClientId(ClientId.apply("id"))
-        .configured(Tuple2.apply(Tracer.apply(new NullTracer()), Tracer.param()))
-        .newIface(":8000", B.ServiceIface.class);
+        .configured(Tracer.apply(new NullTracer()).mk())
+        .newIface(":*", B.ServiceIface.class);
 
     Thrift.server()
-        .withProtocolFactory(null)
-        .configured(Tuple2.apply(Label.apply("test"), Label.param()))
+        .withProtocolFactory(new TBinaryProtocol.Factory())
+        .configured(Label.apply("test").mk())
         .withBufferedTransport()
-        .configured(Tuple2.apply(Tracer.apply(new NullTracer()), Tracer.param()))
-        .serve(":8000", new B.Service(null, new TBinaryProtocol.Factory()));
+        .configured(Tracer.apply(new NullTracer()).mk())
+        .serve(":*", new B.Service(new BServiceImpl(), new TBinaryProtocol.Factory()));
+  }
+
+  /**
+   * A fake implementation of B's service interface for testing purposes.
+   */
+  private class BServiceImpl implements B.ServiceIface {
+
+    @Override
+    public Future<Integer> add(int a, int b) {
+      return Future.value(0);
+    }
+
+    @Override
+    public Future<Void> add_one(int a, int b) {
+      return Future.Void();
+    }
+
+    @Override
+    public Future<SomeStruct> complex_return(String some_string) {
+      return Future.value(new SomeStruct());
+    }
+
+    @Override
+    public Future<Void> someway() {
+      return Future.Void();
+    }
+
+    @Override
+    public Future<String> show_me_your_dtab() {
+      return Future.value("SomeDTab");
+    }
+
+    @Override
+    public Future<Integer> show_me_your_dtab_size() {
+      return Future.value(0);
+    }
+
+    @Override
+    public Future<Integer> multiply(int a, int b) {
+      return Future.value(0);
+    }
   }
 }

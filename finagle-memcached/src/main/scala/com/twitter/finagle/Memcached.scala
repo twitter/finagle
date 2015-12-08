@@ -207,6 +207,11 @@ object Memcached extends finagle.Client[Command, Response]
 
     import Client.mkDestination
 
+    override def configured[P](psp: (P, Stack.Param[P])): Client = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
+
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Response]] = this.stack,
       params: Stack.Params = this.params

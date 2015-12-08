@@ -2,13 +2,10 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.PipeliningDispatcher
-import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import java.net.SocketAddress
 
 trait RedisRichClient { self: Client[Command, Reply] =>
 
@@ -40,6 +37,11 @@ object Redis extends Client[Command, Reply] {
       params: Stack.Params = Client.defaultParams)
     extends StdStackClient[Command, Reply, Client]
     with RedisRichClient {
+
+    override def configured[P](psp: (P, Stack.Param[P])): Client = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
 
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Reply]] = this.stack,
