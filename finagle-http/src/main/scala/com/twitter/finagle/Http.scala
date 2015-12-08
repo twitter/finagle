@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.{DtabFilter, HttpNackFilter}
@@ -119,7 +120,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): Client = copy(stack, params)
 
     protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] =
-      new HttpClientDispatcher(transport)
+      new HttpClientDispatcher(
+        transport,
+        params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+      )
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
       configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
@@ -154,7 +158,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       configured(param.CompressionLevel(level))
   }
 
-  val client = Client()
+  val client: Http.Client = Client()
 
   def newService(dest: Name, label: String): Service[Request, Response] =
     client.newService(dest, label)
@@ -226,7 +230,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       configured(param.CompressionLevel(level))
   }
 
-  val server = Server()
+  val server: Http.Server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Request, Response]): ListeningServer =
     server.serve(addr, service)

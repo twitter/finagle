@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{DtabFilter, HttpNackFilter}
 import com.twitter.finagle.stats.StatsReceiver
@@ -135,8 +136,11 @@ case class Http(
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
         new HttpTransport(super.newClientTransport(ch, statsReceiver))
 
-      override def newClientDispatcher(transport: Transport[Any, Any]) =
-        new HttpClientDispatcher(transport)
+      override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
+        new HttpClientDispatcher(
+          transport,
+          params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+        )
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpClientTraceInitializer[Request, Response]

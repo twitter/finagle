@@ -1,7 +1,8 @@
 package com.twitter.finagle
 
+import com.twitter.finagle
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.PipeliningDispatcher
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
@@ -55,10 +56,13 @@ object Redis extends Client[Command, Reply] {
       Netty3Transporter(redis.RedisClientPipelineFactory, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
-      new PipeliningDispatcher(transport)
+      new PipeliningDispatcher(
+        transport,
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+      )
   }
 
-  val client = Client()
+  val client: Redis.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
     client.newClient(dest, label)

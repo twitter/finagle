@@ -1,5 +1,6 @@
 package com.twitter.finagle.stream
 
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
@@ -73,8 +74,14 @@ class Stream[Req: RequestType] extends CodecFactory[Req, StreamResponse] {
         }
       }
 
-     override def newClientDispatcher(trans: Transport[Any, Any])
-       : Service[Req, StreamResponse] = new StreamClientDispatcher(trans)
+     override def newClientDispatcher(
+       trans: Transport[Any, Any],
+       params: Stack.Params
+     ): Service[Req, StreamResponse] =
+       new StreamClientDispatcher(
+         trans,
+         params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+       )
 
       // TODO: remove when the Meta[_] patch lands.
       override def prepareServiceFactory(

@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
-import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
 import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
@@ -159,7 +159,10 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected def newDispatcher(
       transport: Transport[ThriftClientRequest, Array[Byte]]
     ): Service[ThriftClientRequest, Array[Byte]] =
-      new SerialClientDispatcher(transport)
+      new SerialClientDispatcher(
+        transport,
+        params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+      )
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Client =
       configured(param.ProtocolFactory(protocolFactory))
@@ -170,12 +173,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
   }
 
-  val client = Client()
-  
+  val client: Thrift.Client = Client()
+
   def newService(
     dest: Name,
     label: String
-  ): Service[ThriftClientRequest, Array[Byte]] = 
+  ): Service[ThriftClientRequest, Array[Byte]] =
     client.newService(dest, label)
 
   def newClient(
@@ -254,7 +257,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     def withBufferedTransport(): Server = copy(framed=false)
   }
 
-  val server = Server()
+  val server: Thrift.Server = Server()
 
   def serve(
     addr: SocketAddress,

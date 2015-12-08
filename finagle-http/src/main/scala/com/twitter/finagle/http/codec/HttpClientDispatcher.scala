@@ -6,6 +6,7 @@ import com.twitter.finagle.http.{Fields, ReaderUtils, Request, Response}
 import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.BufReader
 import com.twitter.logging.Logger
@@ -23,13 +24,22 @@ private[http] object HttpClientDispatcher {
  * The dispatcher modifies each request with Dtab encoding from Dtab.local
  * and streams chunked responses via `Reader`.  If the request already contains
  * Dtab headers they will be stripped and an error will be logged.
+ *
+ * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
-class HttpClientDispatcher(trans: Transport[Any, Any])
-  extends GenSerialClientDispatcher[Request, Response, Any, Any](trans) {
+class HttpClientDispatcher(
+    trans: Transport[Any, Any],
+    statsReceiver: StatsReceiver)
+  extends GenSerialClientDispatcher[Request, Response, Any, Any](
+    trans,
+    statsReceiver) {
 
   import GenSerialClientDispatcher.wrapWriteException
   import HttpClientDispatcher._
   import ReaderUtils.{readChunk, streamChunks}
+
+  def this(trans: Transport[Any, Any]) =
+    this(trans, NullStatsReceiver)
 
   // BUG: if there are multiple requests queued, this will close a connection
   // with pending dispatches.  That is the right thing to do, but they should be

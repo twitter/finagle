@@ -4,6 +4,7 @@ import com.twitter.concurrent.Broker
 import com.twitter.finagle.ChannelClosedException
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Promise, Return, Throw}
@@ -12,11 +13,18 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpChunk, HttpResponse}
 /**
  * Stream chunks into StreamResponses.
  */
-private[twitter]
-class StreamClientDispatcher[Req: RequestType](trans: Transport[Any, Any])
-  extends GenSerialClientDispatcher[Req, StreamResponse, Any, Any](trans) {
+private[twitter] class StreamClientDispatcher[Req: RequestType](
+    trans: Transport[Any, Any],
+    statsReceiver: StatsReceiver)
+  extends GenSerialClientDispatcher[Req, StreamResponse, Any, Any](
+    trans,
+    statsReceiver)
+{
   import Bijections._
   import GenSerialClientDispatcher.wrapWriteException
+
+  def this(trans: Transport[Any, Any]) =
+    this(trans, NullStatsReceiver)
 
   private[this] val RT = implicitly[RequestType[Req]]
 

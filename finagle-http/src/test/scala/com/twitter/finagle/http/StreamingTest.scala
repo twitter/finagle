@@ -1,9 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Service, ServiceFactory}
+import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.{Codec, CodecFactory, ChannelClosedException}
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, Reader, Writer}
@@ -349,8 +349,8 @@ object StreamingTest {
         override def newTraceInitializer = codec.newTraceInitializer
 
         // Modified Transports
-        override def newClientDispatcher(transport: Transport[Any, Any]) =
-          codec.newClientDispatcher(cmod(transport))
+        override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
+          codec.newClientDispatcher(cmod(transport), params)
         override def newServerDispatcher(
           transport: Transport[Any, Any],
           service: Service[Request, Response]

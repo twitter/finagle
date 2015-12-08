@@ -117,12 +117,31 @@ Retries
 
 .. include:: metrics/Retries.rst
 
+Dispatching
+-----------
+
+.. _dispatching:
+
+Metrics scoped under `dispatcher` represent information about a client's dispatching
+layer.
+
+Depending on the underlying protocol, dispatchers may have different request
+queueing rules.
+
+**serial/queue_size**
+  a gauge used by serial dispatchers that can only have a single request
+  per connection at a time that represents the number of pending requests.
+
+**pipelining/pending**
+  a gauge used by pipelining dispatchers that represents how many
+  pipelined requests are currently outstanding.
+
 Transport
 ---------
 
 .. _transport_stats:
 
-These metrics pertain to where the finagle abstraction ends and the bytes are sent over the wire.
+These metrics pertain to where the Finagle abstraction ends and the bytes are sent over the wire.
 Understanding these stats often requires deep knowledge of the protocol, or individual transport
 (e.g. Netty) internals.
 

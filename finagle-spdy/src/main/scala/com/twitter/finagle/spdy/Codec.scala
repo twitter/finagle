@@ -84,7 +84,7 @@ case class Spdy(
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
         new ChannelTransport(ch)
 
-      override def newClientDispatcher(transport: Transport[Any, Any]) =
+      override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
         new SpdyClientDispatcher(Transport.cast[HttpRequest, HttpResponse](transport))
     }
   }

@@ -1,12 +1,6 @@
 package com.twitter.finagle
 
-/**
- * Codecs provide protocol encoding and decoding via netty pipelines
- * as well as a standard filter stack that are applied to services
- * from this codec.
- */
-
-import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
@@ -16,7 +10,9 @@ import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
 
 /**
- * Superclass for all codecs.
+ * Codecs provide protocol encoding and decoding via netty pipelines
+ * as well as a standard filter stack that is applied to services
+ * from this codec.
  */
 trait Codec[Req, Rep] {
   /**
@@ -56,10 +52,16 @@ trait Codec[Req, Rep] {
     new ChannelTransport(ch)
 
   def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
-    new SerialClientDispatcher(Transport.cast[Req, Rep](transport))
+    newClientDispatcher(transport, Stack.Params.empty)
 
-  def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params): Service[Req, Rep] =
-    newClientDispatcher(transport)
+  def newClientDispatcher(
+    transport: Transport[Any, Any],
+    params: Stack.Params
+  ): Service[Req, Rep] =
+    new SerialClientDispatcher(
+      Transport.cast[Req, Rep](transport),
+      params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+    )
 
   def newServerDispatcher(
     transport: Transport[Any, Any],
