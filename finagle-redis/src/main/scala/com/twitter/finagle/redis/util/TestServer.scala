@@ -27,13 +27,17 @@ object RedisCluster { self =>
 
   def start(count: Int = 1) {
     0 until count foreach { i =>
-      val instance = new ExternalRedis()
-      instance.start()
-      instanceStack.push(instance)
+      start(new ExternalRedis())
     }
   }
-  def stop() {
-    instanceStack.pop().stop()
+  def start(instance: ExternalRedis) {
+    instance.start()
+    instanceStack.push(instance)
+  }
+  def stop() = {
+    val instance = instanceStack.pop()
+    instance.stop()
+    instance
   }
   def stopAll() {
     instanceStack.foreach { i => i.stop() }

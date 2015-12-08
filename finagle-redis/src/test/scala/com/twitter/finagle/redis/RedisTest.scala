@@ -11,6 +11,7 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import java.net.InetSocketAddress
 import com.twitter.finagle.Service
 import com.twitter.finagle.redis.Client
+import com.twitter.finagle.redis.SubscribeClient
 
 trait RedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
@@ -60,6 +61,16 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
         .hostConnectionLimit(1)
         .buildFactory())
     Await.result(client.flushAll)
+    try {
+      testCode(client)
+    }
+    finally {
+      client.release
+    }
+  }
+
+  protected def withSubscribeClient(testCode: SubscribeClient => Any) {
+    val client = SubscribeClient(RedisCluster.hostAddresses())
     try {
       testCode(client)
     }

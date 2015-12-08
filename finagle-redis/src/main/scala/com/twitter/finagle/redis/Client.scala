@@ -38,6 +38,7 @@ class Client(service: Service[Command, Reply])
   with Sets
   with BtreeSortedSetCommands
   with HyperLogLogs
+  with PubSubs
 
 /**
  * Connects to a single Redis host
