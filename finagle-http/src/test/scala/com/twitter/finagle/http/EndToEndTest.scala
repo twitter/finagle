@@ -4,7 +4,6 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
@@ -204,26 +203,6 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       assert(res.contentString == "0")
 
       client.close()
-    }
-
-    test(name + ": context") {
-      val writtenDeadline = Deadline.ofTimeout(5.seconds)
-      val service = new HttpService {
-        def apply(request: Request) = {
-          val deadline = Contexts.broadcast.get(Deadline).get
-          assert(deadline.deadline == writtenDeadline.deadline)
-          val response = Response(request)
-          Future.value(response)
-        }
-      }
-
-      Contexts.broadcast.let(Deadline, writtenDeadline) {
-        val req = Request()
-        val client = connect(service)
-        val res = Await.result(client(Request("/")))
-        assert(res.status == Status.Ok)
-        client.close()
-      }
     }
 
     test(name + ": stream") {

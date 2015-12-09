@@ -4,7 +4,7 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.codec._
-import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
+import com.twitter.finagle.http.filter.{DtabFilter, HttpNackFilter}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -126,13 +126,12 @@ case class Http(
 
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response]
-      ): ServiceFactory[Request, Response] =
+      ): ServiceFactory[Request, Response] = {
         // Note: This is a horrible hack to ensure that close() calls from
         // ExpiringService do not propagate until all chunks have been read
         // Waiting on CSL-915 for a proper fix.
-        underlying.map( u =>
-          (new ClientContextFilter[Request, Response])
-            .andThen(new DelayedReleaseService(u)))
+        underlying.map(new DelayedReleaseService(_))
+       }
 
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
         new HttpTransport(super.newClientTransport(ch, statsReceiver))
@@ -198,9 +197,7 @@ case class Http(
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] =
-        (new HttpNackFilter).andThen(new DtabFilter.Finagle[Request])
-          .andThen(new ServerContextFilter[Request, Response])
-          .andThen(underlying)
+        (new HttpNackFilter).andThen(new DtabFilter.Finagle[Request]).andThen(underlying)
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpServerTraceInitializer[Request, Response]
