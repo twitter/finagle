@@ -11,7 +11,7 @@ import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.{text, _}
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
-import com.twitter.finagle.service.{Backoff, FailedService, FailureAccrualFactory}
+import com.twitter.finagle.service.{ReqRep, Backoff, FailedService, FailureAccrualFactory}
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
@@ -814,7 +814,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     Future.exception(new FailureAccrualException("Endpoint is marked dead by failureAccrual"))
 
   // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
-  override def isSuccess(response: Try[Rep]): Boolean = response match {
+  override def isSuccess(reqRep: ReqRep): Boolean = reqRep.response match {
     case Return(_) => true
     case Throw(f: Failure) if f.cause.exists(_.isInstanceOf[CancelledRequestException]) && f.isFlagged(Failure.Interrupted) => true
     case Throw(f: Failure) if f.cause.exists(_.isInstanceOf[CancelledConnectionException]) && f.isFlagged(Failure.Interrupted) => true

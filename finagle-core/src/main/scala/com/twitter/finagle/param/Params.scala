@@ -118,6 +118,40 @@ object Monitor {
 }
 
 /**
+ * A class eligible for configuring a [[com.twitter.finagle.service.ResponseClassifier]]
+ * which is used to determine the result of a request/response.
+ *
+ * This allows developers to give Finagle the additional application specific
+ * knowledge necessary in order to properly classify them. Without this,
+ * Finagle can only safely make judgements about the transport level failures.
+ *
+ * As an example take an HTTP client that receives a response with a 500 status
+ * code back from a server. To Finagle this is a successful request/response
+ * based solely on the transport level. The application developer may want to
+ * treat all 500 status codes as failures and can do so via a
+ * [[com.twitter.finagle.service.ResponseClassifier]].
+ *
+ * It is a [[PartialFunction]] and as such multiple classifiers can be composed
+ * together via [[PartialFunction.orElse]].
+ *
+ * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
+ * HTTP classification tools.
+ *
+ * @note If unspecified, the default classifier is
+ * [[com.twitter.finagle.service.ResponseClassifier.Default]]
+ * which is a total function fully covering the input domain.
+ */
+case class ResponseClassifier(
+    responseClassifier: com.twitter.finagle.service.ResponseClassifier) {
+  def mk(): (ResponseClassifier, Stack.Param[ResponseClassifier]) =
+    (this, ResponseClassifier.param)
+}
+object ResponseClassifier {
+  implicit val param = Stack.Param(ResponseClassifier(
+    com.twitter.finagle.service.ResponseClassifier.Default))
+}
+
+/**
  * A class eligible for configuring a
  * [[com.twitter.finagle.util.ReporterFactory]] throughout finagle servers and
  * clients.

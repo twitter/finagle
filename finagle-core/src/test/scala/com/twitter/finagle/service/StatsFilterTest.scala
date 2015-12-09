@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionStatsHandler, InMemoryStatsReceiver}
 import com.twitter.finagle._
-import com.twitter.util.{Time, Await, Promise}
+import com.twitter.util._
 import java.util.concurrent.TimeUnit
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -191,4 +191,37 @@ class StatsFilterTest extends FunSuite {
     assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName())) == 1)
     assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(), classOf[Exception].getName())) == 1)
   }
+
+  test("respects ResponseClassifier") {
+    val sr = new InMemoryStatsReceiver()
+    val svc = Service.mk { i: Int =>
+      if (i < 0) Future.exception(new RuntimeException(i.toString))
+      else Future(i)
+    }
+    val aClassifier: ResponseClassifier = {
+      case ReqRep(_, Return(i: Int)) if i == 5 => ResponseClass.RetryableFailure
+      case ReqRep(_, Throw(x)) if x.getMessage == "-5" => ResponseClass.Success
+    }
+    val statsFilter = new StatsFilter[Int, Int](
+      sr, aClassifier, StatsFilter.DefaultExceptions, TimeUnit.MILLISECONDS)
+
+    val service = statsFilter.andThen(svc)
+
+    // able to categorize Returns as failures
+    assert(5 == Await.result(service(5), 1.second))
+    assert(1 == sr.counter("requests")())
+    assert(0 == sr.counter("success")())
+
+    // able to categorize Throws as success
+    intercept[RuntimeException] { Await.result(service(-5), 1.second) }
+    assert(2 == sr.counter("requests")())
+    assert(1 == sr.counter("success")())
+
+    // handles responses that are not defined in our classifier
+    assert(!aClassifier.isDefinedAt(ReqRep(3, Return(1))))
+    assert(3 == Await.result(service(3), 1.second))
+    assert(3 == sr.counter("requests")())
+    assert(2 == sr.counter("success")())
+  }
+
 }

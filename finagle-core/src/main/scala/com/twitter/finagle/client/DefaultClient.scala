@@ -1,12 +1,10 @@
 package com.twitter.finagle.client
 
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.factory.TimeoutFactory
 import com.twitter.finagle.loadbalancer.{DefaultBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.service.{
-  ExpiringService, FailFastFactory, FailureAccrualFactory, TimeoutFilter}
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
+  ExpiringService, FailFastFactory, FailureAccrualFactory, TimeoutFilter, ResponseClassifier}
 import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -16,8 +14,18 @@ import com.twitter.util._
 import java.net.SocketAddress
 
 object DefaultClient {
-  private def defaultFailureAccrual(sr: StatsReceiver): ServiceFactoryWrapper =
-    FailureAccrualFactory.wrapper(sr, FailureAccrualFactory.defaultPolicy(), "DefaultClient",  DefaultLogger, unconnected)(DefaultTimer.twitter)
+  private def defaultFailureAccrual(
+    sr: StatsReceiver,
+    responseClassifier: ResponseClassifier
+  ): ServiceFactoryWrapper =
+    FailureAccrualFactory.wrapper(
+      sr,
+      FailureAccrualFactory.defaultPolicy(),
+      "DefaultClient",
+      DefaultLogger,
+      unconnected,
+      responseClassifier)(
+      DefaultTimer.twitter)
 
   /** marker trait for uninitialized failure accrual */
   private[finagle] trait UninitializedFailureAccrual
@@ -79,8 +87,10 @@ case class DefaultClient[Req, Rep](
 
   private[this] def transform(stack: Stack[ServiceFactory[Req, Rep]]) = {
     val failureAccrualTransform: Transformer[Req,Rep] = failureAccrual match {
-      case _: DefaultClient.UninitializedFailureAccrual => { factory: ServiceFactory[Req, Rep] =>
-            DefaultClient.defaultFailureAccrual(statsReceiver) andThen factory
+      case _: DefaultClient.UninitializedFailureAccrual =>
+        factory: ServiceFactory[Req, Rep] => {
+          val classifier = params[param.ResponseClassifier].responseClassifier
+          DefaultClient.defaultFailureAccrual(statsReceiver, classifier).andThen(factory)
         }
       case _ => failureAccrual
     }

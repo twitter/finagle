@@ -10,6 +10,13 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: Introduce `c.t.f.service.ResponseClassifier` which allows allows developers to
+    give Finagle the additional application specific knowledge necessary in order to properly
+    classify them. Without this, Finagle can only safely make judgements about transport
+    level failures. This is now used by `StatsFilter` and `FailureAccrualFactory` so that
+    application level failures can be used for both success metrics and failure accrual.
+    ``RB_ID=772906``
+
   * finagle-memcached: Added `c.t.f.memcached.BaseClient.checkAndSet` which exposes the difference
     between a conflict and a not found result.
 
@@ -18,6 +25,7 @@ Deprecations
 
   * finagle-memcached: `c.t.f.memcached.BaseClient.cas` is deprecated in favor of the richer
     `checkAndSet` method.
+
 
 6.31.0
 ~~~~~~~
@@ -39,6 +47,9 @@ New Features
   * finagle-core: Introduce `c.t.f.transport.Transport.Options` to configure transport-level options
     (i.e., socket options `TCP_NODELAY` and `SO_REUSEADDR`). ``RB_ID=773824``
 
+  * finagle-http: `c.t.f.http.exp.Multipart` now supports both in-memory and on-disk file uploads.
+    ``RB_ID=RB_ID=769889``
+
   * finagle-netty4: Hello World. Introduce a `Listener` for Netty 4.1. This is still considered beta.
     ``RB_ID=718688``
 
@@ -46,9 +57,6 @@ New Features
 
   * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
     method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
-
-  * finagle-http: `c.t.f.http.exp.Multipart` now supports both in-memory and on-disk file uploads.
-    ``RB_ID=RB_ID=769889``
 
   * finagle-stats: Added `c.t.f.stats` now has a `statsFilterFile` flag which will read a blacklist
     of regex, newline-separated values. It will be used along with the `statsFilter` flag for stats
@@ -94,6 +102,7 @@ Runtime Behavior Changes
 
   * finagle-serversets: The `c.t.f.serverset2.ZkSession` now uses an unbounded semaphore to
     limit to 100 outstanding zookeeper requests at any one moment. ``RB_ID=771399``
+
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
