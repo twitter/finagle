@@ -5,7 +5,7 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
-import com.twitter.finagle.http.filter.{DtabFilter, HttpNackFilter}
+import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.{ProtocolLibrary, Stats}
 import com.twitter.finagle.server._
@@ -120,10 +120,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): Client = copy(stack, params)
 
     protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] =
-      new HttpClientDispatcher(
-        transport,
-        params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
-      )
+      (new ClientContextFilter[Request, Response])
+        .andThen(new HttpClientDispatcher(
+          transport,
+          params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)))
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
       configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
@@ -201,9 +201,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {
       val dtab = new DtabFilter.Finagle[Request]
+      val context = new ServerContextFilter[Request, Response]
       val Stats(stats) = params[Stats]
 
-      new HttpServerDispatcher(new HttpTransport(transport), dtab andThen service, stats.scope("dispatch"))
+      new HttpServerDispatcher(new HttpTransport(transport), dtab andThen context andThen service, stats.scope("dispatch"))
     }
 
     protected def copy1(

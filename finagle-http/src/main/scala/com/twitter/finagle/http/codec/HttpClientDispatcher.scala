@@ -1,6 +1,7 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.{Dtab, Failure}
+import com.twitter.finagle.{Deadline, Dtab, Failure}
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Fields, ReaderUtils, Request, Response}
 import com.twitter.finagle.http.filter.HttpNackFilter
