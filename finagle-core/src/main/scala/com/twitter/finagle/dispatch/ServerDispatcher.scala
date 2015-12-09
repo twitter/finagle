@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference
   * dispatcher via
   * [[com.twitter.finagle.dispatcher.ServerDispatherAnnotator ServerDispatcherAnnotator]]
  */
-trait ServerDispatcher[Req, Rep, In, Out] {
+trait ServerDispatcher[Req, Rep, Out] {
 
   /**
    * Dispatches a request. The first argument is the request. The second
@@ -27,7 +27,6 @@ trait ServerDispatcher[Req, Rep, In, Out] {
    */
   private[dispatch] def dispatch(req: Out, eos: Promise[Unit]): Future[Rep]
   private[dispatch] def handle(rep: Rep): Future[Unit]
-
 }
 
 
@@ -44,7 +43,7 @@ object GenSerialServerDispatcher {
  * allowing the implementor to furnish custom dispatchers & handlers.
  */
 abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In, Out])
-    extends ServerDispatcher[Req, Rep, In, Out] with Closable {
+    extends ServerDispatcher[Req, Rep, Out] with Closable {
 
   import GenSerialServerDispatcher._
 
@@ -121,20 +120,19 @@ class SerialServerDispatcher[Req, Rep](
 }
 
 /**
-  * A wrapper type around a 
-  * [[com.twitter.finagle.dispatcher.ServerDispather ServerDispatcher]]
-  *
-  * This type adds a 
+  * Wraps a
+  * [[com.twitter.finagle.dispatcher.ServerDispatcher ServerDispatcher]]
+  * adding a
   * [[com.twitter.finagle.tracing.Annotation.WireRecv WireRecv]]
-  * once a dispatcher has received a request, and a
-  * [[com.twitter.finagle.tracing.Annotation.WireSend WireSend]] on a succesful
-  * write by a transporter.
+  * when a request is read from the wire, and later a
+  * [[com.twitter.finagle.tracing.Annotation.WireSend WireSend]]
+  * when it writes successfully to the wire.
  */
-final class AnnotatedServerDispatcher[Req, Rep, In, Out, A <: ServerDispatcher[Req, Rep, In, Out]]
-  (dispatcher: A) extends ServerDispatcher[Req, Rep, In, Out] {
+final class AnnotatedServerDispatcher[Req, Rep, Out]
+  (dispatcher: ServerDispatcher[Req, Rep, Out]) extends ServerDispatcher[Req, Rep, Out] {
 
   override def handle(rep: Rep): Future[Unit] =
-    dispatcher.handle(rep) onSuccess { _ => Trace.record(Annotation.WireSend) }
+    dispatcher.handle(rep).onSuccess { _ => Trace.record(Annotation.WireSend) }
 
   override def dispatch(req: Out, eos: Promise[Unit]): Future[Rep] = {
     Trace.record(Annotation.WireRecv)
