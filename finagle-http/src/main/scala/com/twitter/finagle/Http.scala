@@ -9,6 +9,7 @@ import com.twitter.finagle.http.filter.{DtabFilter, HttpNackFilter}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.{ProtocolLibrary, Stats}
 import com.twitter.finagle.server._
+import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -156,6 +157,16 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
+
+    /**
+     * Produce a [[com.twitter.finagle.Http.Client]] using the provided
+     * [[ResponseClassifier]]. This allows application level customization of
+     * how responses are classified as successful or not.
+     *
+     * @see [[com.twitter.finagle.http.service.HttpResponseClassifier]]
+     */
+    def withResponseClassifier(classifier: ResponseClassifier): Client =
+      configured(com.twitter.finagle.param.ResponseClassifier(classifier))
   }
 
   val client: Http.Client = Client()
