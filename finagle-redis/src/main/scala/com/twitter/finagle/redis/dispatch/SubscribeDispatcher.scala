@@ -1,6 +1,7 @@
 package com.twitter.finagle.redis.dispatch
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.redis.SubscribeHandler
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise}
@@ -9,15 +10,14 @@ import java.util.concurrent.atomic.AtomicReference
 class SubscribeDispatcher(trans: Transport[SubscribeCommand, Reply])
     extends GenSerialClientDispatcher[SubscribeCommand, Unit, SubscribeCommand, Reply](trans) {
 
-  private var listener = new AtomicReference[SubscribeListener]
+  private val listener = new AtomicReference[SubscribeHandler]
 
   loop()
 
   private[this] def handleMessage(reply: Reply) {
     listener.get().onMessage(reply)
     loop()
-
-}
+  }
 
   private[this] def loop(): Unit =
     trans.read().onSuccess { reply =>

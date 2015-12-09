@@ -1,11 +1,9 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.redis.naggati.ProtocolError
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
-import com.twitter.util.{ Future, Time }
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.util.{Future, Time}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 trait PubSubs { self: BaseClient =>
 

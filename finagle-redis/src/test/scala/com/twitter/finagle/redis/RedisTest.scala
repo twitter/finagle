@@ -75,7 +75,7 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
       testCode(client)
     }
     finally {
-      client.release
+      client.close()
     }
   }
 }

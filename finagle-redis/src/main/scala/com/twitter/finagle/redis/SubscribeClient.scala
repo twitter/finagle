@@ -1,18 +1,16 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.Service
+import com.twitter.finagle.{Service, ServiceClosedException, ServiceFactory}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.StringToChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffer
-import com.twitter.util.Future
-import com.twitter.finagle.ServiceFactory
-import com.twitter.finagle.redis.util.CBToString
-import com.twitter.util.Futures
+import com.twitter.finagle.redis.protocol.{ Subscribe => SubscribeCmd }
+import com.twitter.finagle.redis.util._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.conversions.time._
-import com.twitter.util.Time
-import com.twitter.util.TimerTask
-import com.twitter.finagle.ServiceClosedException
+import com.twitter.io.Charsets
+import com.twitter.util._
+import java.util.concurrent.ConcurrentHashMap
+import org.jboss.netty.buffer.ChannelBuffer
+import scala.collection.JavaConverters._
 
 object SubscribeClient {
 
@@ -20,7 +18,7 @@ object SubscribeClient {
   type PMessageHandler = (ChannelBuffer, ChannelBuffer, ChannelBuffer) => Unit
 
   /**
-   * Construct a sentinel client from a single host.
+   * Construct a SubscribeClient from a single host.
    * @param host a String of host:port combination.
    */
   def apply(host: String): SubscribeClient = {
@@ -37,7 +35,15 @@ object SubscribeClient {
   }
 }
 
-class SubscribeClient(service: Service[SubscribeCommand, Unit]) extends SubscribeListener {
+trait SubscribeHandler {
+  def onException(ex: Throwable): Unit
+  def onMessage(msg: Reply): Unit
+}
+
+class SubscribeClient(
+  service: Service[SubscribeCommand, Unit],
+  timer: Timer = DefaultTimer.twitter)
+    extends SubscribeHandler with Closable {
 
   import SubscribeClient._
 
@@ -60,29 +66,25 @@ class SubscribeClient(service: Service[SubscribeCommand, Unit]) extends Subscrib
   /**
    * Releases underlying service object
    */
-  def release() = {
-    service.close()
+  def close(deadline: Time): Future[Unit] = {
+    service.close(deadline)
   }
 
-  def doRequest(cmd: SubscribeCommand) = {
+  private[this] def doRequest(cmd: SubscribeCommand) = {
     service(cmd)
   }
 
-  import scala.collection.mutable.HashMap
-  import com.twitter.finagle.redis.protocol._
-  import com.twitter.finagle.redis.protocol.{ Subscribe => SubscribeCmd }
+  private[this] val msgHandlers = new ConcurrentHashMap[ChannelBuffer, MessageHandler]().asScala
+  private[this] val pMsgHandlers = new ConcurrentHashMap[ChannelBuffer, PMessageHandler]().asScala
 
-  private val msgHandlers = HashMap[ChannelBuffer, MessageHandler]()
-  private val pMsgHandlers = HashMap[ChannelBuffer, PMessageHandler]()
-
-  def onException(e: Throwable) {
+  def onException(e: Throwable): Unit = {
     val sub = if (msgHandlers.nonEmpty) doRequest(Subscribe(msgHandlers.keys.toSeq, this)) else Future.Done
     val psub = if (pMsgHandlers.nonEmpty) doRequest(PSubscribe(pMsgHandlers.keys.toSeq, this)) else Future.Done
     Futures.join(sub, psub).onFailure {
       case sce: ServiceClosedException =>
         // Service closed, do nothing
       case ex =>
-        DefaultTimer.twitter.schedule(Time.now + 1.second)(onException(e))
+        timer.schedule(Time.now + 1.second)(onException(e))
     }
   }
 
@@ -94,15 +96,19 @@ class SubscribeClient(service: Service[SubscribeCommand, Unit]) extends Subscrib
         pMsgHandlers.get(pattern).map(_(pattern, channel, message))
       case MBulkReply(BulkReply(tpe) :: BulkReply(channel) :: IntegerReply(count) :: Nil) =>
         tpe match {
-          case MessageBytes.PSUBSCRIBE   =>
-          case MessageBytes.PUNSUBSCRIBE =>
-          case MessageBytes.SUBSCRIBE    =>
-          case MessageBytes.UNSUBSCRIBE  =>
+          case MessageBytes.PSUBSCRIBE
+            | MessageBytes.PUNSUBSCRIBE
+            | MessageBytes.SUBSCRIBE
+            | MessageBytes.UNSUBSCRIBE =>
+            // The acknowledgement messages may come after a subscribed channel message.
+            // So we register the message handler right after the subscription request
+            // is sent. Nothing is going to be done here. We match against them just to
+            // detect something unexpected.
           case _ =>
-            throw new IllegalArgumentException()
+            throw new IllegalArgumentException(s"Unsupported message type: ${tpe.toString(Charsets.Utf8)}")
         }
       case _ =>
-        throw new IllegalArgumentException()
+        throw new IllegalArgumentException(s"Unexpected reply type: ${message.getClass.getSimpleName}")
     }
   }
 }
