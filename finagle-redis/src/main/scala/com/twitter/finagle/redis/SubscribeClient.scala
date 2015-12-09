@@ -25,7 +25,7 @@ object SubscribeClient {
     new SubscribeClient(com.twitter.finagle.Redis.Subscribe.newService(host))
   }
 
-  object MessageBytes {
+  private object MessageBytes {
     val SUBSCRIBE = StringToChannelBuffer("subscribe")
     val UNSUBSCRIBE = StringToChannelBuffer("unsubscribe")
     val PSUBSCRIBE = StringToChannelBuffer("psubscribe")
