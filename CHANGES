@@ -7,6 +7,17 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-redis: Supports for Pub/Sub.
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-redis: Type of the `encoder` property of `c.t.f.redis.protocol.CommandCodec` is changed
+    from `Encoder[Command]` to `Encoder[RedisMessage]`.
+
 6.31.0
 ~~~~~~~
 
