@@ -1,10 +1,35 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
+
+/**
+  * A base Server Dipatcher type that allows us to safely Annotate a
+  * dispatcher via
+  * [[com.twitter.finagle.dispatcher.ServerDispatherAnnotator ServerDispatcherAnnotator]]
+ */
+trait ServerDispatcher[Req, Rep, In, Out] {
+
+  /**
+   * Dispatches a request. The first argument is the request. The second
+   * argument `eos` (end-of-stream promise) must be fulfilled when the request
+   * is complete.
+   *
+   * For non-streaming requests, `eos.setDone()` should be called immediately,
+   * since the entire request is present. For streaming requests,
+   * `eos.setDone()` must be called at the end of stream (in HTTP, this is on
+   * receipt of last chunk). Refer to the implementation in
+   * [[com.twitter.finagle.http.codec.HttpServerDispatcher]].
+   */
+  private[dispatch] def dispatch(req: Out, eos: Promise[Unit]): Future[Rep]
+  private[dispatch] def handle(rep: Rep): Future[Unit]
+
+}
+
 
 object GenSerialServerDispatcher {
   private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
@@ -19,26 +44,12 @@ object GenSerialServerDispatcher {
  * allowing the implementor to furnish custom dispatchers & handlers.
  */
 abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In, Out])
-    extends Closable {
+    extends ServerDispatcher[Req, Rep, In, Out] with Closable {
 
   import GenSerialServerDispatcher._
 
   private[this] val state = new AtomicReference[Future[_]](Idle)
   private[this] val cancelled = new CancelledRequestException
-
-  /**
-   * Dispatches a request. The first argument is the request. The second
-   * argument `eos` (end-of-stream promise) must be fulfilled when the request
-   * is complete.
-   *
-   * For non-streaming requests, `eos.setDone()` should be called immediately,
-   * since the entire request is present. For streaming requests,
-   * `eos.setDone()` must be called at the end of stream (in HTTP, this is on
-   * receipt of last chunk). Refer to the implementation in
-   * [[com.twitter.finagle.http.codec.HttpServerDispatcher]].
-   */
-  protected def dispatch(req: Out, eos: Promise[Unit]): Future[Rep]
-  protected def handle(rep: Rep): Future[Unit]
 
   private[this] def loop(): Future[Unit] = {
     state.set(Idle)
@@ -103,8 +114,30 @@ class SerialServerDispatcher[Req, Rep](
     service.close()
   }
 
-  protected def dispatch(req: Req, eos: Promise[Unit]) =
+  override def dispatch(req: Req, eos: Promise[Unit]) =
     service(req) ensure eos.setDone()
 
-  protected def handle(rep: Rep) = trans.write(rep)
+  override def handle(rep: Rep) = trans.write(rep)
+}
+
+/**
+  * A wrapper type around a 
+  * [[com.twitter.finagle.dispatcher.ServerDispather ServerDispatcher]]
+  *
+  * This type adds a 
+  * [[com.twitter.finagle.tracing.Annotation.WireRecv WireRecv]]
+  * once a dispatcher has received a request, and a
+  * [[com.twitter.finagle.tracing.Annotation.WireSend WireSend]] on a succesful
+  * write by a transporter.
+ */
+final class AnnotatedServerDispatcher[Req, Rep, In, Out, A <: ServerDispatcher[Req, Rep, In, Out]]
+  (dispatcher: A) extends ServerDispatcher[Req, Rep, In, Out] {
+
+  override def handle(rep: Rep): Future[Unit] =
+    dispatcher.handle(rep) onSuccess { _ => Trace.record(Annotation.WireSend) }
+
+  override def dispatch(req: Out, eos: Promise[Unit]): Future[Rep] = {
+    Trace.record(Annotation.WireRecv)
+    dispatcher.dispatch(req, eos)
+  }
 }
