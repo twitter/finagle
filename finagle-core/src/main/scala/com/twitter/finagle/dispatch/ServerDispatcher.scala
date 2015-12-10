@@ -1,16 +1,16 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.tracing._ //{Annotation, Trace}
+import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
 /**
-  * A base Server Dipatcher type that allows us to safely Annotate a
+  * A base Server Dispatcher type that allows us to safely Annotate a
   * dispatcher via
-  * [[com.twitter.finagle.dispatcher.ServerDispatherAnnotator ServerDispatcherAnnotator]]
+  * [[com.twitter.finagle.dispatcher.ServerDispatcherAnnotator ServerDispatcherAnnotator]]
  */
 trait ServerDispatcher[Req, Rep, Out] {
 
