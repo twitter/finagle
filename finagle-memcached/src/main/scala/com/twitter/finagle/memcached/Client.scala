@@ -739,9 +739,10 @@ private[finagle] object KetamaFailureAccrualFactory {
     key: KetamaClientKey,
     healthBroker: Broker[NodeHealth]
   ): Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module4[
+    new Stack.Module5[
       FailureAccrualFactory.Param,
       Memcached.param.EjectFailedHost,
+      finagle.param.Label,
       finagle.param.Timer,
       finagle.param.Stats,
       ServiceFactory[Req, Rep]] {
@@ -752,6 +753,7 @@ private[finagle] object KetamaFailureAccrualFactory {
       def make(
         failureAccrual: Param,
         _ejectFailedHost: Memcached.param.EjectFailedHost,
+        _label: finagle.param.Label,
         _timer: finagle.param.Timer,
         _stats: finagle.param.Stats,
         next: ServiceFactory[Req, Rep]
@@ -760,8 +762,9 @@ private[finagle] object KetamaFailureAccrualFactory {
             val Memcached.param.EjectFailedHost(ejectFailedHost) = _ejectFailedHost
             val finagle.param.Timer(timer) = _timer
             val finagle.param.Stats(stats) = _stats
+            val finagle.param.Label(label) = _label
             new KetamaFailureAccrualFactory[Req, Rep](next, policy(), timer, key,
-              healthBroker, ejectFailedHost, stats)
+              healthBroker, ejectFailedHost, label, stats)
 
           case Param.Replaced(f) =>
             val param.Timer(timer) = _timer
@@ -784,6 +787,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     key: KetamaClientKey,
     healthBroker: Broker[NodeHealth],
     ejectFailedHost: Boolean,
+    label: String,
     statsReceiver: StatsReceiver)
   extends FailureAccrualFactory[Req, Rep](
     underlying,
@@ -800,7 +804,8 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     timer: Timer,
     key: KetamaClientKey,
     healthBroker: Broker[NodeHealth],
-    ejectFailedHost: Boolean
+    ejectFailedHost: Boolean,
+    label: String
   ) = this(
     underlying,
     FailureAccrualPolicy.consecutiveFailures(numFailures, Backoff.fromFunction(markDeadFor)),
@@ -808,10 +813,11 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     key,
     healthBroker,
     ejectFailedHost,
+    label,
     ClientStatsReceiver.scope("memcached_client"))
 
   private[this] val failureAccrualEx =
-    Future.exception(new FailureAccrualException("Endpoint is marked dead by failureAccrual"))
+    Future.exception(new FailureAccrualException("Endpoint is marked dead by failureAccrual") { serviceName = label })
 
   // exclude CancelledRequestException and CancelledConnectionException for cache client failure accrual
   override def isSuccess(reqRep: ReqRep): Boolean = reqRep.response match {

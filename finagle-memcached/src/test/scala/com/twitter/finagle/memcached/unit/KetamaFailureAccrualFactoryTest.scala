@@ -38,9 +38,10 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val broker = new Broker[NodeHealth]
 
     val timer = new MockTimer
+    val label = "test"
     val factory =
       new KetamaFailureAccrualFactory[Int, Int](
-        underlying, FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(10.seconds)), timer, key, broker, ejectFailedHost, NullStatsReceiver)
+        underlying, FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(10.seconds)), timer, key, broker, ejectFailedHost, label, NullStatsReceiver)
 
     val service = Await.result(factory())
     verify(underlying)()
@@ -69,9 +70,10 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       assert(broker.recv.sync().isDefined == false)
 
       // skips dispatch
-      intercept[FailureAccrualException] {
+      val failureAccrualEx = intercept[FailureAccrualException] {
         Await.result(factory())
       }
+      assert(failureAccrualEx.serviceName == label)
       verify(underlyingService, times(3))(123)
 
       timeControl.advance(10.seconds)
