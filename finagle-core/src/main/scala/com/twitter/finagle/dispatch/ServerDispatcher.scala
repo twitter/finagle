@@ -137,7 +137,7 @@ class SerialServerDispatcher[Req, Rep](
     service.close()
   }
 
-  override def dispatch(req: Req, eos: Promise[Unit]) = service(req) ensure eos.setDone()
+  protected def dispatch(req: Req, eos: Promise[Unit]) = service(req) ensure eos.setDone()
 
-  override def handle(rep: Rep) = trans.write(rep)
+  protected def handle(rep: Rep) = trans.write(rep)
 }
