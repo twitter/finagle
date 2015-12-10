@@ -147,6 +147,16 @@ Understanding these stats often requires deep knowledge of the protocol, or indi
 
 .. include:: metrics/Transport.rst
 
+Admission Control
+-----------------
+
+.. _admission_control_stats:
+
+The stats under the `admission_control` scope show stats for the different admission control
+strategies.
+
+.. include:: metrics/AdmissionControl.rst
+
 Mux
 ---
 
