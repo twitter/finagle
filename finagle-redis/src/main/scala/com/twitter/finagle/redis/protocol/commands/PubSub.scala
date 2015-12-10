@@ -7,25 +7,25 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 abstract class SubscribeCommand extends RedisMessage {
   def command: String
-  def listener: SubscribeHandler
+  def handler: SubscribeHandler
 }
 
-case class PSubscribe(patterns: Seq[ChannelBuffer], listener: SubscribeHandler) extends SubscribeCommand {
+case class PSubscribe(patterns: Seq[ChannelBuffer], handler: SubscribeHandler) extends SubscribeCommand {
   def command = Commands.PSUBSCRIBE
   def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.PSUBSCRIBE +: patterns)
 }
 
-case class PUnsubscribe(patterns: Seq[ChannelBuffer], listener: SubscribeHandler) extends SubscribeCommand {
+case class PUnsubscribe(patterns: Seq[ChannelBuffer], handler: SubscribeHandler) extends SubscribeCommand {
   def command = Commands.PUNSUBSCRIBE
   def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.PUNSUBSCRIBE +: patterns)
 }
 
-case class Subscribe(channels: Seq[ChannelBuffer], listener: SubscribeHandler) extends SubscribeCommand {
+case class Subscribe(channels: Seq[ChannelBuffer], handler: SubscribeHandler) extends SubscribeCommand {
   def command = Commands.SUBSCRIBE
   def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.SUBSCRIBE +: channels)
 }
 
-case class Unsubscribe(channels: Seq[ChannelBuffer], listener: SubscribeHandler) extends SubscribeCommand {
+case class Unsubscribe(channels: Seq[ChannelBuffer], handler: SubscribeHandler) extends SubscribeCommand {
   def command = Commands.UNSUBSCRIBE
   def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.UNSUBSCRIBE +: channels)
 }

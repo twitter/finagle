@@ -40,6 +40,14 @@ trait SubscribeHandler {
   def onMessage(msg: Reply): Unit
 }
 
+/**
+ * SubscribeClient is used to (un)subscribe messages from redis' PUB/SUB subsystem.
+ * Once a client enters PUB/SUB state by subscribing to some channel/pattern, it
+ * should not issue any other commands, except the (un)subscribe commands, until it
+ * exits from the PUB/SUB state, by unsubscribing from all the channels and patterns.
+ * For this reason, we put the (un)subscribe commands here, separately from the other
+ * ordinary commands.
+ */
 class SubscribeClient(
   service: Service[SubscribeCommand, Unit],
   timer: Timer = DefaultTimer.twitter)
