@@ -2,7 +2,7 @@ package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.{OnReady, Rng, Updater}
 import com.twitter.util.{Activity, Future, Promise, Time, Closable, Return, Throw}
 import java.util.concurrent.atomic.AtomicInteger
@@ -144,6 +144,11 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
     updater(Rebuild(dist))
   }
 
+  // A counter that should be named "max_effort_exhausted".
+  // Due to a scalac compile/runtime problem we were unable
+  // to store it as a member variable on this trait.
+  protected[this] def maxEffortExhausted: Counter
+
   private[this] val gauges = Seq(
     statsReceiver.addGauge("available") {
       dist.vector.count(n => n.status == Status.Open)
@@ -248,6 +253,7 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
 
     var n = pick(d, maxEffort)
     if (n == null) {
+      maxEffortExhausted.incr()
       rebuild()
       n = dist.pick()
     }
@@ -363,16 +369,22 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
   protected class Distributor(val vector: Vector[Node]) extends DistributorT {
     type This = Distributor
 
+    // Indicates if we've seen any down nodes during pick which we expected to be available
+    @volatile private[this] var sawDown = false
+
     private[this] val nodeUp: Node => Boolean = { node =>
       node.status == Status.Open
     }
 
     private[this] val (up, down) = vector.partition(nodeUp)
 
-    def needsRebuild: Boolean = down.nonEmpty && down.exists(nodeUp)
+    def needsRebuild: Boolean =
+      sawDown || (down.nonEmpty && down.exists(nodeUp))
+
     def rebuild(): This = new Distributor(vector)
     def rebuild(vec: Vector[Node]): This = new Distributor(vec)
 
+    // TODO: consider consolidating some of this code with `Aperture.Distributor.pick`
     def pick(): Node = {
       if (vector.isEmpty)
         return failingNode(emptyException)
@@ -395,6 +407,10 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
 
         val nodeA = vec(a)
         val nodeB = vec(b)
+
+        if (nodeA.status != Status.Open || nodeB.status != Status.Open)
+          sawDown = true
+
         if (nodeA.load < nodeB.load) nodeA else nodeB
       }
     }

@@ -32,3 +32,7 @@ with a `StatsFilter` scoped to `tries`.
 
 **retries/budget_exhausted**
   a counter of the number of times when the budget is exhausted
+
+**retries/request_limit**
+  a counter of the number of times the limit of retry attempts for a logical
+  request has been reached

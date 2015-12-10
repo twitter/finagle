@@ -37,7 +37,11 @@ private class P2CBalancer[Req, Rep](
   extends Balancer[Req, Rep]
   with LeastLoaded[Req, Rep]
   with P2C[Req, Rep]
-  with Updating[Req, Rep]
+  with Updating[Req, Rep] {
+
+  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+
+}
 
 /**
  * Like [[com.twitter.finagle.loadbalancer.P2CBalancer]] but
@@ -76,7 +80,11 @@ private class P2CBalancerPeakEwma[Req, Rep](
   extends Balancer[Req, Rep]
   with PeakEwma[Req, Rep]
   with P2C[Req, Rep]
-  with Updating[Req, Rep]
+  with Updating[Req, Rep] {
+
+  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+
+}
 
 private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
 

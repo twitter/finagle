@@ -244,7 +244,10 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
             // away. This allows protocols that support graceful shutdown to
             // also gracefully deny new sessions.
             val d = server.newDispatcher(
-              transport, Service.const(Future.exception(Failure.rejected(exc))))
+              transport,
+              Service.const(Future.exception(
+                Failure.rejected("Terminating session and ignoring request", exc)))
+            )
             connections.add(d)
             transport.onClose ensure connections.remove(d)
             // We give it a generous amount of time to shut down the session to

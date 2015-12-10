@@ -45,6 +45,7 @@ private[finagle] class RequeueFilter[Req, Rep](
 
   private[this] val requeueCounter = statsReceiver.counter("requeues")
   private[this] val budgetExhaustCounter = statsReceiver.counter("budget_exhausted")
+  private[this] val requestLimitCounter = statsReceiver.counter("request_limit")
 
   private[this] def applyService(
     req: Req,
@@ -76,6 +77,8 @@ private[finagle] class RequeueFilter[Req, Rep](
         } else {
           if (retriesRemaining > 0)
             budgetExhaustCounter.incr()
+          else
+            requestLimitCounter.incr()
           Future.exception(exc)
         }
     }

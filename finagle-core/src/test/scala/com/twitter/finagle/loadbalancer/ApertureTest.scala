@@ -1,13 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
-import org.scalactic.Tolerance
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
@@ -23,6 +20,8 @@ private trait ApertureTesting {
     protected val maxEffort = 10
     protected def statsReceiver = NullStatsReceiver
     protected val minAperture = 1
+
+    protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
 
     def applyn(n: Int): Unit = {
       val factories = Await.result(Future.collect(Seq.fill(n)(apply())))
@@ -87,7 +86,6 @@ private trait ApertureTesting {
 
 @RunWith(classOf[JUnitRunner])
 private class ApertureTest extends FunSuite with ApertureTesting {
-  import Tolerance._
 
   protected class Bal extends TestBal with LeastLoaded[Unit, Unit]
 
@@ -183,7 +181,6 @@ private class ApertureTest extends FunSuite with ApertureTesting {
 
 @RunWith(classOf[JUnitRunner])
 private class LoadBandTest extends FunSuite with ApertureTesting {
-  import Tolerance._
 
   val rng = Rng()
 
