@@ -92,6 +92,9 @@ Runtime Behavior Changes
     into very basic 500 responses so clients talking to those services see standard HTTP
     responses instead of a dropped connection. ``RB_ID=755846``
 
+  * finagle-memcached: Moved metrics from underlying `KetamaPartitionedClient` for Memcached clients
+    to share the same scope of the underlying finagle client. ``RB_ID=771691``
+
   * finagle-mux: `com.twitter.finagle.mux.ThresholdFailureDetector` is turned on by
     default. ``RB_ID=756213``
 

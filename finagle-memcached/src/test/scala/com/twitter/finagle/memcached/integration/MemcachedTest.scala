@@ -237,7 +237,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       intercept[Exception] { Await.result(client.set("foo", Buf.Utf8("bar"))) }
 
       // Node should have been ejected
-      assert(statsReceiver.counters.get(List("ejections")) == Some(1))
+      assert(statsReceiver.counters.get(List("cacheClient", "ejections")) == Some(1))
 
       // Node should have been marked dead, and still be dead after 5 minutes
       timeControl.advance(5.minutes)
@@ -251,7 +251,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       timer.tick()
 
       // 10 minutes (markDeadFor duration) have passed, so the request should go through
-      assert(statsReceiver.counters.get(List("revivals")) == Some(1))
+      assert(statsReceiver.counters.get(List("cacheClient", "revivals")) == Some(1))
       assert(Await.result(client.get(s"foo")).get == Buf.Utf8("bar"))
     }
   }
