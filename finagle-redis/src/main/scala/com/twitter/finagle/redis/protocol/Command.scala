@@ -141,6 +141,14 @@ object Commands {
   val PFCOUNT           = "PFCOUNT"
   val PFMERGE           = "PFMERGE"
 
+  // PubSub
+  val PUBLISH           = "PUBLISH"
+  val SUBSCRIBE         = "SUBSCRIBE"
+  val UNSUBSCRIBE       = "UNSUBSCRIBE"
+  val PSUBSCRIBE        = "PSUBSCRIBE"
+  val PUNSUBSCRIBE      = "PUNSUBSCRIBE"
+  val PUBSUB            = "PUBSUB"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -265,8 +273,11 @@ object Commands {
     // HyperLogLogs
     PFADD             -> {PFAdd(_)},
     PFCOUNT           -> {PFCount(_)},
-    PFMERGE           -> {PFMerge(_)}
+    PFMERGE           -> {PFMerge(_)},
 
+    // PubSub
+    PUBLISH           -> {Publish(_)},
+    PUBSUB            -> {PubSub(_)}
   )
 
   def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd.toUpperCase).map {
@@ -410,6 +421,14 @@ object CommandBytes {
   val PFADD             = StringToChannelBuffer("PFADD")
   val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
   val PFMERGE           = StringToChannelBuffer("PFMERGE")
+
+  // PubSub
+  val PUBLISH           = StringToChannelBuffer("PUBLISH")
+  val SUBSCRIBE         = StringToChannelBuffer("SUBSCRIBE")
+  val UNSUBSCRIBE       = StringToChannelBuffer("UNSUBSCRIBE")
+  val PSUBSCRIBE        = StringToChannelBuffer("PSUBSCRIBE")
+  val PUNSUBSCRIBE      = StringToChannelBuffer("PUNSUBSCRIBE")
+  val PUBSUB            = StringToChannelBuffer("PUBSUB")
 }
 
 
@@ -422,8 +441,8 @@ class CommandCodec extends UnifiedProtocolCodec {
 
   val log = Logger(getClass)
 
-  val encode = new Encoder[Command] {
-    def encode(obj: Command) = Some(obj.toChannelBuffer)
+  val encode = new Encoder[RedisMessage] {
+    def encode(obj: RedisMessage) = Some(obj.toChannelBuffer)
   }
 
   val decode = readBytes(1) { bytes =>
@@ -446,7 +465,7 @@ class CommandCodec extends UnifiedProtocolCodec {
     emit(cmd)
   }
 
-  def commandDecode(lines: List[Array[Byte]]): Command = {
+  def commandDecode(lines: List[Array[Byte]]): RedisMessage = {
     RequireClientProtocol(lines != null && lines.length > 0, "Invalid client command protocol")
     val cmd = BytesToString(lines.head)
     val args = lines.tail
@@ -459,5 +478,4 @@ class CommandCodec extends UnifiedProtocolCodec {
         throw new ClientError(t.getMessage)
     }
   }
-
 }

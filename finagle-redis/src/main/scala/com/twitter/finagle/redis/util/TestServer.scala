@@ -4,6 +4,7 @@ package util
 import java.lang.ProcessBuilder
 import java.net.InetSocketAddress
 import java.io.{BufferedWriter, FileWriter, PrintWriter, File}
+import com.twitter.finagle
 import com.twitter.util.RandomSocket
 import collection.JavaConversions._
 import scala.util.Random
@@ -21,20 +22,28 @@ object RedisCluster { self =>
     require(instanceStack.length > 0)
     addresses.map { address =>
       val addy = address.get
-      "%s:%d".format(addy.getHostName(), addy.getPort())
+      "%s:%d".format("127.0.0.1", addy.getPort())
     }.sorted.mkString(",")
   }
 
-  def start(count: Int = 1) {
-    0 until count foreach { i =>
-      val instance = new ExternalRedis()
-      instance.start()
-      instanceStack.push(instance)
+  def start(count: Int = 1): Seq[ExternalRedis] = {
+    0 until count map { i =>
+      start(new ExternalRedis())
     }
   }
-  def stop() {
-    instanceStack.pop().stop()
+
+  def start(instance: ExternalRedis) = {
+    instance.start()
+    instanceStack.push(instance)
+    instance
   }
+
+  def stop() = {
+    val instance = instanceStack.pop()
+    instance.stop()
+    instance
+  }
+
   def stopAll() {
     instanceStack.foreach { i => i.stop() }
     instanceStack.clear
@@ -104,6 +113,22 @@ class ExternalRedis() {
   def restart() {
     stop()
     start()
+  }
+
+  def newClient() = finagle.Redis.client
+    .newRichClient(s"127.0.0.1:${address.get.getPort}")
+
+  def newSubscribeClient() = finagle.Redis.Subscribe.client
+    .newRichClient(s"127.0.0.1:${address.get.getPort}")
+
+  def withClient[T](f: finagle.redis.Client => T): T = {
+    val client = newClient
+    try f(client) finally client.release()
+  }
+
+  def withSubscribeClient[T](f: finagle.redis.SubscribeClient => T): T = {
+    val client = newSubscribeClient
+    try f(client) finally client.close()
   }
 
   assertRedisBinaryPresent()
