@@ -22,6 +22,11 @@ trait RedisRichClient { self: Client[Command, Reply] =>
     redis.Client(newService(dest, label))
 }
 
+trait RichSubscribeClient { self: Client[SubscribeCommand, Unit] =>
+
+  def newRichClient(dest: String) = redis.SubscribeClient(dest)
+}
+
 object Redis extends Client[Command, Reply] {
 
   object Client {
@@ -86,7 +91,8 @@ object Redis extends Client[Command, Reply] {
     case class SubscribeClient(
       stack: Stack[ServiceFactory[SubscribeCommand, Unit]] = SubscribeClient.newStack,
       params: Stack.Params = SubscribeClient.defaultParams)
-        extends StdStackClient[SubscribeCommand, Unit, SubscribeClient] {
+        extends StdStackClient[SubscribeCommand, Unit, SubscribeClient]
+        with RichSubscribeClient {
 
       protected def copy1(
         stack: Stack[ServiceFactory[SubscribeCommand, Unit]] = this.stack,

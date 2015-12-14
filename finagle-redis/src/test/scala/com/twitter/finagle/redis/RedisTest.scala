@@ -1,17 +1,19 @@
 package com.twitter.finagle.redis.naggati
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.redis.{Redis, TransactionalClient}
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.util.{Await, Duration, Future, Time, Try}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import java.net.InetSocketAddress
 import com.twitter.finagle.Service
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.SubscribeClient
+import com.twitter.util.Awaitable
 
 trait RedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
@@ -24,6 +26,26 @@ trait RedisTest extends FunSuite {
   protected val boo = StringToChannelBuffer("boo")
   protected val moo = StringToChannelBuffer("moo")
   protected val num = StringToChannelBuffer("num")
+
+  def result[T](awaitable: Awaitable[T], timeout: Duration = 1.second) =
+    Await.result(awaitable, timeout)
+
+  def ready[T <: Awaitable[_]](awaitable: T, timeout: Duration = 1.second) =
+    Await.ready(awaitable, timeout)
+
+  def waitUntil(message: String, countDown: Int = 10)(ready: => Boolean) {
+    if (countDown > 0) {
+      if (!ready) {
+        Thread.sleep(1000)
+        waitUntil(message, countDown - 1)(ready)
+      }
+    }
+    else throw new IllegalStateException(s"Timeout: ${message}")
+  }
+
+  def waitUntilAsserted(message: String, countDown: Int = 10)(assert: => Unit) {
+    waitUntil(message, countDown)(Try(assert).isReturn)
+  }
 }
 
 trait RedisResponseTest extends RedisTest {
@@ -49,6 +71,9 @@ trait RedisRequestTest extends RedisTest {
 }
 
 trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
+
+  implicit def s2cb(s: String) = StringToChannelBuffer(s)
+  implicit def cb2s(cb: ChannelBuffer) = CBToString(cb)
 
   override def beforeAll(): Unit = RedisCluster.start()
   override def afterAll(): Unit = RedisCluster.stop()

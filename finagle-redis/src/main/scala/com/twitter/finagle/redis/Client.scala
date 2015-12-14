@@ -38,7 +38,13 @@ class Client(service: Service[Command, Reply])
   with Sets
   with BtreeSortedSetCommands
   with HyperLogLogs
-  with PubSubs
+  with PubSubs {
+
+  def slaveOf(host: ChannelBuffer, port: ChannelBuffer): Future[Unit] =
+    doRequest(SlaveOf(host, port)) {
+      case StatusReply(message) => Future.Unit
+    }
+}
 
 /**
  * Connects to a single Redis host

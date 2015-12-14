@@ -1,27 +1,23 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.RedisClientTest
-import com.twitter.finagle.redis.tags.{ ClientTest, RedisTest }
 import com.twitter.util.Await
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.SubscribeClient
+import com.twitter.finagle.redis.{Client, SubscribeClient}
+import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Ignore
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.Matchers._
+import org.scalatest.junit.JUnitRunner
 import org.jboss.netty.buffer.ChannelBuffer
 
 @Ignore
 @RunWith(classOf[JUnitRunner])
 final class PubSubClientIntegrationSuite extends RedisClientTest {
-
-  implicit def s2cb(s: String) = StringToChannelBuffer(s)
-  implicit def cb2s(cb: ChannelBuffer) = CBToString(cb)
 
   test("Correctly perform the SUBSCRIBE/UNSUBSCRIBE command", RedisTest, ClientTest) {
     runTest { ctx =>
@@ -91,23 +87,17 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
       assert(ctx.pubSubNumPat() == 0)
     }
   }
-  
-  test("Recover from connection failure", RedisTest, ClientTest) {
+
+  test("Recover from network failure", RedisTest, ClientTest) {
     runTest { ctx =>
       ctx.subscribe("foo")
       ctx.publish("foo")
-      
+
       val redis = RedisCluster.stop()
       the[Exception] thrownBy ctx.publish("foo")
-      
+
       RedisCluster.start(redis)
-      def loop(count: Int = 10) {
-        Try(ctx.publish("foo")).onFailure { _ =>
-          Thread.sleep(1000)
-          loop(count - 1)
-        }
-      }
-      loop()
+      waitUntilAsserted("recover from network failure") { ctx.publish(foo) }
     }
   }
 
@@ -123,49 +113,49 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
 
     val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
 
-    def subscribe(channels: String*) {
-      Await.ready(sc.subscribe(channels.map(s2cb)) { (channel, message) =>
+    def subscribe(channels: ChannelBuffer*) = {
+      result(sc.subscribe(channels) { case (channel, message) =>
         q.get(message).map(_.setValue((channel, message, None)))
       })
     }
 
-    def unsubscribe(channels: String*) {
-      Await.ready(sc.unsubscribe(channels.map(s2cb)))
+    def unsubscribe(channels: String*) = {
+      result(sc.unsubscribe(channels.map(s2cb)))
     }
 
-    def pSubscribe(patterns: String*) {
-      Await.ready(sc.pSubscribe(patterns.map(s2cb)) { (pattern, channel, message) =>
+    def pSubscribe(patterns: String*) = {
+      result(sc.pSubscribe(patterns.map(s2cb)) { case (pattern, channel, message) =>
         q.get(message).map(_.setValue((channel, message, Some(pattern))))
       })
     }
 
-    def pUnsubscribe(patterns: String*) {
-      Await.ready(sc.pUnsubscribe(patterns.map(s2cb)))
+    def pUnsubscribe(patterns: String*) = {
+      result(sc.pUnsubscribe(patterns.map(s2cb)))
     }
-    
+
     def pubSubChannels(pattern: Option[String] = None) = {
-      Await.result(c.pubSubChannels(pattern.map(s2cb))).map(cb2s).toSet
+      result(c.pubSubChannels(pattern.map(s2cb))).map(cb2s).toSet
     }
 
     def pubSubNumSub(channels: String*) = {
-      val result = Await.result(c.pubSubNumSub(channels.map(s2cb)))
-      channels.map(result(_))
+      val r = result(c.pubSubNumSub(channels.map(s2cb)))
+      channels.map(r(_))
     }
 
     def pubSubNumPat() = {
-      Await.result(c.pubSubNumPat())
+      result(c.pubSubNumPat())
     }
 
     def publish(channel: String, pattern: Option[String] = None) {
       val p = new Promise[(String, String, Option[String])]
       val message = nextMessage
       q.put(message, p)
-      Await.result(c.publish(channel, message))
-      assert(Await.result(p, 1.second) == (channel, message, pattern))
+      result(c.publish(channel, message))
+      assert(result(p) == (channel, message, pattern))
     }
-    
+
     val i = new AtomicInteger(0)
-    
+
     def nextMessage = "message-" + i.incrementAndGet()
   }
 }
