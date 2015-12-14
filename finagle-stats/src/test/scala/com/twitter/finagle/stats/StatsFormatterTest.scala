@@ -53,4 +53,19 @@ class StatsFormatterTest extends FunSuite {
     assert(formatted("histo1.average") == 50)
   }
 
+  test("CommonsStats") {
+    val formatter = StatsFormatter.CommonsStats
+    val formatted = formatter(values)
+
+    assert(formatted("histo1_50_0_percentile") == 50)
+    assert(formatted("histo1_90_0_percentile") == 90)
+    assert(formatted("histo1_99_0_percentile") == 99)
+    assert(formatted("histo1_99_9_percentile") == 100)
+    assert(formatted("histo1_99_99_percentile") == 100)
+
+    assert(formatted("histo1_count") == 101)
+    assert(formatted("histo1_max") == 100)
+    assert(formatted("histo1_min") == 0)
+    assert(formatted("histo1_avg") == 50)
+  }
 }
