@@ -198,6 +198,8 @@ class SubscribeClient(
         case Some(subscription) =>
           subscriptions.put(channel, subscription.copy(state = Subscribed(node)))
         case None =>
+          // In case that some retrying attempt is made successfully after the channel is
+          // unsubscribed. 
           node(typ.unsubscribeCommand(channel, this))
       }
     }
@@ -220,6 +222,7 @@ class SubscribeClient(
     }
 
     private def _onException(node: Node, ex: Throwable): Unit = {
+      // Take a snapshot of the managed subscriptions, and change the state.
       subscriptions.toList.collect {
         case (channel, subscription) =>
           subscriptions.put(channel, subscription.copy(state = Pending))
@@ -227,10 +230,12 @@ class SubscribeClient(
       }
     }
 
-    def retry(channel: ChannelBuffer): Future[Unit] =
+    private def retry(channel: ChannelBuffer): Future[Unit] =
       doRequest(typ.subscribeCommand(channel, this))
 
     def subscribe(channel: ChannelBuffer): Future[Unit] = {
+      // It is possible that the channel is unsubscribed, so we always check it before making
+      // another attempt.
       if (subscriptions.get(channel).isEmpty) Future.Unit
       else retry(channel).onFailure {
         case sce: ServiceClosedException =>
