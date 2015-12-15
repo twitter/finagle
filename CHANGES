@@ -26,6 +26,14 @@ Deprecations
   * finagle-memcached: `c.t.f.memcached.BaseClient.cas` is deprecated in favor of the richer
     `checkAndSet` method.
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thrift,thriftmux: Deserialization of Thrift responses now happens as part
+    of service application which means that it will now be part of the latency reported by
+    `StatsFilter`. The actual latency as perceived by clients will not have changed, but
+    for clients that spend significant time deserializing and do not have higher level
+    metrics this may come as a surprise. ``RB_ID=772931``
 
 6.31.0
 ~~~~~~~

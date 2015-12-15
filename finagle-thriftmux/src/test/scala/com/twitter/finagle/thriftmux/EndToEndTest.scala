@@ -6,16 +6,16 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.PipeliningDispatcher
-import com.twitter.finagle.param.{Label, Stats, Tracer => PTracer}
-import com.twitter.finagle.service.{Retries, RetryBudget}
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.param.{Tracer => PTracer, Label, Stats}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, Retries, RetryBudget}
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientFramedCodec, ThriftClientRequest}
-import com.twitter.finagle.thriftmux.thriftscala.{TestService, TestService$FinagleClient, TestService$FinagleService}
+import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestService, TestService$FinagleClient, TestService$FinagleService}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Closable, Future, Promise, Return, Time}
+import com.twitter.util.{Await, Closable, Future, Promise, Return, Time, Throw}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.protocol._
 import org.apache.thrift.TApplicationException
@@ -401,7 +401,6 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     val client = OldPlainThriftClient.newIface[TestService.FutureIface](server)
     val thrown = intercept[TApplicationException] { Await.result(client.query("ok")) }
     assert(thrown.getMessage == "Internal error processing query: 'java.lang.Exception: sad panda'")
-
   }
 
   test("thriftmux server should count exceptions as failures") {
@@ -424,6 +423,105 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     assert(sr.counters(Seq("thrift", "requests")) == 1)
     assert(sr.counters.get(Seq("thrift", "success")) == None)
     assert(sr.counters(Seq("thrift", "failures")) == 1)
+    server.close()
+  }
+
+  test("thriftmux client default failure classification") {
+    val iface = new TestService.FutureIface {
+      def query(x: String) = Future.exception(new InvalidQueryException(x.length))
+    }
+    val svc = new TestService.FinagledService(iface, Protocols.binaryFactory())
+
+    val server = ThriftMux.server
+      .configured(Stats(NullStatsReceiver))
+      .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
+
+    val sr = new InMemoryStatsReceiver()
+    val client =
+      ThriftMux.client
+        .configured(Stats(sr))
+        .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
+
+    val ex = intercept[InvalidQueryException] {
+      Await.result(client.query("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    // by default, the filter/service are Array[Byte] => Array[Byte]
+    // which in turn means thrift exceptions are just "successful"
+    // arrays of bytes...
+    assert(sr.counters(Seq("client", "success")) == 1)
+    server.close()
+  }
+
+  private val classifier: ResponseClassifier = {
+    case ReqRep(TestService.Query.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
+      ResponseClass.Success
+    case ReqRep(_, Throw(_: InvalidQueryException)) => ResponseClass.NonRetryableFailure
+    case ReqRep(_, Return(s: String)) => ResponseClass.NonRetryableFailure
+  }
+
+  private def serverForClassifier(): ListeningServer  = {
+    val iface = new TestService.FutureIface {
+      def query(x: String) =
+        if (x == "safe") Future.value("safe")
+        else Future.exception(new InvalidQueryException(x.length))
+    }
+    val svc = new TestService.FinagledService(iface, Protocols.binaryFactory())
+    ThriftMux.server
+      .configured(Stats(NullStatsReceiver))
+      .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
+  }
+
+  private def testFailureClassification(
+    sr: InMemoryStatsReceiver,
+    client: TestService.FutureIface
+  ): Unit = {
+    val ex = intercept[InvalidQueryException] {
+      Await.result(client.query("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+
+    // test that we can examine the request as well.
+    intercept[InvalidQueryException] {
+      Await.result(client.query("ok"), 5.seconds)
+    }
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.query("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 3)
+    assert(sr.counters(Seq("client", "success")) == 1)
+  }
+
+  ignore("thriftmux stack client deserialized failure classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = ThriftMux.client
+      .configured(Stats(sr))
+      .withResponseClassifier(classifier)
+      .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
+
+    testFailureClassification(sr, client)
+    server.close()
+  }
+
+  ignore("thriftmux ClientBuilder deserialized failure classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val clientBuilder = ClientBuilder()
+      .stack(ThriftMux.client)
+      .name("client")
+      .reportTo(sr)
+      .responseClassifier(classifier)
+      .dest(Name.bound(server.boundAddress))
+      .build()
+    val client = new TestService.FinagledClient(clientBuilder)
+
+    testFailureClassification(sr, client)
     server.close()
   }
 
