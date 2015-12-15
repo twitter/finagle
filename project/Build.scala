@@ -174,7 +174,7 @@ object Finagle extends Build {
     // Core, support.
     finagleCore, finagleTest, finagleStats, finagleNetty4,
     finagleZipkin, finagleServersets, finagleCacheResolver,
-    finagleException, finagleCommonsStats,
+    finagleException, finagleIntegration, finagleCommonsStats,
     finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
     // Protocols
@@ -197,6 +197,22 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-test",
     libraryDependencies ++= Seq(nettyLib, util("core"))
+  )
+
+  lazy val finagleIntegration = Project(
+    id = "finagle-integration",
+    base = file("finagle-integration"),
+    settings = Project.defaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-integration",
+    libraryDependencies ++= Seq(util("core"))
+  ).dependsOn(
+    finagleCore, 
+    finagleHttp, 
+    finagleMySQL, 
+    finagleMemcached, 
+    finagleMux
   )
 
   lazy val finagleCore = Project(
