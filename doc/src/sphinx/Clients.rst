@@ -164,7 +164,7 @@ Twitter. They are considered experimental, so they may change as we continue to 
 place in the client stack.
 
 P2C + Peak Ewma
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 Backed by the P2C distributor, Peak EWMA uses a moving average over an endpoint's round-trip time (RTT)
 that is highly sensitive to peaks. This average is then weighted by the number of outstanding requests,
 effectively increasing our resolution per-request. It is designed to react to slow endpoints more quickly than
@@ -174,7 +174,7 @@ advertised load to incorporate an endpoint's history. However, this assumption b
 presence of long polling clients.
 
 Aperture + Least Loaded
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 All the previously mentioned configurations operate optimally under high load. That is, without
 sufficient concurrent load, the previous distributors can degrade to random selection. The Aperture
 distributor aims to remedy this among other things. By employing a simple feedback controller based
@@ -242,6 +242,8 @@ The following modules aim to preemptively disable sessions that will likely fail
 From the perspective of the load balancer, they act as circuit breakers which, when
 triggered, temporarily suspend the use of a particular endpoint.
 
+.. _client_failure_accrual:
+
 Failure Accrual
 ^^^^^^^^^^^^^^^
 
@@ -308,20 +310,54 @@ services that are between [low, high].
 Retries
 ~~~~~~~
 
-Finagle provides a configurable :src:`RetryExceptionsFilter <com/twitter/finagle/service/RetryingFilter.scala>`.
-The filter can be configured either to retry a specific number of times or to adhere to a back-off strategy.
-By default, the RetryingFilter *does not assume your RPC service is idempotent*. Retries occur only when they
-are known to be safe. That is, when Finagle can guarantee the request was never delivered to the
-server.
+Finagle provides a configurable
+:src:`RetryExceptionsFilter <com/twitter/finagle/service/RetryFilter.scala>`.
+The filter can be configured either to retry a specific number of times or
+to adhere to a back-off strategy. By default, the ``RetryExceptionsFilter``
+*does not assume your RPC service is idempotent* and retries occur only when they
+are known to be safe. That is, when Finagle can guarantee the request was never
+delivered to the server.
+
+To help mitigate retry storms, Finagle applies a
+:src:`RetryBudget <com/twitter/finagle/service/RetryBudget.scala>` that by
+default allows for 1 retry per 5 non-retry requests. The default also allows
+a minimum number of retries per second in order to accommodate client that
+have just started issuing requests or clients that have a low rate of requests
+per second.
 
 There is no direct protocol or annotation support for marking endpoints as idempotent.
-A common workaround is to create separate client instances for issuing non-idempotent requests.
-For example, one could keep separate client objects for reads and writes, the former configured to retry on
-any request failure and the latter being more conservative in order to avoid conflicting writes.
+A common workaround is to create separate client instances for issuing
+non-idempotent requests. For example, one could keep separate client objects
+for reads and writes, the former configured to retry on any request failure
+and the latter being more conservative in order to avoid conflicting writes.
+
+:ref:`Related stats <retries>`
+
+Response Classification
+-----------------------
+
+To give Finagle visibility into application level success and failure
+developers can provide classification of responses by using
+:src:`response classifiers <com/twitter/finagle/service/package.scala>`.
+This gives Finagle the proper domain knowledge and improves the efficacy of
+:ref:`failure accrual <client_failure_accrual>` and more accurate
+:ref:`success rate stats <metrics_stats_filter>`.
+
+``ResponseClassifiers`` can be wired up to a client via
+``StackClient.configured(param.ResponseClassifier)`` or
+``ClientBuilder.responseClassifier``.
+
+Protocol specific helpers for creating classifiers exist such as
+`HttpResponseClassifier <https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/com/twitter/finagle/http/service/HttpResponseClassifier.scala>`_ and
+`ThriftMuxResponseClassifier <https://github.com/twitter/finagle/blob/master/finagle-thriftmux/src/main/scala/com/twitter/finagle/thriftmux/service/ThriftMuxResponseClassifier.scala>`_.
+For example, some HTTP clients may want to treat all 500 status codes as
+failures and can do so by using ``HttpResponseClassifier.ServerErrorsAsFailures``.
+Or, a ThriftMux client may want to treat all Thrift application exceptions
+as failures and can do so by using ``ThriftMuxResponseClassifier.ThriftExceptionsAsFailures``.
 
 Configuration
 -------------
 
-Prior to :doc:`6.x <changelog>`, the `ClientBuilder` was the primary method for configuring
-the modules inside a Finagle client. We've moved away from this model for various
+Prior to :doc:`version 6.0 <changelog>`, the `ClientBuilder` was the primary method for configuring
+the modules inside a Finagle client. We are moving away from this model for various
 :ref:`reasons <configuring_finagle6>`.

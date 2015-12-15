@@ -1,3 +1,5 @@
+.. _metrics_stats_filter:
+
 StatsFilter
 <<<<<<<<<<<
 
