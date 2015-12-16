@@ -6,7 +6,7 @@ import com.twitter.finagle.redis.SubscribeHandler
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Charsets
-import com.twitter.util.{Future, Promise}
+import com.twitter.util.{Future, NonFatal, Promise}
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import org.jboss.netty.buffer.ChannelBuffer
@@ -47,13 +47,16 @@ class SubscribeDispatcher(trans: Transport[SubscribeCommand, Reply])
     trans.read().onSuccess { reply =>
       handleMessage(reply)
       loop()
-    }
-    .onFailure { ex =>
-      Option(handler.get()).map(_.onException(this, ex))
+    }.onFailure {
+      case NonFatal(ex) =>
+        Option(handler.get()).foreach(_.onException(this, ex))
     }
 
-  protected def dispatch(req: SubscribeCommand, p: Promise[Unit]): Future[Unit] =
-    trans.write(req).onSuccess { _ => p.setDone() }
+  protected def dispatch(req: SubscribeCommand, p: Promise[Unit]): Future[Unit] = {
+    trans.write(req)
+      .onSuccess { _ => p.setDone() }
+      .onFailure { case NonFatal(ex) => p.setException(ex) }
+  }
 
   override def apply(req: SubscribeCommand): Future[Unit] = {
     handler.compareAndSet(null, req.handler)
