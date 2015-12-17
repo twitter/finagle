@@ -20,6 +20,8 @@ New Features
   * finagle-memcached: Added `c.t.f.memcached.BaseClient.checkAndSet` which exposes the difference
     between a conflict and a not found result.
 
+  * finagle-mux: Add a Wireshark dissector that can decode Mux messages. ``RB_ID=779482``
+
 Deprecations
 ~~~~~~~~~~~~
 
