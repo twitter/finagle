@@ -7,6 +7,7 @@ import com.twitter.finagle.redis.util._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.conversions.time._
 import com.twitter.io.Charsets
+import com.twitter.logging.Logger
 import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
 import org.jboss.netty.buffer.ChannelBuffer
@@ -81,6 +82,8 @@ class SubscribeClient(
 
   import SubscribeClient._
 
+  private[this] val log = Logger(getClass)
+
   private[this] val subManager = new SubscriptionManager(Channel, timer)
 
   private[this] val pSubManager = new SubscriptionManager(Pattern, timer)
@@ -138,7 +141,7 @@ class SubscribeClient(
         case (Throw(ex), pattern) => (pattern, ex)
       }.toMap)
   }
-  
+
   /**
    * Unsubscribe from channels. The subscriptions to the specified channels are removed from the
    * SubscriptionManager. An unsubscribe command is sent for each of the succeeded
@@ -199,7 +202,7 @@ class SubscribeClient(
           subscriptions.put(channel, subscription.copy(state = Subscribed(node)))
         case None =>
           // In case that some retrying attempt is made successfully after the channel is
-          // unsubscribed. 
+          // unsubscribed.
           node(typ.unsubscribeCommand(channel, this))
       }
     }
@@ -213,7 +216,12 @@ class SubscribeClient(
     }
 
     def handleMessage(channel: ChannelBuffer, message: Message): Unit = {
-      subscriptions.get(channel).map(_.handler(message))
+      try {
+        subscriptions.get(channel).map(_.handler(message))
+      } catch {
+        case NonFatal(ex) =>
+          log.error(ex, "Failed to handle a message: %s", message)
+      }
     }
 
     def onException(node: Node, ex: Throwable): Unit = {
