@@ -164,10 +164,19 @@ object ThriftMux
     }
 
     private[this] def deserializingClassifier: StackClient[mux.Request, mux.Response] = {
-      val c = ThriftMuxResponseClassifier.usingDeserializeCtx(
-        params[param.ResponseClassifier].responseClassifier
-      )
-      muxer.configured(param.ResponseClassifier(c))
+      if (params.contains[param.ResponseClassifier]) {
+        // Note that it is important to only wire up a deserializer if one
+        // was provided so that we keep the prior behavior of Thrift exceptions
+        // being counted as a success. Otherwise, even using the default
+        // ResponseClassifier would then see that response as a `Throw` and thus
+        // a failure.
+        val c = ThriftMuxResponseClassifier.usingDeserializeCtx(
+          params[param.ResponseClassifier].responseClassifier
+        )
+        muxer.configured(param.ResponseClassifier(c))
+      } else {
+        muxer
+      }
     }
 
     def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
