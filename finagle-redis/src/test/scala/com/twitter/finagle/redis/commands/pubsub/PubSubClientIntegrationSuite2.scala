@@ -3,7 +3,8 @@ package com.twitter.finagle.redis.integration
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle
-import com.twitter.finagle.redis.{Client, SubscribeClient}
+import com.twitter.finagle.redis.Client
+import com.twitter.finagle.redis.exp.{RedisSubscribe, SubscribeClient}
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
@@ -64,7 +65,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
       assert(ctx.pubSubNumPat() == 3)
     }
   }
-  
+
   test("Recover from network failures") {
     runTest { implicit ctx =>
       master.stop()
@@ -83,7 +84,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     ctx.subscribe(channels)
     assertSubscribed(channels: _*)
   }
-  
+
   def assertSubscribed(channels: ChannelBuffer*)(implicit ctx: TestContext) {
     channels.foreach { channel =>
       assert(ctx.pubSubNumSub(channel) == 1)
@@ -91,19 +92,19 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
       messages.foreach(message => assert(ctx.recvCount(message) == 1))
     }
   }
-  
+
   def pSubscribeAndAssert(channels: ChannelBuffer*)(implicit ctx: TestContext) {
     ctx.pSubscribe(channels)
     assertPSubscribed(channels: _*)
   }
-  
+
   def assertPSubscribed(channels: ChannelBuffer*)(implicit ctx: TestContext) {
     channels.foreach { channel =>
       val messages = (1 to 10).map(_ => ctx.publish(channel, Some(channel)))
       messages.foreach(message => assert(ctx.recvCount(message) == 1))
     }
   }
-  
+
   def unsubscribeAndAssert(channels: ChannelBuffer*)(implicit ctx: TestContext) {
     ctx.unsubscribe(channels)
     channels.foreach { channel =>
@@ -118,7 +119,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
       the[TimeoutException] thrownBy ctx.publish(channel)
     }
   }
-  
+
   def ensureMasterSlave() {
     slave.withClient { client =>
       val masterAddr = master.address.get
@@ -140,7 +141,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
         val dest = Seq(master, slave)
           .map(node => s"127.0.0.1:${node.address.get.getPort}")
           .mkString(",")
-        val subscribeClnt = finagle.Redis.Subscribe.client.newRichClient(dest)
+        val subscribeClnt = RedisSubscribe.client.newRichClient(dest)
         val ctx = new TestContext(masterClnt, slaveClnt, subscribeClnt)
         try test(ctx) finally subscribeClnt.close()
       }

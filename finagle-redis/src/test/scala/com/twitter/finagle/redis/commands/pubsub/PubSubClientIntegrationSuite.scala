@@ -3,7 +3,8 @@ package com.twitter.finagle.redis.integration
 import com.twitter.util.Await
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.redis.{Client, SubscribeClient}
+import com.twitter.finagle.redis.Client
+import com.twitter.finagle.redis.exp.SubscribeClient
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._

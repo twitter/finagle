@@ -1,10 +1,10 @@
-package com.twitter.finagle.redis
-package util
+package com.twitter.finagle.redis.util
 
 import java.lang.ProcessBuilder
 import java.net.InetSocketAddress
 import java.io.{BufferedWriter, FileWriter, PrintWriter, File}
 import com.twitter.finagle
+import com.twitter.finagle.redis.exp.{RedisSubscribe, SubscribeClient}
 import com.twitter.util.RandomSocket
 import collection.JavaConversions._
 import scala.util.Random
@@ -118,7 +118,7 @@ class ExternalRedis() {
   def newClient() = finagle.Redis.client
     .newRichClient(s"127.0.0.1:${address.get.getPort}")
 
-  def newSubscribeClient() = finagle.Redis.Subscribe.client
+  def newSubscribeClient() = RedisSubscribe.client
     .newRichClient(s"127.0.0.1:${address.get.getPort}")
 
   def withClient[T](f: finagle.redis.Client => T): T = {
@@ -126,7 +126,7 @@ class ExternalRedis() {
     try f(client) finally client.release()
   }
 
-  def withSubscribeClient[T](f: finagle.redis.SubscribeClient => T): T = {
+  def withSubscribeClient[T](f: SubscribeClient => T): T = {
     val client = newSubscribeClient
     try f(client) finally client.close()
   }

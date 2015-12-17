@@ -1,8 +1,7 @@
-package com.twitter.finagle.redis
+package com.twitter.finagle.redis.exp
 
-import com.twitter.finagle.{Service, ServiceClosedException, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.protocol.{Subscribe => SubscribeCmd}
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.conversions.time._
@@ -12,7 +11,6 @@ import com.twitter.util._
 import java.util.concurrent.ConcurrentHashMap
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
-import scala.collection.{immutable, mutable}
 
 object SubscribeClient {
 
@@ -23,7 +21,7 @@ object SubscribeClient {
    * @param host a String of host:port combination.
    */
   def apply(host: String): SubscribeClient = {
-    new SubscribeClient(com.twitter.finagle.Redis.Subscribe.newService(host))
+    new SubscribeClient(com.twitter.finagle.redis.exp.RedisSubscribe.newService(host))
   }
 
   object MessageBytes {
@@ -39,8 +37,7 @@ object SubscribeClient {
 sealed trait SubscribeHandler {
   def onSuccess(channel: ChannelBuffer, node: SubscribeClient.Node): Unit
   def onException(node: SubscribeClient.Node, ex: Throwable): Unit
-  def onMessage(channel: ChannelBuffer, message: ChannelBuffer): Unit
-  def onPMessage(pattern: ChannelBuffer, channel: ChannelBuffer, message: ChannelBuffer): Unit
+  def onMessage(message: Reply): Unit
 }
 
 sealed trait SubscriptionType[Message] {
@@ -207,12 +204,28 @@ class SubscribeClient(
       }
     }
 
-    def onMessage(channel: ChannelBuffer, message: ChannelBuffer): Unit = {
-      subManager.handleMessage(channel, (channel, message))
-    }
-
-    def onPMessage(pattern: ChannelBuffer, channel: ChannelBuffer, message: ChannelBuffer): Unit = {
-      pSubManager.handleMessage(pattern, (pattern, channel, message))
+    def onMessage(message: Reply): Unit = {
+      message match {
+        case MBulkReply(BulkReply(MessageBytes.MESSAGE) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
+          subManager.handleMessage(channel, (channel, message))
+        case MBulkReply(BulkReply(MessageBytes.PMESSAGE) :: BulkReply(pattern) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
+          pSubManager.handleMessage(pattern, (pattern, channel, message))
+        case MBulkReply(BulkReply(tpe) :: BulkReply(channel) :: IntegerReply(count) :: Nil) =>
+          tpe match {
+            case MessageBytes.PSUBSCRIBE
+              | MessageBytes.PUNSUBSCRIBE
+              | MessageBytes.SUBSCRIBE
+              | MessageBytes.UNSUBSCRIBE =>
+              // The acknowledgement messages may come after a subscribed channel message.
+              // So we register the message handler right after the subscription request
+              // is sent. Nothing is going to be done here. We match against them just to
+              // detect something unexpected.
+            case _ =>
+              throw new IllegalArgumentException(s"Unsupported message type: ${tpe.toString(Charsets.Utf8)}")
+          }
+        case _ =>
+          throw new IllegalArgumentException(s"Unexpected reply type: ${message.getClass.getSimpleName}")
+      }
     }
 
     def handleMessage(channel: ChannelBuffer, message: Message): Unit = {

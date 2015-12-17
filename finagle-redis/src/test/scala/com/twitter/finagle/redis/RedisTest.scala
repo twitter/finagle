@@ -1,19 +1,17 @@
 package com.twitter.finagle.redis.naggati
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.redis.exp.SubscribeClient
 import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
-import com.twitter.finagle.redis.{Redis, TransactionalClient}
-import com.twitter.util.{Await, Duration, Future, Time, Try}
+import com.twitter.finagle.redis.{Client, Redis, TransactionalClient}
+import com.twitter.util.{Await, Awaitable, Duration, Future, Time, Try}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import java.net.InetSocketAddress
-import com.twitter.finagle.Service
-import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.SubscribeClient
-import com.twitter.util.Awaitable
 
 trait RedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)

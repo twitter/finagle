@@ -1,7 +1,8 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.{ClientError, SubscribeHandler}
-import com.twitter.finagle.redis.SubscribeClient._
+import com.twitter.finagle.redis.{ClientError}
+import com.twitter.finagle.redis.exp.SubscribeHandler
+import com.twitter.finagle.redis.exp.SubscribeClient._
 import com.twitter.finagle.redis.protocol.Commands._
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
