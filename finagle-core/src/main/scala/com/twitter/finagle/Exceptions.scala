@@ -239,7 +239,9 @@ object ChannelException {
  * An exception encountered within the context of a given socket channel.
  */
 class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
-  extends Exception(underlying) with SourcedException
+  extends Exception(underlying)
+  with SourcedException
+  with HasLogLevel
 {
   def this(underlying: Throwable) = this(underlying, null)
   def this() = this(null, null)
@@ -253,6 +255,7 @@ class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
     if (serviceName == SourcedException.UnspecifiedServiceName) message
     else s"$message from service: $serviceName"
   }
+  def logLevel: Level = Level.DEBUG
 }
 
 /**
