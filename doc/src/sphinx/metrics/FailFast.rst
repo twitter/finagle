@@ -2,10 +2,13 @@ FailFastFactory
 <<<<<<<<<<<<<<<
 
 **marked_dead**
-  a counter of how many times the `FailFastFactory` has been marked dead
+  A counter of how many times the host has been marked dead due to connection
+  problems.
 
 **unhealthy_for_ms**
-  a gauge of how long the `FailFastFactory` has been retrying for this failure
+  A gauge of how long, in milliseconds, Finagle has been trying to reestablish
+  a connection.
 
 **unhealthy_num_tries**
-  a gauge of the number of times the `FailFastFactory` has retried for this failure
+  A gauge of the number of times the Factory has tried to reestablish a
+  connection.

@@ -3,26 +3,29 @@ Name Resolution
 
 Finagle clients resolve :doc:`names <Names>` into sets of network
 addresses to which sockets can be opened. A number of the moving parts
-involved in this process are cached (i.e. `Dtab`\s, `Name`\s, and
-`NameTree`\s). The following stats are recorded under the
+involved in this process are cached (i.e.
+:src:`Dtabs <com/twitter/finagle/Dtab.scala>`,
+:src:`Names <com/twitter/finagle/Name.scala>`, and
+:src:`NameTrees <com/twitter/finagle/NameTree.scala>`).
+The following stats are recorded under the
 `namer/{dtabcache,namecache,nametreecache}` scopes to provide
 visibility into this caching.
 
 **misses**
-  A counter of the number of cache misses
+  A counter of the number of cache misses.
 
 **evicts**
-  A counter of the number of cache evictions
+  A counter of the number of cache evictions.
 
 **idle**
-  A gauge of the number of cached idle `ServiceFactory`\s
+  A gauge of the number of cached idle ``ServiceFactory``\s.
 
 **oneshots**
-  A counter of the number of "one-off" `ServiceFactory`\s that are
-  created in the event that no idle `ServiceFactory`\s are cached
+  A counter of the number of "one-off" ``ServiceFactory``\s that are
+  created in the event that no idle ``ServiceFactory``\s are cached.
 
-The total time spent resolving Names is captured in the
-`namer/bind_latency_us` stat.
+**namer/bind_latency_us**
+  A stat of the total time spent resolving ``Name``\s.
 
 Initial Resolution
 <<<<<<<<<<<<<<<<<<
@@ -30,13 +33,13 @@ Initial Resolution
 **finagle/clientregistry/initialresolution_ms**
 
   A counter of the time spent waiting for client resolution via
-  `com.twitter.finagle.client.ClientRegistry.expAllRegisteredClientsResolved`
+  :src:`ClientRegistry.expAllRegisteredClientsResolved <com/twitter/finagle/client/ClientRegistry.scala>`.
 
 Address Stabilization
 <<<<<<<<<<<<<<<<<<<<<
 
 Resolved addresses (represented as an instance of
-`com.twitter.finagle.Addr`) are stabilized in two ways:
+:src:`Addr <com/twitter/finagle/Addr.scala>`) are stabilized in two ways:
 
 1. ZooKeeper failures will not cause a previously bound address to fail.
 2. When a member leaves a cluster, its removal is delayed.
@@ -81,86 +84,86 @@ Under the \`zk2\` scope
   membership status has been tracked within the process.
 
 **entries/read_ms**
-  A histogram of the latency, in milliseconds, of reading entry znodes
+  A histogram of the latency, in milliseconds, of reading entry znodes.
 
 **entries/parse_ms**
   A histogram of the latency, in milliseconds, of parsing the data
-  within entry znodes
+  within entry znodes.
 
 **vectors/read_ms**
-  A histogram of the latency, in milliseconds, of reading vector znodes
+  A histogram of the latency, in milliseconds, of reading vector znodes.
 
 **vectors/parse_ms**
   A histogram of the latency, in milliseconds, of parsing the data
-  within vector znodes
+  within vector znodes.
 
 Under the \`zkclient\` scope
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **ephemeral_successes**
-  A counter of the number successful ephemeral node creations
+  A counter of the number successful ephemeral node creations.
 
 **ephemeral_failures**
-  A counter of the number failed ephemeral node creations
+  A counter of the number failed ephemeral node creations.
 
 **ephemeral_latency_ms**
-  A histogram of the latency, in milliseconds, of ephemeral node creation
+  A histogram of the latency, in milliseconds, of ephemeral node creation.
 
 **watch_successes**
   A counter of the number successful watch-related operations
   (i.e. "watch exists", "get watch data", and "get child watches"
-  operations)
+  operations).
 
 **watch_failures**
-  A counter of the number failed watch-related operations
+  A counter of the number failed watch-related operations.
 
 **watch_latency_ms**
-  A histogram of the latency, in milliseconds, of watch-related operations
+  A histogram of the latency, in milliseconds, of watch-related operations.
 
 **read_successes**
-  A counter of the number successful ZooKeeper reads
+  A counter of the number successful ZooKeeper reads.
 
 **read_failures**
-  A counter of the number failed ZooKeeper reads
+  A counter of the number failed ZooKeeper reads.
 
 **read_latency_ms**
-  A histogram of the latency, in milliseconds, of ZooKeeper reads
+  A histogram of the latency, in milliseconds, of ZooKeeper reads.
 
 **write_successes**
-  A counter of the number successful ZooKeeper writes
+  A counter of the number successful ZooKeeper writes.
 
 **write_failures**
-  A counter of the number failed ZooKeeper writes
+  A counter of the number failed ZooKeeper writes.
 
 **write_latency_ms**
-  A histogram of the latency, in milliseconds, of ZooKeeper writes
+  A histogram of the latency, in milliseconds, of ZooKeeper writes.
 
 **multi_successes**
-  A counter of the number successful transactional operations
+  A counter of the number successful transactional operations.
 
 **multi_failures**
-  A counter of the number failed transactional operations
+  A counter of the number failed transactional operations.
 
 **multi_latency_ms**
-  A histogram of the latency, in milliseconds, of transactional operations
+  A histogram of the latency, in milliseconds, of transactional operations.
 
 **session_sync_connected**
-  A counter of the number of read-write session transitions
+  A counter of the number of read-write session transitions.
 
 **session_connected_read_only**
-  A counter of the number of read-only session transitions
+  A counter of the number of read-only session transitions.
 
 **session_no_sync_connected**
-  Unused (should always be 0)
+  Unused (should always be 0).
 
 **session_sasl_authenticated**
-  A counter of the number of sessions upgraded to SASL
+  A counter of the number of sessions upgraded to SASL.
 
 **session_auth_failed**
-  A counter of the number of session authentication failures
+  A counter of the number of session authentication failures.
 
 **session_disconnected**
-  A counter of the number of temporary session disconnects
+  A counter of the number of temporary session disconnects.
 
 **session_expired**
-  A counter of the number of session expirations
+  A counter of the number of session expirations.
