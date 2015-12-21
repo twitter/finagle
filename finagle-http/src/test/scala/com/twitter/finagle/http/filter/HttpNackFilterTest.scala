@@ -1,7 +1,8 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.{ChannelClosedException, Failure, Http, Name, Service}
+import com.twitter.finagle.{Failure, Http, Name, Service}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.http
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.finagle.param.{Label, Stats}
 import com.twitter.finagle.server.StackServer
@@ -25,23 +26,30 @@ class HttpNackFilterTest extends FunSuite {
       }
     }
     val request = Request("/")
-    val st = new InMemoryStatsReceiver
+    val serverSr = new InMemoryStatsReceiver
+    val clientSr = new InMemoryStatsReceiver
   }
 
   test("automatically retries with HttpNack") {
     new ClientCtx {
-      val server = Http.server.serve(new InetSocketAddress(0), flakyService)
+      val server =
+        Http.server
+          .configured(Stats(serverSr))
+          .configured(Label("myservice"))
+          .serve(new InetSocketAddress(0), flakyService)
       val client =
         Http.client
-          .configured(Stats(st))
+          .configured(Stats(clientSr))
           .newService(Name.bound(server.boundAddress), "http")
 
       assert(Await.result(client(request)).status == Status.Ok)
-      assert(st.counters(Seq("http", "retries", "requeues")) == 1)
+      assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
 
       // reuse connections
       assert(Await.result(client(request)).status == Status.Ok)
-      assert(st.counters(Seq("http", "connects")) == 1)
+      assert(clientSr.counters(Seq("http", "connects")) == 1)
+
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
 
       Closable.all(client, server).close()
     }
@@ -49,17 +57,23 @@ class HttpNackFilterTest extends FunSuite {
 
   test("HttpNack works with ClientBuilder") {
     new ClientCtx {
-      val server = Http.server.serve(new InetSocketAddress(0), flakyService)
+      val server =
+        Http.server
+          .configured(Stats(serverSr))
+          .configured(Label("myservice"))
+          .serve(new InetSocketAddress(0), flakyService)
       val client =
         ClientBuilder()
           .name("http")
           .hosts(server.boundAddress)
           .codec(com.twitter.finagle.http.Http())
-          .reportTo(st)
+          .reportTo(clientSr)
           .hostConnectionLimit(1).build()
 
       assert(Await.result(client(request)).status == Status.Ok)
-      assert(st.counters(Seq("http", "retries", "requeues")) == 1)
+      assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
+
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
 
       Closable.all(client, server).close()
     }
@@ -67,19 +81,23 @@ class HttpNackFilterTest extends FunSuite {
 
   test("HttpNack works with ServerBuilder") {
     new ClientCtx {
+      val serverLabel = "myservice"
       val server =
         ServerBuilder()
-          .codec(com.twitter.finagle.http.Http())
+          .codec(http.Http(_statsReceiver = serverSr.scope(serverLabel)))
           .bindTo(new InetSocketAddress(0))
-          .name("myservice")
+          .name(serverLabel)
+          .reportTo(serverSr)
           .build(flakyService)
       val client =
         Http.client
-          .configured(Stats(st))
+          .configured(Stats(clientSr))
           .newService(Name.bound(server.boundAddress), "http")
 
       assert(Await.result(client(request)).status == Status.Ok)
-      assert(st.counters(Seq("http", "retries", "requeues")) == 1)
+      assert(clientSr.counters(Seq("http", "retries", "requeues")) == 1)
+
+      assert(serverSr.counters(Seq("myservice", "nacks")) == 1)
 
       Closable.all(client, server).close()
     }
@@ -90,22 +108,23 @@ class HttpNackFilterTest extends FunSuite {
       val server =
         Http.server
           .withStack(StackServer.newStack)
-          .configured(Stats(st))
-          .configured(Label("http-server"))
+          .configured(Stats(serverSr))
+          .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)
 
       val client =
         Http.client
-          .configured(Stats(st))
+          .configured(Stats(clientSr))
           .newService(Name.bound(server.boundAddress), "http-client")
 
       val rep = Await.result(client(request))
       assert(rep.status == Status.InternalServerError)
       assert(rep.headerMap.get(HttpNackFilter.Header) == None)
-      assert(st.counters.get(Seq("http-client", "requeue", "requeues")) == None)
-      assert(st.counters.get(Seq("http-server", "success")) == None)
-      assert(st.counters(Seq("http-server", "failures")) == 1)
+      assert(clientSr.counters.get(Seq("http-client", "requeue", "requeues")) == None)
 
+      assert(serverSr.counters.get(Seq("myservice", "success")) == None)
+      assert(serverSr.counters(Seq("myservice", "failures")) == 1)
+      assert(serverSr.counters.get(Seq("myservice", "nacks")) == None)
       Closable.all(client, server).close()
     }
   }
@@ -115,20 +134,22 @@ class HttpNackFilterTest extends FunSuite {
       n.set(-1)
       val server =
         Http.server
-          .configured(Stats(st))
-          .configured(Label("http-server"))
+          .configured(Stats(serverSr))
+          .configured(Label("myservice"))
           .serve(new InetSocketAddress(0), flakyService)
       val client =
         Http.client
-          .configured(Stats(st))
+          .configured(Stats(clientSr))
           .newService(Name.bound(server.boundAddress), "http-client")
 
       val rep = Await.result(client(request))
       assert(rep.status == Status.InternalServerError)
       assert(rep.headerMap.get(HttpNackFilter.Header) == None)
-      assert(st.counters.get(Seq("http-client", "requeue", "requeues")) == None)
-      assert(st.counters.get(Seq("http-server", "success")) == None)
-      assert(st.counters(Seq("http-server", "failures")) == 1)
+      assert(clientSr.counters.get(Seq("http-client", "requeue", "requeues")) == None)
+
+      assert(serverSr.counters.get(Seq("myservice", "success")) == None)
+      assert(serverSr.counters(Seq("myservice", "failures")) == 1)
+      assert(serverSr.counters.get(Seq("myservice", "nacks")) == None)
 
       Closable.all(client, server).close()
     }

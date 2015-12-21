@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, StorageUnit, Try}
@@ -74,8 +74,34 @@ case class Http(
     _enableTracing: Boolean = false,
     _maxInitialLineLength: StorageUnit = 4096.bytes,
     _maxHeaderSize: StorageUnit = 8192.bytes,
-    _streaming: Boolean = false
+    _streaming: Boolean = false,
+    _statsReceiver: StatsReceiver = NullStatsReceiver
 ) extends CodecFactory[Request, Response] {
+
+  def this(
+    _compressionLevel: Int,
+    _maxRequestSize: StorageUnit,
+    _maxResponseSize: StorageUnit,
+    _decompressionEnabled: Boolean,
+    _channelBufferUsageTracker: Option[ChannelBufferUsageTracker],
+    _annotateCipherHeader: Option[String],
+    _enableTracing: Boolean,
+    _maxInitialLineLength: StorageUnit,
+    _maxHeaderSize: StorageUnit,
+    _streaming: Boolean
+  ) =
+    this(
+      _compressionLevel,
+      _maxRequestSize,
+      _maxResponseSize,
+      _decompressionEnabled,
+      _channelBufferUsageTracker,
+      _annotateCipherHeader,
+      _enableTracing,
+      _maxInitialLineLength,
+      _maxHeaderSize,
+      _streaming,
+      NullStatsReceiver)
 
   require(_maxRequestSize < 2.gigabytes,
     s"maxRequestSize should be less than 2 Gb, but was ${_maxRequestSize}")
@@ -130,7 +156,7 @@ case class Http(
         // Note: This is a horrible hack to ensure that close() calls from
         // ExpiringService do not propagate until all chunks have been read
         // Waiting on CSL-915 for a proper fix.
-        underlying.map( u =>
+        underlying.map(u =>
           (new ClientContextFilter[Request, Response])
             .andThen(new DelayedReleaseService(u)))
 
@@ -197,10 +223,12 @@ case class Http(
 
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response]
-      ): ServiceFactory[Request, Response] =
-        (new HttpNackFilter).andThen(new DtabFilter.Finagle[Request])
+      ): ServiceFactory[Request, Response] = {
+        (new HttpNackFilter(_statsReceiver))
+          .andThen(new DtabFilter.Finagle[Request])
           .andThen(new ServerContextFilter[Request, Response])
           .andThen(underlying)
+      }
 
       override def newTraceInitializer =
         if (_enableTracing) new HttpServerTraceInitializer[Request, Response]

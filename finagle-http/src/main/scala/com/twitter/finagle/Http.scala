@@ -181,9 +181,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackServer.newStack
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
-        .replace(
-          StackServer.Role.preparer,
-          (next: ServiceFactory[Request, Response]) => (new HttpNackFilter).andThen(next))
+        .replace(StackServer.Role.preparer, HttpNackFilter.module)
   }
 
   case class Server(

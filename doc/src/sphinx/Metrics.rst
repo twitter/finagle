@@ -180,3 +180,14 @@ Service Discovery
 These metrics track the state of name resolution and service discovery.
 
 .. include:: metrics/ServiceDiscovery.rst
+
+
+HTTP
+---------
+.. _http_stats:
+
+These stats pertain to the HTTP protocol.
+
+**nacks**
+  A counter of the number of retryable HTTP 503 responses the Http server returns. Those
+  responses are automatically retried by Finagle Http client.
