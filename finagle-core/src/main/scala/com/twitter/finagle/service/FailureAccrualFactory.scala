@@ -34,7 +34,8 @@ object FailureAccrualFactory {
           statsReceiver.scope("failure_accrual"),
           label,
           logger,
-          endpoint)
+          endpoint,
+          responseClassifier)
     }
   }
 
