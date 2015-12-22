@@ -4,10 +4,11 @@ import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{Gauge, DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
+import scala.collection.concurrent
 
 /**
  * A representation of a ZooKeeper session based on asynchronous primitives such
@@ -47,6 +48,22 @@ private[serverset2] class ZkSession(
         // don't release the permit until f is complete
         permit.release()
       }
+    }
+
+
+  // Track a timestamp for the last time we received a good update for
+  // a particular zookeeper child watch. All servers should be updated within the same approximate
+  // time. If a server has a different serverset size than its peers, this gauge will show
+  // us it is because it is not receiving updates.
+  private val lastGoodUpdate = new concurrent.TrieMap[String, Long]
+  private def noteGoodChildWatch(path: String): Unit =
+    lastGoodUpdate.put(path, Time.now.inLongSeconds) match {
+      case None =>
+        // if there was no previous value, ensure we have a gauge
+        statsReceiver.provideGauge("last_watch_update", path) {
+          Time.now.inLongSeconds - lastGoodUpdate.getOrElse(path, 0L)
+        }
+      case _ => //gauge is already there
     }
 
   /**
@@ -163,8 +180,11 @@ private[serverset2] class ZkSession(
         getChildrenWatchOp(path) transform {
           case Activity.Pending => Activity.pending
           case Activity.Ok(Node.Children(children, _)) =>
+            noteGoodChildWatch(path)
             Activity.value(children.filter(_.startsWith(prefix)).toSet)
-          case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Set.empty)
+          case Activity.Failed(KeeperException.NoNode(_)) =>
+            noteGoodChildWatch(path)
+            Activity.value(Set.empty)
           case Activity.Failed(exc) =>
             logger.error(s"GetChildrenWatch to ($path, $prefix) failed with exception $exc")
             Activity.exception(exc)
