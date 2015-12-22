@@ -134,7 +134,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         Await.result(service(123))
       }
 
-      assert(statsReceiver.counters.get(List("removals")) == Some(2))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -164,7 +164,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           Await.result(service(123))
         }
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -173,7 +173,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timeControl.advance(markDeadForList(i) - 1.second)
         timer.tick()
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -183,7 +183,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timer.tick()
 
         // The service should be available for a probe
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(statsReceiver.counters.get(List("revivals")) == None)
         assert(factory.isAvailable)
         assert(service.isAvailable)
@@ -229,7 +229,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           Await.result(service(123))
         }
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -238,7 +238,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timeControl.advance(markDeadFor(i) - 1.second)
         timer.tick()
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -248,7 +248,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timer.tick()
 
         // The service should be available for a probe
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(statsReceiver.counters.get(List("revivals")) == None)
         assert(factory.isAvailable)
         assert(service.isAvailable)

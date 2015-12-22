@@ -311,10 +311,6 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
           case Some(duration) => markDeadFor(duration)
           case None =>
         }
-      case ProbeOpen =>
-        logger.log(Level.DEBUG, "FailureAccrualFactory request failed in the " +
-          "ProbeOpen state, but requests should only fail when FailureAccrualFactory " +
-          "is in the Alive, ProbeClosed, or Dead state.")
       case _ =>
     }
   }
@@ -333,21 +329,21 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
       case ProbeClosed =>
         revivalCounter.incr()
         failureAccrualPolicy.revived()
-      case ProbeOpen =>
-        logger.log(Level.DEBUG, "FailureAccrualFactory request succeeded in the " +
-          "ProbeOpen state, but requests should only succeed when FailureAccrualFactory " +
-          "is in the Alive, ProbeClosed, or Dead state.")
+        state = Alive
       case _ =>
     }
-    state = Alive
     failureAccrualPolicy.recordSuccess()
   }
 
   private[this] def markDeadFor(duration: Duration) = synchronized {
-    removalCounter.incr()
-    val timerTask = timer.schedule(duration.fromNow) { startProbing() }
+
+    // In order to have symmetry with the revival counter, don't count removals
+    // when probing fails.
+    if (state == Alive) removalCounter.incr()
 
     state = Dead
+
+    val timerTask = timer.schedule(duration.fromNow) { startProbing() }
 
     reviveTimerTask = Some(timerTask)
 
