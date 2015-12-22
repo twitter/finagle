@@ -739,7 +739,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
 
     response.setValue("done")
 
-    assert(Await.result(close, 1.second) == (()))
+    assert(Await.result(close.liftToTry, 1.second) == Return.Unit)
     assert(Await.result(f, 1.second) == "done")
 
   }

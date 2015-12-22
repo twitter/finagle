@@ -12,5 +12,6 @@ java_library(name='java',
     'finagle/finagle-kestrel/src/main/scala',
     'util/util-core',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.java')
 )

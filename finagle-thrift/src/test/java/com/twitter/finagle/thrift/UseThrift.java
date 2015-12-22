@@ -24,16 +24,16 @@ public class UseThrift {
 
     Thrift.client()
         .withProtocolFactory(new TBinaryProtocol.Factory())
-        .configured(Label.apply("test").mk())
-        .withClientId(ClientId.apply("id"))
-        .configured(Tracer.apply(new NullTracer()).mk())
+        .configured(new Label("test").mk())
+        .withClientId(new ClientId("id"))
+        .configured(new Tracer(new NullTracer()).mk())
         .newIface(":*", B.ServiceIface.class);
 
     Thrift.server()
         .withProtocolFactory(new TBinaryProtocol.Factory())
-        .configured(Label.apply("test").mk())
+        .configured(new Label("test").mk())
         .withBufferedTransport()
-        .configured(Tracer.apply(new NullTracer()).mk())
+        .configured(new Tracer(new NullTracer()).mk())
         .serve(":*", new B.Service(new BServiceImpl(), new TBinaryProtocol.Factory()));
   }
 

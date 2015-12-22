@@ -286,7 +286,7 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     Await.result(client1.set("foo", Buf.Utf8("bar")))
     Await.result(client2.set("foo", Buf.Utf8("baz")))
     assert(Await.result(replicatedClient.getsAll("foo")) == InconsistentReplication(
-      Seq(Return(Some(Buf.Utf8("bar"), SCasUnique(Buf.Utf8("6")))),
+      Seq(Return(Some((Buf.Utf8("bar"), SCasUnique(Buf.Utf8("6"))))),
         Return(Some((Buf.Utf8("baz"), SCasUnique(Buf.Utf8("5"))))))))
     assert(Await.result(client1.delete("foo")) == true)
     assert(Await.result(replicatedClient.getsAll("foo")) == InconsistentReplication(

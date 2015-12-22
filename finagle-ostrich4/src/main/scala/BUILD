@@ -13,6 +13,7 @@ scala_library(name='scala',
     'util/util-registry',
     'util/util-stats',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-ostrich4/src/main/resources'

@@ -211,6 +211,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
               case sa =>
                 fail(s"$sa not a ServiceFactorySocketAddress")
             }
+          case x => throw new MatchError(x)
         }
       case nt =>
         fail(s"$nt is not NameTree.Leaf")
@@ -235,6 +236,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
               case sa =>
                 fail(s"$sa not a ServiceFactorySocketAddress")
             }
+          case x => throw new MatchError(x)
         }
       case nt =>
         fail(s"$nt is not NameTree.Leaf")

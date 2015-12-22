@@ -94,7 +94,7 @@ private[finagle] object StabilizingAddr {
             // Add newly removed elements to the remove queue.
             val until = Time.now + grace
             for (el <- active &~ newSet if !qcontains(q, el))
-              q = q enqueue (el, until)
+              q = q.enqueue((el, until))
 
             loop(q, h, active ++ newSet, true, addr)
 
@@ -103,7 +103,7 @@ private[finagle] object StabilizingAddr {
             // for removal, so that if we become bound again, we can
             // continue on merrily.
             val until = Time.now + grace
-            val q = remq enqueue (active map(el => (el, until)))
+            val q = remq.enqueue(active.map(el => (el, until)))
 
             loop(q, h, active, true, addr)
         },

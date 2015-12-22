@@ -31,7 +31,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
           Future { new SomeStruct(123, someString) }
       }
     def someway() = {
-      somewayPromise() = Return(())
+      somewayPromise() = Return.Unit
       Future.Void
     }
 
@@ -84,7 +84,7 @@ class ThriftClientFinagleServerTest extends FunSuite with BeforeAndAfter with On
   test("handle one-way calls") {
     assert(somewayPromise.isDefined == false)
     client.someway()                  // just returns(!)
-    assert(Await.result(somewayPromise) == ())
+    assert(Await.result(somewayPromise.liftToTry) == Return.Unit)
   }
 
   test("handle wrong interface") {

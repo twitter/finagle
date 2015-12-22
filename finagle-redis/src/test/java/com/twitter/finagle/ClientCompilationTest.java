@@ -13,6 +13,6 @@ public final class ClientCompilationTest {
    */
   @Test
   public void testClientCompilation() {
-    final Redis.Client client = Redis.client().configured(Tracer.apply(new NullTracer()).mk());
+    final Redis.Client client = Redis.client().configured(new Tracer(new NullTracer()).mk());
   }
 }

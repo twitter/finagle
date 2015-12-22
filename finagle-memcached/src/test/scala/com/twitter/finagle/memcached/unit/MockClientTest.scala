@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached.MockClient
 import com.twitter.finagle.memcached.protocol.ClientError
-import com.twitter.util.Await
+import com.twitter.util.{Return, Await}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -20,13 +20,13 @@ class MockClientTest extends FunSuite {
   test("correctly perform the SET command") {
     val memcache = new MockClient(Map("key" -> "value")).withStrings
 
-    assert(Await.result(memcache.set("key", "new value")) == (()))
+    assert(Await.result(memcache.set("key", "new value").liftToTry) == Return.Unit)
     assert(Await.result(memcache.get("key")) == Some("new value"))
 
-    assert(Await.result(memcache.set("key2", "value2")) == (()))
+    assert(Await.result(memcache.set("key2", "value2").liftToTry) == Return.Unit)
     assert(Await.result(memcache.get("key2")) == Some("value2"))
 
-    assert(Await.result(memcache.set("key2", "value3")) == (()))
+    assert(Await.result(memcache.set("key2", "value3").liftToTry) == Return.Unit)
     assert(Await.result(memcache.get("key2")) == Some("value3"))
   }
 

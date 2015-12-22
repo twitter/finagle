@@ -18,7 +18,7 @@ class DtabStatsFilterTest extends FunSuite with AssertionsForJUnit {
 
     Dtab.unwind {
       Dtab.local = Dtab.empty
-      Await.result(service())
+      Await.result(service((): Unit))
     }
 
     val stat = statsReceiver.stat("prefix", "dtab", "size")
@@ -33,7 +33,7 @@ class DtabStatsFilterTest extends FunSuite with AssertionsForJUnit {
 
     Dtab.unwind {
       Dtab.local = Dtab.read("/s=>/foo;/s=>/bar;/s=>/bah")
-      Await.result(service())
+      Await.result(service((): Unit))
     }
 
     val stat = statsReceiver.stat("prefix", "dtab", "size")

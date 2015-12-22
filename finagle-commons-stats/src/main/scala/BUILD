@@ -10,6 +10,7 @@ scala_library(name='scala',
     'util/util-registry',
     'util/util-stats',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-commons-stats/src/main/resources'

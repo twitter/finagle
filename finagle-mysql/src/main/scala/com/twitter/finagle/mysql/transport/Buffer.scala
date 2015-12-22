@@ -323,7 +323,7 @@ trait BufferWriter extends Buffer {
      charset: JCharset = Charset.defaultCharset
    ): BufferWriter = {
     writeBytes(s.getBytes(charset))
-    writeByte('\0')
+    writeByte('\u0000')
     this
    }
 

@@ -32,6 +32,7 @@ junit_tests(name='defaultloader',
 
 junit_tests(name='client',
   dependencies=[':core'],
+  fatal_warnings=True,
   sources=globs('com/twitter/finagle/serverset2/client/*.scala')
 )
 

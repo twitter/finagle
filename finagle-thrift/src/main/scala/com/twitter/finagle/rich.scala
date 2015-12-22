@@ -7,6 +7,7 @@ import com.twitter.util.NonFatal
 import java.lang.reflect.{Constructor, Method}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
+import scala.language.existentials
 import scala.reflect.ClassTag
 
 private[twitter] object ThriftUtil {

@@ -8,5 +8,6 @@ junit_tests(name='scala',
     'finagle/finagle-mux',
     'finagle/finagle-mysql',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )

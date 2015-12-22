@@ -38,7 +38,7 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
           LatencyCompensation.Compensation(12.millis) +
           Transporter.TLSHostname(Some("tls.host")) +
           Transporter.HttpProxy(Some(new InetSocketAddress(0)), Some(Credentials("user", "pw"))) +
-          Transporter.SocksProxy(Some(new InetSocketAddress(0)), Some("user", "pw")) +
+          Transporter.SocksProxy(Some(new InetSocketAddress(0)), Some(("user", "pw"))) +
           Transport.BufferSizes(Some(100), Some(200)) +
           Transport.TLSClientEngine.param.default +
           Transport.Liveness(1.seconds, 2.seconds, Some(true)) +

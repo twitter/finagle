@@ -51,7 +51,7 @@ public final class HttpServerTest {
         com.twitter.finagle.Http
             .server()
             .withCompressionLevel(2)
-            .configured(Label.apply("test").mk())
+            .configured(new Label("test").mk())
             .withDecompression(true);
   }
 }

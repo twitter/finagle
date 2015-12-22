@@ -16,7 +16,7 @@ public final class ClientCompilationTest {
   public void testClientCompilation() {
     final Client client = Mysql.client()
         .withDatabase("random-db")
-        .configured(Label.apply("test").mk())
+        .configured(new Label("test").mk())
         .withCredentials("user", "password");
   }
 }

@@ -10,5 +10,6 @@ junit_tests(name='scala',
     'finagle/finagle-test',
     'finagle/finagle-zipkin'
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )

@@ -190,8 +190,8 @@ extends ServiceFactory[Req, Rep] {
   @tailrec
   private[this] def closeService(deadline: Time): Future[Unit] = 
     state.get match {
-      case s@Idle =>
-        if (!state.compareAndSet(s, Closed)) closeService(deadline)
+      case Idle =>
+        if (!state.compareAndSet(Idle, Closed)) closeService(deadline)
         else Future.Done
   
       case s@Open(svc) =>

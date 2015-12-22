@@ -39,7 +39,7 @@ class EndToEndTest extends FunSuite {
   ) extends StreamResponse {
 
     val released = new Promise[Unit]
-    def release() = released.updateIfEmpty(Return(()))
+    def release() = released.updateIfEmpty(Return.Unit)
   }
 
   class MyService(response: StreamResponse) extends StreamService {

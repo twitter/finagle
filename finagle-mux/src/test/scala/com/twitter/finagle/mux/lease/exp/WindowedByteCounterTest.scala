@@ -64,7 +64,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
     val counter = new WindowedByteCounter(nfo, Local.save())
     counter.start()
 
-    assert(counter.close().poll == Some(Return(())))
+    assert(counter.close().poll == Some(Return.Unit))
 
     counter.join()
     assert(counter.isAlive == false)

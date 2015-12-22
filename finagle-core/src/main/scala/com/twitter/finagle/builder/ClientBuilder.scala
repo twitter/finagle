@@ -1070,12 +1070,12 @@ private object ClientBuilderClient {
     val client =
       client0
         .transformed(new Stack.Transformer {
-          def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]) =
+          def apply[Request, Response](stack: Stack[ServiceFactory[Request, Response]]) =
             stack
-              .insertBefore(Retries.Role, new StatsFilterModule[Req, Rep])
-              .replace(Retries.Role, Retries.moduleWithRetryPolicy[Req, Rep])
-              .prepend(new GlobalTimeoutModule[Req, Rep])
-              .prepend(new ExceptionSourceFilterModule[Req, Rep])
+              .insertBefore(Retries.Role, new StatsFilterModule[Request, Response])
+              .replace(Retries.Role, Retries.moduleWithRetryPolicy[Request, Response])
+              .prepend(new GlobalTimeoutModule[Request, Response])
+              .prepend(new ExceptionSourceFilterModule[Request, Response])
         })
         .configured(FactoryToService.Enabled(true))
 

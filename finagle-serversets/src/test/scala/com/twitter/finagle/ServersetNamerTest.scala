@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import com.twitter.newZk
-import com.twitter.finagle.{Addr, Resolver, Name, Namer}
 import com.twitter.util.Var
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith

@@ -1,6 +1,7 @@
 package com.twitter.finagle.mux.lease
 
 import java.lang.management.GarbageCollectorMXBean
+import scala.language.implicitConversions
 
 /**
  * This is the experimental package of mux.lease.  Right now, this is all
@@ -72,18 +73,4 @@ import java.lang.management.GarbageCollectorMXBean
 package object exp {
   implicit def gcMxBeanToGc(coll: GarbageCollectorMXBean): GarbageCollectorAddable =
     new GarbageCollectorAddable(coll)
-
-  class GarbageCollectorAddable(self: GarbageCollectorMXBean) {
-    def +(other: GarbageCollectorMXBean): GarbageCollectorMXBean = new GarbageCollectorMXBean {
-      def getCollectionCount() =
-        self.getCollectionCount() + other.getCollectionCount()
-      def getCollectionTime() =
-        self.getCollectionTime() + other.getCollectionTime()
-      def getMemoryPoolNames() =
-        Array.concat(self.getMemoryPoolNames(), other.getMemoryPoolNames())
-      def getName() = self.getName() + "+" + other.getName()
-      def isValid() = self.isValid || other.isValid
-      def getObjectName = throw new UnsupportedOperationException
-    }
-  }
 }

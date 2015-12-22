@@ -11,5 +11,6 @@ junit_tests(name='scala',
     'util/util-core',
     'util/util-logging'
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )

@@ -6,5 +6,6 @@ junit_tests(name='java',
     'finagle/finagle-kestrel',
     'util/util-core'
   ],
+  fatal_warnings=True,
   sources=rglobs('*.java')
 )

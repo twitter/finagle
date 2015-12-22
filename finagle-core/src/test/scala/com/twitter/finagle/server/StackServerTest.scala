@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, ServiceFactory, Deadline, Stack}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver

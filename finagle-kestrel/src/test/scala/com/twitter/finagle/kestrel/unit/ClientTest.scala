@@ -14,6 +14,7 @@ import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.language.postfixOps
 
 // all this so we can spy() on a client.
 class MockClient extends Client {

@@ -99,3 +99,42 @@ class Stream[Req: RequestType] extends CodecFactory[Req, StreamResponse] {
 
   override val protocolLibraryName: String = "http-stream"
 }
+
+/**
+ * Indicates that a stream has ended.
+ */
+object EOF extends Exception
+
+/**
+ * HTTP header encoded as a string pair.
+ */
+final class Header private(val key: String, val value: String) {
+  override def toString: String = s"Header($key, $value)"
+  override def equals(o: Any): Boolean = o match {
+    case h: Header => h.key == key && h.value == value
+    case _ => false
+  }
+}
+
+object Header {
+  implicit class Ops(val headers: Seq[Header]) extends AnyVal {
+    /**
+     * The value of the first header found matching this key, or None.
+     */
+    def first(key: String): Option[String] =
+      headers.find(_.key == key.toLowerCase).map(_.value)
+  }
+
+  def apply(key: String, value: Any): Header =
+    new Header(key.toLowerCase, value.toString)
+}
+
+/**
+ * Represents the HTTP version.
+ */
+case class Version(major: Int, minor: Int)
+
+trait RequestType[Req] {
+  def canonize(req: Req): StreamRequest
+  def specialize(req: StreamRequest): Req
+}

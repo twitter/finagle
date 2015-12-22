@@ -418,6 +418,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
     __isset_bit_vector.set(__DEBUG_ISSET_ID, value);
   }
 
+  @SuppressWarnings("unchecked")
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case TRACE_ID:

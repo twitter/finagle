@@ -65,7 +65,7 @@ private[finagle] object TrafficDistributor {
       case (stale@Activity.Ok(state), Activity.Failed(_)) if init != state => stale
       case (stale@Activity.Ok(state), Activity.Pending) if init != state => stale
       case (_, failed@Activity.Failed(_)) => failed
-      case (_, pending@Activity.Pending) => pending
+      case (_, Activity.Pending) => Activity.Pending
     }
   }
 
@@ -186,7 +186,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
         }
     }.map {
       case Activity.Ok(cache) => Activity.Ok(cache.values.toSet)
-      case pending@Activity.Pending => pending
+      case Activity.Pending => Activity.Pending
       case failed@Activity.Failed(_) => failed
     }
   }
@@ -238,7 +238,7 @@ private[finagle] class TrafficDistributor[Req, Rep](
       case Activity.Ok(cache) => Activity.Ok(cache.map {
         case (weight, CachedBalancer(bal, _, size)) => WeightClass(bal, weight, size)
       })
-      case pending@Activity.Pending => pending
+      case Activity.Pending => Activity.Pending
       case failed@Activity.Failed(_) => failed
     }
   }

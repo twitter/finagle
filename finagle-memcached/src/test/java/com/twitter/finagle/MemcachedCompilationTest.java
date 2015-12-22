@@ -16,7 +16,7 @@ public class MemcachedCompilationTest {
   public void testClientCompilation() {
     final Client client = Memcached.client()
         .withKeyHasher(KeyHashers.FNV1_32())
-        .configured(Label.apply("test").mk())
+        .configured(new Label("test").mk())
         .withEjectFailedHost(true)
         .newRichClient("localhost:11211");
   }

@@ -1,7 +1,6 @@
 package com.twitter.finagle.failters
 
-import org.scalatest.matchers.MustMatchers
-import org.scalatest.FlatSpec
+import org.scalatest.{FlatSpec, MustMatchers}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.mockito.Mockito._

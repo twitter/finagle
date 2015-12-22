@@ -23,6 +23,7 @@ public final class ClientTest {
 
   private ClientTest() { }
 
+  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     Service<Command, Response> service =
       ClientBuilder.safeBuild(

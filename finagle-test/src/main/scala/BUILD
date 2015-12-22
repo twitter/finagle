@@ -8,5 +8,6 @@ scala_library(name='scala',
     '3rdparty/jvm/io/netty',
     'util/util-core'
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
 )

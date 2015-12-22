@@ -68,7 +68,7 @@ public final class HttpClientTest {
       com.twitter.finagle.Http
           .client()
           .withTls("foo.com")
-          .configured(Label.apply("test").mk())
+          .configured(new Label("test").mk())
           .withDecompression(true);
   }
 }

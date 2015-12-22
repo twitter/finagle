@@ -108,7 +108,7 @@ final class ResponseDecodingSuite extends RedisResponseTest {
   }
 
   test("Correctly decodec multi line reply") {
-    assert(decomposeMultiElemDecoding(codec(wrap("$3\r\nfoo\r\n$3\r\nbar\r\n"))) == ("foo", "bar"))
+    assert(decomposeMultiElemDecoding(codec(wrap("$3\r\nfoo\r\n$3\r\nbar\r\n"))) == (("foo", "bar")))
   }
 
   test("Correctly decode EMPTY bulk reply") {

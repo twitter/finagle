@@ -39,10 +39,10 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
       whenever (parts.length > 0) {
         if (ext.length == 0) {
           val p = Path(parts)
-          assert($tilde.unapply(p) == Some(p, ""))
+          assert($tilde.unapply(p) == Some((p, "")))
         } else {
           val p = Path(parts.init ++ List(parts.last + "." + ext))
-          assert($tilde.unapply(p) == Some(Path(parts), ext))
+          assert($tilde.unapply(p) == Some((Path(parts), ext)))
         }
       }
     }

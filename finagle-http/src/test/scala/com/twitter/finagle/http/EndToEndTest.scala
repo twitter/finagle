@@ -17,6 +17,7 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with BeforeAndAfter {

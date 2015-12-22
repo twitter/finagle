@@ -16,6 +16,7 @@ import com.twitter.ostrich.admin.{AdminHttpService, RuntimeEnvironment}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
+import scala.language.reflectiveCalls
 
 object KetamaClientStress extends App {
 

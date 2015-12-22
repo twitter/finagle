@@ -6,5 +6,6 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-netty4',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )

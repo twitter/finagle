@@ -1159,9 +1159,9 @@ case class KetamaClientBuilder private[memcached](
       .configured(FactoryToService.Enabled(true))
       .transformed(new Stack.Transformer {
         val key = KetamaClientKey.fromCacheNode(node)
-        def apply[Command, Response](stk: Stack[ServiceFactory[Command, Response]]) =
+        def apply[Cmd, Rep](stk: Stack[ServiceFactory[Cmd, Rep]]) =
           stk.replace(FailureAccrualFactory.role,
-            KetamaFailureAccrualFactory.module[Command, Response](key, healthBroker))
+            KetamaFailureAccrualFactory.module[Cmd, Rep](key, healthBroker))
       }).newClient(mkDestination(node.host, node.port)).toService
 
     new KetamaPartitionedClient(

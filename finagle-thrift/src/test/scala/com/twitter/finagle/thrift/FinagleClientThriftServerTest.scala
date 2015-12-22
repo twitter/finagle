@@ -19,7 +19,7 @@ import org.scalatest.junit.JUnitRunner
 class FinagleClientThriftServerTest extends FunSuite {
   trait TestServer {
     def server: SocketAddress
-    def shutdown: Unit
+    def shutdown(): Unit
   }
 
   def makeServer(transportFactory: TTransportFactory, somewayPromise: Promise[Unit])(f: (Int, Int) => Int) = {
@@ -29,7 +29,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       def add_one(a: Int, b: Int) = {}
       def complex_return(someString: String) = new SomeStruct(123, someString)
       def someway() {
-        somewayPromise() = Return(())
+        somewayPromise() = Return.Unit
       }
       def show_me_your_dtab() = ""
       def show_me_your_dtab_size() = 0
@@ -56,7 +56,7 @@ class FinagleClientThriftServerTest extends FunSuite {
     thriftServerThread.start()
 
     new TestServer {
-      def shutdown: Unit = thriftServer.stop()
+      def shutdown(): Unit = thriftServer.stop()
 
       def server: SocketAddress = thriftServerAddr
     }
@@ -85,7 +85,7 @@ class FinagleClientThriftServerTest extends FunSuite {
 
       val future = client.multiply(1, 2)
       assert(Await.result(future) == 3)
-      testServer.shutdown
+      testServer.shutdown()
     }
 
     test("%s:finagle client vs. synchronous thrift server should handle exceptions".format(named)) {
@@ -105,7 +105,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       intercept[Exception]{
         Await.result(client.add(1, 2))
       }
-      testServer.shutdown
+      testServer.shutdown()
     }
 
     test("%s:finagle client vs. synchronous thrift server should handle void returns".format(named)) {
@@ -123,7 +123,7 @@ class FinagleClientThriftServerTest extends FunSuite {
 
       Await.result(client.add_one(1, 2))
       assert(true == true)
-      testServer.shutdown
+      testServer.shutdown()
     }
 
     // race condition..
@@ -142,9 +142,9 @@ class FinagleClientThriftServerTest extends FunSuite {
 
       assert(somewayPromise.isDefined == false)
       assert(Await.result(client.someway()) == null)  // returns
-      assert(Await.result(somewayPromise) == (()))
+      assert(Await.result(somewayPromise.liftToTry) == Return.Unit)
 
-      testServer.shutdown
+      testServer.shutdown()
     }
 
     // this test assumes that N requests will be evenly distributed to N hosts.
@@ -173,7 +173,7 @@ class FinagleClientThriftServerTest extends FunSuite {
         resolved foreach { r => assert(r == (3)) }
       }
 
-      addrs.foreach(_.shutdown)
+      addrs.foreach(_.shutdown())
     }
   }
 

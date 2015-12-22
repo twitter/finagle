@@ -9,5 +9,6 @@ junit_tests(name='scala',
     'ostrich',
     'util/util-core'
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )
