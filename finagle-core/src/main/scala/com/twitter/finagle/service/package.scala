@@ -21,6 +21,9 @@ package object service {
    * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
    * HTTP classification tools.
    *
+   * @note Java does not understand the type alias and must be used as
+   * `PartialFunction` in Java.
+   *
    * @note Finagle's default classifier is
    * [[com.twitter.finagle.service.ResponseClassifier.Default]]
    * which is a total function fully covering the input domain.

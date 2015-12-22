@@ -37,6 +37,8 @@ object ResponseClass {
 
   /**
    * A fully successful request/response.
+   *
+   * @see `ResponseClasses.SUCCESS` for a Java friendly API.
    */
   val Success: Successful = Successful(1.0)
 
@@ -57,11 +59,15 @@ object ResponseClass {
 
   /**
    * A complete failure that is not retryable.
+   *
+   * @see `ResponseClasses.NON_RETRYABLE_FAILURE` for a Java friendly API.
    */
   val NonRetryableFailure: Failed = Failed(retryable = false)
 
   /**
    * A complete failure that is retryable.
+   *
+   * @see `ResponseClasses.RETRYABLE_FAILURE` for a Java friendly API.
    */
   val RetryableFailure: Failed = Failed(retryable = true)
 
