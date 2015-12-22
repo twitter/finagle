@@ -107,4 +107,16 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
     testApplyOrElse("yep", Success)
   }
 
+  test("DeserializeCtxOnly only deserializes and sees Thrift exceptions as success") {
+    val in = "fail"
+    val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
+    Contexts.local.let(DeserializeCtx.Key, ctx) {
+      assert(deserializer(in.getBytes(Charsets.Utf8)).isThrow)
+      val rep = mux.Response(Buf.Utf8(in))
+      val reqRep = ReqRep(in, Return(rep))
+      assert(ThriftMuxResponseClassifier.DeserializeCtxOnly.isDefinedAt(reqRep))
+      assert(Success == ThriftMuxResponseClassifier.DeserializeCtxOnly(reqRep))
+    }
+  }
+
 }

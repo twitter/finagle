@@ -5,7 +5,7 @@ import com.twitter.finagle.mux
 import com.twitter.finagle.service._
 import com.twitter.finagle.thrift.DeserializeCtx
 import com.twitter.io.Buf
-import com.twitter.util.{NonFatal, Throw, Return}
+import com.twitter.util.{Try, NonFatal, Throw, Return}
 
 /**
  * [[ResponseClassifier ResponseClassifiers]] for use with `finagle-thriftmux`
@@ -95,7 +95,7 @@ object ThriftMuxResponseClassifier {
 
     def isDefinedAt(reqRep: ReqRep): Boolean = {
       val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializer)
-      if (deserCtx == null)
+      if (deserCtx eq NoDeserializer)
         return false
 
       reqRep.response match {
@@ -113,7 +113,7 @@ object ThriftMuxResponseClassifier {
       reqRep.response match {
         case Return(rep: mux.Response) =>
           val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializer)
-          if (deserCtx == null)
+          if (deserCtx eq NoDeserializer)
             throw new MatchError()
           try {
             classifier(deserialized(deserCtx, rep.body))
@@ -122,5 +122,44 @@ object ThriftMuxResponseClassifier {
           }
       }
   }
+
+  /**
+   * A [[ResponseClassifier]] that uses a Context local [[DeserializeCtx]]
+   * to do deserialization, while using [[ResponseClassifier.Default]] for
+   * the actual response classification.
+   *
+   * Used when a user does not wire up a [[ResponseClassifier]]
+   * to a [[com.twitter.finagle.ThriftMux.Client ThriftMux client]].
+   */
+  private[finagle] val DeserializeCtxOnly: ResponseClassifier =
+    new ResponseClassifier {
+      // we want the side-effect of deserialization if it has not
+      // yet been done
+      private[this] def deserializeIfPossible(rep: Try[Any]): Unit = {
+        rep match {
+          case Return(rep: mux.Response) =>
+            val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializer)
+            if (deserCtx ne NoDeserializer) {
+              try {
+                val bytes = Buf.ByteArray.Owned.extract(rep.body)
+                deserCtx.deserialize(bytes)
+              } catch {
+                case _: Throwable =>
+              }
+            }
+          case _ =>
+        }
+      }
+
+      def isDefinedAt(reqRep: ReqRep): Boolean = {
+        deserializeIfPossible(reqRep.response)
+        ResponseClassifier.Default.isDefinedAt(reqRep)
+      }
+
+      def apply(reqRep: ReqRep): ResponseClass = {
+        deserializeIfPossible(reqRep.response)
+        ResponseClassifier.Default(reqRep)
+      }
+    }
 
 }
