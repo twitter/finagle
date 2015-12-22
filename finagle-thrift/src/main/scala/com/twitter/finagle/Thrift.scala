@@ -73,6 +73,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       val default = ProtocolFactory(Protocols.binaryFactory())
     }
 
+    /**
+     * A `Param` to control whether a framed transport should be used.
+     * If this is set to false, a buffered transport is used.  Framed
+     * transports are enabled by default.
+     * @param enabled Whether a framed transport should be used.
+     */
     case class Framed(enabled: Boolean)
     implicit object Framed extends Stack.Param[Framed] {
       val default = Framed(true)
