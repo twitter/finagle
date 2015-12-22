@@ -353,7 +353,7 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
       case "heap" => Balancers.heap()
       case "choice" => p2c()
       case x =>
-        log.warning(s"""Invalid load balancer ${x}, using "choice" balancer.""")
+        log.warning(s"""Invalid load balancer $x, using "choice" balancer.""")
         p2c()
     }
 

@@ -1,7 +1,7 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Rng, DefaultTimer}
 import com.twitter.finagle.{ServiceFactory, NoBrokersAvailableException}
 import com.twitter.util.{Activity, Duration, Future, Timer, Time}
@@ -124,7 +124,7 @@ object Balancers {
   def aperture(
     smoothWin: Duration = 5.seconds,
     lowLoad: Double = 0.5,
-    highLoad: Double = 2,
+    highLoad: Double = 2.0,
     minAperture: Int = 1,
     timer: Timer = DefaultTimer.twitter,
     maxEffort: Int = MaxEffort,

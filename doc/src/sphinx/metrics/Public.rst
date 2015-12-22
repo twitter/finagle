@@ -46,6 +46,8 @@ StatsFilter
 StatsFactoryWrapper
 <<<<<<<<<<<<<<<<<<<
 
+.. _service_factory_failures:
+
 **failures/<exception_class_name>**
   A counter of the number of times :doc:`Service <ServicesAndFilters>`
   creation has failed with this specific exception.

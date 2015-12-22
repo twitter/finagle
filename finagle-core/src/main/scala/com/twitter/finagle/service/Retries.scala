@@ -61,7 +61,7 @@ object Retries {
   object Budget extends Stack.Param[Budget] {
     /**
      * Default backoff stream to use for automatic retries.
-     * All Zero's
+     * All Zero's.
      */
     val emptyBackoffSchedule = Backoff.constant(Duration.Zero)
 
@@ -108,7 +108,9 @@ object Retries {
         val retryBudget = budgetP.retryBudget
         val timer = timerP.timer
 
-        val filters = newRequeueFilter(retryBudget, budgetP.requeueBackoffs, false, scoped, timer, next)
+        val filters = newRequeueFilter(
+          retryBudget, budgetP.requeueBackoffs, withdrawsOnly = false, scoped, timer, next
+        )
         svcFactory(retryBudget, filters, scoped, requeues, next)
       }
     }
@@ -154,12 +156,14 @@ object Retries {
 
         val filters =
           if (retryPolicy eq RetryPolicy.Never) {
-            newRequeueFilter(retryBudget, budgetP.requeueBackoffs, false, scoped, timerP.timer, next)
+            newRequeueFilter(retryBudget, budgetP.requeueBackoffs, withdrawsOnly = false, scoped, timerP.timer, next)
           } else {
             val retryFilter = new RetryExceptionsFilter[Req, Rep](
               retryPolicy, timerP.timer, statsRecv, retryBudget)
             // note that we wrap the budget, since the retry filter wraps this
-            val requeueFilter = newRequeueFilter(retryBudget, budgetP.requeueBackoffs, true, scoped, timerP.timer, next)
+            val requeueFilter = newRequeueFilter(
+              retryBudget, budgetP.requeueBackoffs, withdrawsOnly = true, scoped, timerP.timer, next
+            )
             retryFilter.andThen(requeueFilter)
           }
 

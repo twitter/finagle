@@ -2,12 +2,10 @@ package com.twitter.finagle.pool
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.StackClient
-import com.twitter.finagle.service.FailedService
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Future, Return, Throw, Time, Promise}
 import java.util.concurrent.atomic.{AtomicReference, AtomicInteger}
 import scala.annotation.tailrec
-import scala.collection.immutable
 
 private[finagle] object SingletonPool {
   val role = StackClient.Role.pool

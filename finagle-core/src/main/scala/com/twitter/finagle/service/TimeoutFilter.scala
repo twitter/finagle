@@ -5,7 +5,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.client.LatencyCompensation
 import com.twitter.finagle.tracing.Trace
-import com.twitter.util.{Future, Duration, Timer, Time}
+import com.twitter.util.{Future, Duration, Timer}
 
 object TimeoutFilter {
   val TimeoutAnnotation = "finagle.timeout"
