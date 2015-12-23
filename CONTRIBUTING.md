@@ -7,9 +7,9 @@ We'd love to get patches from you!
 We are not currently publishing snapshots for Finagle's dependencies, which
 means that it may be necessary to publish the `develop` branches of these
 libraries locally in order to work on Finagle's `develop` branch. To do so
-you can run `./bin/travisci` script and pass it a `TRAVIS_SCALA_VERSION`
-environment variable. For example, the following command locally publishes
-all the Finagle dependencies built for Scala 2.11.7.
+you can run `./bin/travisci` script and pass it an optional
+`TRAVIS_SCALA_VERSION` environment variable. For example, the following command
+locally publishes all the Finagle dependencies built for Scala 2.11.7.
 
 ```
 TRAVIS_SCALA_VERSION=2.11.7 ./bin/travisci
