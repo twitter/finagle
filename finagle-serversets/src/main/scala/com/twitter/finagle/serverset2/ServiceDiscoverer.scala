@@ -1,16 +1,10 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client.{SessionState, WatchState}
-import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.stats.{Gauge, Stat, StatsReceiver}
-import com.twitter.io.Buf
-import com.twitter.logging.Logger
+import com.twitter.finagle.stats.{Stat, StatsReceiver}
 import com.twitter.util._
 
-
 private[serverset2] object ServiceDiscoverer {
-  val DefaultRetrying = Backoff.decorrelatedJittered(5.seconds, 30.seconds)
   val EndpointGlob = "/member_"
   val VectorGlob = "/vector_"
 
