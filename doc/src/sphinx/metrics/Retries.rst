@@ -34,6 +34,9 @@ with a ``StatsFilter`` scoped to `tries`.
   eligible for requeues are failures which are known to be safe — see
   ``com.twitter.finagle.service.RetryPolicy.RetryableWriteException``.
 
+**retries/requeues_per_request**
+  A stat of the number of times requests are requeued.
+
 **retries/budget**
   A gauge of the currently available retry budget.
 
