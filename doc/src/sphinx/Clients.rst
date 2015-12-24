@@ -85,7 +85,7 @@ this is how failure management modules mark entire endpoints as unavailable.
 Observability
 ~~~~~~~~~~~~~
 
-The ``Observe``, ``Monitor``, and ``Trace`` modules export useful information about the internals and
+The `Observe`, `Monitor`, and `Trace` modules export useful information about the internals and
 behavior of a Finagle client. Client metrics are exported using a
 :util-stats-src:`StatsReceiver <com/twitter/finagle/stats/StatsReceiver.scala>`
 (see the :ref:`metrics <public_stats>` section for more details about specific metric values).
@@ -121,9 +121,9 @@ Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
 Retries
 ~~~~~~~
 
-Every Finagle client contains a ``Retries`` module in the top (above load balancers) of its
-stack so it can retry failures from the underlying modules: circuit breakers, timeouts and
-load balancers (when an alive node hasn't been found within a given `effort`).
+Every Finagle client contains a `Retries` module in the top (above load balancers) of its
+stack so it can retry failures from the underlying modules: circuit breakers, timeouts,
+load balancers and connection pools.
 
 Failures that are known to be safe to retry (for example, exceptions that occurred before the
 bytes were written to the wire and protocol level NACKs) will be automatically retried by Finagle.
@@ -131,7 +131,7 @@ These retries come out of a ``RetryBudget`` that allows for approximately 20% of
 to be retried on top of 10 retries per second in order to accommodate clients that have just started
 issuing requests or clients that have a low rate of requests per second.
 
-The ``Retries`` module is configured with two parameters:
+The `Retries` module is configured with two parameters:
 
 1. ``RetryBudget`` - determines whether there is available budget to retry a request
 2. ``Stream[Duration]`` - the backoff [#backoff]_ policy used to requeue the failed request
@@ -223,7 +223,7 @@ The following example [#example]_ constructs an instance of ``RetryPolicy`` usin
       case Return(rep) if rep.status == Status.InternalServerError => true
     }
 
-:ref:`Related stats <retries>`
+See :ref:`Retries metrics <retries>` for more details.
 
 .. note::
 
@@ -235,14 +235,14 @@ Timeouts & Expiration
 
 Finagle provides timeout facilities with fine granularity:
 
-The ``Service Timeout`` module defines a timeout for service acquisition. That is,
+The `Service Timeout` module defines a timeout for service acquisition. That is,
 it defines the maximum time allotted to a request to wait for an available service. Requests
 that exceed this timeout are failed with a ``ServiceTimeoutException``. This module
 is implemented by the :src:`TimeoutFactory <com/twitter/finagle/factory/TimeoutFactory.scala>`
 
-The default timeout value for the ``Service Timeout`` module is unbounded (i.e., ``Duration.Top``),
+The default timeout value for the `Service Timeout` module is unbounded (i.e., ``Duration.Top``),
 which simply means it's disabled. Although, it's possible to override the default setting with
-stack params.
+stack params [#example]_.
 
 .. code-block:: scala
 
@@ -254,18 +254,18 @@ stack params.
     .configured(TimeoutFactory.Param(42.seconds))
     .newService("twitter.com")
 
-See :ref:`Service Latency metrics <service_factory_failures:>` for more details.
+See :ref:`Service Latency metrics <service_factory_failures>` for more details.
 
-The ``Request Timeout`` module is a filter and thus gives an upper bound on the amount of
+The `Request Timeout` module is a filter and thus gives an upper bound on the amount of
 time allowed for a request to be outstanding. An important implementation detail of the
 :src:`TimeoutFilter <com/twitter/finagle/service/TimeoutFilter.scala>` is that it attempts
 to cancel the request when a timeout is triggered. With most protocols, if the request has
 already been dispatched, the only way to cancel the request is to terminate the connection.
 
-The default timeout for the ``Request Timeout`` module is unbounded (i.e., ``Duration.Top``).
+The default timeout for the `Request Timeout` module is unbounded (i.e., ``Duration.Top``).
 Here is an example [#example]_ of how to override that default.
 
-See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
+.. _configuring_timeouts:
 
 .. code-block:: scala
 
@@ -277,11 +277,16 @@ See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
     .configured(TimeoutFilter.Param(42.seconds))
     .newService("twitter.com")
 
-The ``Expiration`` module is attached at the connection level and expires a service after a
+See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
+
+.. note:: Requests timed out by the `Request Timeout` module are not retried by default
+          given it's not known whether or not they were written to the wire.
+
+The `Expiration` module is attached at the connection level and expires a service after a
 certain amount of idle time. The module is implemented by
 :src:`ExpiringService <com/twitter/finagle/service/ExpiringService.scala>`.
 
-The default setting for the ``Expiration`` module is to never expire a connection. Here is how
+The default setting for the `Expiration` module is to never expire a connection. Here is how
 it can be configured [#example]_.
 
 .. code-block:: scala
@@ -294,13 +299,14 @@ it can be configured [#example]_.
     .configured(ExpiringService.Param(idleTime = 10.seconds, lifeTime = 20.seconds))
     .newService("twitter.com")
 
-The ``Expiration`` module takes a single param with two values:
+The `Expiration` module takes a single param with two values:
 
-1. `ideTime` - the maximum duration for which a connection is allowed to idle
+1. `idleTime` - the maximum duration for which a connection is allowed to idle
    (not sending any requests)
 2. `lifeTime` - the maximum duration for which a connection is considered alive
 
-:ref:`Related stats <idle_apoptosis_stats>`
+
+See :ref:`Expiration metrics <idle_apoptosis_stats>` for more details.
 
 Finally, timeouts can be enforced outside of these modules on a per-request level using
 ``Future#within`` or ``Future#raiseWithin``.  [#raise]_:
@@ -316,7 +322,7 @@ Finally, timeouts can be enforced outside of these modules on a per-request leve
 Request Draining
 ~~~~~~~~~~~~~~~~
 
-The ``Drain`` module guarantees that the client delays closure until all
+The `Drain` module guarantees that the client delays closure until all
 outstanding requests have been completed. It wraps each produced service with
 a :src:`RefCountedService <com/twitter/finagle/service/RefcountedService.scala>`.
 
@@ -340,8 +346,8 @@ The default setup for a Finagle client is to use P2C algorithm to distribute loa
 picking the least loaded one. See :ref:`P2C + Least Loaded <p2c_least_loaded>`
 for more details.
 
-There are plenty of useful stats exported from the load balancing module.
-See :ref:`Load Balancing Stats <loadbalancer_stats>` for more details.
+There are plenty of useful stats exported from the `Load Balancing` module.
+See :ref:`Load Balancing metrics <loadbalancer_stats>` for more details.
 
 Use the following code snippet to override the default load balancing strategy for a particular Finagle
 client (see :src:`Balancers <com/twitter/finagle/loadbalancer/Balancers.scala>` on how to construct
@@ -479,7 +485,7 @@ Use ``Balancers.aperture`` to construct an instance of ``LoadBalancerFactory`` [
 The ``aperture`` factory method takes five arguments:
 
 1. `maxEffort` (default: 5) - see :ref:`P2C's max effort <max_effort>`
-2. `smoothWith` (default: 5 seconds) - the window of concurrent load observation
+2. `smoothWin` (default: 5 seconds) - the window of concurrent load observation
 3. [`lowLoad`, `highLoad`] (default: [0.5, 2]) - the load band used to adjust an aperture size
    such that a concurrent load for each endpoint stays within the given interval
 4. `minAperture` (default: 1) - the minimum size of the aperture
@@ -516,11 +522,11 @@ triggered, temporarily suspend the use of a particular endpoint.
 
 There are at least two modules in the client stacks that might be viewed as circuit breakers:
 
-1. ``Fail Fast`` - a session-driven circuit breaker
-2. ``Failure Accrual`` - a `request-driven circuit breaker <http://martinfowler.com/bliki/CircuitBreaker.html>`_
+1. `Fail Fast` - a session-driven circuit breaker
+2. `Failure Accrual` - a `request-driven circuit breaker <http://martinfowler.com/bliki/CircuitBreaker.html>`_
 
-In addition to ``Fail Fast`` and ``Failure Accrual``, some of the protocols (i.e., `Mux`) in
-Finagle support *ping-based failure detectors* [#failure_detectors]_
+In addition to `Fail Fast` and `Failure Accrual`, some of the protocols (i.e., `Mux`) in
+Finagle support `Ping-based Failure Detectors` [#failure_detectors]_
 (i.e., :finagle-mux-src:`ThresholdFailureDetector <com/twitter/finagle/mux/ThresholdFailureDetector.scala>`).
 
 .. _client_fail_fast:
@@ -539,8 +545,9 @@ again on success or when the back-off schedule runs out.
 See the FAQ to :ref:`better understand <faq_failedfastexception>` why clients
 might be seeing ``com.twitter.finagle.FailedFastException``'s.
 
-The ``Fail Fast`` module is enabled by default for most of the Finagle clients. The following
-example demonstrates how to explicitly disable it for a particular client.
+The `Fail Fast` module is enabled by default for all of the Finagle clients except for
+``Memcached.client`` one. The following example demonstrates how to explicitly disable it for a
+particular client.
 
 .. code-block:: scala
 
@@ -554,7 +561,7 @@ example demonstrates how to explicitly disable it for a particular client.
 
 .. note::
 
-  It's important to disable ``Fail Fast`` when only have one host in the replica set because
+  It's important to disable `Fail Fast` when only have one host in the replica set because
   Finagle doesn't have any other path to choose.
 
 :ref:`Related stats <fail_fast_stats>`
@@ -564,7 +571,7 @@ example demonstrates how to explicitly disable it for a particular client.
 Failure Accrual
 ^^^^^^^^^^^^^^^
 
-The ``Failure Accrual`` module marks itself as unavailable based on the number of observed
+The `Failure Accrual` module marks itself as unavailable based on the number of observed
 failures. The module remains unavailable for a predefined duration. Recall
 that the availability is propagated through the stack. Thus the load balancer
 will avoid using an endpoint where the failure accrual module is unavailable.
@@ -582,7 +589,7 @@ setups are available out of the box.
 2. A policy based on the number of consecutive failures occurred in the endpoint (i.e., an endpoint marked
    dead if there are at least ``N`` consecutive failures occurred in this endpoint)
 
-The default setup for the ``Failure Accrual`` module is to use ``FailureAccrualPolicy`` based on the
+The default setup for the `Failure Accrual` module is to use ``FailureAccrualPolicy`` based on the
 number of consecutive failures (default is 5) accompanied by equal jittered backoff [#backoff]_ producing
 durations for which an endpoint is marked dead.
 

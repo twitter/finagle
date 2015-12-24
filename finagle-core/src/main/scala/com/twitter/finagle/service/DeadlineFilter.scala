@@ -5,7 +5,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Future, Stopwatch, Time, TokenBucket}
-import java.util.concurrent.TimeUnit
 
 object DeadlineFilter {
 

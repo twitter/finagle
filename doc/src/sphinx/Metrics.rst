@@ -183,7 +183,7 @@ These metrics track the state of name resolution and service discovery.
 
 
 HTTP
----------
+----
 .. _http_stats:
 
 These stats pertain to the HTTP protocol.

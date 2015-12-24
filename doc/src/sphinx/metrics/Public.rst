@@ -78,8 +78,10 @@ ServerStatsFilter
   A stat accounting for the (implied) amount of time remaining for this request,
   for example from a deadline or timeout. Not supported by all protocols.
 
-DefaultServer
-<<<<<<<<<<<<<
+RequestSemaphoreFilter
+<<<<<<<<<<<<<<<<<<<<<<
+
+.. _requests_concurrency_limit:
 
 **request_concurrency**
   A gauge of the total number of current concurrent requests.
