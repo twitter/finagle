@@ -84,13 +84,12 @@ class Zk2Resolver(
 
   // Cache of ServiceDiscoverer instances.
   private[this] val discoverers = Memoize.snappable[String, ServiceDiscoverer] { hosts =>
-    val scopedStats = statsReceiver.scope(statsOf(hosts))
     val retryStream = RetryStream()
     val varZkSession = ZkSession.retrying(
       retryStream,
-      () => ZkSession(retryStream, hosts, sessionTimeout = sessionTimeout, scopedStats)
+      () => ZkSession(retryStream, hosts, sessionTimeout = sessionTimeout, statsReceiver)
     )
-    new ServiceDiscoverer(varZkSession, scopedStats, unhealthyEpoch)
+    new ServiceDiscoverer(varZkSession, statsReceiver.scope(statsOf(hosts)), unhealthyEpoch)
   }
 
   private[this] val gauges = Seq(
