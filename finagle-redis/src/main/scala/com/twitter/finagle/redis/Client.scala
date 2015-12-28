@@ -30,7 +30,10 @@ object Client {
 
 class Client(service: Service[Command, Reply])
   extends BaseClient(service)
-  with Keys
+  with RichClient
+
+trait RichClient
+  extends Keys
   with Strings
   with Hashes
   with SortedSets
@@ -38,72 +41,17 @@ class Client(service: Service[Command, Reply])
   with Sets
   with BtreeSortedSetCommands
   with HyperLogLogs
-  with PubSubs {
-
-  def slaveOf(host: ChannelBuffer, port: ChannelBuffer): Future[Unit] =
-    doRequest(SlaveOf(host, port)) {
-      case StatusReply(message) => Future.Unit
-    }
+  with PubSubs
+  with ServerCommands
+  with ConnectionCommands {
+  self: BaseClient =>
 }
 
 /**
  * Connects to a single Redis host
  * @param service: Finagle service object built with the Redis codec
  */
-class BaseClient(service: Service[Command, Reply]) {
-
-  /**
-   * Authorizes to db
-   * @param password
-   */
-  def auth(password: ChannelBuffer): Future[Unit] =
-    doRequest(Auth(password)) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Returns information and statistics about the server
-   * @param section Optional parameter can be used to select a specific section of information
-   * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
-   */
-  def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
-    doRequest(Info(section)) {
-      case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
-    }
-
-  /**
-   * Deletes all keys in all databases
-   */
-  def flushAll(): Future[Unit] =
-    doRequest(FlushAll) {
-      case StatusReply(_) => Future.Unit
-    }
-
-  /**
-   * Deletes all keys in current DB
-   */
-  def flushDB(): Future[Unit] =
-    doRequest(FlushDB) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Closes connection to Redis instance
-   */
-  def quit(): Future[Unit] =
-    doRequest(Quit) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Select DB with specified zero-based index
-   * @param index
-   */
-  def select(index: Int): Future[Unit] =
-    doRequest(Select(index)) {
-      case StatusReply(message) => Future.Unit
-    }
+abstract class BaseClient(service: Service[Command, Reply]) {
 
   /**
    * Releases underlying service object
@@ -126,7 +74,6 @@ class BaseClient(service: Service[Command, Reply]) {
     assert(messages.length % 2 == 0, "Odd number of items in response")
     messages.grouped(2).toSeq flatMap { case Seq(a, b) => Some(a, b); case _ => None }
   }
-
 }
 
 
@@ -183,7 +130,6 @@ object TransactionalClient {
    */
   def apply(raw: ServiceFactory[Command, Reply]): TransactionalClient =
     new ConnectedTransactionalClient(raw)
-
 }
 
 /**
