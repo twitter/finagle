@@ -1,13 +1,13 @@
 package com.twitter.finagle.redis.naggati
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Redis, redis}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.redis.exp.SubscribeClient
 import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
-import com.twitter.finagle.redis.{Client, Redis, TransactionalClient}
+import com.twitter.finagle.redis.{Client, TransactionalClient}
 import com.twitter.util.{Await, Awaitable, Duration, Future, Time, Try}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
@@ -76,24 +76,9 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
   override def beforeAll(): Unit = RedisCluster.start()
   override def afterAll(): Unit = RedisCluster.stop()
 
-  protected def withRedisClient(testCode: TransactionalClient => Any) {
-    val client = TransactionalClient(
-      ClientBuilder()
-        .codec(new Redis())
-        .hosts(RedisCluster.hostAddresses())
-        .hostConnectionLimit(1)
-        .buildFactory())
+  protected def withRedisClient(testCode: Client => Any) {
+    val client = Redis.newRichClient(RedisCluster.hostAddresses())
     Await.result(client.flushAll)
-    try {
-      testCode(client)
-    }
-    finally {
-      client.release
-    }
-  }
-
-  protected def withSubscribeClient(testCode: SubscribeClient => Any) {
-    val client = SubscribeClient(RedisCluster.hostAddresses())
     try {
       testCode(client)
     }
@@ -107,7 +92,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   private[this] lazy val svcClient = ClientBuilder()
     .name("redis-client")
-    .codec(Redis())
+    .codec(redis.Redis())
     .hosts(RedisCluster.hostAddresses())
     .hostConnectionLimit(2)
     .retries(2)
@@ -121,7 +106,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   private[this] val server = ServerBuilder()
     .name("redis-server")
-    .codec(Redis())
+    .codec(redis.Redis())
     .bindTo(new InetSocketAddress(0))
     .build(service)
 
@@ -132,12 +117,12 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   protected def withRedisClient(testCode: Service[Command, Reply] => Any) {
     val client = ClientBuilder()
-          .name("redis-client")
-          .codec(Redis())
-          .hosts(server.boundAddress)
-          .hostConnectionLimit(1)
-          .retries(2)
-          .build()
+      .name("redis-client")
+      .codec(redis.Redis())
+      .hosts(server.boundAddress)
+      .hostConnectionLimit(1)
+      .retries(2)
+      .build()
     Await.result(client(FlushAll))
     try {
       testCode(client)

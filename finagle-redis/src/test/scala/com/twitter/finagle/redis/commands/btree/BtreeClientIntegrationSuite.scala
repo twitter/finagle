@@ -1,5 +1,6 @@
 package com.twitter.finagle.redis.integration
 
+import com.twitter.finagle.Redis
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
 import com.twitter.util.Await
@@ -24,7 +25,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     // After the changes become a part of the installed redis server
     // This will use RedisCluster to start and manage the external redis server
     val hostAddress = "127.0.0.1:6379"
-    client = Client(hostAddress)
+    client = Redis.newRichClient(hostAddress)
     dict = generateTestCases()
     assert(client != null)
   }
@@ -32,7 +33,7 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
   override def afterAll(): Unit = {
     println("Closing client...")
     client.flushDB()
-    client.release()
+    client.close()
     println("Done!")
   }
 

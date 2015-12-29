@@ -1,24 +1,23 @@
 package com.twitter.finagle
 
-import com.twitter.finagle._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.loadbalancer._
 import com.twitter.finagle.netty3.Netty3Transporter
-import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.transport.Transport
 
 trait RedisRichClient { self: Client[Command, Reply] =>
 
   def newRichClient(dest: String): redis.Client =
-     redis.Client(newService(dest))
+    redis.Client(newClient(dest))
 
   def newRichClient(dest: Name, label: String): redis.Client =
-    redis.Client(newService(dest, label))
+    redis.Client(newClient(dest, label))
 }
 
-object Redis extends Client[Command, Reply] {
+object Redis extends Client[Command, Reply] with RedisRichClient {
 
   object Client {
     /**
@@ -31,7 +30,7 @@ object Redis extends Client[Command, Reply] {
      * A default client stack which supports the pipelined redis client.
      */
     def newStack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
-      .replace(DefaultPool.Role, SingletonPool.module[Command, Reply])
+      .insertBefore(DefaultPool.Role, RedisPool.module)
   }
 
   case class Client(
@@ -52,7 +51,7 @@ object Redis extends Client[Command, Reply] {
       Netty3Transporter(redis.RedisClientPipelineFactory, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
-      new PipeliningDispatcher(transport)
+      RedisPool.newDispatcher(transport)
   }
 
   val client = Client()

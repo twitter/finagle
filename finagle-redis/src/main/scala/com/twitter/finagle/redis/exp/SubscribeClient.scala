@@ -1,28 +1,19 @@
 package com.twitter.finagle.redis.exp
 
-import com.twitter.finagle.{Service, ServiceClosedException}
-import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util._
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.conversions.time._
+import com.twitter.finagle.{Service, ServiceClosedException, ServiceFactory}
+import com.twitter.finagle.redis.Client
+import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.redis.util.StringToChannelBuffer
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Charsets
 import com.twitter.logging.Logger
-import com.twitter.util._
+import com.twitter.util.{Future, Futures, NonFatal, Throw, Timer}
 import java.util.concurrent.ConcurrentHashMap
 import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
 
-object SubscribeClient {
-
-  type Node = Service[SubscribeCommand, Unit]
-
-  /**
-   * Construct a SubscribeClient from a single host.
-   * @param host a String of host:port combination.
-   */
-  def apply(host: String): SubscribeClient = {
-    new SubscribeClient(com.twitter.finagle.redis.exp.RedisSubscribe.newService(host))
-  }
+object SubscribeCommands {
 
   object MessageBytes {
     val SUBSCRIBE = StringToChannelBuffer("subscribe")
@@ -35,8 +26,8 @@ object SubscribeClient {
 }
 
 sealed trait SubscribeHandler {
-  def onSuccess(channel: ChannelBuffer, node: SubscribeClient.Node): Unit
-  def onException(node: SubscribeClient.Node, ex: Throwable): Unit
+  def onSuccess(channel: ChannelBuffer, node: Service[SubscribeCommand, Reply]): Unit
+  def onException(node: Service[SubscribeCommand, Reply], ex: Throwable): Unit
   def onMessage(message: Reply): Unit
 }
 
@@ -72,12 +63,13 @@ case object Pattern extends SubscriptionType[(ChannelBuffer, ChannelBuffer, Chan
  * For this reason, we put the (un)subscribe commands here, separately from the other
  * ordinary commands.
  */
-class SubscribeClient(
-  service: Service[SubscribeCommand, Unit],
-  timer: Timer = DefaultTimer.twitter)
-    extends Closable {
+trait SubscribeCommands {
 
-  import SubscribeClient._
+  self: Client =>
+
+  private[redis] val timer: Timer
+
+  import SubscribeCommands._
 
   private[this] val log = Logger(getClass)
 
@@ -165,15 +157,8 @@ class SubscribeClient(
       }.toMap)
   }
 
-  /**
-   * Releases underlying service object
-   */
-  def close(deadline: Time): Future[Unit] = {
-    service.close(deadline)
-  }
-
   private[this] def doRequest(cmd: SubscribeCommand) = {
-    service(cmd)
+    RedisPool.forSubscription(factory)(cmd)
   }
 
   private class SubscriptionManager[Message](val typ: SubscriptionType[Message], timer: Timer)
@@ -181,7 +166,7 @@ class SubscribeClient(
 
     sealed trait State
     case object Pending extends State
-    case class Subscribed(node: Node) extends State
+    case class Subscribed(node: Service[SubscribeCommand, Reply]) extends State
 
     private case class Subscription(handler: typ.MessageHandler, state: State)
 
@@ -193,7 +178,7 @@ class SubscribeClient(
       }
     }
 
-    def onSuccess(channel: ChannelBuffer, node: Node): Unit = {
+    def onSuccess(channel: ChannelBuffer, node: Service[SubscribeCommand, Reply]): Unit = {
       subscriptions.get(channel) match {
         case Some(subscription) =>
           subscriptions.put(channel, subscription.copy(state = Subscribed(node)))
@@ -237,12 +222,12 @@ class SubscribeClient(
       }
     }
 
-    def onException(node: Node, ex: Throwable): Unit = {
+    def onException(node: Service[SubscribeCommand, Reply], ex: Throwable): Unit = {
       subManager._onException(node, ex)
       pSubManager._onException(node, ex)
     }
 
-    private def _onException(node: Node, ex: Throwable): Unit = {
+    private def _onException(node: Service[SubscribeCommand, Reply], ex: Throwable): Unit = {
       // Take a snapshot of the managed subscriptions, and change the state.
       subscriptions.toList.collect {
         case (channel, subscription) =>
@@ -251,13 +236,13 @@ class SubscribeClient(
       }
     }
 
-    private def retry(channel: ChannelBuffer): Future[Unit] =
+    private def retry(channel: ChannelBuffer): Future[Reply] =
       doRequest(typ.subscribeCommand(channel, this))
 
-    def subscribe(channel: ChannelBuffer): Future[Unit] = {
+    def subscribe(channel: ChannelBuffer): Future[Reply] = {
       // It is possible that the channel is unsubscribed, so we always check it before making
       // another attempt.
-      if (subscriptions.get(channel).isEmpty) Future.Unit
+      if (subscriptions.get(channel).isEmpty) Future.value(NoReply)
       else retry(channel).onFailure {
         case sce: ServiceClosedException =>
           subscriptions.remove(channel)
@@ -266,12 +251,12 @@ class SubscribeClient(
       }
     }
 
-    def unsubscribe(channel: ChannelBuffer): Future[Unit] = {
+    def unsubscribe(channel: ChannelBuffer): Future[Reply] = {
       subscriptions.remove(channel) match {
         case Some(Subscription(_, Subscribed(node))) =>
           node(typ.unsubscribeCommand(channel, this))
         case _ =>
-          Future.Unit
+          Future.value(NoReply)
       }
     }
   }

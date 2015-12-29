@@ -20,6 +20,9 @@ sealed abstract class SingleLineReply extends Reply { // starts with +,-, or :
   }
 }
 sealed abstract class MultiLineReply extends Reply
+object NoReply extends Reply {
+  def toChannelBuffer: ChannelBuffer = ???
+}
 
 case class StatusReply(message: String) extends SingleLineReply {
   RequireServerProtocol(message != null && message.length > 0, "StatusReply had empty message")

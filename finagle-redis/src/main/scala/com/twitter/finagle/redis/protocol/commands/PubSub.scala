@@ -2,13 +2,11 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.{ClientError}
 import com.twitter.finagle.redis.exp.SubscribeHandler
-import com.twitter.finagle.redis.exp.SubscribeClient._
 import com.twitter.finagle.redis.protocol.Commands._
 import com.twitter.finagle.redis.util._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-abstract class SubscribeCommand extends RedisMessage {
-  def command: String
+abstract class SubscribeCommand extends Command {
   def handler: SubscribeHandler
 }
 

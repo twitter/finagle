@@ -4,7 +4,6 @@ import com.twitter.util.Await
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.exp.SubscribeClient
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
@@ -103,35 +102,33 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
   }
 
   def runTest(test: TestContext => Unit) {
-    withSubscribeClient { sc =>
-      withRedisClient { c =>
-        test(new TestContext(sc, c))
-      }
+    withRedisClient { c =>
+      test(new TestContext(c))
     }
   }
 
-  class TestContext(val sc: SubscribeClient, val c: Client) {
+  class TestContext(val c: Client) {
 
     val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
 
     def subscribe(channels: ChannelBuffer*) = {
-      result(sc.subscribe(channels) { case (channel, message) =>
+      result(c.subscribe(channels) { case (channel, message) =>
         q.get(message).map(_.setValue((channel, message, None)))
       })
     }
 
     def unsubscribe(channels: String*) = {
-      result(sc.unsubscribe(channels.map(s2cb)))
+      result(c.unsubscribe(channels.map(s2cb)))
     }
 
     def pSubscribe(patterns: String*) = {
-      result(sc.pSubscribe(patterns.map(s2cb)) { case (pattern, channel, message) =>
+      result(c.pSubscribe(patterns.map(s2cb)) { case (pattern, channel, message) =>
         q.get(message).map(_.setValue((channel, message, Some(pattern))))
       })
     }
 
     def pUnsubscribe(patterns: String*) = {
-      result(sc.pUnsubscribe(patterns.map(s2cb)))
+      result(c.pUnsubscribe(patterns.map(s2cb)))
     }
 
     def pubSubChannels(pattern: Option[String] = None) = {

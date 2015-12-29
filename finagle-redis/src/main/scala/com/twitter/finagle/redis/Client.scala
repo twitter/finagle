@@ -1,38 +1,31 @@
 package com.twitter.finagle.redis
 
+import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, ServiceProxy}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.util.Future
+import com.twitter.finagle.redis.exp.{RedisPool, SubscribeCommands}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.util.{Closable, Future, Time, Timer}
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
 
 object Client {
 
   /**
-   * Construct a client from a single host.
-   * @param host a String of host:port combination.
-   */
-  def apply(host: String): Client = Client(
-    ClientBuilder()
-      .hosts(host)
-      .hostConnectionLimit(1)
-      .codec(Redis())
-      .daemon(true)
-      .build())
-
-  /**
    * Construct a client from a single Service.
    */
-  def apply(raw: Service[Command, Reply]): Client =
+  def apply(raw: ServiceFactory[Command, Reply]): Client =
     new Client(raw)
-
 }
 
-class Client(service: Service[Command, Reply])
-  extends BaseClient(service)
-  with RichClient
+class Client(
+    factory: ServiceFactory[Command, Reply],
+    private[redis] val timer: Timer = DefaultTimer.twitter)
+  extends BaseClient(factory)
+  with NormalCommands
+  with SubscribeCommands
+  with Transactions
 
-trait RichClient
+trait NormalCommands
   extends Keys
   with Strings
   with Hashes
@@ -47,25 +40,55 @@ trait RichClient
   self: BaseClient =>
 }
 
+trait Transactions { self: Client =>
+
+  case class TxStatus(multi: Boolean, watch: Boolean)
+
+  def transaction[T](f: TransactionalClient => Future[T]): Future[T] = {
+    val singleton = new ServiceFactory[Command, Reply] {
+      val svc = RedisPool.forTransaction(factory)
+      // Because the `singleton` is used in the context of a `FactoryToService` we override
+      // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
+      val proxiedService = svc.map { svc =>
+        new ServiceProxy(svc) {
+          override def close(deadline: Time) = Future.Done
+        }
+      }
+
+      def apply(conn: ClientConnection) = proxiedService
+      def close(deadline: Time): Future[Unit] = svc.map(_.close(deadline))
+    }
+
+    val client = TransactionalClient(singleton)
+
+    f(client).ensure {
+      client.reset() before singleton.close()
+    }
+  }
+}
+
 /**
  * Connects to a single Redis host
  * @param service: Finagle service object built with the Redis codec
  */
-abstract class BaseClient(service: Service[Command, Reply]) {
+abstract class BaseClient(
+    protected val factory: ServiceFactory[Command, Reply])
+  extends Closable {
 
   /**
-   * Releases underlying service object
+   * Releases underlying service factory object
    */
-  def release() = service.close()
+  def close(deadline: Time) = factory.close(deadline)
 
   /**
    * Helper function for passing a command to the service
    */
-  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) =
-    service(cmd) flatMap (handler orElse {
-      case ErrorReply(message)  => Future.exception(new ServerError(message))
-      case _                    => Future.exception(new IllegalStateException)
-    })
+  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) = {
+    factory.toService.apply(cmd) flatMap (handler orElse {
+      case ErrorReply(message)   => Future.exception(new ServerError(message))
+      case StatusReply("QUEUED") => Future.Done.asInstanceOf[Future[Nothing]]
+      case _                     => Future.exception(new IllegalStateException)
+    })}
 
   /**
    * Helper function to convert a Redis multi-bulk reply into a map of pairs
@@ -76,19 +99,23 @@ abstract class BaseClient(service: Service[Command, Reply]) {
   }
 }
 
-
 /**
  * Client connected over a single connection to a
  * single redis instance, supporting transactions
  */
-trait TransactionalClient extends Client {
+class TransactionalClient(factory: ServiceFactory[Command, Reply]) extends Client(factory) {
+
+  private[this] var _multi = false
+  private[this] var _watch = false
 
   /**
    * Flushes all previously watched keys for a transaction
    */
   def unwatch(): Future[Unit] =
     doRequest(UnWatch) {
-      case StatusReply(message)  => Future.Unit
+      case StatusReply(message) =>
+        _watch = false
+        Future.Unit
     }
 
   /**
@@ -97,78 +124,55 @@ trait TransactionalClient extends Client {
    */
   def watch(keys: Seq[ChannelBuffer]): Future[Unit] =
     doRequest(Watch(keys)) {
-      case StatusReply(message)  => Future.Unit
+      case StatusReply(message) =>
+        _watch = true
+        Future.Unit
     }
 
-  /**
-   * Executes given vector of commands as a Redis transaction
-   * The order of the commands queued on the Redis server is not guaranteed
-   * @param Sequence of commands to be executed
-   * @return Results of each command in order
-   */
-  def transaction(cmds: Seq[Command]): Future[Seq[Reply]]
+  def multi(): Future[Unit] =
+    doRequest(Multi) {
+      case StatusReply(message) =>
+        _multi = true
+        Future.Unit
+    }
 
+  def exec(): Future[Seq[Reply]] =
+    doRequest(Exec) {
+      case MBulkReply(messages) =>
+        _watch = false
+        _multi = false
+        Future.value(messages)
+      case EmptyMBulkReply() =>
+        _watch = false
+        _multi = false
+        Future.Nil
+      case NilMBulkReply() =>
+        _watch = false
+        _multi = false
+        Future.exception(new ServerError("One or more keys were modified before transaction"))
+    }
+
+  def discard(): Future[Unit] =
+    doRequest(Multi) {
+      case StatusReply(message) =>
+        _multi = false
+        _watch = false
+        Future.Unit
+    }
+
+  private[redis] def reset(): Future[Unit] = {
+    if (_multi) discard()
+    else if (_watch) unwatch()
+    else Future.Done
+  }
 }
 
 object TransactionalClient {
 
   /**
-   * Construct a client from a single host with transaction commands
-   * @param host a String of host:port combination.
-   */
-  def apply(host: String): TransactionalClient = TransactionalClient(
-    ClientBuilder()
-      .hosts(host)
-      .hostConnectionLimit(1)
-      .codec(Redis())
-      .daemon(true)
-      .buildFactory())
-
-  /**
-   * Construct a client from a service factory
+   * Construct a transactional client from a service factory
    * @param raw ServiceFactory
    */
   def apply(raw: ServiceFactory[Command, Reply]): TransactionalClient =
-    new ConnectedTransactionalClient(raw)
-}
-
-/**
- * Connects to a single Redis host supporting transactions
- */
-private[redis] class ConnectedTransactionalClient(
-  serviceFactory: ServiceFactory[Command, Reply]
-) extends Client(serviceFactory.toService) with TransactionalClient {
-
-  def transaction(cmds: Seq[Command]): Future[Seq[Reply]] = {
-    serviceFactory() flatMap { svc =>
-      multi(svc) before {
-        val cmdQueue = cmds map { cmd => svc(cmd) }
-        Future.collect(cmdQueue).unit before exec(svc)
-      } rescue { case e =>
-        svc(Discard).unit before {
-          Future.exception(ClientError("Transaction failed: " + e.toString))
-        }
-      } ensure {
-        svc.close()
-      }
-    }
-  }
-
-  private def multi(svc: Service[Command, Reply]): Future[Unit] =
-    svc(Multi) flatMap {
-      case StatusReply(message)  => Future.Unit
-      case ErrorReply(message)   => Future.exception(new ServerError(message))
-      case _                     => Future.exception(new IllegalStateException)
-  }
-
-  private def exec(svc: Service[Command, Reply]): Future[Seq[Reply]] =
-    svc(Exec) flatMap {
-      case MBulkReply(messages)  => Future.value(messages)
-      case EmptyMBulkReply()     => Future.Nil
-      case NilMBulkReply()       => Future.exception(
-        new ServerError("One or more keys were modified before transaction"))
-      case ErrorReply(message)   => Future.exception(new ServerError(message))
-      case _                     => Future.exception(new IllegalStateException)
-    }
-
+    new TransactionalClient(raw)
 }

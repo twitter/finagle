@@ -2,9 +2,9 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle
+import com.twitter.finagle.Redis
 import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.exp.{RedisSubscribe, SubscribeClient}
+import com.twitter.finagle.redis.exp.SubscribeCommands
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
@@ -141,20 +141,20 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
         val dest = Seq(master, slave)
           .map(node => s"127.0.0.1:${node.address.get.getPort}")
           .mkString(",")
-        val subscribeClnt = RedisSubscribe.client.newRichClient(dest)
+        val subscribeClnt = Redis.newRichClient(dest)
         val ctx = new TestContext(masterClnt, slaveClnt, subscribeClnt)
         try test(ctx) finally subscribeClnt.close()
       }
     }
   }
 
-  class TestContext(val masterClnt: Client, val slaveClnt: Client, val subscribeClnt: SubscribeClient) {
+  class TestContext(val masterClnt: Client, val slaveClnt: Client, val clusterClnt: Client) {
 
     val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
     val c = new ConcurrentHashMap[String, AtomicInteger]().asScala
 
     def subscribe(channels: Seq[ChannelBuffer]) = {
-      result(subscribeClnt.subscribe(channels) {
+      result(clusterClnt.subscribe(channels) {
         case (channel, message) =>
           q.get(message).map(_.setValue((channel, message, None)))
           c.getOrElseUpdate(message, new AtomicInteger(0)).getAndIncrement
@@ -162,11 +162,11 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
 
     def unsubscribe(channels: Seq[ChannelBuffer]) = {
-      result(subscribeClnt.unsubscribe(channels))
+      result(clusterClnt.unsubscribe(channels))
     }
 
     def pSubscribe(patterns: Seq[ChannelBuffer]) = {
-      result(subscribeClnt.pSubscribe(patterns) {
+      result(clusterClnt.pSubscribe(patterns) {
         case (pattern, channel, message) =>
           q.get(message).map(_.setValue((channel, message, Some(pattern))))
           c.getOrElseUpdate(message, new AtomicInteger(0)).getAndIncrement
@@ -174,7 +174,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
     }
 
     def pUnsubscribe(patterns: Seq[ChannelBuffer]) = {
-      result(subscribeClnt.pUnsubscribe(patterns))
+      result(clusterClnt.pUnsubscribe(patterns))
     }
 
     def pubSubChannels(client: Client, pattern: Option[ChannelBuffer] = None) = {

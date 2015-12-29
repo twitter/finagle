@@ -3,10 +3,10 @@ package com.twitter.finagle.redis.util
 import java.lang.ProcessBuilder
 import java.net.InetSocketAddress
 import java.io.{BufferedWriter, FileWriter, PrintWriter, File}
-import com.twitter.finagle
-import com.twitter.finagle.redis.exp.{RedisSubscribe, SubscribeClient}
+import com.twitter.finagle.Redis
+import com.twitter.finagle.redis.Client
 import com.twitter.util.RandomSocket
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.util.Random
 
 // Helper classes for spinning up a little redis cluster
@@ -98,7 +98,7 @@ class ExternalRedis() {
     val port = address.get.getPort()
     val conf = createConfigFile(port).getAbsolutePath
     val cmd: Seq[String] = Seq("redis-server", conf)
-    val builder = new ProcessBuilder(cmd.toList)
+    val builder = new ProcessBuilder(cmd.asJava)
     process = Some(builder.start())
     Thread.sleep(200)
   }
@@ -115,19 +115,10 @@ class ExternalRedis() {
     start()
   }
 
-  def newClient() = finagle.Redis.client
-    .newRichClient(s"127.0.0.1:${address.get.getPort}")
+  def newClient() = Redis.newRichClient(s"127.0.0.1:${address.get.getPort}")
 
-  def newSubscribeClient() = RedisSubscribe.client
-    .newRichClient(s"127.0.0.1:${address.get.getPort}")
-
-  def withClient[T](f: finagle.redis.Client => T): T = {
+  def withClient[T](f: Client => T): T = {
     val client = newClient
-    try f(client) finally client.release()
-  }
-
-  def withSubscribeClient[T](f: SubscribeClient => T): T = {
-    val client = newSubscribeClient
     try f(client) finally client.close()
   }
 
