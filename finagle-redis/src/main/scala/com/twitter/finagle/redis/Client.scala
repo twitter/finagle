@@ -42,10 +42,8 @@ trait NormalCommands
 
 trait Transactions { self: Client =>
 
-  case class TxStatus(multi: Boolean, watch: Boolean)
-
-  def transaction[T](f: TransactionalClient => Future[T]): Future[T] = {
-    val singleton = new ServiceFactory[Command, Reply] {
+  private[this] def singletonFactory: ServiceFactory[Command, Reply] =
+    new ServiceFactory[Command, Reply] {
       val svc = RedisPool.forTransaction(factory)
       // Because the `singleton` is used in the context of a `FactoryToService` we override
       // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
@@ -59,10 +57,17 @@ trait Transactions { self: Client =>
       def close(deadline: Time): Future[Unit] = svc.map(_.close(deadline))
     }
 
-    val client = TransactionalClient(singleton)
+  def transaction[T](cmds: Seq[Command]): Future[Seq[Reply]] =
+    transactionSupport(_.transaction(cmds))
 
+  def transaction[T](f: NormalCommands => Future[_]): Future[Seq[Reply]] =
+    transactionSupport(_.transaction(f))
+
+  def transactionSupport[T](f: TransactionalClient => Future[T]): Future[T] = {
+    val singleton = singletonFactory
+    val client = new TransactionalClient(singleton)
     f(client).ensure {
-      client.reset() before singleton.close()
+      client.reset() ensure singleton.close()
     }
   }
 }
@@ -103,7 +108,8 @@ abstract class BaseClient(
  * Client connected over a single connection to a
  * single redis instance, supporting transactions
  */
-class TransactionalClient(factory: ServiceFactory[Command, Reply]) extends Client(factory) {
+class TransactionalClient(factory: ServiceFactory[Command, Reply])
+  extends BaseClient(factory) with NormalCommands {
 
   private[this] var _multi = false
   private[this] var _watch = false
@@ -160,19 +166,29 @@ class TransactionalClient(factory: ServiceFactory[Command, Reply]) extends Clien
         Future.Unit
     }
 
+  def transaction[T](cmds: Seq[Command]): Future[Seq[Reply]] = {
+    transaction {
+      cmds.iterator
+        .map(cmd => factory().flatMap(_(cmd)).unit)
+        .reduce(_ before _)
+    }
+  }
+
+  def transaction[T](f: => Future[_]): Future[Seq[Reply]] = {
+    multi() before {
+      f.unit before exec()
+    } ensure {
+      reset()
+    }
+  }
+
+  private[redis] def transaction[T](f: NormalCommands => Future[_]): Future[Seq[Reply]] = {
+    transaction(f(this))
+  }
+
   private[redis] def reset(): Future[Unit] = {
     if (_multi) discard()
     else if (_watch) unwatch()
     else Future.Done
   }
-}
-
-object TransactionalClient {
-
-  /**
-   * Construct a transactional client from a service factory
-   * @param raw ServiceFactory
-   */
-  def apply(raw: ServiceFactory[Command, Reply]): TransactionalClient =
-    new TransactionalClient(raw)
 }

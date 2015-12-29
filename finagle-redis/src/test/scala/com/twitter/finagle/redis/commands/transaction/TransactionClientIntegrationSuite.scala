@@ -17,12 +17,15 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly set and get transaction", RedisTest, ClientTest) {
     withRedisClient { client =>
+      val txResult = Await.result(client.transaction(Seq(Set(foo, bar), Set(baz, boo))))
+      assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "OK"))
+    }
+
+    withRedisClient { client =>
       val txResult = Await.result(
         client.transaction { tx =>
-          tx.multi().unit before
           tx.set(foo, bar).unit before
-          tx.set(baz, boo).unit before
-          tx.exec()
+          tx.set(baz, boo)
         })
       assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "OK"))
     }
@@ -31,12 +34,19 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
   test("Correctly hash set and multi get transaction", RedisTest, ClientTest) {
     withRedisClient { client =>
       val txResult = Await.result(
+        client.transaction(Seq(
+          HSet(foo, bar, baz),
+          HSet(foo, boo, moo),
+          HMGet(foo, Seq(bar, boo)))))
+      assert(ReplyFormat.toString(txResult.toList) == Seq("1", "1", "baz", "moo"))
+    }
+
+    withRedisClient { client =>
+      val txResult = Await.result(
         client.transaction { tx =>
-          tx.multi().unit before
           tx.hSet(foo, bar, baz).unit before
           tx.hSet(foo, boo, moo).unit before
-          tx.hMGet(foo, Seq(bar, boo)).unit before
-          tx.exec()
+          tx.hMGet(foo, Seq(bar, boo))
         })
       assert(ReplyFormat.toString(txResult.toList) == Seq("1", "1", "baz", "moo"))
     }
@@ -45,12 +55,20 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform key command on incorrect data type", RedisTest, ClientTest) {
     withRedisClient { client =>
       val txResult = Await.result(
+        client.transaction(Seq(HSet(foo, boo, moo), Get(foo), HDel(foo, Seq(boo)))))
+      txResult.toList match {
+        case Seq(IntegerReply(1), ErrorReply(message), IntegerReply(1)) =>
+          // TODO: the exact error message varies in different versions of redis. fix this later
+          assert(message endsWith "Operation against a key holding the wrong kind of value")
+      }
+    }
+
+    withRedisClient { client =>
+      val txResult = Await.result(
         client.transaction { tx =>
-          tx.multi().unit before
           tx.hSet(foo, boo, moo).unit before
           tx.get(foo).unit before
-          tx.hDel(foo, Seq(boo)).unit before
-          tx.exec()
+          tx.hDel(foo, Seq(boo))
         })
       txResult.toList match {
         case Seq(IntegerReply(1), ErrorReply(message), IntegerReply(1)) =>
@@ -64,12 +82,12 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       intercept[ServerError] {
         Await.result(
-        client.transaction { tx =>
+        client.transactionSupport { tx =>
           tx.watch(Seq(foo)).unit before
           tx.set(foo, boo).unit before
-          tx.multi().unit before
-          tx.get(foo).unit before
-          tx.exec()
+          tx.transaction {
+            tx.get(foo)
+          }
         })
       }
     }
@@ -78,14 +96,14 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
   test("Correctly watch then unwatch a key", RedisTest, ClientTest) {
     withRedisClient { client =>
       val txResult = Await.result(
-        client.transaction { tx =>
+        client.transactionSupport { tx =>
           tx.set(foo, bar).unit before
           tx.watch(Seq(foo)).unit before
           tx.set(foo, boo).unit before
           tx.unwatch().unit before
-          tx.multi().unit before
-          tx.get(foo).unit before
-          tx.exec()
+          tx.transaction {
+            tx.get(foo)
+          }
         })
       assert(ReplyFormat.toString(txResult.toList) == Seq("boo"))
     }
@@ -95,10 +113,8 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val txResult = Await.result(
         client.transaction { tx =>
-          tx.multi().unit before
           tx.set(foo, bar).unit before
-          tx.get(foo).unit before
-          tx.exec()
+          tx.get(foo)
         })
       assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "bar"))
     }
