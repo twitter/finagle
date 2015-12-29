@@ -32,7 +32,7 @@ object RedisPool {
   def module: Stackable[ServiceFactory[Command, Reply]] =
     new Stack.Module1[Stats, ServiceFactory[Command, Reply]] {
       val role = Stack.Role("RedisPool")
-      val description = "Maintain at most one connection"
+      val description = "Manage redis connections"
       def make(_stats: Stats, next: ServiceFactory[Command, Reply]) = {
         val Stats(sr) = _stats
         new RedisPool(next, sr)
