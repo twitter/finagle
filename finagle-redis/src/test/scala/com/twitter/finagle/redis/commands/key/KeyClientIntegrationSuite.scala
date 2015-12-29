@@ -4,6 +4,7 @@ import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.util.Await
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
+import java.util.Arrays
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -27,8 +28,8 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       val expectedBytes: Array[Byte] = Array(0, -64, 10, 6, 0, -8, 114, 63, -59, -5, -5, 95, 40)
 
       Await.result(client.set(k, v))
-      assert(Await.result(client.dump(k)).fold(fail("Expected result for DUMP"))(_.array) ==
-        expectedBytes)
+      val actualResult = Await.result(client.dump(k)).fold(fail("Expected result for DUMP"))(_.array)
+      assert(Arrays.equals(actualResult, expectedBytes))
       Await.result(client.del(Seq(foo)))
       assert(Await.result(client.dump(foo)) == None)
     }
