@@ -2,6 +2,7 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.finagle.serverset2.client.{SessionState, WatchState}
 import com.twitter.finagle.stats.{Stat, StatsReceiver}
+import com.twitter.logging.Logger
 import com.twitter.util._
 
 private[serverset2] object ServiceDiscoverer {
@@ -67,6 +68,7 @@ private[serverset2] class ServiceDiscoverer(
   private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
 
   private[this] val actZkSession = Activity(varZkSession.map(Activity.Ok(_)))
+  private[this] val log = Logger(getClass)
 
   /**
    * Monitor the session status of the ZkSession and expose to listeners whether
@@ -82,6 +84,7 @@ private[serverset2] class ServiceDiscoverer(
         stateListener.close()
         stateListener = zk.state.changes.dedup.respond {
           case WatchState.SessionState(state) =>
+            log.info(s"SessionState. Session ${zk.sessionIdAsHex}. State $state")
             u() = ClientHealth(state)
           case _ => // don't need to update on non-sessionstate events
         }
@@ -120,6 +123,7 @@ private[serverset2] class ServiceDiscoverer(
     glob: String
   ): Activity[Seq[Entity]] = {
     actZkSession.flatMap { case zkSession =>
+      log.info(s"TurnedSession. Session ${zkSession.sessionIdAsHex}")
       cache.setSession(zkSession)
       zkSession.globOf(path + glob).flatMap { paths =>
         // Remove any cached entries not surfaced by globOf from our cache
