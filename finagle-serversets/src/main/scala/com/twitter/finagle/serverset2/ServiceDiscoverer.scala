@@ -123,7 +123,6 @@ private[serverset2] class ServiceDiscoverer(
     glob: String
   ): Activity[Seq[Entity]] = {
     actZkSession.flatMap { case zkSession =>
-      log.info(s"TurnedSession. Session ${zkSession.sessionIdAsHex}")
       cache.setSession(zkSession)
       zkSession.globOf(path + glob).flatMap { paths =>
         // Remove any cached entries not surfaced by globOf from our cache
