@@ -140,7 +140,7 @@ object ThriftMuxResponseClassifier {
         rep match {
           case Return(rep: mux.Response) =>
             val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializer)
-            if (deserCtx == null) {
+            if (deserCtx != null) {
               try {
                 val bytes = Buf.ByteArray.Owned.extract(rep.body)
                 deserCtx.deserialize(bytes)
