@@ -441,8 +441,8 @@ class CommandCodec extends UnifiedProtocolCodec {
 
   val log = Logger(getClass)
 
-  val encode = new Encoder[RedisMessage] {
-    def encode(obj: RedisMessage) = Some(obj.toChannelBuffer)
+  val encode = new Encoder[Command] {
+    def encode(obj: Command) = Some(obj.toChannelBuffer)
   }
 
   val decode = readBytes(1) { bytes =>
