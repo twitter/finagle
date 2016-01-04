@@ -37,7 +37,7 @@ case class Unsubscribe(channels: Seq[ChannelBuffer], handler: SubscribeHandler) 
 }
 
 object Publish {
-  def apply(args: List[Array[Byte]]) = {
+  def apply(args: List[Array[Byte]]): Publish = {
     val list = trimList(args, 2, "PUBLISH")
     val key = ChannelBuffers.wrappedBuffer(list(0))
     val message = ChannelBuffers.wrappedBuffer(list(1))

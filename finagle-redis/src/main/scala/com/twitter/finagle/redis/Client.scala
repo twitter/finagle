@@ -67,7 +67,7 @@ trait Transactions { self: Client =>
     val singleton = singletonFactory
     val client = new TransactionalClient(singleton)
     f(client).ensure {
-      client.reset() ensure singleton.close()
+      client.reset().ensure(singleton.close())
     }
   }
 }
@@ -83,13 +83,13 @@ abstract class BaseClient(
   /**
    * Releases underlying service factory object
    */
-  def close(deadline: Time) = factory.close(deadline)
+  def close(deadline: Time): Future[Unit] = factory.close(deadline)
 
   /**
    * Helper function for passing a command to the service
    */
-  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) = {
-    factory.toService.apply(cmd) flatMap (handler orElse {
+  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]): Future[T] = {
+    factory.toService.apply(cmd).flatMap (handler orElse {
       case ErrorReply(message)   => Future.exception(new ServerError(message))
       case StatusReply("QUEUED") => Future.Done.asInstanceOf[Future[Nothing]]
       case _                     => Future.exception(new IllegalStateException)

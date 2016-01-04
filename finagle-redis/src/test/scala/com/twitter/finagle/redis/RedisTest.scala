@@ -25,13 +25,13 @@ trait RedisTest extends FunSuite {
   protected val moo = StringToChannelBuffer("moo")
   protected val num = StringToChannelBuffer("num")
 
-  def result[T](awaitable: Awaitable[T], timeout: Duration = 1.second) =
+  def result[T](awaitable: Awaitable[T], timeout: Duration = 1.second): T =
     Await.result(awaitable, timeout)
 
-  def ready[T <: Awaitable[_]](awaitable: T, timeout: Duration = 1.second) =
+  def ready[T <: Awaitable[_]](awaitable: T, timeout: Duration = 1.second): T =
     Await.ready(awaitable, timeout)
 
-  def waitUntil(message: String, countDown: Int = 10)(ready: => Boolean) {
+  def waitUntil(message: String, countDown: Int = 10)(ready: => Boolean): Unit = {
     if (countDown > 0) {
       if (!ready) {
         Thread.sleep(1000)
@@ -41,7 +41,7 @@ trait RedisTest extends FunSuite {
     else throw new IllegalStateException(s"Timeout: ${message}")
   }
 
-  def waitUntilAsserted(message: String, countDown: Int = 10)(assert: => Unit) {
+  def waitUntilAsserted(message: String, countDown: Int = 10)(assert: => Unit): Unit = {
     waitUntil(message, countDown)(Try(assert).isReturn)
   }
 }
@@ -70,13 +70,13 @@ trait RedisRequestTest extends RedisTest {
 
 trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
-  implicit def s2cb(s: String) = StringToChannelBuffer(s)
-  implicit def cb2s(cb: ChannelBuffer) = CBToString(cb)
+  implicit def s2cb(s: String): ChannelBuffer = StringToChannelBuffer(s)
+  implicit def cb2s(cb: ChannelBuffer): String = CBToString(cb)
 
   override def beforeAll(): Unit = RedisCluster.start()
   override def afterAll(): Unit = RedisCluster.stop()
 
-  protected def withRedisClient(testCode: Client => Any) {
+  protected def withRedisClient(testCode: Client => Any): Unit = {
     val client = Redis.newRichClient(RedisCluster.hostAddresses())
     Await.result(client.flushAll)
     try {
@@ -115,7 +115,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   protected val OKStatusReply = StatusReply("OK")
 
-  protected def withRedisClient(testCode: Service[Command, Reply] => Any) {
+  protected def withRedisClient(testCode: Service[Command, Reply] => Any): Unit = {
     val client = ClientBuilder()
       .name("redis-client")
       .codec(redis.Redis())

@@ -32,13 +32,13 @@ object RedisCluster { self =>
     }
   }
 
-  def start(instance: ExternalRedis) = {
+  def start(instance: ExternalRedis): ExternalRedis = {
     instance.start()
     instanceStack.push(instance)
     instance
   }
 
-  def stop() = {
+  def stop(): ExternalRedis = {
     val instance = instanceStack.pop()
     instance.stop()
     instance
@@ -115,7 +115,7 @@ class ExternalRedis() {
     start()
   }
 
-  def newClient() = Redis.newRichClient(s"127.0.0.1:${address.get.getPort}")
+  def newClient(): Client = Redis.newRichClient(s"127.0.0.1:${address.get.getPort}")
 
   def withClient[T](f: Client => T): T = {
     val client = newClient
