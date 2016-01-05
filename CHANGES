@@ -37,6 +37,13 @@ Runtime Behavior Changes
     for clients that spend significant time deserializing and do not have higher level
     metrics this may come as a surprise. ``RB_ID=772931``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thrift: Remove the `framed` attributes from `c.t.f.Thrift.Client` and
+    `c.t.f.Thrift.Server`.  This behavior may now be controlled with `c.t.f.Thrift.param.Framed`.
+
+
 6.31.0
 ------
 

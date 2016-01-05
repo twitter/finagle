@@ -74,6 +74,17 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     }
 
     /**
+     * A `Param` to control whether a framed transport should be used.
+     * If this is set to false, a buffered transport is used.  Framed
+     * transports are enabled by default.
+     * @param enabled Whether a framed transport should be used.
+     */
+    case class Framed(enabled: Boolean)
+    implicit object Framed extends Stack.Param[Framed] {
+      val default = Framed(true)
+    }
+
+    /**
      * A `Param` to set the max size of a reusable buffer for the thrift response.
      * If the buffer size exceeds the specified value, the buffer is not reused,
      * and a new buffer is used for the next thrift response.
@@ -128,8 +139,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   case class Client(
     stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
-    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift"),
-    framed: Boolean = true
+    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift")
   ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client] with ThriftRichClient {
     protected def copy1(
       stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = this.stack,
@@ -141,6 +151,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected type In = ThriftClientRequest
     protected type Out = Array[Byte]
 
+    val param.Framed(framed) = params[param.Framed]
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
     override protected lazy val Stats(stats) = params[Stats]
 
@@ -218,8 +229,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   case class Server(
     stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = Server.stack,
-    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("thrift"),
-    framed: Boolean = true
+    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("thrift")
   ) extends StdStackServer[Array[Byte], Array[Byte], Server] with ThriftRichServer {
     protected def copy1(
       stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = this.stack,
@@ -229,6 +239,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected type In = Array[Byte]
     protected type Out = Array[Byte]
 
+    val param.Framed(framed) = params[param.Framed]
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
 
     override def configured[P](psp: (P, Stack.Param[P])): Server = {
@@ -254,7 +265,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     def withProtocolFactory(protocolFactory: TProtocolFactory): Server =
       configured(param.ProtocolFactory(protocolFactory))
 
-    def withBufferedTransport(): Server = copy(framed=false)
+    def withBufferedTransport(): Server =
+      configured(param.Framed(false))
   }
 
   val server: Thrift.Server = Server()
