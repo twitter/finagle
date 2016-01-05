@@ -96,7 +96,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
 
   protected class Metric(sr: StatsReceiver, name: String) {
     private[this] val epoch = nanoTime()
-    private[this] val Penalty: Double = Double.MaxValue/2
+    private[this] val Penalty: Double = Long.MaxValue >> 16
     // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
     private[this] val Tau: Double = decayTime.inNanoseconds.toDouble
     require(Tau > 0)
