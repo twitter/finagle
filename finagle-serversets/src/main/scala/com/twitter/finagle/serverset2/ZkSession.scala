@@ -221,7 +221,7 @@ private[serverset2] class ZkSession(
       case Return(_) => Future.value(None)
       case Throw(ex:KeeperException.NoNode) => Future.value(None)
       case Throw(exc) =>
-        statsReceiver.counter("read_fail", path).incr()
+        statsReceiver.counter("read_fail").incr()
         logger.warning(s"Unexpected failure for session $sessionIdAsHex. retrieving node $path. ($exc)")
         Future.exception(exc)
     }
