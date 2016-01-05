@@ -3,6 +3,6 @@ junit_tests(name='java',
     '3rdparty/jvm/junit',
     'finagle/finagle-http'
   ],
-  fatal_warnings=True,
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )

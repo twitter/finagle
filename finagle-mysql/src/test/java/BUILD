@@ -4,6 +4,6 @@ junit_tests(name='java',
     'finagle/finagle-core',
     'finagle/finagle-mysql'
   ],
-  fatal_warnings=True,
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )
