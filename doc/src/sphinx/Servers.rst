@@ -170,11 +170,11 @@ Finagle clients, this module is disabled by default (the timeout is unbounded). 
 
 .. rubric:: Footnotes
 
-.. [#nack] Depending on the protocol, a rejected request might be transformed into a `NACK` (currently
-           supported in HTTP/1.1 and Mux) so the remote client can safely `retry` it.
+.. [#nack] Depending on the protocol, a rejected request might be transformed into a `NACK`
+   (currently supported in HTTP/1.1 and Mux) so the remote client can safely `retry` it.
 
-.. [#example] Configuration parameters/values provided in this example are only demonstrate the API usage,
-              not the real world values. We do not recommend blindly applying those values to production
-              systems.
+.. [#example] Configuration parameters/values provided in this example are only demonstrate
+   the API usage, not the real world values. We do not recommend blindly applying those values
+   to production systems.
 
 

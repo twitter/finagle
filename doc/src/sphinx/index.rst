@@ -35,7 +35,7 @@ Other useful resources include:
 - Twitter's `Scala School <http://twitter.github.com/scala_school/>`_ has a section `introducing Finagle <http://twitter.github.com/scala_school/finagle.html>`_ and another `constructing a distributed search engine using Finagle <http://twitter.github.com/scala_school/searchbird.html>`_
 
 .. _Dapper: http://research.google.com/pubs/pub36356.html
-.. _Zipkin: http://twitter.github.com/zipkin/
+.. _Zipkin: http://zipkin.io
 
 User's guide
 ------------

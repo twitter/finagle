@@ -545,6 +545,8 @@ again on success or when the back-off schedule runs out.
 See the FAQ to :ref:`better understand <faq_failedfastexception>` why clients
 might be seeing ``com.twitter.finagle.FailedFastException``'s.
 
+.. _disabling_fail_fast:
+
 The `Fail Fast` module is enabled by default for all of the Finagle clients except for
 ``Memcached.client`` one. The following example demonstrates how to explicitly disable it for a
 particular client.
@@ -769,30 +771,27 @@ as failures and can do so by using ``ThriftMuxResponseClassifier.ThriftException
 .. rubric:: Footnotes
 
 .. [#backoff] Most of the backoff strategies implemented in Finagle are inspired by Mark
-              Brooker's `blog post <http://www.awsarchitectureblog.com/2015/03/backoff.html>`_.
+   Brooker's `blog post <http://www.awsarchitectureblog.com/2015/03/backoff.html>`_.
 
-.. [#experimental] This configuration was developed to target specific problems we encounter at Twitter
-                   and should be considered experimental. Note that its API may change as we continue to
-                   understand its place in the stack.
+.. [#experimental] This configuration was developed to target specific problems we encounter
+   at Twitter and should be considered experimental. Note that its API may change as we continue
+   to understand its place in the stack.
 
-.. [#example] Configuration parameters/values provided in this example are only demonstrate the API usage,
-              not the real world values. We do not recommend blindly applying those values to production
-              systems.
+.. [#example] Configuration parameters/values provided in this example are only to demonstrate
+   the API usage, not the real world values. We do not recommend blindly applying those values
+   to production systems.
 
-.. [#raise] The `Future#within` variant creates a new future
-            that invokes raise on the future when the timeout occurs.
-            The affects of which are dependent on the producer of the
-            future. In most cases, Finagle will attempt to cancel the
-            request if it hasn't already been dispatched. If it has been
-            dispatched, the behavior is dependent on the protocol (without
-            protocol support Finagle needs to tear down the session to signal
-            cancellation).
+.. [#raise] The `Future#within` variant creates a new future that invokes raise on the future
+   when the timeout occurs. The affects of which are dependent on the producer of the future.
+   In most cases, Finagle will attempt to cancel the request if it hasn't already been dispatched.
+   If it has been dispatched, the behavior is dependent on the protocol (without protocol
+   support Finagle needs to tear down the session to signal cancellation).
 
-.. [#p2c] Michael Mitzenmacher. 2001. The Power of Two Choices in
-          Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12, 10 (October 2001), 1094-1104.
+.. [#p2c] Michael Mitzenmacher. 2001. The Power of Two Choices in Randomized Load Balancing.
+   IEEE Trans. Parallel Distrib. Syst. 12, 10 (October 2001), 1094-1104.
 
-.. [#p2c_bounds] The maximum load on any server is roughly bound by `ln(ln(n))` where n is the number
-                 of requests.
+.. [#p2c_bounds] The maximum load on any server is roughly bound by `ln(ln(n))` where n is
+   the number of requests.
 
 .. [#p2c_jmh] Our micro benchmark exposes the stark differences:
 
@@ -801,11 +800,11 @@ as failures and can do so by using ``ThriftMuxResponseClassifier.ThriftException
   HeapBalancer.getAndPut           1000  avgt  10 8686.479 ± 261.360 ns/op
   P2CBalancer.leastLoadedGetAndPut 1000  avgt  10 1692.388 ± 103.164 ns/op
 
-.. [#weights_api] Weights are built into all the balancers except for the ``HeapBalancer``. The API exposed
-                  for this is in ``com.twitter.finagle.WeightedSocketAddress``. The name resolver that
-                  translates logical destinations to ``com.twitter.finagle.Addr`` can wrap concrete
-                  address with a `Double` which influences the balancer's distributor during the
-                  selection process.
+.. [#weights_api] Weights are built into all the balancers except for the ``HeapBalancer``.
+   The API exposed for this is in ``com.twitter.finagle.WeightedSocketAddress``. The name
+   resolver that translates logical destinations to ``com.twitter.finagle.Addr`` can wrap
+   concrete address with a `Double` which influences the balancer's distributor during the
+  selection process.
 
 .. [#probation] See ``com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation``
 
