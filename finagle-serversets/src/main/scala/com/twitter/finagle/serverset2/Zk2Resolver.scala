@@ -89,7 +89,7 @@ class Zk2Resolver(
       retryStream,
       () => ZkSession(retryStream, hosts, sessionTimeout = sessionTimeout, statsReceiver)
     )
-    new ServiceDiscoverer(varZkSession, statsReceiver.scope(statsOf(hosts)), unhealthyEpoch)
+    new ServiceDiscoverer(varZkSession, statsReceiver.scope(statsOf(hosts)), unhealthyEpoch, timer)
   }
 
   private[this] val gauges = Seq(

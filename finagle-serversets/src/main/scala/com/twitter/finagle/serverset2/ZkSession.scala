@@ -3,7 +3,7 @@ package com.twitter.finagle.serverset2
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
-import com.twitter.finagle.stats.{Gauge, DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats._
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
@@ -27,6 +27,8 @@ private[serverset2] class ZkSession(
 
   /** The dynamic `WatchState` of this `ZkSession` instance. */
   val state: Var[WatchState] = watchedZk.state
+
+  private[this] val unexpectedExceptions = new CategorizingExceptionStatsHandler(_ => Some("unexpected_exceptions"))
 
   private val zkr: ZooKeeperReader = watchedZk.value
 
@@ -99,6 +101,11 @@ private[serverset2] class ZkSession(
 
       def loop(): Future[Unit] = {
         if (!closed) safeRetry(go) respond {
+          case Throw(e@KeeperException.SessionExpired(_)) =>
+            // don't retry. The session has expired while trying to set the watch.
+            // In case our activity is still active, notify the listener
+            u() = Activity.Failed(e)
+
           case Throw(exc) =>
             logger.error(s"Operation failed with $exc. Session $sessionIdAsHex")
             u() = Activity.Failed(exc)
@@ -130,7 +137,6 @@ private[serverset2] class ZkSession(
                 retryWithDelay { loop() }
 
               case WatchState.SessionState(SessionState.Expired) =>
-                logger.warning(s"Session $sessionIdAsHex has expired. Watched data is now unavailable.")
                 u() = Activity.Failed(new Exception("session expired"))
               // Do NOT retry here as the session has expired. We expect the watcher of this
               // ZkSession to retry at this point (See [[ZkSession.retrying]]).
@@ -222,6 +228,7 @@ private[serverset2] class ZkSession(
       case Throw(ex:KeeperException.NoNode) => Future.value(None)
       case Throw(exc) =>
         statsReceiver.counter("read_fail").incr()
+        unexpectedExceptions.record(statsReceiver, exc)
         logger.warning(s"Unexpected failure for session $sessionIdAsHex. retrieving node $path. ($exc)")
         Future.exception(exc)
     }
