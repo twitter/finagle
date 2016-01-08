@@ -1,8 +1,8 @@
 package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.util.Time
 import com.twitter.util.TimeConversions.intToTimeableNumber
-import com.twitter.util.{Promise, Time}
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.channel._
 import org.junit.runner.RunWith
@@ -41,16 +41,16 @@ class ChannelStatsHandlerTest extends FunSpec with MockitoSugar {
       val handler = new ChannelStatsHandler(sr)
       connectionsIs(0)
 
-      val p = Promise[Unit]()
+      val e = mock[ChannelStateEvent]
       val ctx = mock[ChannelHandlerContext]
       val al = new AtomicLong()
       val obj = (al, al).asInstanceOf[Object]
       when(ctx.getAttachment()).thenReturn(obj, obj)
-      handler.channelConnected(ctx, p)
+      handler.channelOpen(ctx, e)
 
       connectionsIs(1)
-      p.setDone()
 
+      handler.channelClosed(ctx, e)
       connectionsIs(0)
     }
 

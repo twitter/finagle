@@ -22,12 +22,13 @@ import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.FunSpec
+import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
-class Netty3TransporterTest extends FunSpec with MockitoSugar {
+class Netty3TransporterTest extends FunSpec with MockitoSugar with Eventually {
   describe("Netty3Transporter") {
     it("creates a Netty3Transporter instance based on Stack params") {
       val inputParams =
@@ -148,7 +149,6 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
       firstPipeline.addFirst("channelStatsHandler", firstHandler)
       secondPipeline.addFirst("channelStatsHandler", secondHandler)
 
-      hasConnections("first", 0)
       val firstChannel = Netty3Transporter.channelFactory.newChannel(firstPipeline)
 
       hasConnections("first", 1)
@@ -157,12 +157,11 @@ class Netty3TransporterTest extends FunSpec with MockitoSugar {
       val secondChannel = Netty3Transporter.channelFactory.newChannel(secondPipeline)
       Channels.close(firstChannel)
 
-
-      hasConnections("first", 0)
+      eventually { hasConnections("first", 0) }
       hasConnections("second", 1)
 
       Channels.close(secondChannel)
-      hasConnections("second", 0)
+      eventually { hasConnections("second", 0) }
     }
 
     describe("SocksConnectHandler") {
