@@ -4,20 +4,12 @@ import com.twitter.app.GlobalFlag
 import com.twitter.finagle.{Addr, Dtab, NameTree, Namer, Resolver, Path, Name}
 import com.twitter.util.{Var, Activity}
 
-object newZk extends GlobalFlag(
-  true,
-  "If set to true, the new zk2 com.twitter.finagle.Resolver is used. Otherwise, " +
-  "an older, less reliable zookeeper client is used."
-)
-
 /**
  * A namer for serverset paths of the form /zk-hosts/path... where zk-hosts is
  * a zk connect string like 'zk.foo.com:2181'.  Naming is performed by way of a
- * Resolver.  The specific zk resolver implementation is controlled by the
- * `com.twitter.newZk` flag.
+ * Resolver.
  */
 private[twitter] trait BaseServersetNamer extends Namer {
-  private[this] val scheme = if (newZk()) "zk2" else "zk"
 
   /** Resolve a resolver string to a Var[Addr]. */
   protected[this] def resolve(spec: String): Var[Addr] = Resolver.eval(spec) match {
@@ -26,10 +18,10 @@ private[twitter] trait BaseServersetNamer extends Namer {
   }
 
   protected[this] def resolveServerset(hosts: String, path: String) = 
-    resolve(s"$scheme!$hosts!$path")
+    resolve(s"zk2!$hosts!$path")
 
   protected[this] def resolveServerset(hosts: String, path: String, endpoint: String) = 
-    resolve(s"$scheme!$hosts!$path!$endpoint")
+    resolve(s"zk2!$hosts!$path!$endpoint")
 
   /** Bind a name. */
   protected[this] def bind(path: Path): Option[Name.Bound]
