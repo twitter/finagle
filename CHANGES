@@ -28,6 +28,12 @@ Deprecations
   * finagle-memcached: `c.t.f.memcached.BaseClient.cas` is deprecated in favor of the richer
     `checkAndSet` method.
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: All the deprecated exceptions from `Exceptions.scala` have been removed.
+    ``RB_ID=774658``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
