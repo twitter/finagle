@@ -1,20 +1,18 @@
 package com.twitter.finagle.builder
 
+import com.twitter.util
 import com.twitter.concurrent.AsyncSemaphore
-import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
-import com.twitter.finagle.netty3.channel.IdleConnectionFilter
-import com.twitter.finagle.netty3.channel.OpenConnectionsThresholds
+import com.twitter.finagle.{Server => FinagleServer, _}
+import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, ServerAdmissionControl}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.param.ProtocolLibrary
-import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
+import com.twitter.finagle.netty3.channel.{IdleConnectionFilter, OpenConnectionsThresholds}
+import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
-import com.twitter.finagle.ssl.{Ssl, Engine}
+import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
-import com.twitter.finagle.{Server => FinagleServer, _}
-import com.twitter.util
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
 import java.net.SocketAddress
 import javax.net.ssl.SSLEngine
@@ -354,6 +352,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
     configured(RequestSemaphoreFilter.Param(sem))
   }
+
+  /**
+   * Configure admission control filters in the server Stack.
+   *
+   * @see [[com.twitter.finagle.filter.ServerAdmissionControl]]
+   */
+  def enableAdmissionControl(enable: Boolean): This =
+    configured(ServerAdmissionControl.Param(enable))
 
   def requestTimeout(howlong: Duration): This =
     configured(TimeoutFilter.Param(howlong))

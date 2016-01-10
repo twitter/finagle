@@ -10,7 +10,15 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
-  * finagle-core: Introduce `c.t.f.service.ResponseClassifier` which allows allows developers to
+  * finagle-core: Introduce the `c.t.f.filter.ServerAdmissionControl` module in the server Stack,
+    which is enabled through the param `c.t.f.param.EnableServerAdmissionControl`. Users can define
+    their own admission control filters, which reject requests when the server operates beyond
+    its capacity. These rejections apply backpressure and allow clients to retry requests on
+    servers that may not be over capacity. The filter implementation should define its own logic
+    to determine over capacity. One or more admission control filters can be installed through
+    the `ServerAdmissionControl.register` method. ``RB_ID=776385``
+
+  * finagle-core: Introduce `c.t.f.service.ResponseClassifier` which allows developers to
     give Finagle the additional application specific knowledge necessary in order to properly
     classify them. Without this, Finagle can only safely make judgements about transport
     level failures. This is now used by `StatsFilter` and `FailureAccrualFactory` so that

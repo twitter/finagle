@@ -15,7 +15,7 @@ import com.twitter.util.Duration
  * dbl: Double = 123.32
  * }}}
  */
-private[finagle] object parsers {
+private[twitter] object parsers {
 
   object list {
     def unapplySeq(s: String): Option[List[String]] =

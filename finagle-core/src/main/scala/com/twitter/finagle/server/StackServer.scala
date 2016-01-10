@@ -63,6 +63,10 @@ object StackServer {
     // DeadlineFilter. Thus, DeadlineFilter is pushed before TimeoutFilter.
     stk.push(DeadlineFilter.module)
     stk.push(DtabStatsFilter.module)
+    // Admission Control filters are inserted after `StatsFilter` so that rejected
+    // requests are counted. We may need to adjust how latency are recorded
+    // to exclude Nack response from latency stats, CSL-2306.
+    stk.push(ServerAdmissionControl.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)
