@@ -14,17 +14,10 @@ Futures also decouple Finagle from the operating system and runtime
 thread schedulers. This is used in important ways; for example,
 Finagle uses thread biasing to reduce context switching costs.
 
-.. [#futures] As of version 2.10, Scala has its own implementation
-  of Futures, `scala.concurrent.Future`, in part inspired by the one
-  from `com.twitter.util`. While `com.twitter.util.Future` will eventually
-  implement the same interface as `scala.concurrent.Future`, it does
-  not yet — the Future type described presently is `com.twitter.util.Future`.
-  
 Futures as containers
 ---------------------
 
-Common examples of operations that are represented
-by Futures are:
+Common examples of operations that are represented by futures are:
 
 - an RPC to a remote host
 - a long computation in another thread
@@ -32,11 +25,11 @@ by Futures are:
 
 Note that these operations are all fallible: remote hosts could
 crash, computations might throw an exception, disks could fail, etc.
-A `Future[T]`, then, occupies exactly one of three states:
+A ``Future[T]``, then, occupies exactly one of three states:
 
 - Empty (pending)
-- Succeeded (with a result of type `T`)
-- Failed (with a `Throwable`)
+- Succeeded (with a result of type ``T``)
+- Failed (with a ``Throwable``)
 
 While it is possible to directly query this state, this is rarely useful.
 Instead, a callback may be registered to receive the results once 
@@ -44,19 +37,26 @@ they are made available:
 
 .. code-block:: scala
 
-	val f: Future[Int]
-	f.onSuccess { res =>
-	  println("The result is " + res)
-	}
+  import com.twitter.util.Future
+
+  val f: Future[Int] = ???
+
+  f.onSuccess { res: Int =>
+    println("The result is " + res)
+  }
 
 which will be invoked only on success. Callbacks may also be registered
 to account for failures:
 
 .. code-block:: scala
 
-	f.onFailure { cause: Throwable =>
-	  println("f failed with " + cause)
-	}
+  import com.twitter.util.Future
+
+  val f: Future[Int] = ???
+
+  f.onFailure { cause: Throwable =>
+    println("f failed with " + cause)
+  }
 
 Sequential composition
 ----------------------
@@ -76,41 +76,43 @@ from a website (ala Pinterest). This typically involves:
 
 This is an example of *sequential* composition: in order to do the
 next step, we must have successfully completed the previous one. With
-Futures, this is called `flatMap` [#flatMap]_. The result of `flatMap` is a Future
+Futures, this is called ``flatMap`` [#flatMap]_. The result of ``flatMap`` is a Future
 representing the result of this composite operation. Given some helper
-methods — `fetchUrl` fetches the given URL, `findImageUrls` parses an HTML
+methods — ``fetchUrl`` fetches the given URL, ``findImageUrls`` parses an HTML
 page to find image links — we can implement our Pinterest-style thumbnail
 extract like this:
 
 .. code-block:: scala
 
-	def fetchUrl(url: String): Future[Array[Byte]]
-	def findImageUrls(bytes: Array[Byte]): Seq[String]
+  import com.twitter.util.Future
 
-	val url = "http://www.google.com"
+  def fetchUrl(url: String): Future[Array[Byte]] = ???
+  def findImageUrls(bytes: Array[Byte]): Seq[String] = ???
 
-	val f: Future[Array[Byte]] = fetchUrl(url).flatMap { bytes =>
-	  val images = findImageUrls(bytes)
-	  if (images.isEmpty)
-	    Future.exception(new Exception("no image"))
-	  else
-	    fetchUrl(images(0))
-	}
+  val url = "http://www.google.com"
 
-	f.onSuccess { image =>
-	  println("Found image of size "+image.size)
-	}
+  val f: Future[Array[Byte]] = fetchUrl(url).flatMap { bytes =>
+    val images = findImageUrls(bytes)
+    if (images.isEmpty)
+      Future.exception(new Exception("no image"))
+    else
+      fetchUrl(images.head)
+  }
 
-`f` represents the *composite* operation. It is the result of first
+  f.onSuccess { image =>
+    println("Found image of size " + image.size)
+  }
+
+``f`` represents the *composite* operation. It is the result of first
 retrieving the web page, and then the first image link. If either of
-the smaller operations fail (the first or second `fetchUrl` or if
-`findImageUrls` doesn't successfully find any images), the composite
+the smaller operations fail (the first or second ``fetchUrl`` or if
+``findImageUrls`` doesn't successfully find any images), the composite
 operation also fails.
 
 The astute reader may have noticed something peculiar: this is
 typically the job of the semicolon! That is not far from the truth:
 semicolons sequence two statements, and with traditional I/O
-operations, have the same effect as `flatMap` does above (the
+operations, have the same effect as ``flatMap`` does above (the
 exception mechanism takes the role of a failed future). Futures
 are much more versatile, however, as we'll see.
 
@@ -119,23 +121,25 @@ Concurrent composition
 
 It is also possible to compose Futures *concurrently*. We can extend
 our above example to demonstrate: let's fetch *all* the images.
-Concurrent composition is provided by `Future.collect`:
+Concurrent composition is provided by ``Future.collect``:
 
 .. code-block:: scala
 
-	val collected: Future[Seq[Array[Byte]]] =
-	  fetchUrl(url).flatMap { bytes =>
-	    val fetches = findImageUrls(bytes).map { url => fetchUrl(url) }
-	    Future.collect(fetches)
-	  }
+  import com.twitter.util.Future
+
+  val collected: Future[Seq[Array[Byte]]] =
+    fetchUrl(url).flatMap { bytes =>
+      val fetches = findImageUrls(bytes).map { url => fetchUrl(url) }
+      Future.collect(fetches)
+    }
 
 Here we have combined both concurrent and sequential composition:
 first we fetch the web page, then we collect the results of fetching
 all of the underlying images.
 
 As with sequential composition, concurrent composition propagates
-failures: the future `collected` will fail if any of the underlying
-futures do.
+failures: the future ``collected`` will fail if any of the underlying
+futures do [#collectToTry]_.
 
 It is also simple to write your own combinators that operate over
 Futures. This is quite useful, and gives rise to a great amount of
@@ -147,31 +151,35 @@ Recovering from failure
 
 Composed futures fail whenever any of their constituent futures
 fail. However it is often useful to recover from such failures. The
-`rescue` combinator on `Future` is the dual to `flatMap`: whereas `flatMap`
-operates over *values*, `rescue` operates over *exceptions*. They 
+``rescue`` combinator on ``Future`` is the dual to ``flatMap``: whereas
+``flatMap`` operates over *values*, ``rescue`` operates over *exceptions*. They
 are otherwise identical. It is often desirable to handle only a subset
-of possible exceptions. To accomodate for this `rescue` accepts 
-a `PartialFunction`, mapping a `Throwable` to a `Future`:
+of possible exceptions. To accommodate for this ``rescue`` accepts
+a ``PartialFunction``, mapping a ``Throwable`` to a ``Future``:
 
 .. code-block:: scala
 
-	trait Future[A] {
-	  ..
-	  def rescue[B >: A](f: PartialFunction[Throwable, Future[B]]): Future[B]
-	  ..
-	}
+  trait Future[A] {
+    ..
+    def rescue[B >: A](f: PartialFunction[Throwable, Future[B]]): Future[B]
+    ..
+  }
 
 The following retries a request infinitely should it fail with a
-`TimeoutException`:
+``TimeoutException``:
 
 .. code-block:: scala
 
-	def fetchUrl(url: String): Future[HttpResponse]
-	
-	def fetchUrlWithRetry(url: String) = 
-	  fetchUrl(url).rescue {
-	    case exc: TimeoutException => fetchUrlWithRetry(url)
-	  }
+  import com.twitter.util.Future
+  import com.twitter.finagle.http
+  import com.twitter.finagle.TimeoutException
+
+  def fetchUrl(url: String): Future[http.Response] = ???
+
+  def fetchUrlWithRetry(url: String): Future[http.Response] =
+    fetchUrl(url).rescue {
+      case exc: TimeoutException => fetchUrlWithRetry(url)
+    }
 
 Other resources
 ---------------
@@ -190,13 +198,24 @@ Other resources
 .. _here: http://docs.scala-lang.org/overviews/core/futures.html
 .. _`section dedicated to futures`: http://doc.akka.io/docs/akka/2.1.0/scala/futures.html
 
-.. [#flatMap] The name `flatMap` may seem strange and unrelated to our present
-  discussion, but its etymology is impeccable: it derives from a deeper relationship 
-  between the sort of sequential composition we do with futures, to a similar sort 
-  of composition we can perform over collections. See the this__ page for more details.
-  
+.. rubric:: Footnotes
+
+.. [#futures] Finagle uses its own ``Future`` implementation by a variety of reasons
+   (fewer context switches, interruptibility, support for continuation-local variables,
+   tail-call elimination), but mostly because it's preceded SIP-14_ by over a year.
+
+.. [#collectToTry] Use ``Future.collectToTry`` to concurrently collect a sequence of
+   futures while accumulating errors instead of failing fast.
+
+.. [#flatMap] The name ``flatMap`` may seem strange and unrelated to our present
+   discussion, but its etymology is impeccable: it derives from a deeper relationship
+   between the sort of sequential composition we do with futures, to a similar sort of
+   composition we can perform over collections. See the this__ page for more details.
+
 __ WikipediaMonads_
 .. _WikipediaMonads: http://en.wikipedia.org/wiki/Monad_(functional_programming)
+
+.. _SIP-14: http://docs.scala-lang.org/sips/completed/futures-promises.html
 
 .. TODO
   a section about composing over failures

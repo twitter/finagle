@@ -4,7 +4,6 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, ServiceFactory, Deadline, Stack}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.server.StackServer
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.InMemoryStatsReceiver
@@ -29,7 +28,7 @@ class StackServerTest extends FunSuite {
         val result = svc(())
 
         // we should be one second ahead
-        assert(statsReceiver.stats(Seq("transit_latency_ms"))(0) == 1.second.inMilliseconds.toFloat)
+        assert(statsReceiver.stats(Seq("admission_control", "deadline", "transit_latency_ms"))(0) == 1.second.inMilliseconds.toFloat)
 
         // but the deadline inside the service's closure should be updated
         assert(Await.result(result) == Deadline.ofTimeout(1.second))

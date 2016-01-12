@@ -573,6 +573,44 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(params[DefaultPool.Param].copy(bufferSize = size))
 
   /**
+   * Configure a [[com.twitter.finagle.service.ResponseClassifier]]
+   * which is used to determine the result of a request/response.
+   *
+   * This allows developers to give Finagle the additional application-specific
+   * knowledge necessary in order to properly classify them. Without this,
+   * Finagle cannot make judgements about application level failures as it only
+   * has a narrow understanding of failures (for example: transport level, timeouts,
+   * and nacks).
+   *
+   * As an example take an HTTP client that receives a response with a 500 status
+   * code back from a server. To Finagle this is a successful request/response
+   * based solely on the transport level. The application developer may want to
+   * treat all 500 status codes as failures and can do so via a
+   * [[com.twitter.finagle.service.ResponseClassifier]].
+   *
+   * It is a [[PartialFunction]] and as such multiple classifiers can be composed
+   * together via [[PartialFunction.orElse]].
+   *
+   * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
+   * HTTP classification tools.
+   *
+   * @note If unspecified, the default classifier is
+   * [[com.twitter.finagle.service.ResponseClassifier.Default]]
+   * which is a total function fully covering the input domain.
+   */
+  def responseClassifier(classifier: com.twitter.finagle.service.ResponseClassifier): This =
+    configured(param.ResponseClassifier(classifier))
+
+  /**
+   * The currently configured [[com.twitter.finagle.service.ResponseClassifier]].
+   *
+   * @note If unspecified, the default classifier is
+   * [[com.twitter.finagle.service.ResponseClassifier.Default]].
+   */
+  def responseClassifier: com.twitter.finagle.service.ResponseClassifier =
+    params[param.ResponseClassifier].responseClassifier
+
+  /**
    * Retry (some) failed requests up to `value - 1` times.
    *
    * Retries are only done if the request failed with something
@@ -1032,12 +1070,12 @@ private object ClientBuilderClient {
     val client =
       client0
         .transformed(new Stack.Transformer {
-          def apply[Req, Rep](stack: Stack[ServiceFactory[Req, Rep]]) =
+          def apply[Request, Response](stack: Stack[ServiceFactory[Request, Response]]) =
             stack
-              .insertBefore(Retries.Role, new StatsFilterModule[Req, Rep])
-              .replace(Retries.Role, Retries.moduleWithRetryPolicy[Req, Rep])
-              .prepend(new GlobalTimeoutModule[Req, Rep])
-              .prepend(new ExceptionSourceFilterModule[Req, Rep])
+              .insertBefore(Retries.Role, new StatsFilterModule[Request, Response])
+              .replace(Retries.Role, Retries.moduleWithRetryPolicy[Request, Response])
+              .prepend(new GlobalTimeoutModule[Request, Response])
+              .prepend(new ExceptionSourceFilterModule[Request, Response])
         })
         .configured(FactoryToService.Enabled(true))
 

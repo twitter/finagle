@@ -5,10 +5,11 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
-import com.twitter.finagle.service.RetryPolicy
+import com.twitter.finagle.service._
 import com.twitter.finagle.Stack.Param
 import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
+import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
@@ -136,6 +137,16 @@ object ThriftMux
 
     private[this] val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
 
+    /**
+     * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
+     * [[ResponseClassifier]]. This allows application level customization of
+     * how responses are classified as successful or not.
+     *
+     * @see [[ThriftMuxResponseClassifier]]
+     */
+    def withResponseClassifier(classifier: ResponseClassifier): Client =
+      configured(param.ResponseClassifier(classifier))
+
     private[this] object ThriftMuxToMux extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
       def apply(req: ThriftClientRequest, service: Service[mux.Request, mux.Response]): Future[Array[Byte]] = {
         if (req.oneway) return Future.exception(
@@ -152,11 +163,30 @@ object ThriftMux
       }
     }
 
+    private[this] def deserializingClassifier: StackClient[mux.Request, mux.Response] = {
+      // Note: what type of deserializer used is important if none is specified
+      // so that we keep the prior behavior of Thrift exceptions
+      // being counted as a success. Otherwise, even using the default
+      // ResponseClassifier would then see that response as a `Throw` and thus
+      // a failure. So, when none is specified, a "deserializing-only"
+      // classifier is used to make when deserialization happens in the stack
+      // uniform whether or not a `ResponseClassifier` is wired up.
+      val c =
+        if (params.contains[param.ResponseClassifier]) {
+          ThriftMuxResponseClassifier.usingDeserializeCtx(
+            params[param.ResponseClassifier].responseClassifier
+          )
+        } else {
+          ThriftMuxResponseClassifier.DeserializeCtxOnly
+        }
+      muxer.configured(param.ResponseClassifier(c))
+    }
+
     def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
-      ThriftMuxToMux andThen muxer.newService(dest, label)
+      ThriftMuxToMux andThen deserializingClassifier.newService(dest, label)
 
     def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
-      ThriftMuxToMux andThen muxer.newClient(dest, label)
+      ThriftMuxToMux andThen deserializingClassifier.newClient(dest, label)
 
     // these are necessary to have the right types from Java
     override def configured[P: Stack.Param](p: P): Client = super.configured(p)

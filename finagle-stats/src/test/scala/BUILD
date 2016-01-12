@@ -6,5 +6,6 @@ junit_tests(name='scala',
     'science/src/java/com/twitter/common/metrics:metrics',
     'finagle/finagle-stats'
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )

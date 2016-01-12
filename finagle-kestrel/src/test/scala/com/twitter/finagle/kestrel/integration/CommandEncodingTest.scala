@@ -77,7 +77,10 @@ class CommandEncodingTest extends FunSuite {
     testCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = Delete.apply,
-      extractCommand = { case d: Delete => Delete.unapply(d) }
+      extractCommand = {
+        case d: Delete => Delete.unapply(d)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -85,7 +88,10 @@ class CommandEncodingTest extends FunSuite {
     testCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = Flush.apply,
-      extractCommand = { case f: Flush => Flush.unapply(f) }
+      extractCommand = {
+        case f: Flush => Flush.unapply(f)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -93,7 +99,10 @@ class CommandEncodingTest extends FunSuite {
     testGetCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = Get.apply,
-      extractCommand = { case c: Get => Get.unapply(c) }
+      extractCommand = {
+        case c: Get => Get.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -102,7 +111,10 @@ class CommandEncodingTest extends FunSuite {
       name = "MyQueue",
       timeout = Some(Duration.fromSeconds(2)),
       mkCommand = Get.apply,
-      extractCommand = { case c: Get => Get.unapply(c) }
+      extractCommand = {
+        case c: Get => Get.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -111,7 +123,10 @@ class CommandEncodingTest extends FunSuite {
     testGetCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = Peek.apply,
-      extractCommand = { case c: Peek => Peek.unapply(c) }
+      extractCommand = {
+        case c: Peek => Peek.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -120,7 +135,10 @@ class CommandEncodingTest extends FunSuite {
       name = "MyQueue",
       timeout = Some(Duration.fromSeconds(2)),
       mkCommand = Peek.apply,
-      extractCommand = { case c: Peek => Peek.unapply(c) }
+      extractCommand = {
+        case c: Peek => Peek.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -128,7 +146,10 @@ class CommandEncodingTest extends FunSuite {
     testGetCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = Get.apply,
-      extractCommand = { case c: Get => Get.unapply(c) }
+      extractCommand = {
+        case c: Get => Get.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -137,7 +158,10 @@ class CommandEncodingTest extends FunSuite {
       name = "MyQueue",
       timeout = Some(Duration.fromSeconds(2)),
       mkCommand = Abort.apply,
-      extractCommand = { case c: Abort => Abort.unapply(c) }
+      extractCommand = {
+        case c: Abort => Abort.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -145,7 +169,10 @@ class CommandEncodingTest extends FunSuite {
     testGetCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = Close.apply,
-      extractCommand = { case c: Close => Close.unapply(c) }
+      extractCommand = {
+        case c: Close => Close.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -154,7 +181,10 @@ class CommandEncodingTest extends FunSuite {
       name = "MyQueue",
       timeout = Some(Duration.fromSeconds(2)),
       mkCommand = Close.apply,
-      extractCommand = { case c: Close => Close.unapply(c) }
+      extractCommand = {
+        case c: Close => Close.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -163,7 +193,10 @@ class CommandEncodingTest extends FunSuite {
       name = "MyQueue",
       timeout = Some(Duration.fromSeconds(2)),
       mkCommand = Open.apply,
-      extractCommand = { case c: Open => Open.unapply(c) }
+      extractCommand = {
+        case c: Open => Open.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -171,7 +204,10 @@ class CommandEncodingTest extends FunSuite {
     testGetCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = Open.apply,
-      extractCommand = { case c: Open => Open.unapply(c) }
+      extractCommand = {
+        case c: Open => Open.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -180,7 +216,10 @@ class CommandEncodingTest extends FunSuite {
     testGetCommandEncodeDecode(
       name = "MyQueue",
       mkCommand = CloseAndOpen.apply,
-      extractCommand = { case c: CloseAndOpen => CloseAndOpen.unapply(c) }
+      extractCommand = {
+        case c: CloseAndOpen => CloseAndOpen.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 
@@ -189,7 +228,10 @@ class CommandEncodingTest extends FunSuite {
       name = "MyQueue",
       timeout = Some(Duration.fromSeconds(2)),
       mkCommand = CloseAndOpen.apply,
-      extractCommand = { case c: CloseAndOpen => CloseAndOpen.unapply(c) }
+      extractCommand = {
+        case c: CloseAndOpen => CloseAndOpen.unapply(c)
+        case x => throw new MatchError(x)
+      }
     )
   }
 }

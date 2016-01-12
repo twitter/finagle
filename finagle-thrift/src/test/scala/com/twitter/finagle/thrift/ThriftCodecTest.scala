@@ -9,6 +9,7 @@ import org.jboss.netty.channel._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class ThriftCodecTest extends FunSuite {

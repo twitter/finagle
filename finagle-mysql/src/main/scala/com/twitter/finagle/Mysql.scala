@@ -99,6 +99,11 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] =
       mysql.ClientDispatcher(transport, Handshake(params))
 
+    override def configured[P](psp: (P, Stack.Param[P])): Client = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
+
     /**
      * The credentials to use when authenticating a new session.
      */

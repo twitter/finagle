@@ -32,7 +32,7 @@ object WeightedInetSocketAddress {
   def unapply(addr: SocketAddress): Option[(InetSocketAddress, Double)] = {
     val (base, weight) = WeightedSocketAddress.extract(addr)
     base match {
-      case sa: InetSocketAddress => Some(sa, weight)
+      case sa: InetSocketAddress => Some((sa, weight))
       case _ => None
     }
   }

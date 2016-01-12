@@ -7,6 +7,7 @@ import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.apache.thrift.protocol._
 import org.scalatest.FunSuite
 import scala.collection.mutable
+import scala.language.reflectiveCalls
 import scala.reflect.ClassTag
 
 /**

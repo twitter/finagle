@@ -78,8 +78,8 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
       }
 
       assert(result == Map(
-        "foos" -> ("xyz", "1"),  // the "cas unique" values are predictable from a fresh memcached
-        "bazs" -> ("zyx", "3")
+        "foos" -> (("xyz", "1")),  // the "cas unique" values are predictable from a fresh memcached
+        "bazs" -> (("zyx", "3"))
       ))
     }
   }
@@ -152,7 +152,7 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
 
     intercept[ClientError] { Await.result(client.set("\r", Buf.Utf8("bar"))) }
     intercept[ClientError] { Await.result(client.set("\n", Buf.Utf8("bar"))) }
-    intercept[ClientError] { Await.result(client.set("\0", Buf.Utf8("bar"))) }
+    intercept[ClientError] { Await.result(client.set("\u0000", Buf.Utf8("bar"))) }
 
     val veryLongKey = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
     intercept[ClientError] { Await.result(client.get(veryLongKey)) }

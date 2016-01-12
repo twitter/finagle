@@ -480,11 +480,11 @@ class ClusterClientTest
   // create temporary zk clients for additional cache servers since we will need to
   // de-register these services by expiring corresponding zk client session
   def addMoreServers(size: Int): List[EndpointStatus] = {
-    (1 to size) map { _ =>
+    List.fill(size) {
       val server = TestMemcachedServer.start()
       testServers :+= server.get
       zkServerSetCluster.joinServerSet(server.get.address)
-    } toList
+    }
   }
 
   def initializePool(

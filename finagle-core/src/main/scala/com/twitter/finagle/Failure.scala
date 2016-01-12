@@ -265,12 +265,20 @@ object Failure {
   /**
    * Create a new [[Restartable]] failure with the given message.
    */
-  def rejected(why: String): Failure = new Failure(why, None, Failure.Restartable, logLevel = Level.DEBUG)
+  def rejected(why: String): Failure =
+    new Failure(why, None, Failure.Restartable, logLevel = Level.DEBUG)
 
   /**
    * Create a new [[Restartable]] failure with the given cause.
    */
-  def rejected(cause: Throwable): Failure = Failure(cause, Failure.Restartable, logLevel = Level.DEBUG)
+  def rejected(cause: Throwable): Failure =
+    Failure(cause, Failure.Restartable, logLevel = Level.DEBUG)
+
+  /**
+   * Create a new [[Restartable]] failure with the given message and cause.
+   */
+  def rejected(why: String, cause: Throwable): Failure =
+    new Failure(why, Option(cause), Failure.Restartable, logLevel = Level.DEBUG)
 
   /**
    * A default [[Restartable]] failure.

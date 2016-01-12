@@ -305,13 +305,13 @@ class RetriesTest extends FunSuite {
       Retries.Budget(RetryBudget.Empty)
     val svcFactory: ServiceFactory[Exception, Int] =
       Retries.moduleRequeueable.toStack(end).make(params)
-    assert(budgetGauge.contains(0))
+    assert(budgetGauge.exists(_ == 0))
 
     // closing a service should not touch it
     val svc: Service[Exception, Int] =
       Await.result(svcFactory(), 5.seconds)
     svc.close(Duration.Zero)
-    assert(budgetGauge.contains(0))
+    assert(budgetGauge.exists(_ == 0))
 
     // closing the factory should remove the gauge
     svcFactory.close(Duration.Zero)

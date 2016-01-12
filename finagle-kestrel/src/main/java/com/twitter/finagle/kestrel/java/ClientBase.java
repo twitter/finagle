@@ -122,6 +122,7 @@ public class ClientBase extends com.twitter.finagle.kestrel.java.Client {
    * @param backoffs a (possibly infinite) stream of durations
    * comprising a backoff policy
    */
+  @SuppressWarnings("unchecked")
   public ReadHandle readReliably(
       String queueName,
       Timer timer,

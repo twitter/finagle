@@ -4,6 +4,7 @@ java_library(name='java',
     name = 'finagle-mux-java',
     repo = artifactory,
   ),
+  fatal_warnings=False,
   sources=rglobs('*.java'),
   dependencies=[
     '3rdparty/jvm/org/scala-lang:scala-library',

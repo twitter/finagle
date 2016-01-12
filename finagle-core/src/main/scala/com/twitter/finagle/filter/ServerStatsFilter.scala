@@ -30,8 +30,7 @@ private[finagle] object ServerStatsFilter {
 
 /**
  * A [[com.twitter.finagle.Filter]] that records the elapsed execution
- * times of the underlying [[com.twitter.finagle.Service]], transit
- * time, and budget time.
+ * times of the underlying [[com.twitter.finagle.Service]].
  *
  * @note the stat does not include the time that it takes to satisfy
  *       the returned `Future`, only how long it takes for the `Service`
@@ -45,19 +44,9 @@ private[finagle] class ServerStatsFilter[Req, Rep](statsReceiver: StatsReceiver,
   def this(statsReceiver: StatsReceiver) = this(statsReceiver, Stopwatch.systemNanos)
 
   private[this] val handletime = statsReceiver.stat("handletime_us")
-  private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
-  private[this] val budgetTimeStat = statsReceiver.stat("deadline_budget_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val startAt = nowNanos()
-
-    val dl = Contexts.broadcast.getOrElse(Deadline, NoDeadlineFn)
-    if (dl ne NoDeadline) {
-      val now = Time.now
-      transitTimeStat.add(((now-dl.timestamp) max Duration.Zero).inUnit(TimeUnit.MILLISECONDS))
-      budgetTimeStat.add(((dl.deadline-now) max Duration.Zero).inUnit(TimeUnit.MILLISECONDS))
-    }
-
     try service(request)
     finally {
       val elapsedNs = nowNanos() - startAt

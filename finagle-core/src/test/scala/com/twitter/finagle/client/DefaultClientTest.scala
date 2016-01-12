@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
+import com.twitter.finagle.service.{ResponseClassifier, Backoff, FailureAccrualFactory}
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
@@ -176,7 +176,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
       val svc = client.newService(dest, "test")
       val f = svc.close()
       eventually { assert(f.isDefined) }
-      assert(Await.result(f) == ())
+      assert(Await.result(f.liftToTry) == Return.Unit)
     }
   }
 
@@ -193,7 +193,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
       val svc = client.newService(dest, "test")
       assert(!closed, "client closed too early")
       val f = svc.close()
-      eventually { assert(f.poll == Some(Return(()))) }
+      eventually { assert(f.poll == Some(Return.Unit)) }
       assert(closed, "client not closed")
     }
   }
@@ -248,7 +248,14 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
         timer = timer,
         statsReceiver = statsReceiver,
         failureAccrual = { factory: ServiceFactory[Int, Int] =>
-          FailureAccrualFactory.wrapper(statsReceiver, FailureAccrualPolicy.consecutiveFailures(6, Backoff.const(3.seconds)), name, DefaultLogger, unconnected)(timer) andThen factory
+          FailureAccrualFactory.wrapper(
+            statsReceiver,
+            FailureAccrualPolicy.consecutiveFailures(6, Backoff.const(3.seconds)),
+            name,
+            DefaultLogger,
+            unconnected,
+            ResponseClassifier.Default)(
+            timer) andThen factory
         }
       )
 

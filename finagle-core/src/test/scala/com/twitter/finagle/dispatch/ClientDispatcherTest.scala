@@ -1,20 +1,22 @@
 package com.twitter.finagle.dispatch
 
+import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Failure, WriteException}
+import com.twitter.util.{Future, Promise, Return, Throw}
+import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{times, verify, when}
-import org.mockito.Matchers._
-import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Throw, Return, Promise, Future}
-import com.twitter.finagle.{WriteException, Failure}
 
 @RunWith(classOf[JUnitRunner])
 class ClientDispatcherTest extends FunSuite with MockitoSugar {
   class DispatchHelper {
+    val stats = new InMemoryStatsReceiver()
     val trans = mock[Transport[String, String]]
-    val disp = new SerialClientDispatcher[String, String](trans)
+    val disp = new SerialClientDispatcher[String, String](trans, stats)
   }
 
   test("ClientDispatcher should dispatch requests") {
@@ -121,6 +123,30 @@ class ClientDispatcherTest extends FunSuite with MockitoSugar {
     val result: Throwable = resultOpt.get.asInstanceOf[Throw[String]].e
     assert(result.isInstanceOf[WriteException])
     assert(result.getCause == exc)
+  }
+
+  test("ClientDispatcher queue_size gauge") {
+    val h = new DispatchHelper
+    import h._
+
+    def assertGaugeSize(size: Int): Unit =
+      assert(stats.gauges(Seq("serial", "queue_size"))() == size)
+
+    assertGaugeSize(0)
+
+    val p = new Promise[String]()
+    when(trans.write(any[String])).thenReturn(Future.Done)
+    when(trans.read()).thenReturn(p)
+
+    disp("0")
+    assertGaugeSize(0) // 1 issued, but none pending
+
+    disp("1")
+    disp("2")
+    assertGaugeSize(2) // 1 issued, now 2 pending
+
+    p.setValue("done")
+    assertGaugeSize(0)
   }
 
 }

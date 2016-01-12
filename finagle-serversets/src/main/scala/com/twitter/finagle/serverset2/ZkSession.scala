@@ -3,11 +3,11 @@ package com.twitter.finagle.serverset2
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
-import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats._
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
+import scala.collection.concurrent
 
 /**
  * A representation of a ZooKeeper session based on asynchronous primitives such
@@ -19,6 +19,7 @@ import com.twitter.util._
  * represented with a [[com.twitter.util.Var]].
  */
 private[serverset2] class ZkSession(
+    retryStream: RetryStream,
     watchedZk: Watched[ZooKeeperReader],
     statsReceiver: StatsReceiver
   )(implicit timer: Timer) {
@@ -27,10 +28,9 @@ private[serverset2] class ZkSession(
   /** The dynamic `WatchState` of this `ZkSession` instance. */
   val state: Var[WatchState] = watchedZk.state
 
-  private val zkr: ZooKeeperReader = watchedZk.value
+  private[this] val unexpectedExceptions = new CategorizingExceptionStatsHandler(_ => Some("unexpected_exceptions"))
 
-  private def retryBackoffs =
-    (Backoff.decorrelatedJittered(10.milliseconds, 1.second) take 3) ++ Backoff.const(1.second)
+  private val zkr: ZooKeeperReader = watchedZk.value
 
   // If the zookeeper cluster is under duress, there can be 100's of thousands of clients
   // attempting to read and write at once. Limit to a (fairly large) concurrent request cap.
@@ -49,27 +49,43 @@ private[serverset2] class ZkSession(
       }
     }
 
+  private def retryWithDelay[T](f: => Future[T]): Future[T] =
+    Future.sleep(retryStream.next()).before(f)
+
+  // Track a timestamp for the last time we received a good update for
+  // a particular zookeeper child watch. All servers should be updated within the same approximate
+  // time. If a server has a different serverset size than its peers, this gauge will show
+  // us it is because it is not receiving updates.
+  @volatile var watchUpdateGauges = List.empty[Gauge]
+  private val lastGoodUpdate = new concurrent.TrieMap[String, Long]
+  private def noteGoodChildWatch(path: String): Unit = {
+    lastGoodUpdate.put(path, Time.now.inLongSeconds) match {
+      case None =>
+        // if there was no previous value, ensure we have a gauge
+        synchronized {
+          watchUpdateGauges ::= statsReceiver.addGauge("last_watch_update", path) {
+            Time.now.inLongSeconds - lastGoodUpdate.getOrElse(path, 0L)
+          }
+        }
+      case _ => //gauge is already there
+    }
+  }
+
   /**
    * Invoke a `Future[T]`-producing operation, retrying on
    * [[com.twitter.finagle.serverset2.client.KeeperException.ConnectionLoss]]
-   * according to a backoff schedule defined by [[retryBackoffs]]. The operation itself
+   * according to a backoff schedule defined by [[retryStream]]. The operation itself
    * will be limited by the session-level semaphore.
    */
   private def safeRetry[T](go: => Future[T]): Future[T] = {
-    def loop(backoffs: Stream[Duration]): Future[T] =
+    def loop(): Future[T] =
       limit { go }.rescue {
         case exc: KeeperException.ConnectionLoss =>
-          backoffs match {
-            case wait #:: rest =>
-              logger.warning(s"ConnectionLoss to Zookeeper host. Retrying in $wait")
-              Future.sleep(wait) before loop(rest)
-            case _ =>
-              logger.error(s"ConnectionLoss. Out of retries - failing request with $exc")
-              Future.exception(exc)
-          }
+          logger.warning(s"ConnectionLoss to Zookeeper host. Session $sessionIdAsHex. Retrying")
+          retryWithDelay { loop() }
       }
 
-    loop(retryBackoffs)
+    loop()
   }
 
   /**
@@ -83,19 +99,26 @@ private[serverset2] class ZkSession(
     Activity(Var.async[Activity.State[T]](Activity.Pending) { u =>
       @volatile var closed = false
 
-      def loop() {
+      def loop(): Future[Unit] = {
         if (!closed) safeRetry(go) respond {
+          case Throw(e@KeeperException.SessionExpired(_)) =>
+            // don't retry. The session has expired while trying to set the watch.
+            // In case our activity is still active, notify the listener
+            u() = Activity.Failed(e)
+
           case Throw(exc) =>
-            logger.error(s"Operation failed with $exc")
+            logger.error(s"Operation failed with $exc. Session $sessionIdAsHex")
             u() = Activity.Failed(exc)
+            retryWithDelay { loop() }
 
           case Return(Watched(value, state)) =>
             val ok = Activity.Ok(value)
+            retryStream.reset()
             u() = ok
 
-            state.changes respond {
+            state.changes.respond {
               case WatchState.Pending =>
-                // Ignore updates WatchState is Pending.
+              // Ignore updates WatchState is Pending.
 
               case WatchState.Determined(_) =>
                 // Note: since the watch transitioned to determined, we know
@@ -104,22 +127,37 @@ private[serverset2] class ZkSession(
                 // branches.
                 loop()
 
-              // This should handle SaslAuthenticated in the future (if this
-              // is propagated to non-session watchers).
-              case WatchState.SessionState(SessionState.SyncConnected)
-                 | WatchState.SessionState(SessionState.ConnectedReadOnly) =>
+              case WatchState.SessionState(sessionState)
+                if sessionState == SessionState.ConnectedReadOnly |
+                  sessionState == SessionState.SaslAuthenticated |
+                  sessionState == SessionState.SyncConnected =>
                 u() = ok
+                logger.info(s"Reacquiring watch on $sessionState. Session: $sessionIdAsHex")
+                // We may have lost or never set our watch correctly. Retry to ensure we stay connected
+                retryWithDelay { loop() }
 
               case WatchState.SessionState(SessionState.Expired) =>
-                logger.error("Session has expired. Watched data is now unavailable.")
                 u() = Activity.Failed(new Exception("session expired"))
+              // Do NOT retry here as the session has expired. We expect the watcher of this
+              // ZkSession to retry at this point (See [[ZkSession.retrying]]).
 
-              // Disconnected, NoSyncConnected, AuthFailed
-              case WatchState.SessionState(state) =>
-                logger.error(s"Failure session state: $state. Data is now unavailable.")
-                u() = Activity.Failed(new Exception("" + state))
+              // Disconnected, NoSyncConnected
+              case WatchState.SessionState(sessionState)
+                if sessionState == SessionState.Disconnected |
+                  sessionState == SessionState.NoSyncConnected =>
+                logger.warning(s"Intermediate Failure session state: $sessionState. " +
+                  s"Session: $sessionIdAsHex. Data is now unavailable.")
+                u() = Activity.Failed(new Exception("" + sessionState))
+                // Do NOT keep retrying, wait to be reconnected automatically by the underlying session
+
+              case WatchState.SessionState(sessionState) =>
+                logger.error(s"Unexpected session state $sessionState. Session: $sessionIdAsHex")
+                u() = Activity.Failed(new Exception("" + sessionState))
+                // We don't know what happened. Retry.
+                retryWithDelay { loop() }
             }
         }
+        Future.Done
       }
 
       loop()
@@ -163,8 +201,11 @@ private[serverset2] class ZkSession(
         getChildrenWatchOp(path) transform {
           case Activity.Pending => Activity.pending
           case Activity.Ok(Node.Children(children, _)) =>
+            noteGoodChildWatch(path)
             Activity.value(children.filter(_.startsWith(prefix)).toSet)
-          case Activity.Failed(KeeperException.NoNode(_)) => Activity.value(Set.empty)
+          case Activity.Failed(KeeperException.NoNode(_)) =>
+            noteGoodChildWatch(path)
+            Activity.value(Set.empty)
           case Activity.Failed(exc) =>
             logger.error(s"GetChildrenWatch to ($path, $prefix) failed with exception $exc")
             Activity.exception(exc)
@@ -184,7 +225,12 @@ private[serverset2] class ZkSession(
         logger.debug(s"Zk.GetData($path) retrieved ${data.length} bytes")
         Future.value(Some(data))
       case Return(_) => Future.value(None)
-      case Throw(exc) => Future.value(None)
+      case Throw(ex:KeeperException.NoNode) => Future.value(None)
+      case Throw(exc) =>
+        statsReceiver.counter("read_fail").incr()
+        unexpectedExceptions.record(statsReceiver, exc)
+        logger.warning(s"Unexpected failure for session $sessionIdAsHex. retrieving node $path. ($exc)")
+        Future.exception(exc)
     }
 
   /**
@@ -202,6 +248,7 @@ private[serverset2] class ZkSession(
   def getChildrenWatch(path: String): Future[Watched[Node.Children]] = zkr.getChildrenWatch(path)
   def getData(path: String): Future[Node.Data] = zkr.getData(path)
   def sessionId: Long = zkr.sessionId
+  def sessionIdAsHex = zkr.sessionId.toHexString
   def sessionPasswd: Buf = zkr.sessionPasswd
   def sessionTimeout: Duration = zkr.sessionTimeout
   def close() = zkr.close()
@@ -211,11 +258,10 @@ private[serverset2] object ZkSession {
   /** A noop ZkSession. */
   val nil: ZkSession = {
     implicit val timer = Timer.Nil
-    new ZkSession(Watched(NullZooKeeperReader, Var(WatchState.Pending)), NullStatsReceiver)
+    new ZkSession(RetryStream(), Watched(NullZooKeeperReader, Var(WatchState.Pending)), NullStatsReceiver)
   }
 
   val DefaultSessionTimeout = 10.seconds
-  val DefaultBackoff = 5.seconds
 
   private val authUser = Identities.get().headOption getOrElse(("/null"))
   private val authInfo: String = "%s:%s".format(authUser, authUser)
@@ -228,11 +274,13 @@ private[serverset2] object ZkSession {
    * @param sessionTimeout The ZooKeeper session timeout to use.
    */
   private[serverset2] def apply(
+    retryStream: RetryStream,
     hosts: String,
     sessionTimeout: Duration = DefaultSessionTimeout,
     statsReceiver: StatsReceiver
   )(implicit timer: Timer): ZkSession =
-    new ZkSession(ClientBuilder()
+    new ZkSession(retryStream,
+      ClientBuilder()
         .hosts(hosts)
         .sessionTimeout(sessionTimeout)
         .statsReceiver(DefaultStatsReceiver.scope("zkclient").scope(Zk2Resolver.statsOf(hosts)))
@@ -246,43 +294,37 @@ private[serverset2] object ZkSession {
    * observation of the returned `Var[ZkSession]` is closed.
    */
   def retrying(
-      backoff: Stream[Duration],
+      backoff: RetryStream,
       newZkSession: () => ZkSession
   )(implicit timer: Timer): Var[ZkSession] = {
     val v = Var(ZkSession.nil)
 
     @volatile var closing = false
     @volatile var zkSession: ZkSession = ZkSession.nil
-    @volatile var remainingBackoff = backoff
 
-    def nextBackoff(): Duration = {
-      remainingBackoff match {
-        case value #:: rest =>
-          remainingBackoff = rest
-          value
-
-        case _ => DefaultBackoff
-      }
-    }
     def reconnect() {
       if (closing) return
 
+      logger.info(s"Closing zk session ${zkSession.sessionIdAsHex}")
       zkSession.close()
       zkSession = newZkSession()
+      logger.info(s"Starting new zk session ${zkSession.sessionId}")
 
       // Upon initial connection, send auth info, then update `u`.
       zkSession.state.changes.filter {
         _ == WatchState.SessionState(SessionState.SyncConnected)
       }.toFuture.unit before zkSession.addAuthInfo("digest", Buf.Utf8(authInfo)) onSuccess { _ =>
+        logger.info(s"New ZKSession is connected. Session ID: ${zkSession.sessionIdAsHex}")
         v() = zkSession
+        backoff.reset()
       }
 
       // Kick off a delayed reconnection on session expiration.
       zkSession.state.changes.filter {
         _ == WatchState.SessionState(SessionState.Expired)
       }.toFuture().unit.before {
-        val jitter = nextBackoff()
-        logger.error(s"Zookeeper session has expired. Reconnecting in $jitter")
+        val jitter = backoff.next()
+        logger.error(s"Zookeeper session ${zkSession.sessionIdAsHex} has expired. Reconnecting in $jitter")
         Future.sleep(jitter)
       }.ensure { reconnect() }
     }

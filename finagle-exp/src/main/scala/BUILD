@@ -9,6 +9,7 @@ scala_library(name='scala',
     'finagle/finagle-thrift',
     'util/util-core',
   ],
+  fatal_warnings=True,
   sources=rglobs('com/twitter/finagle/exp/*.scala'),
 )
 

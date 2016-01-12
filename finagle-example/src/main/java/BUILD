@@ -12,6 +12,7 @@ java_library(name='java',
     'finagle/finagle-thrift',
     'util/util-core',
   ],
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )
 

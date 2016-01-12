@@ -5,10 +5,61 @@
 Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 6.x
------
+-------
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: Introduce the `c.t.f.filter.ServerAdmissionControl` module in the server Stack,
+    which is enabled through the param `c.t.f.param.EnableServerAdmissionControl`. Users can define
+    their own admission control filters, which reject requests when the server operates beyond
+    its capacity. These rejections apply backpressure and allow clients to retry requests on
+    servers that may not be over capacity. The filter implementation should define its own logic
+    to determine over capacity. One or more admission control filters can be installed through
+    the `ServerAdmissionControl.register` method. ``RB_ID=776385``
+
+  * finagle-core: Introduce `c.t.f.service.ResponseClassifier` which allows developers to
+    give Finagle the additional application specific knowledge necessary in order to properly
+    classify them. Without this, Finagle can only safely make judgements about transport
+    level failures. This is now used by `StatsFilter` and `FailureAccrualFactory` so that
+    application level failures can be used for both success metrics and failure accrual.
+    ``RB_ID=772906``
+
+  * finagle-memcached: Added `c.t.f.memcached.BaseClient.checkAndSet` which exposes the difference
+    between a conflict and a not found result.
+
+  * finagle-mux: Add a Wireshark dissector that can decode Mux messages. ``RB_ID=779482``
+
+Deprecations
+~~~~~~~~~~~~
+
+  * finagle-memcached: `c.t.f.memcached.BaseClient.cas` is deprecated in favor of the richer
+    `checkAndSet` method.
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: All the deprecated exceptions from `Exceptions.scala` have been removed.
+    ``RB_ID=774658``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thrift,thriftmux: Deserialization of Thrift responses now happens as part
+    of service application which means that it will now be part of the latency reported by
+    `StatsFilter`. The actual latency as perceived by clients will not have changed, but
+    for clients that spend significant time deserializing and do not have higher level
+    metrics this may come as a surprise. ``RB_ID=772931``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-thrift: Remove the `framed` attributes from `c.t.f.Thrift.Client` and
+    `c.t.f.Thrift.Server`.  This behavior may now be controlled with `c.t.f.Thrift.param.Framed`.
+
 
 6.31.0
-~~~~~~~
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -27,6 +78,9 @@ New Features
   * finagle-core: Introduce `c.t.f.transport.Transport.Options` to configure transport-level options
     (i.e., socket options `TCP_NODELAY` and `SO_REUSEADDR`). ``RB_ID=773824``
 
+  * finagle-http: `c.t.f.http.exp.Multipart` now supports both in-memory and on-disk file uploads.
+    ``RB_ID=RB_ID=769889``
+
   * finagle-netty4: Hello World. Introduce a `Listener` for Netty 4.1. This is still considered beta.
     ``RB_ID=718688``
 
@@ -34,9 +88,6 @@ New Features
 
   * finagle-thrift: `c.t.f.ThriftRichClient` implementations of `newServiceIface`
     method that accept a `label` argument to pass to the `ScopedStats` instance. ``RB_ID=760157``
-
-  * finagle-http: `c.t.f.http.exp.Multipart` now supports both in-memory and on-disk file uploads.
-    ``RB_ID=RB_ID=769889``
 
   * finagle-stats: Added `c.t.f.stats` now has a `statsFilterFile` flag which will read a blacklist
     of regex, newline-separated values. It will be used along with the `statsFilter` flag for stats
@@ -72,6 +123,9 @@ Runtime Behavior Changes
     into very basic 500 responses so clients talking to those services see standard HTTP
     responses instead of a dropped connection. ``RB_ID=755846``
 
+  * finagle-memcached: Moved metrics from underlying `KetamaPartitionedClient` for Memcached clients
+    to share the same scope of the underlying finagle client. ``RB_ID=771691``
+
   * finagle-mux: `com.twitter.finagle.mux.ThresholdFailureDetector` is turned on by
     default. ``RB_ID=756213``
 
@@ -82,6 +136,7 @@ Runtime Behavior Changes
 
   * finagle-serversets: The `c.t.f.serverset2.ZkSession` now uses an unbounded semaphore to
     limit to 100 outstanding zookeeper requests at any one moment. ``RB_ID=771399``
+
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -538,7 +593,7 @@ New Features
 
   * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
 
-  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`s.
+  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`\s.
 
   * finagle-core: Introduce per-address latency compensation.  Clients may be configured with
     a 'Compensator' function that uses the client's address metadata to adjust connection and

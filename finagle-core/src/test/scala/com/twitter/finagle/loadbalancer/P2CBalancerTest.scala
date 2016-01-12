@@ -306,7 +306,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
       if (step != 0 && schedule.isEmpty) return
       val next = if (step >= n) schedule else {
         val svc = Await.result(bal())
-        val latency = Await.result(svc()).toLong
+        val latency = Await.result(svc((): Unit)).toLong
         val work = (clock()+latency -> (schedule.getOrElse(clock()+latency, Nil) :+ svc))
         schedule + work
       }
@@ -326,7 +326,7 @@ class P2CBalancerEwmaTest extends FunSuite with App with P2CSuite {
       load += 1
       sum += load
       Future.value(new Service[Unit, Int] {
-        def apply(req: Unit) = Future.value(latency())
+        def apply(req: Unit) = Future.value(latency((): Unit))
       })
     }
     def close(deadline: Time) = Future.Done

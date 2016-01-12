@@ -1,7 +1,5 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.Duration
-
 /**
  * Maintain an exponential moving average of Long-typed values over a
  * given window on a user-defined clock.

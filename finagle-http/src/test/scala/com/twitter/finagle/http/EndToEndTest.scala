@@ -4,9 +4,11 @@ import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.FailureAccrualFactory
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
+import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory}
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, JavaTimer, Promise, Return, Throw, Time}
@@ -15,17 +17,22 @@ import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with BeforeAndAfter {
   var saveBase: Dtab = Dtab.empty
+  private val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
+
   before {
     saveBase = Dtab.base
     Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
+    statsRecv.clear()
   }
 
   after {
     Dtab.base = saveBase
+    statsRecv.clear()
   }
 
   type HttpService = Service[Request, Response]
@@ -48,6 +55,16 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     }
 
     loop(Buf.Empty)
+  }
+
+  private def requestWith(status: Status): Request =
+    Request(("statusCode", status.code.toString))
+
+  private val statusCodeSvc = new HttpService {
+    def apply(request: Request) = {
+      val statusCode = request.getIntParam("statusCode", Status.BadRequest.code)
+      Future.value(Response(Status.fromCode(statusCode)))
+    }
   }
 
   def run(name: String)(tests: HttpTest*)(connect: HttpService => HttpService): Unit = {
@@ -75,6 +92,24 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       request.headers().add("header", "a" * 8192)
       val response = Await.result(client(request))
       assert(response.status == Status.RequestHeaderFieldsTooLarge)
+      client.close()
+    }
+
+    test(name + ": with default ResponseClassifier") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+
+      Await.ready(client(requestWith(Status.Ok)), 1.second)
+      assert(statsRecv.counters(Seq("client", "requests")) == 1)
+      assert(statsRecv.counters(Seq("client", "success")) == 1)
+
+      Await.ready(client(requestWith(Status.ServiceUnavailable)), 1.second)
+      assert(statsRecv.counters(Seq("client", "requests")) == 2)
+      // by default any `Return` is a successful response.
+      assert(statsRecv.counters(Seq("client", "success")) == 2)
+
       client.close()
     }
 
@@ -203,6 +238,26 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       assert(res.contentString == "0")
 
       client.close()
+    }
+
+    test(name + ": context") {
+      val writtenDeadline = Deadline.ofTimeout(5.seconds)
+      val service = new HttpService {
+        def apply(request: Request) = {
+          val deadline = Contexts.broadcast.get(Deadline).get
+          assert(deadline.deadline == writtenDeadline.deadline)
+          val response = Response(request)
+          Future.value(response)
+        }
+      }
+
+      Contexts.broadcast.let(Deadline, writtenDeadline) {
+        val req = Request()
+        val client = connect(service)
+        val res = Await.result(client(Request("/")))
+        assert(res.status == Status.Ok)
+        client.close()
+      }
     }
 
     test(name + ": stream") {
@@ -418,12 +473,14 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     service =>
       val server = ServerBuilder()
         .codec(Http().maxRequestSize(100.bytes))
+        .reportTo(statsRecv)
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .name("server")
         .build(service)
 
       val client = ClientBuilder()
         .codec(Http())
+        .reportTo(statsRecv)
         .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
@@ -438,9 +495,14 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
   run("Client/Server")(standardErrors, standardBehaviour, tracing) {
     service =>
       import com.twitter.finagle
-      val server = finagle.Http.server.withMaxRequestSize(100.bytes).serve("localhost:*", service)
+      val server = finagle.Http.server
+        .configured(Stats(statsRecv))
+        .withMaxRequestSize(100.bytes)
+        .serve("localhost:*", service)
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = finagle.Http.newService("%s:%d".format(addr.getHostName, addr.getPort))
+      val client = finagle.Http.client
+        .configured(Stats(statsRecv))
+        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
       new ServiceProxy(client) {
         override def close(deadline: Time) =
@@ -549,6 +611,35 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         override def close(deadline: Time) =
           Closable.all(client, server).close(deadline)
       }
+  }
+
+  test("ResponseClassifier based on status code") {
+    import com.twitter.finagle
+
+    val classifier = HttpResponseClassifier {
+      case (_, r: Response) if r.status == Status.ServiceUnavailable =>
+        ResponseClass.NonRetryableFailure
+    }
+
+    val server = finagle.Http.server
+      .configured(param.Stats(NullStatsReceiver))
+      .serve("localhost:*", statusCodeSvc)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = finagle.Http.client
+      .configured(param.Stats(statsRecv))
+      .withResponseClassifier(classifier)
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    Await.ready(client(requestWith(Status.Ok)), 1.second)
+    assert(statsRecv.counters(Seq("client", "requests")) == 1)
+    assert(statsRecv.counters(Seq("client", "success")) == 1)
+
+    Await.ready(client(requestWith(Status.ServiceUnavailable)), 1.second)
+    assert(statsRecv.counters(Seq("client", "requests")) == 2)
+    assert(statsRecv.counters(Seq("client", "success")) == 1)
+
+    client.close()
+    server.close()
   }
 
   test("codec should require a message size be less than 2Gb") {

@@ -11,7 +11,7 @@ import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.ShardNotAvailableException
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, MockTimer, Time}
+import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
@@ -78,8 +78,8 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
         }
       val expected =
         Map(
-          "foos" ->("xyz", "1"), // the "cas unique" values are predictable from a fresh memcached
-          "bazs" ->("zyx", "3")
+          "foos" -> (("xyz", "1")), // the "cas unique" values are predictable from a fresh memcached
+          "bazs" -> (("zyx", "3"))
         )
       assert(result == expected)
     }
@@ -146,10 +146,10 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     intercept[NullPointerException] { Await.result(client.set(nullString, Buf.Utf8("bar"))) }
     intercept[ClientError] { Await.result(client.set("    ", Buf.Utf8("bar"))) }
 
-    assert(Await.result(client.set("\t", Buf.Utf8("bar"))) == ()) // "\t" is a valid key
+    assert(Await.result(client.set("\t", Buf.Utf8("bar")).liftToTry) == Return.Unit) // "\t" is a valid key
     intercept[ClientError] { Await.result(client.set("\r", Buf.Utf8("bar"))) }
     intercept[ClientError] { Await.result(client.set("\n", Buf.Utf8("bar"))) }
-    intercept[ClientError] { Await.result(client.set("\0", Buf.Utf8("bar"))) }
+    intercept[ClientError] { Await.result(client.set("\u0000", Buf.Utf8("bar"))) }
 
     val veryLongKey = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
     intercept[ClientError] { Await.result(client.get(veryLongKey)) }
@@ -214,6 +214,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       def apply(command: Command) = command match {
         case Get(key) => Future.value(Values(List(Value(Buf.Utf8("foo"), Buf.Utf8("bar")))))
         case Set(_, _, _, _) => Future.value(Error(new Exception))
+        case x => Future.exception(new MatchError(x))
       }
     }
 
@@ -237,7 +238,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       intercept[Exception] { Await.result(client.set("foo", Buf.Utf8("bar"))) }
 
       // Node should have been ejected
-      assert(statsReceiver.counters.get(List("ejections")) == Some(1))
+      assert(statsReceiver.counters.get(List("cacheClient", "ejections")) == Some(1))
 
       // Node should have been marked dead, and still be dead after 5 minutes
       timeControl.advance(5.minutes)
@@ -251,7 +252,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       timer.tick()
 
       // 10 minutes (markDeadFor duration) have passed, so the request should go through
-      assert(statsReceiver.counters.get(List("revivals")) == Some(1))
+      assert(statsReceiver.counters.get(List("cacheClient", "revivals")) == Some(1))
       assert(Await.result(client.get(s"foo")).get == Buf.Utf8("bar"))
     }
   }

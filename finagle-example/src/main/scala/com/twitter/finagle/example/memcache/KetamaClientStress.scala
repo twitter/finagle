@@ -16,6 +16,7 @@ import com.twitter.ostrich.admin.{AdminHttpService, RuntimeEnvironment}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
+import scala.language.reflectiveCalls
 
 object KetamaClientStress extends App {
 
@@ -232,7 +233,7 @@ object KetamaClientStress extends App {
             val (key, value) = nextKeyValue
             casMap.remove(key) match {
               case Some(ConsistentReplication(Some((_, RCasUnique(uniques))))) =>
-                replicationClient.cas(key, value, uniques)
+                replicationClient.checkAndSet(key, value, uniques)
               case Some(ConsistentReplication(None)) =>
                 // not expecting this to ever happen
                 replicationClient.set(key, value)

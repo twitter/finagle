@@ -1,16 +1,12 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client.{SessionState, WatchState}
-import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.stats.{Gauge, Stat, StatsReceiver}
-import com.twitter.io.Buf
+import com.twitter.finagle.stats.{Stat, StatsReceiver}
+import com.twitter.finagle.util.Rng
 import com.twitter.logging.Logger
 import com.twitter.util._
 
-
 private[serverset2] object ServiceDiscoverer {
-  val DefaultRetrying = Backoff.decorrelatedJittered(5.seconds, 30.seconds)
   val EndpointGlob = "/member_"
   val VectorGlob = "/vector_"
 
@@ -47,6 +43,7 @@ private[serverset2] object ServiceDiscoverer {
     }
   }
 
+  object EntryLookupFailureException extends Exception("All serverset member lookups failed")
 }
 
 /**
@@ -65,7 +62,8 @@ private[serverset2] object ServiceDiscoverer {
 private[serverset2] class ServiceDiscoverer(
   varZkSession: Var[ZkSession],
   val statsReceiver: StatsReceiver,
-  healthStabilizationEpoch: Epoch
+  healthStabilizationEpoch: Epoch,
+  timer: Timer
 ) {
   import ServiceDiscoverer._
 
@@ -73,6 +71,8 @@ private[serverset2] class ServiceDiscoverer(
   private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
 
   private[this] val actZkSession = Activity(varZkSession.map(Activity.Ok(_)))
+  private[this] val log = Logger(getClass)
+  private[this] val retryJitter = Duration.fromSeconds(20 + Rng.threadLocal.nextInt(120))
 
   /**
    * Monitor the session status of the ZkSession and expose to listeners whether
@@ -88,6 +88,7 @@ private[serverset2] class ServiceDiscoverer(
         stateListener.close()
         stateListener = zk.state.changes.dedup.respond {
           case WatchState.SessionState(state) =>
+            log.info(s"SessionState. Session ${zk.sessionIdAsHex}. State $state")
             u() = ClientHealth(state)
           case _ => // don't need to update on non-sessionstate events
         }
@@ -107,14 +108,6 @@ private[serverset2] class ServiceDiscoverer(
   private[serverset2] val health: Var[ClientHealth] =
     HealthStabilizer(rawHealth, healthStabilizationEpoch, statsReceiver)
 
-  private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
-    val elapsed = Stopwatch.start()
-    f.map { rv =>
-      stat.add(elapsed().inMilliseconds)
-      rv
-    }
-  }
-
   /**
    * Activity to keep a hydrated list of Entrys or Vectors for a given ZK path.
    * protected for testing
@@ -130,16 +123,58 @@ private[serverset2] class ServiceDiscoverer(
       zkSession.globOf(path + glob).flatMap { paths =>
         // Remove any cached entries not surfaced by globOf from our cache
         (cache.keys &~ paths).foreach(cache.remove)
-        timedOf(readStat) {
-          // We end up with a Seq[Seq[Entity]] here, b/c cache.get() returns a Seq[Entity]
-          // flatten() to fix this (see the comment on ZkNodeDataCache for why we get a Seq[])
-          Activity.future(Future.collectToTry(paths.toSeq.map(cache.get))
-            .map(tries => tries.collect { case Return(e) => e }.flatten)
-          )
-        }
+        bulkResolveMemberData(path, paths.toSeq, cache, readStat)
       }
     }
   }
+
+  /**
+    * Resolve all child paths of a watch. If all resolutions fail,
+    * schedule a retry for later.
+    */
+  private[this] def bulkResolveMemberData[Entity](
+    parentPath: String,
+    paths: Seq[String],
+    cache: ZkNodeDataCache[Entity],
+    readStat: Stat
+  ): Activity[Seq[Entity]] =
+    Activity(Var.async[Activity.State[Seq[Entity]]](Activity.Pending) { u =>
+      @volatile var closed = false
+
+      def loop(): Future[Unit] = {
+        if (!closed) {
+          @volatile var seenFailures = false
+          Stat.timeFuture(readStat) {
+            Future.collectToTry(paths.map { path =>
+              // note if any failed
+              cache.get(path).onFailure { _ => seenFailures = true }
+            })
+              // We end up with a Seq[Seq[Entity]] here, b/c cache.get() returns a Seq[Entity]
+              // flatten() to fix this (see the comment on ZkNodeDataCache for why we get a Seq[])
+              .map(tries => tries.collect { case Return(e) => e }.flatten)
+              .map { seq =>
+                // if we have *any* results or no-failure, we consider it a success
+                if (seenFailures && seq.isEmpty) u() = Activity.Failed(EntryLookupFailureException)
+                else u() = Activity.Ok(seq)
+              }.ensure {
+                if (seenFailures) {
+                  log.warning(s"Failed to read all data for $parentPath. Retrying in $retryJitter")
+                  timer.doLater(retryJitter) { loop() }
+                }
+              }
+          }
+        }
+
+        Future.Done
+      }
+
+      loop()
+
+      Closable.make { _ =>
+        closed = true
+        Future.Done
+      }
+    })
 
   // protected for testing
   protected[this] val entriesOf: String => Activity[Seq[Entry]] = Memoize { path: String =>

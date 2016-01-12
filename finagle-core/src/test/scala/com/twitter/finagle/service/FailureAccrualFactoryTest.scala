@@ -72,6 +72,35 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("uses ResponseClassifier for determining success") {
+    val svcFactory = ServiceFactory.const {
+      Service.mk { i: Int =>
+        Future.exception[Int](new IllegalArgumentException(i.toString))
+      }
+    }
+    val classifier: ResponseClassifier = {
+      case ReqRep(in: Int, Throw(_)) if in < 0 => ResponseClass.Success
+      case ReqRep(_, Throw(ex)) if ex.getMessage.toInt == 10 => ResponseClass.Success
+    }
+    val stats = new InMemoryStatsReceiver()
+    val faf = new FailureAccrualFactory[Int, Int](
+      svcFactory,
+      FailureAccrualPolicy.consecutiveFailures(1, Backoff.const(2.seconds)),
+      Timer.Nil,
+      stats,
+      responseClassifier = classifier)
+    val svc = Await.result(faf(), 5.second)
+
+    // normally these are failures, but these will not trip it...
+    svc(-1)
+    svc(10)
+    assert(stats.counter("removals")() == 0)
+
+    // trip it.
+    svc(5)
+    assert(stats.counter("removals")() == 1)
+  }
+
   test("a failing service should enter the probing state after the markDeadFor duration") {
     val h = new Helper(consecutiveFailures)
     import h._
@@ -105,7 +134,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         Await.result(service(123))
       }
 
-      assert(statsReceiver.counters.get(List("removals")) == Some(2))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
 
@@ -135,7 +164,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           Await.result(service(123))
         }
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -144,7 +173,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timeControl.advance(markDeadForList(i) - 1.second)
         timer.tick()
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -154,7 +183,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timer.tick()
 
         // The service should be available for a probe
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(statsReceiver.counters.get(List("revivals")) == None)
         assert(factory.isAvailable)
         assert(service.isAvailable)
@@ -200,7 +229,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
           Await.result(service(123))
         }
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -209,7 +238,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timeControl.advance(markDeadFor(i) - 1.second)
         timer.tick()
 
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
 
@@ -219,7 +248,7 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         timer.tick()
 
         // The service should be available for a probe
-        assert(statsReceiver.counters.get(List("removals")) == Some(i + 1))
+        assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(statsReceiver.counters.get(List("revivals")) == None)
         assert(factory.isAvailable)
         assert(service.isAvailable)
@@ -541,13 +570,14 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
 
   class CustomizedFactory {
     class CustomizedFailureAccrualFactory(
-      underlying: ServiceFactory[Int, Int],
-      failureAccrualPolicy: FailureAccrualPolicy,
-      timer: Timer,
-      label: String
-    ) extends FailureAccrualFactory[Int, Int](underlying, failureAccrualPolicy, timer, NullStatsReceiver, label) {
-      override def isSuccess(response: Try[Int]): Boolean = {
-        response match {
+        underlying: ServiceFactory[Int, Int],
+        failureAccrualPolicy: FailureAccrualPolicy,
+        timer: Timer,
+        label: String)
+      extends FailureAccrualFactory[Int, Int](
+        underlying, failureAccrualPolicy, timer, NullStatsReceiver, label) {
+      override def isSuccess(reqRep: ReqRep): Boolean = {
+        reqRep.response match {
           case Throw(_) => false
           case Return(x) => x != 321
         }
@@ -610,21 +640,41 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val p2: Param = Replaced(_ => ServiceFactoryWrapper.identity)
     val p3: Param = Disabled
 
-    assert((p1 match { case Param.Configured(x) => x() }) == failureAccrualPolicy)
-    assert((p2 match { case Param.Replaced(f) => f(null) }) == ServiceFactoryWrapper.identity)
-    assert(p3 match { case Disabled => true })
+    assert((p1 match {
+      case Param.Configured(x) => x()
+      case x => throw new MatchError(x)
+    }) == failureAccrualPolicy)
+
+    assert((p2 match {
+      case Param.Replaced(f) => f(null)
+      case x => throw new MatchError(x)
+    }) == ServiceFactoryWrapper.identity)
+
+    assert(p3 match {
+      case Disabled => true
+      case x => throw new MatchError(x)
+    })
 
     val ps1: Stack.Params = Stack.Params.empty + p1
     assert(ps1.contains[Param])
-    assert((ps1[Param] match { case Param.Configured(x) => x() }) == failureAccrualPolicy)
+    assert((ps1[Param] match {
+      case Param.Configured(x) => x()
+      case x => throw new MatchError(x)
+    }) == failureAccrualPolicy)
 
     val ps2: Stack.Params = Stack.Params.empty + p2 + p1
     assert(ps2.contains[Param])
-    assert((ps2[Param] match { case Param.Configured(x) => x() }) == failureAccrualPolicy)
+    assert((ps2[Param] match {
+      case Param.Configured(x) => x()
+      case x => throw new MatchError(x)
+    }) == failureAccrualPolicy)
 
     val ps3: Stack.Params = Stack.Params.empty + p1 + p2 + p3
     assert(ps3.contains[Param])
-    assert(ps3[Param] match { case Disabled => true })
+    assert(ps3[Param] match {
+      case Disabled => true
+      case x => throw new MatchError(x)
+    })
   }
 
   test("module") {

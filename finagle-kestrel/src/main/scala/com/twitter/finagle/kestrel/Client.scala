@@ -117,7 +117,7 @@ abstract class ReadHandle {
       // just (as is now) be propagated
       // immediately.
       val error = underlying.error
-      def close() = closeReq ! ()
+      def close() = closeReq ! ((): Unit)
     }
   }
 }
@@ -486,7 +486,7 @@ protected[kestrel] class ConnectedClient(underlying: ServiceFactory[Command, Res
     read(
       (response: Response) =>
         response match {
-          case Values(Seq(Value(_, item))) => Return(Some(item, ()))
+          case Values(Seq(Value(_, item))) => Return(Some((item, ())))
           case Values(Seq()) => Return(None)
           case _ => Throw(new IllegalArgumentException("invalid reply from kestrel"))
         },
@@ -592,7 +592,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
   def read(queueName: String): ReadHandle =
     read(
       (response: Seq[Item]) => response match {
-        case Seq(Item(data, id)) => Return(Some(Buf.ByteBuffer(data), id))
+        case Seq(Item(data, id)) => Return(Some((Buf.ByteBuffer(data), id)))
         case Seq() => Return(None)
         case _ => Throw(new IllegalArgumentException("invalid reply from kestrel"))
       },

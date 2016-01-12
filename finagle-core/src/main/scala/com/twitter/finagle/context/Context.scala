@@ -212,7 +212,7 @@ final class MarshalledContext extends Context {
    * and unmarshaller.
    */
 
-  abstract class Key[A](id: String) {
+  abstract class Key[A](val id: String) {
     /**
      * A unique identifier defining this marshaller. This is
      * transmitted together with marshalled values in order to

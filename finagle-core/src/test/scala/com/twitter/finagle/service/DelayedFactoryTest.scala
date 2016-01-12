@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory, Failure}
-import com.twitter.util.{Await, Future, Promise, Time}
+import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -220,7 +220,7 @@ class DelayedFactoryTest extends FunSuite {
         assert(!factory.isAvailable)
         val f = factory.close()
         assert(f.isDefined)
-        assert(Await.result(f) == ())
+        assert(Await.result(f.liftToTry) == Return.Unit)
         assert(underlying.isAvailable)
         completeFuture()
         assert(!underlying.isAvailable)
@@ -233,7 +233,7 @@ class DelayedFactoryTest extends FunSuite {
         assert(!factory.isAvailable)
         val f = factory.close()
         assert(f.isDefined)
-        assert(Await.result(f) == ())
+        assert(Await.result(f.liftToTry) == Return.Unit)
         completeFuture()
       }
     }

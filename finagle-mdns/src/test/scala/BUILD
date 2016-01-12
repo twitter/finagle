@@ -6,5 +6,6 @@ junit_tests(name='scala',
     'finagle/finagle-mdns',
     'util/util-core',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala')
 )

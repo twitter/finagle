@@ -17,10 +17,10 @@ import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
  */
 class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
-  with ConnectionLifecycleHandler
 {
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val connectionCount: AtomicLong = new AtomicLong()
+  private[this] var elapsed: () => Duration = null
 
   private[this] val connects                = statsReceiver.counter("connects")
   private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
@@ -36,23 +36,13 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     connectionCount.get()
   }
 
-  protected[channel] def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
-    ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
+  override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
+    elapsed = Stopwatch.start()
+    ctx.setAttachment(new AtomicLong(0), new AtomicLong(0))
     connects.incr()
     connectionCount.incrementAndGet()
 
-    val elapsed = Stopwatch.start()
-    onClose ensure {
-      closeChans.incr()
-      val (channelReadCount, channelWriteCount) =
-        ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
-
-      connectionReceivedBytes.add(channelReadCount.get)
-      connectionSentBytes.add(channelWriteCount.get)
-
-      connectionDuration.add(elapsed().inMilliseconds)
-      connectionCount.decrementAndGet()
-    }
+    super.channelOpen(ctx, e)
   }
 
   override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
@@ -89,6 +79,20 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     closedCount.incr()
+    closeChans.incr()
+
+    // guarded in case Netty calls channelClosed without calling channelOpen.
+    if (elapsed != null) {
+      val (channelReadCount, channelWriteCount) =
+        ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
+
+      connectionReceivedBytes.add(channelReadCount.get)
+      connectionSentBytes.add(channelWriteCount.get)
+
+      connectionDuration.add(elapsed().inMilliseconds)
+      connectionCount.decrementAndGet()
+    }
+
     super.channelClosed(ctx, e)
   }
 

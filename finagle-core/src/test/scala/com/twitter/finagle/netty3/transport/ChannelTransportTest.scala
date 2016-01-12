@@ -66,7 +66,7 @@ class ChannelTransportTest
     import ctx._
 
     dsme.getFuture.setSuccess()
-    assert(Await.result(f) == ())
+    assert(Await.result(f.liftToTry) == Return.Unit)
   }
 
   test("write to the underlying channel, proxying the underlying ChannelFuture (err)") {

@@ -9,5 +9,6 @@ junit_tests(name='java',
     'finagle/finagle-memcached/src/test/scala:external',
     'util/util-core',
   ],
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )

@@ -20,10 +20,11 @@ private class BalancerTest extends FunSuite
   private class TestBalancer(
       protected val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver)
     extends Balancer[Unit, Unit] {
-    def maxEffort: Int = ???
+    def maxEffort: Int = 5
     def emptyException: Throwable = ???
 
     def stats: InMemoryStatsReceiver = statsReceiver
+    protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
 
     def nodes: Vector[Node] = dist.vector
     def factories: Set[ServiceFactory[Unit, Unit]] = nodes.map(_.factory).toSet
@@ -37,8 +38,8 @@ private class BalancerTest extends FunSuite
 
     case class Distributor(vector: Vector[Node], gen: Int = 1) extends DistributorT {
       type This = Distributor
-      def pick(): Node = ???
-      def needsRebuild = ???
+      def pick(): Node = vector.head
+      def needsRebuild = false
       def rebuild(): This = {
         rebuildDistributor()
         copy(gen=gen+1)
@@ -58,7 +59,7 @@ private class BalancerTest extends FunSuite
         factory.close()
         Future.Done
       }
-      def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = ???
+      def apply(conn: ClientConnection): Future[Service[Unit,Unit]] = Future.never
     }
 
     protected def newNode(
@@ -122,6 +123,22 @@ private class BalancerTest extends FunSuite
     assert(bal.status == Status.Busy)
   }
 
+  test("max_effort_exhausted counter updated properly") {
+    val stats = new InMemoryStatsReceiver()
+    val bal = new TestBalancer(stats)
+    val closed = newFac(Status.Closed)
+    val open = newFac(Status.Open)
+
+    // start out all closed
+    bal.update(Seq(closed))
+    bal(ClientConnection.nil)
+    assert(1 == stats.counters(Seq("max_effort_exhausted")))
+
+    // now have it be open and a pick must succeed
+    bal.update(Seq(open))
+    bal(ClientConnection.nil)
+    assert(1 == stats.counters(Seq("max_effort_exhausted")))
+  }
 
   test("updater: keeps nodes up to date") {
     val bal = new TestBalancer

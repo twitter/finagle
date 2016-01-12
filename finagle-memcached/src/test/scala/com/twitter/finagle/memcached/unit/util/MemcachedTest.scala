@@ -55,7 +55,7 @@ class MemcachedTest extends FunSuite
 
     // wait until we have at least 1 node, or risk getting a ShardNotAvailable exception
     eventually {
-      assert(st.gauges(Seq("live_nodes"))() >= 1)
+      assert(st.gauges(Seq("memcache", "live_nodes"))() >= 1)
     }
 
     val numberRequests = 10

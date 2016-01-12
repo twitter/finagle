@@ -3,8 +3,6 @@ package com.twitter.finagle.http.javaapi;
 import java.util.Collection;
 import java.util.List;
 
-import scala.Tuple2;
-
 import com.twitter.finagle.Client;
 import com.twitter.finagle.Service;
 import com.twitter.finagle.builder.ClientBuilder;
@@ -70,7 +68,7 @@ public final class HttpClientTest {
       com.twitter.finagle.Http
           .client()
           .withTls("foo.com")
-          .configured(Tuple2.apply(Label.apply("test"), Label.param()))
+          .configured(new Label("test").mk())
           .withDecompression(true);
   }
 }

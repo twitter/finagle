@@ -3,9 +3,7 @@ package com.twitter.finagle.service.exp
 import com.twitter.conversions.time._
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.util.Ema
-import com.twitter.util.{Duration, Stopwatch}
-import java.util.Arrays
-import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
+import com.twitter.util.Duration
 
 /**
  * A `FailureAccrualPolicy` is used by `FailureAccrualFactory` to determine

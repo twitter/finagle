@@ -139,9 +139,6 @@ class NoBrokersAvailableException(
     s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
 }
 
-@deprecated("no longer used by com.twitter.finagle.service.RetryExceptionsFilter", "7.0.0")
-class RetryFailureException(cause: Throwable) extends RequestException(cause)
-
 /**
  * Indicates that a request was cancelled. Cancellation is propagated between a
  * Finagle server and a client intra-process when the server is interrupted by
@@ -180,9 +177,6 @@ class TooManyWaitersException extends RequestException
 class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)
 }
-
-@deprecated("no longer used by com.twitter.finagle.service.RetryFilter", "7.0.0")
-class ReplyCastException extends RequestException
 
 /**
  * Used by [[com.twitter.finagle.service.FailFastFactory]] to indicate that a
@@ -239,7 +233,9 @@ object ChannelException {
  * An exception encountered within the context of a given socket channel.
  */
 class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
-  extends Exception(underlying) with SourcedException
+  extends Exception(underlying)
+  with SourcedException
+  with HasLogLevel
 {
   def this(underlying: Throwable) = this(underlying, null)
   def this() = this(null, null)
@@ -253,6 +249,7 @@ class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
     if (serviceName == SourcedException.UnspecifiedServiceName) message
     else s"$message from service: $serviceName"
   }
+  def logLevel: Level = Level.DEBUG
 }
 
 /**
@@ -360,9 +357,6 @@ case class ConnectionRefusedException(override val remoteAddress: SocketAddress)
  */
 case class RefusedByRateLimiter() extends ChannelException
 
-@deprecated("no longer used by com.twitter.finagle.service.FailFastFactory", "7.0.0")
-case class FailFastException() extends ChannelException
-
 /**
  * A base class for exceptions encountered in the context of a
  * [[com.twitter.finagle.transport.Transport]].
@@ -412,9 +406,6 @@ class ServiceTimeoutException(override protected val timeout: Duration)
     "creating a service/connection or reserving a service/connection from the service/connection pool " + serviceName
 }
 
-@deprecated("no longer used", "7.0.0")
-class ApplicationException extends Exception
-
 /**
  * A base class for exceptions encountered on account of incorrect API usage.
  */
@@ -426,15 +417,6 @@ class ApiException extends Exception
  * configurable maximum.
  */
 class TooManyConcurrentRequestsException extends ApiException
-
-@deprecated("no longer used", "7.0.0")
-class InvalidPipelineException extends ApiException
-
-@deprecated("no longer used", "7.0.0")
-class NotYetConnectedException extends ApiException
-
-@deprecated("no longer used", "7.0.0")
-class CodecException(description: String) extends Exception(description)
 
 /**
  * Indicates that an error occurred on account of incorrect usage of a

@@ -420,6 +420,7 @@ object Stack {
    * operates over stacks and the entire parameter map. The `ModuleN` variants
    * may be more convenient for most definitions as they operate over `T` types
    * and the parameter extraction is derived from type parameters.
+   * `ModuleParams` is similar, except it requires `parameters` to be declared.
    *
    * {{{
    * def myNode = new Module[Int=>Int]("myelem") {
@@ -438,6 +439,12 @@ object Stack {
     def make(params: Params, next: Stack[T]): Stack[T]
     def toStack(next: Stack[T]): Stack[T] =
       Node(this, (prms, next) => make(prms, next), next)
+  }
+
+  abstract class ModuleParams[T] extends Stackable[T] {
+    def make(params: Params, next: T): T
+    def toStack(next: Stack[T]): Stack[T] =
+      Node(this, (prms, next) => Leaf(this, make(prms, next.make(prms))), next)
   }
 
   /** A module of 0 parameters. */

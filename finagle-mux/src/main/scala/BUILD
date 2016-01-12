@@ -12,5 +12,6 @@ scala_library(name='scala',
     'finagle/finagle-core',
     'util/util-core',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
 )

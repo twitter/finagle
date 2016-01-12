@@ -2,12 +2,14 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
-import com.twitter.finagle.http.filter.{DtabFilter, HttpNackFilter}
+import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.{ProtocolLibrary, Stats}
 import com.twitter.finagle.server._
+import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
@@ -119,7 +121,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): Client = copy(stack, params)
 
     protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] =
-      new HttpClientDispatcher(transport)
+      (new ClientContextFilter[Request, Response])
+        .andThen(new HttpClientDispatcher(
+          transport,
+          params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)))
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
       configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
@@ -152,9 +157,19 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
+
+    /**
+     * Produce a [[com.twitter.finagle.Http.Client]] using the provided
+     * [[ResponseClassifier]]. This allows application level customization of
+     * how responses are classified as successful or not.
+     *
+     * @see [[com.twitter.finagle.http.service.HttpResponseClassifier]]
+     */
+    def withResponseClassifier(classifier: ResponseClassifier): Client =
+      configured(com.twitter.finagle.param.ResponseClassifier(classifier))
   }
 
-  val client = Client()
+  val client: Http.Client = Client()
 
   def newService(dest: Name, label: String): Service[Request, Response] =
     client.newService(dest, label)
@@ -166,9 +181,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackServer.newStack
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
-        .replace(
-          StackServer.Role.preparer,
-          (next: ServiceFactory[Request, Response]) => (new HttpNackFilter).andThen(next))
+        .replace(StackServer.Role.preparer, HttpNackFilter.module)
   }
 
   case class Server(
@@ -197,9 +210,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {
       val dtab = new DtabFilter.Finagle[Request]
+      val context = new ServerContextFilter[Request, Response]
       val Stats(stats) = params[Stats]
 
-      new HttpServerDispatcher(new HttpTransport(transport), dtab andThen service, stats.scope("dispatch"))
+      new HttpServerDispatcher(new HttpTransport(transport), dtab andThen context andThen service, stats.scope("dispatch"))
     }
 
     protected def copy1(
@@ -226,7 +240,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       configured(param.CompressionLevel(level))
   }
 
-  val server = Server()
+  val server: Http.Server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Request, Response]): ListeningServer =
     server.serve(addr, service)

@@ -1,14 +1,12 @@
 package com.twitter.finagle
 
+import com.twitter.finagle
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.PipeliningDispatcher
-import com.twitter.finagle.loadbalancer._
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import java.net.SocketAddress
 
 trait RedisRichClient { self: Client[Command, Reply] =>
 
@@ -41,6 +39,11 @@ object Redis extends Client[Command, Reply] {
     extends StdStackClient[Command, Reply, Client]
     with RedisRichClient {
 
+    override def configured[P](psp: (P, Stack.Param[P])): Client = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
+
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Reply]] = this.stack,
       params: Stack.Params = this.params
@@ -53,10 +56,13 @@ object Redis extends Client[Command, Reply] {
       Netty3Transporter(redis.RedisClientPipelineFactory, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
-      new PipeliningDispatcher(transport)
+      new PipeliningDispatcher(
+        transport,
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+      )
   }
 
-  val client = Client()
+  val client: Redis.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Reply] =
     client.newClient(dest, label)

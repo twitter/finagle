@@ -20,6 +20,7 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.language.postfixOps
 
 import scala.collection.immutable.{Set => ISet}
 import scala.collection.mutable.{ArrayBuffer, Set => MSet}

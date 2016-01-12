@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.finagle._
 import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Timer, Duration, Future}
+import com.twitter.util._
 
 /**
  * Requeues service application failures that are encountered in modules below it.
@@ -45,45 +45,60 @@ private[finagle] class RequeueFilter[Req, Rep](
 
   private[this] val requeueCounter = statsReceiver.counter("requeues")
   private[this] val budgetExhaustCounter = statsReceiver.counter("budget_exhausted")
+  private[this] val requestLimitCounter = statsReceiver.counter("request_limit")
+  private[this] val requeueStat = statsReceiver.stat("requeues_per_request")
+
+  private[this] def responseFuture(
+    attempt: Int,
+    t: Try[Rep]
+  ): Future[Rep] = {
+    requeueStat.add(attempt)
+    Future.const(t)
+  }
 
   private[this] def applyService(
     req: Req,
     service: Service[Req, Rep],
+    attempt: Int,
     retriesRemaining: Int,
     backoffs: Stream[Duration]
   ): Future[Rep] = {
-    service(req).rescue {
-      case exc@RetryPolicy.RetryableWriteException(_) =>
+    service(req).transform {
+      case t@Throw(RetryPolicy.RetryableWriteException(_)) =>
         if (!canRetry()) {
-          Future.exception(exc)
+          responseFuture(attempt, t)
         } else if (retriesRemaining > 0 && retryBudget.tryWithdraw()) {
           backoffs match {
             case Duration.Zero #:: rest =>
               // no delay between retries. Retry immediately.
               requeueCounter.incr()
-              applyService(req, service, retriesRemaining - 1, rest)
+              applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
             case delay #:: rest =>
               // Delay and then retry.
               timer.doLater(delay) {
                 requeueCounter.incr()
-                applyService(req, service, retriesRemaining - 1, rest)
+                applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
               }.flatten
             case _ =>
               // Schedule has run out of entries. Budget is empty.
               budgetExhaustCounter.incr()
-              Future.exception(exc)
+              responseFuture(attempt, t)
           }
         } else {
           if (retriesRemaining > 0)
             budgetExhaustCounter.incr()
-          Future.exception(exc)
+          else
+            requestLimitCounter.incr()
+          responseFuture(attempt, t)
         }
+      case t =>
+        responseFuture(attempt, t)
     }
   }
 
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     retryBudget.deposit()
     val maxRetries = Math.ceil(maxRetriesPerReq * retryBudget.balance).toInt
-    applyService(req, service, maxRetries, retryBackoffs)
+    applyService(req, service, 0, maxRetries, retryBackoffs)
   }
 }

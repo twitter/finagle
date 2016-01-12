@@ -117,7 +117,10 @@ class BaseClient(service: Service[Command, Reply]) {
    */
   private[redis] def returnPairs(messages: Seq[ChannelBuffer]) = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
-    messages.grouped(2).toSeq flatMap { case Seq(a, b) => Some(a, b); case _ => None }
+    messages.grouped(2).toSeq.flatMap {
+      case Seq(a, b) => Some((a, b))
+      case _ => None
+    }
   }
 
 }

@@ -484,6 +484,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     }
   }
 
+  @SuppressWarnings("unchecked")
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case TRACE_ID:

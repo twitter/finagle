@@ -105,10 +105,12 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
 
   import ZkOp._
 
+  val retryStream = RetryStream()
+
   test("ops retry safely") { Time.withCurrentTimeFrozen { tc =>
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val zk = new ZkSession(watchedZk, NullStatsReceiver)
+    val zk = new ZkSession(retryStream, watchedZk, NullStatsReceiver)
 
     val v = zk.existsOf("/foo/bar")
     // An unobserved Var makes no side effect.
@@ -135,7 +137,7 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
   test("ZkSession.globOf") { Time.withCurrentTimeFrozen { tc =>
     implicit val timer = new MockTimer
     val watchedZk = Watched(new OpqueueZkReader(), Var(WatchState.Pending))
-    val zk = new ZkSession(watchedZk, NullStatsReceiver)
+    val zk = new ZkSession(retryStream, watchedZk, NullStatsReceiver)
 
     val v = zk.globOf("/foo/bar/")
     val ref = new AtomicReference[Activity.State[Set[String]]]
@@ -171,7 +173,7 @@ class ZkSessionTest extends FunSuite with Eventually with IntegrationPatience {
     implicit val timer = new MockTimer
     val zkState: Var[WatchState] with Updatable[WatchState] = Var(WatchState.Pending)
     val watchedZk = Watched(new OpqueueZkReader(), zkState)
-    val zk = ZkSession.retrying(Backoff.constant(5.seconds), () => new ZkSession(watchedZk, NullStatsReceiver))
+    val zk = ZkSession.retrying(retryStream, () => new ZkSession(retryStream, watchedZk, NullStatsReceiver))
 
     zk.changes.respond {
       case _ => ()

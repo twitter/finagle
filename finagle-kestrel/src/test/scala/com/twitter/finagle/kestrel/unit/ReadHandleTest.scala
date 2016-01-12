@@ -7,6 +7,7 @@ import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.language.postfixOps
 
 @RunWith(classOf[JUnitRunner])
 class ReadHandleTest extends FunSuite {

@@ -41,7 +41,7 @@ class ChanTest extends FunSuite {
 
   test("Proc should swallow exceptions") {
     val p = Proc[Int] { _ => throw new RuntimeException }
-    assert((p ! 4) ===())
+    assert((p ! 4) ===((): Unit))
   }
 
 }

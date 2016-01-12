@@ -5,7 +5,6 @@ import com.twitter.util.{Await, Var}
 import java.net.{InetSocketAddress, InetAddress, Socket}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.SpanSugar._
 import org.scalatest.FunSuite
@@ -69,7 +68,7 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
     Await.result(Announcer.announce(sock, "mdns!foo._bar._tcp.local."))
   }
 
-  test("throws an exception on an imporperly formatted name") {
+  test("throws an exception on an improperly formatted name") {
     val res = new MDNSResolver
     val ann = new MDNSAnnouncer
     val ia = new InetSocketAddress(loopback, 0)

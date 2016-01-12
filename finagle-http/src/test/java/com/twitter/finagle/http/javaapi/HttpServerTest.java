@@ -3,8 +3,6 @@ package com.twitter.finagle.http.javaapi;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import scala.Tuple2;
-
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import com.twitter.finagle.Server;
@@ -53,7 +51,7 @@ public final class HttpServerTest {
         com.twitter.finagle.Http
             .server()
             .withCompressionLevel(2)
-            .configured(Tuple2.apply(Label.apply("test"), Label.param()))
+            .configured(new Label("test").mk())
             .withDecompression(true);
   }
 }

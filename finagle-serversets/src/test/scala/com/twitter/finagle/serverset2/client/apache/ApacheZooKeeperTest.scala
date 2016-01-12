@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.serverset2.client._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
-import com.twitter.util.Await
+import com.twitter.util.{Return, Await}
 import java.util.concurrent.ExecutionException
 import org.apache.zookeeper
 import org.junit.runner.RunWith
@@ -105,7 +105,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
 
     val closed = zk.close()
 
-    assert(Await.result(closed) == ())
+    assert(Await.result(closed.liftToTry) == Return.Unit)
   }
 
   "close" should "handle error conditions" in {
@@ -222,7 +222,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
       meq(null))
 
     voidCB.getValue.processResult(apacheOk, path, null)
-    assert(Await.result(deleted) == ())
+    assert(Await.result(deleted.liftToTry) == Return.Unit)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
@@ -236,7 +236,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
       meq(null))
 
     voidCB.getValue.processResult(apacheOk, path, null)
-    assert(Await.result(deleted) == ())
+    assert(Await.result(deleted.liftToTry) == Return.Unit)
     assert(statsReceiver.counter("write_successes")() == 1)
   }
 
@@ -835,7 +835,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
     )
 
     voidCB.getValue.processResult(apacheOk, path, null)
-    assert(Await.result(synced) == ())
+    assert(Await.result(synced.liftToTry) == Return.Unit)
     assert(statsReceiver.counter("read_successes")() == 1)
   }
 

@@ -3,13 +3,15 @@ package com.twitter.finagle.stats
 import com.twitter.app.GlobalFlag
 import scala.collection.Map
 import scala.collection.mutable
+import scala.util.matching.Regex
 
 object format extends GlobalFlag[String](
   "commonsmetrics",
-  "Format style for metric names (ostrich|commonsmetrics)"
+  "Format style for metric names (ostrich|commonsmetrics|commonsstats)"
 ) {
   private[stats] val Ostrich = "ostrich"
   private[stats] val CommonsMetrics = "commonsmetrics"
+  private[stats] val CommonsStats = "commonsstats"
 }
 
 /**
@@ -68,6 +70,7 @@ private[stats] object StatsFormatter {
     format() match {
       case format.Ostrich => Ostrich
       case format.CommonsMetrics => CommonsMetrics
+      case format.CommonsStats => CommonsStats
     }
 
   /**
@@ -126,4 +129,55 @@ private[stats] object StatsFormatter {
     protected def labelAverage: String = "average"
   }
 
+  /**
+   * Replicates the behavior for formatting Commons Stats stats.
+   *
+   * See Commons Stats' `Stats.getVariables()`.
+   */
+  object CommonsStats extends StatsFormatter {
+
+    private[this] def inMegabytes(l: Number): Number = l.longValue() / 1048576L
+    private[this] def inSeconds(l: Number): Number = l.longValue() / 1000L
+    private[this] val gcCycles: Regex = "^jvm_mem_(.*)_cycles$".r
+    private[this] val gcMsec: Regex = "^jvm_mem_(.*)_msec$".r
+
+    override def apply(values: SampledValues): Map[String, Number] = {
+      val original = super.apply(values)
+
+      original.map {
+        case ("jvm_num_cpus", n) => "jvm_available_processors" -> n
+        case ("jvm_classes_current_loaded", n) => "jvm_class_loaded_count" -> n
+        case ("jvm_classes_total_loaded", n) => "jvm_class_total_loaded_count" -> n
+        case ("jvm_classes_total_unloaded", n) => "jvm_class_unloaded_count" -> n
+        case ("jvm_gc_msec", n) => "jvm_gc_collection_time_ms" -> n
+        case ("jvm_gc_cycles", n) => "jvm_gc_collection_count" -> n
+        case ("jvm_heap_committed", n) => "jvm_memory_heap_mb_committed" -> inMegabytes(n)
+        case ("jvm_heap_max", n) => "jvm_memory_heap_mb_max" -> inMegabytes(n)
+        case ("jvm_heap_used", n) => "jvm_memory_heap_mb_used" -> inMegabytes(n)
+        case ("jvm_nonheap_committed", n) => "jvm_memory_non_heap_mb_committed" -> inMegabytes(n)
+        case ("jvm_nonheap_max", n) => "jvm_memory_non_heap_mb_max" -> inMegabytes(n)
+        case ("jvm_nonheap_used", n) => "jvm_memory_non_heap_mb_used" -> inMegabytes(n)
+        case ("jvm_thread_count", n) => "jvm_threads_active" -> n
+        case ("jvm_thread_daemon_count", n) => "jvm_threads_daemon" -> n
+        case ("jvm_thread_peak_count", n) => "jvm_threads_peak" -> n
+        case ("jvm_start_time", n) => "jvm_time_ms" -> n
+        case ("jvm_uptime", n) => "jvm_uptime_secs" -> inSeconds(n)
+        case (gcCycles(gc), n) => s"jvm_gc_${gc}_collection_count" -> n
+        case (gcMsec(gc), n) => s"jvm_gc_${gc}_collection_time_ms" -> n
+        case kv => kv
+      }
+    }
+
+    protected def histoName(name: String, component: String): String =
+      s"${name}_$component"
+
+    protected def labelPercentile(p: Double): String =
+      s"${p * 100}_percentile".replace(".", "_")
+
+    protected def labelMin: String = "min"
+
+    protected def labelMax: String = "max"
+
+    protected def labelAverage: String = "avg"
+  }
 }

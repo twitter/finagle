@@ -53,7 +53,7 @@ class BufferTest extends FunSuite {
   }
 
   test("read null terminated string") {
-    val str = "Null Terminated String\0"
+    val str = "Null Terminated String\u0000"
     val br = BufferReader(str.getBytes)
     assert(str.take(str.size-1) == br.readNullTerminatedString())
   }
@@ -137,7 +137,7 @@ class BufferTest extends FunSuite {
   test("null terminated string") {
     val ctx = writerCtx()
     import ctx._
-    val str = "test\0"
+    val str = "test\u0000"
     bw.writeNullTerminatedString(str)
     assert(str.take(str.length-1) == br.readNullTerminatedString())
   }

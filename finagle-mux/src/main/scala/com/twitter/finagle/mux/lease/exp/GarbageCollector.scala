@@ -1,6 +1,5 @@
 package com.twitter.finagle.mux.lease.exp
 
-import com.twitter.util.NonFatal
 import java.util.logging.Level
 
 private[lease] object GarbageCollector {

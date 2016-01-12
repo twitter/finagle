@@ -32,6 +32,7 @@ class RequeueFilterTest extends FunSuite {
     }
 
     assert(minRetries * percentRequeues == stats.counter("requeues")())
+    assert(Seq(minRetries * percentRequeues) == stats.stat("requeues_per_request")())
     // the budget is not considered exhausted if we only used
     // our maxRetriesPerReq
     assert(0 == stats.counter("budget_exhausted")())
@@ -59,7 +60,53 @@ class RequeueFilterTest extends FunSuite {
     }
 
     assert(minRetries == stats.counter("requeues")())
+    assert(Seq(minRetries) == stats.stat("requeues_per_request")())
     assert(1 == stats.counter("budget_exhausted")())
+  }
+
+  test("tracks requeues_per_request") {
+    val stats = new InMemoryStatsReceiver()
+    def perReqRequeues: Seq[Float] =
+      stats.stat("requeues_per_request")()
+
+    val minRetries = 10
+    val percentRequeues = 0.5 // allow only 50% to be used
+    val retryBudget = RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis)
+    val filter = new RequeueFilter[String, Int](
+      retryBudget,
+      Backoff.constant(Duration.Zero),
+      stats,
+      () => true,
+      percentRequeues,
+      DefaultTimer.twitter)
+
+    var numNos = 0
+    val svc = filter.andThen(Service.mk { s: String =>
+      if (s == "no" && numNos == 0) {
+        numNos += 1
+        Future.exception(new FailedFastException(s))
+      } else if (s == "fail") {
+        Future.exception(new FailedFastException(s))
+      } else {
+        Future.value(s.length)
+      }
+    })
+
+    // a successful request
+    Await.ready(svc("hi"), 5.seconds)
+    assert(Seq(0) == perReqRequeues)
+
+    // a request that fails once
+    Await.ready(svc("no"), 5.seconds)
+    assert(Seq(0, 1) == perReqRequeues)
+
+    // a request that fails until it runs out of attempts
+    assert(0 == stats.counter("request_limit")()) // verify a precondition
+    Await.ready(svc("fail"), 5.seconds)
+    // the 1 failed request knocks our balance from 10 to 9,
+    // then we get 50% of that, which is 5.
+    assert(Seq(0, 1, 5) == perReqRequeues)
+    assert(1 == stats.counter("request_limit")())
   }
 
   test("applies delay") {

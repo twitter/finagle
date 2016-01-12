@@ -7,7 +7,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{DefaultLogger, Updater}
 import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.logging.Level
-import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask, Promise}
+import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
 import java.net.SocketAddress
 import java.util.logging.Logger
 import scala.util.Random

@@ -7,5 +7,6 @@ java_library(name='java',
   dependencies=[
     'finagle/finagle-http/src/main/scala'
   ],
+  fatal_warnings=False,
   sources=rglobs('*.java'),
 )

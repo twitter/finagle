@@ -238,6 +238,7 @@ public class ResponseHeader implements TBase<ResponseHeader, ResponseHeader._Fie
     }
   }
 
+  @SuppressWarnings("unchecked")
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case SPANS:

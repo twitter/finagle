@@ -113,7 +113,7 @@ class ProxyTest extends FunSuite with BeforeAndAfter {
       stats.foreach { stat =>
         assert(stat.startsWith("ITEM"))
       }
-      assert(stats.find { stat => stat.contains("foo") } isDefined)
+      assert(stats.find { stat => stat.contains("foo") }.isDefined)
       externalClient.release()
     }
   }

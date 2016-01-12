@@ -6,7 +6,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
 import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
-import com.twitter.finagle.dispatch.{SerialServerDispatcher, PipeliningDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
@@ -17,13 +17,11 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{Backoff, FailFastFactory, FailureAccrualFactory}
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
-import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.hashing
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Duration, Future}
+import com.twitter.util.{Closable, Future}
 import scala.collection.mutable
 
 /**
@@ -207,6 +205,11 @@ object Memcached extends finagle.Client[Command, Response]
 
     import Client.mkDestination
 
+    override def configured[P](psp: (P, Stack.Param[P])): Client = {
+      val (p, sp) = psp
+      configured(p)(sp)
+    }
+
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Response]] = this.stack,
       params: Stack.Params = this.params
@@ -219,7 +222,10 @@ object Memcached extends finagle.Client[Command, Response]
       Netty3Transporter(MemcachedClientPipelineFactory, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
-      new PipeliningDispatcher(transport)
+      new PipeliningDispatcher(
+        transport,
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+      )
 
     def newTwemcacheClient(dest: Name, label: String) = {
       val _dest = if (LocalMemcached.enabled) {
@@ -234,7 +240,6 @@ object Memcached extends finagle.Client[Command, Response]
       }
 
       val finagle.param.Stats(sr) = params[finagle.param.Stats]
-      val finagle.param.Timer(timer) = params[finagle.param.Timer]
       val param.KeyHasher(hasher) = params[param.KeyHasher]
       val param.NumReps(numReps) = params[param.NumReps]
 
@@ -248,7 +253,8 @@ object Memcached extends finagle.Client[Command, Response]
       }
 
       val group = CacheNodeGroup(Group.fromVarAddr(va))
-      new KetamaPartitionedClient(group, newService, healthBroker, sr, hasher, numReps)
+      val scopedSr = sr.scope(label)
+      new KetamaPartitionedClient(group, newService, healthBroker, scopedSr, hasher, numReps)
         with TwemcachePartitionedClient
     }
 
@@ -273,14 +279,14 @@ object Memcached extends finagle.Client[Command, Response]
     /**
      * Duplicate each node across the hash ring according to `reps`.
      *
-     * @see [[com.twitter.finagle.memcached.KetamaDistributor]] for more
+     * @see [[com.twitter.hashing.KetamaDistributor]] for more
      * details.
      */
     def withNumReps(reps: Int): Client =
       configured(param.NumReps(reps))
   }
 
-  val client = Client()
+  val client: Memcached.Client = Client()
 
   def newClient(dest: Name, label: String): ServiceFactory[Command, Response] =
     client.newClient(dest, label)
@@ -319,7 +325,7 @@ object Memcached extends finagle.Client[Command, Response]
     ): Closable = new SerialServerDispatcher(transport, service)
   }
 
-  val server = Server()
+  val server: Memcached.Server = Server()
 
   def serve(addr: SocketAddress, service: ServiceFactory[Command, Response]): ListeningServer =
     server.serve(addr, service)

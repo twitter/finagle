@@ -2,12 +2,10 @@ package com.twitter.finagle.pool
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.StackClient
-import com.twitter.finagle.service.FailedService
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Future, Return, Throw, Time, Promise}
 import java.util.concurrent.atomic.{AtomicReference, AtomicInteger}
 import scala.annotation.tailrec
-import scala.collection.immutable
 
 private[finagle] object SingletonPool {
   val role = StackClient.Role.pool
@@ -192,8 +190,8 @@ extends ServiceFactory[Req, Rep] {
   @tailrec
   private[this] def closeService(deadline: Time): Future[Unit] = 
     state.get match {
-      case s@Idle =>
-        if (!state.compareAndSet(s, Closed)) closeService(deadline)
+      case Idle =>
+        if (!state.compareAndSet(Idle, Closed)) closeService(deadline)
         else Future.Done
   
       case s@Open(svc) =>

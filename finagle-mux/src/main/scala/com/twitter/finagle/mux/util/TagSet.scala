@@ -26,12 +26,13 @@ private[mux] object TagSet {
   def apply(): TagSet = TagSet(Message.MinTag to Message.MaxTag)
 
   /** Constructs a space-efficient TagSet for the given range */
-  def apply(_range: Range): TagSet = new TagSet {
+  def apply(_range: Range): TagSet = new TagSet { self =>
     val range = _range
     // We could easily stripe the bitsets here, since we don't
     // require contiguous tag assignment.
     require(range.step == 1)
     val start = range.start
+    // thread safety provided by synchronizing on `this`/`self`
     val bits = new BitSet
 
     def acquire(): Option[Int] = synchronized {
@@ -52,10 +53,10 @@ private[mux] object TagSet {
       var _next = start-1
       next()
 
-      def hasNext = _next != -1
-      def next() = {
+      def hasNext: Boolean = _next != -1
+      def next(): Int = {
         val cur = _next
-        _next = TagSet.this.synchronized(bits.nextSetBit(_next+1))
+        _next = self.synchronized { bits.nextSetBit(_next+1) }
         cur
       }
     }

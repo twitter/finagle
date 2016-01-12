@@ -14,6 +14,7 @@ import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+import scala.language.reflectiveCalls
 
 class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep]) extends Service[Req, Rep] {
   @volatile private[this] var currentService: Future[Service[Req, Rep]] = factory()

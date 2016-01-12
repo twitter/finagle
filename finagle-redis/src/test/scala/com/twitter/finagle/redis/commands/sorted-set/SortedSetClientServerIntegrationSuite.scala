@@ -11,6 +11,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import scala.language.implicitConversions
 
 @Ignore
 @RunWith(classOf[JUnitRunner])

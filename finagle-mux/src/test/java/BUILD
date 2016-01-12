@@ -4,5 +4,6 @@ junit_tests(name='java',
     'finagle/finagle-mux',
     'util/util-core',
   ],
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )

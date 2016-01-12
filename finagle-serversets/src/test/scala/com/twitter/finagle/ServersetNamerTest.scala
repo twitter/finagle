@@ -1,7 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.newZk
-import com.twitter.finagle.{Addr, Resolver, Name, Namer}
 import com.twitter.util.Var
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
@@ -43,26 +41,16 @@ class ServersetNamerTest
     }
   }
 
-  test("binds to zk2") {
-    newZk.let(true) { schemeOk("zk2") }
-  }
-
-  test("binds to zk") {
-    newZk.let(false) { schemeOk("zk") }
-  }
-
   test("negative resolution") {
-    newZk.let(true) {
-      var named = 0
-      val namer = mkNamer { spec =>
-        assert(spec == s"zk2!hosts!/twitter/service/role/env/job:endpoint/extra")
-        named += 1
-        Var.value(Addr.Neg)
-      }
-      assert(named == 0)
-      val path = Path.read("/hosts/twitter/service/role/env/job:endpoint/extra")
-      assert(namer.bind(NameTree.Leaf(path)).sample() == NameTree.Neg)
-      assert(named == 1)
+    var named = 0
+    val namer = mkNamer { spec =>
+      assert(spec == s"zk2!hosts!/twitter/service/role/env/job:endpoint/extra")
+      named += 1
+      Var.value(Addr.Neg)
     }
+    assert(named == 0)
+    val path = Path.read("/hosts/twitter/service/role/env/job:endpoint/extra")
+    assert(namer.bind(NameTree.Leaf(path)).sample() == NameTree.Neg)
+    assert(named == 1)
   }
 }

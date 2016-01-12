@@ -82,7 +82,7 @@ class PoolingReadRepairClient(allClients: Seq[BaseClient[Buf]],
   def stats(args: Option[String]) = unsupported
   def decr(key: String,delta: Long) = unsupported
   def incr(key: String,delta: Long) = unsupported
-  def cas(key: String, flags: Int,expiry: Time, value: Buf,casUnique: Buf) = unsupported
+  def checkAndSet(key: String, flags: Int,expiry: Time, value: Buf,casUnique: Buf) = unsupported
   def replace(key: String,flags: Int,expiry: Time,value: Buf) = unsupported
   def prepend(key: String,flags: Int,expiry: Time,value: Buf) = unsupported
   def append(key: String,flags: Int,expiry: Time,value: Buf) = unsupported

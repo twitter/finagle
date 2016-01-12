@@ -2,12 +2,13 @@ ClientBuilder
 <<<<<<<<<<<<<
 
 **codec_connection_preparation_latency_ms**
-  a histogram of the length of time it takes to prepare a connection and get back a service,
-  regardless of success or failure
+  A histogram of the length of time it takes to prepare a connection and get
+  back a service, regardless of success or failure.
 
 StatsServiceFactory
 <<<<<<<<<<<<<<<<<<<
 
 **available**
-  a gauge of whether the underlying factory is available (1) or not (0).  finagle uses this
-  primarily to decide whether a host is available to make new connections to in the load balancer.
+  A gauge of whether the underlying factory is available (1) or not (0).
+  Finagle uses this primarily to decide whether a host is eligible for new
+  connections in the load balancer.

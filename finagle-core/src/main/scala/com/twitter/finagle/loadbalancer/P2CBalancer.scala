@@ -37,7 +37,11 @@ private class P2CBalancer[Req, Rep](
   extends Balancer[Req, Rep]
   with LeastLoaded[Req, Rep]
   with P2C[Req, Rep]
-  with Updating[Req, Rep]
+  with Updating[Req, Rep] {
+
+  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+
+}
 
 /**
  * Like [[com.twitter.finagle.loadbalancer.P2CBalancer]] but
@@ -76,7 +80,11 @@ private class P2CBalancerPeakEwma[Req, Rep](
   extends Balancer[Req, Rep]
   with PeakEwma[Req, Rep]
   with P2C[Req, Rep]
-  with Updating[Req, Rep]
+  with Updating[Req, Rep] {
+
+  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+
+}
 
 private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
 
@@ -88,7 +96,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
 
   protected class Metric(sr: StatsReceiver, name: String) {
     private[this] val epoch = nanoTime()
-    private[this] val Penalty: Double = Double.MaxValue/2
+    private[this] val Penalty: Double = Long.MaxValue >> 16
     // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
     private[this] val Tau: Double = decayTime.inNanoseconds.toDouble
     require(Tau > 0)
