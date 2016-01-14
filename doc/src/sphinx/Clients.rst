@@ -560,7 +560,6 @@ particular client.
     .configured(FailFastFactory.Param(enabled = false))
     .newService("twitter.com")
 
-
 .. note::
 
   It's important to disable `Fail Fast` when only have one host in the replica set because
@@ -623,7 +622,6 @@ requests success rate [#example]_.
     markDeadFor = Backoff.const(30.seconds)
   )
 
-
 The ``successRate`` factory method takes three arguments:
 
 1. `requiredSuccessRate` - the minimally required success rate bellow which an endpoint marked dead
@@ -643,10 +641,9 @@ To construct an instance of ``FailureAccrualPolicy`` based on a number of consec
 
   val policy: FailureAccrualPolicy =
     FailureAccrualPolicy.consecutiveFailures(
-     consecutiveFailures = 10,
+      consecutiveFailures = 10,
       markDeadFor = Backoff.const(30.seconds)
     )
-
 
 The ``consecutiveFailures`` factory method takes two arguments:
 

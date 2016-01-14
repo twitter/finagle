@@ -25,6 +25,9 @@ New Features
     application level failures can be used for both success metrics and failure accrual.
     ``RB_ID=772906``
 
+  * finagle-core: Introduce discoverable stack params which are available on every client/server
+    via the `with`-prefixed methods. ``RB_ID=781833``
+
   * finagle-memcached: Added `c.t.f.memcached.BaseClient.checkAndSet` which exposes the difference
     between a conflict and a not found result.
 

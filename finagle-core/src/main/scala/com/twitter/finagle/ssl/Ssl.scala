@@ -4,8 +4,6 @@ import java.util.logging.Logger
 import javax.net.ssl._
 
 
-import collection.mutable.{Map => MutableMap}
-
 /*
  * SSL helper object, capable of creating cached SSLEngine instances
  * backed by both the native APR/OpenSSL bindings, or pure Java JSSE.
@@ -22,7 +20,7 @@ object Ssl {
    * @param caCertPath The path to the optional PEM encoded CA cert
    *   file. [JSSE: If caCertPath is set, it should contain the
    *   certificate and will be used in place of certificatePath.]
-   * @param cipherSpec [OpenSSL] The cipher spec
+   * @param ciphers [OpenSSL] The ciphers spec
    * @throws RuntimeException if no provider could be initialized
    * @return an SSLEngine
    */
@@ -85,7 +83,7 @@ object Ssl {
   /**
    * Get a client engine from the given context
    */
-  def client(sslContext : SSLContext, peerHost: String, peerPort: Int): Engine = JSSE.client(sslContext, peerHost, peerPort)
+  def client(sslContext: SSLContext, peerHost: String, peerPort: Int): Engine = JSSE.client(sslContext, peerHost, peerPort)
 
   /**
    * Get a client engine that doesn't check the validity of certificates
