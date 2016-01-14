@@ -1,15 +1,18 @@
 package com.twitter.finagle.thrift
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.param.Stats
+import com.twitter.finagle.service.{ResponseClass, ReqRep, ResponseClassifier}
 import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.test._
-import com.twitter.util.{Closable, Await, Duration, Future}
+import com.twitter.util._
 import java.io.{File, PrintWriter, StringWriter}
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.apache.thrift.TApplicationException
@@ -351,6 +354,101 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   }
 
   runThriftTests()
+
+  private val classifier: ResponseClassifier = {
+    case ReqRep(Echo.Echo.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
+      ResponseClass.Success
+    case ReqRep(_, Throw(_: InvalidQueryException)) => ResponseClass.NonRetryableFailure
+    case ReqRep(_, Return(s: String)) => ResponseClass.NonRetryableFailure
+  }
+
+  private def serverForClassifier(): ListeningServer  = {
+    val iface = new Echo.FutureIface {
+      def echo(x: String) =
+        if (x == "safe") Future.value("safe")
+        else Future.exception(new InvalidQueryException(x.length))
+    }
+    val svc = new Echo.FinagledService(iface, Protocols.binaryFactory())
+    Thrift.server
+      .configured(Stats(NullStatsReceiver))
+      .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
+  }
+
+  private def testFailureClassification(
+    sr: InMemoryStatsReceiver,
+    client: Echo.FutureIface
+  ): Unit = {
+    val ex = intercept[InvalidQueryException] {
+      Await.result(client.echo("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+
+    // test that we can examine the request as well.
+    intercept[InvalidQueryException] {
+      Await.result(client.echo("ok"), 5.seconds)
+    }
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.echo("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 3)
+    assert(sr.counters(Seq("client", "success")) == 1)
+  }
+
+
+  test("thrift stack client deserialized response classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = Thrift.client
+      .configured(Stats(sr))
+      .withResponseClassifier(classifier)
+      .newIface[Echo.FutureIface](Name.bound(server.boundAddress), "client")
+
+    testFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("thrift ClientBuilder deserialized response classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val clientBuilder = ClientBuilder()
+      .stack(Thrift.client)
+      .name("client")
+      .reportTo(sr)
+      .responseClassifier(classifier)
+      .dest(Name.bound(server.boundAddress))
+      .build()
+    val client = new Echo.FinagledClient(clientBuilder)
+
+    testFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("thrift response classification using ThriftExceptionsAsFailures") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = Thrift.client
+      .configured(Stats(sr))
+      .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
+      .newIface[Echo.FutureIface](Name.bound(server.boundAddress), "client")
+
+    val ex = intercept[InvalidQueryException] {
+      Await.result(client.echo("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.echo("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+    server.close()
+  }
+
 }
 
 /*

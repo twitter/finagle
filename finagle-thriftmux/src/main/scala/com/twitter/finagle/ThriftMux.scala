@@ -142,6 +142,7 @@ object ThriftMux
      * [[ResponseClassifier]]. This allows application level customization of
      * how responses are classified as successful or not.
      *
+     * @see [[com.twitter.finagle.thrift.service.ThriftResponseClassifier.ThriftExceptionsAsFailures]]
      * @see [[ThriftMuxResponseClassifier]]
      */
     def withResponseClassifier(classifier: ResponseClassifier): Client =
@@ -193,7 +194,7 @@ object ThriftMux
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
-  val client = Client()
+  val client: ThriftMux.Client = Client()
     .configured(Label("thrift"))
     .configured(Stats(ClientStatsReceiver))
 
@@ -204,8 +205,17 @@ object ThriftMux
   protected val Thrift.param.ProtocolFactory(protocolFactory) =
     client.params[Thrift.param.ProtocolFactory]
 
-  def newClient(dest: Name, label: String) = client.newClient(dest, label)
-  def newService(dest: Name, label: String) = client.newService(dest, label)
+  def newClient(
+    dest: Name,
+    label: String
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    client.newClient(dest, label)
+
+  def newService(
+    dest: Name,
+    label: String
+  ): Service[ThriftClientRequest, Array[Byte]] =
+    client.newService(dest, label)
 
   /**
    * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
@@ -393,7 +403,10 @@ object ThriftMux
       }
     }
 
-    def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) = {
+    def serve(
+      addr: SocketAddress,
+      factory: ServiceFactory[Array[Byte], Array[Byte]]
+    ): ListeningServer = {
       muxer.serve(
         addr,
         MuxToArrayFilter.andThen(tracingFilter).andThen(factory))
@@ -404,6 +417,9 @@ object ThriftMux
     .configured(Label("thrift"))
     .configured(Stats(ServerStatsReceiver))
 
-  def serve(addr: SocketAddress, factory: ServiceFactory[Array[Byte], Array[Byte]]) =
+  def serve(
+    addr: SocketAddress,
+    factory: ServiceFactory[Array[Byte], Array[Byte]]
+  ): ListeningServer =
     server.serve(addr, factory)
 }

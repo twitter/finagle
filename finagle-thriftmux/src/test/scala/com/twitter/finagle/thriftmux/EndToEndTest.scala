@@ -10,6 +10,7 @@ import com.twitter.finagle.param.{Tracer => PTracer, Label, Stats}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, Retries, RetryBudget}
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientFramedCodec, ThriftClientRequest}
+import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
 import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestService, TestService$FinagleClient, TestService$FinagleService}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
@@ -497,7 +498,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     assert(sr.counters(Seq("client", "success")) == 1)
   }
 
-  ignore("thriftmux stack client deserialized failure classification") {
+  test("thriftmux stack client deserialized response classification") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = ThriftMux.client
@@ -509,7 +510,7 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     server.close()
   }
 
-  ignore("thriftmux ClientBuilder deserialized failure classification") {
+  test("thriftmux ClientBuilder deserialized response classification") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val clientBuilder = ClientBuilder()
@@ -522,6 +523,28 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     val client = new TestService.FinagledClient(clientBuilder)
 
     testFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("thriftmux response classification using ThriftExceptionsAsFailures") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = ThriftMux.client
+      .configured(Stats(sr))
+      .withResponseClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
+      .newIface[TestService.FutureIface](Name.bound(server.boundAddress), "client")
+
+    val ex = intercept[InvalidQueryException] {
+      Await.result(client.query("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.query("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
     server.close()
   }
 

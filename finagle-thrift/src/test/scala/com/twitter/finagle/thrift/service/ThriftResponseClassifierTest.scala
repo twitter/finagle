@@ -1,24 +1,23 @@
-package com.twitter.finagle.thriftmux.service
+package com.twitter.finagle.thrift.service
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.mux
-import com.twitter.finagle.service.{ReqRep, ResponseClassifier, ResponseClass}
+import com.twitter.finagle.service.{ResponseClassifier, ResponseClass, ReqRep}
 import com.twitter.finagle.service.ResponseClass._
 import com.twitter.finagle.thrift.DeserializeCtx
-import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestService}
-import com.twitter.io.{Buf, Charsets}
-import com.twitter.util.{Throw, Return}
+import com.twitter.finagle.thrift.thriftscala.{InvalidQueryException, Echo}
+import com.twitter.io.Charsets
+import com.twitter.util.{Return, Throw}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ThriftMuxResponseClassifierTest extends FunSuite {
+class ThriftResponseClassifierTest extends FunSuite {
 
-  private val classifier = ThriftMuxResponseClassifier.usingDeserializeCtx {
+  private val classifier = ThriftResponseClassifier.usingDeserializeCtx {
     case ReqRep(_, Return(rep: String)) if rep == "nope" => RetryableFailure
     case ReqRep(_, Throw(e: InvalidQueryException)) if e.errorCode == 4 => NonRetryableFailure
-    case ReqRep(TestService.Query.Args(in), _) if in == "lol" => NonRetryableFailure
+    case ReqRep(Echo.Echo.Args(in), _) if in == "lol" => NonRetryableFailure
   }
 
   private val deserializer = { bytes: Array[Byte] =>
@@ -29,9 +28,9 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
 
   test("usingDeserializeCtx basics") {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
+      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = mux.Response(Buf.Utf8(in))
+        val rep = in.getBytes(Charsets.Utf8)
         assert(expectedClass == classifier(ReqRep(in, Return(rep))))
       }
     }
@@ -40,9 +39,9 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
     testApply("fail", NonRetryableFailure)
 
     def testApplyOrElse(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
+      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = mux.Response(Buf.Utf8(in))
+        val rep = in.getBytes(Charsets.Utf8)
         assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
         assert(expectedClass ==
           classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default))
@@ -59,9 +58,9 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
     }
 
     val input = "throw"
-    val ctx = new DeserializeCtx(TestService.Query.Args(input), throwingDeser)
+    val ctx = new DeserializeCtx(Echo.Echo.Args(input), throwingDeser)
     Contexts.local.let(DeserializeCtx.Key, ctx) {
-      val rep = mux.Response(Buf.Utf8(input))
+      val rep = input.getBytes(Charsets.Utf8)
 
       assert(!classifier.isDefinedAt(ReqRep(input, Return(rep))))
       assert(Success ==
@@ -71,7 +70,7 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
 
   test("usingDeserializeCtx handles no DeserializationCtx") {
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
-      val rep = mux.Response(Buf.Utf8(in))
+      val rep = in.getBytes(Charsets.Utf8)
       assert(expectedClass ==
         classifier.applyOrElse(ReqRep(in, Return(rep)), ResponseClassifier.Default))
     }
@@ -81,23 +80,23 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
   }
 
   test("ThriftExceptionsAsFailures") {
-    import ThriftMuxResponseClassifier.{ThriftExceptionsAsFailures, usingDeserializeCtx}
+    import ThriftResponseClassifier.{ThriftExceptionsAsFailures, usingDeserializeCtx}
 
     val classifier = usingDeserializeCtx(ThriftExceptionsAsFailures)
-    assert("ThriftMux.usingDeserializeCtx(ThriftExceptionsAsFailures)" == classifier.toString())
+    assert("Thrift.usingDeserializeCtx(ThriftExceptionsAsFailures)" == classifier.toString())
 
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
+      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = mux.Response(Buf.Utf8(in))
+        val rep = in.getBytes(Charsets.Utf8)
         assert(expectedClass == classifier(ReqRep(in, Return(rep))))
       }
     }
 
     def testApplyOrElse(in: String, expectedClass: ResponseClass): Unit = {
-      val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
+      val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
-        val rep = mux.Response(Buf.Utf8(in))
+        val rep = in.getBytes(Charsets.Utf8)
         assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
         assert(expectedClass ==
           classifier.applyOrElse(
@@ -112,14 +111,15 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
 
   test("DeserializeCtxOnly only deserializes and sees Thrift exceptions as success") {
     val in = "fail"
-    val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
+    val ctx = new DeserializeCtx(Echo.Echo.Args(in), deserializer)
     Contexts.local.let(DeserializeCtx.Key, ctx) {
       assert(deserializer(in.getBytes(Charsets.Utf8)).isThrow)
-      val rep = mux.Response(Buf.Utf8(in))
+      val rep = in.getBytes(Charsets.Utf8)
       val reqRep = ReqRep(in, Return(rep))
-      assert(ThriftMuxResponseClassifier.DeserializeCtxOnly.isDefinedAt(reqRep))
-      assert(Success == ThriftMuxResponseClassifier.DeserializeCtxOnly(reqRep))
+      assert(ThriftResponseClassifier.DeserializeCtxOnly.isDefinedAt(reqRep))
+      assert(Success == ThriftResponseClassifier.DeserializeCtxOnly(reqRep))
     }
   }
+
 
 }

@@ -5,6 +5,8 @@ import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDisp
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
 import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
+import com.twitter.finagle.service._
+import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Stopwatch
@@ -182,6 +184,34 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       configured(param.ClientId(Some(clientId)))
 
     def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
+
+    private[this] def deserializingClassifier: Client = {
+      // Note: what type of deserializer used is important if none is specified
+      // so that we keep the prior behavior of Thrift exceptions
+      // being counted as a success. Otherwise, even using the default
+      // ResponseClassifier would then see that response as a `Throw` and thus
+      // a failure. So, when none is specified, a "deserializing-only"
+      // classifier is used to make when deserialization happens in the stack
+      // uniform whether or not a `ResponseClassifier` is wired up.
+      val c =
+        if (params.contains[com.twitter.finagle.param.ResponseClassifier]) {
+          ThriftResponseClassifier.usingDeserializeCtx(
+            params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+          )
+        } else {
+          ThriftResponseClassifier.DeserializeCtxOnly
+        }
+      configured(com.twitter.finagle.param.ResponseClassifier(c))
+    }
+
+    private def superNewClient(dest: Name, label: String) =
+      super.newClient(dest, label)
+
+    override def newClient(
+      dest: Name,
+      label: String
+    ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+      deserializingClassifier.superNewClient(dest, label)
   }
 
   val client: Thrift.Client = Client()
@@ -195,7 +225,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
   def newClient(
     dest: Name,
     label: String
-  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = client.newClient(dest, label)
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
+    client.newClient(dest, label)
 
   @deprecated("Use `Thrift.client.withProtocolFactory`", "6.22.0")
   def withProtocolFactory(protocolFactory: TProtocolFactory): Client =

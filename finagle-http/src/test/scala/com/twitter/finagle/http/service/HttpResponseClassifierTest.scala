@@ -14,6 +14,7 @@ class HttpResponseClassifierTest extends FunSuite {
 
   test("ServerErrorsAsFailures") {
     val classifier = HttpResponseClassifier.ServerErrorsAsFailures
+    assert("ServerErrorsAsFailures" == classifier.toString)
 
     assert(ResponseClass.NonRetryableFailure ==
       classifier(ReqRep(req, rep(Status.InternalServerError))))
