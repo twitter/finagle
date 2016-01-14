@@ -185,7 +185,7 @@ object ThriftServiceIface {
                 case None =>
                   Future.exception(new TApplicationException(
                     TApplicationException.MISSING_RESULT,
-                    "Thrift method '${method.name}' failed: missing result"
+                    s"Thrift method '${method.name}' failed: missing result"
                   ))
               }
           }
