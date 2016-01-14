@@ -1,3 +1,5 @@
+.. _finagle_servers:
+
 Servers
 =======
 
@@ -32,20 +34,6 @@ comes with variants that allow for serving a simple ``Service`` as well. Typical
 .. note:: `finagle-thrift` servers expose a rich API because their interfaces are defined
           via a Thrift IDL. See the protocols section on :ref:`Thrift <thrift_and_scrooge>`
           for more details.
-
-Configuration
--------------
-
-Prior to :doc:`version 6.0 <changelog>`, the ``ServerBuilder`` API was the primary method for
-configuring the modules inside a Finagle server. We are moving away from this model for various
-:ref:`reasons <configuring_finagle6>`.
-
-The modern way of configuring Finagle servers is to use `Stack API`, which is generally available
-via the single method ``Server.configured(...)`` that takes a stack param represented as a case class
-and applies it to the given server.
-
-All the examples in this document use the Stack API as a main configuration method and we encourage
-all the Finagle users to follow this pattern.
 
 Server Modules
 --------------
@@ -90,30 +78,23 @@ that might be handled concurrently by your server, use the following example [#e
 
 .. code-block:: scala
 
-  import com.twitter.concurrent.AsyncSemaphore
-  import com.twitter.finagle.Service
   import com.twitter.finagle.Http
-  import com.twitter.finagle.filter.RequestSemaphoreFilter
-
-  val limiter: AsyncSemaphore = new AsyncSemaphore(
-    initialPermits = 10,
-    maxWaiters = 0
-  )
 
   val server = Http.server
-    .configured(RequestSemaphoreFilter.Param(Some(limiter)))
+    .withAdmissionControl.concurrencyLimit(
+      maxConcurrentRequests = 10,
+      maxWaiters = 0,
+    )
     .serve(":8080", service)
 
-``RequestSemaphoreFilter`` uses :util-core-src:`AsyncSemaphore <com/twitter/concurrent/AsyncSemaphore.scala>`
-underneath to maintain the concurrency of the incoming requests. So it might be configured with an
-instance of ``AsyncSemaphore`` that takes two arguments in its constructor:
+The `Concurrency Limit` module is configured with two parameters:
 
-1. `initialPermits` - the number of requests allowed to be handled concurrently
-2. `maxWaiters` - the number of requests (on top of `initialPermits`) allowed to be queued
+1. `maxConcurrentRequests` - the number of requests allowed to be handled concurrently
+2. `maxWaiters` - the number of requests (on top of `maxConcurrentRequests`) allowed to be queued
 
-All the incoming requests on top of ``(initialPermits + maxWaiters)`` will be `rejected` [#nack]_
-by the server. That said, the `Concurrency Limit` module acts as `static admission controller`
-monitoring the current concurrency level of the incoming requests.
+All the incoming requests on top of ``(maxConcurrentRequests + maxWaiters)`` will be
+`rejected`[#nack]_ by the server. That said, the `Concurrency Limit` module acts as
+`static admission controller` monitoring the current concurrency level of the incoming requests.
 
 See :ref:`Requests Concurrency metrics <requests_concurrency_limit>` for more details.
 
@@ -125,28 +106,25 @@ The `Request Deadline` module acts as deadline driven server-side `static admiss
 each request is set up by a frontend service and propagated over the wire to the downstream services.
 
 The `Request Deadline` module is implemented by
-:src:`DeadlineFilter <com/twitter/finagle/filter/DeadlineFilter.scala>` and configured with a single
-param [#example]_.
+:src:`DeadlineFilter <com/twitter/finagle/filter/DeadlineFilter.scala>` and configured with
+following params [#example]_.
 
 .. code-block:: scala
 
   import com.twitter.conversions.time._
-  import com.twitter.finagle.Service
   import com.twitter.finagle.Http
-  import com.twitter.finagle.filter.DeadlineFilter
 
   val server = Http.server
-    .configured(DeadlineFilter.Param(
-      tolerance = 200.milliseconds,
-      maxRejectPercentage = 0.3
-    ))
+    .withAdmissionControl.deadlineTolerance(200.milliseconds)
+    .withAdmissionControl.deadlineMaxRejectedPercentage(0.3)
     .serve(":8080", service)
 
-There are two arguments passed to the ``DeadlineFilter.Param`` constructor:
+There are two arguments passed to the `Request Deadline` module, which might be configured
+separately:
 
-1. `tolerance` (default: 170 ms) - the maximum elapsed time since a request's deadline when it
-   will be considered for rejection
-2. `maxRejectPercentage` (default: 20%) - the maximum percentage of requests that can be
+1. `deadlineTolerance` (default: 170 ms) - the maximum elapsed time since a request's deadline
+   when it will be considered for rejection
+2. `deadlineMaxRejectedPercentage` (default: 20%) - the maximum percentage of requests that can be
    rejected
 
 See :ref:`Deadline Admission Control metrics <deadline_admission_control_stats>` for more details.
@@ -176,5 +154,3 @@ Finagle clients, this module is disabled by default (the timeout is unbounded). 
 .. [#example] Configuration parameters/values provided in this example are only demonstrate
    the API usage, not the real world values. We do not recommend blindly applying those values
    to production systems.
-
-

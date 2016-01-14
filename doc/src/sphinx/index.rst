@@ -46,6 +46,7 @@ User's guide
    Quickstart
    Futures
    ServicesAndFilters
+   Configuration
    Servers
    Clients
    Names
