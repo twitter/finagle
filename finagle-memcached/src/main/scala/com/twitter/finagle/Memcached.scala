@@ -13,6 +13,7 @@ import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.text.{MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
+import com.twitter.finagle.param.WithConcurrentLoadBalancer
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service.{Backoff, FailFastFactory, FailureAccrualFactory}
@@ -117,12 +118,9 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
  *   val client =
  *     Memcached.client
  *       .withEjectFailedHost(true)
- *       // tcp connection timeout
- *       .configured(Transporter.ConnectTimeout(100.milliseconds))
- *       // single request timeout
- *       .configured(TimeoutFilter.Param(requestTimeout))
- *       // the acquisition timeout of a connection
- *       .configured(TimeoutFactory.Param(serviceTimeout))
+ *       .withTransport.connectTimeout(100.milliseconds))
+ *       .withRequestTimeout(10.seconds)
+ *       .withSession.acquisitionTimeout(20.seconds)
  *       .newRichClient(dest, "memcached_client")
  * }}}
  */
@@ -201,6 +199,7 @@ object Memcached extends finagle.Client[Command, Response]
       stack: Stack[ServiceFactory[Command, Response]] = Client.newStack,
       params: Stack.Params = Client.defaultParams)
     extends StdStackClient[Command, Response, Client]
+    with WithConcurrentLoadBalancer[Client]
     with MemcachedRichClient {
 
     import Client.mkDestination
@@ -303,9 +302,9 @@ object Memcached extends finagle.Client[Command, Response]
   }
 
   case class Server(
-    stack: Stack[ServiceFactory[Command, Response]] = StackServer.newStack,
-    params: Stack.Params = Server.defaultParams
-  ) extends StdStackServer[Command, Response, Server] {
+      stack: Stack[ServiceFactory[Command, Response]] = StackServer.newStack,
+      params: Stack.Params = Server.defaultParams)
+    extends StdStackServer[Command, Response, Server] {
 
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Response]] = this.stack,

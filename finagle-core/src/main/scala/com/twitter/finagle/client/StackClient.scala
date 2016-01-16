@@ -280,7 +280,10 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   extends StackClient[Req, Rep]
   with Stack.Parameterized[This]
   with CommonParams[This]
-  with ClientParams[This] { self =>
+  with ClientParams[This]
+  with WithClientTransport[This]
+  with WithSession[This]
+  with WithSessionQualifier[This] { self =>
 
   /**
    * The type we write into the transport.
@@ -338,40 +341,6 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    */
   def withParams(params: Stack.Params): This =
     copy1(params = params)
-
-  /**
-   * An entry point for configuring the client's [[Transport]].
-   *
-   * [[Transport]] is a Finagle abstraction over the network connection
-   * (i.e., a TCP connection).
-   */
-  val withTransport: ClientTransportParams[This] = new ClientTransportParams(this)
-
-  /**
-   * An entry point for configuring the client's sessions.
-   *
-   * Session might be viewed as logical connection that wraps a physical connection
-   * (i.e., [[com.twitter.finagle.transport.Transport transport]]) and controls its
-   * lifecycle. Sessions are used in Finagle to maintain liveness, requests cancellation,
-   * draining, and many more.
-   *
-   * The default setup for a Finagle client's sessions is to not put any
-   * timeouts on it.
-   */
-  val withSession: SessionParams[This] = new SessionParams(this)
-
-  /**
-   * An entry point for configuring the client's load balancer that implements
-   * a strategy for choosing one host/node from a replica set to service
-   * a request.
-   *
-   * The default setup for a Finagle client is to use power of two choices
-   * algorithm to distribute load across endpoints, and comparing nodes
-   * via a least loaded metric.
-   *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
-   */
-  val withLoadBalancer: LoadBalancingParams[This] = new LoadBalancingParams(this)
 
   /**
    * Prepends `filter` to the top of the client. That is, after materializing

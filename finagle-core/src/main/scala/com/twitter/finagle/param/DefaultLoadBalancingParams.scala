@@ -4,13 +4,14 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 
 /**
- * A collection of methods for configuring the Load Balancing module of Finagle clients.
+ * A collection of methods for configuring the Load Balancing (default) module
+ * of Finagle clients.
  *
  * @tparam A a [[Stack.Parameterized]] client to configure
  *
  * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
  */
-class LoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
+class DefaultLoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
 
   /**
    * Configures this client with a given [[LoadBalancerFactory load balancer]] that

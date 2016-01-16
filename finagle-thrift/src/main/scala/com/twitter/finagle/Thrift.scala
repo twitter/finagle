@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
-import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
+import com.twitter.finagle.param._
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
 import com.twitter.finagle.service._
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
@@ -142,7 +142,11 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
   case class Client(
     stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = Client.stack,
     params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("thrift")
-  ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client] with ThriftRichClient {
+  ) extends StdStackClient[ThriftClientRequest, Array[Byte], Client]
+    with WithSessionPool[Client]
+    with WithDefaultLoadBalancer[Client]
+    with ThriftRichClient {
+
     protected def copy1(
       stack: Stack[ServiceFactory[ThriftClientRequest, Array[Byte]]] = this.stack,
       params: Stack.Params = this.params

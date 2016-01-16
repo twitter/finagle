@@ -4,6 +4,7 @@ import com.twitter.finagle
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.param.WithDefaultLoadBalancer
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.transport.Transport
@@ -37,6 +38,7 @@ object Redis extends Client[Command, Reply] {
       stack: Stack[ServiceFactory[Command, Reply]] = Client.newStack,
       params: Stack.Params = Client.defaultParams)
     extends StdStackClient[Command, Reply, Client]
+    with WithDefaultLoadBalancer[Client]
     with RedisRichClient {
 
     override def configured[P](psp: (P, Stack.Param[P])): Client = {

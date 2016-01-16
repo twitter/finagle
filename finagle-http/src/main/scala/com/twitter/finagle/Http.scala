@@ -90,9 +90,11 @@ object Http extends Client[Request, Response] with HttpRichClient
   }
 
   case class Client(
-    stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
-    params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("http")
-  ) extends StdStackClient[Request, Response, Client] {
+      stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
+      params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("http"))
+    extends StdStackClient[Request, Response, Client]
+    with WithSessionPool[Client]
+    with WithDefaultLoadBalancer[Client] {
 
     protected type In = Any
     protected type Out = Any
@@ -128,22 +130,6 @@ object Http extends Client[Request, Response] with HttpRichClient
 
       new ClientContextFilter[Request, Response].andThen(dispatcher)
     }
-
-    /**
-     * An entry point for configuring the client's session qualifiers
-     * (e.g. circuit breakers).
-     *
-     * @see [[http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
-     */
-    val withSessionQualifier: SessionQualificationParams[Client] =
-      new SessionQualificationParams(this)
-
-    /**
-     * An entry point for configuring the client's session pool.
-     *
-     * @see [[http://twitter.github.io/finagle/guide/Clients.html#pooling]]
-     */
-    val withSessionPool: SessionPoolingParams[Client] = new SessionPoolingParams(this)
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
       configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
@@ -188,9 +174,9 @@ object Http extends Client[Request, Response] with HttpRichClient
   }
 
   case class Server(
-    stack: Stack[ServiceFactory[Request, Response]] = Server.stack,
-    params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("http")
-  ) extends StdStackServer[Request, Response, Server] {
+      stack: Stack[ServiceFactory[Request, Response]] = Server.stack,
+      params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("http"))
+    extends StdStackServer[Request, Response, Server] {
 
     protected type In = Any
     protected type Out = Any
@@ -226,12 +212,6 @@ object Http extends Client[Request, Response] with HttpRichClient
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
-
-    /**
-     * An entry point for configuring the servers' admission control.
-     */
-    val withAdmissionControl: ServerAdmissionControlParams[Server] =
-      new ServerAdmissionControlParams(this)
 
     def withTls(cfg: Netty3ListenerTLSConfig): Server =
       configured(Transport.TLSServerEngine(Some(cfg.newEngine)))

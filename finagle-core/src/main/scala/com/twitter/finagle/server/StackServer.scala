@@ -129,7 +129,9 @@ trait StackServer[Req, Rep]
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   extends StackServer[Req, Rep]
   with Stack.Parameterized[This]
-  with CommonParams[This] { self =>
+  with CommonParams[This]
+  with WithServerTransport[This]
+  with WithServerAdmissionControl[This] { self =>
 
   /**
    * The type we write into the transport.
@@ -176,14 +178,6 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    */
   def withParams(params: Stack.Params): This =
     copy1(params = params)
-
-  /**
-   * An entry point for configuring servers' [[Transport]].
-   *
-   * [[Transport]] is a Finagle abstraction over the network connection
-   * (i.e., a TCP connection).
-   */
-  val withTransport: ServerTransportParams[This] = new ServerTransportParams(this)
 
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]): This =
     copy1(stack = stack)

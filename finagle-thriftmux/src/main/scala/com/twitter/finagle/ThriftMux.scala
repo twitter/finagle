@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.param.{Label, Stats, ProtocolLibrary}
+import com.twitter.finagle.param._
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service._
 import com.twitter.finagle.Stack.Param
@@ -101,6 +101,12 @@ object ThriftMux
     extends StackBasedClient[ThriftClientRequest, Array[Byte]]
     with Stack.Parameterized[Client]
     with Stack.Transformable[Client]
+    with CommonParams[Client]
+    with ClientParams[Client]
+    with WithClientTransport[Client]
+    with WithSession[Client]
+    with WithSessionQualifier[Client]
+    with WithDefaultLoadBalancer[Client]
     with ThriftRichClient {
 
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
@@ -136,17 +142,6 @@ object ThriftMux
       configured(Thrift.param.ProtocolFactory(pf))
 
     private[this] val Thrift.param.ClientId(clientId) = params[Thrift.param.ClientId]
-
-    /**
-     * Produce a [[com.twitter.finagle.ThriftMux.Client]] using the provided
-     * [[ResponseClassifier]]. This allows application level customization of
-     * how responses are classified as successful or not.
-     *
-     * @see [[com.twitter.finagle.thrift.service.ThriftResponseClassifier.ThriftExceptionsAsFailures]]
-     * @see [[ThriftMuxResponseClassifier]]
-     */
-    def withResponseClassifier(classifier: ResponseClassifier): Client =
-      configured(param.ResponseClassifier(classifier))
 
     private[this] object ThriftMuxToMux extends Filter[ThriftClientRequest, Array[Byte], mux.Request, mux.Response] {
       def apply(req: ThriftClientRequest, service: Service[mux.Request, mux.Response]): Future[Array[Byte]] = {
@@ -251,9 +246,9 @@ object ThriftMux
    */
 
   case class ServerMuxer(
-    stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
-    params: Stack.Params = Mux.server.params + ProtocolLibrary("thriftmux")
-  ) extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
+      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
+      params: Stack.Params = Mux.server.params + ProtocolLibrary("thriftmux"))
+    extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
 
     protected type In = ChannelBuffer
     protected type Out = ChannelBuffer
@@ -352,7 +347,10 @@ object ThriftMux
     extends StackBasedServer[Array[Byte], Array[Byte]]
     with ThriftRichServer
     with Stack.Parameterized[Server]
-  {
+    with CommonParams[Server]
+    with WithServerTransport[Server]
+    with WithServerAdmissionControl[Server] {
+
     import Server.MuxToArrayFilter
 
     def stack: Stack[ServiceFactory[mux.Request, mux.Response]] =
