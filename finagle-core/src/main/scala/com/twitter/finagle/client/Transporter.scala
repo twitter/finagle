@@ -42,10 +42,13 @@ object Transporter {
   /**
    * $param the connect timeout of a `Transporter`.
    *
-   * @param howlong A maximum amount of time a transport
-   * is allowed to spend connecting.
+   * @param howlong Maximum amount of time a transport is allowed to
+   *                spend connecting. Must be non-negative.
    */
   case class ConnectTimeout(howlong: Duration) {
+    if (howlong < Duration.Zero)
+      throw new IllegalArgumentException(s"howlong must be non-negative: saw $howlong")
+
     def mk(): (ConnectTimeout, Stack.Param[ConnectTimeout]) =
       (this, ConnectTimeout.param)
   }
