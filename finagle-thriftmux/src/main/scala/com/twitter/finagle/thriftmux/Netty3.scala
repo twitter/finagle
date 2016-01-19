@@ -82,7 +82,7 @@ private[finagle] class PipelineFactory(
       val requestBuf = ChannelBuffers.wrappedBuffer(request_)
 
       Message.Tdispatch(
-        Message.MinTag, contextBuf.toSeq, richHeader.dest, richHeader.dtab, requestBuf)
+        Message.Tags.MinTag, contextBuf.toSeq, richHeader.dest, richHeader.dtab, requestBuf)
     }
 
     override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit =  {
@@ -203,7 +203,7 @@ private[finagle] class PipelineFactory(
       super.messageReceived(ctx,
         new UpstreamMessageEvent(
           e.getChannel,
-          Message.encode(Message.Tdispatch(Message.MinTag, Nil, Path.empty, Dtab.empty, buf)),
+          Message.encode(Message.Tdispatch(Message.Tags.MinTag, Nil, Path.empty, Dtab.empty, buf)),
           e.getRemoteAddress))
     }
   }
@@ -339,7 +339,7 @@ private[finagle] class PipelineFactory(
               new UpstreamMessageEvent(
                 e.getChannel,
                 Message.encode(
-                  Message.Tdispatch(Message.MinTag, Nil, Path.empty, Dtab.empty, buf)),
+                  Message.Tdispatch(Message.Tags.MinTag, Nil, Path.empty, Dtab.empty, buf)),
                 e.getRemoteAddress))
           }
 

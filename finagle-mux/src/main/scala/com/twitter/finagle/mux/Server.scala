@@ -42,7 +42,7 @@ object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabl
  * and coordinating draining.
  */
 private class Tracker[T] {
-  private[this] val pending = new ConcurrentHashMap[Int, Future[T]]
+  private[this] val pending = new ConcurrentHashMap[Int, Future[Unit]]
   private[this] val _drained: Promise[Unit] = new Promise
 
   // The state of a tracker is a single integer. Its absolute
@@ -75,8 +75,6 @@ private class Tracker[T] {
     } else if (!state.compareAndSet(n, n-1)) exit()
   }
 
-  private[this] val closedExit = (_: Try[Unit]) => exit()
-
   /**
    * Track a transaction. `track` manages the lifetime of a tag
    * and its reply. Function `process` handles the result of `reply`.
@@ -93,17 +91,18 @@ private class Tracker[T] {
   def track(tag: Int, reply: Future[T])(process: Try[T] => Future[Unit]): Future[Unit] = {
     if (!enter()) return reply.transform(process)
 
-    pending.put(tag, reply)
-    reply transform { r =>
+    val f = reply.transform(process)
+    pending.put(tag, f)
+    f.respond { _ =>
       pending.remove(tag)
-      process(r).respond(closedExit)
+      exit()
     }
   }
 
   /**
-   * Retrieve the value for the pending request matching `tag`.
+   * Retrieve the value for the pending transaction matching `tag`.
    */
-  def get(tag: Int): Option[Future[T]] =
+  def get(tag: Int): Option[Future[Unit]] =
     Option(pending.get(tag))
 
   /**

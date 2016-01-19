@@ -338,4 +338,24 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
     assert(res == Message.RreqOk(tag, BufChannelBuffer(okResponse.body)))
   }
+
+  test("interrupts writes on Tdiscarded") {
+    val writep = new Promise[Unit]
+    writep.setInterruptHandler { case exc => writep.setException(exc) }
+
+    val clientToServer = new AsyncQueue[Message]
+    val transport = new QueueTransport(new AsyncQueue[Message], clientToServer) {
+      override def write(in: Message) = writep
+    }
+
+    val svc = Service.mk { req: Request => Future.value(Response.empty) }
+    val server = ServerDispatcher.newRequestResponse(transport, svc)
+
+    clientToServer.offer(Message.Tdispatch(
+      20, Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER))
+
+    clientToServer.offer(Message.Tdiscarded(20, "timeout"))
+
+    intercept[ClientDiscardedRequestException] { Await.result(writep, 1.second) }
+  }
 }
