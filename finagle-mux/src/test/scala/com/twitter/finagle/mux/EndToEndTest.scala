@@ -18,7 +18,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite
@@ -38,14 +38,7 @@ class EndToEndTest extends FunSuite
     Dtab.base = saveBase
   }
 
-  // turn off failure detector since we don't need it for these tests.
-  override def test(testName: String, testTags: Tag*)(f: => Unit) {
-    super.test(testName, testTags:_*) {
-      mux.sessionFailureDetector.let("none") { f }
-    }
-  }
-
-  test("Discard request properly sent") {
+  test("Discard request properly sent") (sessionFailureDetector.let("none") {
     @volatile var handled = false
     val p = Promise[Response]()
     p.setInterruptHandler { case t: Throwable =>
@@ -68,9 +61,9 @@ class EndToEndTest extends FunSuite
     assert(!p.isDefined)
     f.raise(new Exception())
     eventually { assert(handled) }
-  }
+  })
 
-  test("Dtab propagation") {
+  test("Dtab propagation") (sessionFailureDetector.let("none") {
     val server = Mux.serve("localhost:*", Service.mk[Request, Response] { _ =>
       val stringer = new StringWriter
       val printer = new PrintWriter(stringer)
@@ -90,9 +83,9 @@ class EndToEndTest extends FunSuite
     }
     Await.result(server.close())
     Await.result(client.close())
-  }
+  })
 
-  test("(no) Dtab propagation") {
+  test("(no) Dtab propagation") (sessionFailureDetector.let("none") {
     val server = Mux.serve("localhost:*", Service.mk[Request, Response] { _ =>
       val buf = ChannelBuffers.buffer(4)
       buf.writeInt(Dtab.local.size)
@@ -108,13 +101,13 @@ class EndToEndTest extends FunSuite
     assert(cb.readInt() === 0)
     Await.result(server.close())
     Await.result(client.close())
-  }
+  })
 
   def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
     assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
-  test("trace propagation") {
+  test("trace propagation") (sessionFailureDetector.let("none") {
     val tracer = new BufferingTracer
 
     var count: Int = 0
@@ -151,9 +144,9 @@ class EndToEndTest extends FunSuite
 
     Await.result(server.close(), 30.seconds)
     Await.result(client.close(), 30.seconds)
-  }
+  })
 
-  test("requeue nacks") {
+  test("requeue nacks") (sessionFailureDetector.let("none") {
     val n = new AtomicInteger(0)
 
     val service = new Service[Request, Response] {
@@ -175,9 +168,9 @@ class EndToEndTest extends FunSuite
     Await.result(a.close(), 30.seconds)
     Await.result(b.close(), 30.seconds)
     Await.result(client.close(), 30.seconds)
-  }
+  })
 
-  test("gracefully reject sessions") {
+  test("gracefully reject sessions") (sessionFailureDetector.let("none") {
     val factory = new ServiceFactory[Request, Response] {
       def apply(conn: ClientConnection): Future[Service[Request, Response]] =
         Future.exception(new Exception)
@@ -196,7 +189,7 @@ class EndToEndTest extends FunSuite
 
     Await.result(server.close(), 30.seconds)
     Await.result(client.close(), 30.seconds)
-  }
+  })
 
   private[this] def nextPort(): Int = {
     val s = new Socket()
@@ -243,7 +236,7 @@ w
 EOF
   */
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
-  test("draining and restart") {
+  test("draining and restart") (sessionFailureDetector.let("none") {
     val echo =
       new Service[Request, Response] {
         def apply(req: Request) = Future.value(Response(req.body))
@@ -270,9 +263,9 @@ EOF
     eventually { Await.result(client(req)) }
 
     Await.result(server.close(), 30.seconds)
-  }
+  })
 
-  test("responds to lease") {
+  test("responds to lease") (sessionFailureDetector.let("none") {
     Time.withCurrentTimeFrozen { ctl =>
       class FakeLessor extends Lessor {
         var list: List[Lessee] = Nil
@@ -335,5 +328,5 @@ EOF
 
       Closable.sequence(Await.result(fclient), server, factory).close()
     }
-  }
+  })
 }

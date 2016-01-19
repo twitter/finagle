@@ -33,18 +33,6 @@ New Features
 
   * finagle-mux: Add a Wireshark dissector that can decode Mux messages. ``RB_ID=779482``
 
-  * finagle-mux: Introduce payload framing for mux sessions to eliminate head of line
-    blocking when sending large payloads for Tdispatch and Rdispatch. Any payload larger than 64KiB
-    is fragmented into 64KiB sized chunks. The window size is fixed in the current implementation
-    and future work may include a flow control algorithm which dynamically sizes the window.
-    Because we are now buffering payloads in Mux, we get nice cancellation semantics
-    (i.e. tag streams can be interrupted mid transfer and buffers cleaned up on both ends).
-    This does require that we introduce a new mux message type (Rdispatch) to assure the
-    sender of a Tdispatch they can safely clear their buffers.
-    ``RB_ID=774742``
-
-  * finagle-mux: Tinit/Rinit are now available and permit feature negotiation. ``RB_ID=774742``
-
 Deprecations
 ~~~~~~~~~~~~
 

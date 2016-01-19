@@ -12,7 +12,7 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, Future}
+import com.twitter.util.Future
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -77,17 +77,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newDispatcher(
       transport: Transport[In, Out]
     ): Service[mux.Request, mux.Response] = {
-      // While we do session establishment, we do not want to capture
-      // any request local state. Note, this can probably be applied
-      // more generally for all clients during session establishment
-      // in StackClient.
+      // while we do session establishment, we do not want to capture
+      // any request local state.
       Contexts.letClear {
         val param.Stats(sr) = params[param.Stats]
         val param.Label(name) = params[param.Label]
 
         val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
-        val trans = mux.Handshake.client(transport)
-        val session = new mux.ClientSession(trans, detectorConfig, name, sr.scope("mux"))
+        val msgTrans = transport.map(Message.encode, Message.decode)
+        val session = new mux.ClientSession(msgTrans, detectorConfig, name, sr.scope("mux"))
         mux.ClientDispatcher.newRequestResponse(session)
       }
     }
@@ -129,12 +127,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[mux.Request, mux.Response]
-    ): Closable = {
+    ) = {
       val param.Tracer(tracer) = params[param.Tracer]
       val Lessor.Param(lessor) = params[Lessor.Param]
 
-      val trans = mux.Handshake.server(transport)
-      mux.ServerDispatcher.newRequestResponse(trans, service, lessor, tracer, statsReceiver)
+      val msgTrans = transport.map(Message.encode, Message.decode)
+      mux.ServerDispatcher.newRequestResponse(msgTrans, service, lessor, tracer, statsReceiver)
     }
   }
 

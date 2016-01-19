@@ -69,12 +69,12 @@ trait Transport[In, Out] extends Closable { self =>
     new Transport[In1, Out1] {
       def write(req: In1): Future[Unit] = Future(f(req)).flatMap(self.write)
       def read(): Future[Out1] = self.read().map(g)
-      def status: Status = self.status
-      val onClose: Future[Throwable] = self.onClose
-      def localAddress: SocketAddress = self.localAddress
-      def remoteAddress: SocketAddress = self.remoteAddress
-      def peerCertificate: Option[Certificate] = self.peerCertificate
-      def close(deadline: Time): Future[Unit] = self.close(deadline)
+      def status = self.status
+      val onClose = self.onClose
+      def localAddress = self.localAddress
+      def remoteAddress = self.remoteAddress
+      def peerCertificate = self.peerCertificate
+      def close(deadline: Time) = self.close(deadline)
       override def toString: String = self.toString
     }
 }
@@ -268,20 +268,6 @@ object Transport {
  */
 trait TransportFactory {
   def apply[In, Out](): Transport[In, Out]
-}
-
-/**
- * A [[Transport]] that defers all methods except `read` and `write`
- * to `self`.
- */
-abstract class TransportProxy[In, Out](self: Transport[In, Out]) extends Transport[In, Out] {
-  def status: Status = self.status
-  val onClose: Future[Throwable] = self.onClose
-  def localAddress: SocketAddress = self.localAddress
-  def remoteAddress: SocketAddress = self.remoteAddress
-  def peerCertificate: Option[Certificate] = self.peerCertificate
-  def close(deadline: Time): Future[Unit] = self.close(deadline)
-  override def toString: String = self.toString
 }
 
 /**

@@ -3,9 +3,8 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
 import com.twitter.io.Charsets
-import com.twitter.util.{Duration, Time, Updatable}
+import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ReadOnlyChannelBuffer}
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * Indicates that encoding or decoding of a Mux message failed.
@@ -26,9 +25,6 @@ private[twitter] sealed trait Message {
   /** Only 3 of its bytes are used. */
   def tag: Int
 
-  /**
-   * The body of the message omitting size, typ, and tag.
-   */
   def buf: ChannelBuffer
 }
 
@@ -48,12 +44,7 @@ private[twitter] object Message {
     val Rping = -65: Byte
 
     val Tdiscarded = 66: Byte
-    val Rdiscarded = -66: Byte
-
     val Tlease = 67: Byte
-
-    val Tinit = 68: Byte
-    val Rinit = -68: Byte
 
     val Rerr = -128: Byte
 
@@ -62,21 +53,14 @@ private[twitter] object Message {
     val BAD_Rerr = 127: Byte
   }
 
-  object Tags {
-    val MarkerTag = 0
-    // We reserve a tag for a default ping message to that we
-    // can cache a full ping message and avoid encoding it
-    // every time.
-    val PingTag = 1
-    val MinTag = PingTag+1
-    val MaxTag = (1 << 23) - 1
-    val TagMSB = (1 << 23)
-
-    def extractType(header: Int): Byte = (header >> 24 & 0xff).toByte
-    def extractTag(header: Int): Int = header & 0x00ffffff
-    def isFragment(tag: Int): Boolean = (tag >> 23 & 1) == 1
-    def setMsb(tag: Int): Int = tag | TagMSB
-  }
+  val MarkerTag = 0
+  // We reserve a tag for a default ping message to that we
+  // can cache a full ping message and avoid encoding it
+  // every time.
+  val PingTag = 1
+  val MinTag = PingTag+1
+  val MaxTag = (1 << 23) - 1
+  val TagMSB = (1 << 23)
 
   private def mkByte(b: Byte) =
     ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(Array(b)))
@@ -92,55 +76,11 @@ private[twitter] object Message {
     def tag = 0
   }
 
-  private object Init {
-    def encode(
-      version: Short,
-      headers: Seq[(ChannelBuffer, ChannelBuffer)]
-    ): ChannelBuffer = {
-      val estimatedSize = 2 + headers.length * 24
-      val bytes = ChannelBuffers.dynamicBuffer(estimatedSize)
-      bytes.writeShort(version)
-      val iter = headers.iterator
-      while (iter.hasNext) {
-        iter.next() match { case (k, v) =>
-          bytes.writeInt(k.readableBytes)
-          bytes.writeBytes(k.slice())
-          bytes.writeInt(v.readableBytes)
-          bytes.writeBytes(v.slice())
-        }
-      }
-      bytes
+  object Treq {
+    object Keys {
+      val TraceId = 1
+      val TraceFlag = 2
     }
-
-    def decode(buf: ChannelBuffer): (Short, Seq[(ChannelBuffer, ChannelBuffer)]) = {
-      val version = buf.readShort()
-      val headers = new ArrayBuffer[(ChannelBuffer, ChannelBuffer)]
-      while (buf.readableBytes() > 0) {
-        val k = buf.readSlice(buf.readInt())
-        val v = buf.readSlice(buf.readInt())
-        headers += (k -> v)
-      }
-      (version, headers)
-    }
-  }
-
-  case class Tinit(
-      tag: Int,
-      version: Short,
-      headers: Seq[(ChannelBuffer, ChannelBuffer)])
-    extends Message {
-    def typ: Byte = Types.Tinit
-    lazy val buf: ChannelBuffer = Init.encode(version, headers)
-  }
-
-
-  case class Rinit(
-      tag: Int,
-      version: Short,
-      headers: Seq[(ChannelBuffer, ChannelBuffer)])
-    extends Message {
-    def typ: Byte = Types.Rinit
-    lazy val buf: ChannelBuffer = Init.encode(version, headers)
   }
 
   /**
@@ -180,13 +120,6 @@ private[twitter] object Message {
     }
   }
 
-  object Treq {
-    object Keys {
-      val TraceId = 1
-      val TraceFlag = 2
-    }
-  }
-
   /**
    * A reply to a `Treq` message.
    *
@@ -215,13 +148,14 @@ private[twitter] object Message {
     lazy val buf = {
       // first, compute how large the message header is (in 'n')
       var n = 2
-      var iter = contexts.iterator
-      while (iter.hasNext) {
+      var seq = contexts
+      while (seq.nonEmpty) {
         // Note: here and below we don't use the scala dereferencing sugar of
         // `val (k, v) = seq.head` as that caused unnecessary Tuple2 allocations.
-        iter.next() match { case (k, v) =>
+        seq.head match { case (k, v) =>
           n += 2 + k.readableBytes + 2 + v.readableBytes
         }
+        seq = seq.tail
       }
 
       val dstbytes = if (dst.isEmpty) noBytes else dst.show.getBytes(Charsets.Utf8)
@@ -246,16 +180,17 @@ private[twitter] object Message {
       // then, allocate and populate the header
       val hd = ChannelBuffers.dynamicBuffer(n)
       hd.writeShort(contexts.length)
-      iter = contexts.iterator
-      while (iter.hasNext) {
+      seq = contexts
+      while (seq.nonEmpty) {
         // TODO: it may or may not make sense
         // to do zero-copy here.
-        iter.next() match { case (k, v) =>
+        seq.head match { case (k, v) =>
           hd.writeShort(k.readableBytes)
           hd.writeBytes(k.slice())
           hd.writeShort(v.readableBytes)
           hd.writeBytes(v.slice())
         }
+        seq = seq.tail
       }
 
       hd.writeShort(dstbytes.length)
@@ -329,12 +264,6 @@ private[twitter] object Message {
       contexts: Seq[(ChannelBuffer, ChannelBuffer)])
     extends Rdispatch(2, contexts, ChannelBuffers.EMPTY_BUFFER)
 
-  /**
-   * A fragment, as defined by the mux spec, is a message with its tag MSB
-   * set to 1.
-   */
-  case class Fragment(typ: Byte, tag: Int, buf: ChannelBuffer) extends Message
-
   /** Indicates to the client to stop sending new requests. */
   case class Tdrain(tag: Int) extends EmptyMessage { def typ = Types.Tdrain }
 
@@ -357,7 +286,7 @@ private[twitter] object Message {
     def typ = ???
     def tag = ???
 
-    private[this] val cb = new ReadOnlyChannelBuffer(encode(Tping(Tags.PingTag)))
+    private[this] val cb = new ReadOnlyChannelBuffer(encode(Tping(PingTag)))
     cb.markReaderIndex()
 
     def buf = {
@@ -395,11 +324,6 @@ private[twitter] object Message {
           (which >> 8 & 0xff).toByte,
           (which & 0xff).toByte)),
       encodeString(why))
-  }
-
-  case class Rdiscarded(tag: Int) extends Message {
-    def typ = Types.Rdiscarded
-    def buf: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER
   }
 
   object Tlease {
@@ -605,17 +529,9 @@ private[twitter] object Message {
     if (buf.readableBytes < 4)
       throw BadMessageException("short message")
     val head = buf.readInt()
-    val typ = Tags.extractType(head)
-    val tag = Tags.extractTag(head)
-    if ((tag >> 23 & 1) == 1)
-      Fragment(typ, tag, buf)
-    else typ match {
-      case Types.Tinit =>
-        val (version, ctx) = Init.decode(buf)
-        Tinit(tag, version, ctx)
-      case Types.Rinit =>
-        val (version, ctx) = Init.decode(buf)
-        Rinit(tag, version, ctx)
+    def typ = (head >> 24 & 0xff).toByte
+    val tag = head & 0x00ffffff
+    typ match {
       case Types.Treq => decodeTreq(tag, buf)
       case Types.Rreq => decodeRreq(tag, buf)
       case Types.Tdispatch => decodeTdispatch(tag, buf)
@@ -625,17 +541,16 @@ private[twitter] object Message {
       case Types.Tping => Tping(tag)
       case Types.Rping => Rping(tag)
       case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(buf))
-      case Types.Rdiscarded => Rdiscarded(tag)
       case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(buf)
       case Types.Tlease => decodeTlease(buf)
-      case bad => throw new BadMessageException(s"bad message type: $bad [tag=$tag]")
+      case bad => throw BadMessageException("bad message type: %d [tag=%d]".format(bad, tag))
     }
   }
 
   def encode(msg: Message): ChannelBuffer = msg match {
-    case m: PreEncodedTping => m.buf
+    case m: PreEncodedTping => msg.buf
     case m: Message =>
-      if (m.tag < Tags.MarkerTag || (m.tag & ~Tags.TagMSB) > Tags.MaxTag)
+      if (m.tag < MarkerTag || (m.tag & ~TagMSB) > MaxTag)
         throw new BadMessageException("invalid tag number %d".format(m.tag))
 
       val head = Array[Byte](

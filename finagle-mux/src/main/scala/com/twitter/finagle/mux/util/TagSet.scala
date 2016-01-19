@@ -23,7 +23,7 @@ private[mux] object TagSet {
    * Constructs a space-efficient TagSet for the range of available
    * tags in the mux protocol.
    */
-  def apply(): TagSet = TagSet(Message.Tags.MinTag to Message.Tags.MaxTag)
+  def apply(): TagSet = TagSet(Message.MinTag to Message.MaxTag)
 
   /** Constructs a space-efficient TagSet for the given range */
   def apply(_range: Range): TagSet = new TagSet { self =>

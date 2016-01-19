@@ -128,11 +128,11 @@ private[twitter] class ClientSession(
   }
 
   private[this] def processRmsg(msg: Message): Unit = msg match {
-    case Message.Rping(Message.Tags.PingTag) =>
+    case Message.Rping(Message.PingTag) =>
       val p = pingPromise.getAndSet(null)
       if (p != null) p.setDone()
 
-    case Message.Rerr(Message.Tags.PingTag, err) =>
+    case Message.Rerr(Message.PingTag, err) =>
       val p = pingPromise.getAndSet(null)
       if (p != null) p.setException(ServerError(err))
 
