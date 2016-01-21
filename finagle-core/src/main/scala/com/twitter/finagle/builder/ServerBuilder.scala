@@ -250,7 +250,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         }
       }
 
-      val proto = params[ProtocolLibrary]
+      val proto = ps[ProtocolLibrary]
       val serverParams =
         if (proto != ProtocolLibrary.param.default) ps
         else ps + ProtocolLibrary(codec.protocolLibraryName)

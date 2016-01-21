@@ -3,11 +3,10 @@ package com.twitter.finagle.builder
 import java.net.{InetSocketAddress, InetAddress}
 
 import com.twitter.finagle._
-import com.twitter.finagle.integration.IntegrationBase
-import com.twitter.finagle.service.FailureAccrualFactory
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
 import com.twitter.util._
 import com.twitter.util.registry.{Entry, GlobalRegistry, SimpleRegistry}
+import org.jboss.netty.channel.ChannelPipelineFactory
 import org.junit.runner.RunWith
 import org.mockito.Mockito.{verify, when}
 import org.mockito.Matchers
@@ -94,6 +93,28 @@ class ServerBuilderTest extends FunSuite
       .name("test")
       .codec(cfServer)
       .bindTo(loopback)
+      .build(svc)
+  }
+
+  verifyProtocolRegistry("#codec(CodecFactory#Server)FancyCodec", expected = "fancy") {
+    class FancyCodec extends CodecFactory[String, String] {
+      def client = { config =>
+       new com.twitter.finagle.Codec[String, String] {
+         def pipelineFactory = null
+       }
+      }
+
+      def server = { config =>
+        new com.twitter.finagle.Codec[String, String] {
+         def pipelineFactory = null
+       }
+      }
+      override val protocolLibraryName: String = "fancy"
+    }
+    ServerBuilder()
+      .codec(new FancyCodec)
+      .bindTo(loopback)
+      .name("test")
       .build(svc)
   }
 }
