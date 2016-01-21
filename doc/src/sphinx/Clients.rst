@@ -38,20 +38,6 @@ does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 :ref:`Thrift <thrift_and_scrooge>` for more details.
 
-Configuration
--------------
-
-Prior to :doc:`version 6.0 <changelog>`, the ``ClientBuilder`` API was the primary method for
-configuring the modules inside a Finagle client. We are moving away from this model for various
-:ref:`reasons <configuring_finagle6>`.
-
-The modern way of configuring Finagle clients is to use `Stack API`, which is generally available
-via the single method ``Client.configured(...)`` that takes a stack param represented as a case class
-and applies it to the given client.
-
-All the examples in this document use the Stack API as a main configuration method and we encourage
-all the Finagle users to follow this pattern.
-
 .. _client_modules:
 
 Client Modules
@@ -100,7 +86,6 @@ output. To override this, use the following sample.
 .. code-block:: scala
 
   import com.twitter.finagle.Service
-  import com.twitter.finagle.param
   import com.twitter.finagle.Http
   import com.twitter.finagle.http.{Request, Response}
   import com.twitter.util.Monitor
@@ -112,8 +97,8 @@ output. To override this, use the following sample.
     }
   }
 
-  val twitter: Service[Request, Response] = Http.client.
-    .configured(param.Monitor(monitor))
+  val twitter: Service[Request, Response] = Http.client
+    .withMonitor(monitor)
     .newService("twitter.com")
 
 Finally, clients have built-in support for `Zipkin <http://zipkin.io/>`_.
@@ -146,14 +131,13 @@ To override this default use the following code snippet.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.{Backoff, RetryBudget, Retries}
+  import com.twitter.finagle.service.{Backoff, RetryBudget}
 
   val budget: RetryBudget = ???
 
   val twitter = Http.client
-    .configured(Retries.Budget(
-      retryBudget = budget, requeueBackoffs = Backoff.const(10.seconds)
-    ))
+    .withRetryBudget(budget)
+    .withRetryBackoff(Backoff.const(10.seconds))
     .newService("twitter.com")
 
 The following example [#example]_ shows how to use a factory method ``RetryBudget.apply`` in order to
@@ -235,23 +219,22 @@ Timeouts & Expiration
 
 Finagle provides timeout facilities with fine granularity:
 
-The `Service Timeout` module defines a timeout for service acquisition. That is,
-it defines the maximum time allotted to a request to wait for an available service. Requests
-that exceed this timeout are failed with a ``ServiceTimeoutException``. This module
-is implemented by the :src:`TimeoutFactory <com/twitter/finagle/factory/TimeoutFactory.scala>`
+The `Session Timeout` module defines a timeout for session acquisition. That is, it defines
+the maximum time allotted to a request to wait for an available service/session. Requests
+that exceed this timeout are failed with a ``ServiceTimeoutException``. This module is
+implemented by the :src:`TimeoutFactory <com/twitter/finagle/factory/TimeoutFactory.scala>`
 
-The default timeout value for the `Service Timeout` module is unbounded (i.e., ``Duration.Top``),
+The default timeout value for the `Session Timeout` module is unbounded (i.e., ``Duration.Top``),
 which simply means it's disabled. Although, it's possible to override the default setting with
 stack params [#example]_.
 
 .. code-block:: scala
 
   import com.twitter.conversions.time._
-  import com.twitter.finagle.factory.TimeoutFactory
   import com.twitter.finagle.Http
 
   val twitter = Http.client
-    .configured(TimeoutFactory.Param(42.seconds))
+    .withSession.acquisitionTimeout(42.seconds)
     .newService("twitter.com")
 
 See :ref:`Service Latency metrics <service_factory_failures>` for more details.
@@ -271,10 +254,9 @@ Here is an example [#example]_ of how to override that default.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.TimeoutFilter
 
   val twitter = Http.client
-    .configured(TimeoutFilter.Param(42.seconds))
+    .withRequestTimeout(42.seconds)
     .newService("twitter.com")
 
 See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
@@ -282,29 +264,28 @@ See :ref:`Request Latency metrics <metrics_stats_filter>` for more details.
 .. note:: Requests timed out by the `Request Timeout` module are not retried by default
           given it's not known whether or not they were written to the wire.
 
-The `Expiration` module is attached at the connection level and expires a service after a
-certain amount of idle time. The module is implemented by
+The `Expiration` module is attached at the connection level and expires a service/session
+after a certain amount of idle time. The module is implemented by
 :src:`ExpiringService <com/twitter/finagle/service/ExpiringService.scala>`.
 
-The default setting for the `Expiration` module is to never expire a connection. Here is how
+The default setting for the `Expiration` module is to never expire a session. Here is how
 it can be configured [#example]_.
 
 .. code-block:: scala
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.ExpiringService
 
   val twitter = Http.client
-    .configured(ExpiringService.Param(idleTime = 10.seconds, lifeTime = 20.seconds))
+    .withSession.maxLifeTime(20.seconds)
+    .withSession.maxIdleTime(10.seconds)
     .newService("twitter.com")
 
-The `Expiration` module takes a single param with two values:
+The `Expiration` module takes two parameters:
 
-1. `idleTime` - the maximum duration for which a connection is allowed to idle
+1. `maxLifeTime` - the maximum duration for which a session is considered alive
+2. `maxIdleTime` - the maximum duration for which a session is allowed to idle
    (not sending any requests)
-2. `lifeTime` - the maximum duration for which a connection is considered alive
-
 
 See :ref:`Expiration metrics <idle_apoptosis_stats>` for more details.
 
@@ -360,7 +341,7 @@ instances of ``LoadBalancerFactory``).
 
   val balancer: LoadBalancerFactory = ???
   val twitter = Http.client
-    .configured(LoadBalancerFactory.Param(balancer))
+    .withLoadBalancer(balancer)
     .newService("twitter.com:8081,twitter.com:8082")
 
 In addition to the default configuration (i.e., ``Balancers.p2c``), the following setups are available.
@@ -554,12 +535,10 @@ particular client.
 .. code-block:: scala
 
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.FailFastFactory
 
   val twitter = Http.client
-    .configured(FailFastFactory.Param(enabled = false))
+    .withSessionQualifier.noFailFast
     .newService("twitter.com")
-
 
 .. note::
 
@@ -600,12 +579,11 @@ Use the following code snippet to override the default configuration of the ``Fa
 .. code-block:: scala
 
   import com.twitter.finagle.Http
-  import com.twitter.finagle.service.FailureAccrualFactory
   import com.twitter.finagle.service.exp.FailureAccrualPolicy
 
   val policy: FailureAccrualPolicy = ???
   val twitter = Http.client
-    .configured(FailureAccrualFactory.Param(policy))
+    .withSessionQualifier.failureAccrualPolicy(policy)
     .newService("twitter.com")
 
 Use ``FailureAccrualPolicy.successRate`` to construct an instance of ``FailureAccrualPolicy`` based on
@@ -623,7 +601,6 @@ requests success rate [#example]_.
     markDeadFor = Backoff.const(30.seconds)
   )
 
-
 The ``successRate`` factory method takes three arguments:
 
 1. `requiredSuccessRate` - the minimally required success rate bellow which an endpoint marked dead
@@ -634,7 +611,6 @@ The ``successRate`` factory method takes three arguments:
 To construct an instance of ``FailureAccrualPolicy`` based on a number of consecutive failures, use the
 ``consecutiveFailures`` factory method [#example]_.
 
-
 .. code-block:: scala
 
   import com.twitter.conversions.time._
@@ -643,10 +619,9 @@ To construct an instance of ``FailureAccrualPolicy`` based on a number of consec
 
   val policy: FailureAccrualPolicy =
     FailureAccrualPolicy.consecutiveFailures(
-     consecutiveFailures = 10,
+      consecutiveFailures = 10,
       markDeadFor = Backoff.const(30.seconds)
     )
-
 
 The ``consecutiveFailures`` factory method takes two arguments:
 
@@ -658,6 +633,17 @@ The ``consecutiveFailures`` factory method takes two arguments:
 
   It's highly recommended to use :src:`Backoff <com/twitter/finagle/service/Backoff.scala>`
   API for constructing instances of ``Stream[Duration]`` instead of using the error-prone Stream API directly.
+
+Finally, it's possible to completely disable the `Failure Accrual` module for a given
+client.
+
+.. code-block:: scala
+
+  import com.twitter.finagle.Http
+
+  val twitter = Http.client
+    .withSessionQualifier.noFailureAccrual
+    .newService("twitter.com")
 
 Pooling
 ~~~~~~~
@@ -686,26 +672,18 @@ example [#example]_.
 
   import com.twitter.conversions.time._
   import com.twitter.finagle.Http
-  import com.twitter.finagle.client.DefaultPool
 
   val twitter = Http.client
-    .configured(DefaultPool.Param(
-      low = 10,
-      high = 20,
-      bufferSize = 5,
-      idleTime = 10.seconds,
-      maxWaiters = 100
-    ))
+    .withSessionPool.minSize(10)
+    .withSessionPool.maxSize(20)
+    .withSessionPool.maxWaiters(100)
     .newService("twitter.com")
 
 Thus all the three pools are configured with a single param that takes the following arguments:
 
-1. `low` and `high` - low and high watermarks for the watermark pool (note that a Finagle client
-   will not maintain more connections than `high`)
-2. `bufferSize` - the size of the buffer used by buffering pool (`0` means disabled)
-3. `idleTime` - the amount of idle time for which a connection is cached (applied to connections
-   that number greater than the low watermark but fewer than the high)
-4. `maxWaiters` - the maximum number of connection requests that are queued when the connection
+1. `minSize` and `maxSize` - low and high watermarks for the watermark pool (note that a Finagle
+   client will not maintain more connections than `maxSize`)
+2. `maxWaiters` - the maximum number of connection requests that are queued when the connection
    concurrency exceeds the high watermark
 
 :ref:`Related stats <pool_stats>`
@@ -755,18 +733,110 @@ This gives Finagle the proper domain knowledge and improves the efficacy of
 :ref:`failure accrual <client_failure_accrual>` and more accurate
 :ref:`success rate stats <metrics_stats_filter>`.
 
-``ResponseClassifiers`` can be wired up to a client via
-``StackClient.configured(param.ResponseClassifier)`` or
-``ClientBuilder.responseClassifier``.
+For HTTP clients, using ``HttpResponseClassifier.ServerErrorsAsFailures`` often works
+great as it classifies any HTTP 5xx response code as a failure. For Thrift/ThriftMux
+clients you may want to use ``ThriftResponseClassifier.ThriftExceptionsAsFailures``
+which classifies any deserialized Thrift Exception as a failure. For a large set of
+use cases these should suffice. Classifiers get wired up to your client in a
+straightforward manner, for example:
 
-Protocol specific helpers for creating classifiers exist such as
-:finagle-http-src:`HttpResponseClassifier <com/twitter/finagle/http/service/HttpResponseClassifier.scala>` and
-:finagle-thriftmux-src:`ThriftMuxResponseClassifier <com/twitter/finagle/thriftmux/service/ThriftMuxResponseClassifier.scala>`.
+.. code-block:: scala
 
-For example, some HTTP clients may want to treat all 500 status codes as
-failures and can do so by using ``HttpResponseClassifier.ServerErrorsAsFailures``.
-Or, a ThriftMux client may want to treat all Thrift application exceptions
-as failures and can do so by using ``ThriftMuxResponseClassifier.ThriftExceptionsAsFailures``.
+  import com.twitter.finagle.ThriftMux
+  import com.twitter.finagle.thrift.service.ThriftResponseClassifier
+
+  ThriftMux.client
+    ...
+    .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
+
+If a classifier is not specified on a client or if a user's classifier isn't
+defined for a given request/response pair then ``ResponseClassifier.Default``
+is used. This gives us the simple classification rules of responses that are
+``Returns`` are successful and ``Throws`` are failures.
+
+Custom Classifiers
+~~~~~~~~~~~~~~~~~~
+
+Writing a custom classifier requires understanding of the few classes used. A
+``ResponseClassifier`` is a ``PartialFunction`` from ``ReqRep`` to
+``ResponseClass``.
+
+Let's work our way backwards through those, beginning with ``ResponseClass``.
+This can be either ``Successful`` or ``Failed`` and those values are
+self-explanatory. There are three constants which will cover the vast majority
+of usage: ``Success``, ``NonRetryableFailure`` and ``RetryableFailure``. While
+as of today there is no distinction made between retryable and non-retryable
+failures, it was a good opportunity to lay the groundwork for use in the future.
+
+A ``ReqRep`` is a request/response struct with a request of type ``Any`` and a
+response of type ``Try[Any]``. While all of this functionality is called
+response classification, you’ll note that classifiers make judgements on both a
+request and response.
+
+Creating a custom ``ResponseClassifier`` is fairly straightforward for HTTP
+as the ``ReqRep`` is an ``http.Request`` and ``Try[http.Response]`` pair.
+Here is an example that counts HTTP 503s as failures:
+
+.. code-block:: scala
+
+  import com.twitter.finagle.http
+  import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
+  import com.twitter.util.Return
+
+  val classifier: ResponseClassifier = {
+    case ReqRep(_, Return(r: http.Response)) if r.statusCode == 503 =>
+      ResponseClass.NonRetryableFailure
+  }
+
+Note that this ``PartialFunction`` isn't total which is ok due to Finagle
+always using user defined classifiers in combination with
+``ResponseClassifier.Default`` which will cover all cases.
+
+Thrift and ThriftMux Classifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Thrift and ThriftMux classifiers require a bit more care as the request and
+response types are not as obvious. This is because there is only a single
+``Service`` from ``Array[Byte]`` to ``Array[Byte]`` for all the methods of an
+IDL's service. To make this workable, there is support in Scrooge and
+``Thrift/ThriftMux.newService`` and ``Thrift/ThriftMux.newClient`` code to
+deserialize the responses into the expected application types so that
+classifiers can be written in terms of the Scrooge generated request type,
+``$Service.$Method.Args``, and the method's response type. Given an IDL:
+
+.. code-block:: none
+
+  exception NotFoundException { 1: string reason }
+
+  service SocialGraph {
+    i32 follow(1: i64 follower, 2: i64 followee) throws (1: NotFoundException ex)
+  }
+
+One possible classifier would be:
+
+.. code-block:: scala
+
+  import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
+
+  val classifier: ResponseClassifier = {
+    // #1
+    case ReqRep(_, Throw(_: NotFoundException)) =>
+      ResponseClass.NonRetryableFailure
+
+    // #2
+    case ReqRep(_, Return(x: Int)) if x == 0 =>
+      ResponseClass.NonRetryableFailure
+
+    // #3
+    case ReqRep(SocialGraph.Follow.Args(a, b), _) if a <= 0 =>
+      ResponseClass.NonRetryableFailure
+  }
+
+If you examine that classifier you'll note a few things. First (#1), the
+deserialized ``NotFoundException`` can be treated as a failure. Next (#2), a
+"successful" response can be examined to enable services using status codes to
+classify errors. Lastly (#3), the request can be introspected to make the
+decision.
 
 .. rubric:: Footnotes
 
@@ -804,9 +874,9 @@ as failures and can do so by using ``ThriftMuxResponseClassifier.ThriftException
    The API exposed for this is in ``com.twitter.finagle.WeightedSocketAddress``. The name
    resolver that translates logical destinations to ``com.twitter.finagle.Addr`` can wrap
    concrete address with a `Double` which influences the balancer's distributor during the
-  selection process.
+   selection process.
 
-.. [#probation] See ``com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation``
+.. [#probation] See ``com.twitter.finagle.loadbalancer.LoadBalancerFactory#EnableProbation``.
 
 .. [#failure_detectors] See `Failure Detectors` section from
    Alvaro Videla's `blog post <http://videlalvaro.github.io/2015/12/learning-about-distributed-systems.html>`_.

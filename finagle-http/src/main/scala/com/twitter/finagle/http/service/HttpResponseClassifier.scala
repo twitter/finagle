@@ -16,9 +16,10 @@ object HttpResponseClassifier {
    * Categorizes responses with status codes in the 500s as
    * [[ResponseClass.NonRetryableFailure NonRetryableFailures]].
    */
-  val ServerErrorsAsFailures: ResponseClassifier = {
-    case ReqRep(_, Return(r: Response)) if is500(r) => ResponseClass.NonRetryableFailure
-  }
+  val ServerErrorsAsFailures: ResponseClassifier =
+    ResponseClassifier.named("ServerErrorsAsFailures") {
+      case ReqRep(_, Return(r: Response)) if is500(r) => ResponseClass.NonRetryableFailure
+    }
 
   /**
    * Converts from the more natural `(http.Request, http.Response)` types

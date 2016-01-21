@@ -127,7 +127,11 @@ trait StackServer[Req, Rep]
  * [[com.twitter.finagle.server.StackServer]].
  */
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
-  extends StackServer[Req, Rep] { self =>
+  extends StackServer[Req, Rep]
+  with Stack.Parameterized[This]
+  with CommonParams[This]
+  with WithServerTransport[This]
+  with WithServerAdmissionControl[This] { self =>
 
   /**
    * The type we write into the transport.
@@ -159,7 +163,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    * Creates a new StackServer with parameter `p`.
    */
   override def configured[P: Stack.Param](p: P): This =
-    withParams(params+p)
+    withParams(params + p)
 
   /**
    * Creates a new StackServer with parameter `psp._1` and Stack Param type `psp._2`.

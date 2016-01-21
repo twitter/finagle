@@ -1,7 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.{Deadline, Dtab, Failure}
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.{Dtab, Failure}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Fields, ReaderUtils, Request, Response}
 import com.twitter.finagle.http.filter.HttpNackFilter
@@ -69,7 +68,7 @@ class HttpClientDispatcher(
       if (len > 0) req.headerMap.set(Fields.ContentLength, len.toString)
     }
 
-    trans.write(from[Request, HttpRequest](req)) rescue(wrapWriteException) before {
+    trans.write(from[Request, HttpRequest](req)).rescue(wrapWriteException).before {
       // Do these concurrently:
       Future.join(
         // 1. Drain the Request body into the Transport.

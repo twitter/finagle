@@ -61,7 +61,7 @@
 
     <g id="serviceTimeout" transform="translate(75, 220) rotate(-90)">
       <rect class="node" width="100" height="25"/>
-      <text class="node-label" x="50" y="17.5" text-anchor="middle">Service Timeout</text>
+      <text class="node-label" x="50" y="17.5" text-anchor="middle">Session Timeout</text>
     </g>
 
     <g id="refcounted" transform="translate(100, 220) rotate(-90)">

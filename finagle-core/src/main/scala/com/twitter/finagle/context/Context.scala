@@ -196,6 +196,29 @@ trait Context {
     }
     local.let(newEnv)(fn)
   }
+
+  /**
+   * Clears all bindings in the scope of `fn`.
+   *
+   * For example:
+   * {{{
+   *   context.let(Key1, "value1") {
+   *     context.let(Key2, "something else") {
+   *       context.letClear() {
+   *         // context.contains(Key1) == false
+   *         // context.contains(Key2) == false
+   *       }
+   *       // context(Key1) == "value1"
+   *       // context(Key2) == "something else"
+   *     }
+   *   }
+   * }}}
+   */
+  def letClear[R]()(fn: => R): R =
+    local.let(Empty) {
+      fn
+    }
+
 }
 
 /**

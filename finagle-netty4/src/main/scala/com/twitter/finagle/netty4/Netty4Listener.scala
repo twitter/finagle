@@ -9,6 +9,7 @@ import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import io.netty.bootstrap.ServerBootstrap
+import io.netty.buffer.UnpooledByteBufAllocator
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
@@ -87,8 +88,10 @@ private[finagle] case class Netty4Listener[In, Out](
       bootstrap.channel(classOf[NioServerSocketChannel])
       bootstrap.group(bossLoop, WorkerPool)
       bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
-      //bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT) //todo: investigate pooled allocator CSL-2089
-      //bootstrap.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+
+      //todo: investigate pooled allocator CSL-2089
+      bootstrap.option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+      bootstrap.childOption(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
       bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
       bootstrap.option[JInt](ChannelOption.SO_LINGER, 0)
       backlog.foreach(bootstrap.option[JInt](ChannelOption.SO_BACKLOG, _))

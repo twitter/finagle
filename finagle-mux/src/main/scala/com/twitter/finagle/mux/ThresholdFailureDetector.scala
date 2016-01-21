@@ -1,12 +1,11 @@
 package com.twitter.finagle.mux
 
-import java.util.concurrent.atomic.AtomicReference
-
 import com.twitter.conversions.time._
 import com.twitter.finagle.Status
 import com.twitter.finagle.stats.{MultiCategorizingExceptionStatsHandler, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
 import com.twitter.util._
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The threshold failure detector uses session pings to gauge the health

@@ -4,8 +4,9 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux
 import com.twitter.finagle.service._
 import com.twitter.finagle.thrift.DeserializeCtx
+import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.io.Buf
-import com.twitter.util.{Try, NonFatal, Throw, Return}
+import com.twitter.util.{NonFatal, Return, Try}
 
 /**
  * [[ResponseClassifier ResponseClassifiers]] for use with `finagle-thriftmux`
@@ -56,12 +57,13 @@ object ThriftMuxResponseClassifier {
    * Thrift Exception as a [[ResponseClass.NonRetryableFailure]].
    */
   val ThriftExceptionsAsFailures: ResponseClassifier =
-    usingDeserializeCtx {
-      case ReqRep(_, Throw(_)) => ResponseClass.NonRetryableFailure
-    }
+    ThriftResponseClassifier.ThriftExceptionsAsFailures
 
-  private[this] val NoDeserializer: () => DeserializeCtx[_] =
-    () => null
+  private[this] val NoDeserializeCtx: DeserializeCtx[Nothing] =
+    new DeserializeCtx[Nothing](null, null)
+
+  private[this] val NoDeserializerFn: () => DeserializeCtx[_] =
+    () => NoDeserializeCtx
 
   /**
    * [[mux.Response mux Responses]] need to be deserialized from
@@ -93,9 +95,12 @@ object ThriftMuxResponseClassifier {
       ReqRep(deserCtx.request, deserCtx.deserialize(bytes))
     }
 
+    override def toString: String =
+      s"ThriftMux.usingDeserializeCtx(${classifier.toString})"
+
     def isDefinedAt(reqRep: ReqRep): Boolean = {
-      val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializer)
-      if (deserCtx == null)
+      val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializerFn)
+      if (deserCtx eq NoDeserializeCtx)
         return false
 
       reqRep.response match {
@@ -112,8 +117,8 @@ object ThriftMuxResponseClassifier {
     def apply(reqRep: ReqRep): ResponseClass =
       reqRep.response match {
         case Return(rep: mux.Response) =>
-          val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializer)
-          if (deserCtx == null)
+          val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializerFn)
+          if (deserCtx eq NoDeserializeCtx)
             throw new MatchError("No DeserializeCtx found")
           try {
             classifier(deserialized(deserCtx, rep.body))
@@ -139,8 +144,8 @@ object ThriftMuxResponseClassifier {
       private[this] def deserializeIfPossible(rep: Try[Any]): Unit = {
         rep match {
           case Return(rep: mux.Response) =>
-            val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializer)
-            if (deserCtx != null) {
+            val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializerFn)
+            if (deserCtx ne NoDeserializeCtx) {
               try {
                 val bytes = Buf.ByteArray.Owned.extract(rep.body)
                 deserCtx.deserialize(bytes)

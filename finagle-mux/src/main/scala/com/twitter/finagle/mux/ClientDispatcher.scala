@@ -4,10 +4,9 @@ import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.mux.util.{TagMap, TagSet}
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
-import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Dtab, Filter, Failure, NoStacktrace, Service, ServiceProxy, Status}
+import com.twitter.finagle.{Dtab, Filter, Failure, NoStacktrace, Service, Status}
 import com.twitter.util.{Future, Promise, Return, Throw, Time, Try, Updatable}
 
 /**
@@ -43,17 +42,18 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
   private[this] val tags = TagSet(Message.MinTag to Message.MaxTag)
   private[this] val messages = TagMap[Updatable[Try[Message]]](tags)
 
+  private[this] val processAndRead: Message => Future[Unit] =
+    msg => {
+      process(msg)
+      readLoop()
+    }
+
   /**
    * Reads indefinitely from the transport, handing successfully
    * decoding messages to `processAndRead`.
    */
   private[this] def readLoop(): Future[Unit] =
     trans.read().flatMap(processAndRead)
-
-  private[this] def processAndRead(msg: Message): Future[Unit] = {
-    process(msg)
-    readLoop()
-  }
 
   readLoop().onFailure { case exc: Throwable =>
     trans.close()

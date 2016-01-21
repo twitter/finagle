@@ -277,7 +277,13 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
  *
  */
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
-    extends StackClient[Req, Rep] { self =>
+  extends StackClient[Req, Rep]
+  with Stack.Parameterized[This]
+  with CommonParams[This]
+  with ClientParams[This]
+  with WithClientTransport[This]
+  with WithSession[This]
+  with WithSessionQualifier[This] { self =>
 
   /**
    * The type we write into the transport.
@@ -320,7 +326,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    * Creates a new StackClient with parameter `p`.
    */
   override def configured[P: Stack.Param](p: P): This =
-    withParams(params+p)
+    withParams(params + p)
 
   /**
    * Creates a new StackClient with parameter `psp._1` and Stack Param type `psp._2`.

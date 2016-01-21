@@ -81,13 +81,16 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
   }
 
   test("ThriftExceptionsAsFailures") {
-    import ThriftMuxResponseClassifier.ThriftExceptionsAsFailures
+    import ThriftMuxResponseClassifier.{ThriftExceptionsAsFailures, usingDeserializeCtx}
+
+    val classifier = usingDeserializeCtx(ThriftExceptionsAsFailures)
+    assert("ThriftMux.usingDeserializeCtx(ThriftExceptionsAsFailures)" == classifier.toString())
 
     def testApply(in: String, expectedClass: ResponseClass): Unit = {
       val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
         val rep = mux.Response(Buf.Utf8(in))
-        assert(expectedClass == ThriftExceptionsAsFailures(ReqRep(in, Return(rep))))
+        assert(expectedClass == classifier(ReqRep(in, Return(rep))))
       }
     }
 
@@ -95,9 +98,9 @@ class ThriftMuxResponseClassifierTest extends FunSuite {
       val ctx = new DeserializeCtx(TestService.Query.Args(in), deserializer)
       Contexts.local.let(DeserializeCtx.Key, ctx) {
         val rep = mux.Response(Buf.Utf8(in))
-        assert(!ThriftExceptionsAsFailures.isDefinedAt(ReqRep(in, Return(rep))))
+        assert(!classifier.isDefinedAt(ReqRep(in, Return(rep))))
         assert(expectedClass ==
-          ThriftExceptionsAsFailures.applyOrElse(
+          classifier.applyOrElse(
             ReqRep(in, Return(rep)),
             ResponseClassifier.Default))
       }

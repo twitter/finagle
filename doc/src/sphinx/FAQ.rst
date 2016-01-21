@@ -96,9 +96,9 @@ How do I configure clients and servers with Finagle 6 APIs?
 
 As of :doc:`6.x <changelog>`, We introduced a new, preferred API for constructing Finagle
 ``Client``\s and ``Server``\s. Where the old API used ``ServerBuilder``\/``ClientBuilder``
-with ``Codec``s, the new APIs use ``Protocol.client.newClient`` and ``Protocol.server.serve`` [#]_.
+with ``Codec``\s, the new APIs use ``Protocol.client.newClient`` and ``Protocol.server.serve`` [#]_.
 
-Old ``ClientBuilder`` APIs::
+Old ``ClientBuilder`` APIs:
 
 .. code-block:: scala
 
@@ -117,7 +117,9 @@ New ``Stack`` APIs:
 
   import com.twitter.finagle.Http
 
-  val client = Http.client.newService("localhost:10000,localhost:10001")
+  val client = Http.client
+    .withSessionPool.maxSize(1)
+    .newService("localhost:10000,localhost:10001")
 
 The new APIs make timeouts more explicit, but we think we have a pretty good reason
 for changing the API this way.
@@ -152,14 +154,6 @@ different from ``connectTimeout``?  How is a ``requestTimeout`` different from a
 and it would be difficult to recover from the bad situation.  We also found that
 they were rarely being used correctly, and usually only by very sophisticated
 users.
-
-We're encouraging users to avoid encoding application requirements in Finagle,
-which was previously too easy to do via methods like ``ClientBuilder#retries``, or
-``ClientBuilder#timeout``.  These are fundamentally application-level concerns–
-you're trying to meet an SLA, etc.  In general, in order to do what Finagle is
-for, which is to deliver an RPC message to a cluster, we don't think you should
-need a lot of configuration at all.  You should need to specify your protocol,
-and a few details about the transport (ssl?  no ssl?), but that's about it.
 
 Of course, there are some points where there are rough edges, and we haven't
 figured out exactly what the right default should be.  We're actively looking

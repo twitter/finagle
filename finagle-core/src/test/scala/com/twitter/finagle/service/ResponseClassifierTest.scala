@@ -11,6 +11,7 @@ import org.scalatest.junit.JUnitRunner
 class ResponseClassifierTest extends FunSuite {
 
   test("Default classification") {
+    assert("DefaultResponseClassifier" == ResponseClassifier.Default.toString)
     assert(Success ==
       ResponseClassifier.Default(ReqRep(null, Return("hi"))))
 
