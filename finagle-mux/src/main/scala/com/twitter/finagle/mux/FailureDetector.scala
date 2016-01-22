@@ -37,7 +37,7 @@ private object NullFailureDetector extends FailureDetector {
  * "threshold:minPeriod:threshold:win:closeTimeout":
  *         use the specified configuration for failure detection
  */
-object sessionFailureDetector extends GlobalFlag(
+object sessionFailureDetector extends GlobalFlag[String](
   "threshold:5.seconds:2:100:duration.top",
   "The failure detector used to determine session liveness " +
       "[none|threshold:minPeriod:threshold:win:closeTimeout]")

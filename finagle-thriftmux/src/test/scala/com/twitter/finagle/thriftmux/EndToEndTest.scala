@@ -21,7 +21,7 @@ import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.protocol._
 import org.apache.thrift.TApplicationException
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
+import org.scalatest.{Tag, FunSuite}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import scala.language.reflectiveCalls
 
@@ -54,6 +54,13 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
               Future.value(dtab.show)
           }
       })
+  }
+
+  // turn off failure detector since we don't need it for these tests.
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    super.test(testName, testTags:_*) {
+      mux.sessionFailureDetector.let("none") { f }
+    }
   }
 
   test("end-to-end thriftmux") {
