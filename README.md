@@ -50,6 +50,10 @@ us a pull request!
 
 ## Contributing
 
+We feel that a welcoming community is important and we ask that you follow Twitter's
+[Open Source Code of Conduct](https://engineering.twitter.com/opensource/code-of-conduct)
+in all interactions with the community.
+
 The `master` branch of this repository contains the latest stable release of
 Finagle, and weekly snapshots are published to the `develop` branch. In general
 pull requests should be submitted against `develop`. See
