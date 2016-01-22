@@ -19,7 +19,6 @@ target(name='core',
     '3rdparty/jvm/org/scala-tools/testing:specs',
     'finagle/finagle-core',
     'finagle/finagle-serversets',
-    'finagle/finagle-test',
     'util/util-core',
     'util/util-zk-test'
   ],

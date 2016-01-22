@@ -5,7 +5,6 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-core',
     'finagle/finagle-stream',
-    'finagle/finagle-test',
     'util/util-core'
   ],
   fatal_warnings=True,

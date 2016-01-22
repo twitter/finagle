@@ -7,7 +7,6 @@ junit_tests(name='scala',
     'util/util-core',
     'util/util-codec',
     'finagle/finagle-core',
-    'finagle/finagle-test',
     'finagle/finagle-zipkin'
   ],
   fatal_warnings=True,
