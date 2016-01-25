@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client._
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.mux.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
@@ -77,17 +76,13 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newDispatcher(
       transport: Transport[In, Out]
     ): Service[mux.Request, mux.Response] = {
-      // while we do session establishment, we do not want to capture
-      // any request local state.
-      Contexts.letClear {
-        val param.Stats(sr) = params[param.Stats]
-        val param.Label(name) = params[param.Label]
+      val param.Stats(sr) = params[param.Stats]
+      val param.Label(name) = params[param.Label]
 
-        val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
-        val msgTrans = transport.map(Message.encode, Message.decode)
-        val session = new mux.ClientSession(msgTrans, detectorConfig, name, sr.scope("mux"))
-        mux.ClientDispatcher.newRequestResponse(session)
-      }
+      val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
+      val msgTrans = transport.map(Message.encode, Message.decode)
+      val session = new mux.ClientSession(msgTrans, detectorConfig, name, sr.scope("mux"))
+      mux.ClientDispatcher.newRequestResponse(session)
     }
   }
 

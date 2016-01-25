@@ -59,7 +59,9 @@ private[finagle] trait StringClient {
     protected def newTransporter(): Transporter[String, String] =
       Netty3Transporter(StringClientPipeline, params)
 
-    protected def newDispatcher(transport: Transport[In, Out]) =
+    protected def newDispatcher(
+      transport: Transport[In, Out]
+    ): Service[String, String] =
       new SerialClientDispatcher(transport)
   }
 

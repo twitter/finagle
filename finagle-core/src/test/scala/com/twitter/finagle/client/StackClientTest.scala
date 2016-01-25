@@ -3,24 +3,62 @@ package com.twitter.finagle.client
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Module0
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.dispatch.SerialClientDispatcher
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
+import com.twitter.finagle.netty3.Netty3Transporter
+import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
-import com.twitter.finagle.service.Retries
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
 import com.twitter.util._
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
+private object StackClientTest {
+  case class LocalCheckingStringClient(
+      localKey: Contexts.local.Key[String],
+      stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
+      params: Stack.Params = Stack.Params.empty)
+    extends StdStackClient[String, String, LocalCheckingStringClient] {
+
+    protected def copy1(
+      stack: Stack[ServiceFactory[String, String]] = this.stack,
+      params: Stack.Params = this.params
+    ): LocalCheckingStringClient = copy(localKey, stack, params)
+
+    protected type In = String
+    protected type Out = String
+
+    protected def newTransporter(): Transporter[String, String] =
+      Netty3Transporter(StringClientPipeline, params)
+
+    protected def newDispatcher(
+      transport: Transport[In, Out]
+    ): Service[String, String] = {
+      Contexts.local.get(localKey) match {
+        case Some(s) =>
+          Service.constant(
+            Future.exception(
+              new IllegalStateException("should not have a local context: " + s)))
+        case None =>
+          new SerialClientDispatcher(transport)
+      }
+    }
+  }
+}
+
 @RunWith(classOf[JUnitRunner])
 class StackClientTest extends FunSuite
   with StringClient
+  with StringServer
   with AssertionsForJUnit
   with Eventually
   with IntegrationPatience
@@ -358,7 +396,7 @@ class StackClientTest extends FunSuite
           val description = "description"
           def make(dest: LoadBalancerFactory.Dest, next: ServiceFactory[Unit, Unit]) = {
             val LoadBalancerFactory.Dest(va) = dest
-            va.sample match {
+            va.sample() match {
               case Addr.Bound(addrs, _) if addrs == Set(addr1) => fac1
               case Addr.Bound(addrs, _) if addrs == Set(addr2) => fac2
               case _ => throw new IllegalArgumentException("wat")
@@ -429,4 +467,24 @@ class StackClientTest extends FunSuite
     val svc = stringClient.filtered(reverseFilter).newRichClient(name, "test_client")
     assert(Await.result(svc.ping(), 1.second) == "ping".reverse)
   }
+
+
+  test("endpointer clears Contexts") {
+    import StackClientTest._
+
+    val key = new Contexts.local.Key[String]
+    Contexts.local.let(key, "SomeCoolContext") {
+      val echoSvc = Service.mk[String, String]{ Future.value }
+      val server = stringServer.serve(
+        new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
+        echoSvc)
+
+      val client = new LocalCheckingStringClient(key)
+        .newService(Name.bound(server.boundAddress), "a-label")
+
+      val result = Await.result(client("abc"), 5.seconds)
+      assert("abc" == result)
+    }
+  }
+
 }

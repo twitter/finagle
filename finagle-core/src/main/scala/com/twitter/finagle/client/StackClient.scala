@@ -1,6 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.{
   BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter.{DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
@@ -13,6 +14,7 @@ import com.twitter.finagle.stats.{LoadedHostStatsReceiver, ClientStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
+import com.twitter.util.Future
 
 object StackClient {
   /**
@@ -379,7 +381,15 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
           case _ =>
             val endpointClient = copy1(params=prms)
             val transporter = endpointClient.newTransporter()
-            ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher))
+            val mkFutureSvc: () => Future[Service[Req, Rep]] =
+              () => transporter(addr).map { trans =>
+                // we do not want to capture and request specific Locals
+                // that would live for the life of the session.
+                Contexts.letClear {
+                  endpointClient.newDispatcher(trans)
+                }
+              }
+            ServiceFactory(mkFutureSvc)
         }
         Stack.Leaf(this, factory)
       }
@@ -398,10 +408,10 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     }
 
     val clientStack = stack ++ (endpointer +: nilStack)
-    val clientParams = (params +
+    val clientParams = params +
       Label(clientLabel) +
       Stats(stats.scope(clientLabel)) +
-      BindingFactory.Dest(dest))
+      BindingFactory.Dest(dest)
 
     clientStack.make(clientParams)
   }
