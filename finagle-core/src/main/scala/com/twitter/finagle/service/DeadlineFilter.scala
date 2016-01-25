@@ -125,6 +125,13 @@ private[finagle] class DeadlineFilter[Req, Rep](
   private[this] val rejectBucket = TokenBucket.newLeakyBucket(
     rejectPeriod, 0, nowMillis)
 
+  private[this] def deadlineExceeded(
+    deadline: Deadline,
+    elapsed: Duration,
+    now: Time
+  ) = s"exceeded request deadline of ${deadline.deadline - deadline.timestamp} " +
+    s"by $elapsed. Deadline expired at ${deadline.deadline} and now it is $now."
+
   // The request is rejected if the set deadline has expired, the elapsed time
   // since expiry is less than `tolerance`, and there are at least
   // `rejectWithdrawal` tokens in `rejectBucket`. Otherwise, the request is
@@ -137,21 +144,25 @@ private[finagle] class DeadlineFilter[Req, Rep](
       case Some(deadline) =>
         val now = Time.now
         val remaining = deadline.deadline - now
-        if (remaining < Duration.Zero) {
-          if (-remaining > tolerance) {
-            beyondToleranceStat.incr()
-          } else {
-            exceededStat.incr()
-            if (rejectBucket.tryGet(rejectWithdrawal)) {
-              rejectedStat.incr()
-              return service(request)  // This will return an exception when testing is done.
-            }
-          }
-        }
+
         transitTimeStat.add((now - deadline.timestamp).max(Duration.Zero).inMilliseconds)
         budgetTimeStat.add(remaining.max(Duration.Zero).inMilliseconds)
-        rejectBucket.put(serviceDeposit)
-        service(request)
+
+        // Exceeded the deadline within tolerance, and there are enough
+        // tokens to reject the request
+        if (remaining < Duration.Zero
+            && -remaining <= tolerance
+            && rejectBucket.tryGet(rejectWithdrawal)) {
+          exceededStat.incr()
+          rejectedStat.incr()
+          service(request)  // When turned on this will be Future.exception
+        } else {
+          if (-remaining > tolerance) beyondToleranceStat.incr()
+          else if (remaining < Duration.Zero) exceededStat.incr()
+
+          rejectBucket.put(serviceDeposit)
+          service(request)
+        }
       case None =>
         rejectBucket.put(serviceDeposit)
         service(request)
