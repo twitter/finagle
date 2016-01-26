@@ -5,7 +5,6 @@ import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDisp
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
 import com.twitter.finagle.param._
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
-import com.twitter.finagle.service._
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.transport.Transport
@@ -61,6 +60,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
   protected lazy val Label(defaultClientName) = client.params[Label]
+
+  protected def params: Stack.Params = client.params
 
   override protected lazy val Stats(stats) = client.params[Stats]
 
@@ -197,15 +198,14 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       // a failure. So, when none is specified, a "deserializing-only"
       // classifier is used to make when deserialization happens in the stack
       // uniform whether or not a `ResponseClassifier` is wired up.
-      val c =
-        if (params.contains[com.twitter.finagle.param.ResponseClassifier]) {
-          ThriftResponseClassifier.usingDeserializeCtx(
-            params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
-          )
-        } else {
-          ThriftResponseClassifier.DeserializeCtxOnly
-        }
-      configured(com.twitter.finagle.param.ResponseClassifier(c))
+      val classifier = if (params.contains[com.twitter.finagle.param.ResponseClassifier]) {
+        ThriftResponseClassifier.usingDeserializeCtx(
+          params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
+        )
+      } else {
+        ThriftResponseClassifier.DeserializeCtxOnly
+      }
+      configured(com.twitter.finagle.param.ResponseClassifier(classifier))
     }
 
     private def superNewClient(dest: Name, label: String) =

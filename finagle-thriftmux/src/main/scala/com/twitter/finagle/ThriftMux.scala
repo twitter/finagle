@@ -167,15 +167,14 @@ object ThriftMux
       // a failure. So, when none is specified, a "deserializing-only"
       // classifier is used to make when deserialization happens in the stack
       // uniform whether or not a `ResponseClassifier` is wired up.
-      val c =
-        if (params.contains[param.ResponseClassifier]) {
-          ThriftMuxResponseClassifier.usingDeserializeCtx(
-            params[param.ResponseClassifier].responseClassifier
-          )
-        } else {
-          ThriftMuxResponseClassifier.DeserializeCtxOnly
-        }
-      muxer.configured(param.ResponseClassifier(c))
+      val classifier = if (params.contains[param.ResponseClassifier]) {
+        ThriftMuxResponseClassifier.usingDeserializeCtx(
+          params[param.ResponseClassifier].responseClassifier
+        )
+      } else {
+        ThriftMuxResponseClassifier.DeserializeCtxOnly
+      }
+      muxer.configured(param.ResponseClassifier(classifier))
     }
 
     def newService(dest: Name, label: String): Service[ThriftClientRequest, Array[Byte]] =
@@ -196,6 +195,8 @@ object ThriftMux
   protected lazy val Label(defaultClientName) = client.params[Label]
 
   override protected lazy val Stats(stats) = client.params[Stats]
+
+  protected def params: Stack.Params = client.params
 
   protected val Thrift.param.ProtocolFactory(protocolFactory) =
     client.params[Thrift.param.ProtocolFactory]

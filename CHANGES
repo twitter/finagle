@@ -45,6 +45,10 @@ Breaking API Changes
   * finagle-core: All the deprecated exceptions from `Exceptions.scala` have been removed.
     ``RB_ID=774658``
 
+  * finagle-thrift: `c.t.f.ThriftRichClient` has a new abstract protected method
+    `responseClassifier: ResponseClassifier`. If your implementation does not need
+     this, you can implement it with `ResponseClassifier.Default`. ``RB_ID=791470``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

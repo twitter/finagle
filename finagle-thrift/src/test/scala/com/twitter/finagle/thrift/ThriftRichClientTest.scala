@@ -2,7 +2,6 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
-
 import org.apache.thrift.protocol.TProtocolFactory
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -18,6 +17,8 @@ class ThriftRichClientTest extends FunSuite with MockitoSugar with OneInstancePe
   object ThriftRichClientMock extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient {
     override val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
     override val defaultClientName = "mock_client"
+
+    protected def params: Stack.Params = Stack.Params.empty
 
     def newService(
       dest: Name,

@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
 import com.twitter.finagle.util.Showable
@@ -29,6 +30,14 @@ private[twitter] object ThriftUtil {
       classOf[TProtocolFactory],
       classOf[String],
       classOf[StatsReceiver])
+
+  private val scrooge3FinagleClientWithRepClassifierParamTypes =
+    Seq(
+      classOf[Service[_, _]],
+      classOf[TProtocolFactory],
+      classOf[String],
+      classOf[StatsReceiver],
+      classOf[ResponseClassifier])
 
   def findClass1(name: String): Option[Class[_]] =
     try Some(Class.forName(name)) catch {
@@ -83,7 +92,8 @@ private[twitter] object ThriftUtil {
     underlying: Service[ThriftClientRequest, Array[Byte]],
     cls: Class[_],
     protocolFactory: TProtocolFactory,
-    sr: StatsReceiver
+    sr: StatsReceiver,
+    responseClassifier: ResponseClassifier
   ): Iface = {
     val clsName = cls.getName
 
@@ -99,6 +109,13 @@ private[twitter] object ThriftUtil {
         clientCls  <- findClass[Iface](clsName + "$FinagleClient")
         cons       <- findConstructor(clientCls, scrooge3FinagleClientParamTypes: _*)
       } yield cons.newInstance(underlying, protocolFactory, "", sr)
+
+    def tryScrooge3FinagledClientRepClassifier: Option[Iface] =
+      for {
+        baseName   <- findRootWithSuffix(clsName, "$FutureIface")
+        clientCls  <- findClass[Iface](baseName + "$FinagledClient")
+        cons       <- findConstructor(clientCls, scrooge3FinagleClientWithRepClassifierParamTypes: _*)
+      } yield cons.newInstance(underlying, protocolFactory, "", sr, responseClassifier)
 
     def tryScrooge3FinagledClient: Option[Iface] =
       for {
@@ -128,6 +145,7 @@ private[twitter] object ThriftUtil {
     val iface =
       tryThriftFinagleClient orElse
       tryScrooge3FinagleClient orElse
+      tryScrooge3FinagledClientRepClassifier orElse
       tryScrooge3FinagledClient orElse
       tryScrooge2Client orElse
       trySwiftClient
@@ -289,6 +307,14 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   protected lazy val stats: StatsReceiver = ClientStatsReceiver
 
   /**
+   * The [[Stack.Params]] to be used by this client.
+   *
+   * Both [[defaultClientName]] and [[stats]] predate `Params`
+   * and as such are implemented separately.
+   */
+  protected def params: Stack.Params
+
+  /**
    * $clientUse
    */
   def newIface[Iface](dest: String, cls: Class[_]): Iface = {
@@ -342,15 +368,17 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
-    lazy val underlying = newService(name, label)
-    lazy val clientLabel = (label, defaultClientName) match {
+    val underlying = newService(name, label)
+    val clientLabel = (label, defaultClientName) match {
       case ("", "") => Showable.show(name)
       case ("", l1) => l1
       case (l0, l1) => l0
     }
-    lazy val sr = stats.scope(clientLabel)
+    val sr = stats.scope(clientLabel)
+    val responseClassifier =
+      params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
 
-    constructIface(underlying, cls, protocolFactory, sr)
+    constructIface(underlying, cls, protocolFactory, sr, responseClassifier)
   }
 
 

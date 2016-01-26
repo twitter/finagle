@@ -22,11 +22,15 @@ import org.apache.thrift.protocol._
 import org.apache.thrift.TApplicationException
 import org.junit.runner.RunWith
 import org.scalatest.{Tag, FunSuite}
+import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
-class EndToEndTest extends FunSuite with AssertionsForJUnit {
+class EndToEndTest extends FunSuite
+  with AssertionsForJUnit
+  with Eventually
+  with IntegrationPatience {
   // Used for testing ThriftMux's Context functionality. Duplicated from the
   // finagle-mux package as a workaround because you can't easily depend on a
   // test package in Maven.
@@ -462,12 +466,15 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     server.close()
   }
 
-  private val classifier: ResponseClassifier = {
-    case ReqRep(TestService.Query.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
-      ResponseClass.Success
-    case ReqRep(_, Throw(_: InvalidQueryException)) => ResponseClass.NonRetryableFailure
-    case ReqRep(_, Return(s: String)) => ResponseClass.NonRetryableFailure
-  }
+  private val classifier: ResponseClassifier =
+    ResponseClassifier.named("EndToEndTestClassifier") {
+      case ReqRep(TestService.Query.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
+        ResponseClass.Success
+      case ReqRep(_, Throw(_: InvalidQueryException)) =>
+        ResponseClass.NonRetryableFailure
+      case ReqRep(_, Return(s: String)) =>
+        ResponseClass.NonRetryableFailure
+    }
 
   private def serverForClassifier(): ListeningServer  = {
     val iface = new TestService.FutureIface {
@@ -491,6 +498,11 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     assert("hi".length == ex.errorCode)
     assert(sr.counters(Seq("client", "requests")) == 1)
     assert(sr.counters.get(Seq("client", "success")) == None)
+    assert(sr.counters(Seq("client", "query", "requests")) == 1)
+    eventually {
+      assert(sr.counters(Seq("client", "query", "failures")) == 1)
+      assert(sr.counters.get(Seq("client", "query", "success")) == None)
+    }
 
     // test that we can examine the request as well.
     intercept[InvalidQueryException] {
@@ -498,11 +510,21 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
     }
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "query", "requests")) == 2)
+    eventually {
+      assert(sr.counters(Seq("client", "query", "success")) == 1)
+      assert(sr.counters(Seq("client", "query", "failures")) == 1)
+    }
 
     // test that we can mark a successfully deserialized result as a failure
     assert("safe" == Await.result(client.query("safe")))
     assert(sr.counters(Seq("client", "requests")) == 3)
     assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "query", "requests")) == 3)
+    eventually {
+      assert(sr.counters(Seq("client", "query", "success")) == 1)
+      assert(sr.counters(Seq("client", "query", "failures")) == 2)
+    }
   }
 
   test("thriftmux stack client deserialized response classification") {
@@ -527,7 +549,12 @@ class EndToEndTest extends FunSuite with AssertionsForJUnit {
       .responseClassifier(classifier)
       .dest(Name.bound(server.boundAddress))
       .build()
-    val client = new TestService.FinagledClient(clientBuilder)
+    val client = new TestService.FinagledClient(
+      clientBuilder,
+      serviceName = "client",
+      stats = sr,
+      responseClassifier = classifier
+    )
 
     testFailureClassification(sr, client)
     server.close()
