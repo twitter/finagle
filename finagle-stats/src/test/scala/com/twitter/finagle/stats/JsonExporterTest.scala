@@ -4,6 +4,7 @@ import com.twitter.common.metrics.{AbstractGauge, Metrics}
 import com.twitter.conversions.time._
 import com.twitter.finagle.http.{RequestParamMap, MediaType, Request}
 import com.twitter.util.{Time, MockTimer, Await}
+import java.io.{BufferedWriter, File, FileOutputStream, OutputStreamWriter}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
@@ -74,27 +75,57 @@ class JsonExporterTest
   test("statsFilterFile reads empty files") {
     val registry = Metrics.createDetached()
 
-    statsFilterFile.let(new java.io.File("/dev/null")) {
+    statsFilterFile.let(Set(new File("/dev/null"))) {
       val exporter = new JsonExporter(registry)
       assert(exporter.statsFilterRegex.isEmpty)
+    }
+  }
+
+  test("statsFilterFile reads multiple files") {
+    val registry = Metrics.createDetached()
+
+    val tFile1 = File.createTempFile("regex", ".txt")
+    tFile1.deleteOnExit()
+
+    val writer1 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile1), "UTF-8"))
+    writer1.write("abc123\r\n")
+    writer1.close()
+
+    val tFile2 = File.createTempFile("regex", ".txt")
+    tFile2.deleteOnExit()
+
+    val writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile2), "UTF-8"))
+    writer2.write("def456\r\n")
+    writer2.write("ghi789\r\n")
+    writer2.close()
+
+    statsFilterFile.let(Set(tFile1, tFile2)) {
+      val exporter = new JsonExporter(registry)
+      val regex = exporter.statsFilterRegex
+      assert(regex.isDefined)
+      assert(regex.get.pattern.matcher("abc123").matches)
+      assert(regex.get.pattern.matcher("def456").matches)
+      assert(regex.get.pattern.matcher("ghi789").matches)
     }
   }
 
   test("statsFilterFile and statsFilter combine") {
     val registry = Metrics.createDetached()
 
-    val tFile = java.io.File.createTempFile("regex", ".txt")
-    val writer = new java.io.PrintWriter(tFile)
-    writer.println("abc123")
+    val tFile = File.createTempFile("regex", ".txt")
+    tFile.deleteOnExit()
+
+    val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile), "UTF-8"))
+    writer.write("abc123\r\n")
     writer.close()
 
-    statsFilterFile.let(tFile) {
+    statsFilterFile.let(Set(tFile)) {
       statsFilter.let("def456") {
         val exporter = new JsonExporter(registry)
         val regex = exporter.statsFilterRegex
         assert(regex.isDefined)
-        assert(regex.get.findFirstIn("abc123").isDefined)
-        assert(regex.get.findFirstIn("def456").isDefined)
+        assert(regex.get.pattern.matcher("abc123").matches)
+        assert(regex.get.pattern.matcher("def456").matches)
       }
     }
   }

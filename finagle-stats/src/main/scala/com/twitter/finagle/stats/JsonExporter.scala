@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.io.{IOException, File}
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
-import scala.io.Source
+import scala.io.{Codec, Source}
 import scala.util.matching.Regex
 
 /**
@@ -32,13 +32,14 @@ object statsFilter extends GlobalFlag[String](
 
 
 /**
- * Blacklist of regex, comma-separated. Comma is a reserved character and
- * cannot be used. Used with regexes from statsFilter.
+ * Comma-separated blacklist of files. Each file may have multiple filters,
+ * separated by new lines. Used with regexes from statsFilter.
  *
  * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
-object statsFilterFile extends GlobalFlag[File](
-  "File of newline separated regexes that indicate which metrics to filter out")
+object statsFilterFile extends GlobalFlag[Set[File]](
+  Set.empty[File],
+  "Comma separated files of newline separated regexes that indicate which metrics to filter out")
 
 object useCounterDeltas extends GlobalFlag[Boolean](
   false,
@@ -70,12 +71,12 @@ class JsonExporter(
   private[this] val prettyWriter = mapper.writer(new DefaultPrettyPrinter)
 
   lazy val statsFilterRegex: Option[Regex] = {
-    val regexesFromFile = statsFilterFile.get.toSeq.flatMap { fileName =>
+    val regexesFromFile = statsFilterFile().flatMap { file =>
       try {
-        Source.fromFile(fileName.toString).getLines()
+        Source.fromFile(file)(Codec.UTF8).getLines()
       } catch {
         case e: IOException =>
-          log.error(e, "Unable to read statsFilterFile: %s", fileName)
+          log.error(e, "Unable to read statsFilterFile: %s", file)
           throw e
       }
     }

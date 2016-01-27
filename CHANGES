@@ -33,6 +33,9 @@ New Features
 
   * finagle-mux: Add a Wireshark dissector that can decode Mux messages. ``RB_ID=779482``
 
+  * finagle-stats: Define flag `c.t.f.stats.statsFilterFile` as GlobalFlag[Set[File]] to take
+    comma-separated multiple files. ``RB_ID=793397``
+
 Deprecations
 ~~~~~~~~~~~~
 
