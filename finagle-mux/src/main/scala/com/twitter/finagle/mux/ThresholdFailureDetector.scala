@@ -40,7 +40,7 @@ private class ThresholdFailureDetector(
     minPeriod: Duration = 5.seconds,
     threshold: Double = 2,
     windowSize: Int = 100,
-    closeTimeout: Duration = Duration.Top,
+    closeTimeout: Duration = 4.seconds,
     nanoTime: () => Long = System.nanoTime,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     implicit val timer: Timer = DefaultTimer.twitter)

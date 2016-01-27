@@ -38,7 +38,7 @@ private object NullFailureDetector extends FailureDetector {
  *         use the specified configuration for failure detection
  */
 object sessionFailureDetector extends GlobalFlag[String](
-  "threshold:5.seconds:2:100:duration.top",
+  "threshold:5.seconds:2:100:4.seconds",
   "The failure detector used to determine session liveness " +
       "[none|threshold:minPeriod:threshold:win:closeTimeout]")
 
@@ -74,12 +74,17 @@ object FailureDetector {
    * in the history. A small threshold makes the detection sensitive to potential
    * failures. There can be a low rate of false positive, which is fine in most
    * production cases with cluster redundancy.
+   *
+   * `closeTimeout` allows a session to be closed when a ping response times out
+   * after 4 seconds. This allows sessions to be reestablished when there may be
+   * a networking issue, so that it can choose an alternative networking path instead.
+   * The default 4 seconds is pretty conservative regarding normal ping RTT.
    */
   case class ThresholdConfig(
       minPeriod: Duration = 5.seconds,
       threshold: Double = 2,
       windowSize: Int = 100,
-      closeTimeout: Duration = Duration.Top)
+      closeTimeout: Duration = 4.seconds)
     extends Config
 
   /**

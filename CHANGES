@@ -61,6 +61,12 @@ Runtime Behavior Changes
     for clients that spend significant time deserializing and do not have higher level
     metrics this may come as a surprise. ``RB_ID=772931``
 
+  * finagle-mux,thriftmux: The default `closeTimeout` in ping based failure detection
+    is changed from Duration.Top to 4 seconds, to allow a session to be closed by default
+    when a ping response times out after 4 seconds. This allows sessions to be reestablished
+    when there may be a networking issue, so that it can choose an alternative networking
+    path instead. ``RB_ID=773649``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
