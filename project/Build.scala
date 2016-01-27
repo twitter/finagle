@@ -19,6 +19,9 @@ object Finagle extends Build {
 
   val libthriftVersion = "0.5.0-1"
 
+  val commonsCodecLib = "commons-codec" % "commons-codec" % "1.9"
+  val guavaLib = "com.google.guava" % "guava" % "16.0.1"
+  val jsr166eLib = "com.twitter" % "jsr166e" % "1.0.0"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
     "io.netty" % "netty-handler" % "4.1.0.Beta8",
@@ -30,7 +33,7 @@ object Finagle extends Build {
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion exclude("com.google.guava", "guava"),
-    "com.google.guava" % "guava" % "16.0.1"
+    guavaLib
   )
   val thriftLibs = Seq(
     "org.apache.thrift" % "libthrift" % libthriftVersion intransitive(),
@@ -216,7 +219,6 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-core",
     libraryDependencies ++= Seq(
-      nettyLib,
       util("app"),
       util("cache"),
       util("codec"),
@@ -226,8 +228,12 @@ object Finagle extends Build {
       util("jvm"),
       util("lint"),
       util("logging"),
+      util("registry"),
       util("stats"),
-      "com.twitter" % "jsr166e" % "1.0.0")
+      commonsCodecLib,
+      guavaLib,
+      jsr166eLib,
+      nettyLib)
   )
 
   lazy val finagleNetty4 = Project(
@@ -319,12 +325,12 @@ object Finagle extends Build {
     name := "finagle-serversets",
     fork in Test := true,
     libraryDependencies ++= Seq(
-      "commons-codec" % "commons-codec" % "1.6",
+      commonsCodecLib,
       util("cache"),
       util("zk-common"),
       util("zk-test") % "test",
       "com.twitter.common.zookeeper" % "server-set" % "1.0.103",
-      "com.google.guava" % "guava" % "16.0.1"
+      guavaLib
     ),
 
     libraryDependencies ++= jacksonLibs,
@@ -361,7 +367,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6",
-      "com.google.guava" % "guava" % "16.0.1"
+      guavaLib
     )
   ).dependsOn(finagleCore)
 
@@ -425,7 +431,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("hashing"),
       util("zk-test") % "test",
-      "com.google.guava" % "guava" % "16.0.1",
+      guavaLib,
       "com.twitter.common" % "zookeeper-testing" % "0.0.53" % "test"
     ),
     libraryDependencies ++= jacksonLibs
@@ -495,7 +501,7 @@ object Finagle extends Build {
     ).settings(
       name := "finagle-exp",
       libraryDependencies ++= Seq(
-        "com.twitter" % "jsr166e" % "1.0.0"
+        jsr166eLib
       )
     ).dependsOn(finagleCore, finagleThrift)
 
