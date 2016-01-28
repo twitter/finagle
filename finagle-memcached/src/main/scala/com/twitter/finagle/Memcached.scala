@@ -13,16 +13,17 @@ import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.text.{MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
-import com.twitter.finagle.param.WithConcurrentLoadBalancer
+import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
-import com.twitter.finagle.service.{Backoff, FailFastFactory, FailureAccrualFactory}
+import com.twitter.finagle.service._
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
+import com.twitter.finagle.stats.{StatsReceiver, ExceptionStatsHandler}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.hashing
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Future}
+import com.twitter.util.{Closable, Duration, Future, Monitor}
 import scala.collection.mutable
 
 /**
@@ -204,11 +205,6 @@ object Memcached extends finagle.Client[Command, Response]
 
     import Client.mkDestination
 
-    override def configured[P](psp: (P, Stack.Param[P])): Client = {
-      val (p, sp) = psp
-      configured(p)(sp)
-    }
-
     protected def copy1(
       stack: Stack[ServiceFactory[Command, Response]] = this.stack,
       params: Stack.Params = this.params
@@ -283,6 +279,34 @@ object Memcached extends finagle.Client[Command, Response]
      */
     def withNumReps(reps: Int): Client =
       configured(param.NumReps(reps))
+
+    // Java-friendly forwarders
+    // See https://issues.scala-lang.org/browse/SI-8905
+    override val withLoadBalancer: ConcurrentLoadBalancingParams[Client] =
+      new ConcurrentLoadBalancingParams(this)
+    override val withTransport: ClientTransportParams[Client] =
+      new ClientTransportParams(this)
+    override val withSession: SessionParams[Client] =
+      new SessionParams(this)
+    override val withSessionQualifier: SessionQualificationParams[Client] =
+      new SessionQualificationParams(this)
+
+    override def withLabel(label: String): Client = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Client =
+      super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Client = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Client = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Client =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Client = super.withRequestTimeout(timeout)
+    override def withResponseClassifier(responseClassifier: ResponseClassifier): Client =
+      super.withResponseClassifier(responseClassifier)
+    override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
+    override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
+
+    override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
+    override def filtered(filter: Filter[Command, Response, Command, Response]): Client =
+      super.filtered(filter)
   }
 
   val client: Memcached.Client = Client()
@@ -322,6 +346,24 @@ object Memcached extends finagle.Client[Command, Response]
       transport: Transport[In, Out],
       service: Service[Command, Response]
     ): Closable = new SerialServerDispatcher(transport, service)
+
+    // Java-friendly forwarders
+    //See https://issues.scala-lang.org/browse/SI-8905
+    override val withAdmissionControl: ServerAdmissionControlParams[Server] =
+      new ServerAdmissionControlParams(this)
+    override val withTransport: ServerTransportParams[Server] =
+      new ServerTransportParams(this)
+
+    override def withLabel(label: String): Server = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Server =
+      super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Server = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Server = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Server =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
+
+    override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
   val server: Memcached.Server = Server()

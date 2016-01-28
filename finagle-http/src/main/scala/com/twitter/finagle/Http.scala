@@ -7,11 +7,13 @@ import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInit
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.param._
+import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.server._
+import com.twitter.finagle.service.RetryBudget
+import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, StorageUnit}
+import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
 import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.Channel
 
@@ -99,13 +101,6 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
-    // This override allows java callers to use this method, working around
-    // https://issues.scala-lang.org/browse/SI-8905
-    override def configured[P](psp: (P, Stack.Param[P])): Client = {
-      val (p, sp) = psp
-      configured(p)(sp)
-    }
-
     protected def newTransporter(): Transporter[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
       val codec = param.applyToCodec(params, http.Http())
@@ -154,8 +149,35 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
 
+    // Java-friendly forwarders
+    // See https://issues.scala-lang.org/browse/SI-8905
+    override val withSessionPool: SessionPoolingParams[Client] =
+      new SessionPoolingParams(this)
+    override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
+      new DefaultLoadBalancingParams(this)
+    override val withSessionQualifier: SessionQualificationParams[Client] =
+      new SessionQualificationParams(this)
+    override val withSession: SessionParams[Client] =
+      new SessionParams(this)
+    override val withTransport: ClientTransportParams[Client] =
+      new ClientTransportParams(this)
+
     override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Client =
      super.withResponseClassifier(responseClassifier)
+    override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
+    override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
+    override def withLabel(label: String): Client = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Client =
+      super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Client = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Client = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Client =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Client = super.withRequestTimeout(timeout)
+
+    override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
+    override def filtered(filter: Filter[Request, Response, Request, Response]): Client =
+      super.filtered(filter)
   }
 
   val client: Http.Client = Client()
@@ -180,13 +202,6 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     protected type In = Any
     protected type Out = Any
-
-    // This override allows java callers to use this method, working around
-    // https://issues.scala-lang.org/browse/SI-8905
-    override def configured[P](psp: (P, Stack.Param[P])): Server = {
-      val (p, sp) = psp
-      configured(p)(sp)
-    }
 
     protected def newListener(): Listener[Any, Any] = {
       val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
@@ -230,6 +245,24 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     def withCompressionLevel(level: Int): Server =
       configured(param.CompressionLevel(level))
+
+    // Java-friendly forwarders
+    // See https://issues.scala-lang.org/browse/SI-8905
+    override val withAdmissionControl: ServerAdmissionControlParams[Server] =
+      new ServerAdmissionControlParams(this)
+    override val withTransport: ServerTransportParams[Server] =
+      new ServerTransportParams[Server](this)
+
+    override def withLabel(label: String): Server = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Server =
+      super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Server = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Server = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Server =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
+
+    override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
   val server: Http.Server = Server()

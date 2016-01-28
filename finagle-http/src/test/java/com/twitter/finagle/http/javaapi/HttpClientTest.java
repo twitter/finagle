@@ -67,6 +67,9 @@ public final class HttpClientTest {
     Client<Request, Response> newStyleClient =
       com.twitter.finagle.Http
           .client()
+          .withSessionPool().maxSize(10)
+          .withLabel("ads")
+          .withSessionQualifier().noFailFast()
           .withTls("foo.com")
           .configured(new Label("test").mk())
           .withDecompression(true);

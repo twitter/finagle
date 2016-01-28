@@ -3,12 +3,15 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
-import com.twitter.finagle.param._
+import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
+import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
+import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.{ClientId => _, _}
+import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.Stopwatch
+import com.twitter.util.{Duration, Stopwatch, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -162,11 +165,6 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
     override protected lazy val Stats(stats) = params[Stats]
 
-    override def configured[P](psp: (P, Stack.Param[P])): Client = {
-      val (p, sp) = psp
-      configured(p)(sp)
-    }
-
     protected def newTransporter(): Transporter[In, Out] = {
       val pipeline =
         if (framed) ThriftClientFramedPipelineFactory
@@ -216,6 +214,35 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       label: String
     ): ServiceFactory[ThriftClientRequest, Array[Byte]] =
       deserializingClassifier.superNewClient(dest, label)
+
+    // Java-friendly forwarders
+    // See https://issues.scala-lang.org/browse/SI-8905
+    override val withSessionPool: SessionPoolingParams[Client] =
+      new SessionPoolingParams(this)
+    override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
+      new DefaultLoadBalancingParams(this)
+    override val withTransport: ClientTransportParams[Client] =
+      new ClientTransportParams(this)
+    override val withSession: SessionParams[Client] =
+      new SessionParams(this)
+    override val withSessionQualifier: SessionQualificationParams[Client] =
+      new SessionQualificationParams(this)
+
+    override def withLabel(label: String): Client = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Client = super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Client = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Client = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Client =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Client = super.withRequestTimeout(timeout)
+    override def withResponseClassifier(responseClassifier: ResponseClassifier): Client =
+      super.withResponseClassifier(responseClassifier)
+    override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
+    override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
+
+    override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
+    override def filtered(filter: Filter[ThriftClientRequest, Array[Byte], ThriftClientRequest, Array[Byte]]): Client =
+      super.filtered(filter)
   }
 
   val client: Thrift.Client = Client()
@@ -277,11 +304,6 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     val param.Framed(framed) = params[param.Framed]
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
 
-    override def configured[P](psp: (P, Stack.Param[P])): Server = {
-      val (p, sp) = psp
-      configured(p)(sp)
-    }
-
     protected def newListener(): Listener[In, Out] = {
       val pipeline =
         if (framed) thrift.ThriftServerFramedPipelineFactory
@@ -302,6 +324,24 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     def withBufferedTransport(): Server =
       configured(param.Framed(false))
+
+    // Java-friendly forwarders
+    // See https://issues.scala-lang.org/browse/SI-8905
+    override val withAdmissionControl: ServerAdmissionControlParams[Server] =
+      new ServerAdmissionControlParams(this)
+    override val withTransport: ServerTransportParams[Server] =
+      new ServerTransportParams(this)
+
+    override def withLabel(label: String): Server = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Server =
+      super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Server = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Server = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Server =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
+
+    override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
   val server: Thrift.Server = Server()

@@ -3,17 +3,16 @@ package com.twitter.finagle
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.param._
+import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service._
-import com.twitter.finagle.Stack.Param
-import com.twitter.finagle.stats.{ClientStatsReceiver, ServerStatsReceiver}
+import com.twitter.finagle.stats.{ClientStatsReceiver, ExceptionStatsHandler, ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientRequest, UncaughtAppExceptionFilter}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.finagle.tracing.Trace
+import com.twitter.finagle.tracing.{Tracer, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Future, NonFatal}
+import com.twitter.util._
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.TException
@@ -183,8 +182,30 @@ object ThriftMux
     def newClient(dest: Name, label: String): ServiceFactory[ThriftClientRequest, Array[Byte]] =
       ThriftMuxToMux andThen deserializingClassifier.newClient(dest, label)
 
-    // these are necessary to have the right types from Java
-    override def configured[P: Stack.Param](p: P): Client = super.configured(p)
+    // Java-friendly forwarders
+    // See https://issues.scala-lang.org/browse/SI-8905
+    override val withTransport: ClientTransportParams[Client] =
+      new ClientTransportParams(this)
+    override val withSession: SessionParams[Client] =
+      new SessionParams(this)
+    override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
+      new DefaultLoadBalancingParams(this)
+    override val withSessionQualifier: SessionQualificationParams[Client] =
+      new SessionQualificationParams(this)
+
+    override def withLabel(label: String): Client = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Client =
+      super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Client = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Client = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Client =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Client = super.withRequestTimeout(timeout)
+    override def withResponseClassifier(responseClassifier: ResponseClassifier): Client =
+      super.withResponseClassifier(responseClassifier)
+    override def withRetryBudget(budget: RetryBudget): Client = super.withRetryBudget(budget)
+    override def withRetryBackoff(backoff: Stream[Duration]): Client = super.withRetryBackoff(backoff)
+
     override def configured[P](psp: (P, Stack.Param[P])): Client = super.configured(psp)
   }
 
@@ -363,12 +384,6 @@ object ThriftMux
 
     def params: Stack.Params = muxer.params
 
-    override def configured[P](psp: (P, Param[P])): Server =
-      super.configured(psp)
-
-    override def configured[P: Param](p: P): Server =
-      super.configured(p)
-
     protected val Thrift.param.ProtocolFactory(protocolFactory) =
       params[Thrift.param.ProtocolFactory]
 
@@ -410,6 +425,24 @@ object ThriftMux
         addr,
         MuxToArrayFilter.andThen(tracingFilter).andThen(factory))
     }
+
+    // Java-friendly forwarders
+    // See https://issues.scala-lang.org/browse/SI-8905
+    override val withTransport: ServerTransportParams[Server] =
+      new ServerTransportParams(this)
+    override val withAdmissionControl: ServerAdmissionControlParams[Server] =
+      new ServerAdmissionControlParams(this)
+
+    override def withLabel(label: String): Server = super.withLabel(label)
+    override def withStatsReceiver(statsReceiver: StatsReceiver): Server =
+      super.withStatsReceiver(statsReceiver)
+    override def withMonitor(monitor: Monitor): Server = super.withMonitor(monitor)
+    override def withTracer(tracer: Tracer): Server = super.withTracer(tracer)
+    override def withExceptionStatsHandler(exceptionStatsHandler: ExceptionStatsHandler): Server =
+      super.withExceptionStatsHandler(exceptionStatsHandler)
+    override def withRequestTimeout(timeout: Duration): Server = super.withRequestTimeout(timeout)
+
+    override def configured[P](psp: (P, Stack.Param[P])): Server = super.configured(psp)
   }
 
   val server: Server = Server()
