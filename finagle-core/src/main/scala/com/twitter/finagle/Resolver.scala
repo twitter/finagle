@@ -124,44 +124,51 @@ private[finagle] class InetResolver(
     }
   }
 
-  def bindWeightedHostPortsToAddr(hosts: Seq[WeightedHostPort]): Var[Addr] = {
-    def toAddr(whp: Seq[WeightedHostPort]): Future[Addr] = {
-      val elapsed = Stopwatch.start()
-      Future.collectToTry(whp.map {
-        case (host, port, weight) =>
-          resolveHost(host).map { inetAddrs =>
-            inetAddrs.map { inetAddr =>
-              WeightedSocketAddress(new InetSocketAddress(inetAddr, port), weight): SocketAddress
-            }
+  /**
+    * Resolve all hostnames and merge into a final Addr.
+    * If all lookups are unknown hosts, returns Addr.Neg.
+    * If all lookups fail with unexpected errors, returns Addr.Failed.
+    * If any lookup succeeds the final result will be Addr.Bound
+    * with the successful results.
+    */
+  def toAddr(whp: Seq[WeightedHostPort]): Future[Addr] = {
+    val elapsed = Stopwatch.start()
+    Future.collectToTry(whp.map {
+      case (host, port, weight) =>
+        resolveHost(host).map { inetAddrs =>
+          inetAddrs.map { inetAddr =>
+            WeightedSocketAddress(new InetSocketAddress(inetAddr, port), weight): SocketAddress
           }
-      }).flatMap { seq: Seq[Try[Seq[SocketAddress]]] =>
-          // Filter out all successes. If there was at least 1 success, consider
-          // the entire operation a success
-        val results = seq.collect {
-          case Return(subset) => subset
-        }.flatten
+        }
+    }).flatMap { seq: Seq[Try[Seq[SocketAddress]]] =>
+        // Filter out all successes. If there was at least 1 success, consider
+        // the entire operation a success
+      val results = seq.collect {
+        case Return(subset) => subset
+      }.flatten
 
-        // Consider any result a success. Ignore partial failures.
-        if (results.nonEmpty) {
-          successes.incr()
-          latencyStat.add(elapsed().inMilliseconds)
-          Future.value(Addr.Bound(results.toSet))
-        } else {
-          // Either no hosts or resolution failed for every host
-          failures.incr()
-          log.warning("Resolution failed for all hosts")
+      // Consider any result a success. Ignore partial failures.
+      if (results.nonEmpty) {
+        successes.incr()
+        latencyStat.add(elapsed().inMilliseconds)
+        Future.value(Addr.Bound(results.toSet))
+      } else {
+        // Either no hosts or resolution failed for every host
+        failures.incr()
+        log.warning("Resolution failed for all hosts")
 
-          seq.collectFirst {
-            case Throw(e) => e
-          } match {
-            case Some(_: UnknownHostException) => Future.value(Addr.Neg)
-            case Some(e) => Future.value(Addr.Failed(e))
-            case None => Future.value(Addr.Bound(Set[SocketAddress]()))
-          }
+        seq.collectFirst {
+          case Throw(e) => e
+        } match {
+          case Some(_: UnknownHostException) => Future.value(Addr.Neg)
+          case Some(e) => Future.value(Addr.Failed(e))
+          case None => Future.value(Addr.Bound(Set[SocketAddress]()))
         }
       }
     }
+  }
 
+  def bindWeightedHostPortsToAddr(hosts: Seq[WeightedHostPort]): Var[Addr] = {
     Var.async(Addr.Pending: Addr) { u =>
       toAddr(hosts) onSuccess { u() = _ }
       pollIntervalOpt match {
@@ -205,7 +212,7 @@ private[finagle] class InetResolver(
  * Clients should only use this in scenarios where host -> IP map changes
  * do not occur.
  */
-private[finagle] object FixedInetResolver {
+object FixedInetResolver {
 
   val scheme = "fixedinet"
 
