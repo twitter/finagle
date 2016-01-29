@@ -45,6 +45,9 @@ object Namer  {
     }
   }
 
+  // Key to encode name tree weights in Addr metadata
+  private[twitter] val AddrWeightKey = "namer_nametree_weight"
+
   /**
    * The global [[com.twitter.finagle.Namer Namer]]. It binds paths of the form
    *
@@ -160,7 +163,7 @@ object Namer  {
     lookup: Path => Activity[NameTree[Name]],
     tree: NameTree[Path]
   ): Activity[NameTree[Name.Bound]] =
-    bind(lookup, 0)(tree map { path => Name.Path(path) })
+    bind(lookup, 0, None)(tree map { path => Name.Path(path) })
 
   private[this] def bindUnion(
     lookup: Path => Activity[NameTree[Name]],
@@ -170,7 +173,7 @@ object Namer  {
 
     val weightedTreeVars: Seq[Var[Activity.State[NameTree.Weighted[Name.Bound]]]] = trees.map {
       case Weighted(w, t) =>
-        val treesAct: Activity[NameTree[Name.Bound]] = bind(lookup, depth)(t)
+        val treesAct: Activity[NameTree[Name.Bound]] = bind(lookup, depth, Some(w))(t)
         treesAct.map(Weighted(w, _)).run
     }
 
@@ -196,30 +199,40 @@ object Namer  {
   }
 
   // values of the returned activity are simplified and contain no Alt nodes
-  private def bind(lookup: Path => Activity[NameTree[Name]], depth: Int)(tree: NameTree[Name])
+  private def bind(lookup: Path => Activity[NameTree[Name]], depth: Int, weight: Option[Double])(tree: NameTree[Name])
   : Activity[NameTree[Name.Bound]] =
     if (depth > MaxDepth)
       Activity.exception(new IllegalArgumentException("Max recursion level reached."))
     else tree match {
-      case Leaf(Name.Path(path)) => lookup(path) flatMap bind(lookup, depth+1)
-      case Leaf(bound@Name.Bound(_)) => Activity.value(Leaf(bound))
+      case Leaf(Name.Path(path)) => lookup(path).flatMap(bind(lookup, depth+1, weight))
+      case Leaf(bound@Name.Bound(addr)) =>
+        // Add the weight of the parent to the addr's metadata
+        // Note: this assumes a single level of tree weights
+        val addrWithWeight = addr.map {
+          addr => (addr, weight) match {
+            case (Addr.Bound(addrs, metadata), Some(weight)) =>
+              Addr.Bound(addrs, metadata + ((AddrWeightKey, weight)))
+            case _ => addr
+          }
+        }
+        Activity.value(Leaf(Name.Bound(addrWithWeight, bound.id, bound.path)))
 
       case Fail => Activity.value(Fail)
       case Neg => Activity.value(Neg)
       case Empty => Activity.value(Empty)
 
       case Union() => Activity.value(Neg)
-      case Union(Weighted(_, tree)) => bind(lookup, depth)(tree)
+      case Union(Weighted(weight, tree)) => bind(lookup, depth, Some(weight))(tree)
       case Union(trees@_*) => bindUnion(lookup, depth, trees)
 
       case Alt() => Activity.value(Neg)
-      case Alt(tree) => bind(lookup, depth)(tree)
+      case Alt(tree) => bind(lookup, depth, weight)(tree)
       case Alt(trees@_*) =>
         def loop(trees: Seq[NameTree[Name]]): Activity[NameTree[Name.Bound]] =
           trees match {
             case Nil => Activity.value(Neg)
             case Seq(head, tail@_*) =>
-              bind(lookup, depth)(head) flatMap {
+              bind(lookup, depth, weight)(head).flatMap {
                 case Fail => Activity.value(Fail)
                 case Neg => loop(tail)
                 case head => Activity.value(head)

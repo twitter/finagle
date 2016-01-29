@@ -1,8 +1,9 @@
 package com.twitter.finagle.naming
 
 import com.twitter.finagle._
-import com.twitter.util.Activity
-import java.net.InetSocketAddress
+import com.twitter.finagle.Namer.AddrWeightKey
+import com.twitter.util.{Activity, Var}
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
@@ -22,22 +23,27 @@ class DefaultInterpreterTest extends FunSuite {
     }
   }
 
+  def ia(i: Int) = new InetSocketAddress(i)
+
+  def boundWithWeight(weight: Double, addrs: SocketAddress*): Name.Bound =
+    Name.Bound(Var.value(Addr.Bound(addrs.toSet, Addr.Metadata(AddrWeightKey -> weight))), addrs.toSet)
+
   test("basic dtab evaluation") {
     val dtab = Dtab.read("/foo=>/$/inet/0/8080")
-    assertEval(dtab, "/foo", Name.bound(new InetSocketAddress(8080)))
+    assertEval(dtab, "/foo", Name.bound(ia(8080)))
   }
 
   test("with indirections") {
     val dtab = Dtab.read("/foo=>/bar;/bar=>/$/inet/0/8080")
-    assertEval(dtab, "/foo", Name.bound(new InetSocketAddress(8080)))
+    assertEval(dtab, "/foo", Name.bound(ia(8080)))
   }
 
   test("order of dtab evaluation") {
     val d1 = Dtab.read("/foo=>/bar")
     val d2 = Dtab.read("/foo=>/biz;/biz=>/$/inet/0/8080;/bar=>/$/inet/0/9090")
 
-    assertEval(d1 ++ d2, "/foo", Name.bound(new InetSocketAddress(8080)))
-    assertEval(d2 ++ d1, "/foo", Name.bound(new InetSocketAddress(9090)))
+    assertEval(d1 ++ d2, "/foo", Name.bound(ia(8080)))
+    assertEval(d2 ++ d1, "/foo", Name.bound(ia(9090)))
   }
 
   test("recurse back to the dtab") {
@@ -45,7 +51,7 @@ class DefaultInterpreterTest extends FunSuite {
       "/foo=>/$/com.twitter.finagle.naming.testnamer;/rewritten/by/test/namer=>/$/inet/0/7070"
     )
 
-    assertEval(dtab, "/foo", Name.bound(new InetSocketAddress(7070)))
+    assertEval(dtab, "/foo", Name.bound(ia(7070)))
   }
 
   test("full example") {
@@ -58,9 +64,9 @@ class DefaultInterpreterTest extends FunSuite {
     """)
 
     assertEval(dtab, "/foo",
-      Name.bound(new InetSocketAddress(8080)),
-      Name.bound(new InetSocketAddress(9090)),
-      Name.bound(new InetSocketAddress(7070))
+      boundWithWeight(3.0, ia(8080)),
+      boundWithWeight(2.0, ia(9090)),
+      boundWithWeight(1.0, ia(7070))
     )
   }
 }

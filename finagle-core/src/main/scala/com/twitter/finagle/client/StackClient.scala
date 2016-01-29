@@ -173,6 +173,11 @@ object StackClient {
      *    to satisfy the `LoadBalanceFactory.Dest param`, and above
      *    `StatsScoping` to provide the `AddrMetadata` param.
      *
+     *  * `EndpointRecorder` passes endpoint information to the
+     *    `EndpointRegistry`. It must appear below `BindingFactory` so
+     *    `BindingFactory` can set the `Name.Bound` `BindingFactory.Dest`
+     *    param.
+     *
      *  * `BindingFactory` resolves the destination `Name` into a
      *    `NameTree`, and distributes requests to destination clusters
      *    according to the resolved `NameTree`. Cluster endpoints are
@@ -202,6 +207,7 @@ object StackClient {
      */
     stk.push(StatsScoping.module)
     stk.push(AddrMetadataExtraction.module)
+    stk.push(EndpointRecorder.module)
     stk.push(BindingFactory.module)
     stk.push(TimeoutFactory.module)
     stk.push(FactoryToService.module)

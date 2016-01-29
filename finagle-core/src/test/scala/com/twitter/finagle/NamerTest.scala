@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Await, Future, Return, Throw, Activity, Witness, Try}
+import com.twitter.finagle.Namer.AddrWeightKey
+import com.twitter.util._
 import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -18,6 +19,9 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     }
 
     def ia(i: Int) = new InetSocketAddress(i)
+
+    def boundWithWeight(weight: Double, addrs: SocketAddress*): Name.Bound =
+      Name.Bound(Var.value(Addr.Bound(addrs.toSet, Addr.Metadata(AddrWeightKey -> weight))), addrs.toSet)
 
     class TestException extends Exception {}
     val exc = new TestException {}
@@ -60,12 +64,12 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     }
   }
 
-  def assertEval(res: Activity[NameTree[Name.Bound]], ias: InetSocketAddress*) {
+  def assertEval(res: Activity[NameTree[Name.Bound]], expected: Name.Bound*) =
     res.sample().eval match {
-      case Some(actual) => assert(actual.map(_.addr.sample) == ias.map(Addr.Bound(_)).toSet)
+      case Some(actual) =>
+        assert(actual.map(_.addr.sample) == expected.map(_.addr.sample).toSet)
       case _ => assert(false)
     }
-  }
 
   test("NameTree.bind: union")(new Ctx {
     val res = namer.bind(NameTree.read("/test/0 & /test/1"))
@@ -79,7 +83,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
     // Ok(Bound) & Pending
     namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
-    assertEval(res, ia(1))
+    assertEval(res, boundWithWeight(1.0, ia(1)))
 
     // Failed(exc) & Pending
     namer("/test/1").notify(Throw(exc))
@@ -88,15 +92,15 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     // Ok(Bound) & Ok(Bound)
     namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
     namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
-    assertEval(res, ia(1), ia(2))
+    assertEval(res, boundWithWeight(1.0, ia(1)), boundWithWeight(1.0, ia(2)))
 
     // Ok(Bound) & Ok(Neg)
     namer("/test/2").notify(Return(NameTree.Neg))
-    assertEval(res, ia(1))
+    assertEval(res, boundWithWeight(1.0, ia(1)))
 
     // Ok(Bound) & Failed(exc)
     namer("/test/2").notify(Throw(exc))
-    assertEval(res, ia(1))
+    assertEval(res, boundWithWeight(1.0, ia(1)))
 
     // Failed(exc) & Failed(exc)
     namer("/test/1").notify(Throw(exc))
@@ -123,16 +127,16 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assert(res.sample().eval == Some(Set.empty))
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/1")))
-    assertEval(res, ia(1))
+    assertEval(res, Name.bound(ia(1)))
 
     namer("/test/0").notify(Return(NameTree.Neg))
     assert(res.sample().eval == None)
 
     namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
-    assertEval(res, ia(2))
+    assertEval(res, boundWithWeight(1.0, ia(2)))
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/3")))
-    assertEval(res, ia(3))
+    assertEval(res, Name.bound(ia(3)))
   })
 
   test("NameTree.bind: Alt with Fail/Empty")(new Ctx {
