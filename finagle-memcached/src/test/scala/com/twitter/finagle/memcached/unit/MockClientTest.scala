@@ -2,6 +2,7 @@ package com.twitter.finagle.memcached.unit
 
 import com.twitter.finagle.memcached.MockClient
 import com.twitter.finagle.memcached.protocol.ClientError
+import com.twitter.io.Buf
 import com.twitter.util.{Return, Await}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -119,5 +120,17 @@ class MockClientTest extends FunSuite {
     val result = Await.result(memcache.getResult(Seq("key")))
 
     assert(result.hits("key").casUnique.isDefined)
+  }
+
+  test("`contents` produces immutable copies") {
+    val memcache = new MockClient()
+    val emptyContents = memcache.contents
+
+    memcache.withStrings.set("key", "value")
+    val oneKey = memcache.contents
+
+    // ensure that contents of emptyContents has not changed: check it after set
+    assert(emptyContents == Map())
+    assert(oneKey == Map("key" -> Buf.Utf8("value")))
   }
 }

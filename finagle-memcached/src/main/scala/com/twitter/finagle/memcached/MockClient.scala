@@ -183,4 +183,11 @@ class MockClient(val map: mutable.Map[String, Buf]) extends Client {
   override def toString = {
     "MockClient(" + map.toString + ")"
   }
+
+  /** Returns an immutable copy of the current cache. */
+  def contents: Map[String, Buf] = {
+    map.synchronized {
+      Map(map.toSeq: _*)
+    }
+  }
 }
