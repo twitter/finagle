@@ -195,7 +195,7 @@ class TrafficDistributorTest extends FunSuite {
     assert(balancers.size == init.size)
     assert(newEndpointCalls == init.size)
 
-    // insert new endpoints on exisiting weight classes
+    // insert new endpoints on existing weight classes
     resetCounters()
     val existingWeight = 3.0
     val newAddrs = Set(

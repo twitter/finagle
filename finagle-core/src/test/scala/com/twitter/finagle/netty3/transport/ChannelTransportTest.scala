@@ -157,7 +157,7 @@ class ChannelTransportTest
     verify(ch, times(1)).setReadable(true)
     when(ch.isReadable).thenReturn(true)
 
-    // And finally, we don't attemp to change
+    // And finally, we don't attempt to change
     // readability again when we enqueue further
     // reads.
     assert(!trans.read().isDefined)

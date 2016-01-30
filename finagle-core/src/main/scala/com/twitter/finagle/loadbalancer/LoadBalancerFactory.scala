@@ -293,7 +293,7 @@ object ConcurrentLoadBalancerFactory {
 }
 
 /**
- * A thin interface around a Balancer's contructor that allows Finagle to pass in
+ * A thin interface around a Balancer's constructor that allows Finagle to pass in
  * context from the stack to the balancers at construction time.
  *
  * @see [[Balancers]] for a collection of available balancers.

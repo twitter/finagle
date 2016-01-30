@@ -37,7 +37,7 @@ private[memcached] object MigrationConstants {
  * Migration client. This client manages a two cache clients representing source and
  * destination cache pool. Depending on the migration state, this client may send dark traffic
  * to destination pool to warm up the cache, or send light traffic to destination pool and fall
- * back to original pool for cache misses. The state transitioning is controlled by opeartor
+ * back to original pool for cache misses. The state transitioning is controlled by operator
  * by setting corresponding metadata in zookeeper.
  */
 class MigrationClient(

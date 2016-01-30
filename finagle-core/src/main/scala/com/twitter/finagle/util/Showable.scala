@@ -1,7 +1,7 @@
 package com.twitter.finagle.util
 
 /**
- * Trait showable is a type-class for showing parsable
+ * Trait showable is a type-class for showing parseable
  * representations of objects.
  */
 trait Showable[-T] {

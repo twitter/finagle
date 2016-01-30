@@ -52,7 +52,7 @@ trait Strings { self: BaseClient =>
     }
 
   /**
-   * Decremts number stored at key by 1.
+   * Decrements number stored at key by 1.
    * @param key
    * @return value after decrement.
    */

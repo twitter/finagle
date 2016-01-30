@@ -235,7 +235,7 @@ private object ClientSession {
     Failure.rejected("The request was Nacked by the server"))
 
   val FuturePingNack = Future.exception(Failure(
-    "A ping is already oustanding on this session."))
+    "A ping is already outstanding on this session."))
 
   sealed trait State
   case object Dispatching extends State

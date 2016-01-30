@@ -241,7 +241,7 @@ class ClusterClientTest
 
       /***** start 5 more memcached servers and join the cluster ******/
       // update config data node, which triggers the pool update
-      // cache pool cluster should still be able to see undelrying pool changes
+      // cache pool cluster should still be able to see underlying pool changes
       try {
         expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           addMoreServers(5)
@@ -273,7 +273,7 @@ class ClusterClientTest
 
       /***** start 5 more memcached servers and join the cluster ******/
       // update config data node, which triggers the pool update
-      // cache pool cluster should still be able to see undelrying pool changes
+      // cache pool cluster should still be able to see underlying pool changes
       try {
         expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           addMoreServers(5)
