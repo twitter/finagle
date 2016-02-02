@@ -11,15 +11,18 @@ import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.service.FailFastFactory.FailFast
+import com.twitter.finagle.service.PendingRequestFilter
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress}
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 
 private object StackClientTest {
@@ -346,13 +349,13 @@ class StackClientTest extends FunSuite
     assert(budget > 0)
   })
 
+
   test("Requeues all go to the same cluster in a Union") {
     /*
      * Once we have distributed a request to a particular cluster (in
      * BindingFactory), retries should go to the same cluster rather
      * than being redistributed (possibly to a different cluster).
      */
-
     class CountFactory extends ServiceFactory[Unit, Unit] {
       var count = 0
 
@@ -487,4 +490,101 @@ class StackClientTest extends FunSuite
     }
   }
 
+  test("pending request limit is per connection") {
+    class CountingService(p: Promise[Unit]) extends Service[Unit, Unit] {
+      var pending = new AtomicInteger()
+      val satisfied = new AtomicInteger()
+      def apply(req: Unit): Future[Unit] = {
+        pending.incrementAndGet()
+        p.ensure(satisfied.incrementAndGet())
+      }
+    }
+
+    val (p1, p2) = (new Promise[Unit], new Promise[Unit])
+
+    val (endpoint1, endpoint2) = (new CountingService(p1), new CountingService(p2))
+    var first = true
+
+    val stack = StackClient.newStack[Unit, Unit]
+      .concat(Stack.Leaf(Stack.Role("role"),
+        new ServiceFactory[Unit, Unit] {
+          def apply(conn: ClientConnection): Future[Service[Unit, Unit]] =
+            if (first) {
+              first = false
+              Future.value(endpoint1)
+            }
+            else {
+              Future.value(endpoint2)
+            }
+
+          def close(deadline: Time): Future[Unit] = Future.Done
+        }
+      ))
+      .remove(DefaultPool.Role)
+
+    val sr = new InMemoryStatsReceiver
+    val params =
+      Stack.Params.empty +
+        param.Stats(sr) +
+        DefaultPool.Param(
+          low = 0,
+          high = 2,
+          bufferSize = 0,
+          idleTime = Duration.Zero,
+          maxWaiters = 0) +
+        FactoryToService.Enabled(false) +
+        PendingRequestFilter.Param(Some(2)) +
+        BindingFactory.Dest(Name.Path(Path.read("/$/inet/localhost/0")))
+
+    val svcFac = stack.make(params)
+    val session1 = Await.result(svcFac(), 3.seconds)
+
+    // pending
+    val e1r1 = session1(())
+    // pending
+    val e1r2 = session1(())
+    // rejected
+    val e1r3 = session1(())
+
+    val e1rejected = intercept[Failure] { Await.result(e1r3, 3.seconds) }
+
+    val session2 = Await.result(svcFac(), 3.seconds)
+    // pending
+    val e2r1 = session2(())
+    // pending
+    val e2r2 = session2(())
+    // rejected
+    val e2r3 = session2(())
+
+    val e2rejected = intercept[Failure] { Await.result(e2r3, 3.seconds) }
+
+    // endpoint1 and endpoint2 both only see the first two requests,
+    // meaning they get distinct pending request limits
+    assert(endpoint1.pending.get() == 2)
+    assert(endpoint2.pending.get() == 2)
+    assert(endpoint1.satisfied.get() == 0)
+    assert(endpoint2.satisfied.get() == 0)
+    assert(!e1r1.isDefined)
+    assert(!e1r2.isDefined)
+    intercept[RejectedExecutionException] { throw e1rejected.cause.get }
+    intercept[RejectedExecutionException] { throw e2rejected.cause.get }
+
+
+    // pending requests are satisfied
+    p1.setDone()
+    p2.setDone()
+    assert(endpoint1.satisfied.get() == 2)
+    assert(endpoint2.satisfied.get() == 2)
+
+    // subsequent requests aren't filtered
+    val e2r4 = session2(())
+    val e2r5 = session2(())
+    val e2r6 = session2(())
+
+    Await.result(e2r4, 3.seconds)
+    Await.result(e2r5, 3.seconds)
+    Await.result(e2r6, 3.seconds)
+
+    assert(endpoint2.satisfied.get() == 5)
+  }
 }

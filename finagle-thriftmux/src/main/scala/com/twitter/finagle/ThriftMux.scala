@@ -103,6 +103,7 @@ object ThriftMux
     with CommonParams[Client]
     with ClientParams[Client]
     with WithClientTransport[Client]
+    with WithClientAdmissionControl[Client]
     with WithSession[Client]
     with WithSessionQualifier[Client]
     with WithDefaultLoadBalancer[Client]
@@ -192,6 +193,8 @@ object ThriftMux
       new DefaultLoadBalancingParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
       new SessionQualificationParams(this)
+    override val withAdmissionControl: ClientAdmissionControlParams[Client] =
+      new ClientAdmissionControlParams(this)
 
     override def withLabel(label: String): Client = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Client =
