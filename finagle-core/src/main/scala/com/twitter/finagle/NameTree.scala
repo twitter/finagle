@@ -31,7 +31,7 @@ sealed trait NameTree[+T] {
     NameTree.map(f)(this)
 
    /**
-    * A parsable representation of the name tree; a
+    * A parseable representation of the name tree; a
     * [[com.twitter.finagle.NameTree NameTree]] is recovered
     * from this string by
     * [[com.twitter.finagle.NameTree.read NameTree.read]].

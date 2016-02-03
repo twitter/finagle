@@ -93,7 +93,7 @@ object TwemcacheClient {
  */
 trait TwemcachePartitionedClient extends TwemcacheClient { self: PartitionedClient =>
 
-  // For now we requires the ParitionedClient must be delgating TwemcacheClient.
+  // For now we requires the ParitionedClient must be delegating TwemcacheClient.
   // Refactory is on the way to re-archytect the partitioned client
   protected[memcached] def twemcacheClientOf(key: String): TwemcacheClient = clientOf(key).asInstanceOf[TwemcacheClient]
 

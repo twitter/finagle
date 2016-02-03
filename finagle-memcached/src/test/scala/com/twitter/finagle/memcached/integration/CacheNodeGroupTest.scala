@@ -180,7 +180,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
 
     /***** start 5 more memcached servers and join the cluster ******/
     // update config data node, which triggers the pool update
-    // cache pool cluster should still be able to see undelrying pool changes
+    // cache pool cluster should still be able to see underlying pool changes
     addShards(List(5, 6, 7, 8, 9))
     updateCachePoolConfigData(10)
     assert(waitForMemberSize(myPool, 5, 10, 5.seconds))

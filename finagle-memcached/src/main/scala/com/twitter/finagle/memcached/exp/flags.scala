@@ -7,7 +7,7 @@ import com.twitter.app.{Flaggable, GlobalFlag}
  *
  * Restriction: If a service uses more than one memcache cluster, it cannot use local memcache by this way.
  *
- * Todo: Depracate it once memcache has wily support (TRFC-434).
+ * Todo: Deprecate it once memcache has wily support (TRFC-434).
  */
 
 object localMemcachedPort extends GlobalFlag[Option[Int]] (

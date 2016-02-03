@@ -34,7 +34,7 @@ case class Blackholeter[Req, Rep](probability: Var[Double],
  * This is useful for testing timeout response. Note that the underlying service IS called in this variant,
  * but the result is DISCARDED. Useful for checking for idempotent behavior.
  *
- * @param probability [0,1] whre 1 is 100% blackhole mode
+ * @param probability [0,1] where 1 is 100% blackhole mode
  */
 case class ByzantineBlackholeter[Req, Rep](probability: Var[Double],
                                   seed: Long = Failter.DefaultSeed,

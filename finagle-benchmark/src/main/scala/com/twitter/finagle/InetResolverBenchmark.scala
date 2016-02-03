@@ -8,7 +8,7 @@ import org.openjdk.jmh.annotations._
 
 /**
  * This is primarily a test for allocations not performance
- * so it is recommnded to run with `-prof gc`.
+ * so it is recommended to run with `-prof gc`.
  */
 @State(Scope.Benchmark)
 class InetResolverBenchmark extends StdBenchAnnotations {

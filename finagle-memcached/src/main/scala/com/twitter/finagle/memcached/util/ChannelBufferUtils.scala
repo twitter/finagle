@@ -20,7 +20,7 @@ private[finagle] object ChannelBufferUtils {
   // Per memcached protocol, control characters and whitespace cannot be in the key
   // https://github.com/memcached/memcached/blob/master/doc/protocol.txt
   // But both memcached and twemcache are not strictly enforcing this rule currently,
-  // we are relaxing the rules here to only eliminita ' '(ws), \r, \n and \0, to
+  // we are relaxing the rules here to only eliminate ' '(ws), \r, \n and \0, to
   // make it compatible with our previous validation logic
   val FIND_INVALID_KEY_CHARACTER = new ChannelBufferIndexFinder() {
     def find(buffer: ChannelBuffer, guessedIndex: Int): Boolean = {
