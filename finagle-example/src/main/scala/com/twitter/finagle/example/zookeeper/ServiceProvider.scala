@@ -2,10 +2,9 @@ package com.twitter.finagle.example.zookeeper
 
 import java.net.InetSocketAddress
 
-import com.twitter.finagle.Service
-import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.http._
-import com.twitter.util.{Future, Return, Throw}
+import com.twitter.finagle.http.{Http => _, _}
+import com.twitter.finagle.{Http, Service}
+import com.twitter.util.{Await, Future}
 
 /**
   * This demo shows how to register your service in zookeeper.
@@ -37,26 +36,22 @@ object ServiceProvider {
 
   def main(args: Array[String]): Unit = {
 
-    //start your service on port 8080
-    val server: Server = ServerBuilder()
-      .codec(Http())
-      .bindTo(new InetSocketAddress(8080))
-      .name("echoserver")
-      .build(new EchoServer)
-
-    //providerPath: "zk!127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183!/services/echo/!0"
-    //syntax:        zk!host!path!shardId
-    //zk:            schema name
-    //host:          zookeeper connection string
-    //path:          service registration path in zookeeper
-    //shardId:       it's used internally by Twitter, can be set to 0 in most cases.
+    //echoServicePath: zk!127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183!/services/echo/!0
+    //syntax:          schema!host!path!shardId
+    //schema:          for server, use zk, for client, use zk2
+    //host:            zookeeper connection string
+    //path:            service registration path in zookeeper
+    //shardId:         it's used internally by Twitter, can be set to 0 in most cases
     val echoServicePath = buildProviderPath(EchoServer.servicePath)
 
-    server.announce(echoServicePath) onSuccess { _ =>
-      println("service register success")
-    } onFailure { e =>
-      println(s"error: $e")
-    }
+    //start your service on port 8080 and register to zookeeper
+    Await.ready(
+      Http.server.
+        withLabel("echo-server").
+        serveAndAnnounce(
+          echoServicePath,
+          new InetSocketAddress(8080),
+          new EchoServer))
   }
 
   def buildProviderPath(servicePath: String, zookeeperDest: String = zookeeperDest): String = {
@@ -64,7 +59,7 @@ object ServiceProvider {
   }
 
   def buildConsumerPath(servicePath: String, zookeeperDest: String = zookeeperDest): String = {
-    s"zk!$zookeeperDest!$servicePath"
+    s"zk2!$zookeeperDest!$servicePath"
   }
 
 }
