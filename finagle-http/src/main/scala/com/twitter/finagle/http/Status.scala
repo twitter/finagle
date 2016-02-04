@@ -29,7 +29,47 @@ case class Status(code: Int) {
     }
 }
 
+
+
+
+
 object Status {
+
+  @inline
+  private[finagle] def inRange(lower: Int, upper: Int)
+                              (status: Status): Option[Status] =
+    Some(status).filter(s => s.code >= lower && s.code < upper)
+
+  object UnknownStatus {
+    def unapply(status: Status): Option[Status] =
+      Some(status).filter(s => s.code < 100 || s.code >= 600)
+  }
+
+  object Informational {
+    def unapply(status: Status): Option[Status] =
+      inRange(100, 200)(status)
+  }
+
+  object Successful{
+    def unapply(status: Status): Option[Status] =
+      inRange(200, 300)(status)
+  }
+
+  object Redirection {
+    def unapply(status: Status): Option[Status] =
+      inRange(300, 400)(status)
+  }
+
+  object ClientError {
+    def unapply(status: Status): Option[Status] =
+      inRange(400, 500)(status)
+  }
+
+  object ServerError {
+    def unapply(status: Status): Option[Status] =
+      inRange(500, 600)(status)
+  }
+
   val Continue = Status(100)
   val SwitchingProtocols = Status(101)
   val Processing = Status(102)
