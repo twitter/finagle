@@ -7,7 +7,7 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
-6.32.0
+6.33.0
 ~~~~~~~
 
 New Features
@@ -86,6 +86,10 @@ Breaking API Changes
   * finagle-thrift: Remove the `framed` attributes from `c.t.f.Thrift.Client` and
     `c.t.f.Thrift.Server`.  This behavior may now be controlled with `c.t.f.Thrift.param.Framed`.
 
+6.32.0
+~~~~~~~
+
+NOT RELEASED
 
 6.31.0
 ------
