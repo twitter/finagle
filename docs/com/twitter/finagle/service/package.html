@@ -47,13 +47,35 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"></div>
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+        </div></div>
         
 
       <div id="mbrsel">
         <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
-        
-        
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.service"><span>service</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -195,9 +217,11 @@ customizable.
       </a>
     </span>
       <p class="shortcomment cmt">A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its parametrization.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its parametrization.</p><p>TODO: treat different failures differently (eg. connect failures
-vs. not), enable different backoff strategies.
+itself unavailable when deemed unhealthy according to its configuration.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
+itself unavailable when deemed unhealthy according to its configuration.</p><p>This acts as a request driven
+<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank">circuit breaker</a>.</p><p>When used in a typical Finagle client, there is one instance per node
+and as such, the load balancer will avoid nodes that are marked down
+via failure accrual.
 </p></div></div>
     </li><li name="com.twitter.finagle.service.KetamaShardingServiceBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KetamaShardingServiceBuilder[Req,Rep]extendsProductwithSerializable"></a>
@@ -273,6 +297,98 @@ cases where the function returns false, a the filter fails with a
     </span>
       <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that accepts or refuses requests based on a
 rate limiting strategy.</p>
+    </li><li name="com.twitter.finagle.service.ReqRep" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ReqRepextendsProductwithSerializable"></a>
+      <a id="ReqRep:ReqRep"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ReqRep.html"><span class="name">ReqRep</span></a><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>, <span name="response">response: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ReqRepextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Represents a request/response pair.</p><div class="fullcomment"><div class="comment cmt"><p>Represents a request/response pair.</p><p>For some protocols, like HTTP, these types are what you'd expect —
+<code>com.twitter.finagle.http.Request</code> and <code>com.twitter.finagle.http.Response</code>.
+While for other protocols that may not be the case. Please review
+the protocol's
+&quot;com.twitter.finagle.$protocol.service.$ProtocolResponseClassifier&quot;
+for details.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier</code></p></span><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.ResponseClass" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ResponseClassextendsAnyRef"></a>
+      <a id="ResponseClass:ResponseClass"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ResponseClass.html"><span class="name">ResponseClass</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ResponseClassextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A classification of the result of a request/response pair.</p><div class="fullcomment"><div class="comment cmt"><p>A classification of the result of a request/response pair.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.service.ResponseClasses" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResponseClassesextendsObject"></a>
+      <a id="ResponseClasses:ResponseClasses"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ResponseClasses.html"><span class="name">ResponseClasses</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ResponseClassesextendsObject" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.service.ResponseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]"></a>
+      <a id="ResponseClassifier:ResponseClassifier"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ResponseClassifier</span><span class="result"> = <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.PartialFunction" class="extype" target="_top">PartialFunction</a>[<a href="ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a>, <a href="ResponseClass.html" class="extype" name="com.twitter.finagle.service.ResponseClass">ResponseClass</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A response classifier allows developers to give Finagle the additional
+application specific knowledge necessary in order to properly classify them.</p><div class="fullcomment"><div class="comment cmt"><p>A response classifier allows developers to give Finagle the additional
+application specific knowledge necessary in order to properly classify them.
+Without this, Finagle can only safely make judgements about transport
+level failures.</p><p>As an example take an HTTP client that receives a response with a 500 status
+code back from a server. To Finagle this is a successful request/response
+based solely on the transport level. The application developer may want to
+treat all 500 status codes as failures and can do so via a
+<a href="#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.</p><p>It is a <span class="extype" name="PartialFunction">PartialFunction</span> from a request/response pair to a
+<a href="ResponseClass.html" class="extype" name="com.twitter.finagle.service.ResponseClass">ResponseClass</a> and as such multiple classifiers can be composed
+together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>it is a good practice for users of <code>ResponseClassifier.apply</code> to
+instead use <code>theClassifier.applyOrElse(input, ResponseClassifier.Default)</code>
+in order to ensure that the PartialFunction will be fully covering.</p></span>, <span class="cmt"><p>Finagle's default classifier is
+<a href="ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
+which is a total function fully covering the input domain.</p></span>, <span class="cmt"><p>Java does not understand the type alias and must be used as
+<code>PartialFunction</code> in Java.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some
+HTTP classification tools.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.RetryBudget" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RetryBudgetextendsAnyRef"></a>
       <a id="RetryBudget:RetryBudget"></a>
@@ -466,13 +582,15 @@ proxies all requests to the same <code>service</code> rather than creating new o
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">StatsFilter reports request statistics to the given receiver.</p><div class="fullcomment"><div class="comment cmt"><p>StatsFilter reports request statistics to the given receiver.
+      <p class="shortcomment cmt">A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.</p><div class="fullcomment"><div class="comment cmt"><p>A <code>StatsFilter</code> reports request statistics including number of requests,
+number successful and request latency to the given <span class="extype" name="StatsReceiver">StatsReceiver</span>.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The innocent bystander may find the semantics with respect
 to backup requests a bit puzzling; they are entangled in legacy.
 &quot;requests&quot; counts the total number of requests: subtracting
 &quot;success&quot; from this produces the failure count. However, this
 doesn't allow for &quot;shadow&quot; requests to be accounted for in
-&quot;requests&quot;. This is why we don't increment &quot;requests&quot; on backup
+&quot;requests&quot;. This is why we don't modify metrics for backup
 request failures.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.StatsServiceFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StatsServiceFactory[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a>
@@ -548,6 +666,23 @@ the duration after which a request is to be retried.
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.service.package@BackoffBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.service.DeadlineFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DeadlineFilter"></a>
+      <a id="DeadlineFilter:DeadlineFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DeadlineFilter$.html"><span class="name">DeadlineFilter</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@DeadlineFilter" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -637,6 +772,58 @@ the duration after which a request is to be retried.
       </a>
     </span>
       <p class="shortcomment cmt">A static <span class="extype" name="com.twitter.finagle.FailedService">com.twitter.finagle.FailedService</span> object.</p>
+    </li><li name="com.twitter.finagle.service.PendingRequestFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PendingRequestFilter"></a>
+      <a id="PendingRequestFilter:PendingRequestFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PendingRequestFilter$.html"><span class="name">PendingRequestFilter</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@PendingRequestFilter" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A module which allows clients to limit the number of pending
+requests per connection.</p>
+    </li><li name="com.twitter.finagle.service.ResponseClass" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResponseClass"></a>
+      <a id="ResponseClass:ResponseClass"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ResponseClass$.html"><span class="name">ResponseClass</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ResponseClass" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.service.ResponseClassifier" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ResponseClassifier"></a>
+      <a id="ResponseClassifier:ResponseClassifier"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ResponseClassifier$.html"><span class="name">ResponseClassifier</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ResponseClassifier" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.service.Retries" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Retries"></a>
       <a id="Retries:Retries"></a>
@@ -801,7 +988,11 @@ a client.</p>
         </div>
 
         <div id="inheritedMembers">
-        
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+            </div>
         
         </div>
 

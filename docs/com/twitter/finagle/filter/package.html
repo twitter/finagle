@@ -202,6 +202,33 @@ the future).</p>
 by the subsequent <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>. Exceptions are handled
 according to the argument <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">com.twitter.util.Monitor</a>.
 </p></div></div>
+    </li><li name="com.twitter.finagle.filter.RequestMeterFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RequestMeterFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="RequestMeterFilter[Req,Rep]:RequestMeterFilter[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RequestMeterFilter.html"><span class="name">RequestMeterFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.RequestMeterFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.RequestMeterFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.filter.package@RequestMeterFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that rate limits requests to a fixed rate over time by
+using the <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.AsyncMeter" class="extype" target="_top">com.twitter.concurrent.AsyncMeter</a> implementation.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that rate limits requests to a fixed rate over time by
+using the <a href="https://twitter.github.io/util/docs/index.html#com.twitter.concurrent.AsyncMeter" class="extype" target="_top">com.twitter.concurrent.AsyncMeter</a> implementation. It can be used for slowing
+down access to throttled resources. Requests that cannot be enqueued to await a permit are failed
+immediately with a <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">com.twitter.finagle.Failure</a> that signals that the work was never done,
+so it's safe to reenqueue.</p><p>NOTE: If you're just trying not to be overwhelmed, you almost certainly want to use
+<a href="RequestSemaphoreFilter.html" class="extype" name="com.twitter.finagle.filter.RequestSemaphoreFilter">com.twitter.finagle.filter.RequestSemaphoreFilter</a> instead, because RequestMeterFilter
+doesn't work well with &quot;real&quot; resources that are sometimes faster or slower (like a service
+that you're depending on that sometimes slows when it takes bursty traffic). This is better for
+resources that are artificially bounded, like a rate-limited API.
+</p></div></div>
     </li><li name="com.twitter.finagle.filter.RequestSemaphoreFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="RequestSemaphoreFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="RequestSemaphoreFilter[Req,Rep]:RequestSemaphoreFilter[Req,Rep]"></a>

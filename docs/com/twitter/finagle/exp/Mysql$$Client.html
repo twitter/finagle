@@ -46,22 +46,22 @@
       </span>
       <span class="symbol">
         <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]] = <span class="defval" name='<span class="name"><a href="MySqlClientTracingFilter$.html">StackClient.newStack
-      .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)</a></span>'>...</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="../param/ProtocolLibrary$.html">StackClient.defaultParams + DefaultPool.Param(
-        low = 0, high = 1, bufferSize = 0,
-        idleTime = Duration.Top,
-        maxWaiters = Int.MaxValue) +
-      ProtocolLibrary(&quot;mysql&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)</a></span>'>...</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="../param/ProtocolLibrary$.html">StackClient.defaultParams + DefaultPool.Param(
+          low = 0, high = 1, bufferSize = 0,
+          idleTime = Duration.Top,
+          maxWaiters = Int.MaxValue) +
+        ProtocolLibrary(&quot;mysql&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>] with <a href="../param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>] with <a href="../param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Implements a mysql client in terms of a
-<span class="extype" name="com.twitter.finagle.StackClient">com.twitter.finagle.StackClient</span>. The client inherits a wealth
+<a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">com.twitter.finagle.client.StackClient</a>. The client inherits a wealth
 of features from finagle including connection pooling and load
 balancing.</p><p>Additionally, this class provides methods for constructing a rich
 client which exposes a rich mysql api.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a>, <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="../client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="../Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]], <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]], <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a>, <a href="../param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../param/WithSessionQualifier.html" class="extype" name="com.twitter.finagle.param.WithSessionQualifier">WithSessionQualifier</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../param/WithSession.html" class="extype" name="com.twitter.finagle.param.WithSession">WithSession</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../param/WithClientTransport.html" class="extype" name="com.twitter.finagle.param.WithClientTransport">WithClientTransport</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../param/WithClientAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithClientAdmissionControl">WithClientAdmissionControl</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../param/ClientParams.html" class="extype" name="com.twitter.finagle.param.ClientParams">ClientParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="../client/StackBasedClient.html" class="extype" name="com.twitter.finagle.client.StackBasedClient">StackBasedClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="../Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]], <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>], <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -79,7 +79,7 @@ client which exposes a rich mysql api.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.exp.Mysql.Client"><span>Client</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.exp.MysqlRichClient"><span>MysqlRichClient</span></li><li class="in" name="com.twitter.finagle.client.StdStackClient"><span>StdStackClient</span></li><li class="in" name="com.twitter.finagle.client.StackClient"><span>StackClient</span></li><li class="in" name="com.twitter.finagle.client.StackBasedClient"><span>StackBasedClient</span></li><li class="in" name="com.twitter.finagle.Stack.Transformable"><span>Transformable</span></li><li class="in" name="com.twitter.finagle.Stack.Parameterized"><span>Parameterized</span></li><li class="in" name="com.twitter.finagle.Client"><span>Client</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.exp.Mysql.Client"><span>Client</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.twitter.finagle.exp.MysqlRichClient"><span>MysqlRichClient</span></li><li class="in" name="com.twitter.finagle.param.WithDefaultLoadBalancer"><span>WithDefaultLoadBalancer</span></li><li class="in" name="com.twitter.finagle.param.WithSessionPool"><span>WithSessionPool</span></li><li class="in" name="com.twitter.finagle.client.StdStackClient"><span>StdStackClient</span></li><li class="in" name="com.twitter.finagle.param.WithSessionQualifier"><span>WithSessionQualifier</span></li><li class="in" name="com.twitter.finagle.param.WithSession"><span>WithSession</span></li><li class="in" name="com.twitter.finagle.param.WithClientTransport"><span>WithClientTransport</span></li><li class="in" name="com.twitter.finagle.param.WithClientAdmissionControl"><span>WithClientAdmissionControl</span></li><li class="in" name="com.twitter.finagle.param.ClientParams"><span>ClientParams</span></li><li class="in" name="com.twitter.finagle.param.CommonParams"><span>CommonParams</span></li><li class="in" name="com.twitter.finagle.client.StackClient"><span>StackClient</span></li><li class="in" name="com.twitter.finagle.client.StackBasedClient"><span>StackBasedClient</span></li><li class="in" name="com.twitter.finagle.Stack.Transformable"><span>Transformable</span></li><li class="in" name="com.twitter.finagle.Stack.Parameterized"><span>Parameterized</span></li><li class="in" name="com.twitter.finagle.Client"><span>Client</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -108,11 +108,11 @@ client which exposes a rich mysql api.
       </span>
       <span class="symbol">
         <span class="name">Client</span><span class="params">(<span name="stack">stack: <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]] = <span class="defval" name='<span class="name"><a href="MySqlClientTracingFilter$.html">StackClient.newStack
-      .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)</a></span>'>...</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="../param/ProtocolLibrary$.html">StackClient.defaultParams + DefaultPool.Param(
-        low = 0, high = 1, bufferSize = 0,
-        idleTime = Duration.Top,
-        maxWaiters = Int.MaxValue) +
-      ProtocolLibrary(&quot;mysql&quot;)</a></span>'>...</span></span>)</span>
+        .replace(ClientTracingFilter.role, MySqlClientTracingFilter.Stackable)</a></span>'>...</span></span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="../param/ProtocolLibrary$.html">StackClient.defaultParams + DefaultPool.Param(
+          low = 0, high = 1, bufferSize = 0,
+          idleTime = Duration.Top,
+          maxWaiters = Int.MaxValue) +
+        ProtocolLibrary(&quot;mysql&quot;)</a></span>'>...</span></span>)</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@&lt;init&gt;(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
@@ -259,8 +259,8 @@ client which exposes a rich mysql api.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.client.StdStackClient#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):This"></a>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):com.twitter.finagle.exp.Mysql.Client"></a>
       <a id="configured[P]((P,Param[P])):Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -268,15 +268,15 @@ client which exposes a rich mysql api.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="psp">psp: (<span class="extype" name="com.twitter.finagle.client.StdStackClient.configured.P">P</span>, <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.client.StdStackClient.configured.P">P</span>])</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+        <span class="name">configured</span><span class="tparams">[<span name="P">P</span>]</span><span class="params">(<span name="psp">psp: (<span class="extype" name="com.twitter.finagle.exp.Mysql.Client.configured.P">P</span>, <a href="../Stack$$Param.html" class="extype" name="com.twitter.finagle.Stack.Param">Param</a>[<span class="extype" name="com.twitter.finagle.exp.Mysql.Client.configured.P">P</span>])</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):This" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@configured[P](psp:(P,com.twitter.finagle.Stack.Param[P])):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Creates a new StackClient with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with parameter <code>psp._1</code> and Stack Param type <code>psp._2</code>.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#configured" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="configured[P](p:P)(implicitevidence$2:com.twitter.finagle.Stack.Param[P]):This"></a>
       <a id="configured[P](P)(Param[P]):Client"></a>
@@ -352,8 +352,8 @@ when applied.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.client.StdStackClient#filtered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="filtered(filter:com.twitter.finagle.Filter[Req,Rep,Req,Rep]):This"></a>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#filtered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filtered(filter:com.twitter.finagle.Filter[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result,com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result]):com.twitter.finagle.exp.Mysql.Client"></a>
       <a id="filtered(Filter[Request,Result,Request,Result]):Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -364,7 +364,7 @@ when applied.
         <span class="name">filtered</span><span class="params">(<span name="filter">filter: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@filtered(filter:com.twitter.finagle.Filter[Req,Rep,Req,Rep]):This" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@filtered(filter:com.twitter.finagle.Filter[com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result,com.twitter.finagle.exp.mysql.Request,com.twitter.finagle.exp.mysql.Result]):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -373,7 +373,7 @@ the client (newClient/newService) <code>filter</code> will be the first element 
 requests flow through. This is a familiar chaining combinator for filters and
 is particularly useful for <code>StdStackClient</code> implementations that don't expose
 services but instead wrap the resulting service with a rich API.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -829,6 +829,25 @@ Concrete StackClient implementations are expected to specify this.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withAdmissionControl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withAdmissionControl:com.twitter.finagle.param.ClientAdmissionControlParams[com.twitter.finagle.exp.Mysql.Client]"></a>
+      <a id="withAdmissionControl:ClientAdmissionControlParams[Client]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withAdmissionControl</span><span class="result">: <a href="../param/ClientAdmissionControlParams.html" class="extype" name="com.twitter.finagle.param.ClientAdmissionControlParams">ClientAdmissionControlParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withAdmissionControl:com.twitter.finagle.param.ClientAdmissionControlParams[com.twitter.finagle.exp.Mysql.Client]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An entry point for configuring the clients' admission control
+</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the clients' admission control
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/WithClientAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithClientAdmissionControl">WithClientAdmissionControl</a></dd></dl></div>
     </li><li name="com.twitter.finagle.exp.Mysql.Client#withCharset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withCharset(charset:Short):com.twitter.finagle.exp.Mysql.Client"></a>
       <a id="withCharset(Short):Client"></a>
@@ -881,6 +900,89 @@ a new session.</p>
       </a>
     </span>
       <p class="shortcomment cmt">Database to use when this client establishes a new session.</p>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withExceptionStatsHandler" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withExceptionStatsHandler(exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withExceptionStatsHandler(ExceptionStatsHandler):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withExceptionStatsHandler</span><span class="params">(<span name="exceptionStatsHandler">exceptionStatsHandler: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">ExceptionStatsHandler</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withExceptionStatsHandler(exceptionStatsHandler:com.twitter.finagle.stats.ExceptionStatsHandler):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures this server or client with given
+<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given
+<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.ExceptionStatsHandler" class="extype" target="_top">exception stats handler</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withLabel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withLabel(label:String):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withLabel(String):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLabel</span><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withLabel(label:String):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures this server or client with given <code>label</code> (default: empty string).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <code>label</code> (default: empty string).</p><p>The <code>label</code> value is used for stats reporting to scope stats reported
+from different clients/servers to a single stats receiver.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withLoadBalancer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withLoadBalancer:com.twitter.finagle.param.DefaultLoadBalancingParams[com.twitter.finagle.exp.Mysql.Client]"></a>
+      <a id="withLoadBalancer:DefaultLoadBalancingParams[Client]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withLoadBalancer</span><span class="result">: <a href="../param/DefaultLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.DefaultLoadBalancingParams">DefaultLoadBalancingParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withLoadBalancer:com.twitter.finagle.param.DefaultLoadBalancingParams[com.twitter.finagle.exp.Mysql.Client]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An entry point for configuring the client's load balancer that implements
+a strategy for choosing one host/node from a replica set to service
+a request.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's load balancer that implements
+a strategy for choosing one host/node from a replica set to service
+a request.</p><p>The default setup for a Finagle client is to use power of two choices
+algorithm to distribute load across endpoints, and comparing nodes
+via a least loaded metric.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withMonitor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withMonitor(monitor:com.twitter.util.Monitor):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withMonitor(Monitor):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withMonitor</span><span class="params">(<span name="monitor">monitor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">Monitor</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withMonitor(monitor:com.twitter.util.Monitor):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
+(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Monitor" class="extype" target="_top">util.Monitor</a>
+(default: <span class="extype" name="com.twitter.finagle.util.DefaultMonitor">com.twitter.finagle.util.DefaultMonitor</span>).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#withParams" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withParams(params:com.twitter.finagle.Stack.Params):This"></a>
       <a id="withParams(Params):Client"></a>
@@ -899,6 +1001,164 @@ a new session.</p>
     </span>
       <p class="shortcomment cmt">Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Creates a new StackClient with <code>params</code> used to configure this StackClient's <code>stack</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a> → <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withRequestTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRequestTimeout(timeout:com.twitter.util.Duration):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withRequestTimeout(Duration):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRequestTimeout</span><span class="params">(<span name="timeout">timeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withRequestTimeout(timeout:com.twitter.util.Duration):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+(if there are retries, they each get a fresh request timeout). The timeout is applied
+only after a connection has been acquired. That is: it is applied to the interval
+between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
+spend handling the incoming request. Using the Finagle terminology, this is an amount
+of time after which a non-satisfied future returned from the user-defined service
+times out.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withResponseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withResponseClassifier(responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withResponseClassifier(ResponseClassifier):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withResponseClassifier</span><span class="params">(<span name="responseClassifier">responseClassifier: <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withResponseClassifier(responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures the <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">Response Classifier</a> of this client,
+which is used to determine the result of a request/response.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">Response Classifier</a> of this client,
+which is used to determine the result of a request/response.</p><p>This allows developers to give Finagle the additional application-specific
+knowledge necessary in order to properly classify them. Without this,
+Finagle cannot make judgements about application level failures as it only
+has a narrow understanding of failures (for example: transport level, timeouts,
+and NACKs).</p><p>As an example take an HTTP client that receives a response with a 500 status
+code back from a server. To Finagle this is a successful request/response
+based solely on the transport level. The application developer may want to
+treat all 500 status codes as failures and can do so via a
+<a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">Response Classifier</a>.</p><p>It is a <span class="extype" name="PartialFunction">PartialFunction</span> and as such multiple classifiers can be composed
+together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/ClientParams.html" class="extype" name="com.twitter.finagle.param.ClientParams">ClientParams</a></dd><dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is <a href="../service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">service.ResponseClassifier.Default</a>
+      which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some
+     HTTP classification tools.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withRetryBackoff" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRetryBackoff(backoff:Stream[com.twitter.util.Duration]):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withRetryBackoff(Stream[Duration]):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRetryBackoff</span><span class="params">(<span name="backoff">backoff: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withRetryBackoff(backoff:Stream[com.twitter.util.Duration]):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures the requeue backoff policy of this client (default: no delay).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the requeue backoff policy of this client (default: no delay).</p><p>The <code>backoff</code> policy is represented by a stream of delays (i.e.,
+<code>Stream[Duration]</code>) used to delay each retry.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/ClientParams.html" class="extype" name="com.twitter.finagle.param.ClientParams">ClientParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#retries" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#retries</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withRetryBudget" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withRetryBudget(budget:com.twitter.finagle.service.RetryBudget):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withRetryBudget(RetryBudget):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withRetryBudget</span><span class="params">(<span name="budget">budget: <a href="../service/RetryBudget.html" class="extype" name="com.twitter.finagle.service.RetryBudget">RetryBudget</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withRetryBudget(budget:com.twitter.finagle.service.RetryBudget):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures the <span class="extype" name="RetryBudget">retry budget</span> of this client (default:
+allows for about 20% of the total requests to be retried on top of
+10 retries per second).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <span class="extype" name="RetryBudget">retry budget</span> of this client (default:
+allows for about 20% of the total requests to be retried on top of
+10 retries per second).</p><p>This <code>budget</code> is shared across requests and governs the number of
+retries that can be made by this client.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/ClientParams.html" class="extype" name="com.twitter.finagle.param.ClientParams">ClientParams</a></dd><dt>Note</dt><dd><span class="cmt"><p>The retry budget helps prevent clients from overwhelming the
+      downstream service.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#retries" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#retries</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withSession" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withSession:com.twitter.finagle.param.SessionParams[com.twitter.finagle.exp.Mysql.Client]"></a>
+      <a id="withSession:SessionParams[Client]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withSession</span><span class="result">: <a href="../param/SessionParams.html" class="extype" name="com.twitter.finagle.param.SessionParams">SessionParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withSession:com.twitter.finagle.param.SessionParams[com.twitter.finagle.exp.Mysql.Client]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An entry point for configuring the client's sessions.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's sessions.</p><p>Session might be viewed as logical connection that wraps a physical connection
+(i.e., <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">transport</a>) and controls its
+lifecycle. Sessions are used in Finagle to maintain liveness, requests cancellation,
+draining, and many more.</p><p>The default setup for a Finagle client's sessions is to not put any
+timeouts on it.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/WithSession.html" class="extype" name="com.twitter.finagle.param.WithSession">WithSession</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withSessionPool" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withSessionPool:com.twitter.finagle.param.SessionPoolingParams[com.twitter.finagle.exp.Mysql.Client]"></a>
+      <a id="withSessionPool:SessionPoolingParams[Client]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withSessionPool</span><span class="result">: <a href="../param/SessionPoolingParams.html" class="extype" name="com.twitter.finagle.param.SessionPoolingParams">SessionPoolingParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withSessionPool:com.twitter.finagle.param.SessionPoolingParams[com.twitter.finagle.exp.Mysql.Client]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An entry point for configuring the client's session pool.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session pool.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#pooling" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#pooling</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withSessionQualifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withSessionQualifier:com.twitter.finagle.param.SessionQualificationParams[com.twitter.finagle.exp.Mysql.Client]"></a>
+      <a id="withSessionQualifier:SessionQualificationParams[Client]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withSessionQualifier</span><span class="result">: <a href="../param/SessionQualificationParams.html" class="extype" name="com.twitter.finagle.param.SessionQualificationParams">SessionQualificationParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withSessionQualifier:com.twitter.finagle.param.SessionQualificationParams[com.twitter.finagle.exp.Mysql.Client]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An entry point for configuring the client's session qualifiers
+(e.g.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's session qualifiers
+(e.g. circuit breakers).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/WithSessionQualifier.html" class="extype" name="com.twitter.finagle.param.WithSessionQualifier">WithSessionQualifier</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.client.StdStackClient#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>
       <a id="withStack(Stack[ServiceFactory[Request,Result]]):Client"></a>
@@ -916,6 +1176,64 @@ a new session.</p>
       </a>
     </span>
       <p class="shortcomment cmt">A new StackClient with the provided stack.</p><div class="fullcomment"><div class="comment cmt"><p>A new StackClient with the provided stack.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a> → <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withStatsReceiver" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withStatsReceiver(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withStatsReceiver(StatsReceiver):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withStatsReceiver</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withStatsReceiver(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
+(default: <a href="../stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">stats.StatsReceiver</a>
+(default: <a href="../stats/DefaultStatsReceiver$.html" class="extype" name="com.twitter.finagle.stats.DefaultStatsReceiver">stats.DefaultStatsReceiver</a>).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withTracer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withTracer(tracer:com.twitter.finagle.tracing.Tracer):com.twitter.finagle.exp.Mysql.Client"></a>
+      <a id="withTracer(Tracer):Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withTracer</span><span class="params">(<span name="tracer">tracer: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withTracer(tracer:com.twitter.finagle.tracing.Tracer):com.twitter.finagle.exp.Mysql.Client" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configures this server or client with given <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a>
+(default: <a href="../tracing/DefaultTracer$.html" class="extype" name="com.twitter.finagle.tracing.DefaultTracer">com.twitter.finagle.tracing.DefaultTracer</a>).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">tracing.Tracer</a>
+(default: <a href="../tracing/DefaultTracer$.html" class="extype" name="com.twitter.finagle.tracing.DefaultTracer">com.twitter.finagle.tracing.DefaultTracer</a>).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.Mysql.Client#withTransport" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withTransport:com.twitter.finagle.param.ClientTransportParams[com.twitter.finagle.exp.Mysql.Client]"></a>
+      <a id="withTransport:ClientTransportParams[Client]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withTransport</span><span class="result">: <a href="../param/ClientTransportParams.html" class="extype" name="com.twitter.finagle.param.ClientTransportParams">ClientTransportParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.Mysql$$Client@withTransport:com.twitter.finagle.param.ClientTransportParams[com.twitter.finagle.exp.Mysql.Client]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An entry point for configuring the client's <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">com.twitter.finagle.transport.Transport</a>.</p><div class="fullcomment"><div class="comment cmt"><p>An entry point for configuring the client's <a href="../transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">com.twitter.finagle.transport.Transport</a>.</p><p><code>Transport</code> is a Finagle abstraction over the network connection (i.e., a TCP connection).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a> → <a href="../param/WithClientTransport.html" class="extype" name="com.twitter.finagle.param.WithClientTransport">WithClientTransport</a></dd></dl></div>
     </li></ol>
             </div>
 
@@ -978,8 +1296,24 @@ a new session.</p>
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
             </div><div class="parent" name="com.twitter.finagle.exp.MysqlRichClient">
               <h3>Inherited from <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.param.WithDefaultLoadBalancer">
+              <h3>Inherited from <a href="../param/WithDefaultLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithDefaultLoadBalancer">WithDefaultLoadBalancer</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.param.WithSessionPool">
+              <h3>Inherited from <a href="../param/WithSessionPool.html" class="extype" name="com.twitter.finagle.param.WithSessionPool">WithSessionPool</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.client.StdStackClient">
               <h3>Inherited from <a href="../client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>, <a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.param.WithSessionQualifier">
+              <h3>Inherited from <a href="../param/WithSessionQualifier.html" class="extype" name="com.twitter.finagle.param.WithSessionQualifier">WithSessionQualifier</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.param.WithSession">
+              <h3>Inherited from <a href="../param/WithSession.html" class="extype" name="com.twitter.finagle.param.WithSession">WithSession</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.param.WithClientTransport">
+              <h3>Inherited from <a href="../param/WithClientTransport.html" class="extype" name="com.twitter.finagle.param.WithClientTransport">WithClientTransport</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.param.WithClientAdmissionControl">
+              <h3>Inherited from <a href="../param/WithClientAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithClientAdmissionControl">WithClientAdmissionControl</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.param.ClientParams">
+              <h3>Inherited from <a href="../param/ClientParams.html" class="extype" name="com.twitter.finagle.param.ClientParams">ClientParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
+            </div><div class="parent" name="com.twitter.finagle.param.CommonParams">
+              <h3>Inherited from <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.client.StackClient">
               <h3>Inherited from <a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.client.StackBasedClient">
@@ -987,7 +1321,7 @@ a new session.</p>
             </div><div class="parent" name="com.twitter.finagle.Stack.Transformable">
               <h3>Inherited from <a href="../Stack$$Transformable.html" class="extype" name="com.twitter.finagle.Stack.Transformable">Transformable</a>[<a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]]</h3>
             </div><div class="parent" name="com.twitter.finagle.Stack.Parameterized">
-              <h3>Inherited from <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="../client/StackClient.html" class="extype" name="com.twitter.finagle.client.StackClient">StackClient</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]]</h3>
+              <h3>Inherited from <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<a href="" class="extype" name="com.twitter.finagle.exp.Mysql.Client">Client</a>]</h3>
             </div><div class="parent" name="com.twitter.finagle.Client">
               <h3>Inherited from <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">

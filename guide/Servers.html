@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Servers &mdash; Finagle 6.31.0 documentation</title>
+    <title>Servers &mdash; Finagle 6.33.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.31.0',
+        VERSION:     '6.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,9 +23,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.31.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.33.0 documentation" href="index.html" />
     <link rel="next" title="Clients" href="Clients.html" />
-    <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
+    <link rel="prev" title="Configuration" href="Configuration.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -55,7 +55,7 @@
           <a href="Clients.html" title="Clients"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
+          <a href="Configuration.html" title="Configuration"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
@@ -67,7 +67,7 @@
           <div class="body">
             
   <div class="section" id="servers">
-<h1>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h1>
+<span id="finagle-servers"></span><h1>Servers<a class="headerlink" href="#servers" title="Permalink to this headline">¶</a></h1>
 <p>Finagle servers implement a simple <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Server.scala">interface:</a></p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">serve</span><span class="o">(</span>
   <span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">,</span>
@@ -75,33 +75,146 @@
 <span class="o">)</span><span class="k">:</span> <span class="kt">ListeningServer</span>
 </pre></div>
 </div>
-<p>When given a <cite>SocketAddress</cite> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>, a server returns a handle
-to a <cite>ListeningServer</cite>. The handle allows for management of server resources. The interface comes with
-variants that allow for serving a simple <cite>Service</cite> as well. Typical usage takes the form
+<p>When given a <tt class="docutils literal"><span class="pre">SocketAddress</span></tt> and a <a class="reference internal" href="ServicesAndFilters.html#service-factory"><em>ServiceFactory</em></a>, a server returns a
+<tt class="docutils literal"><span class="pre">ListeningServer</span></tt>. The <tt class="docutils literal"><span class="pre">ListeningServer</span></tt> allows for management of server resources. The interface
+comes with variants that allow for serving a simple <tt class="docutils literal"><span class="pre">Service</span></tt> as well. Typical usage takes the form
 <tt class="docutils literal"><span class="pre">Protocol.serve(...)</span></tt>, for example:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">myService</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Service</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.</span><span class="o">{</span><span class="nc">Await</span><span class="o">,</span> <span class="nc">Future</span><span class="o">}</span>
+
+<span class="k">val</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="nc">Response</span><span class="o">())</span>
+<span class="o">}</span>
+
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
 <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">server</span><span class="o">)</span> <span class="c1">// waits until the server resources are released</span>
 </pre></div>
 </div>
-<p>However, <cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined
-via a thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><em>Thrift</em></a>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><cite>finagle-thrift</cite> servers expose a rich API because their interfaces are defined
+via a Thrift IDL. See the protocols section on <a class="reference internal" href="Protocols.html#thrift-and-scrooge"><em>Thrift</em></a>
 for more details.</p>
+</div>
 <div class="section" id="server-modules">
 <h2>Server Modules<a class="headerlink" href="#server-modules" title="Permalink to this headline">¶</a></h2>
 <p>Finagle servers are simple; they are designed to serve requests quickly. As such,
 Finagle minimally furnishes servers with additional behavior. More sophisticated
-behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><em>clients</em></a>. However, the server does come
-with some useful modules to help owners observe and debug their servers. This includes
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">Monitoring</a>,
-<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/tracing/TraceInitializerFilter.scala">Tracing</a>,
-and <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">Stats</a>.
-Additionally, Finagle servers <a class="reference internal" href="FAQ.html#propagate-failure"><em>propagate failure</em></a>.</p>
+behavior lives in the <a class="reference internal" href="Clients.html#finagle-clients"><em>clients</em></a>.</p>
+<div class="figure">
+<img src="_images/serverstack.svg" /><p class="caption">Fig. 1: A visual representation of each module in a default Finagle server. Requests flow from left to right.</p>
 </div>
-<div class="section" id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
-<p>Prior to <a class="reference internal" href="changelog.html"><em>6.x</em></a>, the <cite>ServerBuilder</cite> was the primary method for configuring
-the modules inside a Finagle server. We&#8217;ve moved away from this model for various
-<a class="reference internal" href="FAQ.html#configuring-finagle6"><em>reasons</em></a>.</p>
+<p>Many of the server modules act as <cite>admission controllers</cite> that make a decision (based on either a dynamic or
+static property) whether this server can handle the incoming request while maintaining some SLO (Service Level
+Objective).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">An <cite>Endpoint</cite> module represents a user-defined <tt class="docutils literal"><span class="pre">Service</span></tt> passed to the <tt class="docutils literal"><span class="pre">Server.serve(...)</span></tt>
+method.</p>
+</div>
+<div class="section" id="observability">
+<h3>Observability<a class="headerlink" href="#observability" title="Permalink to this headline">¶</a></h3>
+<p>A Finagle server comes with some useful modules to help owners observe and debug
+their servers. This includes <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/MonitorFilter.scala">Monitoring</a>,
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/tracing/TraceInitializerFilter.scala">Tracing</a>,
+and <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/StatsFilter.scala">Stats</a>.</p>
+<p>All the unhandled exceptions from a user-defined service flow through the <tt class="docutils literal"><span class="pre">Monitor</span></tt> object
+used by the given Finagle server. See <a class="reference internal" href="Clients.html#configuring-monitors"><em>this example</em></a> on how to
+override the default instance that simply logs exceptions onto a the standard output.</p>
+</div>
+<div class="section" id="concurrency-limit">
+<h3>Concurrency Limit<a class="headerlink" href="#concurrency-limit" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>Concurrency Limit</cite> module is implemented by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/RequestSemaphoreFilter.scala">RequestSemaphoreFilter</a> and maintains
+the <cite>concurrency</cite> of the Finagle server.</p>
+<p>By default, this module is disabled, which means a Finagle server&#8217;s requests concurrency is unbounded.
+To enable the <cite>Concurrency Limit</cite> module and put some bounds in terms of maximum number of requests
+that might be handled concurrently by your server, use the following example <a class="footnote-reference" href="#example" id="id1">[2]</a>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
+  <span class="o">.</span><span class="n">withAdmissionControl</span><span class="o">.</span><span class="n">concurrencyLimit</span><span class="o">(</span>
+    <span class="n">maxConcurrentRequests</span> <span class="k">=</span> <span class="mi">10</span><span class="o">,</span>
+    <span class="n">maxWaiters</span> <span class="k">=</span> <span class="mi">0</span><span class="o">,</span>
+  <span class="o">)</span>
+  <span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>The <cite>Concurrency Limit</cite> module is configured with two parameters:</p>
+<ol class="arabic simple">
+<li><cite>maxConcurrentRequests</cite> - the number of requests allowed to be handled concurrently</li>
+<li><cite>maxWaiters</cite> - the number of requests (on top of <cite>maxConcurrentRequests</cite>) allowed to be queued</li>
+</ol>
+<p>All the incoming requests on top of <tt class="docutils literal"><span class="pre">(maxConcurrentRequests</span> <span class="pre">+</span> <span class="pre">maxWaiters)</span></tt> will be
+<cite>rejected`[#nack]_ by the server. That said, the `Concurrency Limit</cite> module acts as
+<cite>static admission controller</cite> monitoring the current concurrency level of the incoming requests.</p>
+<p>See <a class="reference internal" href="Metrics.html#requests-concurrency-limit"><em>Requests Concurrency metrics</em></a> for more details.</p>
+</div>
+<div class="section" id="request-deadline">
+<h3>Request Deadline<a class="headerlink" href="#request-deadline" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>Request Deadline</cite> module acts as deadline driven server-side <cite>static admission controller</cite> and
+<cite>rejects</cite> <a class="footnote-reference" href="#nack" id="id2">[1]</a> all the incoming requests that expire their deadline. Generally, the deadline for
+each request is set up by a frontend service and propagated over the wire to the downstream services.</p>
+<p>The <cite>Request Deadline</cite> module is implemented by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/DeadlineFilter.scala">DeadlineFilter</a> and configured with
+following params <a class="footnote-reference" href="#example" id="id3">[2]</a>.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+
+<span class="k">val</span> <span class="n">server</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">server</span>
+  <span class="o">.</span><span class="n">withAdmissionControl</span><span class="o">.</span><span class="n">deadlineTolerance</span><span class="o">(</span><span class="mf">200.</span><span class="n">milliseconds</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withAdmissionControl</span><span class="o">.</span><span class="n">deadlineMaxRejectedPercentage</span><span class="o">(</span><span class="mf">0.3</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:8080&quot;</span><span class="o">,</span> <span class="n">service</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>There are two arguments passed to the <cite>Request Deadline</cite> module, which might be configured
+separately:</p>
+<ol class="arabic simple">
+<li><cite>deadlineTolerance</cite> (default: 170 ms) - the maximum elapsed time since a request&#8217;s deadline
+when it will be considered for rejection</li>
+<li><cite>deadlineMaxRejectedPercentage</cite> (default: 20%) - the maximum percentage of requests that can be
+rejected</li>
+</ol>
+<p>See <a class="reference internal" href="Metrics.html#deadline-admission-control-stats"><em>Deadline Admission Control metrics</em></a> for more details.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <cite>Request Deadline</cite> module is currently in an experimental mode where it doesn&#8217;t actually
+reject any of the <cite>expired</cite> requests, but only maintains metrics.</p>
+</div>
+</div>
+<div class="section" id="request-timeout">
+<h3>Request Timeout<a class="headerlink" href="#request-timeout" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>Request Timeout</cite> module is implemented by
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">TimeoutFilter</a> and simply <cite>fails</cite> all the
+requests that a given server hasn&#8217;t be able to handle in the given amount of time. As well as for
+Finagle clients, this module is disabled by default (the timeout is unbounded). See
+<a class="reference internal" href="Clients.html#configuring-timeouts"><em>this example</em></a> to override this behaviour.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <cite>Request Timeout</cite> module doesn&#8217;t <cite>reject</cite> the incoming request, but <cite>fails</cite> it. This
+means it won&#8217;t by default be retried by a remote client given it&#8217;s not known whether
+the request has been timed out being in the queue (waiting for processing) or being
+processed.</p>
+</div>
+<p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="nack" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>Depending on the protocol, a rejected request might be transformed into a <cite>NACK</cite>
+(currently supported in HTTP/1.1 and Mux) so the remote client can safely <cite>retry</cite> it.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="example" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> Configuration parameters/values provided in this example are only demonstrate
+the API usage, not the real world values. We do not recommend blindly applying those values
+to production systems.</td></tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 
@@ -125,15 +238,20 @@ the modules inside a Finagle server. We&#8217;ve moved away from this model for 
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Servers</a><ul>
-<li><a class="reference internal" href="#server-modules">Server Modules</a></li>
-<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#server-modules">Server Modules</a><ul>
+<li><a class="reference internal" href="#observability">Observability</a></li>
+<li><a class="reference internal" href="#concurrency-limit">Concurrency Limit</a></li>
+<li><a class="reference internal" href="#request-deadline">Request Deadline</a></li>
+<li><a class="reference internal" href="#request-timeout">Request Timeout</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="ServicesAndFilters.html" title="previous chapter">Services &amp; Filters</a></li>
+      <li>Previous: <a href="Configuration.html" title="previous chapter">Configuration</a></li>
       <li>Next: <a href="Clients.html" title="next chapter">Clients</a></li>
   </ul></li>
 </ul>
@@ -154,7 +272,7 @@ the modules inside a Finagle server. We&#8217;ve moved away from this model for 
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2014 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2016 Twitter, Inc.</div>
   
   </body>
 </html>

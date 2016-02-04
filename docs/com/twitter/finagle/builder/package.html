@@ -310,32 +310,6 @@ that would remove entries in the minimum set are censored and counted.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-11-21)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.NonShrinkingCluster" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="NonShrinkingCluster[T]extendsCluster[T]"></a>
-      <a id="NonShrinkingCluster[T]:NonShrinkingCluster[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="NonShrinkingCluster.html"><span class="name deprecated" title="Deprecated: (Since version 2014-11-21) Use com.twitter.finagle.Name to represent clusters instead">NonShrinkingCluster</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<span class="extype" name="com.twitter.finagle.builder.NonShrinkingCluster.T">T</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.package@NonShrinkingCluster[T]extendsCluster[T]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Dynamic clusters, such as serversets, can be volatile and untrustworthy.</p><div class="fullcomment"><div class="comment cmt"><p>Dynamic clusters, such as serversets, can be volatile and untrustworthy. Finagle has
-mechanisms for handling failed nodes that haven't been removed from the cluster. However
-there are cases where a server's entry me be falsely removed from the cluster thus
-causing clients to exert unnecessary pressure on remaining nodes. This filter reduces that
-impact by delaying node removals. We do so by disallowing the cluster to shrink. Add
-events are always propagated but Rem events require a corresponding Add.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2014-11-21)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.StaticCluster" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="StaticCluster[T]extendsCluster[T]withProductwithSerializable"></a>
       <a id="StaticCluster[T]:StaticCluster[T]"></a>

@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configuration &mdash; Finagle 6.33.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.33.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.33.0 documentation" href="index.html" />
+    <link rel="next" title="Servers" href="Servers.html" />
+    <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Servers.html" title="Servers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ServicesAndFilters.html" title="Services &amp; Filters"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>Prior to <a class="reference internal" href="changelog.html"><em>version 6.0</em></a>, the <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ServerBuilder</span></tt> API was the
+primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><em>client</em></a>
+or <a class="reference internal" href="Servers.html#finagle-servers"><em>server</em></a>. We are moving away from this model for various
+<a class="reference internal" href="FAQ.html#configuring-finagle6"><em>reasons</em></a>.</p>
+<p>The modern way of configuring Finagle clients or servers is to use the Finagle 6 API,
+which is generally available via the <tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods. For example, the following
+code snippet creates a new HTTP client altered with two extra parameters: label and transport
+verbosity.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+
+<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;my-http-client&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withTransport</span><span class="o">.</span><span class="n">verbose</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All the examples in this user guide use the Finagle 6 API as a main configuration
+method and we encourage all the Finagle users to follow this pattern given that
+the <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ServerBuilder</span></tt> API will eventually be deprecated.</p>
+</div>
+<p>In addition to <tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods that provide easy-to-use and safe-to-configure
+parameters of Finagle clients and servers, there is an expert-level <cite>Stack API</cite>.</p>
+<p>The Stack API is available via the <tt class="docutils literal"><span class="pre">configured</span></tt> method on a Finagle client/server
+that takes a stack param: a value of arbitrary type for which there is an implicit instance
+of <tt class="docutils literal"><span class="pre">Stack.Param</span></tt> type-class available in the scope. For example, the following code
+demonstrates how to use <tt class="docutils literal"><span class="pre">.configured</span></tt> to override TCP socket options provided by default.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<span class="k">import</span> <span class="nn">com.twitter.transport.Transport</span>
+
+<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">Transport</span><span class="o">.</span><span class="nc">Options</span><span class="o">(</span><span class="n">noDelay</span> <span class="k">=</span> <span class="kc">false</span><span class="o">,</span> <span class="n">reuseAddr</span> <span class="k">=</span> <span class="kc">false</span><span class="o">))</span>
+  <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The expert-level API requires deep knowledge of Finagle internals and
+it&#8217;s highly recommended to avoid it unless you&#8217;re absolutely sure what
+you&#8217;re doing.</p>
+</div>
+<div class="section" id="design-principles">
+<h2>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h2>
+<p>Finagle has many different components and we tried to faithfully model our configuration
+to help understand the constituents and the resulting behavior. For the sake of consistency,
+the current version of the <tt class="docutils literal"><span class="pre">with</span></tt> API is designed with following principles in mind.</p>
+<ol class="arabic simple">
+<li><strong>Reasonable grouping of parameters</strong>: We target for the fine grained API so most of the
+<tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods take a single argument. Although, there is common sense driven
+exception from this rule: some of the parameters only make sense when viewed as a group
+rather than separately (e.g. it makes no sense to specify SOCKS proxy credentials when
+proxy itself is disabled).</li>
+<li><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
+reason about because their type doesn&#8217;t encode it&#8217;s mission in the domain (e.g. in
+most of the cases it&#8217;s impossible to tell what <tt class="docutils literal"><span class="pre">true</span></tt> or <tt class="docutils literal"><span class="pre">false</span></tt> means in a function
+call). Instead of boolean flags with use pair a methods <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">noX</span></tt> indicating
+whether the <tt class="docutils literal"><span class="pre">x</span></tt> feature enabled or disabled.</li>
+<li><strong>Less primitive number types in the API</strong>: We promote a sane level of and type-full
+programming, where a reasonable level of guarantees is encoded into a type-system.
+Thus, we never use primitive number types for durations and storage units given that
+there are utility types <tt class="docutils literal"><span class="pre">Duration</span></tt> and <tt class="docutils literal"><span class="pre">StorageUnit</span></tt> exist.</li>
+<li><strong>No experimental and/or advanced features</strong>: While, it&#8217;s relatively safe to configure
+parameters exposed via <tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods, you should never assume the same about
+the <cite>Stack API</cite> (i.e., <tt class="docutils literal"><span class="pre">.configured</span></tt>). It&#8217;s <em>easy</em> to configure basic parameters; it&#8217;s
+<em>possible</em> to configure expert-level parameters.</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#design-principles">Design Principles</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ServicesAndFilters.html" title="previous chapter">Services &amp; Filters</a></li>
+      <li>Next: <a href="Servers.html" title="next chapter">Servers</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2016 Twitter, Inc.</div>
+  
+  </body>
+</html>

@@ -254,36 +254,36 @@ the aggregated replication status.</p>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.replication.BaseReplicationClient#cas" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="cas(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[Boolean]]"></a>
-      <a id="cas(String,Int,Time,Buf,Seq[Buf]):Future[ReplicationStatus[Boolean]]"></a>
+    </li><li name="com.twitter.finagle.memcached.replication.BaseReplicationClient#checkAndSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="checkAndSet(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[com.twitter.finagle.memcached.CasResult]]"></a>
+      <a id="checkAndSet(String,Int,Time,Buf,Seq[Buf]):Future[ReplicationStatus[CasResult]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUniques">casUniques: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]]</span>
+        <span class="name">checkAndSet</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUniques">casUniques: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<a href="../CasResult.html" class="extype" name="com.twitter.finagle.memcached.CasResult">CasResult</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.BaseReplicationClient@cas(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[Boolean]]" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.BaseReplicationClient@checkAndSet(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[com.twitter.finagle.memcached.CasResult]]" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.memcached.replication.BaseReplicationClient#cas" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="cas(key:String,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[Boolean]]"></a>
-      <a id="cas(String,Buf,Seq[Buf]):Future[ReplicationStatus[Boolean]]"></a>
+    </li><li name="com.twitter.finagle.memcached.replication.BaseReplicationClient#checkAndSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="checkAndSet(key:String,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[com.twitter.finagle.memcached.CasResult]]"></a>
+      <a id="checkAndSet(String,Buf,Seq[Buf]):Future[ReplicationStatus[CasResult]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUniques">casUniques: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]]</span>
+        <span class="name">checkAndSet</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUniques">casUniques: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="ReplicationStatus.html" class="extype" name="com.twitter.finagle.memcached.replication.ReplicationStatus">ReplicationStatus</a>[<a href="../CasResult.html" class="extype" name="com.twitter.finagle.memcached.CasResult">CasResult</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.BaseReplicationClient@cas(key:String,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[Boolean]]" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.memcached.replication.BaseReplicationClient@checkAndSet(key:String,value:com.twitter.io.Buf,casUniques:Seq[com.twitter.io.Buf]):com.twitter.util.Future[com.twitter.finagle.memcached.replication.ReplicationStatus[com.twitter.finagle.memcached.CasResult]]" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

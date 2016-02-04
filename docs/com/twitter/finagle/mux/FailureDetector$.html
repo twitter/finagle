@@ -136,7 +136,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="FailureDetector$$ThresholdConfig.html"><span class="name">ThresholdConfig</span></a><span class="params">(<span name="minPeriod">minPeriod: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.seconds</a></span></span></span>, <span name="threshold">threshold: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="windowSize">windowSize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">100</span></span>, <span name="closeTimeout">closeTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">Duration.Top</a></span></span></span>)</span><span class="result"> extends <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="FailureDetector$$ThresholdConfig.html"><span class="name">ThresholdConfig</span></a><span class="params">(<span name="minPeriod">minPeriod: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">5.seconds</a></span></span></span>, <span name="threshold">threshold: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Double" class="extype" target="_top">Double</a> = <span class="symbol">2</span></span>, <span name="windowSize">windowSize: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">100</span></span>, <span name="closeTimeout">closeTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a> = <span class="symbol"><span class="name"><a href="../../../package.html">4.seconds</a></span></span></span>)</span><span class="result"> extends <a href="FailureDetector$$Config.html" class="extype" name="com.twitter.finagle.mux.FailureDetector.Config">Config</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.mux.FailureDetector$@ThresholdConfigextendsFailureDetector.ConfigwithProductwithSerializable" title="Permalink" target="_top">
@@ -150,7 +150,10 @@ representative ping distribution in a Twitter data center. With long tail
 distribution, we want a reasonably large window size to capture long RTTs
 in the history. A small threshold makes the detection sensitive to potential
 failures. There can be a low rate of false positive, which is fine in most
-production cases with cluster redundancy.
+production cases with cluster redundancy.</p><p><code>closeTimeout</code> allows a session to be closed when a ping response times out
+after 4 seconds. This allows sessions to be reestablished when there may be
+a networking issue, so that it can choose an alternative networking path instead.
+The default 4 seconds is pretty conservative regarding normal ping RTT.
 </p></div></div>
     </li></ol>
             </div>

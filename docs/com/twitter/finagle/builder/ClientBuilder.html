@@ -1224,6 +1224,57 @@ timeout is applied only after a connection has been acquired.
 That is: it is applied to the interval between the dispatch of
 the request and the receipt of the response.
 </p></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#responseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="responseClassifier:com.twitter.finagle.service.ResponseClassifier"></a>
+      <a id="responseClassifier:ResponseClassifier"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">responseClassifier</span><span class="result">: <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@responseClassifier:com.twitter.finagle.service.ResponseClassifier" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The currently configured <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.</p><div class="fullcomment"><div class="comment cmt"><p>The currently configured <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
+<a href="../service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#responseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="responseClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):ClientBuilder.this.This"></a>
+      <a id="responseClassifier(ResponseClassifier):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">responseClassifier</span><span class="params">(<span name="classifier">classifier: <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@responseClassifier(classifier:com.twitter.finagle.service.ResponseClassifier):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configure a <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
+which is used to determine the result of a request/response.</p><div class="fullcomment"><div class="comment cmt"><p>Configure a <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
+which is used to determine the result of a request/response.</p><p>This allows developers to give Finagle the additional application-specific
+knowledge necessary in order to properly classify them. Without this,
+Finagle cannot make judgements about application level failures as it only
+has a narrow understanding of failures (for example: transport level, timeouts,
+and nacks).</p><p>As an example take an HTTP client that receives a response with a 500 status
+code back from a server. To Finagle this is a successful request/response
+based solely on the transport level. The application developer may want to
+treat all 500 status codes as failures and can do so via a
+<a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.</p><p>It is a <span class="extype" name="PartialFunction">PartialFunction</span> and as such multiple classifiers can be composed
+together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
+<a href="../service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
+which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some
+HTTP classification tools.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#retries" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="retries(value:Int):ClientBuilder.this.This"></a>
       <a id="retries(Int):This"></a>

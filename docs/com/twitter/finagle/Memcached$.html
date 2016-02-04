@@ -53,12 +53,9 @@
                <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client =
   Memcached.client
     .withEjectFailedHost(<span class="kw">true</span>)
-    <span class="cmt">// tcp connection timeout</span>
-    .configured(Transporter.ConnectTimeout(<span class="num">100.</span>milliseconds))
-    <span class="cmt">// single request timeout</span>
-    .configured(TimeoutFilter.Param(requestTimeout))
-    <span class="cmt">// the acquisition timeout of a connection</span>
-    .configured(TimeoutFactory.Param(serviceTimeout))
+    .withTransport.connectTimeout(<span class="num">100.</span>milliseconds))
+    .withRequestTimeout(<span class="num">10.</span>seconds)
+    .withSession.acquisitionTimeout(<span class="num">20.</span>seconds)
     .newRichClient(dest, <span class="lit">"memcached_client"</span>)</pre></li>, <li class="cmt"><p></p><pre><span class="kw">val</span> client = Memcached.newRichClient(dest)</pre><p>If you want to provide more finely tuned configurations:</p></li></ol>
             </div></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
@@ -102,7 +99,7 @@
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.twitter.finagle.Memcached.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientextendsStdStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable"></a>
+      <a id="ClientextendsStdStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withWithConcurrentLoadBalancer[com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -110,10 +107,10 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Memcached$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.newStack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.defaultParams</a></span></span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>] with <a href="MemcachedRichClient.html" class="extype" name="com.twitter.finagle.MemcachedRichClient">MemcachedRichClient</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Memcached$$Client.html"><span class="name">Client</span></a><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.newStack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="symbol"><span class="name"><a href="Memcached$$Client$.html">Client.defaultParams</a></span></span></span>)</span><span class="result"> extends <a href="client/StdStackClient.html" class="extype" name="com.twitter.finagle.client.StdStackClient">StdStackClient</a>[<a href="memcached/protocol/Command.html" class="extype" name="com.twitter.finagle.memcached.protocol.Command">Command</a>, <a href="memcached/protocol/Response.html" class="extype" name="com.twitter.finagle.memcached.protocol.Response">Response</a>, <a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>] with <a href="param/WithConcurrentLoadBalancer.html" class="extype" name="com.twitter.finagle.param.WithConcurrentLoadBalancer">WithConcurrentLoadBalancer</a>[<a href="Memcached$$Client.html" class="extype" name="com.twitter.finagle.Memcached.Client">Client</a>] with <a href="MemcachedRichClient.html" class="extype" name="com.twitter.finagle.MemcachedRichClient">MemcachedRichClient</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Memcached$@ClientextendsStdStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Memcached$@ClientextendsStdStackClient[com.twitter.finagle.memcached.protocol.Command,com.twitter.finagle.memcached.protocol.Response,com.twitter.finagle.Memcached.Client]withWithConcurrentLoadBalancer[com.twitter.finagle.Memcached.Client]withMemcachedRichClientwithProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

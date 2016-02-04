@@ -523,6 +523,32 @@ If it is not defined, <code>orElse</code> is evaluated and returned.
       </a>
     </span>
       <p class="shortcomment cmt">Bind <code>value</code> to <code>key</code> in the scope of <code>fn</code>.</p>
+    </li><li name="com.twitter.finagle.context.Context#letClear" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letClear[R]()(fn:=&gt;R):R"></a>
+      <a id="letClear[R]()(⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">()</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Context.letClear.R">R</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.Context@letClear[R]()(fn:=&gt;R):R" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Clears all bindings in the scope of <code>fn</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Clears all bindings in the scope of <code>fn</code>.</p><p>For example:</p><pre>context.let(Key1, <span class="lit">"value1"</span>) {
+  context.let(Key2, <span class="lit">"something else"</span>) {
+    context.letClear() {
+      <span class="cmt">// context.contains(Key1) == false</span>
+      <span class="cmt">// context.contains(Key2) == false</span>
+    }
+    <span class="cmt">// context(Key1) == "value1"</span>
+    <span class="cmt">// context(Key2) == "something else"</span>
+  }
+}</pre></div></div>
     </li><li name="com.twitter.finagle.context.Context#letClear" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="letClear[R](keys:Context.this.Key[_]*)(fn:=&gt;R):R"></a>
       <a id="letClear[R](Key[_]*)(⇒R):R"></a>

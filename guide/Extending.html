@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Extending Finagle &mdash; Finagle 6.31.0 documentation</title>
+    <title>Extending Finagle &mdash; Finagle 6.33.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.31.0',
+        VERSION:     '6.33.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.31.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.33.0 documentation" href="index.html" />
     <link rel="next" title="Metrics" href="Metrics.html" />
     <link rel="prev" title="Protocols" href="Protocols.html" />
    
@@ -101,17 +101,17 @@ components included in Finagle&#8217;s clients are discussed in the
 <a class="reference internal" href="Clients.html#client-modules"><em>client documentation</em></a>.</p>
 <p>While we can imagine stacking such modules together in a manual
 fashion—for example, by building it bottoms-up, passing each
-<cite>ServiceFactory</cite> into the constructor of the next—this technique quickly
+<tt class="docutils literal"><span class="pre">ServiceFactory</span></tt> into the constructor of the next—this technique quickly
 becomes onerous; it become very difficult to:</p>
 <ul class="simple">
 <li>parameterize each component, for example to set the sizes of
-connection pools.</li>
+connection pools</li>
 <li>inject dependencies such as
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> implementations;</li>
+<a class="reference external" href="http://twitter.github.io/util/docs/#com.twitter.finagle.stats.StatsReceiver">StatsReceiver</a> implementations</li>
 <li>rearrange any part of the stack, for example to remove an
-unused timeout filter;</li>
+unused timeout filter</li>
 <li>modify the stack for a specific use, for example to replace
-the connection pooling implementation or the load balancer.</li>
+the connection pooling implementation or the load balancer</li>
 </ul>
 <p>Traditionally, the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> and <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder">ServerBuilder</a> performed this duty in
 the manner just described. While it worked well for a while, it
@@ -128,11 +128,11 @@ parameterizing individual modules.</p>
 <p>The stack abstraction also formalizes the concept of a <em>parameter</em>—i.e.
 a map of values used to construct an object. <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Stack$.Params">Stack.Params</a>
 is a kind of type-safe map used to hold parameters.</p>
-<p><cite>Stack</cite> and <cite>Param</cite> work together like this: <cite>Stack</cite> represents the stack
+<p><tt class="docutils literal"><span class="pre">Stack</span></tt> and <tt class="docutils literal"><span class="pre">Param</span></tt> work together like this: <tt class="docutils literal"><span class="pre">Stack</span></tt> represents the stack
 of modules. These modules aren&#8217;t <em>materialized</em>. Rather, they represent
-a constructor for a <cite>ServiceFactory</cite> that accepts a <cite>Params</cite> map. Thus,
-to extract the final <cite>ServiceFactory</cite> that represents the entirety of the stack,
-we simply call <cite>stack.make(params)</cite>.</p>
+a constructor for a <tt class="docutils literal"><span class="pre">ServiceFactory</span></tt> that accepts a <tt class="docutils literal"><span class="pre">Params</span></tt> map. Thus,
+to extract the final <tt class="docutils literal"><span class="pre">ServiceFactory</span></tt> that represents the entirety of the stack,
+we simply call <tt class="docutils literal"><span class="pre">stack.make(params)</span></tt>.</p>
 <p>Finagle defines default (polymorphic) stacks for both
 <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.StackClient$.newStack">clients</a> and
 <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.server.StackServer$.newStack">servers</a>.</p>
@@ -181,11 +181,11 @@ translating our pipeline into a typed transport are defined by the
 </pre></div>
 </div>
 <p>This implements the <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/server/Listener.scala">Listener</a>
-interface that exposes a <cite>listen</cite> method:</p>
+interface that exposes a <tt class="docutils literal"><span class="pre">listen</span></tt> method:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">listen</span><span class="o">(</span><span class="n">addr</span><span class="k">:</span> <span class="kt">SocketAddress</span><span class="o">)(</span><span class="n">serveTransport</span><span class="k">:</span> <span class="kt">Transport</span><span class="o">[</span><span class="kt">In</span>, <span class="kt">Out</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Unit</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>That is, given a socket address to bind and listen, <cite>serveTransport</cite> is dispatched
+<p>That is, given a socket address to bind and listen, <tt class="docutils literal"><span class="pre">serveTransport</span></tt> is dispatched
 for each new connection established.</p>
 <p>For example, here is a simple echo server:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">address</span> <span class="k">=</span> <span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="nc">InetSocketAddress</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
@@ -200,7 +200,7 @@ for each new connection established.</p>
 &gt; hello
 </pre></div>
 </div>
-<p>The <cite>serveTransport</cite> function defined above is primitive. For example,
+<p>The <tt class="docutils literal"><span class="pre">serveTransport</span></tt> function defined above is primitive. For example,
 it closes each connection after one read and write. Finagle provides tools
 to provision a transport with more sophisticated behavior.</p>
 </div>
@@ -213,7 +213,7 @@ is funneled through a service object and the resulting value
 is written back to the transport. Additionally, the
 server dispatcher drains existing requests before
 closing a transport.</p>
-<p>We could translate our <cite>serveTransport</cite> function to use this facility:</p>
+<p>We could translate our <tt class="docutils literal"><span class="pre">serveTransport</span></tt> function to use this facility:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
   <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
 <span class="o">}</span>
@@ -232,17 +232,17 @@ what Finagle&#8217;s default server implementation does.</p>
 <div class="section" id="stdstackserver">
 <h2>StdStackServer<a class="headerlink" href="#stdstackserver" title="Permalink to this headline">¶</a></h2>
 <p>Finagle&#8217;s <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/server/StackServer.scala">StdStackServer</a> provides appropriate
-features for building a robust server. It puts together a <cite>Listener</cite>
-and a <cite>Dispatcher</cite> in much the same way we just did. <cite>StdStackServer</cite>
-also layers a <cite>Stack</cite> on top of it (e.g. to provide timeouts, stats,
+features for building a robust server. It puts together a <tt class="docutils literal"><span class="pre">Listener</span></tt>
+and a <tt class="docutils literal"><span class="pre">Dispatcher</span></tt> in much the same way we just did. <tt class="docutils literal"><span class="pre">StdStackServer</span></tt>
+also layers a <tt class="docutils literal"><span class="pre">Stack</span></tt> on top of it (e.g. to provide timeouts, stats,
 concurrency control, tracing, etc.) and takes care of graceful
 shutdown, so that outstanding requests are drained before a server
 exits. The resulting server is fully parameterized, providing a simple
 and standard way to receive parameters and dependencies.</p>
 <p>Using the listener and dispatcher as above, we define our full server.
-The abstract type parameters <cite>In</cite> and <cite>Out</cite> are used when the type of
-<cite>Listener</cite> differs from the type of <cite>Server</cite>. This is common when some protocol
-processing is done in the <cite>Dispatcher</cite>.</p>
+The abstract type parameters <tt class="docutils literal"><span class="pre">In</span></tt> and <tt class="docutils literal"><span class="pre">Out</span></tt> are used when the type of
+<tt class="docutils literal"><span class="pre">Listener</span></tt> differs from the type of <tt class="docutils literal"><span class="pre">Server</span></tt>. This is common when some protocol
+processing is done in the <tt class="docutils literal"><span class="pre">Dispatcher</span></tt>.</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">case</span> <span class="k">class</span> <span class="nc">Server</span><span class="o">(</span>
   <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
   <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackServer</span><span class="o">.</span><span class="n">defaultParams</span>
@@ -364,7 +364,7 @@ two and create a client:</p>
 </div>
 <div class="section" id="a-robust-client">
 <h2>A Robust Client<a class="headerlink" href="#a-robust-client" title="Permalink to this headline">¶</a></h2>
-<p>Our client is a Service, so we can supply additional
+<p>Our client is a <tt class="docutils literal"><span class="pre">Service</span></tt>, so we can supply additional
 behavior to make our client more robust using
 filters:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">retry</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">RetryExceptionsFilter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">](</span>
@@ -413,10 +413,10 @@ with respect to Finagle&#8217;s connection pool.</td></tr>
 combines a <cite>Transporter</cite>, a <cite>Dispatcher</cite>, and a <cite>Stack</cite> to provide a robust,
 load balanced, resource-managed client. The default stack includes many
 features including
-<a class="reference internal" href="Clients.html#id3"><em>load balancing</em></a> over multiple hosts
+<a class="reference internal" href="Clients.html#load-balancer"><em>load balancing</em></a> over multiple hosts
 and <a class="reference internal" href="Clients.html#watermark-pool"><em>connection pooling</em></a> per host. See the section
 on <a class="reference internal" href="Clients.html#client-modules"><em>client modules</em></a> for more details.</p>
-<p>Putting together a <cite>StdStackClient</cite> is simple:</p>
+<p>Putting together a <tt class="docutils literal"><span class="pre">StdStackClient</span></tt> is simple:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">case</span> <span class="k">class</span> <span class="nc">Client</span><span class="o">(</span>
   <span class="n">stack</span><span class="k">:</span> <span class="kt">Stack</span><span class="o">[</span><span class="kt">ServiceFactory</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">newStack</span><span class="o">,</span>
   <span class="n">params</span><span class="k">:</span> <span class="kt">Stack.Params</span> <span class="o">=</span> <span class="nc">StackClient</span><span class="o">.</span><span class="n">defaultParams</span>
@@ -510,7 +510,7 @@ allowing concurrent dispatches.</p>
       </div>
       <div class="clearer"></div>
     </div>
-  <div class="footer">&copy; Copyright 2014 Twitter, Inc.</div>
+  <div class="footer">&copy; Copyright 2016 Twitter, Inc.</div>
   
   </body>
 </html>

@@ -43,17 +43,17 @@ components included in Finagle's clients are discussed in the
 
 While we can imagine stacking such modules together in a manual
 fashion—for example, by building it bottoms-up, passing each
-`ServiceFactory` into the constructor of the next—this technique quickly
+``ServiceFactory`` into the constructor of the next—this technique quickly
 becomes onerous; it become very difficult to:
 
 - parameterize each component, for example to set the sizes of
-  connection pools.
+  connection pools
 - inject dependencies such as 
-  :api:`StatsReceiver <com.twitter.finagle.stats.StatsReceiver>` implementations; 
+  :util:`StatsReceiver <com.twitter.finagle.stats.StatsReceiver>` implementations
 - rearrange any part of the stack, for example to remove an 
-  unused timeout filter;
+  unused timeout filter
 - modify the stack for a specific use, for example to replace
-  the connection pooling implementation or the load balancer.
+  the connection pooling implementation or the load balancer
 
 Traditionally, the :api:`ClientBuilder
 <com.twitter.finagle.builder.ClientBuilder>` and :api:`ServerBuilder
@@ -75,11 +75,11 @@ The stack abstraction also formalizes the concept of a *parameter*—i.e.
 a map of values used to construct an object. :api:`Stack.Params <com.twitter.finagle.Stack$.Params>`
 is a kind of type-safe map used to hold parameters.
 
-`Stack` and `Param` work together like this: `Stack` represents the stack
+``Stack`` and ``Param`` work together like this: ``Stack`` represents the stack
 of modules. These modules aren't *materialized*. Rather, they represent
-a constructor for a `ServiceFactory` that accepts a `Params` map. Thus,
-to extract the final `ServiceFactory` that represents the entirety of the stack,
-we simply call `stack.make(params)`.
+a constructor for a ``ServiceFactory`` that accepts a ``Params`` map. Thus,
+to extract the final ``ServiceFactory`` that represents the entirety of the stack,
+we simply call ``stack.make(params)``.
 
 Finagle defines default (polymorphic) stacks for both 
 :api:`clients <com.twitter.finagle.client.StackClient$.newStack>` and 
@@ -130,13 +130,13 @@ We define a listener in our server implementation:
    :language: scala
 
 This implements the :src:`Listener <com/twitter/finagle/server/Listener.scala>`
-interface that exposes a `listen` method:
+interface that exposes a ``listen`` method:
 
 .. code-block:: scala
 
   def listen(addr: SocketAddress)(serveTransport: Transport[In, Out] => Unit)
 
-That is, given a socket address to bind and listen, `serveTransport` is dispatched
+That is, given a socket address to bind and listen, ``serveTransport`` is dispatched
 for each new connection established.
 
 For example, here is a simple echo server:
@@ -156,7 +156,7 @@ We can now send requests over this socket and have them echoed back:
   > echo "hello" | nc localhost 8080
   > hello
 
-The `serveTransport` function defined above is primitive. For example,
+The ``serveTransport`` function defined above is primitive. For example,
 it closes each connection after one read and write. Finagle provides tools
 to provision a transport with more sophisticated behavior.
 
@@ -171,7 +171,7 @@ is written back to the transport. Additionally, the
 server dispatcher drains existing requests before
 closing a transport.
 
-We could translate our `serveTransport` function to use this facility:
+We could translate our ``serveTransport`` function to use this facility:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#simplelisten
    :language: scala
@@ -186,18 +186,18 @@ StdStackServer
 
 Finagle's :src:`StdStackServer
 <com/twitter/finagle/server/StackServer.scala>` provides appropriate
-features for building a robust server. It puts together a `Listener`
-and a `Dispatcher` in much the same way we just did. `StdStackServer`
-also layers a `Stack` on top of it (e.g. to provide timeouts, stats,
+features for building a robust server. It puts together a ``Listener``
+and a ``Dispatcher`` in much the same way we just did. ``StdStackServer``
+also layers a ``Stack`` on top of it (e.g. to provide timeouts, stats,
 concurrency control, tracing, etc.) and takes care of graceful
 shutdown, so that outstanding requests are drained before a server
 exits. The resulting server is fully parameterized, providing a simple
 and standard way to receive parameters and dependencies.
 
 Using the listener and dispatcher as above, we define our full server.
-The abstract type parameters `In` and `Out` are used when the type of
-`Listener` differs from the type of `Server`. This is common when some protocol
-processing is done in the `Dispatcher`.
+The abstract type parameters ``In`` and ``Out`` are used when the type of
+``Listener`` differs from the type of ``Server``. This is common when some protocol
+processing is done in the ``Dispatcher``.
 
 .. includecode:: code/client-server-anatomy/Echo.scala#server
    :language: scala
@@ -270,7 +270,7 @@ Assuming we have a server willing to listen, we can expect a response:
 A Robust Client
 ---------------
 
-Our client is a Service, so we can supply additional
+Our client is a ``Service``, so we can supply additional
 behavior to make our client more robust using
 filters:
 
@@ -306,7 +306,7 @@ features including
 and :ref:`connection pooling <watermark_pool>` per host. See the section
 on :ref:`client modules <client_modules>` for more details.
 
-Putting together a `StdStackClient` is simple:
+Putting together a ``StdStackClient`` is simple:
 
 .. includecode:: code/client-server-anatomy/Echo.scala#client
    :language: scala

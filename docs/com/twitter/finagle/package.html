@@ -435,7 +435,7 @@ usage in public APIs.
       <p class="shortcomment cmt">Indicates that a given channel was closed, for instance if the connection
 was reset by a peer or a proxy.</p>
     </li><li name="com.twitter.finagle.ChannelException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ChannelExceptionextendsExceptionwithSourcedException"></a>
+      <a id="ChannelExceptionextendsExceptionwithSourcedExceptionwithHasLogLevel"></a>
       <a id="ChannelException:ChannelException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -443,10 +443,10 @@ was reset by a peer or a proxy.</p>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ChannelException.html"><span class="name">ChannelException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a href="ChannelException.html"><span class="name">ChannelException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ChannelExceptionextendsExceptionwithSourcedException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@ChannelExceptionextendsExceptionwithSourcedExceptionwithHasLogLevel" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -543,7 +543,9 @@ connection.</p>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Superclass for all codecs.</p>
+      <p class="shortcomment cmt">Codecs provide protocol encoding and decoding via netty pipelines
+as well as a standard filter stack that is applied to services
+from this codec.</p>
     </li><li name="com.twitter.finagle.CodecFactory" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CodecFactory[Req,Rep]extendsAnyRef"></a>
       <a id="CodecFactory[Req,Rep]:CodecFactory[Req,Rep]"></a>
@@ -682,6 +684,26 @@ delegation rules. Together, these describe how to bind a
 <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">com.twitter.finagle.Addr</a>. <a href="naming/DefaultInterpreter$.html" class="extype" name="com.twitter.finagle.naming.DefaultInterpreter">com.twitter.finagle.naming.DefaultInterpreter</a>
 implements the default binding stategy.
 </p></div></div>
+    </li><li name="com.twitter.finagle.DtabBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DtabBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="DtabBenchmark:DtabBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DtabBenchmark.html"><span class="name">DtabBenchmark</span></a><span class="result"> extends <a href="benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@DtabBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.DtabBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DtabBuilderextendsBuilder[com.twitter.finagle.Dentry,com.twitter.finagle.Dtab]"></a>
       <a id="DtabBuilder:DtabBuilder"></a>
@@ -891,6 +913,29 @@ from a proxy when there is no outstanding connect request.
 could be a single request-retry performed as a constituent of an
 application-level RPC.
 </p></div></div>
+    </li><li name="com.twitter.finagle.InetResolverBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="InetResolverBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="InetResolverBenchmark:InetResolverBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="InetResolverBenchmark.html"><span class="name">InetResolverBenchmark</span></a><span class="result"> extends <a href="benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@InetResolverBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This is primarily a test for allocations not performance
+so it is recommended to run with <code>-prof gc</code>.</p><div class="fullcomment"><div class="comment cmt"><p>This is primarily a test for allocations not performance
+so it is recommended to run with <code>-prof gc</code>.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.ListeningServer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ListeningServerextendsClosablewithAwaitable[Unit]withGroup[java.net.SocketAddress]"></a>
       <a id="ListeningServer:ListeningServer"></a>
@@ -1053,6 +1098,26 @@ translates <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Pa
 external processes, for example lookups through DNS or to ZooKeeper,
 and thus lookup results are represented by a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Activity" class="extype" target="_top">Activity</a>.
 </p></div></div>
+    </li><li name="com.twitter.finagle.NamerBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="NamerBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="NamerBenchmark:NamerBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NamerBenchmark.html"><span class="name">NamerBenchmark</span></a><span class="result"> extends <a href="benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@NamerBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.NoBrokersAvailableException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="NoBrokersAvailableExceptionextendsRequestException"></a>
       <a id="NoBrokersAvailableException:NoBrokersAvailableException"></a>
@@ -1161,6 +1226,26 @@ for details on this behavior.
     </span>
       <p class="shortcomment cmt">A Path comprises a sequence of byte buffers naming a
 hierarchically-addressed object.</p>
+    </li><li name="com.twitter.finagle.PathBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PathBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="PathBenchmark:PathBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="PathBenchmark.html"><span class="name">PathBenchmark</span></a><span class="result"> extends <a href="benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@PathBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.ProxyAnnouncement" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ProxyAnnouncementextendsAnnouncementwithProxy"></a>
       <a id="ProxyAnnouncement:ProxyAnnouncement"></a>
@@ -1747,57 +1832,26 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
 to indicate the health of <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>, <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>, and of
 <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">transport.Transport</a>.</p><p>Object <a href="Status$.html" class="extype" name="com.twitter.finagle.Status">Status$</a> contains the status definitions.
 </p></div></div>
-    </li><li name="com.twitter.finagle.SunkChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SunkChannelextendsAbstractChannel"></a>
-      <a id="SunkChannel:SunkChannel"></a>
+    </li><li name="com.twitter.finagle.StatusBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StatusBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="StatusBenchmark:StatusBenchmark"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SunkChannel.html"><span class="name">SunkChannel</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.AbstractChannel">AbstractChannel</span></span>
+        <a href="StatusBenchmark.html"><span class="name">StatusBenchmark</span></a><span class="result"> extends <a href="benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@SunkChannelextendsAbstractChannel" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@StatusBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
-    </li><li name="com.twitter.finagle.SunkChannelFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SunkChannelFactoryextendsChannelFactory"></a>
-      <a id="SunkChannelFactory:SunkChannelFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="SunkChannelFactory.html"><span class="name">SunkChannelFactory</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelFactory">ChannelFactory</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@SunkChannelFactoryextendsChannelFactory" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.SunkChannelSink" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SunkChannelSinkextendsAbstractChannelSink"></a>
-      <a id="SunkChannelSink:SunkChannelSink"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="SunkChannelSink.html"><span class="name">SunkChannelSink</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.AbstractChannelSink">AbstractChannelSink</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@SunkChannelSinkextendsAbstractChannelSink" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="ThriftRichClientextendsAnyRef"></a>
       <a id="ThriftRichClient:ThriftRichClient"></a>
@@ -1985,66 +2039,6 @@ not have reached the other end.
       <p class="shortcomment cmt">Indicates that a write to a given <code>remoteAddress</code> timed out.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that a write to a given <code>remoteAddress</code> timed out. See
 <span class="extype" name="com.twitter.finagle.netty3.channel.WriteCompletionTimeoutHandler">com.twitter.finagle.netty3.channel.WriteCompletionTimeoutHandler</span> for details.
 </p></div></div>
-    </li><li name="com.twitter.finagle.ApplicationException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ApplicationExceptionextendsException"></a>
-      <a id="ApplicationException:ApplicationException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ApplicationException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used">ApplicationException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ApplicationExceptionextendsException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.CodecException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="CodecExceptionextendsException"></a>
-      <a id="CodecException:CodecException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="CodecException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used">CodecException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@CodecExceptionextendsException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.FailFastException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="FailFastExceptionextendsChannelExceptionwithProductwithSerializable"></a>
-      <a id="FailFastException:FailFastException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="FailFastException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used by com.twitter.finagle.service.FailFastFactory">FailFastException</span></a><span class="params">()</span><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@FailFastExceptionextendsChannelExceptionwithProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used by com.twitter.finagle.service.FailFastFactory</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Group" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Group[T]extendsAnyRef"></a>
       <a id="Group[T]:Group[T]"></a>
@@ -2067,7 +2061,7 @@ flexibility is derived from the ability to <i>map</i>, creating
 derived groups. The map operation ensures that each element is
 mapped over exactly once, allowing side-effecting operations to
 rely on this to implement safe semantics.</p><p><b>Note:</b> querying groups is nonblocking, which means that
-derived groups are effectively eventually consistent.</p><p><b>Note:</b> <code>T</code>s must be hashable, definining <code>hashCode</code> and
+derived groups are effectively eventually consistent.</p><p><b>Note:</b> <code>T</code>s must be hashable, defining <code>hashCode</code> and
 <code>equals</code> to ensure that maps have exactly-once semantics.</p><p><b>Note:</b> Groups are invariant because Scala's Sets are. In
 the case of sets, this is an implementation artifact, and is
 unfortunate, but it's better to keep things simpler and
@@ -2076,26 +2070,6 @@ consistent.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.InvalidPipelineException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="InvalidPipelineExceptionextendsApiException"></a>
-      <a id="InvalidPipelineException:InvalidPipelineException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="InvalidPipelineException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used">InvalidPipelineException</span></a><span class="result"> extends <a href="ApiException.html" class="extype" name="com.twitter.finagle.ApiException">ApiException</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@InvalidPipelineExceptionextendsApiException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used</p></dd></dl></div>
     </li><li name="com.twitter.finagle.LabelledGroup" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LabelledGroup[T]extendsGroup[T]withProductwithSerializable"></a>
       <a id="LabelledGroup[T]:LabelledGroup[T]"></a>
@@ -2138,26 +2112,6 @@ to assign labels to groups that ascribe meaning to them.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.x)</i> Use <code>com.twitter.finagle.Name</code> to represent clusters instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.NotYetConnectedException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="NotYetConnectedExceptionextendsApiException"></a>
-      <a id="NotYetConnectedException:NotYetConnectedException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="NotYetConnectedException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used">NotYetConnectedException</span></a><span class="result"> extends <a href="ApiException.html" class="extype" name="com.twitter.finagle.ApiException">ApiException</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@NotYetConnectedExceptionextendsApiException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used</p></dd></dl></div>
     </li><li name="com.twitter.finagle.ProxyServiceFactory" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ProxyServiceFactory[-Req,+Rep]extendsServiceFactory[Req,Rep]withProxy"></a>
       <a id="ProxyServiceFactory[-Req,+Rep]:ProxyServiceFactory[Req,Rep]"></a>
@@ -2178,46 +2132,6 @@ to assign labels to groups that ascribe meaning to them.
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.7.5)</i> use ServiceFactoryProxy instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.ReplyCastException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ReplyCastExceptionextendsRequestException"></a>
-      <a id="ReplyCastException:ReplyCastException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ReplyCastException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used by com.twitter.finagle.service.RetryFilter">ReplyCastException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@ReplyCastExceptionextendsRequestException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used by com.twitter.finagle.service.RetryFilter</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.RetryFailureException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="RetryFailureExceptionextendsRequestException"></a>
-      <a id="RetryFailureException:RetryFailureException"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="RetryFailureException.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) no longer used by com.twitter.finagle.service.RetryExceptionsFilter">RetryFailureException</span></a><span class="result"> extends <a href="RequestException.html" class="extype" name="com.twitter.finagle.RequestException">RequestException</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@RetryFailureExceptionextendsRequestException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> no longer used by com.twitter.finagle.service.RetryExceptionsFilter</p></dd></dl></div>
     </li><li name="com.twitter.finagle.ThriftMuxClientLike" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftMuxClientLikeextendsStackBasedClient[com.twitter.finagle.thrift.ThriftClientRequest,Array[Byte]]withStack.Parameterized[com.twitter.finagle.ThriftMuxClientLike]withStack.Transformable[com.twitter.finagle.ThriftMuxClientLike]withThriftRichClient"></a>
       <a id="ThriftMuxClientLike:ThriftMuxClientLike"></a>
@@ -2558,6 +2472,27 @@ their corresponding backup requests succeeded first. See
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.FixedInetResolver" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FixedInetResolver"></a>
+      <a id="FixedInetResolver:FixedInetResolver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="FixedInetResolver$.html"><span class="name">FixedInetResolver</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@FixedInetResolver" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">InetResolver that caches all successful DNS lookups indefinitely
+and does not poll for updates.</p><div class="fullcomment"><div class="comment cmt"><p>InetResolver that caches all successful DNS lookups indefinitely
+and does not poll for updates.</p><p>Clients should only use this in scenarios where host -&gt; IP map changes
+do not occur.
+</p></div></div>
     </li><li name="com.twitter.finagle.Group" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Group"></a>
       <a id="Group:Group"></a>
@@ -2629,12 +2564,9 @@ their corresponding backup requests succeeded first. See
                <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client =
   Memcached.client
     .withEjectFailedHost(<span class="kw">true</span>)
-    <span class="cmt">// tcp connection timeout</span>
-    .configured(Transporter.ConnectTimeout(<span class="num">100.</span>milliseconds))
-    <span class="cmt">// single request timeout</span>
-    .configured(TimeoutFilter.Param(requestTimeout))
-    <span class="cmt">// the acquisition timeout of a connection</span>
-    .configured(TimeoutFactory.Param(serviceTimeout))
+    .withTransport.connectTimeout(<span class="num">100.</span>milliseconds))
+    .withRequestTimeout(<span class="num">10.</span>seconds)
+    .withSession.acquisitionTimeout(<span class="num">20.</span>seconds)
     .newRichClient(dest, <span class="lit">"memcached_client"</span>)</pre></li>, <li class="cmt"><p></p><pre><span class="kw">val</span> client = Memcached.newRichClient(dest)</pre><p>If you want to provide more finely tuned configurations:</p></li></ol>
             </div></dl></div>
     </li><li name="com.twitter.finagle.Mux" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -2952,23 +2884,6 @@ empty stack for <a href="ServiceFactory.html" class="extype" name="com.twitter.f
       <p class="shortcomment cmt">Define valid <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status!</a> values.</p><div class="fullcomment"><div class="comment cmt"><p>Define valid <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status!</a> values. They are, in order from
 most to least healthy:</p><ul><li>Open</li><li>Busy</li><li>Closed</li></ul><p>(An <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.math.Ordering" class="extype" target="_top">scala.math.Ordering</a> is defined in these terms.)
 </p></div></div>
-    </li><li name="com.twitter.finagle.SunkChannel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SunkChannel"></a>
-      <a id="SunkChannel:SunkChannel"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="SunkChannel$.html"><span class="name">SunkChannel</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@SunkChannel" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.twitter.finagle.Thrift" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Thrift"></a>
       <a id="Thrift:Thrift"></a>
@@ -3486,9 +3401,9 @@ is a pure session layer.</p><p>In the below description, all numeric values are 
 big-endian byte order. The schema <i>size:4 body:10</i> defines the
 field size to be 4 bytes, followed by 10 bytes of the field body. The
 schema <i>key~4</i> defines the field key to be defined by 4 bytes
-intepreted as the size of the field, followed by that many bytes
+interpreted as the size of the field, followed by that many bytes
 comprising the field itself--it is shorthand for <i>keysize:4 key:keysize</i>.
-Groups are denoted by parenthesis; <i>*</i> denotes reptition of the
+Groups are denoted by parenthesis; <i>*</i> denotes repetition of the
 previous schema 0 or more times, while <code>{n}</code> indicates repetition
 exactly <i>n</i> times. Unspecified sizes consume the rest of the frame:
 they may be specified only as the last field in the message.</p><p>All strings  in Mux are Utf-8 encoded, and are never null-terminated.</p><h3>Message framing</h3><p>Messages in mux are framed with a 4-byte big-endian size header,
@@ -3505,7 +3420,7 @@ sequence and an Rerr ends an Rdispatch sequence.</p><p>Message types, interprete
 numbered as follows: positive numbers are T-messages; their negative
 complement is the corresponding R message. T-messages greater than 63
 (correspondingly R-messages smaller than -63) are session messages.
-The message number -128 is reserved for Rerr. All other messsages are
+The message number -128 is reserved for Rerr. All other messages are
 application messages. Middle boxes may forward application messages
 indiscriminately. Because of an early implementation bug, two aliases
 exist: 127 is Rerr, and -62 is Tdiscarded.</p><p>The protocol is full duplex: both the server and client may send T
@@ -3885,6 +3800,23 @@ thrift <code>ProtocolFactory</code>.</p><p>These transports are used by the serv
 class <code>ServiceToClient</code> is provided by the finagle thrift code
 generator.
 </p></div></div>
+    </li><li name="com.twitter.finagle.thriftmux" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="thriftmux"></a>
+      <a id="thriftmux:thriftmux"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="thriftmux/package.html"><span class="name">thriftmux</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@thriftmux" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.tracing" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="tracing"></a>
       <a id="tracing:tracing"></a>

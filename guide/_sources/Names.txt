@@ -1,6 +1,8 @@
 Names and Naming in Finagle
 ===========================
 
+.. _finagle_names:
+
 Finagle uses *names* [#names]_ to identify network locations. Names must be
 supplied when constructing a Finagle client through
 :api:`ClientBuilder.dest <com.twitter.finagle.builder.ClientBuilder>`

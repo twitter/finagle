@@ -47,17 +47,17 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelException</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <span class="name">ChannelException</span><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An exception encountered within the context of a given socket channel.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a>, <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="ChannelClosedException.html" class="extype" name="com.twitter.finagle.ChannelClosedException">ChannelClosedException</a>, <a href="ChannelWriteException.html" class="extype" name="com.twitter.finagle.ChannelWriteException">ChannelWriteException</a>, <a href="ConnectionFailedException.html" class="extype" name="com.twitter.finagle.ConnectionFailedException">ConnectionFailedException</a>, <a href="ConnectionRefusedException.html" class="extype" name="com.twitter.finagle.ConnectionRefusedException">ConnectionRefusedException</a>, <a href="FailFastException.html" class="extype" name="com.twitter.finagle.FailFastException">FailFastException</a>, <a href="InconsistentStateException.html" class="extype" name="com.twitter.finagle.InconsistentStateException">InconsistentStateException</a>, <a href="RefusedByRateLimiter.html" class="extype" name="com.twitter.finagle.RefusedByRateLimiter">RefusedByRateLimiter</a>, <a href="SslHandshakeException.html" class="extype" name="com.twitter.finagle.SslHandshakeException">SslHandshakeException</a>, <a href="SslHostVerificationException.html" class="extype" name="com.twitter.finagle.SslHostVerificationException">SslHostVerificationException</a>, <a href="UnknownChannelException.html" class="extype" name="com.twitter.finagle.UnknownChannelException">UnknownChannelException</a>, <a href="WriteTimedOutException.html" class="extype" name="com.twitter.finagle.WriteTimedOutException">WriteTimedOutException</a></div>
+            <div class="subClasses hiddenContent"><a href="ChannelClosedException.html" class="extype" name="com.twitter.finagle.ChannelClosedException">ChannelClosedException</a>, <a href="ChannelWriteException.html" class="extype" name="com.twitter.finagle.ChannelWriteException">ChannelWriteException</a>, <a href="ConnectionFailedException.html" class="extype" name="com.twitter.finagle.ConnectionFailedException">ConnectionFailedException</a>, <a href="ConnectionRefusedException.html" class="extype" name="com.twitter.finagle.ConnectionRefusedException">ConnectionRefusedException</a>, <a href="InconsistentStateException.html" class="extype" name="com.twitter.finagle.InconsistentStateException">InconsistentStateException</a>, <a href="RefusedByRateLimiter.html" class="extype" name="com.twitter.finagle.RefusedByRateLimiter">RefusedByRateLimiter</a>, <a href="SslHandshakeException.html" class="extype" name="com.twitter.finagle.SslHandshakeException">SslHandshakeException</a>, <a href="SslHostVerificationException.html" class="extype" name="com.twitter.finagle.SslHostVerificationException">SslHostVerificationException</a>, <a href="UnknownChannelException.html" class="extype" name="com.twitter.finagle.UnknownChannelException">UnknownChannelException</a>, <a href="WriteTimedOutException.html" class="extype" name="com.twitter.finagle.WriteTimedOutException">WriteTimedOutException</a></div>
           </div></div>
         
 
@@ -75,7 +75,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.ChannelException"><span>ChannelException</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.ChannelException"><span>ChannelException</span></li><li class="in" name="com.twitter.logging.HasLogLevel"><span>HasLogLevel</span></li><li class="in" name="com.twitter.finagle.SourcedException"><span>SourcedException</span></li><li class="in" name="java.lang.Exception"><span>Exception</span></li><li class="in" name="java.lang.Throwable"><span>Throwable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -489,6 +489,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.ChannelException#logLevel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logLevel:com.twitter.logging.Level"></a>
+      <a id="logLevel:Level"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logLevel</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.Level" class="extype" target="_top">Level</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.ChannelException@logLevel:com.twitter.logging.Level" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a> → HasLogLevel</dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -754,7 +771,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.SourcedException">
+        <div class="parent" name="com.twitter.logging.HasLogLevel">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.SourcedException">
               <h3>Inherited from <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></h3>
             </div><div class="parent" name="java.lang.Exception">
               <h3>Inherited from <span class="extype" name="java.lang.Exception">Exception</span></h3>

@@ -57,32 +57,48 @@
     <h1>Finagle</h1>
 
     <blockquote style="margin: 0;">
+    <p>
       Finagle is an extensible RPC system for the JVM, used to
       construct high-concurrency servers. Finagle implements uniform
       client and server APIs for several protocols, and is designed
       for high performance and concurrency. Most of Finagle’s code is
       protocol agnostic, simplifying the implementation of new
       protocols.
-      <p/>
+    </p>
+    <p>
       Finagle is written in Scala, but provides both Scala and Java idiomatic
       APIs.
+    </p>
     </blockquote>
 
     <ul>
       <li><a href="https://github.com/twitter/finagle">Github project</a></li>
       <li><a href="guide">User’s guide</a></li>
       <li><a href="docs/#com.twitter.finagle.package">API documentation</a></li>
+      <li><a href="https://gitter.im/twitter/finagle">Gitter channel</a></li>
       <li><a href="http://groups.google.com/group/finaglers?hl=en">Google groups</a></li>
     </ul>
 
     <h2>Contributing</h2>
 
+    We feel that a welcoming community is important and we ask that you follow Twitter’s
+    <a href="https://engineering.twitter.com/opensource/code-of-conduct">Open Source Code of Conduct</a>
+    in all interactions with the community.
+
     Finagle is actively maintained by Twitter’s infrastructure
     team, but we have <a href="https://github.com/twitter/finagle/graphs/contributors">
-    many external contributors</a> as well. Before endeavoring on large
+    many external contributors</a> as well.
+
+    The master branch represents the most recent published release
+    while active development happens on the develop branch.
+
+    Before endeavoring on large
     changes, please discuss them with the
     <a href="http://groups.google.com/group/finaglers?hl=en">Google groups</a>
     to receive feedback and suggestions.
+
+    For all patches, please review our
+    <a href="https://github.com/twitter/finagle/blob/develop/CONTRIBUTING.md">contributing docs</a>.
 
     <h2>Other resources</h2>
 
@@ -96,19 +112,23 @@
       <li><a href="http://monkey.org/~marius/talks/twittersystems/#1">Slides</a> from another talk explaining
       the role of Finagle in Twitter’s distributed systems</li>
       <li>A <a href="http://blog.oskarsson.nu/post/40196324612/the-twitter-stack">blog post</a>
-      explaning Twitter’s server stack, in which Finagle plays a central role</li>
+      explaining Twitter’s server stack, in which Finagle plays a central role</li>
       <li>Matt Ho’s <a href="http://marakana.com/s/post/1416/twitter_finagle_for_the_asynchronous_programmer_matt_ho_video">NEScala talk</a> about Finagle</li>
     </ul>
 
     <h2>Companion Projects</h2>
     <blockquote>In no particular order...</blockquote>
     <ul>
-      <li><a href="https://github.com/twitter/finatra">Finatra: fast, testable, Scala HTTP services built on Twitter-Server and Finagle</a></li>
-      <li><a href="https://github.com/novus/unfinagled">A small library for using unfiltered as a finagle frontend</a></li>
-      <li><a href="https://github.com/mairbek/finagle-postgres">Postgres protocol support for finagle</a></li>
-      <li><a href="https://github.com/sprsquish/finagle-irc">An implementation of the IRC protocol on finagle</a></li>
+      <li><a href="https://github.com/twitter/finatra">Finatra</a> - fast, testable, Scala services built on TwitterServer and Finagle</li>
+      <li><a href="https://github.com/finagle/finch">Finch</a> - a pure functional wrapper around Finagle HTTP built with Shapeless and Cats</li>
+      <li><a href="https://github.com/finagle/finagle-serial">Finagle Serial</a> - a Mux-powered, Finagle protocol over Scala's case classes with a serialization library of your choice</li>
+      <li><a href="https://github.com/finagle/finagle-oauth2">Finagle OAuth2</a> - an OAuth2 server-side provider for Finagle</li>
+      <li><a href="https://github.com/novus/unfinagled">Unfinagled</a> - a small library for using unfiltered as a Finagle frontend</li>
+      <li><a href="https://github.com/finagle/finagle-postgres">Finagle Postgres</a> - Postgres protocol support for Finagle</li>
+      <li><a href="https://github.com/sprsquish/finagle-irc">Finagle IRC</a> - an implementation of the IRC protocol on Finagle</li>
       <li><a href="https://github.com/sprsquish/finagle-websocket">WebSockets implementation for Finagle</a></li>
-      <li><a href="https://github.com/evnm/fintop">A top-like utility for monitoring Finagle services</a></li>
+      <li><a href="https://github.com/evnm/fintop">Fintop</a> - a top-like utility for monitoring Finagle services</li>
+      <li><a href="http://fintrospect.io/">Fintrospect</a> - adds an intelligent HTTP routing layer to Finagle. It provides a simple way to implement contracts for both server and client-side HTTP services</li>
     </ul>
   </div>
   </body>

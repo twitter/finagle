@@ -319,6 +319,28 @@ marshalled context values.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.context.Contexts#letClear" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="letClear[R](fn:=&gt;R):R"></a>
+      <a id="letClear[R](⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">letClear</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="fn">fn: ⇒ <span class="extype" name="com.twitter.finagle.context.Contexts.letClear.R">R</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.context.Contexts.letClear.R">R</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.Contexts$@letClear[R](fn:=&gt;R):R" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Executes <code>fn</code> with all Finagle <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">contexts</a> cleared.</p><div class="fullcomment"><div class="comment cmt"><p>Executes <code>fn</code> with all Finagle <a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">contexts</a> cleared.</p><p>This should be used when Finagle needs to execute work
+that is not request scoped but may be triggered by something
+that is part of the request. For example, processing a user
+request may create a &quot;background Future-loop&quot; which should
+not capture these request scoped values.
+</p></div></div>
     </li><li name="com.twitter.finagle.context.Contexts#local" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="local:com.twitter.finagle.context.LocalContext"></a>
       <a id="local:LocalContext"></a>

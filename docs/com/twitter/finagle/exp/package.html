@@ -122,6 +122,27 @@ onto a different endpoint from the original. Eventually, this
 should be implemented as a sort of queueing policy.</p></span>, <span class="cmt"><p>Care must be taken to ensure that application of this filter
 preserves semantics since a request may be issued twice (ie. they
 are idempotent).</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.BackupRequestFilterBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BackupRequestFilterBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="BackupRequestFilterBenchmark:BackupRequestFilterBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BackupRequestFilterBenchmark.html"><span class="name">BackupRequestFilterBenchmark</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@BackupRequestFilterBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This test is used for allocation more so than performance.</p><div class="fullcomment"><div class="comment cmt"><p>This test is used for allocation more so than performance.</p><p>In other words, it's best run with &quot;-prof gc&quot;.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="com.twitter.finagle.exp.DarkTrafficFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="DarkTrafficFilter[Req,Rep]:DarkTrafficFilter[Req,Rep]"></a>

@@ -45,15 +45,15 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">statsFilterFile</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.io.File">File</span>]</span>
+        <span class="name">statsFilterFile</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Blacklist of regex, comma-separated. Comma is a reserved character and
-cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Comma-separated blacklist of files. Each file may have multiple filters,
+separated by new lines. Used with regexes from statsFilter.</p><p>See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.io.File">File</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="java.io.File">File</span>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -149,14 +149,14 @@ cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-l
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.app.Flag#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply():T"></a>
-      <a id="apply():File"></a>
+      <a id="apply():Set[File]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">()</span><span class="result">: <span class="extype" name="java.io.File">File</span></span>
+        <span class="name">apply</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.stats.statsFilterFile$@apply():T" title="Permalink" target="_top">
@@ -280,14 +280,14 @@ cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-l
         </dd></dl></div>
     </li><li name="com.twitter.app.Flag#flaggable" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="flaggable:com.twitter.app.Flaggable[T]"></a>
-      <a id="flaggable:Flaggable[File]"></a>
+      <a id="flaggable:Flaggable[Set[File]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">flaggable</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flaggable" class="extype" target="_top">Flaggable</a>[<span class="extype" name="java.io.File">File</span>]</span>
+        <span class="name">flaggable</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flaggable" class="extype" target="_top">Flaggable</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.stats.statsFilterFile$@flaggable:com.twitter.app.Flaggable[T]" title="Permalink" target="_top">
@@ -297,14 +297,14 @@ cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-l
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Flag</dd></dl></div>
     </li><li name="com.twitter.app.Flag#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="get:Option[T]"></a>
-      <a id="get:Option[File]"></a>
+      <a id="get:Option[Set[File]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.io.File">File</span>]</span>
+        <span class="name">get</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.stats.statsFilterFile$@get:Option[T]" title="Permalink" target="_top">
@@ -348,14 +348,14 @@ cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-l
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>GlobalFlag</dd></dl></div>
     </li><li name="com.twitter.app.GlobalFlag#getValue" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getValue:Option[T]"></a>
-      <a id="getValue:Option[File]"></a>
+      <a id="getValue:Option[Set[File]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getValue</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.io.File">File</span>]</span>
+        <span class="name">getValue</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.stats.statsFilterFile$@getValue:Option[T]" title="Permalink" target="_top">
@@ -365,14 +365,14 @@ cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-l
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>GlobalFlag → Flag</dd></dl></div>
     </li><li name="com.twitter.app.Flag#getWithDefault" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getWithDefault:Option[T]"></a>
-      <a id="getWithDefault:Option[File]"></a>
+      <a id="getWithDefault:Option[Set[File]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getWithDefault</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.io.File">File</span>]</span>
+        <span class="name">getWithDefault</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.stats.statsFilterFile$@getWithDefault:Option[T]" title="Permalink" target="_top">
@@ -450,14 +450,14 @@ cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-l
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.app.Flag#let" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="let(t:T)(f:=&gt;Unit):Unit"></a>
-      <a id="let(File)(⇒Unit):Unit"></a>
+      <a id="let(Set[File])(⇒Unit):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="params">(<span name="t">t: <span class="extype" name="java.io.File">File</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">let</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]</span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.stats.statsFilterFile$@let(t:T)(f:=&gt;Unit):Unit" title="Permalink" target="_top">
@@ -748,9 +748,9 @@ cannot be used. Used with regexes from statsFilter.</p><p>See http://www.scala-l
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.app.GlobalFlag">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.io.File">File</span>]</h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</h3>
             </div><div class="parent" name="com.twitter.app.Flag">
-              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="java.io.File">File</span>]</h3>
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="java.io.File">File</span>]]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

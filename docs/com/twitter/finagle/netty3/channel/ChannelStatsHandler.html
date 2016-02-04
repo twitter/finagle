@@ -45,7 +45,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ChannelStatsHandler</span><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span> with <span class="extype" name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler">ConnectionLifecycleHandler</span></span>
+        <span class="name">ChannelStatsHandler</span><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></span>
       </span>
       </h4>
       
@@ -55,7 +55,7 @@ statistics. The handler is meant to be shared by all
 server in order to consolidate statistics across a number of channels.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler">ConnectionLifecycleHandler</span>, <span class="extype" name="org.jboss.netty.channel.LifeCycleAwareChannelHandler">LifeCycleAwareChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelUpstreamHandler">ChannelUpstreamHandler</span>, <span class="extype" name="org.jboss.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -73,7 +73,7 @@ server in order to consolidate statistics across a number of channels.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.netty3.channel.ChannelStatsHandler"><span>ChannelStatsHandler</span></li><li class="in" name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler"><span>ConnectionLifecycleHandler</span></li><li class="in" name="org.jboss.netty.channel.LifeCycleAwareChannelHandler"><span>LifeCycleAwareChannelHandler</span></li><li class="in" name="org.jboss.netty.channel.SimpleChannelHandler"><span>SimpleChannelHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelDownstreamHandler"><span>ChannelDownstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelUpstreamHandler"><span>ChannelUpstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelHandler"><span>ChannelHandler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.netty3.channel.ChannelStatsHandler"><span>ChannelStatsHandler</span></li><li class="in" name="org.jboss.netty.channel.SimpleChannelHandler"><span>SimpleChannelHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelDownstreamHandler"><span>ChannelDownstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelUpstreamHandler"><span>ChannelUpstreamHandler</span></li><li class="in" name="org.jboss.netty.channel.ChannelHandler"><span>ChannelHandler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -169,40 +169,6 @@ server in order to consolidate statistics across a number of channels.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler#afterAdd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="afterAdd(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit"></a>
-      <a id="afterAdd(ChannelHandlerContext):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">afterAdd</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.ChannelStatsHandler@afterAdd(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ConnectionLifecycleHandler → LifeCycleAwareChannelHandler</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler#afterRemove" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="afterRemove(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit"></a>
-      <a id="afterRemove(ChannelHandlerContext):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">afterRemove</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.ChannelStatsHandler@afterRemove(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ConnectionLifecycleHandler → LifeCycleAwareChannelHandler</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -220,40 +186,6 @@ server in order to consolidate statistics across a number of channels.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler#beforeAdd" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="beforeAdd(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit"></a>
-      <a id="beforeAdd(ChannelHandlerContext):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">beforeAdd</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.ChannelStatsHandler@beforeAdd(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ConnectionLifecycleHandler → LifeCycleAwareChannelHandler</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler#beforeRemove" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="beforeRemove(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit"></a>
-      <a id="beforeRemove(ChannelHandlerContext):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">beforeRemove</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.ChannelStatsHandler@beforeRemove(ctx:org.jboss.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ConnectionLifecycleHandler → LifeCycleAwareChannelHandler</dd></dl></div>
     </li><li name="org.jboss.netty.channel.SimpleChannelHandler#bindRequested" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="bindRequested(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="bindRequested(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
@@ -317,23 +249,6 @@ server in order to consolidate statistics across a number of channels.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.channel.ChannelStatsHandler">ChannelStatsHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.channel.ChannelStatsHandler#channelConnected" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channelConnected(ctx:org.jboss.netty.channel.ChannelHandlerContext,onClose:com.twitter.util.Future[Unit]):Unit"></a>
-      <a id="channelConnected(ChannelHandlerContext,Future[Unit]):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">channelConnected</span><span class="params">(<span name="ctx">ctx: <span class="extype" name="org.jboss.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="onClose">onClose: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.ChannelStatsHandler@channelConnected(ctx:org.jboss.netty.channel.ChannelHandlerContext,onClose:com.twitter.util.Future[Unit]):Unit" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="package.html" class="extype" name="com.twitter.finagle.netty3.channel">com.twitter.finagle.netty3.channel</a>] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.channel.ChannelStatsHandler">ChannelStatsHandler</a> → ConnectionLifecycleHandler</dd></dl></div>
     </li><li name="org.jboss.netty.channel.SimpleChannelHandler#channelConnected" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="channelConnected(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelConnected(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
@@ -397,7 +312,7 @@ server in order to consolidate statistics across a number of channels.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.channel.ChannelStatsHandler">ChannelStatsHandler</a> → SimpleChannelHandler</dd></dl></div>
-    </li><li name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler#channelOpen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.netty3.channel.ChannelStatsHandler#channelOpen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="channelOpen(ctx:org.jboss.netty.channel.ChannelHandlerContext,e:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelOpen(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
       <h4 class="signature">
@@ -413,7 +328,7 @@ server in order to consolidate statistics across a number of channels.
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ConnectionLifecycleHandler → SimpleChannelHandler</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty3.channel.ChannelStatsHandler">ChannelStatsHandler</a> → SimpleChannelHandler</dd></dl></div>
     </li><li name="org.jboss.netty.channel.SimpleChannelHandler#channelUnbound" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="channelUnbound(x$1:org.jboss.netty.channel.ChannelHandlerContext,x$2:org.jboss.netty.channel.ChannelStateEvent):Unit"></a>
       <a id="channelUnbound(ChannelHandlerContext,ChannelStateEvent):Unit"></a>
@@ -1006,11 +921,7 @@ server in order to consolidate statistics across a number of channels.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.netty3.channel.ConnectionLifecycleHandler">ConnectionLifecycleHandler</span></h3>
-            </div><div class="parent" name="org.jboss.netty.channel.LifeCycleAwareChannelHandler">
-              <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.LifeCycleAwareChannelHandler">LifeCycleAwareChannelHandler</span></h3>
-            </div><div class="parent" name="org.jboss.netty.channel.SimpleChannelHandler">
+        <div class="parent" name="org.jboss.netty.channel.SimpleChannelHandler">
               <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.SimpleChannelHandler">SimpleChannelHandler</span></h3>
             </div><div class="parent" name="org.jboss.netty.channel.ChannelDownstreamHandler">
               <h3>Inherited from <span class="extype" name="org.jboss.netty.channel.ChannelDownstreamHandler">ChannelDownstreamHandler</span></h3>

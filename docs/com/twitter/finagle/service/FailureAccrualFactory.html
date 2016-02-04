@@ -52,8 +52,10 @@
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">com.twitter.finagle.ServiceFactory</a> that accrues failures, marking
-itself unavailable when deemed unhealthy according to its parametrization.</p><p>TODO: treat different failures differently (eg. connect failures
-vs. not), enable different backoff strategies.
+itself unavailable when deemed unhealthy according to its configuration.</p><p>This acts as a request driven
+<a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank">circuit breaker</a>.</p><p>When used in a typical Finagle client, there is one instance per node
+and as such, the load balancer will avoid nodes that are marked down
+via failure accrual.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<a href="../ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
@@ -106,6 +108,23 @@ vs. not), enable different backoff strategies.
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],numFailures:Int,markDeadFor:com.twitter.util.Duration,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,label:String,logger:java.util.logging.Logger,endpoint:java.net.SocketAddress):com.twitter.finagle.service.FailureAccrualFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.service.FailureAccrualFactory#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],numFailures:Int,markDeadFor:com.twitter.util.Duration,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,label:String,logger:java.util.logging.Logger,endpoint:java.net.SocketAddress,responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.service.FailureAccrualFactory[Req,Rep]"></a>
+      <a id="&lt;init&gt;:FailureAccrualFactory[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FailureAccrualFactory</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]</span>, <span name="numFailures">numFailures: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="markDeadFor">markDeadFor: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>, <span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="logger">logger: <span class="extype" name="java.util.logging.Logger">Logger</span></span>, <span name="endpoint">endpoint: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>, <span name="responseClassifier">responseClassifier: <a href="package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@&lt;init&gt;(underlying:com.twitter.finagle.ServiceFactory[Req,Rep],numFailures:Int,markDeadFor:com.twitter.util.Duration,timer:com.twitter.util.Timer,statsReceiver:com.twitter.finagle.stats.StatsReceiver,label:String,logger:java.util.logging.Logger,endpoint:java.net.SocketAddress,responseClassifier:com.twitter.finagle.service.ResponseClassifier):com.twitter.finagle.service.FailureAccrualFactory[Req,Rep]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -559,18 +578,18 @@ only need to modify or operate on the underlying service.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory#isSuccess" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="isSuccess(response:com.twitter.util.Try[Rep]):Boolean"></a>
-      <a id="isSuccess(Try[Rep]):Boolean"></a>
+      <a id="isSuccess(reqRep:com.twitter.finagle.service.ReqRep):Boolean"></a>
+      <a id="isSuccess(ReqRep):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isSuccess</span><span class="params">(<span name="response">response: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Rep">Rep</span>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isSuccess</span><span class="params">(<span name="reqRep">reqRep: <a href="ReqRep.html" class="extype" name="com.twitter.finagle.service.ReqRep">ReqRep</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@isSuccess(response:com.twitter.util.Try[Rep]):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@isSuccess(reqRep:com.twitter.finagle.service.ReqRep):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -721,18 +740,18 @@ releases the service.</p><div class="fullcomment"><div class="comment cmt"><p>Ma
 releases the service.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toString:String"></a>
-      <a id="toString:String"></a>
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toString</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@toString:String" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory@toString():String" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

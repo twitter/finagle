@@ -57,7 +57,7 @@ flexibility is derived from the ability to <i>map</i>, creating
 derived groups. The map operation ensures that each element is
 mapped over exactly once, allowing side-effecting operations to
 rely on this to implement safe semantics.</p><p><b>Note:</b> querying groups is nonblocking, which means that
-derived groups are effectively eventually consistent.</p><p><b>Note:</b> <code>T</code>s must be hashable, definining <code>hashCode</code> and
+derived groups are effectively eventually consistent.</p><p><b>Note:</b> <code>T</code>s must be hashable, defining <code>hashCode</code> and
 <code>equals</code> to ensure that maps have exactly-once semantics.</p><p><b>Note:</b> Groups are invariant because Scala's Sets are. In
 the case of sets, this is an implementation artifact, and is
 unfortunate, but it's better to keep things simpler and
@@ -120,7 +120,7 @@ consistent.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="result">: <span class="extype" name="com.twitter.util.Var">Var</span>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="com.twitter.finagle.Group.T">T</span>]]</span>
+        <span class="name">set</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Var" class="extype" target="_top">Var</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="com.twitter.finagle.Group.T">T</span>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Group@set:com.twitter.util.Var[Set[T]]" title="Permalink" target="_top">

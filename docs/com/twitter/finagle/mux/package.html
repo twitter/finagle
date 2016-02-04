@@ -54,9 +54,9 @@ is a pure session layer.</p><p>In the below description, all numeric values are 
 big-endian byte order. The schema <i>size:4 body:10</i> defines the
 field size to be 4 bytes, followed by 10 bytes of the field body. The
 schema <i>key~4</i> defines the field key to be defined by 4 bytes
-intepreted as the size of the field, followed by that many bytes
+interpreted as the size of the field, followed by that many bytes
 comprising the field itself--it is shorthand for <i>keysize:4 key:keysize</i>.
-Groups are denoted by parenthesis; <i>*</i> denotes reptition of the
+Groups are denoted by parenthesis; <i>*</i> denotes repetition of the
 previous schema 0 or more times, while <code>{n}</code> indicates repetition
 exactly <i>n</i> times. Unspecified sizes consume the rest of the frame:
 they may be specified only as the last field in the message.</p><p>All strings  in Mux are Utf-8 encoded, and are never null-terminated.</p><h3>Message framing</h3><p>Messages in mux are framed with a 4-byte big-endian size header,
@@ -73,7 +73,7 @@ sequence and an Rerr ends an Rdispatch sequence.</p><p>Message types, interprete
 numbered as follows: positive numbers are T-messages; their negative
 complement is the corresponding R message. T-messages greater than 63
 (correspondingly R-messages smaller than -63) are session messages.
-The message number -128 is reserved for Rerr. All other messsages are
+The message number -128 is reserved for Rerr. All other messages are
 application messages. Middle boxes may forward application messages
 indiscriminately. Because of an early implementation bug, two aliases
 exist: 127 is Rerr, and -62 is Tdiscarded.</p><p>The protocol is full duplex: both the server and client may send T
@@ -456,7 +456,7 @@ that the server is unable to process.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="sessionFailureDetector$.html"><span class="name">sessionFailureDetector</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <a href="sessionFailureDetector$.html"><span class="name">sessionFailureDetector</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.mux.package@sessionFailureDetector" title="Permalink" target="_top">

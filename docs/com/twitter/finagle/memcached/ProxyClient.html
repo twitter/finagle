@@ -289,19 +289,19 @@ exist, the operation has no effect.</p></div><dl class="paramcmts block"><dt>ret
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.memcached.Client">Client</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.ProxyClient#cas" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="cas(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
-      <a id="cas(String,Int,Time,Buf,Buf):Future[Boolean]"></a>
+    </li><li name="com.twitter.finagle.memcached.ProxyClient#checkAndSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="checkAndSet(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]"></a>
+      <a id="checkAndSet(String,Int,Time,Buf,Buf):Future[CasResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">checkAndSet</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="CasResult.html" class="extype" name="com.twitter.finagle.memcached.CasResult">CasResult</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.memcached.ProxyClient@cas(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.ProxyClient@checkAndSet(key:String,flags:Int,expiry:com.twitter.util.Time,value:com.twitter.io.Buf,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -311,30 +311,34 @@ extracted from a <code>gets</code> command.</p><div class="fullcomment"><div cla
 changed since the value was last retrieved, and <code>casUnique</code>
 extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
 opaquely, but in reality it is a string-encoded u64.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.ProxyClient">ProxyClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.memcached.BaseClient#cas" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="cas(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
-      <a id="cas(String,Buf,Buf):Future[Boolean]"></a>
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
+       operation failed because someone else had changed the value,
+       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.ProxyClient">ProxyClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.BaseClient#checkAndSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]"></a>
+      <a id="checkAndSet(String,Buf,Buf):Future[CasResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">cas</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">checkAndSet</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="CasResult.html" class="extype" name="com.twitter.finagle.memcached.CasResult">CasResult</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.memcached.ProxyClient@cas(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.ProxyClient@checkAndSet(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[com.twitter.finagle.memcached.CasResult]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not
-changed since the value was last retrieved, and <code>casUnique</code>
-extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
-changed since the value was last retrieved, and <code>casUnique</code>
-extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
-opaquely, but in reality it is a string-encoded u64.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
+      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not changed
+since the value was last retrieved.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not changed
+since the value was last retrieved.  This is enforced by passing a
+<code>casUnique</code> token extracted from a <code>gets</code> command.  If the <code>casUnique</code>
+token matches the one on the server, the value is replaced.  We treat the
+&quot;cas unique&quot; token opaquely, but in reality it is a string-encoded u64.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p><span class="extype" name="Stored">Stored</span> if the operation was successful, <span class="extype" name="Exists">Exists</span> if the
+       operation failed because someone else had changed the value,
+       or <span class="extype" name="NotFound">NotFound</span> if the key was not found in the cache.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -374,7 +378,7 @@ opaquely, but in reality it is a string-encoded u64.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Decrement a key.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement a key. Interpret the value as an JLong if it is parsable.
+      <p class="shortcomment cmt">Decrement a key.</p><div class="fullcomment"><div class="comment cmt"><p>Decrement a key. Interpret the value as an JLong if it is parseable.
 This operation has no effect if there is no value there already.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.ProxyClient">ProxyClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#decr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -634,7 +638,7 @@ from memcached.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Increment a key.</p><div class="fullcomment"><div class="comment cmt"><p>Increment a key. Interpret the value as an Long if it is parsable.
+      <p class="shortcomment cmt">Increment a key.</p><div class="fullcomment"><div class="comment cmt"><p>Increment a key. Interpret the value as an Long if it is parseable.
 This operation has no effect if there is no value there already.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.memcached.ProxyClient">ProxyClient</a> → <a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.memcached.BaseClient#incr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1058,7 +1062,64 @@ effect.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.memcached.BaseClient#cas" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cas(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="cas(String,Buf,Buf):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2015-12-10) BaseClient.cas deprecated in favor of checkAndSet">cas</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.ProxyClient@cas(key:String,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
+opaquely, but in reality it is a string-encoded u64.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-12-10)</i> BaseClient.cas deprecated in favor of checkAndSet</p></dd><dt>Note</dt><dd><span class="cmt"><p>this is superceded by <code>checkAndSet</code> which returns a higher fidelity
+      return value</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.memcached.BaseClient#cas" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cas(key:String,flags:Int,expiry:com.twitter.util.Time,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="cas(String,Int,Time,Buf,Buf):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2015-12-10) BaseClient.cas deprecated in favor of checkAndSet">cas</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="flags">flags: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="casUnique">casUnique: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.ProxyClient@cas(key:String,flags:Int,expiry:com.twitter.util.Time,value:T,casUnique:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a CAS operation on the key, only if the value has not
+changed since the value was last retrieved, and <code>casUnique</code>
+extracted from a <code>gets</code> command.  We treat the &quot;cas unique&quot; token
+opaquely, but in reality it is a string-encoded u64.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if replaced, false if not</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BaseClient.html" class="extype" name="com.twitter.finagle.memcached.BaseClient">BaseClient</a></dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-12-10)</i> BaseClient.cas deprecated in favor of checkAndSet</p></dd><dt>Note</dt><dd><span class="cmt"><p>this is superceded by <code>checkAndSet</code> which returns a higher fidelity
+      return value</p></span></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
