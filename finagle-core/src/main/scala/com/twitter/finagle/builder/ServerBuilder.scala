@@ -483,14 +483,16 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       ServerConfigEvidence[HasCodec, HasBindTo, HasName]
   ): Server = {
 
-    val Label(label) = params[Label]
+    val Label(lbl) = params[Label]
+    val label = if (lbl == "") "server" else lbl
+
     val BindTo(addr) = params[BindTo]
     val Logger(logger) = params[Logger]
     val Daemonize(daemon) = params[Daemonize]
     val MonitorFactory(newMonitor) = params[MonitorFactory]
 
-    val monitor = newMonitor(label, InetSocketAddressUtil.toPublic(addr)) andThen
-      new SourceTrackingMonitor(logger, "server")
+    val monitor = newMonitor(lbl, InetSocketAddressUtil.toPublic(addr)) andThen
+      new SourceTrackingMonitor(logger, label)
 
     val serverParams = params +
       Monitor(monitor) +
