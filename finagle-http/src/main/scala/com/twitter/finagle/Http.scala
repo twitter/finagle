@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.dispatch.{ServerDispatcherConfig, GenSerialClientDispatcher}
 import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
@@ -72,6 +72,11 @@ object Http extends Client[Request, Response] with HttpRichClient
     case class CompressionLevel(level: Int)
     implicit object CompressionLevel extends Stack.Param[CompressionLevel] {
       val default = CompressionLevel(-1)
+    }
+
+    case class HttpTracer(tracer: Tracer)
+    implicit object HttpTracer extends Stack.Param[Tracer] {
+      val default = new BufferingTracer()
     }
 
     private[Http] def applyToCodec(
@@ -193,7 +198,7 @@ object Http extends Client[Request, Response] with HttpRichClient
   object Server {
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackServer.newStack
-        .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
+//        .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
   }
 
@@ -222,7 +227,17 @@ object Http extends Client[Request, Response] with HttpRichClient
 
       val endpoint = dtab.andThen(context).andThen(service)
 
-      new HttpServerDispatcher(new HttpTransport(transport), endpoint, stats.scope("dispatch"))
+      implicit object Servy extends Stack.Param[ReqRepToTraceId[Request, Response]] {
+        val default = new ReqRepToTraceId(http.TraceInfo.TraceIdFromRequest,
+          http.TraceInfo.TraceIdFromResponse)
+      }
+
+      val com.twitter.finagle.param.Tracer(tracer) = params[com.twitter.finagle.param.Tracer]
+      val fs = params[com.twitter.finagle.param.ReqRepToTraceId[Request, Response]]
+      val conf = new ServerDispatcherConfig(tracer, fs.fReq, fs.fRep)
+
+      new HttpServerDispatcher(new HttpTransport(transport), endpoint, stats.scope("dispatch"),
+        conf)
     }
 
     protected def copy1(
@@ -254,6 +269,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       new ServerAdmissionControlParams(this)
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams[Server](this)
+    override val withServerDispatcher: ServerDispatcherParams[Server, Request, Response] =
+      new ServerDispatcherParams[Server, Request, Response](this)
 
     override def withLabel(label: String): Server = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Server =

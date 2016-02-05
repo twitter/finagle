@@ -1,11 +1,12 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.Service
-import com.twitter.finagle.dispatch.GenSerialServerDispatcher
+import com.twitter.finagle.dispatch.{GenSerialServerDispatcher, ServerDispatcherConfig}
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.Service
 import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.tracing.{Annotation, Trace, Tracer, BufferingTracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, BufReader}
 import com.twitter.logging.Logger
@@ -14,10 +15,16 @@ import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
+import com.twitter.finagle.param.ReqRepToTraceId
+
 class HttpServerDispatcher(
   trans: Transport[Any, Any],
   service: Service[Request, Response],
-  stats: StatsReceiver) extends GenSerialServerDispatcher[Request, Response, Any, Any](trans) {
+  stats: StatsReceiver,
+  config: ServerDispatcherConfig[Request, Response] = new ServerDispatcherConfig(
+    new BufferingTracer(),TraceInfo.TraceIdFromRequest, TraceInfo.TraceIdFromResponse)
+  )
+  extends GenSerialServerDispatcher[Request, Response, Any, Any](trans,config) {
 
   def this(
     trans: Transport[Any, Any],
@@ -70,8 +77,11 @@ class HttpServerDispatcher(
       }
 
       val req = Request(reqIn, reader, addr)
-      service(req).handle {
-        case _ => Response(req.version, Status.InternalServerError)
+      Trace.letTracerAndId(config.tracer, config.fReq(req)) {
+        Trace.record(Annotation.WireRecv)
+        service(req).handle {
+          case _ => Response(req.version, Status.InternalServerError)
+        }
       }
 
     case invalid =>
@@ -80,38 +90,42 @@ class HttpServerDispatcher(
   }
 
   protected def handle(rep: Response): Future[Unit] = {
-    setKeepAlive(rep, !isClosing)
-    if (rep.isChunked) {
-      // We remove content length here in case the content is later
-      // compressed. This is a pretty bad violation of modularity:
-      // this is likely an issue with the Netty content
-      // compressors, which (should?) adjust headers regardless of
-      // transfer encoding.
-      rep.headers.remove(Fields.ContentLength)
+    println(Trace.isActivelyTracing)
+    //Trace.letTracerAndId(config.tracer, config.fRep(rep)) {
+    Trace.letTracer(config.tracer) {
+      setKeepAlive(rep, !isClosing)
+      if (rep.isChunked) {
+        // We remove content length here in case the content is later
+        // compressed. This is a pretty bad violation of modularity:
+        // this is likely an issue with the Netty content
+        // compressors, which (should?) adjust headers regardless of
+        // transfer encoding.
+        rep.headers.remove(Fields.ContentLength)
 
-      val p = new Promise[Unit]
-      val f = trans.write(from[Response, HttpResponse](rep)) before
-        streamChunks(trans, rep.reader)
-      f.proxyTo(p)
-      // This awkwardness is unfortunate but necessary for now as you may be
-      // interrupted in the middle of a write, or when there otherwise isn’t
-      // an outstanding read (e.g. read-write race).
-      f.onFailure { t =>
-        Logger.get(this.getClass.getName).debug(t, "Failed mid-stream. Terminating stream, closing connection")
-        failureReceiver.counter(Throwables.mkString(t): _*).incr()
-        rep.reader.discard()
-      }
-      p.setInterruptHandler { case intr =>
-        rep.reader.discard()
-        f.raise(intr)
-      }
-      p
-    } else {
-      // Ensure Content-Length is set if not chunked
-      if (!rep.headers.contains(Fields.ContentLength))
-        rep.contentLength = rep.content.length
+        val p = new Promise[Unit]
+        val f = trans.write(from[Response, HttpResponse](rep)).onSuccess(RecordWireSend) before
+          streamChunks(trans, rep.reader)
+        f.proxyTo(p)
+        // This awkwardness is unfortunate but necessary for now as you may be
+        // interrupted in the middle of a write, or when there otherwise isn’t
+        // an outstanding read (e.g. read-write race).
+        f.onFailure { t =>
+          Logger.get(this.getClass.getName).debug(t, "Failed mid-stream. Terminating stream, closing connection")
+          failureReceiver.counter(Throwables.mkString(t): _*).incr()
+          rep.reader.discard()
+        }
+        p.setInterruptHandler { case intr =>
+          rep.reader.discard()
+          f.raise(intr)
+        }
+        p
+      } else {
+        // Ensure Content-Length is set if not chunked
+        if (!rep.headers.contains(Fields.ContentLength))
+          rep.contentLength = rep.content.length
 
-      trans.write(from[Response, HttpResponse](rep))
+        trans.write(from[Response, HttpResponse](rep)).onSuccess(RecordWireSend)
+      }
     }
   }
 
@@ -132,3 +146,4 @@ class HttpServerDispatcher(
     }
   }
 }
+
