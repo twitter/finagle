@@ -367,6 +367,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6",
+      "com.twitter" %% "finagle-core" % "6.31.0-SNAPSHOT",
       guavaLib
     )
   ).dependsOn(finagleCore)

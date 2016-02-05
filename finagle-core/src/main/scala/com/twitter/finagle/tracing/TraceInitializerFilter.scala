@@ -94,11 +94,15 @@ private[finagle] object TraceInitializerFilter {
  * @param newId Set the next TraceId when the tracer is pushed (used for clients)
  */
 class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean) extends SimpleFilter[Req, Rep] {
-  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
-    if (newId)
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    if (newId) {
+      println("TraceInitializerFilter newId")
       Trace.letTracerAndNextId(tracer) { service(request) }
-    else
+    } else {
+      println("TraceInitializerFilter tracer only")
       Trace.letTracer(tracer) { service(request) }
+    }
+  }
 }
 
 /**

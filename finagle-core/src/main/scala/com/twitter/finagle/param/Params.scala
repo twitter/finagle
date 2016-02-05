@@ -1,6 +1,7 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.service.StatsFilter
+import com.twitter.finagle.tracing.TraceId
 import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.finagle.{stats, tracing, util, Stack}
 import com.twitter.util.JavaTimer
@@ -194,3 +195,5 @@ object ExceptionStatsHandler {
     lazy val default = ExceptionStatsHandler(StatsFilter.DefaultExceptions)
   }
 }
+
+case class ReqRepToTraceId[Req, Rep](fReq: Req => TraceId, fRep: (Rep) => TraceId)
