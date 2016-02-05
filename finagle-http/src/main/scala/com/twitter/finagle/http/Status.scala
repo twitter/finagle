@@ -1,20 +1,20 @@
 package com.twitter.finagle.http
 
 /**
- * Represents an HTTP status code.
- *
- * The set of commonly known HTTP status codes have an associated reason phrase
- * (see `reasons`). We don't provide a way to set the reason phrase because:
- *
- * - it simplifies construction (users only supply the code)
- * - it avoids the need to validate user-defined reason phrases
- * - it omits the possibility of statuses with duplicate reason phrases
- *
- * The only downside is that we lose the ability to create custom statuses with
- * "vanity" reason phrases, but this should be tolerable.
- *
- * For Java-friendly enums, see [[com.twitter.finagle.http.Statuses]].
- */
+  * Represents an HTTP status code.
+  *
+  * The set of commonly known HTTP status codes have an associated reason phrase
+  * (see `reasons`). We don't provide a way to set the reason phrase because:
+  *
+  * - it simplifies construction (users only supply the code)
+  * - it avoids the need to validate user-defined reason phrases
+  * - it omits the possibility of statuses with duplicate reason phrases
+  *
+  * The only downside is that we lose the ability to create custom statuses with
+  * "vanity" reason phrases, but this should be tolerable.
+  *
+  * For Java-friendly enums, see [[com.twitter.finagle.http.Statuses]].
+  */
 case class Status(code: Int) {
   def reason: String =
     Status.reasons.get(this) match {
@@ -30,45 +30,63 @@ case class Status(code: Int) {
 }
 
 
-
-
-
 object Status {
 
-  @inline
-  private[finagle] def inRange(lower: Int, upper: Int)
-                              (status: Status): Option[Status] =
-    Some(status).filter(s => s.code >= lower && s.code < upper)
-
+  /**
+    * Matches when the status code isn't in range of any of the
+    * categories: {{Informational}}, {{Successful}}, {{Redirection}},
+    * {{ClientError}}, {{ServerError}}.
+    */
   object UnknownStatus {
     def unapply(status: Status): Option[Status] =
-      Some(status).filter(s => s.code < 100 || s.code >= 600)
+      Option(status).filter(s => s.code < 100 || s.code >= 600)
   }
 
+  /**
+    * Matches when the status code is between 100 and 200.
+    */
   object Informational {
     def unapply(status: Status): Option[Status] =
-      inRange(100, 200)(status)
+      inRange(100, 200, status)
   }
 
-  object Successful{
+  /**
+    * Matches when the status code is between 200 and 300.
+    */
+  object Successful {
     def unapply(status: Status): Option[Status] =
-      inRange(200, 300)(status)
+      inRange(200, 300, status)
   }
 
+  /**
+    * Matches when the status code is between 300 and 400.
+    */
   object Redirection {
     def unapply(status: Status): Option[Status] =
-      inRange(300, 400)(status)
+      inRange(300, 400, status)
   }
 
+  /**
+    * Matches when the status code is between 400 and 500.
+    */
   object ClientError {
     def unapply(status: Status): Option[Status] =
-      inRange(400, 500)(status)
+      inRange(400, 500, status)
   }
 
+  /**
+    * Matches when the status code is between 500 and 600.
+    */
   object ServerError {
     def unapply(status: Status): Option[Status] =
-      inRange(500, 600)(status)
+      inRange(500, 600, status)
   }
+
+  @inline
+  private[finagle] def inRange(lower: Int, upper: Int,
+                               status: Status): Option[Status] =
+    Option(status).filter(s => s.code >= lower && s.code < upper)
+
 
   val Continue = Status(100)
   val SwitchingProtocols = Status(101)

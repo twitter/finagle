@@ -18,6 +18,12 @@ class StatusTest extends FunSuite {
   }
 
   test("Pattern match usability check") {
+    null match {
+      case UnknownStatus(_) | Informational(_) | Successful(_) |
+           Redirection(_) | ClientError(_) | ServerError(_) => fail("null shouldn't match any status.")
+      case _ =>
+    }
+
     Status(99) match {
       case UnknownStatus(_) =>
       case status => fail(s"$status should be UnknownStatus")
