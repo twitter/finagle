@@ -33,50 +33,39 @@ case class Status(code: Int) {
 object Status {
 
   /**
-   * Matches when the status code isn't in range of any of the
-   * categories: {{Informational}}, {{Successful}}, {{Redirection}},
-   * {{ClientError}}, {{ServerError}}.
+   * Matches when the status code isn't in range of any of the  categories: {{Informational}},
+   * {{Successful}}, {{Redirection}}, {{ClientError}}, {{ServerError}}.
    */
   object UnknownStatus {
     def unapply(status: Status): Option[Status] =
       Option(status).filter(s => s.code < 100 || s.code >= 600)
   }
 
-  /**
-   * Matches when the status code is between 100 and 200.
-   */
+  /** Matches when the status code is between 100 and 200. */
   object Informational {
     def unapply(status: Status): Option[Status] =
       inRange(100, 200, status)
   }
 
-  /**
-   * Matches when the status code is between 200 and 300.
-   */
+  /** Matches when the status code is between 200 and 300. */
   object Successful {
     def unapply(status: Status): Option[Status] =
       inRange(200, 300, status)
   }
 
-  /**
-   * Matches when the status code is between 300 and 400.
-   */
+  /** Matches when the status code is between 300 and 400. */
   object Redirection {
     def unapply(status: Status): Option[Status] =
       inRange(300, 400, status)
   }
 
-  /**
-   * Matches when the status code is between 400 and 500.
-   */
+  /** Matches when the status code is between 400 and 500. */
   object ClientError {
     def unapply(status: Status): Option[Status] =
       inRange(400, 500, status)
   }
 
-  /**
-   * Matches when the status code is between 500 and 600.
-   */
+  /** Matches when the status code is between 500 and 600. */
   object ServerError {
     def unapply(status: Status): Option[Status] =
       inRange(500, 600, status)

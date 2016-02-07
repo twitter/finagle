@@ -17,44 +17,71 @@ class StatusTest extends FunSuite {
     assert(Status(601).reason == "Unknown Status")
   }
 
-  test("Pattern match usability check") {
+  test("null isn't a status") {
     null match {
       case UnknownStatus(_) | Informational(_) | Successful(_) |
            Redirection(_) | ClientError(_) | ServerError(_) => fail("null shouldn't match any status.")
       case _ =>
     }
-
+  }
+  test("matches unknown status") {
     Status(99) match {
       case UnknownStatus(_) =>
       case status => fail(s"$status should be UnknownStatus")
     }
-    Status(100) match {
-      case Informational(_) =>
-      case status => fail(s"$status should be Informational")
+  }
+
+  test("matches informational status") {
+    100 until 200 foreach { code =>
+      Status(code) match {
+        case Informational(_) =>
+        case status => fail(s"$status should be Informational")
+      }
     }
-    Status(199) match {
-      case Informational(_) =>
-      case status => fail(s"$status should be Informational")
+  }
+
+  test("matches successful status") {
+    200 until 300 foreach { code =>
+      Status(code) match {
+        case Successful(_) =>
+        case status => fail(s"$status should be Successful")
+      }
     }
-    Status(299) match {
-      case Successful(_) =>
-      case status => fail(s"$status should be Successful")
+  }
+
+  test("matches redirection status") {
+    300 until 400 foreach { code =>
+      Status(code) match {
+        case Redirection(_) =>
+        case status => fail(s"$status should be Redirection")
+      }
     }
-    Status(399) match {
-      case Redirection(_) =>
-      case status => fail(s"$status should be Redirection")
+  }
+
+  test("match client error status") {
+    400 until 500 foreach { code =>
+      Status(code) match {
+        case ClientError(_) =>
+        case status => fail(s"$status should be ClientError")
+      }
     }
-    Status(489) match {
-      case ClientError(_) =>
-      case status => fail(s"$status should be ClientError")
+  }
+
+  test("match server error status") {
+    500 until 600 foreach { code =>
+      Status(code) match {
+        case ServerError(_) =>
+        case status => fail(s"$status should be ServerError")
+      }
     }
-    Status(599) match {
-      case ServerError(_) =>
-      case status => fail(s"$status should be ServerError")
-    }
-    Status(601) match {
-      case UnknownStatus(_) =>
-      case status => fail(s"$status should be UnknownStatus")
+  }
+
+  test("match unknown status") {
+    600 until 700 foreach { code =>
+      Status(601) match {
+        case UnknownStatus(_) =>
+        case status => fail(s"$status should be UnknownStatus")
+      }
     }
   }
 }
