@@ -17,13 +17,6 @@ class StatusTest extends FunSuite {
     assert(Status(601).reason == "Unknown Status")
   }
 
-  test("null isn't a status") {
-    null match {
-      case UnknownStatus(_) | Informational(_) | Successful(_) |
-           Redirection(_) | ClientError(_) | ServerError(_) => fail("null shouldn't match any status.")
-      case _ =>
-    }
-  }
   test("matches unknown status") {
     Status(99) match {
       case UnknownStatus(_) =>
