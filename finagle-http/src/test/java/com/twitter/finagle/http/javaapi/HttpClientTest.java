@@ -69,6 +69,7 @@ public final class HttpClientTest {
           .client()
           .withSessionPool().maxSize(10)
           .withLabel("ads")
+          .withAdmissionControl().maxPendingRequests(100)
           .withSessionQualifier().noFailFast()
           .withTls("foo.com")
           .configured(new Label("test").mk())

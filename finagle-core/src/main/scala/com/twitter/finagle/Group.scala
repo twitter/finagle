@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference
  * '''Note:''' querying groups is nonblocking, which means that
  * derived groups are effectively eventually consistent.
  *
- * '''Note:''' `T`s must be hashable, definining `hashCode` and
+ * '''Note:''' `T`s must be hashable, defining `hashCode` and
  * `equals` to ensure that maps have exactly-once semantics.
  *
  * '''Note:''' Groups are invariant because Scala's Sets are. In

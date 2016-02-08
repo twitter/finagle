@@ -1,6 +1,5 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.Failure
 import com.twitter.logging.{HasLogLevel, Logger, Level}
 import com.twitter.util.{RootMonitor, Monitor, NullMonitor}
 import java.net.SocketAddress
@@ -13,10 +12,21 @@ import java.net.SocketAddress
 private[util] class DefaultMonitor(log: Logger) extends Monitor {
   private[this] val MinLogLevel = Level.INFO.value
 
+  private[this] def logThrowable(t: Throwable, level: Level): Unit =
+    log.log(level, t, "Exception propagated to DefaultMonitor")
+
   def handle(exc: Throwable): Boolean = {
     exc match {
       case f: HasLogLevel if f.logLevel.value < MinLogLevel =>
-        log.log(f.logLevel, f, "Exception propagated to DefaultMonitor")
+        logThrowable(exc, f.logLevel)
+        true
+      case _: com.twitter.util.TimeoutException =>
+        // This is a bit convoluted. `Future.within` and `Future.raiseWithin`
+        // use `c.t.u.TimeoutExceptions` and these can propagate to the Monitor
+        // which in turn leads to noisy logs. By turning the log level down we
+        // risk losing other usage of this exception, but it seems like the good
+        // outweighs the bad in this case.
+        logThrowable(exc, Level.TRACE)
         true
       case _ =>
         RootMonitor.handle(exc)
@@ -30,7 +40,10 @@ private[util] class DefaultMonitor(log: Logger) extends Monitor {
  * The default [[Monitor]] to be used throughout Finagle.
  *
  * Mostly delegates to [[RootMonitor]], with the exception
- * of [[Failure Failures]] with a `Failure.logLevel` below `INFO`.
+ * of [[HasLogLevel HasLogLevels]] with a `logLevel` below `INFO`.
+ * [[com.twitter.util.TimeoutException TimeoutExceptions]] are also
+ * suppressed because they often originate from `Future.within` and
+ * `Future.raiseWithin`.
  */
 object DefaultMonitor
   extends DefaultMonitor(Logger.get(classOf[DefaultMonitor]))

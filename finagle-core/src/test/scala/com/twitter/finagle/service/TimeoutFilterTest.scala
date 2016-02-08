@@ -2,7 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
-import com.twitter.finagle.{Deadline, IndividualRequestTimeoutException, Service}
+import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -10,8 +10,7 @@ import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
-class TimeoutFilterTest extends FunSuite with MockitoSugar {
+private object TimeoutFilterTest {
 
   class TimeoutFilterHelper {
     val timer = new MockTimer
@@ -29,6 +28,12 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
     val timeoutFilter = new TimeoutFilter[String, String](timeout, exception, timer)
     val timeoutService = timeoutFilter.andThen(service)
   }
+}
+
+@RunWith(classOf[JUnitRunner])
+class TimeoutFilterTest extends FunSuite with MockitoSugar {
+
+  import TimeoutFilterTest.TimeoutFilterHelper
 
   test("TimeoutFilter should request succeeds when the service succeeds") {
     val h = new TimeoutFilterHelper
@@ -100,5 +105,43 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
       }
       assert(Await.result(f) == Some(Deadline(Time.now, Time.now+1.second)))
     }
+  }
+
+  private def verifyFilterAddedOrNot(
+    timoutModule: Stackable[ServiceFactory[Int, Int]]
+  ) = {
+    val svc = Service.mk { i: Int => Future.value(i) }
+    val svcFactory = ServiceFactory.const(svc)
+    val stack = timoutModule.toStack(Stack.Leaf(Stack.Role("test"), svcFactory))
+
+    def assertNoTimeoutFilter(duration: Duration): Unit = {
+      val params = Stack.Params.empty + TimeoutFilter.Param(duration)
+      val made = stack.make(params)
+      // this relies on the fact that we do not compose
+      // with a TimeoutFilter if the duration is not appropriate.
+      assert(svcFactory == made)
+    }
+    assertNoTimeoutFilter(Duration.Bottom)
+    assertNoTimeoutFilter(Duration.Top)
+    assertNoTimeoutFilter(Duration.Undefined)
+    assertNoTimeoutFilter(Duration.Zero)
+    assertNoTimeoutFilter(-1.second)
+
+    def assertTimeoutFilter(duration: Duration): Unit = {
+      val params = Stack.Params.empty + TimeoutFilter.Param(duration)
+      val made = stack.make(params)
+      // this relies on the fact that we do compose
+      // with a TimeoutFilter if the duration is appropriate.
+      assert(svcFactory != made)
+    }
+    assertTimeoutFilter(10.seconds)
+  }
+
+  test("filter added or not to clientModule based on duration") {
+    verifyFilterAddedOrNot(TimeoutFilter.clientModule[Int, Int])
+  }
+
+  test("filter added or not to serverModule based on duration") {
+    verifyFilterAddedOrNot(TimeoutFilter.serverModule[Int, Int])
   }
 }

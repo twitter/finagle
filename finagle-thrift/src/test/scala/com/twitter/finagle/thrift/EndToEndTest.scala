@@ -461,7 +461,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
    // Temporary buffer used by several methods
    private byte[] tmpbuf_ = new byte[4];
 
--  // Read a byte that must match b[0]; otherwise an excpetion is thrown.
+-  // Read a byte that must match b[0]; otherwise an exception is thrown.
 +  // Read a byte that must match b[0]; otherwise an exception is thrown.
    // Marked protected to avoid synthetic accessor in JSONListContext.read
    // and JSONPairContext.read

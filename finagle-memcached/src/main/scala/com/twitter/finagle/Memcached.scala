@@ -288,6 +288,8 @@ object Memcached extends finagle.Client[Command, Response]
       new ClientTransportParams(this)
     override val withSession: SessionParams[Client] =
       new SessionParams(this)
+    override val withAdmissionControl: ClientAdmissionControlParams[Client] =
+      new ClientAdmissionControlParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
       new SessionQualificationParams(this)
 

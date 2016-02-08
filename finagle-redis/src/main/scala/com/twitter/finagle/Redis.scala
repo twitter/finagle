@@ -72,6 +72,8 @@ object Redis extends Client[Command, Reply] {
       new SessionParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
       new SessionQualificationParams(this)
+    override val withAdmissionControl: ClientAdmissionControlParams[Client] =
+      new ClientAdmissionControlParams(this)
 
     override def withLabel(label: String): Client = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Client =

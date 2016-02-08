@@ -157,6 +157,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       new DefaultLoadBalancingParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
       new SessionQualificationParams(this)
+    override val withAdmissionControl: ClientAdmissionControlParams[Client] =
+      new ClientAdmissionControlParams(this)
     override val withSession: SessionParams[Client] =
       new SessionParams(this)
     override val withTransport: ClientTransportParams[Client] =

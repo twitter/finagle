@@ -21,7 +21,8 @@ jdk:
   - oraclejdk7
   # Note: not currently testing on JDK 8 internally
   - oraclejdk8
-  - openjdk7
+  # Enable once https://github.com/travis-ci/travis-ci/issues/5227 is fixed.
+  #- openjdk7
 
 notifications:
   hipchat:

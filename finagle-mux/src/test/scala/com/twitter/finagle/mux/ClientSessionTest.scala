@@ -98,7 +98,7 @@ private class ClientSessionTest extends FunSuite {
 
     session.ping().poll match {
       case Some(Throw(f: Failure)) =>
-        assert(f.getMessage == "A ping is already oustanding on this session.")
+        assert(f.getMessage == "A ping is already outstanding on this session.")
       case _ => fail()
     }
 

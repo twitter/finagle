@@ -50,24 +50,24 @@ Design Principles
 
 Finagle has many different components and we tried to faithfully model our configuration
 to help understand the constituents and the resulting behavior. For the sake of consistency,
-the current version of the ``with`` API is designed with following principles in mind.
+the current version of the ``with`` API is designed with the following principles in mind.
 
 1. **Reasonable grouping of parameters**: We target for the fine grained API so most of the
-   ``with``-prefixed methods take a single argument. Although, there is common sense driven
+   ``with``-prefixed methods take a single argument. Although, there is a common sense driven
    exception from this rule: some of the parameters only make sense when viewed as a group
    rather than separately (e.g. it makes no sense to specify SOCKS proxy credentials when
-   proxy itself is disabled).
+   the proxy itself is disabled).
 
 2. **No boolean flags (i.e., enabled, yesOrNo)**: Boolean values are usually hard to
    reason about because their type doesn't encode it's mission in the domain (e.g. in
    most of the cases it's impossible to tell what ``true`` or ``false`` means in a function
-   call). Instead of boolean flags with use pair a methods ``x`` and ``noX`` indicating
-   whether the ``x`` feature enabled or disabled.
+   call). Instead of boolean flags, we use a pair of methods ``x`` and ``noX`` to indicate
+   whether the ``x`` feature is enabled or disabled.
 
-3. **Less primitive number types in the API**: We promote a sane level of and type-full
+3. **Less primitive number types in the API**: We promote a sane level of type-full
    programming, where a reasonable level of guarantees is encoded into a type-system.
    Thus, we never use primitive number types for durations and storage units given that
-   there are utility types ``Duration`` and ``StorageUnit`` exist.
+   there are utility types: ``Duration`` and ``StorageUnit``.
 
 4. **No experimental and/or advanced features**: While, it's relatively safe to configure
    parameters exposed via ``with``-prefixed methods, you should never assume the same about

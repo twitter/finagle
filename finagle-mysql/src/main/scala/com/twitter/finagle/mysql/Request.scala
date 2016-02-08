@@ -5,7 +5,7 @@ import java.security.MessageDigest
 import java.util.logging.Logger
 
 object Command {
-  val COM_NO_OP               = -1.toByte   // used internall by this client
+  val COM_NO_OP               = -1.toByte   // used internally by this client
   val COM_SLEEP               = 0x00.toByte // internal thread state
   val COM_QUIT                = 0x01.toByte // mysql_close
   val COM_INIT_DB             = 0x02.toByte // mysql_select_db

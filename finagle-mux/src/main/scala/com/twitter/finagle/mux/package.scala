@@ -10,9 +10,9 @@ package com.twitter.finagle
  * big-endian byte order. The schema ''size:4 body:10'' defines the
  * field size to be 4 bytes, followed by 10 bytes of the field body. The
  * schema ''key~4'' defines the field key to be defined by 4 bytes
- * intepreted as the size of the field, followed by that many bytes
+ * interpreted as the size of the field, followed by that many bytes
  * comprising the field itself--it is shorthand for ''keysize:4 key:keysize''.
- * Groups are denoted by parenthesis; ''*'' denotes reptition of the
+ * Groups are denoted by parenthesis; ''*'' denotes repetition of the
  * previous schema 0 or more times, while `{n}` indicates repetition
  * exactly ''n'' times. Unspecified sizes consume the rest of the frame:
  * they may be specified only as the last field in the message.
@@ -41,7 +41,7 @@ package com.twitter.finagle
  * numbered as follows: positive numbers are T-messages; their negative
  * complement is the corresponding R message. T-messages greater than 63
  * (correspondingly R-messages smaller than -63) are session messages.
- * The message number -128 is reserved for Rerr. All other messsages are
+ * The message number -128 is reserved for Rerr. All other messages are
  * application messages. Middle boxes may forward application messages
  * indiscriminately. Because of an early implementation bug, two aliases
  * exist: 127 is Rerr, and -62 is Tdiscarded.

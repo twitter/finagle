@@ -5,10 +5,16 @@
 Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 6.x
--------
+-----
+
+6.33.0
+~~~~~~~
 
 New Features
 ~~~~~~~~~~~~
+  * finagle-core: Introduce the `c.t.f.service.PendingRequestFactory` module in the client Stack.
+    The module allows clients to limit the number of pending requests per connection. It is disabled
+    by default. ``RB_ID=795491``
 
   * finagle-core: Introduce the `c.t.f.filter.ServerAdmissionControl` module in the server Stack,
     which is enabled through the param `c.t.f.param.EnableServerAdmissionControl`. Users can define
@@ -80,6 +86,10 @@ Breaking API Changes
   * finagle-thrift: Remove the `framed` attributes from `c.t.f.Thrift.Client` and
     `c.t.f.Thrift.Server`.  This behavior may now be controlled with `c.t.f.Thrift.param.Framed`.
 
+6.32.0
+~~~~~~~
+
+NOT RELEASED
 
 6.31.0
 ------

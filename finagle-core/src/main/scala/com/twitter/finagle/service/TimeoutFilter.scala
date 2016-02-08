@@ -8,9 +8,9 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Future, Duration, Timer}
 
 object TimeoutFilter {
-  val TimeoutAnnotation = "finagle.timeout"
+  val TimeoutAnnotation: String = "finagle.timeout"
 
-  val role = new Stack.Role("RequestTimeout")
+  val role: Stack.Role = new Stack.Role("RequestTimeout")
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
@@ -36,16 +36,23 @@ object TimeoutFilter {
         ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
-      def make(_param: Param, _timer: param.Timer,
-          _compensation: LatencyCompensation.Compensation,
-          next: ServiceFactory[Req, Rep]) = {
-        val Param(timeout) = _param
-        val param.Timer(timer) = _timer
-        val LatencyCompensation.Compensation(compensation) = _compensation
 
-        val exc = new IndividualRequestTimeoutException(timeout)
-        val filter = new TimeoutFilter[Req, Rep](timeout + compensation, exc, timer)
-        filter andThen next
+      def make(
+        _param: Param,
+        _timer: param.Timer,
+        _compensation: LatencyCompensation.Compensation,
+        next: ServiceFactory[Req, Rep]
+      ): ServiceFactory[Req, Rep] = {
+        val timeout = _param.timeout + _compensation.howlong
+
+        if (!timeout.isFinite || timeout <= Duration.Zero) {
+          next
+        } else {
+          val param.Timer(timer) = _timer
+          val exc = new IndividualRequestTimeoutException(timeout)
+          val filter = new TimeoutFilter[Req, Rep](timeout, exc, timer)
+          filter.andThen(next)
+        }
       }
     }
 
@@ -60,13 +67,17 @@ object TimeoutFilter {
         ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
-      def make(_param: Param, _timer: param.Timer, next: ServiceFactory[Req, Rep]) = {
+      def make(
+        _param: Param,
+        _timer: param.Timer,
+        next: ServiceFactory[Req, Rep]
+      ): ServiceFactory[Req, Rep] = {
         val Param(timeout) = _param
         val param.Timer(timer) = _timer
-        if (!timeout.isFinite) next else {
+        if (!timeout.isFinite || timeout <= Duration.Zero) next else {
           val exc = new IndividualRequestTimeoutException(timeout)
           val filter = new TimeoutFilter[Req, Rep](timeout, exc, timer)
-          filter andThen next
+          filter.andThen(next)
         }
       }
     }
@@ -92,7 +103,7 @@ class TimeoutFilter[Req, Rep](
     timeout: Duration,
     exception: RequestTimeoutException,
     timer: Timer)
-    extends SimpleFilter[Req, Rep] {
+  extends SimpleFilter[Req, Rep] {
   def this(timeout: Duration, timer: Timer) =
     this(timeout, new IndividualRequestTimeoutException(timeout), timer)
 
@@ -109,7 +120,7 @@ class TimeoutFilter[Req, Rep](
 
     Contexts.broadcast.let(Deadline, deadline) {
       val res = service(request)
-      res.within(timer, timeout) rescue {
+      res.within(timer, timeout).rescue {
         case exc: java.util.concurrent.TimeoutException =>
           res.raise(exc)
           Trace.record(TimeoutFilter.TimeoutAnnotation)

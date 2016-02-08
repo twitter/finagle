@@ -301,14 +301,14 @@ trait BaseClient[T] {
   def delete(key: String): Future[JBoolean]
 
   /**
-   * Increment a key. Interpret the value as an Long if it is parsable.
+   * Increment a key. Interpret the value as an Long if it is parseable.
    * This operation has no effect if there is no value there already.
    */
   def incr(key: String, delta: Long): Future[Option[JLong]]
   def incr(key: String): Future[Option[JLong]] = incr(key, 1L)
 
   /**
-   * Decrement a key. Interpret the value as an JLong if it is parsable.
+   * Decrement a key. Interpret the value as an JLong if it is parseable.
    * This operation has no effect if there is no value there already.
    */
   def decr(key: String, delta: Long): Future[Option[JLong]]

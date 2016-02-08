@@ -72,7 +72,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
    * of retries that the underlying policy would allow, it is capped to be no greater than the
    * number returned by `maxRetries` on the first failure in the chain.
    *
-   * Using a dynamically choosen retry limit allows for the retry count to be tuned at runtime
+   * Using a dynamically chosen retry limit allows for the retry count to be tuned at runtime
    * based upon backpressure signals such as failure rate or request latency.
    */
   def limit(maxRetries: => Int): RetryPolicy[A] =

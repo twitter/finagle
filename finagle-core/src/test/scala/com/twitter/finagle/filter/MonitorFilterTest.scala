@@ -107,7 +107,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     verify(monitor).handle(outer)
     verify(mockLogger).log(
       Matchers.eq(Level.SEVERE),
-      Matchers.eq("A server service FakeService2 on behalf of FakeService1 threw an exception"),
+      Matchers.eq("The 'FakeService2' service FakeService2 on behalf of FakeService1 threw an exception"),
       Matchers.eq(outer))
   }
 

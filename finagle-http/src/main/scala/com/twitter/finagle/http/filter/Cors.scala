@@ -27,7 +27,7 @@ object Cors {
    * response header (in response to non-preflight requests).
    *
    * If supportsCredentials is true and allowsOrigin does not return '*', the Access-Control-
-   * Allow-Credentials resopnse header will be set to 'true'.
+   * Allow-Credentials response header will be set to 'true'.
    *
    * If maxAge is defined, its value (in seconds) will be set in the Access-Control-Max-Age
    * response header.

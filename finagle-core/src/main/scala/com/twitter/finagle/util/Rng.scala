@@ -27,7 +27,7 @@ trait Rng {
   def nextInt(): Int
 
   /**
-   * Generate a random Long betwen 0 (inclusive) and `n` (exclusive).
+   * Generate a random Long between 0 (inclusive) and `n` (exclusive).
    *
    * @param n the upper bound (exclusive). Must be a positive value.
    */
