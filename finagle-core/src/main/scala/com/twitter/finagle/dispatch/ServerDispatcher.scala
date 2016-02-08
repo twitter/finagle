@@ -1,30 +1,18 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
-object GenSerialServerDispatcher {
-  private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
-  // We don't use Future.never here, because object equality is important here
-  private val Idle = new NoFuture
-  private val Closed = new NoFuture
-}
-
 /**
- * A generic version of
- * [[com.twitter.finagle.dispatch.SerialServerDispatcher SerialServerDispatcher]],
- * allowing the implementor to furnish custom dispatchers & handlers.
+  * A base Server Dispatcher type that allows us to safely Annotate a
+  * dispatcher via
+  * [[com.twitter.finagle.dispatcher.ServerDispatcherAnnotator ServerDispatcherAnnotator]]
  */
-abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In, Out])
-    extends Closable {
-
-  import GenSerialServerDispatcher._
-
-  private[this] val state = new AtomicReference[Future[_]](Idle)
-  private[this] val cancelled = new CancelledRequestException
+trait ServerDispatcher[Req, Rep, Out] {
 
   /**
    * Dispatches a request. The first argument is the request. The second
@@ -39,6 +27,52 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
    */
   protected def dispatch(req: Out, eos: Promise[Unit]): Future[Rep]
   protected def handle(rep: Rep): Future[Unit]
+}
+
+/**
+  * Allows for wrapping a 
+  * [[com.twitter.finagle.dispatcher.ServerDispatcher ServerDispatcher]]
+  * adding a
+  * [[com.twitter.finagle.tracing.Annotation.WireRecv WireRecv]]
+  * when a request is read from the wire, and later a
+  * [[com.twitter.finagle.tracing.Annotation.WireSend WireSend]]
+  * when it writes successfully to the wire.
+ */
+trait ServerDispatcherAnnotator[Req, Rep, Out, A <: ServerDispatcher[Req, Rep, Out]] { self: A =>
+  private[this] val RecordWireSend: Unit => Unit = _ => Trace.record(Annotation.WireSend)
+
+  protected def annotatedDispatch(req: Out, eos: Promise[Unit]): Future[Rep] = {
+    Trace.record(Annotation.WireRecv)
+    self.dispatch(req, eos)
+  }
+
+  protected def annotatedHandle(rep: Rep): Future[Unit] =
+    self.handle(rep).onSuccess { RecordWireSend }
+}
+
+object GenSerialServerDispatcher {
+  private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
+  // We don't use Future.never here, because object equality is important here
+  private val Idle = new NoFuture
+  private val Closed = new NoFuture
+}
+
+/**
+ * A generic version of
+ * [[com.twitter.finagle.dispatch.SerialServerDispatcher SerialServerDispatcher]],
+ * allowing the implementor to furnish custom dispatchers & handlers.
+ */
+abstract class GenSerialServerDispatcher
+  [Req, Rep, In, Out, A <: GenSerialServerDispatcher[Req, Rep, In, Out, A]]
+  (trans: Transport[In, Out])
+  extends Closable
+  with ServerDispatcher[Req, Rep, Out]
+  with ServerDispatcherAnnotator[Req, Rep, Out, GenSerialServerDispatcher[Req, Rep, In, Out, A]] {
+
+  import GenSerialServerDispatcher._
+
+  private[this] val state = new AtomicReference[Future[_]](Idle)
+  private[this] val cancelled = new CancelledRequestException
 
   private[this] def loop(): Future[Unit] = {
     state.set(Idle)
@@ -48,15 +82,15 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
         val eos = new Promise[Unit]
         val save = Local.save()
         try trans.peerCertificate match {
-          case None => p.become(dispatch(req, eos))
+          case None => p.become(annotatedDispatch(req, eos))
           case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
-            p.become(dispatch(req, eos))
+            p.become(annotatedDispatch(req, eos))
           }
         } finally Local.restore(save)
         p map { res => (res, eos) }
       } else Eof
     } flatMap { case (rep, eos) =>
-      Future.join(handle(rep), eos).unit
+      Future.join(annotatedHandle(rep), eos).unit
     } respond {
       case Return(()) if state.get ne Closed =>
         loop()
@@ -97,14 +131,13 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
 class SerialServerDispatcher[Req, Rep](
     trans: Transport[Rep, Req],
     service: Service[Req, Rep])
-    extends GenSerialServerDispatcher[Req, Rep, Rep, Req](trans) {
+    extends GenSerialServerDispatcher[Req, Rep, Rep, Req, SerialServerDispatcher[Req, Rep]] (trans) {
 
   trans.onClose ensure {
     service.close()
   }
 
-  protected def dispatch(req: Req, eos: Promise[Unit]) =
-    service(req) ensure eos.setDone()
+  protected def dispatch(req: Req, eos: Promise[Unit]) = service(req) ensure eos.setDone()
 
   protected def handle(rep: Rep) = trans.write(rep)
 }
