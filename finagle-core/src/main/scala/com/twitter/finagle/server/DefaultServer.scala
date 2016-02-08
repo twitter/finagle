@@ -1,6 +1,7 @@
 package com.twitter.finagle.server
 
 import com.twitter.concurrent.AsyncSemaphore
+import com.twitter.finagle.dispatch.ServerDispatcherInitializer
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
@@ -41,7 +42,8 @@ import java.net.SocketAddress
 case class DefaultServer[Req, Rep, In, Out](
   name: String,
   listener: Listener[In, Out],
-  serviceTransport: (Transport[In, Out], Service[Req, Rep]) => Closable,
+  serviceTransport: (Transport[In, Out], Service[Req, Rep],
+    ServerDispatcherInitializer) => Closable,
   requestTimeout: Duration = Duration.Top,
   maxConcurrentRequests: Int = Int.MaxValue,
   cancelOnHangup: Boolean = true,
@@ -75,8 +77,8 @@ case class DefaultServer[Req, Rep, In, Out](
     protected type In = _In
     protected type Out = _Out
     protected def newListener() = listener
-    protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]) =
-      serviceTransport(transport, service)
+    protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep],
+      init: ServerDispatcherInitializer) = serviceTransport(transport, service, init)
   }
 
   val underlying: StackServer[Req, Rep] = Server()

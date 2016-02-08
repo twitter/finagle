@@ -4,6 +4,7 @@ import com.twitter.util
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, ServerAdmissionControl}
+import com.twitter.finagle.dispatch.ServerDispatcherInitializer
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.netty3.channel.{IdleConnectionFilter, OpenConnectionsThresholds}
 import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
@@ -213,7 +214,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       val newStack = StackServer.newStack[Req1, Rep1].replace(
         StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
-      ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
+      )
 
       case class Server(
         stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,
@@ -230,7 +231,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         protected def newListener(): Listener[Any, Any] =
           Netty3Listener(codec.pipelineFactory, params)
 
-        protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1]) = {
+        protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1],
+          init: ServerDispatcherInitializer) = {
           // TODO: Expiration logic should be installed using ExpiringService
           // in StackServer#newStack. Then we can thread through "closes"
           // via ClientConnection.
@@ -239,7 +241,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
           val Stats(sr) = params[Stats]
           val idle = if (idleTime.isFinite) Some(idleTime) else None
           val life = if (lifeTime.isFinite) Some(lifeTime) else None
-          val dispatcher = codec.newServerDispatcher(transport, service)
+          val dispatcher = codec.newServerDispatcher(transport, service, init)
           (idle, life) match {
             case (None, None) => dispatcher
             case _ =>
@@ -387,6 +389,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def tracer(t: com.twitter.finagle.tracing.Tracer): This =
     configured(Tracer(t))
+
+  def reqRepToTraceId(fs: ReqRepToTraceId): This =
+    configured(fs)
 
   /**
    * Cancel pending futures whenever the the connection is shut down.

@@ -5,6 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.client.{Bridge, DefaultClient}
 import com.twitter.finagle.dispatch._
+import com.twitter.finagle.tracing.{BufferingTracer, Trace}
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util._
 import com.twitter.finagle.stats.StatsReceiver
@@ -20,6 +21,9 @@ import org.scalatest.mock.MockitoSugar
 class DefaultServerTest extends FunSpec with MockitoSugar {
   describe("DefaultServer") {
     val name = "name"
+    val g = (s: Any) => None
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, g, g)
 
     it("should successfully add sourcedexception") {
       val qIn = new AsyncQueue[Try[Int]]()
@@ -27,8 +31,9 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val listener = new FakeListener[Try[Int]](qIn, qOut)
       val clientTransport = new QueueTransport(qOut, qIn)
 
-      val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]]) => Closable = {
-        case (transport, service) =>
+      val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]],
+        ServerDispatcherInitializer) => Closable = {
+        case (transport, service, init) =>
           val f = transport.read() flatMap { num =>
             service(num)
           } respond { result =>
@@ -62,8 +67,9 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val mockConnHandle = mock[Closable]
       when(mockConnHandle.close(any[Time])) thenReturn Future.Done
 
-      val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]]) => Closable =
-        (_, _) => mockConnHandle
+      val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]], 
+        ServerDispatcherInitializer) => Closable =
+        (_, _,init) => mockConnHandle
 
       val server: Server[Try[Int], Try[Int]] = DefaultServer[Try[Int], Try[Int], Try[Int], Try[Int]](name, listener, serviceTransport)
 
@@ -91,8 +97,11 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val mockConnHandle = mock[Closable]
       when(mockConnHandle.close(any[Time])) thenReturn Future.Done
 
-      val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]]) => Closable =
-        new SerialServerDispatcher(_, _)
+      val serviceTransport: (Transport[Try[Int], Try[Int]], Service[Try[Int], Try[Int]],
+        ServerDispatcherInitializer) => Closable = 
+        (t: Transport[Try[Int], Try[Int]], s: Service[Try[Int], Try[Int]], 
+          sdi: ServerDispatcherInitializer) => 
+          new SerialServerDispatcher(t, s, init)
 
       val server: Server[Try[Int], Try[Int]] = DefaultServer[Try[Int], Try[Int], Try[Int], Try[Int]](name, listener, serviceTransport)
       val socket = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)

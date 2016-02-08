@@ -1,13 +1,14 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch._
 import com.twitter.finagle.netty3._
+import com.twitter.finagle.param.ReqRepToTraceId
 import com.twitter.finagle.server._
+import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Charsets
@@ -37,6 +38,12 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
+  val serviceTransport: (Transport[String, String], Service[String, String],
+    ServerDispatcherInitializer) => Closable = 
+        (t: Transport[String, String], s: Service[String, String], 
+          sdi: ServerDispatcherInitializer) => 
+          new SerialServerDispatcher(t, s, sdi)
+
   /**
    * Ensure all annotations have the same TraceId (unique to server and client though)
    * Ensure core annotations are present and properly ordered
@@ -57,6 +64,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     assert(serverTracer.map(_.traceId).toSet.size == 1)
     assert(clientTracer.map(_.traceId).toSet.size == 1)
 
+
     assertAnnotationsInOrder(combinedTracer.toSeq, Seq(
       Annotation.ServiceName("theClient"),
       Annotation.ClientSend(),
@@ -68,7 +76,14 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
   test("core events are traced in the stack client/server") {
     testCoreTraces { (serverTracer, clientTracer) =>
+      val f = (s: Any) => s match {
+        case s: String => Some(Trace.id)
+        case _         => None
+      }
+
       val svc = stringServer
+        .withServerDispatcher.requestToTraceId(f)
+        .withServerDispatcher.responseToTraceId(f)
         .configured(fparam.Tracer(serverTracer))
         .configured(fparam.Label("theServer"))
         .serve("localhost:*", Svc)
@@ -85,7 +100,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
       val server = DefaultServer[String, String, String, String](
         name = "theServer",
         listener = Netty3Listener("theServer", StringServerPipeline),
-        serviceTransport = new SerialServerDispatcher(_, _),
+        serviceTransport = serviceTransport,
         tracer = serverTracer)
 
       val client = DefaultClient[String, String](
@@ -101,11 +116,18 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
   test("core events are traced in the ClientBuilder/ServerBuilder") {
     testCoreTraces { (serverTracer, clientTracer) =>
+      val f = (s: Any) => s match {
+        case s: String => Some(Trace.id)
+        case _         => None
+      }
+      val fs = new ReqRepToTraceId(f, f)
+
       val svc = ServerBuilder()
         .name("theServer")
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .codec(StringServerCodec)
         .tracer(serverTracer)
+        .reqRepToTraceId(fs)
         .build(Svc)
 
       ClientBuilder()
