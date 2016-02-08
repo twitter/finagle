@@ -838,6 +838,15 @@ deserialized ``NotFoundException`` can be treated as a failure. Next (#2), a
 classify errors. Lastly (#3), the request can be introspected to make the
 decision.
 
+Other Details
+~~~~~~~~~~~~~
+
+If you have a response classifier that categorizes ``Returns`` as
+failures, note that they will be counted in the ``StatsFilter``
+as a ``com.twitter.finagle.service.ResponseClassificationSyntheticException`` in the
+``StatsReceiver`` to indicate when this happens.
+
+
 .. rubric:: Footnotes
 
 .. [#backoff] Most of the backoff strategies implemented in Finagle are inspired by Mark

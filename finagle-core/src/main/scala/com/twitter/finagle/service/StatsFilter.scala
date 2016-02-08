@@ -58,6 +58,9 @@ object StatsFilter {
     mkFlags = Failure.flagsOf,
     mkSource = SourcedException.unapply)
 
+  private val SyntheticException =
+    new ResponseClassificationSyntheticException()
+
   def typeAgnostic(
     statsReceiver: StatsReceiver,
     exceptionStatsHandler: ExceptionStatsHandler
@@ -95,6 +98,7 @@ class StatsFilter[Req, Rep](
     timeUnit: TimeUnit)
   extends SimpleFilter[Req, Rep]
 {
+  import StatsFilter.SyntheticException
 
   def this(
     statsReceiver: StatsReceiver,
@@ -153,14 +157,15 @@ class StatsFilter[Req, Rep](
         ) match {
           case ResponseClass.Failed(_) =>
             latencyStat.add(elapsed().inUnit(timeUnit))
+            response match {
+              case Throw(e) =>
+                exceptionStatsHandler.record(statsReceiver, e)
+              case _ =>
+                exceptionStatsHandler.record(statsReceiver, SyntheticException)
+            }
           case ResponseClass.Successful(_) =>
             successCount.incr()
             latencyStat.add(elapsed().inUnit(timeUnit))
-        }
-
-        response match {
-          case Throw(e) => exceptionStatsHandler.record(statsReceiver, e)
-          case _ =>
         }
       }
     }
@@ -177,7 +182,7 @@ private[finagle] object StatsServiceFactory {
     new Stack.Module1[param.Stats, ServiceFactory[Req, Rep]] {
       val role = StatsServiceFactory.role
       val description = "Report connection statistics"
-      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
+      def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
         val param.Stats(statsReceiver) = _stats
         if (statsReceiver.isNull) next
         else new StatsServiceFactory(next, statsReceiver)
