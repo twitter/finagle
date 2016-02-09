@@ -10,8 +10,6 @@ import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
 import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
 
-import com.twitter.finagle.tracing.Trace
-
 private[finagle] object StringServerPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()

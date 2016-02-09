@@ -11,7 +11,7 @@ import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdS
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.{Engine, Ssl}
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.tracing.TraceInitializerFilter
+import com.twitter.finagle.tracing.{TraceId, TraceInitializerFilter}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Time}
@@ -214,7 +214,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
       val newStack = StackServer.newStack[Req1, Rep1].replace(
         StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
           codec.prepareConnFactory(next)
-      )
+        ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
       case class Server(
         stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,
@@ -390,8 +390,21 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tracer(t: com.twitter.finagle.tracing.Tracer): This =
     configured(Tracer(t))
 
-  def reqRepToTraceId(fs: ReqRepToTraceId): This =
-    configured(fs)
+  /**
+    * Provides the hook to convert a Request to a
+    *  [[com.twitter.finagle.tracing.TraceId TraceId]]
+    * @param f a function `Any` to `Option[TraceId]`
+    */
+  def requestToTraceId(f: (Any) => Option[TraceId]): This =
+    configured(params[ReqRepToTraceId].copy(fReq = f))
+
+  /**
+    * Provides the hook to convert a Response to a
+    *  [[com.twitter.finagle.tracing.TraceId TraceId]]
+    * @param f a function `Any` to `Option[TraceId]`
+    */
+  def responseToTraceId(f: (Any) => Option[TraceId]): This =
+    configured(params[ReqRepToTraceId].copy(fRep = f))
 
   /**
    * Cancel pending futures whenever the the connection is shut down.

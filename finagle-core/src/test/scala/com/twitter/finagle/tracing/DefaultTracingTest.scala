@@ -76,14 +76,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
   test("core events are traced in the stack client/server") {
     testCoreTraces { (serverTracer, clientTracer) =>
-      val f = (s: Any) => s match {
-        case s: String => Some(Trace.id)
-        case _         => None
-      }
-
       val svc = stringServer
-        .withServerDispatcher.requestToTraceId(f)
-        .withServerDispatcher.responseToTraceId(f)
         .configured(fparam.Tracer(serverTracer))
         .configured(fparam.Label("theServer"))
         .serve("localhost:*", Svc)
@@ -116,18 +109,11 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
   test("core events are traced in the ClientBuilder/ServerBuilder") {
     testCoreTraces { (serverTracer, clientTracer) =>
-      val f = (s: Any) => s match {
-        case s: String => Some(Trace.id)
-        case _         => None
-      }
-      val fs = new ReqRepToTraceId(f, f)
-
       val svc = ServerBuilder()
         .name("theServer")
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .codec(StringServerCodec)
         .tracer(serverTracer)
-        .reqRepToTraceId(fs)
         .build(Svc)
 
       ClientBuilder()

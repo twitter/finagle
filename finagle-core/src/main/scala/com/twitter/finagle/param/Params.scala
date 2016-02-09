@@ -204,7 +204,9 @@ object ExceptionStatsHandler {
   */
 case class ReqRepToTraceId(fReq: Any => Option[TraceId], fRep: Any => Option[TraceId])
 object ReqRepToTraceId {
+  val Default = new ReqRepToTraceId((a: Any) => None, (a: Any) => None)
+
   implicit val param: Stack.Param[ReqRepToTraceId] = new Stack.Param[ReqRepToTraceId] {
-    implicit val default = new ReqRepToTraceId((a: Any) => None, (a: Any) => None)
+    implicit val default = Default
   }
 }

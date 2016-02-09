@@ -3,6 +3,7 @@ package com.twitter.finagle.server
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.dispatch.ServerDispatcherInitializer
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter}
+import com.twitter.finagle.param.ReqRepToTraceId
 import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stats.{StatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
@@ -54,6 +55,7 @@ case class DefaultServer[Req, Rep, In, Out](
   logger: java.util.logging.Logger = DefaultLogger,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   tracer: Tracer = DefaultTracer,
+  reqRepToTraceId: ReqRepToTraceId = ReqRepToTraceId.Default,
   reporter: ReporterFactory = LoadedReporterFactory,
   newTraceInitializer: Stackable[ServiceFactory[Req, Rep]] = TraceInitializerFilter.serverModule[Req, Rep]
 ) extends Server[Req, Rep] {
@@ -94,6 +96,7 @@ case class DefaultServer[Req, Rep, In, Out](
     .configured(param.Logger(logger))
     .configured(param.Stats(statsReceiver))
     .configured(param.Tracer(tracer))
+    .configured(param.ReqRepToTraceId(reqRepToTraceId.fRep, reqRepToTraceId.fReq))
     .configured(param.Reporter(reporter))
     .configured(MaskCancelFilter.Param(!cancelOnHangup))
     .configured(TimeoutFilter.Param(requestTimeout))
