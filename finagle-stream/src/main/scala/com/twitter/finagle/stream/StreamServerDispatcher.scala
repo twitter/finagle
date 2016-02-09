@@ -1,7 +1,7 @@
 package com.twitter.finagle.stream
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.dispatch.GenSerialServerDispatcher
+import com.twitter.finagle.dispatch.{GenSerialServerDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise}
@@ -12,8 +12,9 @@ import org.jboss.netty.handler.codec.http._
  */
 private[twitter] class StreamServerDispatcher[Req: RequestType](
     trans: Transport[Any, Any],
-    service: Service[Req, StreamResponse]
-) extends GenSerialServerDispatcher[Req, StreamResponse, Any, Any](trans) {
+    service: Service[Req, StreamResponse],
+    init: ServerDispatcherInitializer
+) extends GenSerialServerDispatcher[Req, StreamResponse, Any, Any](trans, init) {
   import Bijections._
 
   trans.onClose ensure {
