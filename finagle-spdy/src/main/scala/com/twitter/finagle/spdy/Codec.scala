@@ -2,6 +2,7 @@ package com.twitter.finagle.spdy
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
+import com.twitter.finagle.dispatch.ServerDispatcherInitializer
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
@@ -111,9 +112,10 @@ case class Spdy(
 
       override def newServerDispatcher(
           transport: Transport[Any, Any],
-          service: Service[HttpRequest, HttpResponse]
+          service: Service[HttpRequest, HttpResponse],
+          init: ServerDispatcherInitializer
       ): Closable = new SpdyServerDispatcher(
-        Transport.cast[HttpResponse, HttpRequest](transport), service)
+        Transport.cast[HttpResponse, HttpRequest](transport), service, init)
     }
   }
 
