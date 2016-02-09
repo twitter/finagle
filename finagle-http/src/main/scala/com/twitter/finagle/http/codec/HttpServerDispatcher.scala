@@ -1,11 +1,12 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.dispatch.GenSerialServerDispatcher
+import com.twitter.finagle.dispatch.{GenSerialServerDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
+import com.twitter.finagle.tracing.{Annotation, Trace}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, BufReader}
 import com.twitter.logging.Logger
@@ -17,11 +18,14 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 class HttpServerDispatcher(
   trans: Transport[Any, Any],
   service: Service[Request, Response],
-  stats: StatsReceiver) extends GenSerialServerDispatcher[Request, Response, Any, Any](trans) {
+  stats: StatsReceiver,
+  init: ServerDispatcherInitializer) 
+  extends GenSerialServerDispatcher[Request, Response, Any, Any](trans, init) {
 
   def this(
     trans: Transport[Any, Any],
-    service: Service[Request, Response]) = this(trans, service, DefaultStatsReceiver)
+    service: Service[Request, Response],
+    init: ServerDispatcherInitializer) = this(trans, service, DefaultStatsReceiver, init)
 
   private[this] val failureReceiver = new RollupStatsReceiver(stats.scope("stream")).scope("failures")
 
@@ -70,8 +74,17 @@ class HttpServerDispatcher(
       }
 
       val req = Request(reqIn, reader, addr)
-      service(req).handle {
-        case _ => Response(req.version, Status.InternalServerError)
+      init.fReq(req) match {
+        case Some(traceId) => Trace.letTracerAndId(init.tracer, traceId) {
+          Trace.record(Annotation.WireRecv)
+          service(req).handle {
+            case _ => Response(req.version, Status.InternalServerError)
+          }
+        }
+        case None          => service(req).handle {
+          case _ => Response(req.version, Status.InternalServerError)
+        }
+
       }
 
     case invalid =>
@@ -90,8 +103,15 @@ class HttpServerDispatcher(
       rep.headers.remove(Fields.ContentLength)
 
       val p = new Promise[Unit]
-      val f = trans.write(from[Response, HttpResponse](rep)) before
-        streamChunks(trans, rep.reader)
+      val f = init.fReq(rep) match {
+        case Some(traceId) => Trace.letTracerAndId(init.tracer, traceId) {
+          trans.write(from[Response, HttpResponse](rep))
+            .onSuccess{RecordWireSend}
+            .before{streamChunks(trans, rep.reader)}
+        }
+        case None => trans.write(from[Response, HttpResponse](rep))
+          .before{streamChunks(trans, rep.reader)}
+      }
       f.proxyTo(p)
       // This awkwardness is unfortunate but necessary for now as you may be
       // interrupted in the middle of a write, or when there otherwise isn’t
@@ -111,7 +131,13 @@ class HttpServerDispatcher(
       if (!rep.headers.contains(Fields.ContentLength))
         rep.contentLength = rep.content.length
 
-      trans.write(from[Response, HttpResponse](rep))
+      init.fRep(rep) match {
+        case Some(traceId) => Trace.letTracerAndId(init.tracer, traceId) {
+          trans.write(from[Response, HttpResponse](rep))
+            .onSuccess{RecordWireSend}
+        }
+        case None         => trans.write(from[Response, HttpResponse](rep))
+      }
     }
   }
 

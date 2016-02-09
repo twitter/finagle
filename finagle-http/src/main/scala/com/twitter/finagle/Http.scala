@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
@@ -215,14 +215,15 @@ object Http extends Client[Request, Response] with HttpRichClient
     }
 
     protected def newDispatcher(transport: Transport[In, Out],
-        service: Service[Request, Response]) = {
+        service: Service[Request, Response],
+        init: ServerDispatcherInitializer) = {
       val dtab = new DtabFilter.Finagle[Request]
       val context = new ServerContextFilter[Request, Response]
       val Stats(stats) = params[Stats]
 
       val endpoint = dtab.andThen(context).andThen(service)
 
-      new HttpServerDispatcher(new HttpTransport(transport), endpoint, stats.scope("dispatch"))
+      new HttpServerDispatcher(new HttpTransport(transport), endpoint, stats.scope("dispatch"), init)
     }
 
     protected def copy1(
@@ -254,6 +255,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       new ServerAdmissionControlParams(this)
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams[Server](this)
+    override val withServerDispatcher: ServerDispatcherParams[Server] =
+      new ServerDispatcherParams[Server](this)
 
     override def withLabel(label: String): Server = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Server =

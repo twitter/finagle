@@ -1,11 +1,13 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{ChannelClosedException, Service, Status}
+import com.twitter.finagle.dispatch.ServerDispatcherInitializer
 import com.twitter.finagle.http
 import com.twitter.finagle.http.{BadHttpRequest, Request, Response, Version}
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.tracing.BufferingTracer
 import com.twitter.finagle.transport.{QueueTransport, Transport}
+import com.twitter.finagle.{ChannelClosedException, Service, Status}
 import com.twitter.io.{Reader, Buf}
 import com.twitter.util.{Await, Future, Promise}
 import org.jboss.netty.buffer.ChannelBuffers
@@ -29,7 +31,10 @@ class HttpServerDispatcherTest extends FunSuite {
   test("invalid message") {
     val (in, out) = mkPair[Any, Any]
     val service = Service.mk { req: Request => Future.value(Response()) }
-    val disp = new HttpServerDispatcher(out, service)
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, http.TraceInfo.requestToTraceId,
+      http.TraceInfo.responseToTraceId)
+    val disp = new HttpServerDispatcher(out, service, init)
 
     in.write("invalid")
     Await.ready(out.onClose)
@@ -39,7 +44,10 @@ class HttpServerDispatcherTest extends FunSuite {
   test("bad request") {
     val (in, out) = mkPair[Any, Any]
     val service = Service.mk { req: Request => Future.value(Response()) }
-    val disp = new HttpServerDispatcher(out, service)
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, http.TraceInfo.requestToTraceId,
+      http.TraceInfo.responseToTraceId)
+    val disp = new HttpServerDispatcher(out, service, init)
 
     in.write(BadHttpRequest(new Exception()))
     Await.result(in.read)
@@ -49,7 +57,10 @@ class HttpServerDispatcherTest extends FunSuite {
   test("streaming request body") {
     val service = Service.mk { req: Request => ok(req.reader) }
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher(out, service)
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, http.TraceInfo.requestToTraceId,
+      http.TraceInfo.responseToTraceId)
+    val disp = new HttpServerDispatcher(out, service, init)
 
     val req = Request()
     req.setChunked(true)
@@ -64,9 +75,12 @@ class HttpServerDispatcherTest extends FunSuite {
   test("client abort before dispatch") {
     val promise = new Promise[Response]
     val service = Service.mk { _: Request => promise }
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, http.TraceInfo.requestToTraceId,
+      http.TraceInfo.responseToTraceId)
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher(out, service)
+    val disp = new HttpServerDispatcher(out, service, init)
 
     in.write(Request().httpRequest)
 
@@ -79,9 +93,12 @@ class HttpServerDispatcherTest extends FunSuite {
     val req = Request()
     val res = req.response
     val service = Service.mk { _: Request => Future.value(res) }
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, http.TraceInfo.requestToTraceId,
+      http.TraceInfo.responseToTraceId)
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher(out, service)
+    val disp = new HttpServerDispatcher(out, service, init)
 
     req.response.setChunked(true)
     in.write(req.httpRequest)
