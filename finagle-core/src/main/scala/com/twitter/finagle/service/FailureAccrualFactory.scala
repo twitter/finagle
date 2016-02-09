@@ -242,7 +242,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     logger: Logger = DefaultLogger,
     endpoint: SocketAddress = unconnected,
     responseClassifier: ResponseClassifier = ResponseClassifier.Default)
-  extends ServiceFactory[Req, Rep] {
+  extends ServiceFactory[Req, Rep] { svcFacSelf =>
   import FailureAccrualFactory._
 
   def this(
@@ -297,14 +297,16 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     NullStatsReceiver,
     label)
 
-  @volatile private[this] var state: State = Alive
 
+  // writes to `state` and `reviveTimerTask` are synchronized on `svcFacSelf`
+  @volatile private[this] var state: State = Alive
   private[this] var reviveTimerTask: Option[TimerTask] = None
 
   private[this] val removalCounter = statsReceiver.counter("removals")
   private[this] val revivalCounter = statsReceiver.counter("revivals")
 
-  private[this] def didFail() = synchronized {
+
+  private[this] def didFail() = svcFacSelf.synchronized {
     state match {
       case Alive | ProbeClosed =>
         failureAccrualPolicy.markDeadOnFailure() match {
@@ -323,7 +325,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
       case ResponseClass.Failed(_) => false
     }
 
-  protected def didSucceed(): Unit = synchronized {
+  protected def didSucceed(): Unit = svcFacSelf.synchronized {
     // Only count revivals when the probe succeeds.
     state match {
       case ProbeClosed =>
@@ -335,7 +337,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     failureAccrualPolicy.recordSuccess()
   }
 
-  private[this] def markDeadFor(duration: Duration) = synchronized {
+  private[this] def markDeadFor(duration: Duration) = svcFacSelf.synchronized {
 
     // In order to have symmetry with the revival counter, don't count removals
     // when probing fails.
@@ -363,13 +365,15 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
    * Enter 'Probing' state.
    * The service must satisfy one request before accepting more.
    */
-  protected def startProbing() = synchronized {
+  protected def startProbing() = svcFacSelf.synchronized {
     state = ProbeOpen
     cancelReviveTimerTasks()
   }
 
   def apply(conn: ClientConnection) = {
     underlying(conn).map { service =>
+      // N.B. the reason we can't simply filter the service factory is so that
+      // we can override the session status to reflect the broader endpoint status.
       new Service[Req, Rep] {
         def apply(request: Req): Future[Rep] = {
           // If service has just been revived, accept no further requests.
@@ -380,7 +384,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
           // (unsuccessful).
           state match {
             case ProbeOpen =>
-              synchronized {
+              svcFacSelf.synchronized {
                 state match {
                   case ProbeOpen => state = ProbeClosed
                   case _ =>
@@ -409,7 +413,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
 
   protected[this] def getState: State = state
 
-  private[this] def cancelReviveTimerTasks(): Unit = synchronized {
+  private[this] def cancelReviveTimerTasks(): Unit = svcFacSelf.synchronized {
     reviveTimerTask.foreach(_.cancel())
     reviveTimerTask = None
   }
