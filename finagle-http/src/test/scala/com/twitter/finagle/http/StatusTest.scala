@@ -19,7 +19,7 @@ class StatusTest extends FunSuite {
 
   test("matches unknown status") {
     Status(99) match {
-      case UnknownStatus(_) =>
+      case Unknown(_) =>
       case status => fail(s"$status should be UnknownStatus")
     }
   }
@@ -72,7 +72,7 @@ class StatusTest extends FunSuite {
   test("match unknown status") {
     600 until 700 foreach { code =>
       Status(601) match {
-        case UnknownStatus(_) =>
+        case Unknown(_) =>
         case status => fail(s"$status should be UnknownStatus")
       }
     }

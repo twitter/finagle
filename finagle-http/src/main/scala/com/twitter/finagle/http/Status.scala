@@ -36,9 +36,9 @@ object Status {
    * Matches when the status code isn't in range of any of the  categories: {{Informational}},
    * {{Successful}}, {{Redirection}}, {{ClientError}}, {{ServerError}}.
    */
-  object UnknownStatus {
+  object Unknown {
     def unapply(status: Status): Option[Status] =
-      Option(status).filter(s => s.code < 100 || s.code >= 600)
+      Some(status).filter(s => s.code < 100 || s.code >= 600)
   }
 
   /** Matches when the status code is between 100 and 200. */
