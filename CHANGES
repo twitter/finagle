@@ -7,8 +7,13 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+  * finagle-http: Introduce convenience extractors to pattern match `c.t.f.http.Response.status`
+    against the different categories.
+
 6.33.0
-~~~~~~~
+~~~~~~
 
 New Features
 ~~~~~~~~~~~~
