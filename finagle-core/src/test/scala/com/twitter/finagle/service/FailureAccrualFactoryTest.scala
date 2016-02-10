@@ -492,6 +492,47 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("A failure during probing that does not mark dead moves back to probing") {
+    val policy = new FailureAccrualPolicy {
+      var markDead = true
+
+      def recordSuccess() = ()
+      def revived() = ()
+      def markDeadOnFailure(): Option[Duration] = {
+        if (markDead) {
+          markDead = false
+          Some(1.second)
+        } else None
+      }
+    }
+
+    val h = new Helper(policy)
+    import h._
+
+    Time.withCurrentTimeFrozen { tc =>
+
+      // Fail a request to mark dead
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(!factory.isAvailable)
+      assert(!service.isAvailable)
+
+      // Advance past period
+      tc.advance(2.seconds)
+      timer.tick()
+
+      // Although the underlying service is failing, the policy tells us
+      // we are healthy. Make sure we accept more requests to reconcile
+      // with the policy.
+      intercept[Exception] {
+        Await.result(service(123))
+      }
+      assert(factory.isAvailable)
+      assert(service.isAvailable)
+    }
+  }
+
   class HealthyServiceHelper {
     val statsReceiver = new InMemoryStatsReceiver()
     val underlyingService = mock[Service[Int, Int]]

@@ -304,6 +304,8 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
 
   private[this] val removalCounter = statsReceiver.counter("removals")
   private[this] val revivalCounter = statsReceiver.counter("revivals")
+  private[this] val probesCounter = statsReceiver.counter("probes")
+  private[this] val removedForCounter = statsReceiver.counter("removed_for_ms")
 
 
   private[this] def didFail() = svcFacSelf.synchronized {
@@ -311,6 +313,12 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
       case Alive | ProbeClosed =>
         failureAccrualPolicy.markDeadOnFailure() match {
           case Some(duration) => markDeadFor(duration)
+          case None if state == ProbeClosed =>
+            // The probe request failed, but the policy tells us that we
+            // should not mark dead. We probe again in an attempt to
+            // resolve this ambiguity, but we could also mark dead for a
+            // fixed period of time, or even mark alive.
+            startProbing()
           case None =>
         }
       case _ =>
@@ -351,6 +359,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
 
     if (logger.isLoggable(Level.DEBUG))
       logger.log(Level.DEBUG, s"""FailureAccrualFactory marking connection to "$label" as dead. Remote Address: ${endpoint.toString}""")
+    removedForCounter.incr(duration.inMilliseconds.toInt)
 
     didMarkDead()
   }
@@ -367,7 +376,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
    */
   protected def startProbing() = svcFacSelf.synchronized {
     state = ProbeOpen
-    cancelReviveTimerTasks()
+    cancelReviveTimerTask()
   }
 
   def apply(conn: ClientConnection) = {
@@ -384,6 +393,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
           // (unsuccessful).
           state match {
             case ProbeOpen =>
+              probesCounter.incr()
               svcFacSelf.synchronized {
                 state match {
                   case ProbeOpen => state = ProbeClosed
@@ -413,13 +423,13 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
 
   protected[this] def getState: State = state
 
-  private[this] def cancelReviveTimerTasks(): Unit = svcFacSelf.synchronized {
+  private[this] def cancelReviveTimerTask(): Unit = svcFacSelf.synchronized {
     reviveTimerTask.foreach(_.cancel())
     reviveTimerTask = None
   }
 
   def close(deadline: Time): Future[Unit] = underlying.close(deadline).ensure {
-    cancelReviveTimerTasks()
+    cancelReviveTimerTask()
   }
 
   override def toString = s"failure_accrual_${underlying.toString}"

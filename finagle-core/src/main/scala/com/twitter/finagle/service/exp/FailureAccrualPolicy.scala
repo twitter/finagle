@@ -49,7 +49,7 @@ object FailureAccrualPolicy {
    * than the required success rate, `markDeadOnFailure()` will return
    * Some(Duration).
    *
-   * @see com.twitter.finagle.util.Ema for how the succes rate is computed
+   * @see com.twitter.finagle.util.Ema for how the success rate is computed
    *
    * @param requiredSuccessRate successRate that must be met
    *
