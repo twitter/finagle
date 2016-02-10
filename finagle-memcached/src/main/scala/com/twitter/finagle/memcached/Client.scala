@@ -1153,6 +1153,8 @@ case class KetamaClientBuilder private[memcached](
 
     val healthBroker = new Broker[NodeHealth]
 
+    Memcached.registerClient(label, keyHasher.toString, isPipelining = false)
+
     def newService(node: CacheNode) = stackBasedClient
       .configured(Memcached.param.EjectFailedHost(_ejectFailedHost))
       .configured(FailureAccrualFactory.Param(numFailures, markDeadFor))

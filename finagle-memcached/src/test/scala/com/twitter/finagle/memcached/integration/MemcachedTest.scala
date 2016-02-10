@@ -2,16 +2,18 @@ package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Name
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.Memcached
-import com.twitter.finagle.memcached.{Client, PartitionedClient}
+import com.twitter.finagle.memcached.{KetamaClientBuilder, Client, PartitionedClient}
 import com.twitter.finagle.param
 import com.twitter.finagle.Service
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.ShardNotAvailableException
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util._
+import com.twitter.util.registry.GlobalRegistry
 import java.net.{InetAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite, Outcome}
@@ -25,12 +27,13 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
 
   val TimeOut = 15.seconds
 
+  private val clientName = "test_client"
   before {
     server1 = TestMemcachedServer.start()
     server2 = TestMemcachedServer.start()
     if (server1.isDefined && server2.isDefined) {
       val n = Name.bound(server1.get.address, server2.get.address)
-      client = Memcached.client.newRichClient(n, "test_client")
+      client = Memcached.client.newRichClient(n, clientName)
     }
   }
 
@@ -205,6 +208,31 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       if (Await.result(client.get(s"foo$i"), TimeOut) == None) cacheMisses = cacheMisses + 1
     }
     assert(cacheMisses > 0)
+  }
+
+  test("GlobalRegistry pipelined client") {
+    val expectedKey = Seq("client", "memcached", clientName, "is_pipelining")
+    val isPipelining = GlobalRegistry.get.iterator.exists { e =>
+      e.key == expectedKey && e.value == "true"
+    }
+    assert(isPipelining)
+  }
+
+  test("GlobalRegistry non-pipelined client") {
+    val name = "not-pipelined"
+    val expectedKey = Seq("client", "memcached", name, "is_pipelining")
+    KetamaClientBuilder()
+      .clientBuilder(ClientBuilder()
+        .hosts(Seq(server1.get.address))
+        .name(name)
+        .codec(new com.twitter.finagle.memcached.protocol.text.Memcached(NullStatsReceiver))
+        .hostConnectionLimit(1))
+      .build()
+
+    val isPipelining = GlobalRegistry.get.iterator.exists { e =>
+      e.key == expectedKey && e.value == "false"
+    }
+    assert(isPipelining)
   }
 
   test("host comes back into ring after being ejected") {
