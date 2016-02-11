@@ -8,7 +8,7 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 -----
 
 6.33.0
-~~~~~~~
+------
 
 New Features
 ~~~~~~~~~~~~
@@ -63,7 +63,7 @@ Breaking API Changes
 
   * finagle-thrift: `c.t.f.ThriftRichClient` has a new abstract protected method
     `responseClassifier: ResponseClassifier`. If your implementation does not need
-     this, you can implement it with `ResponseClassifier.Default`. ``RB_ID=791470``
+    this, you can implement it with `ResponseClassifier.Default`. ``RB_ID=791470``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,7 +87,7 @@ Breaking API Changes
     `c.t.f.Thrift.Server`.  This behavior may now be controlled with `c.t.f.Thrift.param.Framed`.
 
 6.32.0
-~~~~~~~
+------
 
 NOT RELEASED
 
@@ -1209,7 +1209,7 @@ Bug Fixes
 - `finagle-zipkin`: Include service name in all traces
 
 6.13.1
-~~~~~~~
+------
 
 - `finagle-core`: Case insensitive Dtab headers in HTTP codec
 - `finagle-core`: Introduce Stack.Params#contains
@@ -1228,7 +1228,7 @@ Bug Fixes
 - `finagle`: upgrade util to 6.13.2
 
 6.13.0
-~~~~~~
+------
 
 - `finagle-core`: ForkJoin scheduler: first draft
 - `finagle-doc`: Update URL to Finagle blog post. Motivation: Outdated URL
@@ -1254,21 +1254,21 @@ Bug Fixes
 - `finagle`: upgrade util to version 6.13.0
 
 6.12.2
-~~~~~~
+------
 
 - `finagle`: release scrooge version 3.12.3
 - `finagle-exception`: Drop scrooge in favor of pre-generated Thrift Java source code.
 - `finagle-zipkin`: Drop scrooge in favor of pre-generated Thrift Java source code.
 
 6.12.1
-~~~~~~
+------
 
 - `finagle`: release ostrich version 9.3.1
 - `finagle`: release util version 6.12.1
 - `finagle`: Upgrade everyone to the new c.t.common.server-set
 
 6.12.0
-~~~~~~
+------
 
 - `finagle-core`: Add a `ServerBuilder.safeBuild(ServiceFactory)` method for Java compatibility
 - `finagle-core`: Add basic Scaladocs for all Filters and Services
@@ -1305,7 +1305,7 @@ Bug Fixes
 - `finagle`: Use a more descriptive message for when client name resolution is negative
 
 6.11.1
-~~~~~~
+------
 
 - `finagle-core`: Masks cancellation on PipeliningDispatcher
 - `finagle-doc`: Fix finagle-websocket link on Finagle docs website.
@@ -1313,7 +1313,7 @@ Bug Fixes
 - `finagle-kestrel`: Add abort command to kestrel client
 
 6.11.0
-~~~~~~
+------
 
 - `finagle-core`: Add a "tries" scoped StatsFilter to ClientBuilder.
 - `finagle-core`: Allow clean shutdown for insoluble address in DelayedFactory.
@@ -1339,7 +1339,7 @@ Bug Fixes
 - `finagle`: s/setValue(())/setDone()/g
 
 6.10.0
-~~~~~~
+------
 
 - `finagle-core`: Fix ServiceTimeoutException naming.
 - `finagle-core`: Increase default tcpConnectTimeout to 350ms.
@@ -1348,7 +1348,7 @@ Bug Fixes
 - `finagle`: Daemonize threads in ClientBuilders used in finagle.
 
 6.9.0
-~~~~~
+-----
 
 - `finagle-core`: Avoid creating a new 'NoStacktrace' array for each exception.
 - `finagle-core`: Better support for negative Addr resolution in StabilizingAddr.
@@ -1361,14 +1361,14 @@ Bug Fixes
 - `finagle`: Adhere to scala 2.10 pattern matching strictness.
 
 6.8.1
-~~~~~
+-----
 
 - `finagle`: Upgrade ostrich to 9.2.1
 - `finagle`: Upgarde util to 6.8.1
 - `finagle`: Upgarde scrooge to 3.11.1
 
 6.8.0
-~~~~~
+-----
 
 - `finagle-serversets`: Higher fidelity addrs from ZK We do the best we can with the current server set implementation.
 - `finagle-mysql`: better type support
@@ -1406,14 +1406,14 @@ Bug Fixes
 - `finagle-memcached`: more performance and less allocations in Decoder
 
 6.7.4
-~~~~~
+-----
 
 - `finagle-core`: Fail ChannelTransport read queue before closing the connection
 - `finagle-mux`: Add session for mux message passing and bidirectional RPC
 - `finagle-zipkin`: Depend on scrooge-core instead of scrooge-runtime
 
 6.7.2
-~~~~~
+-----
 
 - `finagle-core`: LoadService: skip empty lines
 - `finagle-core`: Improve GC profile of Var and Group
@@ -1422,7 +1422,7 @@ Bug Fixes
 - `finagle-mysql`: move protocol into a dispatcher and port to new style apis.
 
 6.7.1
-~~~~~
+-----
 
 - `finagle-*`: Tagging various tests as flaky
 - `finagle-*`: Fix and reenable some formerly-flaky tests Now that Time.withXXXX is threadsafe
@@ -1459,12 +1459,12 @@ Bug Fixes
 - `finagle-thrift`: Set the client id in thriftmux
 
 6.7.0
-~~~~~
+-----
 
 Release process failed. Rolled forward to 6.7.1.
 
 6.6.2
-~~~~~
+-----
 
 - `finagle-core`: Configurable loadBalancer for ClientConfig
 - `finagle-core`: Fix the memory leak due to the GlobalStatsReceiver
@@ -1474,7 +1474,7 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle`: New ostrich version
 
 6.6.0
-~~~~~
+-----
 
 - `finagle-core`: Add a RetryPolicy constant for retrying on ChannelClosedExceptions.
 - `finagle-core`: ChannelSnooper: Print exceptions via Logger
@@ -1508,7 +1508,7 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle-zipkin`: optimize scribe logging to not need slf4j
 
 6.5.2
-~~~~~
+-----
 
 - finagle-ostrich4: set stats export URI to stats.json
 - finagle-core: Introduce StabilizingGroup which cautiously removes items from a Group
@@ -1519,7 +1519,7 @@ Release process failed. Rolled forward to 6.7.1.
 - finagle-memcache: added support for twemcache commands
 
 6.5.1
-~~~~~
+-----
 
 - `finagle-http`: Move routing by path and method function to RoutingService
 - `finagle-redis`: Switching from Strings to ChannelBuffers for Scored Zrange commands
@@ -1534,7 +1534,7 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle-core`: Open connection threshold et al
 
 6.5.0
-~~~~~
+-----
 
 - `finagle-core`: fix a bug in Trace.unwind in ruby
 - `finagle-core`: speed up tracing when a trace is unsampled.
@@ -1552,7 +1552,7 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle`: Upgrade util to 6.3.6 and scrooge-runtime to 3.1.2
 
 6.4.1
-~~~~~
+-----
 
 - `finagle-http`: CookieMap instead of CookieSet
 - `finagle-memcached`: remove items stats test since twemcache does not carry those
@@ -1574,7 +1574,7 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle`: Update sbt project for (util, ostrich, finagle)
 
 6.4.0
-~~~~~
+-----
 
 - `finagle-core`: Add unmanaged cache pool cluster
 - `finagle-core`: Always enable TracingFilter even when no tracers are used.
@@ -1613,7 +1613,7 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle`: Upgrade util to 6.3.4
 
 6.3.0
-~~~~~
+-----
 
 - `finagle`: Upgrade util to 6.3.0
 - `finagle-thrift`: SocketAddress when serving an iface
@@ -1621,13 +1621,13 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle-core`: DefaultClient/Server: Do not add TracingFilter if NullTracer is used
 
 6.1.4
-~~~~~
+-----
 
 - `finagle-zipkin`: tracing improvements
 - `finagle`: Upgrade util to 6.2.5
 
 6.1.3
-~~~~~
+-----
 
 - `finagle-core`: Add BroadcastCounter and BroadcastStat, refactor Broadcast and Rollup Receiver.
 - `finagle`: update sbt, add finagle-exp
@@ -1641,7 +1641,7 @@ Release process failed. Rolled forward to 6.7.1.
 - `finagle-core`: CachingPool: Do not schedule timer tasks if ttl is Duration.Top
 
 6.1.2
-~~~~~
+-----
 
 Released 2013/03/21
 
@@ -1662,7 +1662,7 @@ Released 2013/03/21
 - `finagle-thrift`: fix 2.10 build
 
 6.1.1
-~~~~~
+-----
 
 Released 2013/03/12
 
@@ -1690,7 +1690,7 @@ Released 2013/03/12
 - `finagle-zipkin`: new factory methods.
 
 6.1.0
-~~~~~
+-----
 
 Released 2013/01/30
 
@@ -1706,14 +1706,14 @@ Released 2013/01/30
 - `finagle-http`: add new-style client and server, including a primitive URL fetcher
 
 6.0.5
-~~~~~
+-----
 
 Released 2013/01/22
 
 - `finagle-core`: basic SOCKS support for finagle clients, intended for use with ssh -D.
 
 6.0.4
-~~~~~
+-----
 
 Released 2013/01/22
 
@@ -1728,7 +1728,7 @@ Released 2013/01/22
 - `finagle-redis`: expireAt command
 
 6.0.3
-~~~~~
+-----
 
 Released 2012/12/18
 
@@ -1738,7 +1738,7 @@ Released 2012/12/18
 - `finagle-http RequestProxy`: proxy response
 
 6.0.2
-~~~~~
+-----
 
 Released 2012/12/11
 
@@ -1755,25 +1755,22 @@ Released 2012/12/11
 - `finagle-redis`: parse case-insensitive commands
 
 6.0.1
-~~~~~
+-----
 
 Released 2012/11/26
 
 - Use java.util.ArrayDeque in place of mutable.Queue due to https://issues.scala-lang.org/browse/SI-6690
 
 6.0.0
-~~~~~
+-----
 
 Released 2012/11/26
 
 - util 6.0.0 dependency
 - `finagle-core`: new client/server APIs; not yet exposed to users
 
-5.x
-----
-
 5.3.23
-~~~~~~
+------
 
 Released 2012/11/21
 
@@ -1784,7 +1781,7 @@ Released 2012/11/21
 - `finagle-core`: don't leak Spooled updates in the HeapBalancer
 
 5.3.22
-~~~~~~
+------
 
 Released 2012/11/08
 
@@ -1794,7 +1791,7 @@ Released 2012/11/08
 - `BackupRequestFilter`: experimental service filter to perform backup requests
 
 5.3.20
-~~~~~~
+------
 
 Released 2012/10/26
 
@@ -1804,7 +1801,7 @@ Released 2012/10/26
 - `finagle-core`: Introduce an experimental buffer-based pool
 
 5.3.19
-~~~~~~
+------
 
 Released 2012/10/16
 
@@ -1822,7 +1819,7 @@ Released 2012/10/16
 - `finagle-redis`: added new commands
 
 5.3.18
-~~~~~~
+------
 
 Released 2012/09/27
 
@@ -1841,7 +1838,7 @@ Released 2012/09/27
 - `finagle-redis`: add list commands
 
 5.3.9
-~~~~~
+-----
 
 Released 2012/09/07
 
@@ -1853,7 +1850,7 @@ Released 2012/09/07
 - `finagle-core`: SSL: fix connection failure propagation in futures
 
 5.3.8
-~~~~~
+-----
 
 2012/08/24
 
@@ -1861,7 +1858,7 @@ Released 2012/09/07
 - `finagle-core`: Upgrade to Netty 3.5.5
 
 5.3.7
-~~~~~
+-----
 
 Released 2012/08/24
 
@@ -1873,7 +1870,7 @@ Released 2012/08/24
 - `finagle-http`: Fix file extension bug in finagle-http
 
 5.3.6
-~~~~~
+-----
 
 Released 2012/06/17
 
@@ -1884,7 +1881,7 @@ Released 2012/06/17
 - `finagle-memcached`: Adding key length validation and refactor validation logic.
 
 5.3.5
-~~~~~
+-----
 
 Released 2012/08/10
 
@@ -1896,7 +1893,7 @@ Released 2012/08/10
 - `finagle-stress`: finagle: kill obsolete benchmark
 
 5.3.4
-~~~~~
+-----
 
 Released 2012/08/02
 
@@ -1905,14 +1902,14 @@ Released 2012/08/02
 - `finagle-core`: Timer: address review comments, fix tiny race
 
 5.3.3
-~~~~~
+-----
 
 Released 2012/07/31
 
 - `finagle-core`: Timer: dispose timeouts on cancellation
 
 5.3.2
-~~~~~
+-----
 
 Released 2012/07/31
 
@@ -1924,7 +1921,7 @@ Released 2012/07/31
 - `finagle-zipkin`: Add duration to the the JVM gc annotation.
 
 5.3.1
-~~~~~
+-----
 
 Released 2012/07/20
 
@@ -1934,7 +1931,7 @@ Released 2012/07/20
 - `finagle-serversets`: bump up server-set version to 1.0.10 (latest) in finagle-serversets
 
 5.3.0
-~~~~~
+-----
 
 Released 2012/06/25
 
@@ -1944,7 +1941,7 @@ Released 2012/06/25
 - `Dispatcher`: all write exceptions are wrapped with WriteException
 
 5.1.0
-~~~~~
+-----
 
 Released 2012/06/14
 
@@ -1957,7 +1954,7 @@ Released 2012/06/14
 - `finagle-core`: JvmFiler, trace jvm events
 
 5.0.2
-~~~~~
+-----
 
 Released 2012/06/01
 
@@ -1968,7 +1965,7 @@ Released 2012/06/01
 - `finagle-exception`: Upgrade jerkson to 0.5.0 and streamyj to 0.4.1
 
 5.0.0
-~~~~~
+-----
 
 Released 2012/05/25
 
@@ -1979,11 +1976,8 @@ Released 2012/05/25
 - `finagle-memcached`: record client recv annotation after hit/miss
 - `finagle-core`: expand exception chain in StatsFilter
 
-4.x
-----
-
 4.0.0
-~~~~~
+-----
 
 Released 2012/05/08
 
@@ -2006,11 +2000,8 @@ Released 2012/05/08
 - `finagle-http`: add service multiplexer
 - friendlier java interface for retries
 
-3.x
-----
-
 3.0.0
-~~~~~
+-----
 
 Released 2012/03/14
 
@@ -2031,11 +2022,8 @@ Released 2012/03/14
 - `thrift`: concatenate arrays with System.arraycopy
 - `memached`: fix bug wherein we made requests with empty keys on retries
 
-2.x
-----
-
 2.0.1
-~~~~~
+-----
 
 Released 2012/03/01
 
@@ -2045,7 +2033,7 @@ Released 2012/03/01
 - `clientbuilder`: buffer handlers to avoid deadlock
 
 2.0.0
-~~~~~
+-----
 
 Released 2012/02/27
 
@@ -2055,11 +2043,8 @@ Released 2012/02/27
 - `b3`: make tests deterministic
 - upgrade to newest util (and to Guava r11)
 
-1.x
-----
-
 1.11.1
-~~~~~~
+------
 
 Released 2012/02/15
 
@@ -2069,7 +2054,7 @@ Released 2012/02/15
 - `core`: keep track of handler walltimes
 
 1.11.0
-~~~~~~
+------
 
 Released 2012/02/13
 
@@ -2090,7 +2075,7 @@ Released 2012/02/13
 - `SummarizingStatsReceiver`: fix bug where sort didn't operate over a stable collection
 
 1.10.0
-~~~~~~
+------
 
 Released 2012/01/24
 
@@ -2105,7 +2090,7 @@ Released 2012/01/24
 - `redis`: imported finagle redis client from Tumblr. not yet published.
 
 1.9.12
-~~~~~~
+------
 
 Released 2012/01/05
 
@@ -2122,21 +2107,21 @@ Released 2012/01/05
 - `finagle-ostrich`: remove, it's obsoleted by finagle-ostrich4
 
 1.9.10
-~~~~~~
+------
 
 Released 2011/12/02
 
 - update to util 1.12.7
 
 1.9.9
-~~~~~
+-----
 
 Released 2011/12/01
 
 - update to util 1.12.6
 
 1.9.8
-~~~~~
+-----
 
 Released 2011/11/30
 
@@ -2145,7 +2130,7 @@ Released 2011/11/30
 - `native`: fix content-length header
 
 1.9.7
-~~~~~
+-----
 
 Released 2011/11/29
 
@@ -2159,7 +2144,7 @@ Released 2011/11/29
 - kill off openConnectionsHealthThresholds (unused)
 
 1.9.6
-~~~~~
+-----
 
 Released 2011/11/08
 
@@ -2169,7 +2154,7 @@ Released 2011/11/08
 - a more flexible retry filter
 
 1.9.5
-~~~~~
+-----
 
 Released 2011/11/04
 
@@ -2185,7 +2170,7 @@ Released 2011/11/04
 - `Tracing`: Add release method to Tracer trait, add tracerFactory to builders, deprecate tracer on builders
 
 1.9.4
-~~~~~
+-----
 
 Released 2011/10/24
 
@@ -2197,7 +2182,7 @@ Released 2011/10/24
 - `some timer bug fixes, particularly`: TimerToNettyTimer: actually cancel underlying task.
 
 1.9.2
-~~~~~
+-----
 
 Released 2011/10/14
 
@@ -2207,7 +2192,7 @@ Released 2011/10/14
 - `http`: add common media types
 
 1.9.1
-~~~~~
+-----
 
 Released 2011/09/28
 
@@ -2220,14 +2205,14 @@ Released 2011/09/28
 - upgrade to ostrich 4.9.0
 
 1.9.0
-~~~~~
+-----
 
 Released 2011/08/29
 
 - `http`: new http library
 
 1.8.4
-~~~~~
+-----
 
 Released 2011/08/23
 
@@ -2239,7 +2224,7 @@ Released 2011/08/23
 - `core`: expose stats on failed retries
 
 1.8.3
-~~~~~
+-----
 
 Released 2011/08/12
 
@@ -2251,7 +2236,7 @@ Released 2011/08/12
 - `kestrel`: buffered & merging of ReadHandles
 
 1.8.1
-~~~~~
+-----
 
 Released 2011/08/05
 
@@ -2264,7 +2249,7 @@ Released 2011/08/05
 - quench unecessary error reporting
 
 1.8.0
-~~~~~
+-----
 
 Released 2011/08/02
 
@@ -2272,7 +2257,7 @@ Released 2011/08/02
 - introduce util-codec dependency for use of the apache commons base 64 codec
 
 1.7.5
-~~~~~
+-----
 
 Released 2011/07/29
 
@@ -2289,7 +2274,7 @@ Released 2011/07/29
 - `ChannelServiceFactory`: encode exceptions from bootstrap.connect()
 
 1.7.4
-~~~~~
+-----
 
 Released 2011/07/22
 
@@ -2298,7 +2283,7 @@ Released 2011/07/22
 - `memcache`: `gets` and `cas` support.
 
 1.7.3
-~~~~~
+-----
 
 Released 2011/07/19
 
@@ -2309,7 +2294,7 @@ Released 2011/07/19
 
 
 1.7.2
-~~~~~
+-----
 
 Released 2011/07/18
 

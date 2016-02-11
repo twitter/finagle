@@ -184,7 +184,7 @@ load balancer (for example an Nginx server or a hardware load balancer).
 It is important to disable fail fast as the remote load balancer has
 the visibility into which endpoints are up.
 
-See :ref:`this example <disabling_fail_fast>`_ on how to disable `Fail Fast` for a given client.
+See :ref:`this example <disabling_fail_fast>` on how to disable `Fail Fast` for a given client.
 
 Refer to the :ref:`fail fast <client_fail_fast>` section for further context.
 
