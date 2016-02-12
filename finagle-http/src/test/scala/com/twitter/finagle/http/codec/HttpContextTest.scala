@@ -24,10 +24,10 @@ class HttpContextTest extends FunSuite {
       Contexts.broadcast.letClear(Deadline) {
 
         // ensure the deadline was cleared
-        assert(Contexts.broadcast.get(Deadline) == None)
+        assert(Deadline.current == None)
 
         HttpContext.read(m) {
-          val readDeadline = Contexts.broadcast.get(Deadline).get
+          val readDeadline = Deadline.current.get
           assert(writtenDeadline == readDeadline)
         }
       }

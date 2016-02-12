@@ -244,7 +244,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val writtenDeadline = Deadline.ofTimeout(5.seconds)
       val service = new HttpService {
         def apply(request: Request) = {
-          val deadline = Contexts.broadcast.get(Deadline).get
+          val deadline = Deadline.current.get
           assert(deadline.deadline == writtenDeadline.deadline)
           val response = Response(request)
           Future.value(response)

@@ -50,6 +50,7 @@ User's guide
    Configuration
    Servers
    Clients
+   Contexts
    Names
    Protocols
    Extending
