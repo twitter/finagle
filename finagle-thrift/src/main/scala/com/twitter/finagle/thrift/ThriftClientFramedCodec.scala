@@ -28,37 +28,56 @@ object ThriftClientFramedCodec {
 class ThriftClientFramedCodecFactory(
     clientId: Option[ClientId],
     _useCallerSeqIds: Boolean,
-    _protocolFactory: TProtocolFactory)
+    _protocolFactory: TProtocolFactory,
+    _attemptProtocolUpgrade: Boolean)
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client {
 
-  def this(clientId: Option[ClientId]) = this(clientId, false, Protocols.binaryFactory())
+  def this(clientId: Option[ClientId], _useCallerSeqIds: Boolean, _protocolFactory: TProtocolFactory) =
+    this(clientId, _useCallerSeqIds, _protocolFactory, true)
+
+  def this(clientId: Option[ClientId]) =
+    this(clientId, false, Protocols.binaryFactory(), true)
 
   def this(clientId: ClientId) = this(Some(clientId))
 
   // Fix this after the API/ABI freeze (use case class builder)
   def useCallerSeqIds(x: Boolean): ThriftClientFramedCodecFactory =
-    new ThriftClientFramedCodecFactory(clientId, x, _protocolFactory)
+    new ThriftClientFramedCodecFactory(clientId, x, _protocolFactory, _attemptProtocolUpgrade)
 
   /**
-   * Use the given protocolFactory in stead of the default `TBinaryProtocol.Factory`
+   * Use the given protocolFactory instead of the default `TBinaryProtocol.Factory`
    */
   def protocolFactory(pf: TProtocolFactory) =
-    new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, pf)
+    new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, pf, _attemptProtocolUpgrade)
+
+  /**
+   * Enable or disable protocol upgrading.
+   */
+  def attemptProtocolUpgrade(enabled: Boolean): ThriftClientFramedCodecFactory =
+    new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, _protocolFactory, enabled)
 
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
    * with a default TBinaryProtocol.
    */
   def apply(config: ClientCodecConfig) =
-    new ThriftClientFramedCodec(_protocolFactory, config, clientId, _useCallerSeqIds)
+    new ThriftClientFramedCodec(
+      _protocolFactory, config, clientId, _useCallerSeqIds, _attemptProtocolUpgrade)
 }
 
 class ThriftClientFramedCodec(
   protocolFactory: TProtocolFactory,
   config: ClientCodecConfig,
   clientId: Option[ClientId] = None,
-  useCallerSeqIds: Boolean = false
+  useCallerSeqIds: Boolean = false,
+  attemptProtocolUpgrade: Boolean = true
 ) extends Codec[ThriftClientRequest, Array[Byte]] {
+
+  def this(protocolFactory: TProtocolFactory,
+           config: ClientCodecConfig,
+           clientId: Option[ClientId],
+           useCallerSeqIds: Boolean) =
+    this(protocolFactory, config, clientId, useCallerSeqIds, true)
 
   private[this] val preparer = ThriftClientPreparer(
     protocolFactory, config.serviceName,
@@ -71,6 +90,16 @@ class ThriftClientFramedCodec(
     underlying: ServiceFactory[ThriftClientRequest, Array[Byte]],
     params: Stack.Params
   ) = preparer.prepare(underlying, params)
+=======
+    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]
+  ) = {
+    if (attemptProtocolUpgrade) {
+      preparer.prepare(underlying)
+    } else {
+      underlying
+    }
+  }
+>>>>>>> Allow control over thrift protocol upgrade.
 
   override val protocolLibraryName: String = "thrift"
 }

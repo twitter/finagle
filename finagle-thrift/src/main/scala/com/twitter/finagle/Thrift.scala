@@ -100,6 +100,15 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
       val default = MaxReusableBufferSize(maxThriftBufferSize)
     }
+
+    /**
+     * A `Param` to control upgrading the thrift protocol to TTwitter.
+     * @see The [[https://twitter.github.io/finagle/guide/Protocols.html?highlight=Twitter-upgraded#thrift user guide]] for details on Twitter-upgrade Thrift.
+     */
+    case class AttemptProtocolUpgrade(upgrade: Boolean)
+    implicit object AttemptProtocolUpgrade extends Stack.Param[AttemptProtocolUpgrade] {
+      val default = AttemptProtocolUpgrade(true)
+    }
   }
 
   object Client {
@@ -112,20 +121,25 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
           params: Stack.Params,
           next: ServiceFactory[ThriftClientRequest, Array[Byte]]
         ) = {
-          val Label(label) = params[Label]
-          val param.ClientId(clientId) = params[param.ClientId]
-          val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
-          val Stats(stats) = params[Stats]
-          val preparer = new ThriftClientPreparer(pf, label, clientId)
-          val underlying = preparer.prepare(next, params)
-          new ServiceFactoryProxy(underlying) {
-            val stat = stats.stat("codec_connection_preparation_latency_ms")
-            override def apply(conn: ClientConnection) = {
-              val elapsed = Stopwatch.start()
-              super.apply(conn).ensure {
-                stat.add(elapsed().inMilliseconds)
+          val param.AttemptProtocolUpgrade(upgrade) = params[param.AttemptProtocolUpgrade]
+          if (upgrade) {
+            val Label(label) = params[Label]
+            val param.ClientId(clientId) = params[param.ClientId]
+            val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
+            val Stats(stats) = params[Stats]
+            val preparer = new ThriftClientPreparer(pf, label, clientId)
+            val underlying = preparer.prepare(next, params)
+            new ServiceFactoryProxy(underlying) {
+              val stat = stats.stat("codec_connection_preparation_latency_ms")
+              override def apply(conn: ClientConnection) = {
+                val elapsed = Stopwatch.start()
+                super.apply(conn).ensure {
+                  stat.add(elapsed().inMilliseconds)
+                }
               }
             }
+          } else {
+            next
           }
         }
       }
@@ -177,6 +191,9 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     def withClientId(clientId: thrift.ClientId): Client =
       configured(param.ClientId(Some(clientId)))
+
+    def withAttemptProtocolUpgrade(attemptUpgrade: Boolean): Client =
+      configured(param.AttemptProtocolUpgrade(attemptUpgrade))
 
     def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
 
