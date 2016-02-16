@@ -172,6 +172,9 @@ private[twitter] object ServerDispatcher {
   ): ServerDispatcher =
     newRequestResponse(trans, service, Lessor.nil, NullTracer, NullStatsReceiver)
 
+  /**
+   * Used when comparing the difference between leases.
+   */
   val Epsilon = 1.second
 
   object State extends Enumeration {
@@ -260,8 +263,8 @@ private[twitter] class ServerDispatcher(
       tracker.drain()
 
     case m: Message =>
-      val msg = Message.Rerr(m.tag, f"Did not understand Tmessage ${m.typ}%d")
-      write(msg)
+      val rerr = Message.Rerr(m.tag, s"Unexpected mux message type ${m.typ}")
+      write(rerr)
   }
 
   private[this] def loop(): Unit =

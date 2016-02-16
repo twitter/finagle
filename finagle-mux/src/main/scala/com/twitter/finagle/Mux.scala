@@ -11,7 +11,7 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.Future
+import com.twitter.util.{Closable, Future}
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -19,6 +19,10 @@ import org.jboss.netty.buffer.ChannelBuffer
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
  */
 object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mux.Response] {
+  /**
+   * The current version of the mux protocol.
+   */
+  val LatestVersion: Short = 0x0001
 
   private[finagle] abstract class ProtoTracing(
     process: String,
@@ -80,8 +84,19 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val param.Label(name) = params[param.Label]
 
       val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
-      val msgTrans = transport.map(Message.encode, Message.decode)
-      val session = new mux.ClientSession(msgTrans, detectorConfig, name, sr.scope("mux"))
+
+      val negotiatedTrans = mux.Handshake.client(
+        trans = transport,
+        version = LatestVersion,
+        headers = Nil,
+        negotiate = mux.Handshake.NoopNegotiator)
+
+      val session = new mux.ClientSession(
+        negotiatedTrans,
+        detectorConfig,
+        name,
+        sr.scope("mux"))
+
       mux.ClientDispatcher.newRequestResponse(session)
     }
   }
@@ -122,12 +137,22 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[mux.Request, mux.Response]
-    ) = {
+    ): Closable = {
       val param.Tracer(tracer) = params[param.Tracer]
       val Lessor.Param(lessor) = params[Lessor.Param]
 
-      val msgTrans = transport.map(Message.encode, Message.decode)
-      mux.ServerDispatcher.newRequestResponse(msgTrans, service, lessor, tracer, statsReceiver)
+      val negotiatedTrans = mux.Handshake.server(
+        trans = transport,
+        version = LatestVersion,
+        headers = _ => Nil,
+        negotiate = mux.Handshake.NoopNegotiator)
+
+      mux.ServerDispatcher.newRequestResponse(
+        negotiatedTrans,
+        service,
+        lessor,
+        tracer,
+        statsReceiver)
     }
   }
 

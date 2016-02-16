@@ -45,6 +45,8 @@ New Features
   * finagle-stats: Define flag `c.t.f.stats.statsFilterFile` as GlobalFlag[Set[File]] to take
     comma-separated multiple files. ``RB_ID=793397``
 
+  * finagle-mux: Tinit/Rinit are now available and permit feature negotiation. ``RB_ID=793350``
+
 Deprecations
 ~~~~~~~~~~~~
 
