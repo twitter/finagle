@@ -7,11 +7,33 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle: Export two new histograms: `request_payload_bytes` and `response_payload_bytes`
+    for the following protocols: HTTP (non-chunked), Mux, ThriftMux and Thrift. ``RB_ID=797821``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.Codec.prepareConnFactory(ServiceFactory)` is marked `final`, override
+    `c.t.f.Codec.prepareConnFactory(ServiceFactory, Stack.Params)` instead. ``RB_ID=797821``
+
+  * finagle-core: `c.t.f.Codec.newClientDispatcher(Transport)` is marked `final`, override
+    `c.t.f.Codec.newClientDispatcher(Transport, Stack.Params)` instead. ``RB_ID=797821``
+
+  * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
+    pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``
+
+  * finagle-redis: `c.t.f.redis.Redis` no longer takes a `StatsReceiver`, pass it to a
+    `(Client/Server)Builder` instead. ``RB_ID=797821``
+
 6.33.0
 ------
 
 New Features
 ~~~~~~~~~~~~
+
   * finagle-core: Introduce the `c.t.f.service.PendingRequestFactory` module in the client Stack.
     The module allows clients to limit the number of pending requests per connection. It is disabled
     by default. ``RB_ID=795491``

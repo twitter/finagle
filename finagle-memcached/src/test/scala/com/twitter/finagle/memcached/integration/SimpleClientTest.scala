@@ -29,7 +29,8 @@ class SimpleClientTest extends FunSuite with BeforeAndAfter {
     if (testServer.isDefined) {
       val service = ClientBuilder()
         .hosts(Seq(testServer.get.address))
-        .codec(new Memcached(stats))
+        .reportTo(stats)
+        .codec(new Memcached())
         .hostConnectionLimit(1)
         .build()
       client = Client(service)

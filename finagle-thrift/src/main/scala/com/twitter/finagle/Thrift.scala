@@ -104,33 +104,25 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   object Client {
     private val preparer: Stackable[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
-      new Stack.Module4[
-        param.ClientId,
-        Label,
-        Stats,
-        param.ProtocolFactory,
-        ServiceFactory[ThriftClientRequest, Array[Byte]]
-      ] {
-        val role = StackClient.Role.prepConn
-        val description = "Prepare TTwitter thrift connection"
+      new Stack.ModuleParams[ServiceFactory[ThriftClientRequest, Array[Byte]]] {
+        override def parameters: Seq[Stack.Param[_]] = Nil
+        override val role = StackClient.Role.prepConn
+        override val description = "Prepare TTwitter thrift connection"
         def make(
-          _clientId: param.ClientId,
-          _label: Label,
-          _stats: Stats,
-          _pf: param.ProtocolFactory,
+          params: Stack.Params,
           next: ServiceFactory[ThriftClientRequest, Array[Byte]]
         ) = {
-          val Label(label) = _label
-          val param.ClientId(clientId) = _clientId
-          val param.ProtocolFactory(pf) = _pf
+          val Label(label) = params[Label]
+          val param.ClientId(clientId) = params[param.ClientId]
+          val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
+          val Stats(stats) = params[Stats]
           val preparer = new ThriftClientPreparer(pf, label, clientId)
-          val underlying = preparer.prepare(next)
-          val Stats(stats) = _stats
+          val underlying = preparer.prepare(next, params)
           new ServiceFactoryProxy(underlying) {
             val stat = stats.stat("codec_connection_preparation_latency_ms")
             override def apply(conn: ClientConnection) = {
               val elapsed = Stopwatch.start()
-              super.apply(conn) ensure {
+              super.apply(conn).ensure {
                 stat.add(elapsed().inMilliseconds)
               }
             }
@@ -271,20 +263,16 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   object Server {
     private val preparer =
-      new Stack.Module2[Label, param.ProtocolFactory, ServiceFactory[Array[Byte], Array[Byte]]]
-    {
-      val role = StackClient.Role.prepConn
-      val description = "Prepare TTwitter thrift connection"
-      def make(
-        _label: Label,
-        _pf: param.ProtocolFactory,
-        next: ServiceFactory[Array[Byte], Array[Byte]]
-      ) = {
-        val Label(label) = _label
-        val param.ProtocolFactory(pf) = _pf
-        val preparer = new thrift.ThriftServerPreparer(pf, label)
-        preparer.prepare(next)
-      }
+      new Stack.ModuleParams[ServiceFactory[Array[Byte], Array[Byte]]] {
+        override def parameters: Seq[Stack.Param[_]] = Nil
+        override val role = StackClient.Role.prepConn
+        override val description = "Prepare TTwitter thrift connection"
+        def make(params: Stack.Params, next: ServiceFactory[Array[Byte], Array[Byte]]) = {
+          val Label(label) = params[Label]
+          val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
+          val preparer = new thrift.ThriftServerPreparer(pf, label)
+          preparer.prepare(next, params)
+        }
     }
 
     val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack

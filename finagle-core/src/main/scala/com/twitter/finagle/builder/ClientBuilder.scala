@@ -1114,12 +1114,13 @@ private case class CodecClient[Req, Rep](
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
     val codec = codecFactory(ClientCodecConfig(label))
 
-    val prepConn = new Stack.Module1[Stats, ServiceFactory[Req, Rep]] {
-      val role = StackClient.Role.prepConn
-      val description = "Connection preparation phase as defined by a Codec"
-      def make(_stats: Stats, next: ServiceFactory[Req, Rep]) = {
-        val Stats(stats) = _stats
-        val underlying = codec.prepareConnFactory(next)
+    val prepConn = new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
+      override def parameters: Seq[Stack.Param[_]] = Nil
+      override val role = StackClient.Role.prepConn
+      override val description = "Connection preparation phase as defined by a Codec"
+      def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]) = {
+        val Stats(stats) = ps[Stats]
+        val underlying = codec.prepareConnFactory(next, ps)
         new ServiceFactoryProxy(underlying) {
           val stat = stats.stat("codec_connection_preparation_latency_ms")
           override def apply(conn: ClientConnection) = {

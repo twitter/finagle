@@ -336,4 +336,29 @@ EOF
       Closable.sequence(Await.result(fclient), server, factory).close()
     }
   }
+
+  test("measures payload sizes") {
+    val sr = new InMemoryStatsReceiver
+    val service = new Service[Request, Response] {
+      def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
+    }
+    val server = Mux.server
+      .withLabel("server")
+      .withStatsReceiver(sr)
+      .serve("localhost:*", service)
+
+    val client = Mux.client
+      .withLabel("client")
+      .withStatsReceiver(sr)
+      .newService(server)
+
+    Await.ready(client(Request(Path.empty, Buf.Utf8("." * 10))))
+
+    assert(sr.stat("client", "request_payload_bytes")() == Seq(10.0f))
+    assert(sr.stat("client", "response_payload_bytes")() == Seq(20.0f))
+    assert(sr.stat("server", "request_payload_bytes")() == Seq(10.0f))
+    assert(sr.stat("server", "response_payload_bytes")() == Seq(20.0f))
+
+    Await.ready(Closable.all(server, client).close())
+  }
 }

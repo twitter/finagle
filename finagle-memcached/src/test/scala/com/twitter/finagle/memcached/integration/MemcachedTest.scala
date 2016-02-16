@@ -10,7 +10,7 @@ import com.twitter.finagle.param
 import com.twitter.finagle.Service
 import com.twitter.finagle.service.FailureAccrualFactory
 import com.twitter.finagle.ShardNotAvailableException
-import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
@@ -225,7 +225,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       .clientBuilder(ClientBuilder()
         .hosts(Seq(server1.get.address))
         .name(name)
-        .codec(new com.twitter.finagle.memcached.protocol.text.Memcached(NullStatsReceiver))
+        .codec(new com.twitter.finagle.memcached.protocol.text.Memcached())
         .hostConnectionLimit(1))
       .build()
 

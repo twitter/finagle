@@ -342,7 +342,7 @@ object StreamingTest {
         val pipelineFactory = codec.pipelineFactory
         override def prepareServiceFactory(sf: ServiceFactory[Request, Response]) =
           codec.prepareServiceFactory(sf)
-        override def prepareConnFactory(sf: ServiceFactory[Request, Response]) =
+        override def prepareConnFactory(sf: ServiceFactory[Request, Response], ps: Stack.Params) =
           codec.prepareConnFactory(sf)
         override def newClientTransport(ch: Channel, sr: StatsReceiver) =
           codec.newClientTransport(ch, sr)

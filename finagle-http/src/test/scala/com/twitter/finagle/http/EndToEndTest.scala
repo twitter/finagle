@@ -298,6 +298,28 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
         }
       })
     }
+
+    test(name + ": measure payload size") {
+      val service = new HttpService {
+        def apply(request: Request) = {
+          val rep = Response()
+          rep.content = request.content.concat(request.content)
+
+          Future.value(rep)
+        }
+      }
+
+      val client = connect(service)
+      val req = Request()
+      req.content = Buf.Utf8("." * 10)
+      Await.ready(client(req))
+
+      assert(statsRecv.stat("client", "request_payload_bytes")() == Seq(10.0f))
+      assert(statsRecv.stat("client", "response_payload_bytes")() == Seq(20.0f))
+      assert(statsRecv.stat("server", "request_payload_bytes")() == Seq(10.0f))
+      assert(statsRecv.stat("server", "response_payload_bytes")() == Seq(20.0f))
+      client.close()
+    }
   }
 
   def streaming(name: String)(connect: HttpService => HttpService) {
@@ -431,6 +453,18 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       Await.result(client(Request()))
       client.close()
     }
+
+    test(name +": does not measure payload size") {
+      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val client = connect(svc)
+      Await.result(client(Request()))
+
+      assert(statsRecv.stat("client", "request_payload_bytes")() == Nil)
+      assert(statsRecv.stat("client", "response_payload_bytes")() == Nil)
+      assert(statsRecv.stat("server", "request_payload_bytes")() == Nil)
+      assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
+      client.close()
+    }
   }
 
   def tracing(name: String)(connect: HttpService => HttpService) {
@@ -496,6 +530,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     service =>
       import com.twitter.finagle
       val server = finagle.Http.server
+        .withLabel("server")
         .configured(Stats(statsRecv))
         .withMaxRequestSize(100.bytes)
         .serve("localhost:*", service)

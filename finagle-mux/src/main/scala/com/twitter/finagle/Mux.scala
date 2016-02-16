@@ -2,6 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
+import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.mux.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
@@ -58,6 +59,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
       .replace(BindingFactory.role, MuxBindingFactory)
+      .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
   }
 
   case class Client(
@@ -111,10 +113,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   private[finagle] class ServerProtoTracing extends ProtoTracing("srv", StackServer.Role.protoTracing)
 
-  case class Server(
-      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
+  object Server {
+    val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
         .remove(TraceInitializerFilter.role)
-        .replace(StackServer.Role.protoTracing, new ServerProtoTracing),
+        .replace(StackServer.Role.protoTracing, new ServerProtoTracing)
+        .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+  }
+
+  case class Server(
+      stack: Stack[ServiceFactory[mux.Request, mux.Response]] = Server.stack,
       params: Stack.Params = StackServer.defaultParams + ProtocolLibrary("mux"))
     extends StdStackServer[mux.Request, mux.Response, Server] {
 

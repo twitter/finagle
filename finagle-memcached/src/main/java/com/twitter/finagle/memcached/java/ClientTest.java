@@ -40,7 +40,7 @@ public final class ClientTest {
     CachePoolCluster cluster = CachePoolClusterUtil.newStaticCluster(
         ImmutableSet.of(new CacheNode("localhost", 11211, 1)));
 
-    ClientBuilder builder = ClientBuilder.get().codec(new Memcached(null));
+    ClientBuilder builder = ClientBuilder.get().codec(new Memcached());
     com.twitter.finagle.memcached.Client memcachedClient = KetamaClientBuilder.get()
         .cachePoolCluster(cluster)
         .clientBuilder(builder)

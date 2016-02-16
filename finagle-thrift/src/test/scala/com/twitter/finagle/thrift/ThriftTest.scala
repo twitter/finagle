@@ -88,8 +88,9 @@ trait ThriftTest { self: FunSuite =>
 
   private val newAPIServer = (protocolFactory: TProtocolFactory) => new {
     val server = Thrift.server
+      .withLabel("thriftserver")
       .withProtocolFactory(protocolFactory)
-      .serveIface("thriftserver=:*", processor)
+      .serveIface("localhost:*", processor)
     val boundAddr = server.boundAddress
 
     def close() {

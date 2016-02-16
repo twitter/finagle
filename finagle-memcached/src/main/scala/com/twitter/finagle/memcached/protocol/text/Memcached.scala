@@ -13,12 +13,12 @@ import server.{Decoder => ServerDecoder}
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.io.Buf
 
 object Memcached {
-  def apply(stats: StatsReceiver = NullStatsReceiver) = new Memcached(stats)
+  def apply(): Memcached = new Memcached()
   def get() = apply()
 }
 
@@ -52,9 +52,8 @@ object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
     pipeline
   }
 }
-class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
+class Memcached extends CodecFactory[Command, Response] {
 
-  def this() = this(NullStatsReceiver)
   def server = Function.const {
     new Codec[Command, Response] {
       def pipelineFactory = MemcachedServerPipelineFactory
@@ -66,8 +65,8 @@ class Memcached(stats: StatsReceiver) extends CodecFactory[Command, Response] {
       def pipelineFactory = MemcachedClientPipelineFactory
 
       // pass every request through a filter to create trace data
-      override def prepareConnFactory(underlying: ServiceFactory[Command, Response]) =
-        new MemcachedLoggingFilter(stats) andThen underlying
+      override def prepareConnFactory(underlying: ServiceFactory[Command, Response], params: Stack.Params) =
+        new MemcachedLoggingFilter(params[param.Stats].statsReceiver).andThen(underlying)
 
       override def newTraceInitializer = MemcachedTraceInitializer.Module
     }

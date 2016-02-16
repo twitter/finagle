@@ -37,21 +37,23 @@ trait Codec[Req, Rep] {
    * Prepare a connection factory. Used to allow codec modifications
    * to the service at the bottom of the stack (connection level).
    */
+  final def prepareConnFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+    prepareConnFactory(underlying, Stack.Params.empty)
+
   def prepareConnFactory(
-    underlying: ServiceFactory[Req, Rep]
-  ): ServiceFactory[Req, Rep] =
-    underlying
+    underlying: ServiceFactory[Req, Rep],
+    params: Stack.Params
+  ): ServiceFactory[Req, Rep] = underlying
 
   /**
    * Note: the below ("raw") interfaces are low level, and require a
    * good understanding of finagle internals to implement correctly.
    * Proceed with care.
    */
-
   def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
     new ChannelTransport(ch)
 
-  def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
+  final def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
     newClientDispatcher(transport, Stack.Params.empty)
 
   def newClientDispatcher(

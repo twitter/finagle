@@ -30,7 +30,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
     val statsReceiver = new InMemoryStatsReceiver
 
     val codec = mock[Codec[String, String]]
-    when(codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenAnswer {
+    when(codec.prepareConnFactory(any[ServiceFactory[String, String]], any[Stack.Params])) thenAnswer {
       new Answer[ServiceFactory[String, String]] {
         def answer(invocation: InvocationOnMock): ServiceFactory[String, String] = {
           val arg = invocation.getArguments.head
@@ -131,7 +131,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
       client.withStack(
         // needed for ClientBuilderTest.ClientBuilderHelper
         client.stack.replace(StackClient.Role.prepConn, (next: ServiceFactory[String, String]) =>
-          codec.prepareConnFactory(next)))
+          codec.prepareConnFactory(next, Stack.Params.empty)))
     }
   }
 }

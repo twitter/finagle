@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
@@ -84,11 +85,30 @@ object Http extends Client[Request, Response] with HttpRichClient
           .compressionLevel(params[CompressionLevel].level)
   }
 
+  // Only record payload sizes when streaming is disabled.
+  private[this] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
+    new Stack.Module2[param.Streaming, Stats, ServiceFactory[Request, Response]] {
+      override def role: Stack.Role = PayloadSizeFilter.Role
+      override def description: String = PayloadSizeFilter.Description
+
+      override def make(
+        streaming: param.Streaming,
+        stats: Stats,
+        next: ServiceFactory[Request, Response]
+      ): ServiceFactory[Request, Response] = {
+        if (!streaming.enabled)
+          new PayloadSizeFilter[Request, Response](
+            stats.statsReceiver, _.content.length, _.content.length).andThen(next)
+        else next
+      }
+    }
+
   object Client {
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
+        .prepend(nonChunkedPayloadSize)
   }
 
   case class Client(
@@ -195,6 +215,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       StackServer.newStack
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
+        .prepend(nonChunkedPayloadSize)
   }
 
   case class Server(

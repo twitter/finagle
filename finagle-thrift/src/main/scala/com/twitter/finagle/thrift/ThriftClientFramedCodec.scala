@@ -1,6 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
+import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.util.Future
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
@@ -67,8 +68,9 @@ class ThriftClientFramedCodec(
     ThriftClientFramedPipelineFactory
 
   override def prepareConnFactory(
-    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]
-  ) = preparer.prepare(underlying)
+    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]],
+    params: Stack.Params
+  ) = preparer.prepare(underlying, params)
 
   override val protocolLibraryName: String = "thrift"
 }
@@ -116,7 +118,7 @@ private[finagle] case class ThriftClientPreparer(
     clientId: Option[ClientId] = None,
     useCallerSeqIds: Boolean = false) {
 
-  def prepareService(
+  def prepareService(params: Stack.Params)(
     service: Service[ThriftClientRequest, Array[Byte]]
   ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
     // Attempt to upgrade the protocol the first time around by
@@ -130,28 +132,36 @@ private[finagle] case class ThriftClientPreparer(
 
     buffer().writeMessageEnd()
 
-    service(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
+    val payloadSize = new PayloadSizeFilter[ThriftClientRequest, Array[Byte]](
+      params[param.Stats].statsReceiver, _.message.length, _.length
+    )
+
+    val payloadSizeService = payloadSize.andThen(service)
+
+    payloadSizeService(new ThriftClientRequest(buffer.toArray, false)) map { bytes =>
       val memoryTransport = new TMemoryInputTransport(bytes)
       val iprot = protocolFactory.getProtocol(memoryTransport)
       val reply = iprot.readMessageBegin()
+
       val ttwitter = new TTwitterClientFilter(
         serviceName,
         reply.`type` != TMessageType.EXCEPTION,
         clientId, protocolFactory)
       // TODO: also apply this for Protocols.binaryFactory
+
       val seqIdFilter =
         if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
           new SeqIdFilter
         else
           Filter.identity[ThriftClientRequest, Array[Byte]]
 
-      val filtered = seqIdFilter andThen ttwitter andThen service
+      val filtered = seqIdFilter.andThen(ttwitter).andThen(payloadSizeService)
       new ValidateThriftService(filtered, protocolFactory)
     }
   }
 
-  def prepare(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) =
-    underlying flatMap prepareService
+  def prepare(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]], params: Stack.Params) =
+    underlying.flatMap(prepareService(params))
 }
 
 /**

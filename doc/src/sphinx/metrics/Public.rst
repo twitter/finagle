@@ -93,3 +93,12 @@ RequestSemaphoreFilter
 **request_queue_size**
   A gauge of the total number of requests which are waiting because of the limit
   on simultaneous requests.
+
+PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+**request_payload_bytes**
+  A histogram of the number of bytes per request's payload.
+
+**response_payload_bytes**
+  A histogram of the number of bytes per response's payload.
