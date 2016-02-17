@@ -8,7 +8,7 @@ import com.twitter.finagle.client.DefaultPool
  *
  * @tparam A a [[Stack.Parameterized]] client to configure
  *
- * @see [[http://twitter.github.io/finagle/guide/Clients.html#pooling]]
+ * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
  */
 class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
 
@@ -20,7 +20,7 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
    *
    * @note The session pool will not have more active sessions than `sessionsPerHost`.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#pooling]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
   def maxSize(sessionsPerHost: Int): A =
     self.configured(self.params[DefaultPool.Param].copy(high = sessionsPerHost))
@@ -31,7 +31,7 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
    *
    * @note The session pool will not be shrinked below `sessionsPerHost`.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#pooling]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
   def minSize(sessionsPerHost: Int): A =
     self.configured(self.params[DefaultPool.Param].copy(low = sessionsPerHost))
@@ -42,7 +42,7 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
    * when the connections concurrency exceeds the maximum size of this pool
    * (default: unbounded).
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#pooling]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
   def maxWaiters(maxWaitersPerHost: Int): A =
     self.configured(self.params[DefaultPool.Param].copy(maxWaiters = maxWaitersPerHost))

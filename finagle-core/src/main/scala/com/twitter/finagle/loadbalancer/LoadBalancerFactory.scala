@@ -297,6 +297,9 @@ object ConcurrentLoadBalancerFactory {
  * context from the stack to the balancers at construction time.
  *
  * @see [[Balancers]] for a collection of available balancers.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing user guide]]
+ *      for more details.
  */
 abstract class LoadBalancerFactory {
   /**

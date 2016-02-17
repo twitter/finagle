@@ -13,7 +13,7 @@ trait WithSessionQualifier[A <: Stack.Parameterized[A]] { self: Stack.Parameteri
    * An entry point for configuring the client's session qualifiers
    * (e.g. circuit breakers).
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
    */
   val withSessionQualifier: SessionQualificationParams[A] = new SessionQualificationParams(self)
 }

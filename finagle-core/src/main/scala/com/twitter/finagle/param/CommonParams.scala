@@ -66,7 +66,7 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    * of time after which a non-satisfied future returned from the user-defined service
    * times out.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
    */
   def withRequestTimeout(timeout: util.Duration): A =
     self.configured(TimeoutFilter.Param(timeout))

@@ -28,8 +28,12 @@ import com.twitter.util._
  * Must be non-negative.
  *
  * @param timer Timer used to schedule retries
+ *
  * @note consider using a [[Timer]] with high resolution so there is
  * less correlation between retries. For example [[HighResTimer.Default]]
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
+ *      for more details.
  */
 private[finagle] class RequeueFilter[Req, Rep](
     retryBudget: RetryBudget,

@@ -46,7 +46,7 @@ class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
  * [[com.twitter.finagle.Resolver]] was invalid according to the destination
  * name grammar [1].
  *
- * [1] http://twitter.github.io/finagle/guide/Names.html
+ * [1] https://twitter.github.io/finagle/guide/Names.html
  */
 class ResolverAddressInvalid(addr: String)
   extends Exception("Resolver address \"%s\" is not valid".format(addr))

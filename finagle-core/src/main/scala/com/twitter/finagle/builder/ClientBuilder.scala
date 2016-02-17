@@ -171,8 +171,8 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * A builder of Finagle [[com.twitter.finagle.Client Clients]].
  *
  * Please see the
- * [[http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6 Finagle user guide]]
- * for information on a newer set of client-construction APIs introduced in Finagle v6.
+ * [[http://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
+ * for information on the preferred `with`-style client-construction APIs.
  *
  * {{{
  * val client = ClientBuilder()
@@ -248,6 +248,9 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `sendBufferSize`, `recvBufferSize`: OS-defined default value
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
+ *      for information on the preferred `with`-style APIs insead.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
   client: StackBasedClient[Req, Rep]

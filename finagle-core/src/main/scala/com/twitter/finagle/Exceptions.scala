@@ -146,6 +146,9 @@ class NoBrokersAvailableException(
  * this exception. The client will cancel its pending request which will by
  * default propagate an interrupt to its downstream, and so on. This is done to
  * conserve resources.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception user guide]]
+ *      for additional details.
  */
 class CancelledRequestException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)
@@ -173,6 +176,9 @@ class TooManyWaitersException extends RequestException
  * during session establishment.
  *
  * @see com.twitter.finagle.CancelledRequestException
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/FAQ.html#what-are-cancelledrequestexception-and-cancelledconnectionexception user guide]]
+ *      for additional details.
  */
 class CancelledConnectionException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)
@@ -181,8 +187,11 @@ class CancelledConnectionException(cause: Throwable) extends RequestException(ca
 /**
  * Used by [[com.twitter.finagle.service.FailFastFactory]] to indicate that a
  * request failed because all hosts in the cluster to which the client is
- * connected have been marked as failed. See FailFastFactory for details on
- * this behavior.
+ * connected have been marked as failed. See [[com.twitter.finagle.service.FailFastFactory]]
+ * for details on this behavior.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s user guide]]
+ *      for additional details.
  */
 class FailedFastException(message: String)
   extends RequestException(message, cause = null)

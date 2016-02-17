@@ -6,6 +6,12 @@ import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.annotation.tailrec
 
+/**
+ * Buffers up to `size` connections and produces/closes new ones beyond that limit.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#buffering-pool user guide]]
+ *      for more details.
+ */
 class BufferingPool[Req, Rep](underlying: ServiceFactory[Req, Rep], size: Int)
   extends ServiceFactoryProxy[Req, Rep](underlying)
 {

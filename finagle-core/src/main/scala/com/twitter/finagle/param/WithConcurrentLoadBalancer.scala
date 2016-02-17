@@ -14,7 +14,7 @@ trait WithConcurrentLoadBalancer[A <: Stack.Parameterized[A]] { self: Stack.Para
    * a strategy for choosing one host/node from a replica set to service
    * a request.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
    */
   val withLoadBalancer: ConcurrentLoadBalancingParams[A] = new ConcurrentLoadBalancingParams(self)
 }

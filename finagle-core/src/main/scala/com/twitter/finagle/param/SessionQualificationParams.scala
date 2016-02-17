@@ -13,7 +13,7 @@ import com.twitter.finagle.service.{FailureAccrualFactory, FailFastFactory}
  *
  * @tparam A a [[Stack.Parameterized]] client to configure
  *
- * @see [[http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
+ * @see [[https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
  */
 class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
 
@@ -26,8 +26,8 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    * @note Usually, it's a good idea to disable Fail Fast for server sets with only
    *       one host in the load balancer's replica set.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#fail-fast]]
-   *      [[http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#fail-fast]]
+   *      [[https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
    *      [[FailFastFactory]]
    */
   def noFailFast: A =
@@ -42,8 +42,8 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    * consecutive failures (default is 5) accompanied by equal jittered backoff
    * producing durations for which a host is marked unavailable.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#failure-accrual]]
-   *      [[http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual]]
+   *      [[https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
    *      [[FailureAccrualFactory]]
    */
   def noFailureAccrual: A =
@@ -60,8 +60,8 @@ class SessionQualificationParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    * consecutive failures (default is 5) accompanied by equal jittered backoff
    * producing durations for which a host is marked unavailable.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#failure-accrual]]
-   *      [[http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual]]
+   *      [[https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking]]
    *      [[FailureAccrualFactory]]
    */
   def failureAccrualPolicy(policy: FailureAccrualPolicy): A =

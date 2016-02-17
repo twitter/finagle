@@ -107,6 +107,9 @@ object FailureAccrualFactory {
    *
    * @param numFailures The number of consecutive failures before marking an endpoint as dead.
    * @param markDeadFor The duration to mark an endpoint as dead.
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
+   *      for more details.
    */
   def Param(numFailures: Int, markDeadFor: () => Duration): Param =
     Param.Configured(() => FailureAccrualPolicy.consecutiveFailures(
@@ -117,6 +120,9 @@ object FailureAccrualFactory {
    *
    * @param numFailures The number of consecutive failures before marking an endpoint as dead.
    * @param markDeadFor The duration to mark an endpoint as dead.
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
+   *      for more details.
    */
   def Param(numFailures: Int, markDeadFor: Duration): Param =
     Param.Configured(() => FailureAccrualPolicy.consecutiveFailures(numFailures,
@@ -126,6 +132,9 @@ object FailureAccrualFactory {
    * Configures the [[FailureAccrualFactory]].
    *
    * @param failureAccrualPolicy The policy to use to determine when to mark an endpoint as dead.
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
+   *      for more details.
    */
   def Param(failureAccrualPolicy: FailureAccrualPolicy): Param =
     Param.Configured(() => failureAccrualPolicy)
@@ -232,6 +241,9 @@ object FailureAccrualFactory {
  *
  * @param responseClassifier used to determine which request/response pairs
  * are successful or not.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
+ *      for more details.
  */
 class FailureAccrualFactory[Req, Rep] private[finagle](
     underlying: ServiceFactory[Req, Rep],

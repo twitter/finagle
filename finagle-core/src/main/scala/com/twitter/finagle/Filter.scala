@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.{NonFatal, Future, Time}
+import com.twitter.util.{Future, Time}
 
 /**
  * A [[Filter]] acts as a decorator/transformer of a [[Service service]].
@@ -9,12 +9,12 @@ import com.twitter.util.{NonFatal, Future, Time}
  *           (*  MyService  *)
  * [ReqIn -> (ReqOut -> RepIn) -> RepOut]
  * }}}
- * For example, you may have a POJO service that takes Strings and
- * parses them as Ints.  If you want to expose this as a Network
+ * For example, you may have a service that takes `Strings` and
+ * parses them as `Ints`.  If you want to expose this as a Network
  * Service via Thrift, it is nice to isolate the protocol handling
  * from the business rules. Hence you might have a Filter that
  * converts back and forth between Thrift structs. Again, your service
- * deals with POJOs:
+ * deals with plain objects:
  * {{{
  * [ThriftIn -> (String  ->  Int) -> ThriftOut]
  * }}}
@@ -23,6 +23,8 @@ import com.twitter.util.{NonFatal, Future, Time}
  * In other words, it converts a `Service[ReqOut, RepIn]` to a
  * `Service[ReqIn, RepOut]`.
  *
+ * @see The [[http://twitter.github.io/finagle/guide/ServicesAndFilters.html#filters user guide]]
+ *      for details and examples.
  */
 abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut])
@@ -45,7 +47,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
    * myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))
    * }}}
    *
-   * '''Note:''' synchronously thrown exceptions in the underlying service are automatically
+   * @note synchronously thrown exceptions in the underlying service are automatically
    * lifted into Future.exception.
    *
    * @param next another filter to follow after this one
@@ -57,7 +59,7 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     else AndThen(service => andThen(next.andThen(service)))
 
   /**
-   * Terminates a filter chain in a service. For example,
+   * Terminates a filter chain in a [[Service]]. For example,
    *
    * {{{
    *   myFilter.andThen(myService)
@@ -78,6 +80,15 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     req => Filter.this.apply(req, service)
   }
 
+  /**
+   * Terminates a filter chain in a [[ServiceFactory]]. For example,
+   *
+   * {{{
+   *   myFilter.andThen(myServiceFactory)
+   * }}}
+   * @param factory a service factory that takes the output request type and
+   *                the input response type.
+   */
   def andThen(factory: ServiceFactory[ReqOut, RepIn]): ServiceFactory[ReqIn, RepOut] =
     new ServiceFactory[ReqIn, RepOut] {
       val fn: Service[ReqOut, RepIn] => Service[ReqIn, RepOut] =

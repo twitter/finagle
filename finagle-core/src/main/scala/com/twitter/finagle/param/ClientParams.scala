@@ -9,7 +9,7 @@ import com.twitter.util.Duration
  *
  * @tparam A a [[Stack.Parameterized]] client to configure
  *
- * @see [[http://twitter.github.io/finagle/guide/Clients.html]]
+ * @see [[https://twitter.github.io/finagle/guide/Clients.html]]
  */
 trait ClientParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =>
 
@@ -24,7 +24,7 @@ trait ClientParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    * @note The retry budget helps prevent clients from overwhelming the
    *       downstream service.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#retries]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#retries]]
    */
   def withRetryBudget(budget: RetryBudget): A =
     self.configured(self.params[Retries.Budget].copy(retryBudget = budget))
@@ -35,7 +35,7 @@ trait ClientParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    * The `backoff` policy is represented by a stream of delays (i.e.,
    * `Stream[Duration]`) used to delay each retry.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#retries]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#retries]]
    */
   def withRetryBackoff(backoff: Stream[Duration]): A =
     self.configured(self.params[Retries.Budget].copy(requeueBackoffs = backoff))

@@ -125,6 +125,12 @@ trait StackServer[Req, Rep]
 /**
  * A standard template implementation for
  * [[com.twitter.finagle.server.StackServer]].
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Servers.html user guide]]
+ *      for further details on Finagle servers and their configuration.
+ *
+ * @see [[StackServer.newStack]] for the default modules used by Finagle
+ *      servers.
  */
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   extends StackServer[Req, Rep]

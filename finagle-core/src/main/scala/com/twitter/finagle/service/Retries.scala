@@ -9,6 +9,9 @@ import com.twitter.util._
  * The [[Stack]] parameters and modules for configuring
  * '''which''' and '''how many''' failed requests are retried for
  * a client.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
+ *      for more details.
  */
 object Retries {
 
@@ -38,8 +41,8 @@ object Retries {
 
   /**
    * Determines '''how many''' failed requests are eligible for
-   * being retried. 
-   * 
+   * being retried.
+   *
    * @param retryBudget maintains a budget of remaining retries for
    *                    an individual request.
    *

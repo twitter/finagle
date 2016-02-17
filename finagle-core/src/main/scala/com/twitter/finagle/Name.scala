@@ -27,6 +27,9 @@ import com.twitter.finagle.util.Showable
  * As names are bound, a [[com.twitter.finagle.Namer Namer]] may elect
  * to bind only a [[com.twitter.finagle.Name Name]] prefix, leaving an
  * unbound residual name to be processed by a downstream Namer.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Names.html user guide]]
+ *      for further details.
  */
 sealed trait Name
 
@@ -153,7 +156,7 @@ object Name {
           val sockaddrs = addrs.flatMap {
             case Addr.Bound(as, _) => as
             case _ => Set.empty: Set[SocketAddress]
-          }.toSet
+          }
           Addr.Bound(sockaddrs, Addr.Metadata.empty)
 
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg

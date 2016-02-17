@@ -94,6 +94,9 @@ object DeadlineFilter {
  * ".../admission_control/deadline/"
  *
  * @param nowMillis current time in milliseconds
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
+ *      for more details.
  */
 private[finagle] class DeadlineFilter[Req, Rep](
     tolerance: Duration,

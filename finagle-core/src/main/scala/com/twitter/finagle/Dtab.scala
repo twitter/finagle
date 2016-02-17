@@ -14,6 +14,9 @@ import scala.collection.mutable.Builder
  * [[com.twitter.finagle.Path]] to a set of
  * [[com.twitter.finagle.Addr]]. [[com.twitter.finagle.naming.DefaultInterpreter]]
  * implements the default binding stategy.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Names.html#interpreting-paths-with-delegation-tables user guide]]
+ *      for further details.
  */
 case class Dtab(dentries0: IndexedSeq[Dentry])
   extends IndexedSeq[Dentry] {
@@ -137,7 +140,7 @@ object Dentry {
    * }}}
    *
    * where the productions `path` and `tree` are from the grammar
-   * documented in [[com.twitter.finagle.NameTree$ NameTree.read]].
+   * documented in [[com.twitter.finagle.NameTree.read NameTree.read]].
    */
   def read(s: String): Dentry = NameTreeParsers.parseDentry(s)
 
@@ -227,7 +230,7 @@ object Dtab {
    * }}}
    *
    * where the production `dentry` is from the grammar documented in
-   * [[com.twitter.finagle.Dentry$ Dentry.read]]
+   * [[com.twitter.finagle.Dentry.read Dentry.read]]
    *
    */
   def read(s: String): Dtab = NameTreeParsers.parseDtab(s)
@@ -261,7 +264,7 @@ final class DtabBuilder extends Builder[Dentry, Dtab] {
     this
   }
 
-  def clear() = builder.clear()
+  def clear(): Unit = builder.clear()
 
   def result(): Dtab = Dtab(builder.result)
 }

@@ -7,8 +7,8 @@ import java.net.SocketAddress
 object Service {
 
   /**
-   * Wrap an underlying service such that any synchronously thrown exceptions are lifted into
-   * Future.exception
+   * Wrap the given service such that any synchronously thrown `NonFatal`
+   * exceptions are lifted into `Future.exceptions`.
    */
   def rescue[Req, Rep](service: Service[Req, Rep]) = new ServiceProxy[Req, Rep](service) {
     override def apply(request: Req): Future[Rep] = {
@@ -20,6 +20,10 @@ object Service {
     }
   }
 
+  /**
+   * A convenience method for creating `Services` from a `Function1` of
+   * `Req` to a `Future[Rep]`.
+   */
   def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
     def apply(req: Req): Future[Rep] = f(req)
   }
@@ -38,11 +42,15 @@ object Service {
 }
 
 /**
- * A Service is an asynchronous function from Request to Future[Response]. It is the
- * basic unit of an RPC interface.
+ * A `Service` is an asynchronous function from a `Request` to a `Future[Response]`.
  *
- * '''Note:''' this is an abstract class (vs. a trait) to maintain java
- * compatibility, as it has implementation as well as interface.
+ * It is the basic unit of an RPC interface.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/ServicesAndFilters.html#services user guide]]
+ *      for details and examples.
+ *
+ * @see [[com.twitter.finagle.Service.mk Service.mk]] for a convenient
+ *     way to create new instances.
  */
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   def map[Req1](f: Req1 => Req) = new Service[Req1, Rep] {
@@ -66,12 +74,12 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   def close(deadline: Time): Future[Unit] = Future.Done
 
   /**
-   * The current availability [[Status]] of this Service.
+   * The current availability [[Status]] of this `Service`.
    */
   def status: Status = Status.Open
 
   /**
-   * Determines whether this service is available (can accept requests
+   * Determines whether this `Service` is available (can accept requests
    * with a reasonable likelihood of success).
    */
   final def isAvailable: Boolean = status == Status.Open

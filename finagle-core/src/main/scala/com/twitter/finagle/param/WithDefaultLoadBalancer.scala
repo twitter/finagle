@@ -18,7 +18,7 @@ trait WithDefaultLoadBalancer[A <: Stack.Parameterized[A]] { self: Stack.Paramet
    * algorithm to distribute load across endpoints, and comparing nodes
    * via a least loaded metric.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
    */
   val withLoadBalancer: DefaultLoadBalancingParams[A] = new DefaultLoadBalancingParams(self)
 }
