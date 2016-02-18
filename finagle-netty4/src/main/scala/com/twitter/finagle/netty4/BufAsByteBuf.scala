@@ -9,7 +9,7 @@ private[finagle] object BufAsByteBuf {
     /**
      * A read-only and potentially non-copying `ByteBuf` wrapper for [[Buf]].
      */
-    def apply(buf: Buf, endianness: ByteOrder): ByteBuf = {
+    def apply(buf: Buf): ByteBuf = {
       val bb = buf match {
         case ByteBufAsBuf.Owned(underlying) =>
           underlying
@@ -19,20 +19,16 @@ private[finagle] object BufAsByteBuf {
           Unpooled.wrappedBuffer(Buf.ByteBuffer.Owned.extract(buf))
       }
 
-      Unpooled.unmodifiableBuffer(bb.order(endianness))
+      Unpooled.unmodifiableBuffer(bb)
     }
 
-    /**
-     * A read-only and potentially non-copying `ByteBuf` wrapper for [[Buf]].
-     */
-    def apply(buf: Buf): ByteBuf = apply(buf, ByteOrder.BIG_ENDIAN)
   }
 
   object Shared {
     /**
      * A read-only copying `ByteBuf` wrapper for [[Buf]]
      */
-    def apply(buf: Buf, endianness: ByteOrder): ByteBuf = {
+    def apply(buf: Buf): ByteBuf = {
       val bb = buf match {
         case ByteBufAsBuf.Shared(underlying) =>
           Unpooled.copiedBuffer(underlying)
@@ -42,12 +38,7 @@ private[finagle] object BufAsByteBuf {
           Unpooled.wrappedBuffer(Buf.ByteBuffer.Shared.extract(buf))
       }
 
-      Unpooled.unmodifiableBuffer(bb.order(endianness))
+      Unpooled.unmodifiableBuffer(bb)
     }
-
-    /**
-     * A read-only copying `ByteBuf` wrapper for [[Buf]]
-     */
-    def apply(buf: Buf): ByteBuf = apply(buf, ByteOrder.BIG_ENDIAN)
   }
 }

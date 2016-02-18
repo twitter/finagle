@@ -24,8 +24,8 @@ object Finagle extends Build {
   val jsr166eLib = "com.twitter" % "jsr166e" % "1.0.0"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
-    "io.netty" % "netty-handler" % "4.1.0.Beta8",
-    "io.netty" % "netty-transport" % "4.1.0.Beta8"
+    "io.netty" % "netty-handler" % "4.1.0.CR1",
+    "io.netty" % "netty-transport" % "4.1.0.CR1"
   )
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
