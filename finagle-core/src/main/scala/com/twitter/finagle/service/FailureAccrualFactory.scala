@@ -295,21 +295,6 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     logger,
     endpoint)
 
-  @deprecated("Please call the FailureAccrualFactory constructor that supplies a StatsReceiver", "6.22.1")
-  def this(
-    underlying: ServiceFactory[Req, Rep],
-    numFailures: Int,
-    markDeadFor: Duration,
-    timer: Timer,
-    label: String
-  ) = this(
-    underlying,
-    FailureAccrualPolicy.consecutiveFailures(numFailures, Backoff.const(markDeadFor)),
-    timer,
-    NullStatsReceiver,
-    label)
-
-
   // writes to `state` and `reviveTimerTask` are synchronized on `svcFacSelf`
   @volatile private[this] var state: State = Alive
   private[this] var reviveTimerTask: Option[TimerTask] = None

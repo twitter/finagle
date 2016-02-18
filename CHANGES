@@ -22,6 +22,15 @@ Breaking API Changes
   * finagle-core: `c.t.f.Codec.newClientDispatcher(Transport)` is marked `final`, override
     `c.t.f.Codec.newClientDispatcher(Transport, Stack.Params)` instead. ``RB_ID=797821``
 
+  * finagle-core: Removed deprecations: ``RB_ID=800974``
+    - Removed `c.t.f.Service.release`, replace usage with `Service.close()`.
+    - Removed `c.t.f.ServiceFactory.make`, replace usage with `ServiceFactory.apply`.
+    - Removed `c.t.f.ProxyServiceFactory`, replace usage with `ServiceFactoryProxy`.
+    - Removed deprecated `c.t.f.service.FailureAccrualFactory` constructor.
+    - Removed `c.t.f.netty3.ChannelBufferBuf.apply`, replace usage with `ChannelBufferBuf.Owned.apply`.
+    - Removed `c.t.f.util.InetAddressUtil.Loopback`, replace usage with `java.net.InetAddress.getLoopbackAddress`.
+    - Removed `c.t.f.tracing.TracingFilter`, replace usage with `TraceInitializationFilter` and `(Client|Server)TracingFilter`.
+
   * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
     pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``
 

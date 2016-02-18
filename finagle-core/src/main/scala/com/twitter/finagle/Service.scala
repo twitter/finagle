@@ -63,14 +63,6 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
    */
   def apply(request: Req): Future[Rep]
 
-  /**
-   * Relinquishes the use of this service instance. Behavior is
-   * undefined if apply() is called after resources are relinquished.
-   */
-  // This is asynchronous on purpose, the old API allowed for it.
-  @deprecated("Use close() instead", "7.0.0")
-  final def release(): Unit = close()
-
   def close(deadline: Time): Future[Unit] = Future.Done
 
   /**
@@ -147,9 +139,6 @@ abstract class ServiceFactory[-Req, +Rep]
   def apply(conn: ClientConnection): Future[Service[Req, Rep]]
   final def apply(): Future[Service[Req, Rep]] = this(ClientConnection.nil)
 
-  @deprecated("use apply() instead", "5.0.1")
-  final def make(): Future[Service[Req, Rep]] = this()
-
   /**
    * Apply `f` on created services, returning the resulting Future in their
    * stead. This is useful for implementing common factory wrappers that
@@ -206,23 +195,20 @@ object ServiceFactory {
     }
 }
 
-@deprecated("use ServiceFactoryProxy instead", "6.7.5")
-trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Proxy {
-  def self: ServiceFactory[Req, Rep]
+/**
+ * A [[ServiceFactory]] that proxies all calls to another
+ * ServiceFactory.  This can be useful if you want to modify
+ * and existing `ServiceFactory`.
+ */
+abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
+  extends ServiceFactory[Req, Rep]
+  with Proxy {
+  def self: ServiceFactory[Req, Rep] = _self
+
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = self(conn)
   def close(deadline: Time): Future[Unit] = self.close(deadline)
 
   override def status: Status = self.status
-}
-
-/**
- * A simple proxy ServiceFactory that forwards all calls to another
- * ServiceFactory.  This is is useful if you to wrap-but-modify an
- * existing service factory.
- */
-abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
-  extends ProxyServiceFactory[Req, Rep] {
-  def self: ServiceFactory[Req, Rep] = _self
 }
 
 private[finagle] case class ServiceFactorySocketAddress[Req, Rep](factory: ServiceFactory[Req, Rep])

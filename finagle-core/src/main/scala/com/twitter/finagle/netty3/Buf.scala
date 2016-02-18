@@ -32,7 +32,7 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
     else if (i == 0 && j >= length) this
     else new ChannelBufferBuf(underlying.slice(i, (j-i) min (length-i)))
   }
-  
+
   override def equals(other: Any): Boolean = other match {
     case ChannelBufferBuf(otherCB) => underlying.equals(otherCB)
     case other: Buf =>  Buf.equals(this, other)
@@ -52,12 +52,6 @@ object ChannelBufferBuf {
 
   private val Empty = new ChannelBufferBuf(ChannelBuffers.EMPTY_BUFFER)
 
-  /**
-   * Obtain a buffer using the provided ChannelBuffer unsafely.
-   */
-  @deprecated("Use ChannelBufferBuf.Shared, ChannelBufferBuf.Owned.", "6.23.0")
-  def apply(cb: ChannelBuffer): Buf = Owned(cb.duplicate)
-
   /** Extract a read-only ChannelBuffer from a ChannelBufferBuf. */
   def unapply(cbb: ChannelBufferBuf): Option[ChannelBuffer] =
     Some(ChannelBuffers.unmodifiableBuffer(cbb.underlying))
@@ -74,6 +68,12 @@ object ChannelBufferBuf {
       new ChannelBufferBuf(cb)
   }
 
+  /**
+   * Java API for [[ChannelBufferBuf.Owned.apply]].
+   */
+  def newOwned(cb: ChannelBuffer): Buf =
+    Owned(cb)
+
   object Owned {
 
     // N.B. We cannot use ChannelBuffers.unmodifiableBuffer to ensure
@@ -83,6 +83,8 @@ object ChannelBufferBuf {
     /**
      * Obtain a buffer using the provided ChannelBuffer, which should not be
      * mutated after being passed to this function.
+     *
+     * @see [[newOwned]] for a Java friendly API.
      */
     def apply(cb: ChannelBuffer): Buf = cb match {
       case cb if cb.readableBytes == 0 => Buf.Empty
