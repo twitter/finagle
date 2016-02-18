@@ -102,7 +102,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   private[this] val gauge = statsReceiver.addGauge("aperture") { aperture }
 
   protected class Distributor(val vector: Vector[Node], initAperture: Int)
-    extends DistributorT {
+    extends DistributorT[Node] {
     type This = Distributor
 
     // Indicates if we've seen any down nodes during pick which we expected to be available
@@ -273,21 +273,22 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
 
   protected case class Node(
       factory: ServiceFactory[Req, Rep],
-      counter: AtomicInteger, token: Int)
+      counter: AtomicInteger,
+      token: Int)
     extends ServiceFactoryProxy[Req, Rep](factory)
-    with NodeT {
+    with NodeT[Req, Rep] {
     type This = Node
 
-    def load = counter.get
-    def pending = counter.get
+    def load: Double = counter.get
+    def pending: Int = counter.get
 
     override def apply(conn: ClientConnection) = {
       adjustNode(this, 1)
-      super.apply(conn) transform {
+      super.apply(conn).transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
             override def close(deadline: Time) =
-              super.close(deadline) ensure {
+              super.close(deadline).ensure {
                 adjustNode(Node.this, -1)
               }
           })

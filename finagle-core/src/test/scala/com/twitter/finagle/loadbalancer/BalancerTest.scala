@@ -36,7 +36,8 @@ private class BalancerTest extends FunSuite
 
     def rebuildDistributor() {}
 
-    case class Distributor(vector: Vector[Node], gen: Int = 1) extends DistributorT {
+    case class Distributor(vector: Vector[Node], gen: Int = 1)
+      extends DistributorT[Node] {
       type This = Distributor
       def pick(): Node = vector.head
       def needsRebuild = false
@@ -50,7 +51,7 @@ private class BalancerTest extends FunSuite
       }
     }
 
-    class Node(val factory: ServiceFactory[Unit, Unit]) extends NodeT {
+    class Node(val factory: ServiceFactory[Unit, Unit]) extends NodeT[Unit, Unit] {
       type This = Node
       def load: Double = ???
       def pending: Int = ???

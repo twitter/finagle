@@ -147,21 +147,24 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
 
-  protected case class Node(factory: ServiceFactory[Req, Rep], metric: Metric, token: Int)
-      extends ServiceFactoryProxy[Req, Rep](factory)
-      with NodeT {
+  protected case class Node(
+      factory: ServiceFactory[Req, Rep],
+      metric: Metric,
+      token: Int)
+    extends ServiceFactoryProxy[Req, Rep](factory)
+    with NodeT[Req, Rep] {
     type This = Node
 
-    def load = metric.get()
-    def pending = metric.rate()
+    def load: Double = metric.get()
+    def pending: Int = metric.rate()
 
     override def apply(conn: ClientConnection) = {
       val ts = metric.start()
-      super.apply(conn) transform {
+      super.apply(conn).transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
             override def close(deadline: Time) =
-              super.close(deadline) ensure {
+              super.close(deadline).ensure {
                 metric.end(ts)
               }
           })
