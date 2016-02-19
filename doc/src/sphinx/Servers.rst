@@ -65,6 +65,8 @@ All the unhandled exceptions from a user-defined service flow through the ``Moni
 used by the given Finagle server. See :ref:`this example <configuring_monitors>` on how to
 override the default instance that simply logs exceptions onto a the standard output.
 
+.. include:: shared-modules/ResponseClassification.rst
+
 Concurrency Limit
 ^^^^^^^^^^^^^^^^^
 

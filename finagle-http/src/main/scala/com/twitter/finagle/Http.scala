@@ -276,6 +276,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams[Server](this)
 
+    override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Server =
+      super.withResponseClassifier(responseClassifier)
     override def withLabel(label: String): Server = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Server =
       super.withStatsReceiver(statsReceiver)

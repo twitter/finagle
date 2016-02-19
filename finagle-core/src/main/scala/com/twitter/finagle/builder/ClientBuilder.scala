@@ -594,6 +594,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * It is a [[PartialFunction]] and as such multiple classifiers can be composed
    * together via [[PartialFunction.orElse]].
    *
+   * Response classification is independently configured on the client and server.
+   * For server-side response classification using [[com.twitter.finagle.builder.ServerBuilder]],
+   * see [[com.twitter.finagle.builder.ServerBuilder.responseClassifier]]
+   *
    * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
    * HTTP classification tools.
    *

@@ -1,7 +1,7 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.{stats, tracing, Stack}
+import com.twitter.finagle.{service, stats, tracing, Stack}
 import com.twitter.util
 
 /**
@@ -41,6 +41,38 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    */
   def withTracer(tracer: tracing.Tracer): A =
     self.configured(Tracer(tracer))
+
+  /**
+   * Configure a [[com.twitter.finagle.service.ResponseClassifier]]
+   * which is used to determine the result of a request/response.
+   *
+   * This allows developers to give Finagle the additional application-specific
+   * knowledge necessary in order to properly classify responses. Without this,
+   * Finagle cannot make judgements about application-level failures as it only
+   * has a narrow understanding of failures (for example: transport level, timeouts,
+   * and nacks).
+   *
+   * As an example take an HTTP server that returns a response with a 500 status
+   * code. To Finagle this is a successful request/response. However, the application
+   * developer may want to treat all 500 status codes as failures and can do so via
+   * setting a [[com.twitter.finagle.service.ResponseClassifier]].
+   *
+   * ResponseClassifier is a [[PartialFunction]] and as such multiple classifiers can
+   * be composed together via [[PartialFunction.orElse]].
+   *
+   * Response classification is independently configured on the client and server.
+   * For client-side response classification using [[com.twitter.finagle.builder.ClientBuilder]],
+   * see `com.twitter.finagle.builder.ClientBuilder.responseClassifier`
+   *
+   * @see [[com.twitter.finagle.http.service.HttpResponseClassifier]] for some
+   * HTTP classification tools.
+   *
+   * @note If unspecified, the default classifier is
+   * [[com.twitter.finagle.service.ResponseClassifier.Default]]
+   * which is a total function fully covering the input domain.
+   */
+  def withResponseClassifier(responseClassifier: service.ResponseClassifier): A =
+    self.configured(ResponseClassifier(responseClassifier))
 
   /**
    * Configures this server or client with given

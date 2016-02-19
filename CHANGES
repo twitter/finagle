@@ -9,6 +9,9 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 New Features
 ~~~~~~~~~~~~
+  * finagle-core: Introduce `c.t.f.service.ResponseClassifier` for HTTP servers,
+    which allows developers to give Finagle the additional application specific knowledge
+    necessary in order to properly classify responses.``RB_ID=800179``
 
   * finagle: Export two new histograms: `request_payload_bytes` and `response_payload_bytes`
     for the following protocols: HTTP (non-chunked), Mux, ThriftMux and Thrift. ``RB_ID=797821``
@@ -36,6 +39,7 @@ Breaking API Changes
 
   * finagle-redis: `c.t.f.redis.Redis` no longer takes a `StatsReceiver`, pass it to a
     `(Client/Server)Builder` instead. ``RB_ID=797821``
+>>>>>>> @{-1}
 
 6.33.0
 ------

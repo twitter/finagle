@@ -40,31 +40,4 @@ trait ClientParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
   def withRetryBackoff(backoff: Stream[Duration]): A =
     self.configured(self.params[Retries.Budget].copy(requeueBackoffs = backoff))
 
-  /**
-   * Configures the [[service.ResponseClassifier Response Classifier]] of this client,
-   * which is used to determine the result of a request/response.
-   *
-   * This allows developers to give Finagle the additional application-specific
-   * knowledge necessary in order to properly classify them. Without this,
-   * Finagle cannot make judgements about application level failures as it only
-   * has a narrow understanding of failures (for example: transport level, timeouts,
-   * and NACKs).
-   *
-   * As an example take an HTTP client that receives a response with a 500 status
-   * code back from a server. To Finagle this is a successful request/response
-   * based solely on the transport level. The application developer may want to
-   * treat all 500 status codes as failures and can do so via a
-   * [[service.ResponseClassifier Response Classifier]].
-   *
-   * It is a [[PartialFunction]] and as such multiple classifiers can be composed
-   * together via [[PartialFunction.orElse]].
-   *
-   * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
-   *      HTTP classification tools.
-   *
-   * @note If unspecified, the default classifier is [[service.ResponseClassifier.Default]]
-   *       which is a total function fully covering the input domain.
-   */
-  def withResponseClassifier(responseClassifier: service.ResponseClassifier): A =
-    self.configured(ResponseClassifier(responseClassifier))
 }
