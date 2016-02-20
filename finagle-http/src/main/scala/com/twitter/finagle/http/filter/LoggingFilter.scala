@@ -73,7 +73,7 @@ class CommonLogFormatter extends LogFormatter {
    *   %l: remote logname
    *   %u: remote user
    *   %t: time request was received
-   *   %r: request lime
+   *   %r: request time
    *   %s: status
    *   %b: bytes
    *
