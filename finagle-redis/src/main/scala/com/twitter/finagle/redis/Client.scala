@@ -2,6 +2,7 @@ package com.twitter.finagle.redis
 
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.redis.util._
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.Future
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
@@ -37,13 +38,7 @@ class Client(service: Service[Command, Reply])
   with Lists
   with Sets
   with BtreeSortedSetCommands
-  with HyperLogLogs
-
-/**
- * Connects to a single Redis host
- * @param service: Finagle service object built with the Redis codec
- */
-class BaseClient(service: Service[Command, Reply]) {
+  with HyperLogLogs {
 
   /**
    * Authorizes to db
@@ -52,17 +47,6 @@ class BaseClient(service: Service[Command, Reply]) {
   def auth(password: ChannelBuffer): Future[Unit] =
     doRequest(Auth(password)) {
       case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Returns information and statistics about the server
-   * @param section Optional parameter can be used to select a specific section of information
-   * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
-   */
-  def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
-    doRequest(Info(section)) {
-      case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
     }
 
   /**
@@ -82,19 +66,47 @@ class BaseClient(service: Service[Command, Reply]) {
     }
 
   /**
-   * Closes connection to Redis instance
-   */
-  def quit(): Future[Unit] =
-    doRequest(Quit) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
    * Select DB with specified zero-based index
    * @param index
    */
   def select(index: Int): Future[Unit] =
     doRequest(Select(index)) {
+      case StatusReply(message) => Future.Unit
+    }
+
+  /**
+   * @param host
+   * @param port
+   */
+  def slaveOf(host: ChannelBuffer, port: Int): Future[Unit] =
+    doRequest(SlaveOf(host, StringToChannelBuffer(port.toString))) {
+      case StatusReply(message) => Future.Unit
+    }
+}
+
+/**
+ * Connects to a single Redis host
+ * @param service: Finagle service object built with the Redis codec
+ */
+class BaseClient(service: Service[Command, Reply]) {
+
+  /**
+   * Returns information and statistics about the server
+   * @param section Optional parameter can be used to select a specific section of information. A
+   * list of available values can be found <a href="http://redis.io/commands/info">here</a>.
+   * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
+   */
+  def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
+    doRequest(Info(section)) {
+      case BulkReply(message) => Future.value(Some(message))
+      case EmptyBulkReply() => Future.value(None)
+    }
+
+  /**
+   * Closes connection to Redis instance
+   */
+  def quit(): Future[Unit] =
+    doRequest(Quit) {
       case StatusReply(message) => Future.Unit
     }
 
@@ -123,6 +135,15 @@ class BaseClient(service: Service[Command, Reply]) {
     }
   }
 
+  /**
+   * Helper function to convert a Redis multi-bulk reply into a Map[String, String]
+   */
+  private[redis] def returnMap(messages: Seq[String]): Map[String, String] = {
+    assert(messages.length % 2 == 0, "Odd number of items in response")
+    messages.grouped(2).collect {
+      case Seq(a, b) => (a, b)
+    }.toMap
+  }
 }
 
 

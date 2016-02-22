@@ -20,6 +20,12 @@ trait RedisRichClient { self: Client[Command, Reply] =>
 
   def newRichClient(dest: Name, label: String): redis.Client =
     redis.Client(newService(dest, label))
+
+  def newSentinelClient(dest: String): redis.SentinelClient =
+    redis.SentinelClient(newService(dest))
+
+  def newSentinelClient(dest: Name, label: String): redis.SentinelClient =
+    redis.SentinelClient(newService(dest, label))
 }
 
 object Redis extends Client[Command, Reply] {
