@@ -9,6 +9,7 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 New Features
 ~~~~~~~~~~~~
+
   * finagle-core: Introduce `c.t.f.service.ResponseClassifier` for HTTP servers,
     which allows developers to give Finagle the additional application specific knowledge
     necessary in order to properly classify responses.``RB_ID=800179``
@@ -19,6 +20,9 @@ New Features
   * finagle-core: Define `c.t.f.Address` to represent an endpoint's physical location.
     Resolvers and namers may attach metadata such as weight to individual endpoint addresses.
     ``RB_ID=792209``
+
+  * finagle-http: Introduce convenience extractors to pattern match `c.t.f.http.Response.status`
+    against the different categories. ``RB_ID=802953``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -74,7 +78,6 @@ Breaking API Changes
 
   * finagle-redis: `c.t.f.redis.Redis` no longer takes a `StatsReceiver`, pass it to a
     `(Client/Server)Builder` instead. ``RB_ID=797821``
->>>>>>> @{-1}
 
 6.33.0
 ------
