@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Await}
-import java.net.{UnknownHostException, InetAddress, InetSocketAddress}
+import java.net.{UnknownHostException, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -40,7 +40,7 @@ class InetResolverTest extends FunSuite {
     val f = addr.changes.filter(_ != Addr.Pending).toFuture
     Await.result(f, 10.seconds) match {
       case Addr.Bound(b, meta) if meta.isEmpty =>
-        assert(b.contains(WeightedSocketAddress(new InetSocketAddress("localhost", 80), 1L)))
+        assert(b.contains(Address("localhost", 80)))
       case _ => fail()
     }
     assert(statsReceiver.counter("inet", "dns", "successes")() > 0)
@@ -61,7 +61,7 @@ class InetResolverTest extends FunSuite {
     val f = addr.changes.filter(_ != Addr.Pending).toFuture
     Await.result(f) match {
       case Addr.Bound(b, meta) if meta.isEmpty =>
-        assert(b.contains(WeightedSocketAddress(new InetSocketAddress("localhost", 80), 1L)))
+        assert(b.contains(Address("localhost", 80)))
       case _ => fail()
     }
     assert(statsReceiver.counter("inet", "dns", "successes")() > 0)

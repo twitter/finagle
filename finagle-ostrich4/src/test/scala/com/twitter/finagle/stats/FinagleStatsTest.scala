@@ -62,7 +62,7 @@ class FinagleStatsTest extends FunSuite with MockitoSugar {
   val service = ClientBuilder()
     .name("client")
     .reportTo(statsReceiver)
-    .hosts(server.boundAddress)
+    .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
     .codec(codec)
     .hostConnectionLimit(10)
     .build()

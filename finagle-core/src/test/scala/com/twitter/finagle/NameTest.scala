@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.util.{Witness, Var}
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -15,12 +15,16 @@ class NameTest extends FunSuite {
     var addr: Addr = Addr.Pending
     n.addr.changes.register(Witness({ addr = _ }))
     assert(addr == Addr.Pending)
-    val set = Set(new SocketAddress {}, new SocketAddress {})
+    val set = Set[SocketAddress](new InetSocketAddress(0), new InetSocketAddress(1))
     g() = set
 
     val Addr.Bound(s2, r) = addr
-    assert(s2 == set)
+    assert(s2.collect { case Address.Inet(ia, _) => ia } == set)
     assert(r.isEmpty)
+    
+    g() = Set(new SocketAddress {})
+    val Addr.Failed(e) = addr
+    assert(e.isInstanceOf[IllegalArgumentException])
   }
 
   test("Name.Bound maintains equality as per 'id'") {

@@ -166,7 +166,7 @@ class EndToEndTest extends FunSuite
     }
 
     val a, b = Mux.serve("localhost:*", service)
-    val client = Mux.newService(Name.bound(a.boundAddress, b.boundAddress), "client")
+    val client = Mux.newService(Name.bound(Address(a.boundAddress.asInstanceOf[InetSocketAddress]), Address(b.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(n.get == 0)
     assert(Await.result(client(Request.empty), 30.seconds).body.isEmpty)

@@ -71,11 +71,11 @@ object Namer  {
   val global: Namer = new Namer {
 
     private[this] object InetPath {
-      def unapply(path: Path): Option[(InetSocketAddress, Path)] = path match {
+      def unapply(path: Path): Option[(Address, Path)] = path match {
         case Path.Utf8("$", "inet", host, IntegerString(port), residual@_*) =>
-          Some((new InetSocketAddress(host, port), Path.Utf8(residual:_*)))
+          Some((Address(new InetSocketAddress(host, port)), Path.Utf8(residual:_*)))
         case Path.Utf8("$", "inet", IntegerString(port), residual@_*) =>
-          Some((new InetSocketAddress(port), Path.Utf8(residual:_*)))
+          Some((Address(new InetSocketAddress(port)), Path.Utf8(residual:_*)))
         case _ => None
       }
     }
@@ -265,7 +265,7 @@ trait ServiceNamer[Req, Rep] extends Namer {
       Activity.value(NameTree.Neg)
     case Some(svc) =>
       val factory = ServiceFactory(() => Future.value(svc))
-      val addr = Addr.Bound(ServiceFactorySocketAddress(factory))
+      val addr = Addr.Bound(exp.Address(factory))
       val name = Name.Bound(Var.value(addr), factory, path)
       Activity.value(NameTree.Leaf(name))
   }

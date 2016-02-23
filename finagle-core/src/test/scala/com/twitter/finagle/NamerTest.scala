@@ -18,9 +18,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
         }
     }
 
-    def ia(i: Int) = new InetSocketAddress(i)
-
-    def boundWithWeight(weight: Double, addrs: SocketAddress*): Name.Bound =
+    def boundWithWeight(weight: Double, addrs: Address*): Name.Bound =
       Name.Bound(Var.value(Addr.Bound(addrs.toSet, Addr.Metadata(AddrWeightKey -> weight))), addrs.toSet)
 
     class TestException extends Exception {}
@@ -83,7 +81,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
     // Ok(Bound) & Pending
     namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
-    assertEval(res, boundWithWeight(1.0, ia(1)))
+    assertEval(res, boundWithWeight(1.0, Address(1)))
 
     // Failed(exc) & Pending
     namer("/test/1").notify(Throw(exc))
@@ -92,15 +90,15 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     // Ok(Bound) & Ok(Bound)
     namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
     namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
-    assertEval(res, boundWithWeight(1.0, ia(1)), boundWithWeight(1.0, ia(2)))
+    assertEval(res, boundWithWeight(1.0, Address(1)), boundWithWeight(1.0, Address(2)))
 
     // Ok(Bound) & Ok(Neg)
     namer("/test/2").notify(Return(NameTree.Neg))
-    assertEval(res, boundWithWeight(1.0, ia(1)))
+    assertEval(res, boundWithWeight(1.0, Address(1)))
 
     // Ok(Bound) & Failed(exc)
     namer("/test/2").notify(Throw(exc))
-    assertEval(res, boundWithWeight(1.0, ia(1)))
+    assertEval(res, boundWithWeight(1.0, Address(1)))
 
     // Failed(exc) & Failed(exc)
     namer("/test/1").notify(Throw(exc))
@@ -127,16 +125,16 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assert(res.sample().eval == Some(Set.empty))
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/1")))
-    assertEval(res, Name.bound(ia(1)))
+    assertEval(res, Name.bound(Address(1)))
 
     namer("/test/0").notify(Return(NameTree.Neg))
     assert(res.sample().eval == None)
 
     namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
-    assertEval(res, boundWithWeight(1.0, ia(2)))
+    assertEval(res, boundWithWeight(1.0, Address(2)))
 
     namer("/test/0").notify(Return(NameTree.read("/$/inet/0/3")))
-    assertEval(res, Name.bound(ia(3)))
+    assertEval(res, Name.bound(Address(3)))
   })
 
   test("NameTree.bind: Alt with Fail/Empty")(new Ctx {
@@ -145,16 +143,16 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assert(namer.bind(NameTree.read("(/$/nil | /$/fail | /test/1)")).sample() == NameTree.Empty)
   })
 
-  def assertLookup(path: String, ias: SocketAddress*) {
+  def assertLookup(path: String, addrs: Address*) {
     Namer.global.lookup(Path.read(path)).sample() match {
-      case NameTree.Leaf(Name.Bound(addr)) => assert(addr.sample() == Addr.Bound(ias.toSet))
+      case NameTree.Leaf(Name.Bound(addr)) => assert(addr.sample() == Addr.Bound(addrs.toSet))
       case _ => fail()
     }
   }
 
   test("Namer.global: /$/inet") {
-    assertLookup("/$/inet/1234", new InetSocketAddress(1234))
-    assertLookup("/$/inet/127.0.0.1/1234", new InetSocketAddress("127.0.0.1", 1234))
+    assertLookup("/$/inet/1234", Address(1234))
+    assertLookup("/$/inet/127.0.0.1/1234", Address("127.0.0.1", 1234))
 
     intercept[ClassNotFoundException] {
       Namer.global.lookup(Path.read("/$/inet")).sample()
@@ -162,7 +160,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
     Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234/foobar")).sample() match {
       case NameTree.Leaf(bound: Name.Bound) =>
-        assert(bound.addr.sample() == Addr.Bound(new InetSocketAddress("127.0.0.1", 1234)))
+        assert(bound.addr.sample() == Addr.Bound(Address("127.0.0.1", 1234)))
         assert(bound.id == Path.Utf8("$", "inet", "127.0.0.1", "1234"))
         assert(bound.path == Path.Utf8("foobar"))
 
@@ -171,7 +169,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
     Namer.global.lookup(Path.read("/$/inet/1234/foobar")).sample() match {
       case NameTree.Leaf(bound: Name.Bound) =>
-        assert(bound.addr.sample() == Addr.Bound(new InetSocketAddress(1234)))
+        assert(bound.addr.sample() == Addr.Bound(Address(1234)))
         assert(bound.id == Path.Utf8("$", "inet", "1234"))
         assert(bound.path == Path.Utf8("foobar"))
 
@@ -207,13 +205,13 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
           case bound: Addr.Bound =>
             assert(bound.addrs.size == 1)
             bound.addrs.head match {
-              case ServiceFactorySocketAddress(sf: ServiceFactory[Path, Path]) =>
+              case exp.Address.ServiceFactory(sf: ServiceFactory[Path, Path], _) =>
                 val svc = Await.result(sf())
                 val rsp = Await.result(svc(Path.Utf8("yodles")))
                 assert(rsp == Path.Utf8("foo", "yodles"))
 
-              case sa =>
-                fail(s"$sa not a ServiceFactorySocketAddress")
+              case addr =>
+                fail(s"$addr not a exp.Address.ServiceFactory")
             }
           case x => throw new MatchError(x)
         }
@@ -231,14 +229,14 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
           case bound: Addr.Bound =>
             assert(bound.addrs.size == 1)
             bound.addrs.head match {
-              case ServiceFactorySocketAddress(sf: ServiceFactory[Int, Int]) =>
+              case exp.Address.ServiceFactory(sf: ServiceFactory[Int, Int], _) =>
                 val svc = Await.result(sf())
                 intercept [ClassCastException] {
                   val rsp = Await.result(svc(3))
                 }
 
-              case sa =>
-                fail(s"$sa not a ServiceFactorySocketAddress")
+              case addr =>
+                fail(s"$addr not a exp.Address.ServiceFactory")
             }
           case x => throw new MatchError(x)
         }

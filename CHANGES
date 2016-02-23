@@ -16,6 +16,10 @@ New Features
   * finagle: Export two new histograms: `request_payload_bytes` and `response_payload_bytes`
     for the following protocols: HTTP (non-chunked), Mux, ThriftMux and Thrift. ``RB_ID=797821``
 
+  * finagle-core: Define `c.t.f.Address` to represent an endpoint's physical location.
+    Resolvers and namers may attach metadata such as weight to individual endpoint addresses.
+    ``RB_ID=792209``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -33,6 +37,37 @@ Breaking API Changes
     - Removed `c.t.f.netty3.ChannelBufferBuf.apply`, replace usage with `ChannelBufferBuf.Owned.apply`.
     - Removed `c.t.f.util.InetAddressUtil.Loopback`, replace usage with `java.net.InetAddress.getLoopbackAddress`.
     - Removed `c.t.f.tracing.TracingFilter`, replace usage with `TraceInitializationFilter` and `(Client|Server)TracingFilter`.
+
+  * finagle-core: `c.t.f.Addr.Bound.addr` type changed from `Set[SocketAddress]` to
+    `Set[c.t.f.Address]`. We provide a migration guide below for the most common cases.
+
+    Callers of `c.t.f.Addr.Bound.addr` must handle `Set[c.t.f.Address]` instead of
+    `Set[SocketAddresses]`. If you do something with the `SocketAddress` and expect the underlying
+    type to be `InetSocketAddress`, use `c.t.f.Address.Inet.addr` to get the underlying
+    `InetSocketAddress`.
+
+    `c.t.f.Addr` constructors and `c.t.f.Name.bound` method now accept `c.t.f.Address` instead
+    of `SocketAddress`. For most cases, wrapping the `InetSocketAddress` in an `Address.Inet`
+    will fix the compile error.
+
+    Any other `SocketAddress` subclass is currently incompatible with `c.t.f.Address`. Instead,
+    you should encode any additional information in the metadata field of `c.t.f.Address.Inet`
+    or `c.t.f.exp.Address.ServiceFactory`.
+
+    ``RB_ID=792209``
+
+  * finagle-core: Delete `c.t.f.ServiceFactorySocketAddress` and replace usages with
+    `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
+
+  * finagle-core: Delete `c.t.f.WeightedSocketAddress` and instead use
+    `c.t.f.addr.WeightedAddress` to represent address weights. ``RB_ID=792209``
+
+  * finagle-core: `c.t.f.builder.ClientBuilder.hosts` takes a Seq of `InetSocketAddress` instead of
+    `SocketAddress`. If you get a compile error, change the static type to `InetSocketAddress` if
+    you can. Otherwise, cast it at runtime to `InetSocketAddress`. ``RB_ID=792209``
+
+  * finagle-core: `c.t.f.client.Transporter.EndpointAddr` takes a `c.t.f.Address` as its
+    parameter instead of `SocketAddress`. ``RB_ID=792209``
 
   * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
     pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``

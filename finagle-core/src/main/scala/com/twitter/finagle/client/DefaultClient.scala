@@ -9,7 +9,6 @@ import com.twitter.finagle.stats.{ClientStatsReceiver, NullStatsReceiver, StatsR
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util._
-import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.util._
 import java.net.SocketAddress
 
@@ -23,7 +22,7 @@ object DefaultClient {
       FailureAccrualFactory.defaultPolicy(),
       "DefaultClient",
       DefaultLogger,
-      unconnected,
+      Address.failing,
       responseClassifier)(
       DefaultTimer.twitter)
 
@@ -64,7 +63,7 @@ object DefaultClient {
  */
 case class DefaultClient[Req, Rep](
   name: String,
-  endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep],
+  endpointer: (Address, StatsReceiver) => ServiceFactory[Req, Rep],
   pool: StatsReceiver => Transformer[Req, Rep] = DefaultPool[Req, Rep](),
   maxIdletime: Duration = Duration.Top,
   maxLifetime: Duration = Duration.Top,
@@ -162,7 +161,7 @@ case class DefaultClient[Req, Rep](
   val newStack0: Var[Addr] => ServiceFactory[Req, Rep] = va => {
     clientStack.make(params + LoadBalancerFactory.Dest(va))
   }
-  val bindStack: SocketAddress => ServiceFactory[Req, Rep] = sa => {
-    endpointStack.make(params + Transporter.EndpointAddr(sa))
+  val bindStack: Address => ServiceFactory[Req, Rep] = addr => {
+    endpointStack.make(params + Transporter.EndpointAddr(addr))
   }
 }

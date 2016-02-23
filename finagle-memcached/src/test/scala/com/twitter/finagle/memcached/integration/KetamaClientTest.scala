@@ -2,7 +2,7 @@ package com.twitter.finagle.memcached.integration
 
 import com.twitter.finagle.cacheresolver.CacheNodeGroup
 import com.twitter.finagle.memcached.KetamaClientBuilder
-import com.twitter.finagle.{Group, Name}
+import com.twitter.finagle.{Address, Group, Name}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -48,7 +48,7 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
   }
 
   test("using Name doesn't blow up") {
-    val name = Name.bound(address1, address2)
+    val name = Name.bound(Address(address1), Address(address2))
     val client = KetamaClientBuilder().dest(name).build()
 
     Await.result(client.delete("foo"))

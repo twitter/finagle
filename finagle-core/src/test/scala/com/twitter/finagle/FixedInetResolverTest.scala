@@ -3,7 +3,7 @@ package com.twitter.finagle
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Future, Await}
-import java.net.{UnknownHostException, InetAddress, InetSocketAddress}
+import java.net.{UnknownHostException, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -22,7 +22,7 @@ class FixedInetResolverTest extends FunSuite {
         val result = va.changes.filter(_ != Addr.Pending).toFuture()
         Await.result(result) match {
           case Addr.Bound(set, _) =>
-            assert(set.contains(WeightedSocketAddress(new InetSocketAddress("1.2.3.4", 100), 1L)))
+            assert(set.contains(Address("1.2.3.4", 100)))
           case _ => fail("Should have been a bound address")
         }
 

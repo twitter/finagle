@@ -18,7 +18,7 @@ class ServersetNamerTest
   }
 
   def schemeOk(scheme: String): Unit = {
-    val addr = Addr.Bound(new InetSocketAddress(7127))
+    val addr = Addr.Bound(Address(7127))
     var named = 0
     val namer = mkNamer { spec =>
       assert(spec == s"$scheme!hosts!/twitter/service/role/env/job!endpoint")

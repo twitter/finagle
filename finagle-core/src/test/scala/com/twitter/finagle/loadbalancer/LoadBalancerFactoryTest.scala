@@ -76,7 +76,7 @@ class LoadBalancerFactoryTest extends FunSuite
     val sr = new InMemoryStatsReceiver
     val client = stringClient
         .configured(Stats(sr))
-        .newService(Name.bound(server1.boundAddress, server2.boundAddress), "client")
+        .newService(Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress]), Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 2)
     assert(Await.result(client("hello\n")) == "hello")
@@ -101,32 +101,6 @@ class LoadBalancerFactoryTest extends FunSuite
 }
 
 @RunWith(classOf[JUnitRunner])
-class SocketAddressesTest extends FunSuite {
-  import SocketAddresses._
-
-  val sa = new SocketAddress {}
-  val wsa = WeightedSocketAddress(sa, 2.0)
-  def newWrapped: SocketAddress = new SocketAddresses.Wrapped {
-    val underlying = sa
-  }
-
-  def replicator(sa: SocketAddress): Set[SocketAddress] =
-    for (i: Int <- (0 until 2).toSet) yield
-        WeightedSocketAddress(newWrapped, 1.0)
-
-  test("unwraps address") {
-    assert(SocketAddresses.unwrap(sa) == sa)
-    assert(SocketAddresses.unwrap(wsa) == sa)
-    replicator(wsa).foreach { addr =>
-      assert(SocketAddresses.unwrap(addr) == sa)
-    }
-    replicator(wsa).foreach { replica => // Weighted(replicated(sa), w)
-      (SocketAddresses.unwrap(WeightedSocketAddress(replica, 2.0)) == sa)
-    }
-  }
-}
-
-@RunWith(classOf[JUnitRunner])
 class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with StringServer {
   val echoService = Service.mk[String, String](Future.value(_))
 
@@ -140,7 +114,7 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
         LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[String, String])
     val client = stringClient.withStack(clientStack)
       .configured(Stats(sr))
-      .newService(Name.bound(server.boundAddress), "client")
+      .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 4)
     assert(Await.result(client("hello\n")) == "hello")
@@ -160,7 +134,7 @@ class ConcurrentLoadBalancerFactoryTest extends FunSuite with StringClient with 
     val client = stringClient.withStack(clientStack)
       .configured(Stats(sr))
       .configured(ConcurrentLoadBalancerFactory.Param(3))
-      .newService(Name.bound(server1.boundAddress, server2.boundAddress), "client")
+      .newService(Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress]), Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(sr.counters(Seq("client", "loadbalancer", "adds")) == 6)
   }

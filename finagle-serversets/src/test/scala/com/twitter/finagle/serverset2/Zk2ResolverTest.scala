@@ -1,8 +1,9 @@
 package com.twitter.finagle.serverset2
 
 import com.twitter.common.zookeeper.ServerSetImpl
+import com.twitter.finagle.{Addr, Address, Resolver, Name}
+import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.zookeeper.ZkInstance
-import com.twitter.finagle.{Addr, Resolver, Name, WeightedSocketAddress}
 import com.twitter.util.RandomSocket
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
@@ -25,7 +26,7 @@ class Zk2ResolverTest
   val zkTimeout: Span = 100.milliseconds
 
   implicit val config = PatienceConfig(
-    timeout = 5.seconds,
+    timeout = 45.seconds,
     interval = zkTimeout)
 
   // The Zk2 resolver has a hardcoded session timeout of 10 seconds and a stabilization epoch of
@@ -66,7 +67,7 @@ class Zk2ResolverTest
     val joinAddr = RandomSocket()
     val status = serverSet.join(joinAddr, Map.empty[String, InetSocketAddress].asJava)
     eventually {
-      assert(va.sample() == Addr.Bound(WeightedSocketAddress(joinAddr, 1.0)),
+      assert(va.sample() == Addr.Bound(WeightedAddress(Address(joinAddr), 1.0)),
         "resolution is not bound once the serverset exists")
     }
 
@@ -92,9 +93,9 @@ class Zk2ResolverTest
     val epepAddr = RandomSocket()
     val status = serverSet.join(serviceAddr,  Map("epep" -> epepAddr).asJava)
     eventually {
-      assert(va1.sample() == Addr.Bound(WeightedSocketAddress(serviceAddr, 1.0)),
+      assert(va1.sample() == Addr.Bound(WeightedAddress(Address(serviceAddr), 1.0)),
         "resolution is not bound once the serverset exists")
-      assert(va2.sample() == Addr.Bound(WeightedSocketAddress(epepAddr, 1.0)),
+      assert(va2.sample() == Addr.Bound(WeightedAddress(Address(epepAddr), 1.0)),
         "resolution is not bound once the serverset exists")
     }
 

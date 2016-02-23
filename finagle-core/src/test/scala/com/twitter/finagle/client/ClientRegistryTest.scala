@@ -6,7 +6,6 @@ import com.twitter.finagle.util.{StackRegistry, TestParam, TestParam2}
 import com.twitter.util.{Var, Return, Activity, Future, Await}
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 import com.twitter.conversions.time.intToTimeableNumber
-
 import org.junit.runner.RunWith
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito
@@ -15,8 +14,6 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-
-import java.net.SocketAddress
 
 object crtnamer {
   val va = Var[Addr](Addr.Pending)
@@ -63,7 +60,7 @@ class ClientRegistryTest extends FunSuite
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
     assert(allResolved.poll == None)
 
-    va() = Addr.Bound(Set.empty[SocketAddress])
+    va() = Addr.Bound(Set.empty[Address])
     eventually {
       assert(allResolved.poll == Some(Return(Set("foo"))))
     }
@@ -102,7 +99,7 @@ class ClientRegistryTest extends FunSuite
     val c0 = stackClient.newClient(Name.Bound(va0, new Object()), "foo")
     val allResolved0 = ClientRegistry.expAllRegisteredClientsResolved()
     assert(allResolved0.poll == None)
-    va0() = Addr.Bound(Set.empty[SocketAddress])
+    va0() = Addr.Bound(Set.empty[Address])
     eventually {
       assert(allResolved0.poll == Some(Return(Set("foo"))))
     }
@@ -110,7 +107,7 @@ class ClientRegistryTest extends FunSuite
     val c1 = stackClient.newClient(Name.Bound(va1, new Object()), "bar")
     val allResolved1 = ClientRegistry.expAllRegisteredClientsResolved()
     assert(allResolved1.poll == None)
-    va1() = Addr.Bound(Set.empty[SocketAddress])
+    va1() = Addr.Bound(Set.empty[Address])
 
     eventually {
       assert(allResolved1.poll == Some(Return(Set("foo", "bar"))))
@@ -122,7 +119,7 @@ class ClientRegistryTest extends FunSuite
     val c = stackClient.newClient(Name.Path(path), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
     assert(allResolved.poll == None)
-    crtnamer.va() = Addr.Bound(Set.empty[SocketAddress])
+    crtnamer.va() = Addr.Bound(Set.empty[Address])
     eventually {
       assert(allResolved.poll == Some(Return(Set("foo"))))
     }
