@@ -3,6 +3,7 @@ package com.twitter.finagle.serverset2
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.finagle.{Addr, Address, Resolver, Name}
 import com.twitter.finagle.addr.WeightedAddress
+import com.twitter.finagle.serverset2.addr.ZkMetadata
 import com.twitter.finagle.zookeeper.ZkInstance
 import com.twitter.util.RandomSocket
 import java.net.InetSocketAddress
@@ -37,6 +38,8 @@ class Zk2ResolverTest
   val stabilizationTimeout = PatienceConfiguration.Timeout(stabilizationEpoch * 2)
   val stabilizationInterval = PatienceConfiguration.Interval(5.seconds)
 
+  val shardId = 42
+
   before {
     inst = new ZkInstance
     inst.start()
@@ -56,6 +59,10 @@ class Zk2ResolverTest
   private[this] def zk2resolve(path: String): Name =
     Resolver.eval("zk2!"+inst.zookeeperConnectString+"!"+path)
 
+  private[this] def address(ia: InetSocketAddress): Address =
+    WeightedAddress(Address.Inet(ia, ZkMetadata.toAddrMetadata(
+      ZkMetadata(Some(shardId)))), 1.0)
+
   test("end-to-end: service endpoint") {
     val Name.Bound(va) = zk2resolve("/foo/bar")
     eventually {
@@ -65,9 +72,9 @@ class Zk2ResolverTest
 
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
     val joinAddr = RandomSocket()
-    val status = serverSet.join(joinAddr, Map.empty[String, InetSocketAddress].asJava)
+    val status = serverSet.join(joinAddr, Map.empty[String, InetSocketAddress].asJava, shardId)
     eventually {
-      assert(va.sample() == Addr.Bound(WeightedAddress(Address(joinAddr), 1.0)),
+      assert(va.sample() == Addr.Bound(address(joinAddr)),
         "resolution is not bound once the serverset exists")
     }
 
@@ -91,11 +98,11 @@ class Zk2ResolverTest
     val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
     val serviceAddr = RandomSocket()
     val epepAddr = RandomSocket()
-    val status = serverSet.join(serviceAddr,  Map("epep" -> epepAddr).asJava)
+    val status = serverSet.join(serviceAddr,  Map("epep" -> epepAddr).asJava, shardId)
     eventually {
-      assert(va1.sample() == Addr.Bound(WeightedAddress(Address(serviceAddr), 1.0)),
+      assert(va1.sample() == Addr.Bound(address(serviceAddr)),
         "resolution is not bound once the serverset exists")
-      assert(va2.sample() == Addr.Bound(WeightedAddress(Address(epepAddr), 1.0)),
+      assert(va2.sample() == Addr.Bound(address(epepAddr)),
         "resolution is not bound once the serverset exists")
     }
 

@@ -4,6 +4,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
+import com.twitter.finagle.serverset2.addr.ZkMetadata
 import com.twitter.finagle.{FixedInetResolver, Addr, Resolver}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
@@ -141,9 +142,10 @@ class Zk2Resolver(
         case Activity.Ok(eps) =>
           val endpoint = endpointOption.getOrElse(null)
           val subseq = eps collect {
-            case (Endpoint(names, host, port, _, Endpoint.Status.Alive, _), weight)
+            case (Endpoint(names, host, port, shard, Endpoint.Status.Alive, _), weight)
                 if names.contains(endpoint) && host != null =>
-              (host, port, Addr.Metadata(WeightedAddress.weightKey -> weight))
+              val metadata = ZkMetadata.toAddrMetadata(ZkMetadata(Some(shard)))
+              (host, port, metadata + (WeightedAddress.weightKey -> weight))
           }
 
           if (chatty()) {
