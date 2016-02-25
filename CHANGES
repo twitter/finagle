@@ -24,6 +24,9 @@ New Features
   * finagle-http: Introduce convenience extractors to pattern match `c.t.f.http.Response.status`
     against the different categories. ``RB_ID=802953``
 
+  * finagle-http: Add `toBoolean` method in `StringUtil` to parse strings to boolean consistently.
+    ``RB_ID=804056``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
