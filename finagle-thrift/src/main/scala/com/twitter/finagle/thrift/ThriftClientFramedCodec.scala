@@ -28,60 +28,41 @@ object ThriftClientFramedCodec {
 class ThriftClientFramedCodecFactory(
     clientId: Option[ClientId],
     _useCallerSeqIds: Boolean,
-    _protocolFactory: TProtocolFactory,
-    _attemptProtocolUpgrade: Boolean)
+    _protocolFactory: TProtocolFactory)
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client {
 
-  def this(clientId: Option[ClientId], _useCallerSeqIds: Boolean, _protocolFactory: TProtocolFactory) =
-    this(clientId, _useCallerSeqIds, _protocolFactory, true)
-
   def this(clientId: Option[ClientId]) =
-    this(clientId, false, Protocols.binaryFactory(), true)
+    this(clientId, false, Protocols.binaryFactory())
 
   def this(clientId: ClientId) = this(Some(clientId))
 
   // Fix this after the API/ABI freeze (use case class builder)
   def useCallerSeqIds(x: Boolean): ThriftClientFramedCodecFactory =
-    new ThriftClientFramedCodecFactory(clientId, x, _protocolFactory, _attemptProtocolUpgrade)
+    new ThriftClientFramedCodecFactory(clientId, x, _protocolFactory)
 
   /**
    * Use the given protocolFactory instead of the default `TBinaryProtocol.Factory`
    */
   def protocolFactory(pf: TProtocolFactory) =
-    new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, pf, _attemptProtocolUpgrade)
-
-  /**
-   * Enable or disable protocol upgrading.
-   */
-  def attemptProtocolUpgrade(enabled: Boolean): ThriftClientFramedCodecFactory =
-    new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, _protocolFactory, enabled)
+    new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, pf)
 
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
    * with a default TBinaryProtocol.
    */
   def apply(config: ClientCodecConfig) =
-    new ThriftClientFramedCodec(
-      _protocolFactory, config, clientId, _useCallerSeqIds, _attemptProtocolUpgrade)
+    new ThriftClientFramedCodec(_protocolFactory, config, clientId, _useCallerSeqIds)
 }
 
 class ThriftClientFramedCodec(
   protocolFactory: TProtocolFactory,
   config: ClientCodecConfig,
   clientId: Option[ClientId] = None,
-  useCallerSeqIds: Boolean = false,
-  attemptProtocolUpgrade: Boolean = true
+  useCallerSeqIds: Boolean = false
 ) extends Codec[ThriftClientRequest, Array[Byte]] {
 
-  def this(protocolFactory: TProtocolFactory,
-           config: ClientCodecConfig,
-           clientId: Option[ClientId],
-           useCallerSeqIds: Boolean) =
-    this(protocolFactory, config, clientId, useCallerSeqIds, true)
-
   private[this] val preparer = ThriftClientPreparer(
-    protocolFactory, config.serviceName,
-    clientId, useCallerSeqIds, attemptProtocolUpgrade)
+    protocolFactory, config.serviceName, clientId, useCallerSeqIds)
 
   def pipelineFactory: ChannelPipelineFactory =
     ThriftClientFramedPipelineFactory
@@ -137,8 +118,7 @@ private[finagle] case class ThriftClientPreparer(
     protocolFactory: TProtocolFactory,
     serviceName: String = "unknown",
     clientId: Option[ClientId] = None,
-    useCallerSeqIds: Boolean = false,
-    attemptProtocolUpgrade: Boolean = true) {
+    useCallerSeqIds: Boolean = false) {
 
   def prepareService(params: Stack.Params)(
     service: Service[ThriftClientRequest, Array[Byte]]
@@ -146,9 +126,11 @@ private[finagle] case class ThriftClientPreparer(
     val payloadSize = new PayloadSizeFilter[ThriftClientRequest, Array[Byte]](
       params[param.Stats].statsReceiver, _.message.length, _.length
     )
+    val Thrift.param.AttemptProtocolUpgrade(attemptUpgrade) =
+      params[Thrift.param.AttemptProtocolUpgrade]
     val payloadSizeService = payloadSize.andThen(service)
     val upgradedService =
-      if (attemptProtocolUpgrade) {
+      if (attemptUpgrade) {
         upgrade(payloadSizeService)
       } else {
         Future.value(payloadSizeService)
@@ -164,8 +146,11 @@ private[finagle] case class ThriftClientPreparer(
     params: Stack.Params
   ): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
     val param.Stats(stats) = params[param.Stats]
+    val Thrift.param.AttemptProtocolUpgrade(attemptUpgrade) =
+      params[Thrift.param.AttemptProtocolUpgrade]
     val preparingFactory = underlying.flatMap(prepareService(params))
-    if (attemptProtocolUpgrade) {
+
+    if (attemptUpgrade) {
       new ServiceFactoryProxy(preparingFactory) {
         val stat = stats.stat("codec_connection_preparation_latency_ms")
         override def apply(conn: ClientConnection) = {

@@ -540,7 +540,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .configured(Stats(sr))
       .withProtocolFactory(pf)
       .withClientId(ClientId("aClient"))
-      .withAttemptProtocolUpgrade(false)
+      .withNoProtocolUpgrade
       .newIface[B.ServiceIface](server)
 
     assert(Await.result(client.someway()) == null)
