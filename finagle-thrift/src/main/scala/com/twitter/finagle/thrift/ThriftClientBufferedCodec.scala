@@ -26,11 +26,7 @@ object ThriftClientBufferedCodec {
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientBufferedCodecFactory]]
    */
-  def apply(): ThriftClientBufferedCodecFactory =
-    apply(Protocols.binaryFactory())
-
-  def apply(protocolFactory: TProtocolFactory): ThriftClientBufferedCodecFactory =
-    apply(protocolFactory)
+  def apply() = new ThriftClientBufferedCodecFactory
 
   /**
    * Helpful from Java.
@@ -43,14 +39,16 @@ object ThriftClientBufferedCodec {
     // be quite a surprise and the wrong type. Ick.
     apply()
   }
+
+  def apply(protocolFactory: TProtocolFactory) =
+    new ThriftClientBufferedCodecFactory(protocolFactory)
+
 }
 
-class ThriftClientBufferedCodecFactory(
-    protocolFactory: TProtocolFactory)
-  extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client
+class ThriftClientBufferedCodecFactory(protocolFactory: TProtocolFactory) extends
+  CodecFactory[ThriftClientRequest, Array[Byte]]#Client
 {
   def this() = this(Protocols.binaryFactory())
-
   /**
    * Create a [[com.twitter.finagle.thrift.ThriftClientBufferedCodec]]
    * with a default TBinaryProtocol.
@@ -60,10 +58,7 @@ class ThriftClientBufferedCodecFactory(
   }
 }
 
-class ThriftClientBufferedCodec(
-    protocolFactory: TProtocolFactory,
-    config: ClientCodecConfig)
-  extends ThriftClientFramedCodec(protocolFactory, config) {
-
+class ThriftClientBufferedCodec(protocolFactory: TProtocolFactory, config: ClientCodecConfig)
+    extends ThriftClientFramedCodec(protocolFactory, config) {
   override def pipelineFactory = ThriftClientBufferedPipelineFactory(protocolFactory)
 }

@@ -31,8 +31,7 @@ class ThriftClientFramedCodecFactory(
     _protocolFactory: TProtocolFactory)
   extends CodecFactory[ThriftClientRequest, Array[Byte]]#Client {
 
-  def this(clientId: Option[ClientId]) =
-    this(clientId, false, Protocols.binaryFactory())
+  def this(clientId: Option[ClientId]) = this(clientId, false, Protocols.binaryFactory())
 
   def this(clientId: ClientId) = this(Some(clientId))
 
@@ -41,7 +40,7 @@ class ThriftClientFramedCodecFactory(
     new ThriftClientFramedCodecFactory(clientId, x, _protocolFactory)
 
   /**
-   * Use the given protocolFactory instead of the default `TBinaryProtocol.Factory`
+   * Use the given protocolFactory in stead of the default `TBinaryProtocol.Factory`
    */
   def protocolFactory(pf: TProtocolFactory) =
     new ThriftClientFramedCodecFactory(clientId, _useCallerSeqIds, pf)
@@ -62,7 +61,8 @@ class ThriftClientFramedCodec(
 ) extends Codec[ThriftClientRequest, Array[Byte]] {
 
   private[this] val preparer = ThriftClientPreparer(
-    protocolFactory, config.serviceName, clientId, useCallerSeqIds)
+    protocolFactory, config.serviceName,
+    clientId, useCallerSeqIds)
 
   def pipelineFactory: ChannelPipelineFactory =
     ThriftClientFramedPipelineFactory

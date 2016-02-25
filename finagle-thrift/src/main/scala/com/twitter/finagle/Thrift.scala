@@ -124,7 +124,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
           val Label(label) = params[Label]
           val param.ClientId(clientId) = params[param.ClientId]
           val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
-          val preparer = new ThriftClientPreparer(pf, label, clientId, false)
+          val preparer = new ThriftClientPreparer(pf, label, clientId)
           preparer.prepare(next, params)
         }
       }
@@ -177,10 +177,10 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     def withClientId(clientId: thrift.ClientId): Client =
       configured(param.ClientId(Some(clientId)))
 
-    def withProtocolUpgrade: Client =
+    def withAttemptProtocolUpgrade: Client =
       configured(param.AttemptProtocolUpgrade(true))
 
-    def withNoProtocolUpgrade: Client =
+    def withNoAttemptProtocolUpgrade: Client =
       configured(param.AttemptProtocolUpgrade(false))
 
     def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
