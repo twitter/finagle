@@ -1,7 +1,7 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.socks.SocksProxyFlags
+import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import com.twitter.util.Future
@@ -29,13 +29,14 @@ object Transporter {
   /**
    * $param a `SocketAddress` that a `Transporter` connects to.
    */
-  case class EndpointAddr(addr: Address) {
+  case class EndpointAddr(addr: SocketAddress) {
     def mk(): (EndpointAddr, Stack.Param[EndpointAddr]) =
       (this, EndpointAddr.param)
   }
   object EndpointAddr {
-    implicit val param =
-      Stack.Param(EndpointAddr(Address.failing))
+    implicit val param = Stack.Param(EndpointAddr(new SocketAddress {
+      override def toString = "noaddr"
+    }))
   }
 
   /**

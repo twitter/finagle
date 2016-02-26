@@ -1,47 +1,60 @@
 package com.twitter.finagle.http.service
 
-import com.twitter.conversions.time._
-import com.twitter.finagle.{ChannelClosedException, ClientConnection, Http, ServiceFactory}
-import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.http.{Http => HttpCodec, Request, Response, Version, Method}
-import com.twitter.finagle.service.FailingFactory
+import org.jboss.netty.channel.local._
+import org.jboss.netty.channel._
+import org.jboss.netty.bootstrap.ServerBootstrap
+
+import com.twitter.util.TimeConversions._
 import com.twitter.util.{Await, Throw, Try}
-import java.net.InetSocketAddress
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.http.{Http, Request, Response, Version, Method}
+import com.twitter.finagle.ChannelClosedException
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ClientTest extends FunSuite {
-  def withServer(factory: ServiceFactory[Request, Response])(
-    spec: ClientBuilder.Complete[Request, Response] => Unit
-  ): Unit = {
-    val server = Http.serve(new InetSocketAddress(0), factory)
-    val serverAddress = server.boundAddress.asInstanceOf[InetSocketAddress]
+  def withServer(handler: ChannelHandler)(spec: ClientBuilder.Complete[Request, Response] => Unit) {
+    val cf = new DefaultLocalServerChannelFactory()
+
+    val bs = new ServerBootstrap(cf)
+    bs.setPipelineFactory(new ChannelPipelineFactory {
+      def getPipeline = {
+        val pipeline = Channels.pipeline()
+        pipeline.addLast("theHandler", handler)
+        pipeline
+      }
+    })
+
+    val serverAddress = new LocalAddress("server")
+    val serverChannel = bs.bind(serverAddress)
 
     val builder =
       ClientBuilder()
-        .hosts(serverAddress)
+        .channelFactory(new DefaultLocalClientChannelFactory)
+        .hosts(Seq(serverAddress))
         .hostConnectionLimit(1)
-        .codec(HttpCodec())
+        .codec(Http())
 
-    try spec(builder) finally {
-      Await.result(server.close())
+    try {
+      spec(builder)
+    } finally {
+      serverChannel.close().awaitUninterruptibly()
     }
   }
 
   var counter = 0
-
-  def failingFactory: ServiceFactory[Request, Response] =
-    new FailingFactory[Request, Response](new Exception("bye")) {
-      override def apply(conn: ClientConnection) = {
-        counter += 1
-        super.apply(conn)
-      }
+  lazy val closingHandler = new SimpleChannelUpstreamHandler {
+    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+      counter += 1
+      Channels.close(ctx.getChannel)
     }
+  }
 
   test("report a closed connection when the server doesn't reply") {
-    withServer(failingFactory) { clientBuilder =>
+    withServer(closingHandler) { clientBuilder =>
       counter = 0
       val client = clientBuilder.build()
       try {
@@ -51,13 +64,13 @@ class ClientTest extends FunSuite {
         val resolved = Try(Await.result(future, 1.second))
         assert(resolved.isThrow == true)
         val Throw(cause) = resolved
-        intercept[ChannelClosedException] { throw cause }
+        intercept[ChannelClosedException] {throw cause}
       } finally client.close()
     }
   }
 
   test("report a closed connection when the server doesn't reply, without retrying") {
-    withServer(failingFactory) { clientBuilder =>
+    withServer(closingHandler) { clientBuilder =>
       counter = 0
       val client = clientBuilder
         .retries(10)
@@ -67,7 +80,7 @@ class ClientTest extends FunSuite {
         val resolved = Try(Await.result(future, 1.second))
         assert(resolved.isThrow == true)
         val Throw(cause) = resolved
-        intercept[ChannelClosedException] { throw cause }
+        intercept[ChannelClosedException] {throw cause}
         assert(counter == 1)
       } finally client.close()
     }

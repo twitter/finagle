@@ -10,7 +10,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol.{Command, Response, Set}
-import com.twitter.finagle.{Addr, Address, ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle.{Addr, ClientConnection, Service, ServiceFactory}
 import com.twitter.io.Buf
 import com.twitter.util._
 import org.junit.runner.RunWith
@@ -49,8 +49,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
     val queueNameBuf = Buf.Utf8(queueName)
     val N = 3
     val hosts = 0 until N map { i =>
-      Address(
-        InetSocketAddress.createUnresolved("10.0.0.%d".format(i), 22133))
+      InetSocketAddress.createUnresolved("10.0.0.%d".format(i), 22133)
     }
 
     val executor = Executors.newCachedThreadPool()
@@ -91,7 +90,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       hosts.foreach { host =>
         val mockHostClientBuilder =
           mock[ClientBuilder[Command, Response, ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]]
-        when(result.addrs(host)) thenReturn mockHostClientBuilder
+        when(result.hosts(host)) thenReturn mockHostClientBuilder
 
         val queues = hostQueuesMap(host)
         val factory = new ServiceFactory[Command, Response] {
@@ -192,7 +191,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       hosts.foreach { host =>
         val mockHostClientBuilder =
           mock[ClientBuilder[Command, Response, ClientConfig.Yes, ClientConfig.Yes, ClientConfig.Yes]]
-        when(result.addrs(Address(host))) thenReturn mockHostClientBuilder
+        when(result.hosts(host)) thenReturn mockHostClientBuilder
 
         val queues = hostQueuesMap(host)
         val factory = new ServiceFactory[Command, Response] {
@@ -333,7 +332,7 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
 
   test("Var[Addr]-based cluster should read messages as cluster hosts are removed") {
     new AddrClusterHelper {
-      var mutableHosts: Seq[Address] = hosts
+      var mutableHosts: Seq[SocketAddress] = hosts
       val va = Var(Addr.Bound(mutableHosts: _*))
       val rest = hosts.tail.reverse
       val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()

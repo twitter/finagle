@@ -1,6 +1,6 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Resolver, Addr, Address}
+import com.twitter.finagle.{Announcer, Resolver, Addr}
 import com.twitter.util.{Await, Var}
 import java.net.{InetSocketAddress, InetAddress, Socket}
 import org.junit.runner.RunWith
@@ -44,11 +44,9 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
 
       eventually(timeout(5 seconds)) {
         Var.sample(addr) match {
-          case Addr.Bound(addrs, _) =>
-            assert(addrs.exists {
-              case Address.Inet(ia1: InetSocketAddress, _) =>
-                ia1.getPort == ia.getPort
-              case _ => false
+          case Addr.Bound(sockaddrs, _) =>
+            assert(sockaddrs exists {
+              case ia1: InetSocketAddress => ia1.getPort == ia.getPort
             })
           case _ => fail()
         }

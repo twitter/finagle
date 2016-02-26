@@ -1,11 +1,12 @@
 package com.twitter.finagle.factory
 
 import com.twitter.finagle._
-import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.service.{DelayedFactory, FailingFactory, ServiceFactoryRef}
+import com.twitter.finagle.ServiceFactoryProxy
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.{Drv, Rng}
 import com.twitter.util._
+import java.net.SocketAddress
 
 private[finagle] object TrafficDistributor {
   /**
@@ -101,11 +102,11 @@ private[finagle] object TrafficDistributor {
 
 /**
  * A traffic distributor groups the input `dest` into distinct weight classes and
- * allocates traffic to each class. Classes are encoded in the stream of [[Address]]
+ * allocates traffic to each class. Classes are encoded in the stream of [[SocketAddress]]
  * instances in `dest`. The class operates with the following regime:
 
- * 1. For every distinct [[Address]] observed in `dest`, it creates a `newEndpoint`.
- * Each resulting `newEndpoint` is paired with a weight extracted from the [[Address]].
+ * 1. For every distinct [[SocketAddress]] observed in `dest`, it creates a `newEndpoint`.
+ * Each resulting `newEndpoint` is paired with a weight extracted from the [[SocketAddress]].
  * Calls to `newEndpoint` are assumed to be expensive, so they are cached by input address.
  *
  * 2. The weighted endpoints are partitioned into weight classes and each class is
@@ -113,14 +114,14 @@ private[finagle] object TrafficDistributor {
  * class is also load balanced across its members. Offered load is distributed according
  * to the classes weight and number of members that belong to the class.
  *
- * @param eagerEviction When set to false, an [[Address]] cache entry is only removed
+ * @param eagerEviction When set to false, a SocketAddress cache entry is only removed
  * when its associated [[ServiceFactory]] has a status that is not Status.Open. This allows
  * for stale cache entries across updates that are only evicted when a [[ServiceFactory]]
  * is no longer eligible to receive traffic (as indicated by its `status` field).
  */
 private[finagle] class TrafficDistributor[Req, Rep](
-    dest: Activity[Set[Address]],
-    newEndpoint: Address => ServiceFactory[Req, Rep],
+    dest: Activity[Set[SocketAddress]],
+    newEndpoint: SocketAddress => ServiceFactory[Req, Rep],
     newBalancer: Activity[Set[ServiceFactory[Req, Rep]]] => ServiceFactory[Req, Rep],
     eagerEviction: Boolean,
     rng: Rng = Rng.threadLocal,
@@ -133,40 +134,40 @@ private[finagle] class TrafficDistributor[Req, Rep](
   private[this] val outerClose = new Promise[Unit]
 
   /**
-   * Creates a `newEndpoint` for each distinct [[Address]] in the `addrs`
+   * Creates a `newEndpoint` for each distinct [[SocketAddress]] in the `sockaddrs`
    * stream. Calls to `newEndpoint` are cached based on the input address. The cache is
-   * privy to [[Address]] with weight metadata and unwraps them. Weights
+   * privy to SocketAddresses of type [[WeightedSocketAddress]] and unwraps them. Weights
    * are extracted and coupled with the their respective result from `newEndpoint`. If
-   * the [[Address]] does not have a weight, a default weight of 1.0 is used.
+   * the SocketAddress does not have a weight, a default weight of 1.0 is used.
    */
   private[this] def weightEndpoints(
-    addrs: Event[Activity.State[Set[Address]]]
+    sockaddrs: Event[Activity.State[Set[SocketAddress]]]
   ): Event[Activity.State[Set[WeightedFactory[Req, Rep]]]] = {
-    val init = Map.empty[Address, WeightedFactory[Req, Rep]]
-    safelyScanLeft(init, addrs) {
+    val init = Map.empty[SocketAddress, WeightedFactory[Req, Rep]]
+    safelyScanLeft(init, sockaddrs) {
       case (active, addrs) =>
-        // Note, if an update contains multiple `Address` instances
-        // with duplicate `weight` metadata, only one of the instances and its associated
+        // Note, if an update contains multiple `WeightedSocketAddress` instances
+        // with duplicate `addr` fields, only one of the instances and its associated
         // factory is cached. Last write wins.
-        val weightedAddrs: Set[(Address, Double)] = addrs.map(WeightedAddress.extract)
-        val merged = weightedAddrs.foldLeft(active) { case (cache, (addr, weight)) =>
-          cache.get(addr) match {
-            // An update with an existing Address that has a new weight
+        val weightedAddrs = addrs.map(WeightedSocketAddress.extract)
+        val merged = weightedAddrs.foldLeft(active) { case (cache, (sa, saWeight)) =>
+          cache.get(sa) match {
+            // An update with an existing SocketAddress that has a new weight
             // results in the the weight being overwritten but the [[ServiceFactory]]
             // instance is maintained.
-            case Some(wf@WeightedFactory(_, _, w)) if w != weight =>
-              cache.updated(addr, wf.copy(weight = weight))
+            case Some(wf@WeightedFactory(_, _, w)) if w != saWeight =>
+              cache.updated(sa, wf.copy(weight = saWeight))
             case None =>
               // The `closeGate` allows us to defer closing an endpoint service
               // factory until it is removed from this cache. Without it, an endpoint may
               // be closed prematurely when moving across weight classes if the
               // weight class is removed.
               val closeGate = new Promise[Unit]
-              val endpoint = new ServiceFactoryProxy(newEndpoint(addr)) {
+              val endpoint = new ServiceFactoryProxy(newEndpoint(sa)) {
                 override def close(when: Time) =
                   (closeGate or outerClose).before { super.close(when) }
               }
-              cache.updated(addr, WeightedFactory(endpoint, closeGate, weight))
+              cache.updated(sa, WeightedFactory(endpoint, closeGate, saWeight))
             case _ => cache
           }
         }
@@ -174,12 +175,12 @@ private[finagle] class TrafficDistributor[Req, Rep](
         // Remove stale cache entries. When `eagerEviction` is false cache
         // entries are only removed in subsequent stream updates.
         val removed = merged.keySet -- weightedAddrs.map(_._1)
-        removed.foldLeft(merged) { case (cache, addr) =>
-          cache.get(addr) match {
+        removed.foldLeft(merged) { case (cache, sa) =>
+          cache.get(sa) match {
             case Some(WeightedFactory(f, g, _)) if eagerEviction || f.status != Status.Open =>
               g.setDone()
               f.close()
-              cache - addr
+              cache - sa
             case _ => cache
           }
         }

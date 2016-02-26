@@ -1,11 +1,12 @@
 package com.twitter.finagle.client
 
-import com.twitter.finagle._
+import com.twitter.finagle.{Addr, Name, Path, Service, Stack, StackBuilder, ServiceFactory}
 import com.twitter.finagle.client.AddrMetadataExtraction.AddrMetadata
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stack.nilStack
 import com.twitter.util.{Await, Future, Var}
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.FunSuite
@@ -15,7 +16,7 @@ class AddrMetadataExtractionTest extends FunSuite with AssertionsForJUnit {
   class Ctx {
     val unbound = Name.Path(Path.read("/$/fail"))
     val metadata = Addr.Metadata("foo" -> "bar")
-    val addrBound = Addr.Bound(Set.empty[Address], metadata)
+    val addrBound = Addr.Bound(Set.empty[SocketAddress], metadata)
     val vaddrBound = Var(addrBound)
     val bound = Name.Bound(vaddrBound, Path.read("/baz"))
 

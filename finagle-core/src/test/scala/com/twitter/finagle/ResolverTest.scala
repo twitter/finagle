@@ -1,22 +1,12 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Future, Time, Return, Throw, Var}
-import java.net.InetSocketAddress
+import com.twitter.util.{Return, Throw, Var}
+import java.net.SocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-object TestAddr {
-  case class StringFactory(s: String) extends ServiceFactory[Any, String] {
-    val svc = Service.const(Future.value(s))
-    override def apply(conn: ClientConnection) = Future.value(svc)
-    override def close(deadline: Time) = Future.Done
-  }
-
-  def apply(arg: String): Address = {
-    exp.Address(StringFactory(arg))
-  }
-}
+case class TestAddr(arg: String) extends SocketAddress
 
 class TestResolver extends Resolver {
   val scheme = "test"
@@ -67,8 +57,8 @@ class ResolverTest extends FunSuite {
       case _ => fail()
     }
 
-    val sockaddr = new InetSocketAddress(0)
-    ConstResolver(Addr.Bound(Address(sockaddr))).resolve("blah") match {
+    val sockaddr = new SocketAddress {}
+    ConstResolver(Addr.Bound(sockaddr)).resolve("blah") match {
       case Return(g) => assert(g() == Set(sockaddr))
       case _ => fail()
     }

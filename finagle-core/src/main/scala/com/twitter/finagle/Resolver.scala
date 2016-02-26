@@ -98,7 +98,7 @@ private[finagle] class InetResolver(
 ) extends Resolver {
   import InetSocketAddressUtil._
 
-  type HostPortMetadata = (String, Int, Addr.Metadata)
+  type WeightedHostPort = (String, Int, Double)
 
   val scheme = "inet"
   private[this] val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
@@ -131,16 +131,16 @@ private[finagle] class InetResolver(
     * If any lookup succeeds the final result will be Addr.Bound
     * with the successful results.
     */
-  def toAddr(hp: Seq[HostPortMetadata]): Future[Addr] = {
+  def toAddr(whp: Seq[WeightedHostPort]): Future[Addr] = {
     val elapsed = Stopwatch.start()
-    Future.collectToTry(hp.map {
-      case (host, port, meta) =>
+    Future.collectToTry(whp.map {
+      case (host, port, weight) =>
         resolveHost(host).map { inetAddrs =>
           inetAddrs.map { inetAddr =>
-            Address.Inet(new InetSocketAddress(inetAddr, port), meta)
+            WeightedSocketAddress(new InetSocketAddress(inetAddr, port), weight): SocketAddress
           }
         }
-    }).flatMap { seq: Seq[Try[Seq[Address]]] =>
+    }).flatMap { seq: Seq[Try[Seq[SocketAddress]]] =>
         // Filter out all successes. If there was at least 1 success, consider
         // the entire operation a success
       val results = seq.collect {
@@ -162,13 +162,13 @@ private[finagle] class InetResolver(
         } match {
           case Some(_: UnknownHostException) => Future.value(Addr.Neg)
           case Some(e) => Future.value(Addr.Failed(e))
-          case None => Future.value(Addr.Bound(Set[Address]()))
+          case None => Future.value(Addr.Bound(Set[SocketAddress]()))
         }
       }
     }
   }
 
-  def bindHostPortsToAddr(hosts: Seq[HostPortMetadata]): Var[Addr] = {
+  def bindWeightedHostPortsToAddr(hosts: Seq[WeightedHostPort]): Var[Addr] = {
     Var.async(Addr.Pending: Addr) { u =>
       toAddr(hosts) onSuccess { u() = _ }
       pollIntervalOpt match {
@@ -196,9 +196,10 @@ private[finagle] class InetResolver(
    */
   def bind(hosts: String): Var[Addr] = Try(parseHostPorts(hosts)) match {
     case Return(hp) =>
-      bindHostPortsToAddr(hp.map { case (host, port) =>
-        (host, port, Addr.Metadata.empty)
-      })
+      val whp = hp collect { case (host, port) =>
+        (host, port, 1D)
+      }
+      bindWeightedHostPortsToAddr(whp)
     case Throw(exc) =>
       Var.value(Addr.Failed(exc))
   }

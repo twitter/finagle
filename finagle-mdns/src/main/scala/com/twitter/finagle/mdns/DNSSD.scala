@@ -1,9 +1,9 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcement, Announcer, Addr, Address, Resolver}
+import com.twitter.finagle.{Announcement, Announcer, Addr, Resolver}
 import com.twitter.util.{Closable, Future, Promise, Return, Throw, Time, Try, Var}
 import java.lang.reflect.{InvocationHandler, Method, Proxy}
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 import scala.collection.mutable
 
 private case class Record(
@@ -127,7 +127,7 @@ private object DNSSD {
   }
 
   def resolve(regType: String, domain: String): Var[Addr] = {
-    val services = new mutable.HashMap[String, Address]()
+    val services = new mutable.HashMap[String, MdnsRecord]()
     val v = Var[Addr](Addr.Pending)
 
     def mkRecord(args: Array[Object]) = {
@@ -144,17 +144,15 @@ private object DNSSD {
       case ("serviceFound", args)  =>
         val record = mkRecord(args)
         instance.resolve(record) foreach { resolved =>
-          val metadata = MdnsAddrMetadata(
+          val mdnsRecord = MdnsRecord(
             record.serviceName,
             record.regType,
-            record.domain)
-          val addr = Address.Inet(
-            new InetSocketAddress(resolved.hostName, resolved.port),
-            MdnsAddrMetadata.toAddrMetadata(metadata))
+            record.domain,
+            new InetSocketAddress(resolved.hostName, resolved.port))
 
           synchronized {
-            services.put(record.serviceName, addr)
-            v() = Addr.Bound(services.values.toSet: Set[Address])
+            services.put(record.serviceName, mdnsRecord)
+            v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
           }
         }
 
@@ -162,7 +160,7 @@ private object DNSSD {
         val record = mkRecord(args)
         synchronized {
           if (services.remove(record.serviceName).isDefined)
-            v() = Addr.Bound(services.values.toSet: Set[Address])
+            v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
         }
     }
 

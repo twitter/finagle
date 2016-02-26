@@ -497,13 +497,12 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
         val factory = addr match {
-          case com.twitter.finagle.exp.Address.ServiceFactory(sf: ServiceFactory[Req, Rep], _) => sf
-          case Address.Failed(e) => new FailingFactory[Req, Rep](e)
-          case Address.Inet(ia, _) =>
+          case ServiceFactorySocketAddress(sf: ServiceFactory[Req, Rep]) => sf
+          case _ =>
             val endpointClient = copy1(params=prms)
             val transporter = endpointClient.newTransporter()
             val mkFutureSvc: () => Future[Service[Req, Rep]] =
-              () => transporter(ia).map { trans =>
+              () => transporter(addr).map { trans =>
                 // we do not want to capture and request specific Locals
                 // that would live for the life of the session.
                 Contexts.letClear {

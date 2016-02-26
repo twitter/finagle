@@ -1,6 +1,6 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Announcement, Resolver, Addr, Address}
+import com.twitter.finagle.{Announcer, Announcement, Resolver, Addr}
 import com.twitter.util.{Future, Return, Throw, Try, Var}
 import java.lang.management.ManagementFactory
 import java.net.{InetSocketAddress, SocketAddress}
@@ -9,28 +9,12 @@ import scala.collection.mutable
 class MDNSAddressException(addr: String)
   extends Exception("Invalid MDNS address \"%s\"".format(addr))
 
-private case class MdnsAddrMetadata(
-    name: String,
-    regType: String,
-    domain: String)
-
-private object MdnsAddrMetadata {
-  private val key = "mdns_addr_metadata"
-
-  def toAddrMetadata(metadata: MdnsAddrMetadata) = Addr.Metadata(key -> metadata)
-
-  def fromAddrMetadata(metadata: Addr.Metadata): Option[MdnsAddrMetadata] =
-    metadata.get(key) match {
-      case some@Some(_: MdnsAddrMetadata) =>
-        some.asInstanceOf[Option[MdnsAddrMetadata]]
-      case _ => None
-    }
-
-  def unapply(metadata: Addr.Metadata): Option[(String, String, String)] =
-    fromAddrMetadata(metadata).map {
-      case MdnsAddrMetadata(name, regType, domain) => (name, regType, domain)
-    }
-}
+private case class MdnsRecord(
+  name: String,
+  regType: String,
+  domain: String,
+  addr: InetSocketAddress)
+extends SocketAddress
 
 private trait MDNSAnnouncerIface {
   def announce(
@@ -105,10 +89,10 @@ class MDNSResolver extends Resolver {
   def bind(arg: String): Var[Addr] = {
     val (name, regType, domain) = parse(arg)
     resolver.resolve(regType, domain) map {
-      case Addr.Bound(addrs, attrs) =>
-        val filtered = addrs.filter {
-          case Address.Inet(ia, MdnsAddrMetadata(n, _, _)) => n.startsWith(name)
-          case _ => false
+      case Addr.Bound(sockaddrs, attrs) =>
+        val filtered = sockaddrs collect {
+          case MdnsRecord(n, _, _, a) if n startsWith name =>
+            a: SocketAddress
         }
         Addr.Bound(filtered, attrs)
       case a => a

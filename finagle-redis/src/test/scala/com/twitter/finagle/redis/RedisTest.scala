@@ -100,7 +100,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
     val client = ClientBuilder()
           .name("redis-client")
           .codec(Redis())
-          .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
+          .hosts(server.boundAddress)
           .hostConnectionLimit(1)
           .retries(2)
           .build()

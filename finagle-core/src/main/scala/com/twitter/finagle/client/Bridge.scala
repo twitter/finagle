@@ -1,7 +1,6 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
-import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
@@ -24,9 +23,6 @@ object Bridge {
   def apply[In, Out, Req, Rep](
     transporter: (SocketAddress, StatsReceiver) => Future[Transport[In, Out]],
     newDispatcher: Transport[In, Out] => Service[Req, Rep]
-  ): ((Address, StatsReceiver) => ServiceFactory[Req, Rep]) = {
-    case (Address.Inet(ia, _), sr) => ServiceFactory(() => transporter(ia, sr) map newDispatcher)
-    case (com.twitter.finagle.exp.Address.ServiceFactory(sf: ServiceFactory[Req, Rep], _), _) => sf
-    case (Address.Failed(e), _) => new FailingFactory(e)
-  }
+  ): ((SocketAddress, StatsReceiver) => ServiceFactory[Req, Rep]) =
+    (sa, sr) => ServiceFactory(() => transporter(sa, sr) map newDispatcher)
 }

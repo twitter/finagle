@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 import com.twitter.util.Var
 import com.twitter.finagle.util.Showable
 
@@ -99,7 +99,7 @@ object Name {
   /**
    * Create a pre-bound address.
    */
-  def bound(addrs: Address*): Name.Bound =
+  def bound(addrs: SocketAddress*): Name.Bound =
     Name.Bound(Var.value(Addr.Bound(addrs:_*)), addrs.toSet)
 
   /**
@@ -112,9 +112,8 @@ object Name {
    *
    * @note Full Addr semantics cannot be recovered from Group. We
    * take a conservative approach here: we will only provide bound
-   * and failed addresses. Empty sets could indicate either pending or
-   * negative resolutions. A failed address is only returned if the Group
-   * contains a [[SocketAddress]] that is not an [[InetSocketAddress]].
+   * addresses. Empty sets could indicate either pending or negative
+   * resolutions.
    */
   def fromGroup(g: Group[SocketAddress]): Name.Bound = g match {
     case NameGroup(name) => name
@@ -127,14 +126,7 @@ object Name {
          case newSet if first && newSet.isEmpty => Addr.Pending
          case newSet =>
            first = false
-           newSet.foldLeft[Addr](Addr.Bound()) {
-             case (Addr.Bound(set, metadata), ia: InetSocketAddress) =>
-               Addr.Bound(set + Address(ia), metadata)
-             case (Addr.Bound(_, _), sa) =>
-               Addr.Failed(new IllegalArgumentException(
-                 s"Unsupported SocketAddress of type '${sa.getClass.getName}': $sa"))
-             case (addr, _) => addr
-           }
+           Addr.Bound(newSet)
        }
      }, group)
   }
@@ -161,11 +153,11 @@ object Name {
     else {
       val va = Var.collect(names map(_.addr)) map {
         case addrs if addrs.exists({case Addr.Bound(_, _) => true; case _ => false}) =>
-          val endpointAddrs = addrs.flatMap {
+          val sockaddrs = addrs.flatMap {
             case Addr.Bound(as, _) => as
-            case _ => Set.empty[Address]
-          }.toSet
-          Addr.Bound(endpointAddrs, Addr.Metadata.empty)
+            case _ => Set.empty: Set[SocketAddress]
+          }
+          Addr.Bound(sockaddrs, Addr.Metadata.empty)
 
         case addrs if addrs.forall(_ == Addr.Neg) => Addr.Neg
         case addrs if addrs.forall({case Addr.Failed(_) => true; case _ => false}) =>

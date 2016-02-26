@@ -102,8 +102,8 @@ class StackClientTest extends FunSuite
     ClientRegistry.clear()
 
     val name = "testClient"
-    client.newClient(Name.bound(Address(8080)), name)
-    client.newClient(Name.bound(Address(8080)), name)
+    client.newClient(Name.bound(new InetSocketAddress(8080)), name)
+    client.newClient(Name.bound(new InetSocketAddress(8080)), name)
 
     assert(ClientRegistry.registrants.count { e: StackRegistry.Entry =>
       val param.Label(actual) = e.params[param.Label]
@@ -373,8 +373,8 @@ class StackClientTest extends FunSuite
     val fac1 = new CountFactory
     val fac2 = new CountFactory
 
-    val addr1 = Address(1729)
-    val addr2 = Address(1730)
+    val addr1 = new InetSocketAddress(1729)
+    val addr2 = new InetSocketAddress(1730)
 
     val baseDtab = Dtab.read("/s=>/test")
 
@@ -445,11 +445,11 @@ class StackClientTest extends FunSuite
       client.configured[param.Label]((param.Label("foo"), param.Label.param))
   }
 
-  test("StackClient binds to a local service via exp.Address.ServiceFactory") {
+  test("StackClient binds to a local service via ServiceFactorySocketAddress") {
     val reverser = Service.mk[String, String] { in => Future.value(in.reverse) }
     val sf = ServiceFactory(() => Future.value(reverser))
-    val addr = exp.Address(sf)
-    val name = Name.bound(addr)
+    val sa = ServiceFactorySocketAddress(sf)
+    val name = Name.bound(sa)
     val service = stringClient.newService(name, "sfsa-test")
     val forward = "a man a plan a canal: panama"
     val reversed = Await.result(service(forward), 1.second)
@@ -459,8 +459,8 @@ class StackClientTest extends FunSuite
   test("filtered composes filters atop the stack") {
     val echoServer = Service.mk[String, String] { in => Future.value(in) }
     val sf = ServiceFactory(() => Future.value(echoServer))
-    val addr = exp.Address(sf)
-    val name = Name.bound(addr)
+    val sa = ServiceFactorySocketAddress(sf)
+    val name = Name.bound(sa)
 
     val reverseFilter = new SimpleFilter[String, String] {
       def apply(str: String, svc: Service[String, String]) =
@@ -481,10 +481,9 @@ class StackClientTest extends FunSuite
       val server = stringServer.serve(
         new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
         echoSvc)
-      val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
 
       val client = new LocalCheckingStringClient(key)
-        .newService(Name.bound(Address(ia)), "a-label")
+        .newService(Name.bound(server.boundAddress), "a-label")
 
       val result = Await.result(client("abc"), 5.seconds)
       assert("abc" == result)

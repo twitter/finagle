@@ -329,7 +329,7 @@ object StreamingTest {
   def connect(addr: SocketAddress, mod: Modifier, name: String = "client") =
     ClientBuilder()
       .codec(new Custom(mod, identity))
-      .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
+      .hosts(Seq(addr))
       .hostConnectionLimit(1)
       .name(name)
       .build()

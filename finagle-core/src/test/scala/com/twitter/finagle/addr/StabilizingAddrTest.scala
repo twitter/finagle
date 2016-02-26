@@ -2,13 +2,14 @@ package com.twitter.finagle.addr
 
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Address}
+import com.twitter.finagle.Addr
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{MockTimer, Time}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import StabilizingAddr.State._
+import java.net.SocketAddress
 
 class MockHealth {
   val pulse = new Broker[Health]()
@@ -17,25 +18,16 @@ class MockHealth {
 }
 
 class Context {
-  val s1 = Address(1)
-  val s2 = Address(2)
-  val s3 = Address(3)
-  val s4 = Address(4)
-  val s5 = Address(5)
-  val s6 = Address(6)
-  val s7 = Address(7)
-  val s8 = Address(8)
-  val s9 = Address(9)
-  val s10 = Address(10)
+  val s1, s2, s3, s4, s5, s6, s7, s8, s9, s10 = new SocketAddress {}
   val allAddrs = Set(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10)
 
   object addrs {
     val broker = new Broker[Addr]
     val offer = broker.recv
-    @volatile var set = Set.empty[Address]
+    @volatile var set = Set.empty[SocketAddress]
 
     def apply() = set
-    def update(newSet: Set[Address]) {
+    def update(newSet: Set[SocketAddress]) {
       set = newSet
       broker !! Addr.Bound(set)
     }

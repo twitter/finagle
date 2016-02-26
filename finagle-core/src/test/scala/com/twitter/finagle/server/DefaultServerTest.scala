@@ -105,7 +105,7 @@ class DefaultServerTest extends FunSpec with MockitoSugar {
       val transporter: (SocketAddress, StatsReceiver) => Future[Transport[Try[Int], Try[Int]]] =
         (_, _) => Future.value(clientTransport)
 
-      val endpointer: (Address, StatsReceiver) => ServiceFactory[Try[Int], Try[Int]] =
+      val endpointer: (SocketAddress, StatsReceiver) => ServiceFactory[Try[Int], Try[Int]] =
         Bridge(transporter, (t: Transport[Try[Int], Try[Int]]) => new SerialClientDispatcher(t))
 
       val client: Client[Try[Int], Try[Int]] = DefaultClient("name", endpointer)

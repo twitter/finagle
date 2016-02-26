@@ -333,7 +333,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService1()
     )
-    val client1 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+    val client1 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(server1.boundAddress), "client")
 
     assert(Await.result(client1.echo("asdf")) == "asdf")
     assert(Await.result(client1.getStatus()) == "OK")
@@ -347,7 +347,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService2()
     )
-    val client2 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+    val client2 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(server2.boundAddress), "client")
 
     assert(Await.result(client2.echo("asdf")) == "asdf")
     assert(Await.result(client2.getStatus()) == "OK")
@@ -405,7 +405,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client = Thrift.client
       .configured(Stats(sr))
       .withResponseClassifier(classifier)
-      .newIface[Echo.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+      .newIface[Echo.FutureIface](Name.bound(server.boundAddress), "client")
 
     testFailureClassification(sr, client)
     server.close()
@@ -419,7 +419,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .name("client")
       .reportTo(sr)
       .responseClassifier(classifier)
-      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+      .dest(Name.bound(server.boundAddress))
       .build()
     val client = new Echo.FinagledClient(clientBuilder)
 
@@ -433,7 +433,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val client = Thrift.client
       .configured(Stats(sr))
       .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
-      .newIface[Echo.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+      .newIface[Echo.FutureIface](Name.bound(server.boundAddress), "client")
 
     val ex = intercept[InvalidQueryException] {
       Await.result(client.echo("hi"), 5.seconds)
@@ -472,26 +472,26 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       )
   )
 
-  private[this] val clients: Seq[(String, (StatsReceiver, Address) => Echo.FutureIface)] = Seq(
+  private[this] val clients: Seq[(String, (StatsReceiver, SocketAddress) => Echo.FutureIface)] = Seq(
     "Thrift.client" ->
-      ((sr, addr) => Thrift.client
+      ((sr, sa) => Thrift.client
         .withStatsReceiver(sr)
-        .newIface[Echo.FutureIface](Name.bound(addr), "client")
+        .newIface[Echo.FutureIface](Name.bound(sa), "client")
       ),
     "ClientBuilder(stack)" ->
-      ((sr, addr) => new Echo.FinagledClient(ClientBuilder().stack(Thrift.client)
+      ((sr, sa) => new Echo.FinagledClient(ClientBuilder().stack(Thrift.client)
         .name("client")
         .hostConnectionLimit(1)
         .reportTo(sr)
-        .dest(Name.bound(addr))
+        .dest(Name.bound(sa))
         .build())
       ),
     "ClientBuilder(codec)" ->
-      ((sr, addr) => new Echo.FinagledClient(ClientBuilder().codec(ThriftClientFramedCodec())
+      ((sr, sa) => new Echo.FinagledClient(ClientBuilder().codec(ThriftClientFramedCodec())
         .name("client")
         .hostConnectionLimit(1)
         .reportTo(sr)
-        .dest(Name.bound(addr))
+        .dest(Name.bound(sa))
         .build())
       )
   )
@@ -507,7 +507,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     }
 
     val ss = server(sr, fi)
-    val cc = client(sr, Address(ss.boundAddress.asInstanceOf[InetSocketAddress]))
+    val cc = client(sr, ss.boundAddress)
 
     Await.ready(cc.echo("." * 10))
 

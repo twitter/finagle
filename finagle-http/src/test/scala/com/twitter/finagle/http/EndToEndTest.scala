@@ -538,7 +538,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = ClientBuilder()
         .codec(Http())
         .reportTo(statsRecv)
-        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -577,7 +577,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http().streaming(true))
-        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -598,7 +598,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http().enableTracing(true))
-        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -642,7 +642,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http())
-        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
+        .hosts(Seq(server.boundAddress))
         .hostConnectionLimit(1)
         .name(name)
         .failureAccrualParams((failureAccrualFailures, 1.minute))
@@ -661,7 +661,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = finagle.Http.client
         .configured(Stats(st))
         .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
-        .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), name)
+        .newService(Name.bound(server.boundAddress), name)
 
       new ServiceProxy(client) {
         override def close(deadline: Time) =

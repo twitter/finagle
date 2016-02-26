@@ -2,7 +2,7 @@ package com.twitter.finagle.zookeeper
 
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Address, Resolver}
+import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.thrift.Status._
 import com.twitter.util.{Await, Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
@@ -114,12 +114,12 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
       val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
       val port1 = RandomSocket.nextPort()
       val port2 = RandomSocket.nextPort()
-      val sockAddr = Address.Inet(new InetSocketAddress("127.0.0.1", port1), Addr.Metadata.empty)
-      val blahAddr = Address.Inet(new InetSocketAddress("10.0.0.1", port2), Addr.Metadata.empty)
+      val sockAddr = new InetSocketAddress("127.0.0.1", port1)
+      val blahAddr = new InetSocketAddress("10.0.0.1", port2)
 
       val status = serverSet.join(
-        sockAddr.addr,
-        Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava,
+        sockAddr,
+        Map[String, InetSocketAddress]("blah" -> blahAddr).asJava,
         ALIVE
       )
 
@@ -127,8 +127,8 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
       status.leave()
       eventually { assert(Var.sample(va) == Addr.Neg) }
       serverSet.join(
-        sockAddr.addr,
-        Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava, ALIVE)
+        sockAddr,
+        Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
       eventually { assert(Var.sample(va) == Addr.Bound(sockAddr)) }
 
       val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(

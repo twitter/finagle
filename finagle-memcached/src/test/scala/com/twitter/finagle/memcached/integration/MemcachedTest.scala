@@ -1,7 +1,7 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Name, Address}
+import com.twitter.finagle.Name
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.Memcached
@@ -32,7 +32,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     server1 = TestMemcachedServer.start()
     server2 = TestMemcachedServer.start()
     if (server1.isDefined && server2.isDefined) {
-      val n = Name.bound(Address(server1.get.address), Address(server2.get.address))
+      val n = Name.bound(server1.get.address, server2.get.address)
       client = Memcached.client.newRichClient(n, clientName)
     }
   }
@@ -172,7 +172,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
   }
 
   test("re-hash when a bad host is ejected") {
-    val n = Name.bound(Address(server1.get.address), Address(server2.get.address))
+    val n = Name.bound(server1.get.address, server2.get.address)
     client = Memcached.client
       .configured(FailureAccrualFactory.Param(1, () => 10.minutes))
       .configured(Memcached.param.EjectFailedHost(true))
@@ -258,7 +258,7 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
       .configured(Memcached.param.EjectFailedHost(true))
       .configured(param.Timer(timer))
       .configured(param.Stats(statsReceiver))
-      .newRichClient(Name.bound(Address(cacheServer.boundAddress.asInstanceOf[InetSocketAddress])), "cacheClient")
+      .newRichClient(Name.bound(cacheServer.boundAddress), "cacheClient")
 
     Time.withCurrentTimeFrozen { timeControl =>
 

@@ -104,7 +104,7 @@ class EndToEndTest extends FunSuite {
     val mem = new InMemoryStatsReceiver
     val client = ClientBuilder()
       .name("client")
-      .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
+      .hosts(server.boundAddress)
       .codec(StringCodec)
       .daemon(true) // don't create an exit guard
       .requestTimeout(10.millisecond)
@@ -128,7 +128,7 @@ class EndToEndTest extends FunSuite {
     val mem = new InMemoryStatsReceiver
     val client = ClientBuilder()
         .name("client")
-        .addrs(Address.failing)
+        .hosts(TestAddr("a"))  // triggers write exceptions
         .codec(StringCodec)
         .daemon(true) // don't create an exit guard
         .requestTimeout(10.millisecond)
@@ -137,7 +137,8 @@ class EndToEndTest extends FunSuite {
         .reportTo(mem)
         .build()
 
-    intercept[IllegalArgumentException] { Await.result(client("hi"), 1.second) }
+    // generate com.twitter.finagle.ChannelWriteException
+    intercept[ChannelWriteException] { Await.result(client("hi"), 1.second) }
 
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
@@ -163,7 +164,7 @@ class EndToEndTest extends FunSuite {
     val mem = new InMemoryStatsReceiver
     val client = ClientBuilder()
       .name("testClient")
-      .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
+      .hosts(server.boundAddress)
       .codec(StringCodec)
       .hostConnectionLimit(1)
       .hostConnectionMaxWaiters(1)
@@ -193,7 +194,6 @@ class EndToEndTest extends FunSuite {
       .build(always)
 
     val mem = new InMemoryStatsReceiver
-    val addr = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
     val client = ClientBuilder.stackClientOfCodec(StringCodec.client)
       .configured(DefaultPool.Param(
         /* low        */ 1,
@@ -203,7 +203,7 @@ class EndToEndTest extends FunSuite {
         /* maxWaiters */ 1))
       .configured(Stats(mem))
       .configured(Retries.Policy(RetryPolicy.tries(1)))
-      .newService(Name.bound(addr), "testClient")
+      .newService(Name.bound(server.boundAddress), "testClient")
 
     Await.result(client("ping"), 1.second)
     Await.ready(server.close(), 1.second)

@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.loadbalancer.defaultBalancer
 import com.twitter.test.{AnException, B, SomeStruct}
 import com.twitter.util.{Await, Promise, Return}
-import java.net.{ServerSocket, InetSocketAddress, InetAddress}
+import java.net.{ServerSocket, SocketAddress, InetAddress}
 import java.util.concurrent.CyclicBarrier
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.server.TSimpleServer
@@ -18,7 +18,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class FinagleClientThriftServerTest extends FunSuite {
   trait TestServer {
-    def server: InetSocketAddress
+    def server: SocketAddress
     def shutdown(): Unit
   }
 
@@ -47,7 +47,7 @@ class FinagleClientThriftServerTest extends FunSuite {
         new TBinaryProtocol.Factory()
       )
 
-      (socket.getLocalSocketAddress.asInstanceOf[InetSocketAddress], server)
+      (socket.getLocalSocketAddress, server)
     }
 
     val thriftServerThread = new Thread("thriftServer") {
@@ -58,7 +58,7 @@ class FinagleClientThriftServerTest extends FunSuite {
     new TestServer {
       def shutdown(): Unit = thriftServer.stop()
 
-      def server: InetSocketAddress = thriftServerAddr
+      def server: SocketAddress = thriftServerAddr
     }
   }
 
