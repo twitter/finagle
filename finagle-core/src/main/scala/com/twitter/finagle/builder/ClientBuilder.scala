@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLContext
 import org.jboss.netty.channel.{Channel, ChannelFactory}
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, varargs}
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -288,8 +288,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * will be load balanced across these.  This is a shorthand form for
    * specifying a cluster.
    *
-   * One of the {{hosts}} variations or direct specification of the
-   * cluster (via {{cluster}}) is required.
+   * One of the `hosts` variations or direct specification of the
+   * cluster (via `cluster`) is required.
    *
    * @param hostnamePortCombinations comma-separated "host:port"
    * string.
@@ -302,22 +302,32 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   }
 
   /**
-   * A variant of {{hosts}} that takes a sequence of
-   * [[java.net.SocketAddress]] instead.
+   * A variant of `hosts` that takes a sequence of
+   * [[java.net.InetSocketAddress]] instead.
    */
   def hosts(
-    addrs: Seq[SocketAddress]
+    sockaddrs: Seq[InetSocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    dest(Name.bound(addrs:_*))
+    addrs(sockaddrs.map(Address(_)): _*)
 
   /**
    * A convenience method for specifying a one-host
    * [[java.net.SocketAddress]] client.
    */
   def hosts(
-    address: SocketAddress
+    address: InetSocketAddress
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     hosts(Seq(address))
+
+  /**
+   * A convenience method for specifying a client with one or more
+   * [[com.twitter.finagle.Address]]s.
+   */
+  @varargs
+  def addrs(
+    addrs: Address*
+  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
+    dest(Name.bound(addrs:_*))
 
   /**
    * The logical destination of requests dispatched through this

@@ -4,9 +4,9 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.conversions.time._
 import com.twitter.finagle.util.{HashedWheelTimer, TimerStats}
 import com.twitter.finagle.stats.FinagleStatsReceiver
-import com.twitter.finagle.{Addr, WeightedSocketAddress}
+import com.twitter.finagle.{Addr, Address}
+import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.util._
-import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
 import org.jboss.netty.{util => netty}
 
@@ -71,8 +71,8 @@ private[serverset2] object Stabilizer {
 
   // Used for delaying removals
   private case class State(
-    limbo: Option[Set[SocketAddress]],
-    active: Option[Set[SocketAddress]],
+    limbo: Option[Set[Address]],
+    active: Option[Set[Address]],
     addr: Addr)
 
   // Used for batching updates
@@ -212,12 +212,12 @@ private[serverset2] object Stabilizer {
    * Merge WeightedSocketAddresses with same underlying SocketAddress
    * preferring weights from `next` over `prev`.
    */
-  private def merge(prev: Set[SocketAddress], next: Set[SocketAddress]): Set[SocketAddress] = {
-    val nextStripped = next.map(WeightedSocketAddress.extract(_)._1)
+  private def merge(prev: Set[Address], next: Set[Address]): Set[Address] = {
+    val nextUnweighted = next.map(WeightedAddress.extract(_)._1)
 
     val legacy = prev.filter { addr =>
-      val (sa, _) = WeightedSocketAddress.extract(addr)
-      !nextStripped.contains(sa)
+      val (unweighted, _) = WeightedAddress.extract(addr)
+      !nextUnweighted.contains(unweighted)
     }
 
     legacy ++ next

@@ -97,7 +97,7 @@ class SslTest extends FunSuite {
     def client =
       ClientBuilder()
         .name("http-client")
-        .hosts(server.boundAddress)
+        .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
         .codec(codec)
         .hostConnectionLimit(1)
         .tlsWithoutValidation()

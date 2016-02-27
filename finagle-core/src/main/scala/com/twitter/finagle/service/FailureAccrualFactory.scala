@@ -7,11 +7,9 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultLogger
-import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.logging.Level
 import com.twitter.util._
 import java.util.logging.Logger
-import java.net.SocketAddress
 import scala.util.Random
 
 object FailureAccrualFactory {
@@ -20,7 +18,7 @@ object FailureAccrualFactory {
     failureAccrualPolicy: FailureAccrualPolicy,
     label: String,
     logger: Logger,
-    endpoint: SocketAddress,
+    endpoint: Address,
     responseClassifier: ResponseClassifier
   )(
     timer: Timer
@@ -252,7 +250,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     statsReceiver: StatsReceiver,
     label: String = "",
     logger: Logger = DefaultLogger,
-    endpoint: SocketAddress = unconnected,
+    endpoint: Address = Address.failing,
     responseClassifier: ResponseClassifier = ResponseClassifier.Default)
   extends ServiceFactory[Req, Rep] { svcFacSelf =>
   import FailureAccrualFactory._
@@ -265,7 +263,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     statsReceiver: StatsReceiver,
     label: String,
     logger: Logger,
-    endpoint: SocketAddress,
+    endpoint: Address,
     responseClassifier: ResponseClassifier
   ) = this(
     underlying,
@@ -285,7 +283,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
     statsReceiver: StatsReceiver,
     label: String,
     logger: Logger,
-    endpoint: SocketAddress
+    endpoint: Address
   ) = this(
     underlying,
     FailureAccrualPolicy.consecutiveFailures(numFailures, Backoff.const(markDeadFor)),

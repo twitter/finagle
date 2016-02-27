@@ -7,11 +7,11 @@ import com.twitter.common.zookeeper.{ServerSet, ServerSetImpl}
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.finagle.addr.StabilizingAddr
 import com.twitter.finagle.stats.DefaultStatsReceiver
-import com.twitter.finagle.{Group, Resolver, Addr}
+import com.twitter.finagle.{Address, Group, Resolver, Addr}
 import com.twitter.thrift.Endpoint
 import com.twitter.thrift.ServiceInstance
 import com.twitter.util.Var
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import java.util.logging.{Level, Logger}
@@ -91,10 +91,10 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
     synchronized {
       cache.getOrElseUpdate(
         (zkHosts, path, endpoint, shardId),
-        newVar(zkHosts, path, newToSocketAddrs(endpoint, shardId)))
+        newVar(zkHosts, path, newToAddresses(endpoint, shardId)))
     }
 
-  private def newToSocketAddrs(endpoint: Option[String], shardId: Option[Int]) = {
+  private def newToAddresses(endpoint: Option[String], shardId: Option[Int]) = {
 
     val getEndpoint: PartialFunction[ServiceInstance, Endpoint] = endpoint match {
       case Some(epname) => {
@@ -113,21 +113,21 @@ class ZkResolver(factory: ZkClientFactory) extends Resolver {
       case None => { case x => x }
     }
 
-    val toSocketAddr: Endpoint => SocketAddress = (ep: Endpoint) =>
-      new InetSocketAddress(ep.getHost, ep.getPort)
+    val toAddress: Endpoint => Address = (ep: Endpoint) =>
+      Address(ep.getHost, ep.getPort)
 
     (insts: Set[ServiceInstance]) =>
-      insts.collect(filterShardId).collect(getEndpoint).map(toSocketAddr)
+      insts.collect(filterShardId).collect(getEndpoint).map(toAddress)
   }
 
   private def newVar(
       zkHosts: Set[InetSocketAddress],
-      path: String, toSocketAddrs: Set[ServiceInstance] => Set[SocketAddress]) = {
+      path: String, toAddresses: Set[ServiceInstance] => Set[Address]) = {
 
     val (zkClient, zkHealthHandler) = factory.get(zkHosts)
     val zkOffer = new ZkOffer(new ServerSetImpl(zkClient, path), path)
     val addrOffer = zkOffer map { newSet =>
-      val sockaddrs = toSocketAddrs(newSet)
+      val sockaddrs = toAddresses(newSet)
       if (sockaddrs.nonEmpty) Addr.Bound(sockaddrs)
       else Addr.Neg
     }

@@ -1046,12 +1046,7 @@ case class KetamaClientBuilder private[memcached](
 
   private def withLocalMemcached = {
     val Name.Bound(va) = localMemcachedName
-    copy(
-      _group = CacheNodeGroup(
-        Group.fromVarAddr(va),
-        useOnlyResolvedAddress = false
-      )
-    )
+    copy(_group = CacheNodeGroup.fromVarAddr(va))
   }
 
   def dest(
@@ -1063,13 +1058,7 @@ case class KetamaClientBuilder private[memcached](
     } else {
       name
     }
-
-    copy(
-      _group = CacheNodeGroup(
-        Group.fromVarAddr(va),
-        useOnlyResolvedAddress = useOnlyResolvedAddress
-      )
-    )
+    copy(_group = CacheNodeGroup.fromVarAddr(va, useOnlyResolvedAddress))
   }
 
   def dest(name: String): KetamaClientBuilder =

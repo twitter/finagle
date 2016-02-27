@@ -27,7 +27,8 @@ class StackTest extends FunSuite {
       val server = stringServer.serve(new InetSocketAddress(0), failService)
       val client =
         stringClient.withStack(newClientStack)
-          .newService(Name.bound(server.boundAddress), "client")
+          .newService(Name.bound(Address(
+            server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
       // marked busy by FailureAccrualFactory
       for (_ <- 0 until 6) {
@@ -48,7 +49,7 @@ class StackTest extends FunSuite {
 
       val client = ClientBuilder()
         .codec(StringCodec)
-        .hosts(Seq(server.boundAddress))
+        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)
         .build()
 
@@ -65,7 +66,8 @@ class StackTest extends FunSuite {
     new TestCtx {
       val client =
         stringClient.withStack(newClientStack)
-          .newService(Name.bound(new InetSocketAddress(InetAddress.getLoopbackAddress, 0)), "client")
+          .newService(Name.bound(Address(new InetSocketAddress(
+            InetAddress.getLoopbackAddress, 0))), "client")
 
       // marked busy by FailFastFactory
       intercept[Exception](Await.result(client("hello\n")))

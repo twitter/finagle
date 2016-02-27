@@ -8,7 +8,6 @@ import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
@@ -150,7 +149,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     val n1 = Dtab.read("/foo/bar=>/test1010")
     val s1 = newWith(n1)
     val v1 = Await.result(s1(()))
-    assert(v1.sample() == Addr.Bound(new InetSocketAddress(1010)))
+    assert(v1.sample() == Addr.Bound(Address(1010)))
 
     s1.close()
   })
@@ -161,7 +160,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     val n1 = Dtab.read("/foo/bar=>/test1010")
     val s1 = newWith(n1)
     val v1 = Await.result(s1(()))
-    assert(v1.sample() == Addr.Bound(new InetSocketAddress(1011)))
+    assert(v1.sample() == Addr.Bound(Address(1011)))
 
     s1.close()
   })

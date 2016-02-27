@@ -10,7 +10,7 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.finagle.transport.Transport
-import java.net.SocketAddress
+import java.net.InetSocketAddress
 import org.jboss.netty.channel.{Channel, ChannelFactory, ChannelPipeline,
 ChannelPipelineFactory, Channels, DefaultChannelConfig}
 import org.mockito.Matchers._
@@ -68,7 +68,7 @@ trait IntegrationBase extends FunSuite with MockitoSugar {
     when(codec.failFastOk).thenReturn(true)
     when(codec.protocolLibraryName).thenReturn("fancy")
 
-    val clientAddress = new SocketAddress {}
+    val clientAddress = new InetSocketAddress(0)
 
     // Pipeline
     val clientPipelineFactory = mock[ChannelPipelineFactory]

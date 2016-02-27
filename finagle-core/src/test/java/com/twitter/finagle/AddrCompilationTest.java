@@ -1,7 +1,6 @@
 package com.twitter.finagle;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 
@@ -21,15 +20,15 @@ public class AddrCompilationTest {
 
   @Test
   public void testBound() {
-    List<SocketAddress> list = Lists.<SocketAddress>newArrayList(
-        new InetSocketAddress(0),
-        new InetSocketAddress(0)
+    List<Address> list = Lists.<Address>newArrayList(
+        Addresses.newInetAddress(new InetSocketAddress(0)),
+        Addresses.newInetAddress(new InetSocketAddress(0))
     );
 
     Map<String, Object> meta = Maps.newHashMap();
     meta.put("foo", "bar");
 
-    Addr a = Addrs.newBoundAddr(list.toArray(new SocketAddress[list.size()]));
+    Addr a = Addrs.newBoundAddr(list.toArray(new Address[list.size()]));
     Addr b = Addrs.newBoundAddr(list);
     Addr c = Addrs.newBoundAddr(list, meta);
 

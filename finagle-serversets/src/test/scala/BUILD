@@ -42,6 +42,7 @@ junit_tests(name='serversets',
   sources=globs(
     'com/twitter/finagle/*.scala',
     'com/twitter/finagle/serverset2/*.scala',
+    'com/twitter/finagle/serverset2/addr/*.scala',
     'com/twitter/finagle/zookeeper/*.scala',
   )
 )

@@ -5,7 +5,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{DefaultLogger, Updater}
-import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
 import java.net.SocketAddress
@@ -110,7 +109,7 @@ private[finagle] class FailFastFactory[Req, Rep](
     timer: Timer,
     label: String,
     logger: Logger = DefaultLogger,
-    endpoint: SocketAddress = unconnected,
+    endpoint: Address = Address.failing,
     backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs)
   extends ServiceFactoryProxy(underlying) {
   import FailFastFactory._

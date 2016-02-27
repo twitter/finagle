@@ -15,7 +15,7 @@ import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.SocketAddress
 import org.jboss.netty.channel.Channel
 
 /**
@@ -27,7 +27,7 @@ trait HttpRichClient { self: Client[Request, Response] =>
   def fetchUrl(url: java.net.URL): Future[Response] = {
     val addr = {
       val port = if (url.getPort < 0) url.getDefaultPort else url.getPort
-      new InetSocketAddress(url.getHost, port)
+      Address(url.getHost, port)
     }
     val req = http.RequestBuilder().url(url).buildGet()
     val service = newService(Name.bound(addr), "")
