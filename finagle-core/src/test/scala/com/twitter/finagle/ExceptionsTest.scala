@@ -1,7 +1,10 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.context.RemoteInfo
+import com.twitter.finagle.thrift.ClientId
+import com.twitter.finagle.tracing.{Trace, SpanId, TraceId}
 import com.twitter.util.Duration
-import java.net.SocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
 
 import org.junit.runner.RunWith
 import org.mockito.Mockito.when
@@ -82,7 +85,7 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
   test("ServiceTimeoutException should have a good explanation when filled in") {
     val exc = new ServiceTimeoutException(Duration.Top)
     exc.serviceName = "finagle"
-    assert(exc.getMessage.endsWith(exc.serviceName))
+    assert(exc.getMessage.contains(exc.serviceName))
   }
 
   test("SourcedException extractor understands SourceException") {
@@ -105,6 +108,22 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
     assert(SourcedException.unapply(finagleExc) == Some("finagle"))
   }
 
+  test("HasRemoteInfo exception contains remote info in message") {
+    val exc = new HasRemoteInfo {
+      override def exceptionMessage = "foo"
+    }
+    val traceId = TraceId(None, None, SpanId(1L), None)
+    val downstreamAddr = new InetSocketAddress("1.2.3.4", 100)
+    val downstreamId = "downstream"
+    val upstreamAddr = new InetSocketAddress("2.3.4.5", 100)
+    val upstreamId = "upstream"
+
+    exc.setRemoteInfo(RemoteInfo.Available(Some(upstreamAddr), Some(ClientId(upstreamId)), Some(downstreamAddr), Some(ClientId(downstreamId)), traceId))
+    assert(exc.getMessage() == "foo. Remote Info: Upstream Address: /2.3.4.5:100, Upstream Client Id: upstream, " +
+      "Downstream Address: /1.2.3.4:100, Downstream Client Id: downstream, " +
+      s"Trace Id: $traceId")
+  }
+
   test("NoBrokersAvailableException includes dtabs in error message") {
     val ex = new NoBrokersAvailableException(
       "/s/cool/story",
@@ -115,7 +134,8 @@ class ExceptionsTest extends FunSuite with MockitoSugar {
     assert(ex.getMessage ==
       "No hosts are available for /s/cool/story, " +
       s"Dtab.base=[${Dtab.base.show}], " +
-      "Dtab.local=[/foo=>/$/com.twitter.butt]"
+      "Dtab.local=[/foo=>/$/com.twitter.butt]. " +
+      "Remote Info: Not Available"
     )
   }
 }

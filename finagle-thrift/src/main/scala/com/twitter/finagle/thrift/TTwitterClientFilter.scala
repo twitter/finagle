@@ -39,7 +39,7 @@ private[thrift] class TTwitterClientFilter(
 
     clientId match {
       case Some(clientId) =>
-        header.setClient_id(clientId.toThrift)
+        header.setClient_id(new thrift.ClientId(clientId.name))
       case None =>
     }
 

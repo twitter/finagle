@@ -1,15 +1,38 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.context.RemoteInfo
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.Duration
 import java.net.SocketAddress
+
+
+/**
+ * A trait for exceptions that contain remote information:
+ * the downstream address/client id, upstream address/client id (if applicable), and trace id
+ * of the request. [[RemoteInfo.NotAvailable]] is used if no remote information
+ * has been set.
+ */
+trait HasRemoteInfo extends Exception {
+  private[this] var _remoteInfo: RemoteInfo = RemoteInfo.NotAvailable
+
+  def remoteInfo(): RemoteInfo = _remoteInfo
+
+  private[finagle] def setRemoteInfo(remoteInfo: RemoteInfo): Unit =
+    _remoteInfo = remoteInfo
+
+  def exceptionMessage(): String = super.getMessage()
+
+  override def getMessage(): String =
+    if (exceptionMessage == null) null
+    else s"$exceptionMessage. Remote Info: $remoteInfo"
+}
 
 /**
  * A trait for exceptions that have a source. The name of the source is
  * specified as a `serviceName`. The "unspecified" value is used if no
  * `serviceName` is provided by the implementation.
  */
-trait SourcedException extends Exception {
+trait SourcedException extends Exception with HasRemoteInfo {
   var serviceName: String = SourcedException.UnspecifiedServiceName
 }
 
@@ -73,7 +96,7 @@ trait TimeoutException extends SourcedException { self: Exception =>
   protected val timeout: Duration
   protected def explanation: String
 
-  override def getMessage = s"exceeded $timeout to $serviceName while $explanation"
+  override def exceptionMessage = s"exceeded $timeout to $serviceName while $explanation"
 }
 
 /**
@@ -135,7 +158,7 @@ class NoBrokersAvailableException(
 ) extends RequestException {
   def this(name: String = "unknown") = this(name, Dtab.empty, Dtab.empty)
 
-  override def getMessage =
+  override def exceptionMessage =
     s"No hosts are available for $name, Dtab.base=[${baseDtab.show}], Dtab.local=[${localDtab.show}]"
 }
 
@@ -152,7 +175,7 @@ class NoBrokersAvailableException(
  */
 class CancelledRequestException(cause: Throwable) extends RequestException(cause) {
   def this() = this(null)
-  override def getMessage = {
+  override def exceptionMessage = {
     if (cause == null)
       "request cancelled"
     else
@@ -248,9 +271,9 @@ class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
 {
   def this(underlying: Throwable) = this(underlying, null)
   def this() = this(null, null)
-  override def getMessage = {
+  override def exceptionMessage = {
     val message = (underlying, remoteAddress) match {
-      case (_, null) => super.getMessage
+      case (_, null) => super.exceptionMessage
       case (null, _) => s"ChannelException at remote address: ${remoteAddress.toString}"
       case (_, _) => s"${underlying.getMessage} at remote address: ${remoteAddress.toString}"
     }

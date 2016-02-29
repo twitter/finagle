@@ -282,7 +282,7 @@ class RetryFilterTest extends FunSpec
             val e = intercept[WriteException] {
               Await.result(f)
             }
-            assert(e.getMessage.endsWith("i'm exhausted") == true)
+            assert(e.getMessage.contains("i'm exhausted") == true)
           }
         }
       }

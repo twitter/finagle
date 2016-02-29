@@ -3,7 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
@@ -276,9 +276,13 @@ private[twitter] class ServerDispatcher(
 
   Local.letClear {
     Trace.letTracer(tracer) {
-      trans.peerCertificate match {
-        case None => loop()
-        case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) { loop() }
+      Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
+        trans.peerCertificate match {
+          case None => loop()
+          case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+            loop()
+          }
+        }
       }
     }
   }

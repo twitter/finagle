@@ -10,6 +10,10 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: Include upstream/downstream addresses/client ids and request trace id
+    in exceptions that extend `c.t.f.HasRemoteInfo` (including `c.t.f.SourcedException`),
+    accessible via the `remoteInfo` value. ``RB_ID=797082``
+
   * finagle-core: Introduce `c.t.f.service.ResponseClassifier` for HTTP servers,
     which allows developers to give Finagle the additional application specific knowledge
     necessary in order to properly classify responses.``RB_ID=800179``
