@@ -94,7 +94,7 @@ private[finagle] object TrafficDistributor {
     private[this] val svcFactoryStatus: ServiceFactory[Req, Rep] => Status =
       sf => sf.status
 
-    override def status = Status.worstOf[ServiceFactory[Req, Rep]](balancers, svcFactoryStatus)
+    override def status = Status.bestOf[ServiceFactory[Req, Rep]](balancers, svcFactoryStatus)
     override def toString = s"Distributor($classes)"
   }
 }

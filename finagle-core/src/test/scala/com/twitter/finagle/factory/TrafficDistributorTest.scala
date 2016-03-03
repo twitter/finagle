@@ -4,7 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.client.StringClient
-import com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory
+import com.twitter.finagle.loadbalancer.{DefaultBalancerFactory, ConcurrentLoadBalancerFactory}
 import com.twitter.finagle.server.StringServer
 import com.twitter.finagle.stats._
 import com.twitter.finagle.util.Rng
@@ -35,10 +35,16 @@ private object TrafficDistributorTest {
       WeightedAddress(WeightedTestAddr(i, w), w)
     }
 
+  val busyWeight = 2.0
   case class AddressFactory(addr: Address) extends ServiceFactory[Int, Int] {
     def apply(conn: ClientConnection) = Future.value(Service.mk(i => Future.value(i)))
     def close(deadline: Time) = Future.Done
     override def toString = s"AddressFactory($addr)"
+    override def status: Status =
+      addr match {
+        case WeightedTestAddr(_, weight) if weight == busyWeight => Status.Busy
+        case _ => Status.Open
+      }
   }
 
   case class Balancer(endpoints: Activity[Set[ServiceFactory[Int, Int]]])
@@ -70,12 +76,10 @@ private object TrafficDistributorTest {
     }
 
   class Ctx {
-    // var endpointStatus: Status = Status.Open
     var newEndpointCalls = 0
     def newEndpoint(addr: Address): ServiceFactory[Int, Int] = {
       newEndpointCalls += 1
       AddressFactory(addr)
-        // override def status = endpointStatus
     }
 
     var newBalancerCalls = 0
@@ -329,6 +333,23 @@ class TrafficDistributorTest extends FunSuite {
 
     dest() = Activity.Failed(new Exception)
     Await.result(dist())
+  })
+
+
+  test("status is bestOf all weight classes") (new Ctx {
+    val weightClasses = Seq((1.0, 1), (busyWeight, 2))
+    val classes = weightClasses.flatMap(weightClass.tupled).toSet
+    val dest = Var(Activity.Ok(classes))
+    val dist = new TrafficDistributor[Int, Int](
+      dest = Activity(dest),
+      newEndpoint = newEndpoint,
+      newBalancer = DefaultBalancerFactory.newBalancer(_, NullStatsReceiver, new NoBrokersAvailableException("test")),
+      eagerEviction = true,
+      statsReceiver = NullStatsReceiver,
+      rng = Rng("seed".hashCode)
+    )
+
+    assert(dist.status == Status.Open)
   })
 
   test("handles replicated addresses") (new Ctx {

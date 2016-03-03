@@ -51,6 +51,7 @@ private[finagle] class RequeueFilter[Req, Rep](
   private[this] val budgetExhaustCounter = statsReceiver.counter("budget_exhausted")
   private[this] val requestLimitCounter = statsReceiver.counter("request_limit")
   private[this] val requeueStat = statsReceiver.stat("requeues_per_request")
+  private[this] val canNotRetryCounter = statsReceiver.counter("cannot_retry")
 
   private[this] def responseFuture(
     attempt: Int,
@@ -70,6 +71,7 @@ private[finagle] class RequeueFilter[Req, Rep](
     service(req).transform {
       case t@Throw(RetryPolicy.RetryableWriteException(_)) =>
         if (!canRetry()) {
+          canNotRetryCounter.incr()
           responseFuture(attempt, t)
         } else if (retriesRemaining > 0 && retryBudget.tryWithdraw()) {
           backoffs match {

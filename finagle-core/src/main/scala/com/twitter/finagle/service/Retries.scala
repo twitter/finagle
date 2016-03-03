@@ -208,6 +208,8 @@ object Retries {
       // are tied together.
       private[this] val budgetGauge =
         statsReceiver.addGauge("budget") { retryBudget.balance }
+      private[this] val notOpenCounter =
+        statsReceiver.counter("not_open")
 
       private[this] val serviceFn: Service[Req, Rep] => Service[Req, Rep] =
         service => filters.andThen(service)
@@ -221,9 +223,14 @@ object Retries {
        */
       private[this] def applySelf(conn: ClientConnection, n: Int): Future[Service[Req, Rep]] =
         self(conn).rescue {
-          case RetryPolicy.RetryableWriteException(_) if n > 0 && status == Status.Open =>
-            requeuesCounter.incr()
-            applySelf(conn, n-1)
+          case e@RetryPolicy.RetryableWriteException(_) if n > 0 =>
+            if (status == Status.Open) {
+              requeuesCounter.incr()
+              applySelf(conn, n-1)
+            } else {
+              notOpenCounter.incr()
+              Future.exception(e)
+            }
         }
 
       /**
