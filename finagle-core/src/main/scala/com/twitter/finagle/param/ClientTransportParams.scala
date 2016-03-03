@@ -71,7 +71,7 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
   }
 
   /**
-   * Enables the SOCKS proxy on this client (default: disabled).
+   * Enables the SOCKS proxy on this client (default: global flags).
    *
    * @param socketAddress the socket address of the proxy server
    *

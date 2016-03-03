@@ -770,6 +770,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(params[Transporter.HttpProxy].copy(sa = Some(httpProxy)))
 
   /**
+    * Make connections via the given HTTP proxy by host name and port.
+    * The host name is resolved every transport connection.
+    * This API is experiment.
+    * If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
+    */
+  def expHttpProxy(hostName: String, port: Int): This =
+    configured(params[Transporter.HttpProxy].copy(sa = Some(InetSocketAddress.createUnresolved(hostName, port))))
+
+  /**
    * For the http proxy use these [[Credentials]] for authentication.
    */
   def httpProxyUsernameAndPassword(credentials: Credentials): This =
@@ -785,6 +794,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def socksProxy(socksProxy: Option[SocketAddress]): This =
     configured(params[Transporter.SocksProxy].copy(sa = socksProxy))
+
+  /**
+    * Make connections via the given HTTP proxy by host name and port.
+    * The host name is resolved every transport connection.
+    * This API is experiment.
+    * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
+    */
+  def expSocksProxy(hostName: String, port: Int): This =
+    configured(params[Transporter.HttpProxy].copy(sa = Some(InetSocketAddress.createUnresolved(hostName, port))))
 
   /**
    * For the socks proxy use this username for authentication.

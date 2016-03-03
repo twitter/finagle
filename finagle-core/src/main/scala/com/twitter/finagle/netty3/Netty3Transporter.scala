@@ -355,8 +355,7 @@ case class Netty3Transporter[In, Out](
               UsernamePassAuthenticationSetting(username, password)
             case _ => Unauthenticated
           }
-          pipeline.addFirst("socksConnect",
-            new SocksConnectHandler(proxyAddr, inetSockAddr, Seq(authentication)))
+          SocksConnectHandler.addHandler(proxyAddr, inetSockAddr, Seq(authentication), pipeline)
         }
       case _ =>
     }
