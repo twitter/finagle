@@ -24,7 +24,7 @@ private[finagle] class RichRequestHeader(val header: RequestHeader) extends AnyV
       while (ds.hasNext()) {
         val d = ds.next()
         if (d.isSetSrc && d.isSetDst) {
-          val src = Path.read(d.getSrc)
+          val src = Dentry.Prefix.read(d.getSrc)
           val dst = NameTree.read(d.getDst)
           dtab += Dentry(src, dst)
         }

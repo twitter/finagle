@@ -61,7 +61,7 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     assert(dtab1.size == 2)
     dtab1(0) match {
       case Dentry(a, b) =>
-        assert(a == Path.Utf8("A"))
+        assert(a == Dentry.Prefix(Dentry.Prefix.Label("A")))
         assert(b == NameTree.Leaf(Path.Utf8("B")))
     }
   }
@@ -74,5 +74,10 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
           """)
       } catch { case _: IllegalArgumentException => Dtab.empty }
     assert(dtab.length == 2)
+  }
+
+  test("dtab rewrites with wildcards") {
+    val dtab = Dtab.read("/a/*/c => /d")
+    assert(dtab.lookup(Path.read("/a/b/c/e/f")) == NameTree.Leaf(Name.Path(Path.read("/d/e/f"))))
   }
 }

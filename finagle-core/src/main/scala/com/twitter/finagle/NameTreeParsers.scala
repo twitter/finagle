@@ -7,6 +7,7 @@ private[finagle] object NameTreeParsers {
   def parsePath(str: String): Path = new NameTreeParsers(str).parseAllPath()
   def parseNameTree(str: String): NameTree[Path] = new NameTreeParsers(str).parseAllNameTree()
   def parseDentry(str: String): Dentry = new NameTreeParsers(str).parseAllDentry()
+  def parseDentryPrefix(str: String): Dentry.Prefix = new NameTreeParsers(str).parseAllDentryPrefix()
   def parseDtab(str: String): Dtab = new NameTreeParsers(str).parseAllDtab()
 }
 
@@ -105,6 +106,14 @@ private class NameTreeParsers private (str: String) {
     Buf.ByteArray.Owned(baos.getBuf, 0, baos.size)
   }
 
+  private[this] def isDentryPrefixElemChar(c: Char) = isLabelChar(c) || c == '*'
+
+  private[this] def parseDentryPrefixElem(): Dentry.Prefix.Elem =
+    if (peek == '*') {
+      next()
+      Dentry.Prefix.AnyElem
+    } else Dentry.Prefix.Label(parseLabel())
+
   private[this] def isNumberChar(c: Char) = c.isDigit || c == '.'
 
   private[this] def parseNumber(): Double = {
@@ -123,6 +132,24 @@ private class NameTreeParsers private (str: String) {
       illegal("weight", '.')
     }
     sb.toString.toDouble // can fail if string is too long
+  }
+
+  private[this] def parseDentryPrefix(): Dentry.Prefix = {
+    eatWhitespace()
+    eat('/')
+
+    if (!isDentryPrefixElemChar(peek))
+      Dentry.Prefix.empty
+
+    else {
+      val elems = Buffer[Dentry.Prefix.Elem]()
+
+      do {
+        elems += parseDentryPrefixElem()
+      } while (maybeEat('/'))
+
+      Dentry.Prefix(elems:_*)
+    }
   }
 
   private[this] def parsePath(): Path = {
@@ -217,12 +244,12 @@ private class NameTreeParsers private (str: String) {
   }
 
   private[this] def parseDentry(): Dentry = {
-    val path = parsePath()
+    val prefix = parseDentryPrefix()
     eatWhitespace()
     eat('=')
     eat('>')
     val tree = parseTree()
-    Dentry(path, tree)
+    Dentry(prefix, tree)
   }
 
   private[this] def parseDtab(): Dtab = {
@@ -258,6 +285,13 @@ private class NameTreeParsers private (str: String) {
     eatWhitespace()
     ensureEnd()
     dentry
+  }
+
+  def parseAllDentryPrefix(): Dentry.Prefix = {
+    val pfx = parseDentryPrefix()
+    eatWhitespace()
+    ensureEnd()
+    pfx
   }
 
   def parseAllDtab(): Dtab = {
