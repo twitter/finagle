@@ -11,7 +11,7 @@ import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Stopwatch, Monitor}
+import com.twitter.util.{Duration, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -100,6 +100,15 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
       val default = MaxReusableBufferSize(maxThriftBufferSize)
     }
+
+    /**
+     * A `Param` to control upgrading the thrift protocol to TTwitter.
+     * @see The [[https://twitter.github.io/finagle/guide/Protocols.html?highlight=Twitter-upgraded#thrift user guide]] for details on Twitter-upgrade Thrift.
+     */
+    case class AttemptTTwitterUpgrade(upgrade: Boolean)
+    implicit object AttemptTTwitterUpgrade extends Stack.Param[AttemptTTwitterUpgrade] {
+      val default = AttemptTTwitterUpgrade(true)
+    }
   }
 
   object Client {
@@ -115,18 +124,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
           val Label(label) = params[Label]
           val param.ClientId(clientId) = params[param.ClientId]
           val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
-          val Stats(stats) = params[Stats]
           val preparer = new ThriftClientPreparer(pf, label, clientId)
-          val underlying = preparer.prepare(next, params)
-          new ServiceFactoryProxy(underlying) {
-            val stat = stats.stat("codec_connection_preparation_latency_ms")
-            override def apply(conn: ClientConnection) = {
-              val elapsed = Stopwatch.start()
-              super.apply(conn).ensure {
-                stat.add(elapsed().inMilliseconds)
-              }
-            }
-          }
+          preparer.prepare(next, params)
         }
       }
 
@@ -177,6 +176,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     def withClientId(clientId: thrift.ClientId): Client =
       configured(param.ClientId(Some(clientId)))
+
+    def withAttemptTTwitterUpgrade: Client =
+      configured(param.AttemptTTwitterUpgrade(true))
+
+    def withNoAttemptTTwitterUpgrade: Client =
+      configured(param.AttemptTTwitterUpgrade(false))
 
     def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
 
