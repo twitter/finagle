@@ -543,7 +543,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .withNoAttemptTTwitterUpgrade
       .newIface[B.ServiceIface](server)
 
-    assert(Await.result(client.someway()) == null, 5.seconds)
+    assert(Await.result(client.someway(), 5.seconds) == null)
     assert(sr.stats.get(Seq("codec_connection_preparation_latency_ms")) == None)
   }
 }
