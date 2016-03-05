@@ -64,6 +64,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   val serviceToIface = new B.ServiceToClient(_, _)
 
   val missingClientIdEx = new IllegalStateException("uh no client id")
+  val presentClientIdEx = new IllegalStateException("unexpected client id")
 
   def servers(pf: TProtocolFactory): Seq[(String, Closable, Int)] = {
     val iface = new BServiceImpl {
@@ -518,6 +519,32 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.stat("server", "response_payload_bytes")() == Seq(40.0f, 45.0f))
 
     Await.ready(ss.close())
+  }
+
+  test("clientId is not sent and prep stats are not recorded when TTwitter upgrading is disabled") {
+    val pf = Protocols.binaryFactory()
+    val iface = new BServiceImpl {
+      override def someway(): Future[Void] = {
+        ClientId.current.map(_.name) match {
+          case Some(name) => Future.exception(presentClientIdEx)
+          case _ => Future.Void
+        }
+      }
+    }
+    val server = Thrift.server
+      .withProtocolFactory(pf)
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val sr = new InMemoryStatsReceiver()
+    val client = Thrift.client
+      .configured(Stats(sr))
+      .withProtocolFactory(pf)
+      .withClientId(ClientId("aClient"))
+      .withNoAttemptTTwitterUpgrade
+      .newIface[B.ServiceIface](server)
+
+    assert(Await.result(client.someway(), timeout = 100.millis) == null)
+    assert(sr.stats.get(Seq("codec_connection_preparation_latency_ms")) == None)
   }
 }
 
