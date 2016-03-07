@@ -114,32 +114,9 @@ private[finagle] class PipelineFactory(
               Message.encode(Message.Rdrain(tag)),
               e.getRemoteAddress))
 
-        case Message.Tping(tag) =>
-          e.getFuture.setSuccess()
-          super.messageReceived(ctx,
-            new UpstreamMessageEvent(
-              e.getChannel,
-              Message.encode(Message.Rping(tag)),
-              e.getRemoteAddress))
-
-        case Message.ControlMessage(tag) =>
-          e.getFuture.setSuccess()
-          super.messageReceived(ctx,
-            new UpstreamMessageEvent(
-              e.getChannel,
-              Message.encode(
-                Message.Rerr(tag, "Unable to send Mux control message to non-Mux client")
-              ),
-              e.getRemoteAddress))
-
-        case Message.RdispatchError(_, _, error) =>
-          // OK to throw an exception here as ServerBridge take cares it
-          // by logging the error and then closing the channel.
-          throw newUnexpectedRequestException(error)
-
         case unexpected =>
           throw newUnexpectedRequestException(
-            "Unexpected request type %s".format(unexpected.getClass.getName))
+            s"unable to send ${unexpected.getClass.getName} to non-mux client")
       }
     }
   }
@@ -167,34 +144,9 @@ private[finagle] class PipelineFactory(
               Message.encode(Message.Rdrain(tag)),
               e.getRemoteAddress))
 
-        // Non-mux clients can't handle T-type control messages, so we
-        // simulate responses.
-        case Message.Tping(tag) =>
-          e.getFuture.setSuccess()
-          super.messageReceived(ctx,
-            new UpstreamMessageEvent(
-              e.getChannel,
-              Message.encode(Message.Rping(tag)),
-              e.getRemoteAddress))
-
-        case Message.ControlMessage(tag) =>
-          e.getFuture.setSuccess()
-          super.messageReceived(ctx,
-            new UpstreamMessageEvent(
-              e.getChannel,
-              Message.encode(
-                Message.Rerr(tag, "Unable to send Mux control message to non-Mux client")
-              ),
-              e.getRemoteAddress))
-
-        case Message.RdispatchError(_, _, error) =>
-          // OK to throw an exception here as ServerBridge take cares it
-          // by logging the error and then closing the channel.
-          throw newUnexpectedRequestException(error)
-
         case unexpected =>
           throw newUnexpectedRequestException(
-            "Unexpected request type %s".format(unexpected.getClass.getName))
+            s"unable to send ${unexpected.getClass.getName} to non-mux client")
       }
     }
 
