@@ -12,7 +12,7 @@ import org.scalatest.concurrent.{IntegrationPatience, Conductors}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-private class BalancerTest extends FunSuite
+class BalancerTest extends FunSuite
   with Conductors
   with IntegrationPatience
   with GeneratorDrivenPropertyChecks {

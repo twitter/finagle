@@ -6,7 +6,7 @@ package com.twitter.finagle.loadbalancer
  * data across updates.
  */
 protected[loadbalancer] trait DistributorT[Node] {
-  type This
+  type This <: DistributorT[Node]
 
   /**
    * The vector of nodes over which we are currently balancing.
