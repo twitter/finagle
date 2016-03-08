@@ -9,6 +9,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Failure, Stack, WriteTimedOutException}
 import io.netty.channel._
+import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.timeout._
@@ -101,12 +102,11 @@ private[netty4] class Netty4ChannelInitializer(
 /**
  * Bridges a channel onto a transport.
  */
+@Sharable
 private[netty4] class ServerBridge[In, Out](
     transportFac: SocketChannel => Transport[In, Out],
     serveTransport: Transport[In, Out] => Unit)
   extends ChannelInboundHandlerAdapter {
-
-  override def isSharable = true
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     val transport: Transport[In, Out] = transportFac(ctx.channel.asInstanceOf[SocketChannel])
@@ -128,13 +128,12 @@ private[netty4] object ChannelExceptionHandler {
 /**
  * Logs channel exceptions
  */
+@Sharable
 private[netty4] class ChannelExceptionHandler(
     stats: StatsReceiver,
     log: java.util.logging.Logger)
   extends ChannelInboundHandlerAdapter {
   import ChannelExceptionHandler.FinestIOExceptionMessages
-
-  override def isSharable = true
 
   private[this] val readTimeoutCounter = stats.counter("read_timeout")
   private[this] val writeTimeoutCounter = stats.counter("write_timeout")

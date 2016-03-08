@@ -108,8 +108,6 @@ private[netty4] class ConnectionHandler[In, Out](
     p: Promise[Transport[In,Out]])
   extends ChannelInboundHandlerAdapter {
 
-  override def isSharable = false
-
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     val transport = new ChannelTransport[In, Out](ctx.channel)
     p.updateIfEmpty(Return(transport))

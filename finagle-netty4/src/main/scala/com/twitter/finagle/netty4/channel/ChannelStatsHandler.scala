@@ -5,6 +5,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Monitor, Stopwatch}
 import io.netty.buffer.ByteBuf
 import io.netty.channel.{ChannelDuplexHandler, ChannelHandlerContext, ChannelPromise}
+import io.netty.channel.ChannelHandler.Sharable
 import io.netty.util.AttributeKey
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicLong
@@ -26,11 +27,10 @@ private[netty4] object ChannelStatsHandler {
  * [[io.netty.channel.Channel Channels]] within a Finagle client or
  * server in order to consolidate statistics across a number of channels.
  */
+@Sharable
 private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends ChannelDuplexHandler {
   import ChannelStatsHandler._
-
-  override def isSharable: Boolean = true
 
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val connectionCount: AtomicLong = new AtomicLong()

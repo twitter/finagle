@@ -2,6 +2,7 @@ package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.stats.StatsReceiver
 import io.netty.channel._
+import io.netty.channel.ChannelHandler.Sharable
 import io.netty.util.AttributeKey
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -17,12 +18,11 @@ private[finagle] object ChannelRequestStatsHandler {
  *
  * @param statsReceiver the [[StatsReceiver]] to which stats are reported
  */
+@Sharable
 private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
   extends ChannelInboundHandlerAdapter
 {
   import ChannelRequestStatsHandler.ConnectionRequestsKey
-
-  override def isSharable: Boolean = true
 
   private[this] val requestCount = statsReceiver.stat("connection_requests")
 
