@@ -375,8 +375,8 @@ class EndToEndTest extends FunSuite {
     messages !! Buf.Utf8("1")
     assert((res.messages??) == Buf.Utf8("1"))
     assert(count == 1)
-    error !! EOF
     res.release()
+    error !! EOF
     val res2 = Await.result(f2, 1.second)
     assert(count == 2)
     res2.release()
