@@ -1,7 +1,6 @@
 package com.twitter.finagle.exp.mysql.integration
 
 import com.twitter.finagle.exp.Mysql
-import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.param
 import com.twitter.finagle.tracing._
 import com.twitter.util.Await

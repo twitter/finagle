@@ -21,7 +21,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
-import scala.collection.JavaConverters._
 
 
 @RunWith(classOf[JUnitRunner])

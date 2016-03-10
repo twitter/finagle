@@ -1,6 +1,5 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.exp.mysql._
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.util.{Await, Closable, Future, Time}
 import org.junit.runner.RunWith

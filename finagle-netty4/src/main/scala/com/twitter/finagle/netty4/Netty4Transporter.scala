@@ -3,7 +3,6 @@ package com.twitter.finagle.netty4
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
-import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Throw, Future, Promise}
 import io.netty.bootstrap.Bootstrap

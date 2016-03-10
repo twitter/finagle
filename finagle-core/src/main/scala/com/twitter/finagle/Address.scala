@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.service.FailingFactory
 import java.net.InetSocketAddress
 import java.util.{Map => JMap}
 import scala.collection.JavaConverters._

@@ -14,7 +14,6 @@ import java.net.InetSocketAddress
  * and thus lookup results are represented by a [[com.twitter.util.Activity Activity]].
  */
 trait Namer { self =>
-  import Namer._
 
   /**
    * Translate a [[com.twitter.finagle.Path Path]] into a

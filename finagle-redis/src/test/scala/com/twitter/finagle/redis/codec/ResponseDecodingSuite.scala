@@ -1,8 +1,6 @@
 package com.twitter.finagle.redis.naggati
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.redis.{ClientError, ServerError}
-import com.twitter.finagle.redis.naggati.test._
 import com.twitter.finagle.redis.util._
 import com.twitter.util.Time
 import org.jboss.netty.buffer.ChannelBuffer
