@@ -18,15 +18,17 @@ object Finagle extends Build {
   val scroogeVersion = "4.5.0" + suffix
 
   val libthriftVersion = "0.5.0-1"
+  val netty4Version = "4.1.0.CR1"
 
   val commonsCodecLib = "commons-codec" % "commons-codec" % "1.9"
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
   val jsr166eLib = "com.twitter" % "jsr166e" % "1.0.0"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
-    "io.netty" % "netty-handler" % "4.1.0.CR1",
-    "io.netty" % "netty-transport" % "4.1.0.CR1"
+    "io.netty" % "netty-handler" % netty4Version,
+    "io.netty" % "netty-transport" % netty4Version
   )
+  val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
   val jacksonLibs = Seq(
@@ -187,7 +189,7 @@ object Finagle extends Build {
     finagleHttp, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy, finagleRedis
+    finagleSpdy, finagleRedis, finagleHttpNetty4 
 
     // finagleBenchmark
 
@@ -370,6 +372,20 @@ object Finagle extends Build {
       guavaLib
     )
   ).dependsOn(finagleCore)
+
+  lazy val finagleHttpNetty4 = Project(
+    id = "finagle-http-netty4",
+    base = file("finagle-http-netty4"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-http-netty4",
+    libraryDependencies ++= Seq(
+      util("codec"), util("logging"),
+      "commons-lang" % "commons-lang" % "2.6",
+      netty4Http 
+    )
+  ).dependsOn(finagleCore, finagleNetty4, finagleHttp)
 
   lazy val finagleHttpCompat = Project(
     id = "finagle-http-compat",

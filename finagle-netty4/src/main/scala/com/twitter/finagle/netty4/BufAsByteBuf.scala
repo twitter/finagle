@@ -2,7 +2,6 @@ package com.twitter.finagle.netty4
 
 import com.twitter.io.Buf
 import io.netty.buffer._
-import java.nio.ByteOrder
 
 private[finagle] object BufAsByteBuf {
   object Owned {
@@ -11,6 +10,8 @@ private[finagle] object BufAsByteBuf {
      */
     def apply(buf: Buf): ByteBuf = {
       val bb = buf match {
+        case _ if buf.isEmpty =>
+          Unpooled.EMPTY_BUFFER
         case ByteBufAsBuf.Owned(underlying) =>
           underlying
         case _: Buf.ByteArray =>
@@ -30,6 +31,8 @@ private[finagle] object BufAsByteBuf {
      */
     def apply(buf: Buf): ByteBuf = {
       val bb = buf match {
+        case _ if buf.isEmpty =>
+          Unpooled.EMPTY_BUFFER
         case ByteBufAsBuf.Shared(underlying) =>
           Unpooled.copiedBuffer(underlying)
         case _: Buf.ByteArray =>
