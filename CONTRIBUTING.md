@@ -67,13 +67,16 @@ Comments should be formatted to a width no greater than 80 columns.
 Files should be exempt of trailing spaces.
 
 We adhere to a specific format for commit messages. Please write your commit
-messages along these guidelines:
+messages along these guidelines. Please keep the line width no greater than
+80 columns (You can use `fmt -n -p -w 80` to accomplish this).
+
     One line description of your change (less than 72 characters)
 
     Problem
 
-    Explain here the context, and why you're making that change.
-    What is the problem you're trying to solve?
+    Explain the context and why you're making that change.  What is the
+    problem you're trying to solve? In some cases there is not a problem
+    and this can be thought of being the motivation for your change.
 
     Solution
 
@@ -81,7 +84,9 @@ messages along these guidelines:
 
     Result
 
-    After your change, what will change?
+    What will change as a result of your pull request? Note that sometimes
+    this section is unnecessary because it is self-explanatory based on
+    the solution.
 
 ## Code Review
 
