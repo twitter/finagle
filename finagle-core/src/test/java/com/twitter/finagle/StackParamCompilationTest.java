@@ -30,6 +30,7 @@ import com.twitter.finagle.param.Stats;
 import com.twitter.finagle.param.Timer;
 import com.twitter.finagle.param.Tracer;
 import com.twitter.finagle.server.Listener;
+import com.twitter.finagle.service.Backoff;
 import com.twitter.finagle.service.ExpiringService;
 import com.twitter.finagle.service.FailFastFactory;
 import com.twitter.finagle.service.FailureAccrualFactory;
@@ -37,7 +38,7 @@ import com.twitter.finagle.service.Retries;
 import com.twitter.finagle.service.RetryBudgets;
 import com.twitter.finagle.service.RetryPolicy;
 import com.twitter.finagle.service.TimeoutFilter;
-import com.twitter.finagle.service.exp.FailureAccrualPolicies;
+import com.twitter.finagle.service.exp.FailureAccrualPolicy;
 import com.twitter.finagle.socks.SocksProxyFlags;
 import com.twitter.finagle.ssl.Engine;
 import com.twitter.finagle.stats.NullStatsReceiver;
@@ -94,8 +95,20 @@ public class StackParamCompilationTest {
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
           .configured(new FailFastFactory.FailFast(true).mk())
         .configured(FailureAccrualFactory.Param(10, Duration.Bottom()).mk())
-        .configured(FailureAccrualFactory.Param(FailureAccrualPolicies.newConsecutiveFailuresPolicy(
-          3, Duration.fromSeconds(0))).mk())
+        .configured(FailureAccrualFactory.Param(new Function0<FailureAccrualPolicy>() {
+          @Override
+          public FailureAccrualPolicy apply() {
+            return FailureAccrualPolicy.consecutiveFailures(
+                3, Backoff.constant(Duration.fromSeconds(1)));
+          }
+        }).mk())
+        .configured(FailureAccrualFactory.Param(new Function0<FailureAccrualPolicy>() {
+          @Override
+          public FailureAccrualPolicy apply() {
+            return FailureAccrualPolicy.successRate(
+                0.99, 100, Backoff.constant(Duration.fromSeconds(1)));
+          }
+        }).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())

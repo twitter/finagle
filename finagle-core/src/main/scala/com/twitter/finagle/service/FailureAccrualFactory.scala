@@ -5,7 +5,7 @@ import com.twitter.finagle.Stack.{Params, Role}
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.logging.Level
 import com.twitter.util._
@@ -49,7 +49,8 @@ object FailureAccrualFactory {
   private[finagle] val jitteredBackoff: Stream[Duration] =
     Backoff.equalJittered(5.seconds, 300.seconds)
 
-  private[finagle] val defaultPolicy = () => FailureAccrualPolicy.consecutiveFailures(defaultConsecutiveFailures, jitteredBackoff)
+  private[finagle] val defaultPolicy =
+    () => FailureAccrualPolicy.consecutiveFailures(defaultConsecutiveFailures, jitteredBackoff)
 
 
   /**
@@ -81,7 +82,6 @@ object FailureAccrualFactory {
 
   private[finagle] object Param {
     case class Configured(failureAccrualPolicy: () => FailureAccrualPolicy) extends Param
-
     case class Replaced(factory: Timer => ServiceFactoryWrapper) extends Param
     case object Disabled extends Param
 
@@ -134,17 +134,7 @@ object FailureAccrualFactory {
    * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
    *      for more details.
    */
-  def Param(failureAccrualPolicy: FailureAccrualPolicy): Param =
-    Param.Configured(() => failureAccrualPolicy)
-
-  /**
-   * Configures the [[FailureAccrualFactory]].
-   *
-   * Used by the memcache client's default params so clients don't share the policy.
-   *
-   * @param failureAccrualPolicy The policy to use to determine when to mark an endpoint as dead.
-   */
-  private[finagle] def Param(failureAccrualPolicy: () => FailureAccrualPolicy): Param =
+  def Param(failureAccrualPolicy: () => FailureAccrualPolicy): Param =
     Param.Configured(failureAccrualPolicy)
 
   /**

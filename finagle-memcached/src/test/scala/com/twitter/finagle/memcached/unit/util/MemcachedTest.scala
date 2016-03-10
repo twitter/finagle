@@ -27,7 +27,7 @@ class MemcachedTest extends FunSuite
     val markDeadFor = Backoff.const(1.second)
     val failureAccrualPolicy = FailureAccrualPolicy.consecutiveFailures(20, markDeadFor)
     val client = Memcached.client
-      .configured(FailureAccrualFactory.Param(failureAccrualPolicy))
+      .configured(FailureAccrualFactory.Param(() => failureAccrualPolicy))
       .configured(Transporter.ConnectTimeout(100.milliseconds))
       .configured(TimeoutFilter.Param(200.milliseconds))
       .configured(TimeoutFactory.Param(200.milliseconds))

@@ -85,6 +85,16 @@ Breaking API Changes
   * finagle-core: `c.t.f.client.Transporter.EndpointAddr` takes a `c.t.f.Address` as its
     parameter instead of `SocketAddress`. ``RB_ID=792209``
 
+  * finagle-core: `c.t.f.service.FauilureAccrualFactory.Param(FailureAccrualPolicy)` is removed -
+    it's not safe to configure Failure Accrual with a shareable instance of the policy, use
+    `() => FailureAccrualPolicy` instead. ``RB_ID=802953``
+
+  * finagle-core: `$Client.withSessionQualifier.failureAccrualPolicy` has been removed from the API
+    since it enables an experimental feature (use Stack's `.configured` API instead). ``RB_ID=802953``
+
+  * finagle-core: `c.t.f.service.exp.FailureAccrualPolicies` (Java-friendly API) has bee removed -
+    use `c.t.f.service.exp.FailureAccrualPolicy` instead.
+
   * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
     pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``
 

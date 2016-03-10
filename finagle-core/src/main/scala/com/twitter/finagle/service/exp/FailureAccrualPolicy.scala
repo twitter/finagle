@@ -15,8 +15,7 @@ import com.twitter.util.Duration
  * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
  *      for more details.
  */
-trait FailureAccrualPolicy {
-
+abstract class FailureAccrualPolicy {
   /** Invoked by FailureAccrualFactory when a request is successful. */
   def recordSuccess(): Unit
 
