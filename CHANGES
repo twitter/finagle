@@ -7,6 +7,9 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+6.34.0
+------
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
   * finagle-core: GenSerialClientDispatcher fails pending and subsequent requests when 
