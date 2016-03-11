@@ -45,6 +45,9 @@ object TimeoutFactory {
 /**
  * A factory wrapper that times out the service acquisition after the
  * given time.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
+ *      for more details.
  */
 class TimeoutFactory[Req, Rep](
     self: ServiceFactory[Req, Rep],

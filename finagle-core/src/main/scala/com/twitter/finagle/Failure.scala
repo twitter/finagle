@@ -142,7 +142,7 @@ object Failure {
     Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1))
 
   object Source extends Enumeration {
-    val Service, Role = Value
+    val Service, Role, RemoteInfo = Value
   }
 
   /**

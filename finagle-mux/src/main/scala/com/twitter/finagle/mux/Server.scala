@@ -3,7 +3,7 @@ package com.twitter.finagle.mux
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
@@ -172,6 +172,9 @@ private[twitter] object ServerDispatcher {
   ): ServerDispatcher =
     newRequestResponse(trans, service, Lessor.nil, NullTracer, NullStatsReceiver)
 
+  /**
+   * Used when comparing the difference between leases.
+   */
   val Epsilon = 1.second
 
   object State extends Enumeration {
@@ -260,8 +263,8 @@ private[twitter] class ServerDispatcher(
       tracker.drain()
 
     case m: Message =>
-      val msg = Message.Rerr(m.tag, f"Did not understand Tmessage ${m.typ}%d")
-      write(msg)
+      val rerr = Message.Rerr(m.tag, s"Unexpected mux message type ${m.typ}")
+      write(rerr)
   }
 
   private[this] def loop(): Unit =
@@ -273,9 +276,13 @@ private[twitter] class ServerDispatcher(
 
   Local.letClear {
     Trace.letTracer(tracer) {
-      trans.peerCertificate match {
-        case None => loop()
-        case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) { loop() }
+      Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
+        trans.peerCertificate match {
+          case None => loop()
+          case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+            loop()
+          }
+        }
       }
     }
   }

@@ -12,7 +12,7 @@ trait WithSessionPool[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A
   /**
    * An entry point for configuring the client's session pool.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#pooling]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
   val withSessionPool: SessionPoolingParams[A] = new SessionPoolingParams(self)
 }

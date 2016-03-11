@@ -29,14 +29,15 @@ private[finagle] object ExceptionSourceFilter {
  * argument of this filter.
  */
 class ExceptionSourceFilter[Req, Rep](serviceName: String) extends SimpleFilter[Req, Rep] {
-  def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
-    service(req) rescue { case t: Throwable =>
-      Future.exception(t match {
-        case f: Failure => f.withSource(Failure.Source.Service, serviceName)
-        case e: SourcedException =>
-          e.serviceName = serviceName
-          e
-        case t: Throwable => t
-      })
-    }
+
+  private[this] val addExceptionSource: PartialFunction[Throwable, Future[Rep]] = {
+    case f: Failure =>
+      Future.exception(f.withSource(Failure.Source.Service, serviceName))
+    case e: SourcedException =>
+      e.serviceName = serviceName
+      Future.exception(e)
+  }
+
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
+    service(request).rescue(addExceptionSource)
 }

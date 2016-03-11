@@ -32,6 +32,9 @@ object RetryingService {
  *
  * @note consider using a [[Timer]] with high resolution so that there is
  * less correlation between retries. For example [[HighResTimer.Default]].
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
+ *      for more details.
  */
 class RetryFilter[Req, Rep](
     retryPolicy: RetryPolicy[(Req, Try[Rep])],

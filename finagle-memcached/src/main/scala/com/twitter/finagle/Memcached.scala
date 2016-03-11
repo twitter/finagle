@@ -5,9 +5,9 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
-import com.twitter.finagle.client.{DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, 
   SerialServerDispatcher, ServerDispatcherInitializer}
+import com.twitter.finagle.client.{ClientRegistry, DefaultPool, StackClient, StdStackClient, Transporter}
 import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
@@ -24,6 +24,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.hashing
 import com.twitter.io.Buf
+import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, Duration, Future, Monitor}
 import scala.collection.mutable
 
@@ -163,6 +164,8 @@ object Memcached extends finagle.Client[Command, Response]
 
   object Client {
 
+    private[Memcached] val ProtocolLibraryName = "memcached"
+
     private[this] val defaultFailureAccrualPolicy = () => FailureAccrualPolicy.consecutiveFailures(
       100, Backoff.const(1.second))
 
@@ -175,7 +178,7 @@ object Memcached extends finagle.Client[Command, Response]
       FailureAccrualFactory.Param(defaultFailureAccrualPolicy) +
       FailFastFactory.FailFast(false) +
       LoadBalancerFactory.Param(Balancers.p2cPeakEwma()) +
-      finagle.param.ProtocolLibrary("memcached")
+      finagle.param.ProtocolLibrary(ProtocolLibraryName)
 
     /**
      * A default client stack which supports the pipelined memcached client.
@@ -197,6 +200,23 @@ object Memcached extends finagle.Client[Command, Response]
       s"${FixedInetResolver.scheme}!$hostName:$port"
   }
 
+  private[finagle] def registerClient(
+    label: String,
+    hasher: String,
+    isPipelining: Boolean
+  ): Unit = {
+    GlobalRegistry.get.put(
+      Seq(ClientRegistry.registryName, Client.ProtocolLibraryName, label, "is_pipelining"),
+      isPipelining.toString)
+    GlobalRegistry.get.put(
+      Seq(ClientRegistry.registryName, Client.ProtocolLibraryName, label, "key_hasher"),
+      hasher)
+  }
+
+  /**
+   * A memcached client with support for pipelined requests, consistent hashing,
+   * and per-node load-balancing.
+   */
   case class Client(
       stack: Stack[ServiceFactory[Command, Response]] = Client.newStack,
       params: Stack.Params = Client.defaultParams)
@@ -223,7 +243,7 @@ object Memcached extends finagle.Client[Command, Response]
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
 
-    def newTwemcacheClient(dest: Name, label: String) = {
+    def newTwemcacheClient(dest: Name, label: String): TwemcacheClient = {
       val _dest = if (LocalMemcached.enabled) {
         Resolver.eval(mkDestination("localhost", LocalMemcached.port))
       } else dest
@@ -232,12 +252,15 @@ object Memcached extends finagle.Client[Command, Response]
       // See KetamaPartitionedClient for more details.
       val va = _dest match {
         case Name.Bound(va) => va
-        case _ => throw new IllegalArgumentException("Memcached client only supports Bound Names")
+        case n =>
+          throw new IllegalArgumentException(s"Memcached client only supports Bound Names, was: $n")
       }
 
       val finagle.param.Stats(sr) = params[finagle.param.Stats]
       val param.KeyHasher(hasher) = params[param.KeyHasher]
       val param.NumReps(numReps) = params[param.NumReps]
+
+      registerClient(label, hasher.toString, isPipelining = true)
 
       val healthBroker = new Broker[NodeHealth]
 
@@ -248,7 +271,7 @@ object Memcached extends finagle.Client[Command, Response]
         withStack(stk).newService(mkDestination(node.host, node.port), label)
       }
 
-      val group = CacheNodeGroup(Group.fromVarAddr(va))
+      val group = CacheNodeGroup.fromVarAddr(va)
       val scopedSr = sr.scope(label)
       new KetamaPartitionedClient(group, newService, healthBroker, scopedSr, hasher, numReps)
         with TwemcachePartitionedClient

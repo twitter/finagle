@@ -12,7 +12,7 @@ import com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory
  *
  * @tparam A a [[Stack.Parameterized]] client to configure
  *
- * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
+ * @see [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
  */
 class ConcurrentLoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A])
   extends DefaultLoadBalancingParams(self) {

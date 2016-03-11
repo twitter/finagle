@@ -7,6 +7,7 @@ import com.twitter.finagle.codec.{FrameEncoder, FixedLengthDecoder}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Promise}
+import io.netty.buffer.{Unpooled, ByteBuf}
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
@@ -189,5 +190,40 @@ class Netty4ClientChannelInitializerTest
 
     assert(Await.result(transport.read(), timeout) == "hell")
     assert(Await.result(transport.read(), timeout) == "o wo")
+  }
+
+  test("raw channel initializer exposes netty pipeline") {
+    val p = new Promise[Transport[ByteBuf, ByteBuf]]
+    val reverser = new ChannelOutboundHandlerAdapter{
+      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = msg match {
+        case b: ByteBuf =>
+          val bytes = new Array[Byte](b.readableBytes)
+          b.readBytes(bytes)
+          val reversed = Unpooled.wrappedBuffer(bytes.reverse)
+          super.write(ctx, reversed, promise)
+        case _ => fail("expected ByteBuf message")
+      }
+    }
+    val init =
+      new RawNetty4ClientChannelInitializer[ByteBuf, ByteBuf](p, Params.empty, _.addLast(reverser))
+
+    val channel: SocketChannel = new NioSocketChannel()
+    val loop = new NioEventLoopGroup()
+    loop.register(channel)
+    init.initChannel(channel)
+
+    val msgSeen = new Promise[ByteBuf]
+    channel.pipeline.addFirst(new ChannelOutboundHandlerAdapter {
+      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = msg match {
+        case b: ByteBuf => msgSeen.setValue(b)
+        case _ => fail("expected ByteBuf message")
+      }
+    })
+    val bytes = Array(1.toByte, 2.toByte, 3.toByte)
+    channel.write(Unpooled.wrappedBuffer(bytes))
+
+    val seen = new Array[Byte](3)
+    Await.result(msgSeen, 5.seconds).readBytes(seen)
+    assert(seen.toList == bytes.reverse.toList)
   }
 }

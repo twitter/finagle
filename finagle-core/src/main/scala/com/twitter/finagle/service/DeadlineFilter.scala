@@ -94,6 +94,9 @@ object DeadlineFilter {
  * ".../admission_control/deadline/"
  *
  * @param nowMillis current time in milliseconds
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline user guide]]
+ *      for more details.
  */
 private[finagle] class DeadlineFilter[Req, Rep](
     tolerance: Duration,
@@ -140,7 +143,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
   // Note: While in the testing stages, requests are never rejected, but
   // the admission_control/deadline/rejected stat is incremented.
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
-    Contexts.broadcast.get(Deadline) match {
+    Deadline.current match {
       case Some(deadline) =>
         val now = Time.now
         val remaining = deadline.deadline - now

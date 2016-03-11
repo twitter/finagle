@@ -51,6 +51,9 @@ object RequestSemaphoreFilter {
  * to the given [[com.twitter.concurrent.AsyncSemaphore]]. Requests that are
  * unable to acquire a permit are failed immediately with a [[com.twitter.finagle.Failure]]
  * that signals a restartable or idempotent process.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#concurrency-limit user guide]]
+ *      for more details.
  */
 class RequestSemaphoreFilter[Req, Rep](sem: AsyncSemaphore) extends SimpleFilter[Req, Rep] {
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =

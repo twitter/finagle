@@ -12,7 +12,7 @@ import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.{ClientId => _, _}
 import com.twitter.finagle.tracing.Tracer
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Duration, Stopwatch, Monitor}
+import com.twitter.util.{Duration, Monitor}
 import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 
@@ -101,41 +101,32 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
       val default = MaxReusableBufferSize(maxThriftBufferSize)
     }
+
+    /**
+     * A `Param` to control upgrading the thrift protocol to TTwitter.
+     * @see The [[https://twitter.github.io/finagle/guide/Protocols.html?highlight=Twitter-upgraded#thrift user guide]] for details on Twitter-upgrade Thrift.
+     */
+    case class AttemptTTwitterUpgrade(upgrade: Boolean)
+    implicit object AttemptTTwitterUpgrade extends Stack.Param[AttemptTTwitterUpgrade] {
+      val default = AttemptTTwitterUpgrade(true)
+    }
   }
 
   object Client {
     private val preparer: Stackable[ServiceFactory[ThriftClientRequest, Array[Byte]]] =
-      new Stack.Module4[
-        param.ClientId,
-        Label,
-        Stats,
-        param.ProtocolFactory,
-        ServiceFactory[ThriftClientRequest, Array[Byte]]
-      ] {
-        val role = StackClient.Role.prepConn
-        val description = "Prepare TTwitter thrift connection"
+      new Stack.ModuleParams[ServiceFactory[ThriftClientRequest, Array[Byte]]] {
+        override def parameters: Seq[Stack.Param[_]] = Nil
+        override val role = StackClient.Role.prepConn
+        override val description = "Prepare TTwitter thrift connection"
         def make(
-          _clientId: param.ClientId,
-          _label: Label,
-          _stats: Stats,
-          _pf: param.ProtocolFactory,
+          params: Stack.Params,
           next: ServiceFactory[ThriftClientRequest, Array[Byte]]
         ) = {
-          val Label(label) = _label
-          val param.ClientId(clientId) = _clientId
-          val param.ProtocolFactory(pf) = _pf
+          val Label(label) = params[Label]
+          val param.ClientId(clientId) = params[param.ClientId]
+          val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
           val preparer = new ThriftClientPreparer(pf, label, clientId)
-          val underlying = preparer.prepare(next)
-          val Stats(stats) = _stats
-          new ServiceFactoryProxy(underlying) {
-            val stat = stats.stat("codec_connection_preparation_latency_ms")
-            override def apply(conn: ClientConnection) = {
-              val elapsed = Stopwatch.start()
-              super.apply(conn) ensure {
-                stat.add(elapsed().inMilliseconds)
-              }
-            }
-          }
+          preparer.prepare(next, params)
         }
       }
 
@@ -186,6 +177,12 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     def withClientId(clientId: thrift.ClientId): Client =
       configured(param.ClientId(Some(clientId)))
+
+    def withAttemptTTwitterUpgrade: Client =
+      configured(param.AttemptTTwitterUpgrade(true))
+
+    def withNoAttemptTTwitterUpgrade: Client =
+      configured(param.AttemptTTwitterUpgrade(false))
 
     def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
 
@@ -272,20 +269,16 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
   object Server {
     private val preparer =
-      new Stack.Module2[Label, param.ProtocolFactory, ServiceFactory[Array[Byte], Array[Byte]]]
-    {
-      val role = StackClient.Role.prepConn
-      val description = "Prepare TTwitter thrift connection"
-      def make(
-        _label: Label,
-        _pf: param.ProtocolFactory,
-        next: ServiceFactory[Array[Byte], Array[Byte]]
-      ) = {
-        val Label(label) = _label
-        val param.ProtocolFactory(pf) = _pf
-        val preparer = new thrift.ThriftServerPreparer(pf, label)
-        preparer.prepare(next)
-      }
+      new Stack.ModuleParams[ServiceFactory[Array[Byte], Array[Byte]]] {
+        override def parameters: Seq[Stack.Param[_]] = Nil
+        override val role = StackClient.Role.prepConn
+        override val description = "Prepare TTwitter thrift connection"
+        def make(params: Stack.Params, next: ServiceFactory[Array[Byte], Array[Byte]]) = {
+          val Label(label) = params[Label]
+          val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
+          val preparer = new thrift.ThriftServerPreparer(pf, label)
+          preparer.prepare(next, params)
+        }
     }
 
     val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack

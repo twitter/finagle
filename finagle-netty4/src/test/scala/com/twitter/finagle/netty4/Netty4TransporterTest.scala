@@ -12,7 +12,7 @@ import org.scalatest.junit.JUnitRunner
 class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPatience {
 
   test("connection failures are propagated to the transporter promise") {
-    val transporter = Netty4Transporter(Params.empty, None, None)
+    val transporter = Netty4Transporter(None, None, Params.empty)
 
     val p = transporter(InetSocketAddressUtil.unconnected)
 

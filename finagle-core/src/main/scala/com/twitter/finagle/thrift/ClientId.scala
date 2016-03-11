@@ -5,8 +5,6 @@ import com.twitter.util.{Return, Throw}
 import com.twitter.io.Buf
 
 case class ClientId(name: String) {
-  def toThrift: thrift.ClientId = new thrift.ClientId(name)
-
   /**
    * Executes the given function with this ClientId set as the current
    * ClientId.  The current ClientId before executing this will be restored

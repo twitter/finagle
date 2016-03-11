@@ -9,24 +9,6 @@ import com.twitter.util.{Activity, Future, Time, Var}
 import java.net.SocketAddress
 import java.util.logging.{Level, Logger}
 
-/**
- * Allows duplicate SocketAddresses to be threaded through the
- * load balancer while avoiding the cache.
- */
-private object SocketAddresses {
-  trait Wrapped extends SocketAddress {
-    def underlying: SocketAddress
-  }
-
-  def unwrap(addr: SocketAddress): SocketAddress = {
-    addr match {
-      case sa: Wrapped => unwrap(sa.underlying)
-      case WeightedSocketAddress(s, _) => unwrap(s)
-      case _ => addr
-    }
-  }
-}
-
 object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +
   "\tWhen enabled,the configured stats receiver will be used,\n" +
   "\tor the loaded stats receiver if none given.\n" +
@@ -154,18 +136,24 @@ object LoadBalancerFactory {
       // that `sockaddr` is an available param for `next`. Note, in the default
       // client stack, `next` represents the endpoint stack which will result
       // in a connection being established when materialized.
-      def newEndpoint(sockaddr: SocketAddress): ServiceFactory[Req, Rep] = {
+      def newEndpoint(addr: Address): ServiceFactory[Req, Rep] = {
         val stats = if (hostStatsReceiver.isNull) statsReceiver else {
-          val scope = sockaddr match {
-            case WeightedInetSocketAddress(addr, _) =>
-              "%s:%d".format(addr.getHostName, addr.getPort)
+          val scope = addr match {
+            case Address.Inet(ia, _) =>
+              "%s:%d".format(ia.getHostName, ia.getPort)
             case other => other.toString
           }
           val host = hostStatsReceiver.scope(label).scope(scope)
           BroadcastStatsReceiver(Seq(host, statsReceiver))
         }
 
-        val composite = reporter(label, Some(sockaddr)) andThen monitor
+        val composite = {
+          val ia = addr match {
+            case Address.Inet(ia, _) => Some(ia)
+            case _ => None
+          }
+          reporter(label, ia).andThen(monitor)
+        }
 
         // While constructing a single endpoint stack is fairly cheap,
         // creating a large number of them can be expensive. On server
@@ -181,7 +169,7 @@ object LoadBalancerFactory {
             synchronized {
               if (isClosed) return Future.exception(new ServiceClosedException)
               if (underlying == null) underlying = next.make(params +
-                Transporter.EndpointAddr(SocketAddresses.unwrap(sockaddr)) +
+                Transporter.EndpointAddr(addr) +
                 param.Stats(stats) +
                 param.Monitor(composite))
             }
@@ -198,7 +186,7 @@ object LoadBalancerFactory {
               else Status.Closed
             else underlying.status
           }
-          override def toString: String = sockaddr.toString
+          override def toString: String = addr.toString
         }
       }
 
@@ -207,7 +195,7 @@ object LoadBalancerFactory {
       def newBalancer(endpoints: Activity[Set[ServiceFactory[Req, Rep]]]) =
         loadBalancerFactory.newBalancer(endpoints, balancerStats, balancerExc)
 
-      val destActivity: Activity[Set[SocketAddress]] = Activity(dest.map {
+      val destActivity: Activity[Set[Address]] = Activity(dest.map {
         case Addr.Bound(set, _) =>
           Activity.Ok(set)
         case Addr.Neg =>
@@ -221,10 +209,10 @@ object LoadBalancerFactory {
             log.fine(s"$label: name resolution is pending")
           }
           Activity.Pending
-      }: Var[Activity.State[Set[SocketAddress]]])
+      }: Var[Activity.State[Set[Address]]])
 
       // Instead of simply creating a newBalancer here, we defer to the
-      // traffic distributor to interpret `WeightedSocketAddresses`.
+      // traffic distributor to interpret weighted `Addresses`.
       Stack.Leaf(role, new TrafficDistributor[Req, Rep](
         dest = destActivity,
         newEndpoint = newEndpoint,
@@ -252,15 +240,14 @@ object LoadBalancerFactory {
 object ConcurrentLoadBalancerFactory {
   import LoadBalancerFactory._
 
-  private case class ReplicatedSocketAddress(underlying: SocketAddress, i: Int)
-    extends SocketAddresses.Wrapped
+  private val ReplicaKey = "concurrent_lb_replica"
 
-  private def replicate(num: Int): SocketAddress => Set[SocketAddress] = {
-    case sa: SocketAddresses.Wrapped => Set(sa)
-    case sa =>
-      val (base, w) = WeightedSocketAddress.extract(sa)
+  // package private for testing
+  private[finagle] def replicate(num: Int): Address => Set[Address] = {
+    case Address.Inet(ia, metadata) =>
       for (i: Int <- (0 until num).toSet) yield
-        WeightedSocketAddress(ReplicatedSocketAddress(base, i), w)
+        Address.Inet(ia, metadata + (ReplicaKey -> i))
+    case addr => Set(addr)
   }
 
   /**
@@ -283,7 +270,7 @@ object ConcurrentLoadBalancerFactory {
         val Param(numConnections) = params[Param]
         val Dest(dest) = params[Dest]
         val newDest = dest.map {
-          case bound@Addr.Bound(set, meta) =>
+          case bound@Addr.Bound(set, _) =>
             bound.copy(addrs = set.flatMap(replicate(numConnections)))
           case addr => addr
         }
@@ -297,6 +284,9 @@ object ConcurrentLoadBalancerFactory {
  * context from the stack to the balancers at construction time.
  *
  * @see [[Balancers]] for a collection of available balancers.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing user guide]]
+ *      for more details.
  */
 abstract class LoadBalancerFactory {
   /**

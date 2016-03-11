@@ -269,7 +269,6 @@ object ThriftMux
    * tracing information embedded in the thrift requests to Mux (which has native
    * tracing support).
    */
-
   case class ServerMuxer(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = BaseServerStack,
       params: Stack.Params = Mux.server.params + ProtocolLibrary("thriftmux"))
@@ -312,10 +311,19 @@ object ThriftMux
       service: Service[mux.Request, mux.Response]
     ): Closable = {
       val param.Tracer(tracer) = params[param.Tracer]
+
+      val negotiatedTrans = mux.Handshake.server(
+        trans = transport,
+        version = Mux.LatestVersion,
+        headers = _ => Nil,
+        negotiate = mux.Handshake.NoopNegotiator)
+
       mux.ServerDispatcher.newRequestResponse(
-        transport.map(Message.encode, Message.decode), service,
+        negotiatedTrans,
+        service,
         mux.lease.exp.ClockedDrainer.flagged,
-        tracer, muxStatsReceiver)
+        tracer,
+        muxStatsReceiver)
     }
   }
 

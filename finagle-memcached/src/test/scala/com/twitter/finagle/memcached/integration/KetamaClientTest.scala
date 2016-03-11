@@ -1,8 +1,8 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.finagle.cacheresolver.CacheNodeGroup
-import com.twitter.finagle.memcached.KetamaClientBuilder
-import com.twitter.finagle.{Group, Name}
+import com.twitter.finagle.memcached.{KetamaClientBuilder, KetamaPartitionedClient, KetamaClientKey}
+import com.twitter.finagle.{Address, Group, Name}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
@@ -48,8 +48,24 @@ class KetamaClientTest extends FunSuite with BeforeAndAfter {
   }
 
   test("using Name doesn't blow up") {
-    val name = Name.bound(address1, address2)
+    val name = Name.bound(Address(address1), Address(address2))
     val client = KetamaClientBuilder().dest(name).build()
+
+    Await.result(client.delete("foo"))
+    assert(Await.result(client.get("foo")) == None)
+    Await.result(client.set("foo", Buf.Utf8("bar")))
+    val Buf.Utf8(res) = Await.result(client.get("foo")).get
+    assert(res == "bar")
+  }
+  
+  test("using .dest() preserves custom keys") {
+    val key1 = 0
+    val key2 = 3
+    val name = s"twcache!localhost:${address1.getPort}:1:$key1,localhost:${address2.getPort}:1:$key2"
+    val client = KetamaClientBuilder().dest(name).build().asInstanceOf[KetamaPartitionedClient]
+    
+    assert(client.ketamaNodeGrp().size == 2)
+    assert(client.ketamaNodeGrp().map(_._1) == Set(KetamaClientKey(key1.toString), KetamaClientKey(key2.toString)))
 
     Await.result(client.delete("foo"))
     assert(Await.result(client.get("foo")) == None)

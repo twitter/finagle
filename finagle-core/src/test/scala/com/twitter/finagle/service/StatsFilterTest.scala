@@ -211,17 +211,24 @@ class StatsFilterTest extends FunSuite {
     assert(5 == Await.result(service(5), 1.second))
     assert(1 == sr.counter("requests")())
     assert(0 == sr.counter("success")())
+    assert(1 == sr.counter("failures")())
+    val failure = sr.counter(
+      "failures",
+      "com.twitter.finagle.service.ResponseClassificationSyntheticException")
+    assert(1 == failure())
 
     // able to categorize Throws as success
     intercept[RuntimeException] { Await.result(service(-5), 1.second) }
     assert(2 == sr.counter("requests")())
     assert(1 == sr.counter("success")())
+    assert(1 == sr.counter("failures")())
 
     // handles responses that are not defined in our classifier
     assert(!aClassifier.isDefinedAt(ReqRep(3, Return(1))))
     assert(3 == Await.result(service(3), 1.second))
     assert(3 == sr.counter("requests")())
     assert(2 == sr.counter("success")())
+    assert(1 == sr.counter("failures")())
   }
 
 }

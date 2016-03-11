@@ -12,7 +12,7 @@ import com.twitter.util.{Await, Duration, Future, Throw, Try}
 
 object ThriftServiceIfaceExample {
   def main(args: Array[String]) {
-    // See the docs at http://twitter.github.io/finagle/guide/Protocols.html#using-finagle-thrift
+    // See the docs at https://twitter.github.io/finagle/guide/Protocols.html#using-finagle-thrift
     //#thriftserverapi
     val server = Thrift.serveIface(
       "localhost:1234",

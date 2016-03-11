@@ -6,7 +6,7 @@ import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.protocol.text.{Encoder, server, client}
 import server.{Decoder => ServerDecoder}
 import client.{Decoder => ClientDecoder}
-import com.twitter.finagle.{ServiceFactory, Codec, CodecFactory}
+import com.twitter.finagle.{Stack, ServiceFactory, Codec, CodecFactory}
 import com.twitter.finagle.tracing.ClientRequestTracingFilter
 
 class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
@@ -49,7 +49,7 @@ class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
       }
 
       // pass every request through a filter to create trace data
-      override def prepareConnFactory(underlying: ServiceFactory[Command, Response]) =
+      override def prepareConnFactory(underlying: ServiceFactory[Command, Response], params: Stack.Params) =
         new KestrelTracingFilter() andThen underlying
 
       override def failFastOk = failFast

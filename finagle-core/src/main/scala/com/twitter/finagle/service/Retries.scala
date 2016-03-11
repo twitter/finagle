@@ -9,6 +9,9 @@ import com.twitter.util._
  * The [[Stack]] parameters and modules for configuring
  * '''which''' and '''how many''' failed requests are retried for
  * a client.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout user guide]]
+ *      for more details.
  */
 object Retries {
 
@@ -38,8 +41,8 @@ object Retries {
 
   /**
    * Determines '''how many''' failed requests are eligible for
-   * being retried. 
-   * 
+   * being retried.
+   *
    * @param retryBudget maintains a budget of remaining retries for
    *                    an individual request.
    *
@@ -205,6 +208,8 @@ object Retries {
       // are tied together.
       private[this] val budgetGauge =
         statsReceiver.addGauge("budget") { retryBudget.balance }
+      private[this] val notOpenCounter =
+        statsReceiver.counter("not_open")
 
       private[this] val serviceFn: Service[Req, Rep] => Service[Req, Rep] =
         service => filters.andThen(service)
@@ -218,9 +223,14 @@ object Retries {
        */
       private[this] def applySelf(conn: ClientConnection, n: Int): Future[Service[Req, Rep]] =
         self(conn).rescue {
-          case RetryPolicy.RetryableWriteException(_) if n > 0 && status == Status.Open =>
-            requeuesCounter.incr()
-            applySelf(conn, n-1)
+          case e@RetryPolicy.RetryableWriteException(_) if n > 0 =>
+            if (status == Status.Open) {
+              requeuesCounter.incr()
+              applySelf(conn, n-1)
+            } else {
+              notOpenCounter.incr()
+              Future.exception(e)
+            }
         }
 
       /**

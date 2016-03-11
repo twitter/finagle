@@ -49,7 +49,7 @@ private[http] object HttpContext {
    *     - Deadline
    */
   def write(msg: Message): Unit =
-    Contexts.broadcast.get(Deadline) match {
+    Deadline.current match {
       case Some(deadline) =>
         msg.headerMap.set(DeadlineHeaderKey, marshalDeadline(deadline))
       case None =>

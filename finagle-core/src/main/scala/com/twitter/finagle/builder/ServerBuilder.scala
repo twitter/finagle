@@ -164,6 +164,9 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * - `openConnectionsThresholds`: None
  * - `maxConcurrentRequests`: Int.MaxValue
  * - `backlog`: OS-defined default value
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
+ *      for information on the preferred `with`-style APIs insead.
  */
 class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   val params: Stack.Params,
@@ -210,11 +213,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     stack({ ps =>
       val Label(label) = ps[Label]
       val BindTo(addr) = ps[BindTo]
+      val Stats(stats) = ps[Stats]
       val codec = codecFactory(ServerCodecConfig(label, addr))
+
+
       val newStack = StackServer.newStack[Req1, Rep1].replace(
         StackServer.Role.preparer, (next: ServiceFactory[Req1, Rep1]) =>
-          codec.prepareConnFactory(next)
-        ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
+          codec.prepareConnFactory(next, ps + Stats(stats.scope(label)))
+      ).replace(TraceInitializerFilter.role, codec.newTraceInitializer)
 
       case class Server(
         stack: Stack[ServiceFactory[Req1, Rep1]] = newStack,
@@ -440,6 +446,47 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    */
   def daemon(daemonize: Boolean): This =
     configured(Daemonize(daemonize))
+
+  /**
+   * Configure a [[com.twitter.finagle.service.ResponseClassifier]]
+   * which is used to determine the result of a request/response.
+   *
+   * This allows developers to give Finagle the additional application-specific
+   * knowledge necessary in order to properly classify responses. Without this,
+   * Finagle cannot make judgements about application-level failures as it only
+   * has a narrow understanding of failures (for example: transport level, timeouts,
+   * and nacks).
+   *
+   * As an example take an HTTP server that returns a response with a 500 status
+   * code. To Finagle this is a successful request/response. However, the application
+   * developer may want to treat all 500 status codes as failures and can do so via
+   * setting a [[com.twitter.finagle.service.ResponseClassifier]].
+   *
+   * ResponseClassifier is a [[PartialFunction]] and as such multiple classifiers can
+   * be composed together via [[PartialFunction.orElse]].
+   *
+   * Response classification is independently configured on the client and server.
+   * For client-side response classification using [[com.twitter.finagle.builder.ClientBuilder]],
+   * see `com.twitter.finagle.builder.ClientBuilder.responseClassifier`
+   *
+   * @see [[com.twitter.finagle.http.service.HttpResponseClassifier]] for some
+   * HTTP classification tools.
+   *
+   * @note If unspecified, the default classifier is
+   * [[com.twitter.finagle.service.ResponseClassifier.Default]]
+   * which is a total function fully covering the input domain.
+   */
+  def responseClassifier(classifier: com.twitter.finagle.service.ResponseClassifier): This =
+    configured(param.ResponseClassifier(classifier))
+
+  /**
+   * The currently configured [[com.twitter.finagle.service.ResponseClassifier]].
+   *
+   * @note If unspecified, the default classifier is
+   * [[com.twitter.finagle.service.ResponseClassifier.Default]].
+   */
+  def responseClassifier: com.twitter.finagle.service.ResponseClassifier =
+    params[param.ResponseClassifier].responseClassifier
 
   /**
    * Provide an alternative to putting all request exceptions under

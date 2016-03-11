@@ -23,7 +23,7 @@ class ServerAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
    * @param maxWaiters the maximum number requests (on top of `maxConcurrentRequests`)
    *                   allowed to be queued (default: unbounded)
    *
-   * @see [[http://twitter.github.io/finagle/guide/Servers.html#concurrency-limit]]
+   * @see [[https://twitter.github.io/finagle/guide/Servers.html#concurrency-limit]]
    */
   def concurrencyLimit(maxConcurrentRequests: Int, maxWaiters: Int): A = {
     val semaphore =
@@ -41,7 +41,7 @@ class ServerAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
    * @param tolerance the maximum elapsed time since a request's deadline when it
    *                  will be considered for rejection (default: 170 ms)
    *
-   * @see [[http://twitter.github.io/finagle/guide/Servers.html#request-deadline]]
+   * @see [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline]]
    */
   def deadlineTolerance(tolerance: Duration): A =
     self.configured(self.params[DeadlineFilter.Param].copy(tolerance = tolerance))
@@ -51,7 +51,7 @@ class ServerAdmissionControlParams[A <: Stack.Parameterized[A]](self: Stack.Para
    * of requests that can be rejected due to request's deadline) of this server
    * (default: 20%).
    *
-   * @see [[http://twitter.github.io/finagle/guide/Servers.html#request-deadline]]
+   * @see [[https://twitter.github.io/finagle/guide/Servers.html#request-deadline]]
    */
   def deadlineMaxRejectedPercentage(percentage: Double): A =
     self.configured(self.params[DeadlineFilter.Param].copy(maxRejectPercentage = percentage))

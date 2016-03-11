@@ -11,6 +11,9 @@ import scala.util.Random
  * Constructor methods for various load balancers. The methods take balancer
  * specific parameters and return a [[LoadBalancerFactory]] that allows you
  * to easily inject a balancer into the Finagle stack via client configuration.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing user guide]]
+ *      for more details.
  */
 object Balancers {
   /** Default MaxEffort used in constructors below. */
@@ -66,6 +69,8 @@ object Balancers {
    * @param rng The PRNG used for flipping coins. Override for
    * deterministic tests.
    *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#power-of-two-choices-p2c-least-loaded user guide]]
+   *      for more details.
    */
   def p2cPeakEwma(
     decayTime: Duration = 10.seconds,
@@ -90,6 +95,9 @@ object Balancers {
    * An efficient strictly least-loaded balancer that maintains
    * an internal heap. Note, because weights are not supported by
    * the HeapBalancer they are ignored when the balancer is constructed.
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#heap-least-loaded user guide]]
+   *      for more details.
    */
   def heap(rng: Random = new Random): LoadBalancerFactory =
     new LoadBalancerFactory {
@@ -120,6 +128,9 @@ object Balancers {
    *
    * Unavailable services are not counted--the aperture expands as
    * needed to cover those that are available.
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded user guide]]
+   *      for more details.
    */
   def aperture(
     smoothWin: Duration = 5.seconds,

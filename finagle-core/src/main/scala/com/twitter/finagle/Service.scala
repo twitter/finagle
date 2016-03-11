@@ -7,8 +7,8 @@ import java.net.SocketAddress
 object Service {
 
   /**
-   * Wrap an underlying service such that any synchronously thrown exceptions are lifted into
-   * Future.exception
+   * Wrap the given service such that any synchronously thrown `NonFatal`
+   * exceptions are lifted into `Future.exceptions`.
    */
   def rescue[Req, Rep](service: Service[Req, Rep]) = new ServiceProxy[Req, Rep](service) {
     override def apply(request: Req): Future[Rep] = {
@@ -20,6 +20,10 @@ object Service {
     }
   }
 
+  /**
+   * A convenience method for creating `Services` from a `Function1` of
+   * `Req` to a `Future[Rep]`.
+   */
   def mk[Req, Rep](f: Req => Future[Rep]): Service[Req, Rep] = new Service[Req, Rep] {
     def apply(req: Req): Future[Rep] = f(req)
   }
@@ -38,11 +42,15 @@ object Service {
 }
 
 /**
- * A Service is an asynchronous function from Request to Future[Response]. It is the
- * basic unit of an RPC interface.
+ * A `Service` is an asynchronous function from a `Request` to a `Future[Response]`.
  *
- * '''Note:''' this is an abstract class (vs. a trait) to maintain java
- * compatibility, as it has implementation as well as interface.
+ * It is the basic unit of an RPC interface.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/ServicesAndFilters.html#services user guide]]
+ *      for details and examples.
+ *
+ * @see [[com.twitter.finagle.Service.mk Service.mk]] for a convenient
+ *     way to create new instances.
  */
 abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
   def map[Req1](f: Req1 => Req) = new Service[Req1, Rep] {
@@ -55,23 +63,15 @@ abstract class Service[-Req, +Rep] extends (Req => Future[Rep]) with Closable {
    */
   def apply(request: Req): Future[Rep]
 
-  /**
-   * Relinquishes the use of this service instance. Behavior is
-   * undefined if apply() is called after resources are relinquished.
-   */
-  // This is asynchronous on purpose, the old API allowed for it.
-  @deprecated("Use close() instead", "7.0.0")
-  final def release(): Unit = close()
-
   def close(deadline: Time): Future[Unit] = Future.Done
 
   /**
-   * The current availability [[Status]] of this Service.
+   * The current availability [[Status]] of this `Service`.
    */
   def status: Status = Status.Open
 
   /**
-   * Determines whether this service is available (can accept requests
+   * Determines whether this `Service` is available (can accept requests
    * with a reasonable likelihood of success).
    */
   final def isAvailable: Boolean = status == Status.Open
@@ -139,9 +139,6 @@ abstract class ServiceFactory[-Req, +Rep]
   def apply(conn: ClientConnection): Future[Service[Req, Rep]]
   final def apply(): Future[Service[Req, Rep]] = this(ClientConnection.nil)
 
-  @deprecated("use apply() instead", "5.0.1")
-  final def make(): Future[Service[Req, Rep]] = this()
-
   /**
    * Apply `f` on created services, returning the resulting Future in their
    * stead. This is useful for implementing common factory wrappers that
@@ -198,27 +195,21 @@ object ServiceFactory {
     }
 }
 
-@deprecated("use ServiceFactoryProxy instead", "6.7.5")
-trait ProxyServiceFactory[-Req, +Rep] extends ServiceFactory[Req, Rep] with Proxy {
-  def self: ServiceFactory[Req, Rep]
+/**
+ * A [[ServiceFactory]] that proxies all calls to another
+ * ServiceFactory.  This can be useful if you want to modify
+ * and existing `ServiceFactory`.
+ */
+abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
+  extends ServiceFactory[Req, Rep]
+  with Proxy {
+  def self: ServiceFactory[Req, Rep] = _self
+
   def apply(conn: ClientConnection): Future[Service[Req, Rep]] = self(conn)
   def close(deadline: Time): Future[Unit] = self.close(deadline)
 
   override def status: Status = self.status
 }
-
-/**
- * A simple proxy ServiceFactory that forwards all calls to another
- * ServiceFactory.  This is is useful if you to wrap-but-modify an
- * existing service factory.
- */
-abstract class ServiceFactoryProxy[-Req, +Rep](_self: ServiceFactory[Req, Rep])
-  extends ProxyServiceFactory[Req, Rep] {
-  def self: ServiceFactory[Req, Rep] = _self
-}
-
-private[finagle] case class ServiceFactorySocketAddress[Req, Rep](factory: ServiceFactory[Req, Rep])
-  extends SocketAddress
 
 object FactoryToService {
   val role = Stack.Role("FactoryToService")

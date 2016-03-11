@@ -3,7 +3,6 @@ package com.twitter.finagle.mux
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Status, Stack}
-import com.twitter.finagle.mux._
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.parsers.{double, duration, int, list}
 import com.twitter.util.{Duration, Future}

@@ -102,11 +102,11 @@ private class ClientSessionTest extends FunSuite {
       case _ => fail()
     }
 
-    recv(Message.Rping(Message.PingTag))
+    recv(Message.Rping(Message.Tags.PingTag))
     assert(ping0.isDefined)
 
     val ping1 = session.ping()
-    recv(Message.Rping(Message.PingTag))
+    recv(Message.Rping(Message.Tags.PingTag))
     assert(ping1.isDefined)
   }
 }

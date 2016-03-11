@@ -1,6 +1,7 @@
 package com.twitter.finagle.httpproxy
 
 import com.twitter.finagle.client.Transporter.Credentials
+import com.twitter.finagle.netty3.{SocketAddressResolveHandler, SocketAddressResolver}
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
 import com.twitter.io.Charsets
 import com.twitter.util.Base64StringEncoder
@@ -27,6 +28,11 @@ object HttpConnectHandler {
     val clientCodec = new HttpClientCodec()
     val handler = new HttpConnectHandler(proxyAddr, addr, clientCodec, proxyCredentials)
     pipeline.addFirst("httpProxyCodec", handler)
+    proxyAddr match {
+      case proxyInetAddr: InetSocketAddress if proxyInetAddr.isUnresolved =>
+        pipeline.addFirst("socketAddressResolver", new SocketAddressResolveHandler(SocketAddressResolver.random, addr))
+      case _ =>
+    }
     pipeline.addFirst("clientCodec", clientCodec)
     handler
   }
@@ -46,7 +52,6 @@ class HttpConnectHandler(
     clientCodec: HttpClientCodec,
     proxyCredentials: Option[Credentials])
   extends SimpleChannelHandler {
-  import HttpConnectHandler._
 
   private[this] val connectFuture = new AtomicReference[ChannelFuture](null)
 

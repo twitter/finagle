@@ -27,6 +27,13 @@ case class Deadline(timestamp: Time, deadline: Time) extends Ordered[Deadline] {
  * A broadcast context for deadlines.
  */
 object Deadline extends Contexts.broadcast.Key[Deadline]("com.twitter.finagle.Deadline") {
+
+  /**
+   * Returns the current request's deadline, if set.
+   */
+  def current: Option[Deadline] =
+    Contexts.broadcast.get(Deadline)
+
   /**
    * Construct a deadline from a timeout.
    */

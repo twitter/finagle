@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.storage._
 import com.twitter.conversions.time._
+import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.context.Contexts
@@ -95,7 +96,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       client.close()
     }
 
-    test(name + ": with default ResponseClassifier") {
+    test(name + ": with default client-side ResponseClassifier") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -111,6 +112,28 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       assert(statsRecv.counters(Seq("client", "success")) == 2)
 
       client.close()
+    }
+
+    test(name + ": with default server-side ResponseClassifier") {
+      val server = finagle.Http.server
+        .withLabel("server")
+        .withStatsReceiver(statsRecv)
+        .serve("localhost:*", statusCodeSvc)
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val client = finagle.Http.client
+        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+      Await.ready(client(requestWith(Status.Ok)), 1.second)
+      assert(statsRecv.counters(Seq("server", "requests")) == 1)
+      assert(statsRecv.counters(Seq("server", "success")) == 1)
+
+      Await.ready(client(requestWith(Status.ServiceUnavailable)), 1.second)
+      assert(statsRecv.counters(Seq("server", "requests")) == 2)
+      // by default any `Return` is a successful response.
+      assert(statsRecv.counters(Seq("server", "success")) == 2)
+
+      client.close()
+      server.close()
     }
 
     test(name + ": unhandled exceptions are converted into 500s") {
@@ -244,7 +267,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val writtenDeadline = Deadline.ofTimeout(5.seconds)
       val service = new HttpService {
         def apply(request: Request) = {
-          val deadline = Contexts.broadcast.get(Deadline).get
+          val deadline = Deadline.current.get
           assert(deadline.deadline == writtenDeadline.deadline)
           val response = Response(request)
           Future.value(response)
@@ -297,6 +320,28 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
           }
         }
       })
+    }
+
+    test(name + ": measure payload size") {
+      val service = new HttpService {
+        def apply(request: Request) = {
+          val rep = Response()
+          rep.content = request.content.concat(request.content)
+
+          Future.value(rep)
+        }
+      }
+
+      val client = connect(service)
+      val req = Request()
+      req.content = Buf.Utf8("." * 10)
+      Await.ready(client(req))
+
+      assert(statsRecv.stat("client", "request_payload_bytes")() == Seq(10.0f))
+      assert(statsRecv.stat("client", "response_payload_bytes")() == Seq(20.0f))
+      assert(statsRecv.stat("server", "request_payload_bytes")() == Seq(10.0f))
+      assert(statsRecv.stat("server", "response_payload_bytes")() == Seq(20.0f))
+      client.close()
     }
   }
 
@@ -431,6 +476,18 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       Await.result(client(Request()))
       client.close()
     }
+
+    test(name +": does not measure payload size") {
+      val svc = Service.mk[Request, Response] { _ => Future.value(Response()) }
+      val client = connect(svc)
+      Await.result(client(Request()))
+
+      assert(statsRecv.stat("client", "request_payload_bytes")() == Nil)
+      assert(statsRecv.stat("client", "response_payload_bytes")() == Nil)
+      assert(statsRecv.stat("server", "request_payload_bytes")() == Nil)
+      assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
+      client.close()
+    }
   }
 
   def tracing(name: String)(connect: HttpService => HttpService) {
@@ -481,7 +538,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = ClientBuilder()
         .codec(Http())
         .reportTo(statsRecv)
-        .hosts(Seq(server.boundAddress))
+        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -494,8 +551,8 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
   run("Client/Server")(standardErrors, standardBehaviour, tracing) {
     service =>
-      import com.twitter.finagle
       val server = finagle.Http.server
+        .withLabel("server")
         .configured(Stats(statsRecv))
         .withMaxRequestSize(100.bytes)
         .serve("localhost:*", service)
@@ -520,7 +577,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http().streaming(true))
-        .hosts(Seq(server.boundAddress))
+        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -541,7 +598,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http().enableTracing(true))
-        .hosts(Seq(server.boundAddress))
+        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)
         .name("client")
         .build()
@@ -585,7 +642,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = ClientBuilder()
         .codec(Http())
-        .hosts(Seq(server.boundAddress))
+        .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
         .hostConnectionLimit(1)
         .name(name)
         .failureAccrualParams((failureAccrualFailures, 1.minute))
@@ -600,12 +657,11 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
   status("Client/Server") {
     (service, st, name) =>
-      import com.twitter.finagle
       val server = finagle.Http.serve(new InetSocketAddress(0), service)
       val client = finagle.Http.client
         .configured(Stats(st))
         .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
-        .newService(Name.bound(server.boundAddress), name)
+        .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), name)
 
       new ServiceProxy(client) {
         override def close(deadline: Time) =
@@ -613,9 +669,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
   }
 
-  test("ResponseClassifier based on status code") {
-    import com.twitter.finagle
-
+  test("Client-side ResponseClassifier based on status code") {
     val classifier = HttpResponseClassifier {
       case (_, r: Response) if r.status == Status.ServiceUnavailable =>
         ResponseClass.NonRetryableFailure
@@ -637,6 +691,34 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     Await.ready(client(requestWith(Status.ServiceUnavailable)), 1.second)
     assert(statsRecv.counters(Seq("client", "requests")) == 2)
     assert(statsRecv.counters(Seq("client", "success")) == 1)
+
+    client.close()
+    server.close()
+  }
+
+  test("server-side ResponseClassifier based on status code") {
+    val classifier = HttpResponseClassifier {
+      case (_, r: Response) if r.status == Status.ServiceUnavailable =>
+        ResponseClass.NonRetryableFailure
+    }
+
+    val server = finagle.Http.server
+      .withResponseClassifier(classifier)
+      .withStatsReceiver(statsRecv)
+      .withLabel("server")
+      .serve("localhost:*", statusCodeSvc)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = finagle.Http.client
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    Await.ready(client(requestWith(Status.Ok)), 1.second)
+    assert(statsRecv.counters(Seq("server", "requests")) == 1)
+    assert(statsRecv.counters(Seq("server", "success")) == 1)
+
+    Await.ready(client(requestWith(Status.ServiceUnavailable)), 1.second)
+    assert(statsRecv.counters(Seq("server", "requests")) == 2)
+    assert(statsRecv.counters(Seq("server", "success")) == 1)
+    assert(statsRecv.counters(Seq("server", "failures")) == 1)
 
     client.close()
     server.close()

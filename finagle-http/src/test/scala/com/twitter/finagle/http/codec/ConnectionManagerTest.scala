@@ -45,9 +45,10 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   }
 
   def perform(request: Request, response: Response, shouldMarkDead: Boolean) {
+    val closeP = new Promise[Throwable]
     val trans = mock[Transport[Any, Any]]
-    when(trans.close(any[Time])).thenReturn(Future.Done)
     when(trans.close).thenReturn(Future.Done)
+    when(trans.onClose).thenReturn(closeP)
 
     val disp = new HttpClientDispatcher(new HttpTransport(trans))
 

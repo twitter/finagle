@@ -329,7 +329,7 @@ object StreamingTest {
   def connect(addr: SocketAddress, mod: Modifier, name: String = "client") =
     ClientBuilder()
       .codec(new Custom(mod, identity))
-      .hosts(Seq(addr))
+      .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .name(name)
       .build()
@@ -342,7 +342,7 @@ object StreamingTest {
         val pipelineFactory = codec.pipelineFactory
         override def prepareServiceFactory(sf: ServiceFactory[Request, Response]) =
           codec.prepareServiceFactory(sf)
-        override def prepareConnFactory(sf: ServiceFactory[Request, Response]) =
+        override def prepareConnFactory(sf: ServiceFactory[Request, Response], ps: Stack.Params) =
           codec.prepareConnFactory(sf)
         override def newClientTransport(ch: Channel, sr: StatsReceiver) =
           codec.newClientTransport(ch, sr)

@@ -1,6 +1,7 @@
 package com.twitter.finagle.netty3.socks
 
 import com.twitter.finagle.{ChannelClosedException, ConnectionFailedException, InconsistentStateException}
+import com.twitter.finagle.netty3.{SocketAddressResolveHandler, SocketAddressResolver}
 import com.twitter.finagle.socks.{AuthenticationSetting, Unauthenticated, UsernamePassAuthenticationSetting}
 import com.twitter.io.Charsets
 import java.net.{Inet4Address, Inet6Address, InetSocketAddress, SocketAddress}
@@ -29,6 +30,22 @@ object SocksConnectHandler {
   private val Connect: Byte = 0x01
   private val Reserved: Byte = 0x00
   private val SuccessResponse: Byte = 0x00
+
+  def addHandler(
+    proxyAddr: SocketAddress,
+    addr: InetSocketAddress,
+    authenticationSettings: Seq[AuthenticationSetting],
+    pipeline: ChannelPipeline
+  ): SocksConnectHandler = {
+    val handler = new SocksConnectHandler(proxyAddr, addr, authenticationSettings)
+    pipeline.addFirst("socksConnect", handler)
+    proxyAddr match {
+      case proxyInetAddr: InetSocketAddress if proxyInetAddr.isUnresolved =>
+        pipeline.addFirst("socketAddressResolver", new SocketAddressResolveHandler(SocketAddressResolver.random, addr))
+      case _ =>
+    }
+    handler
+  }
 }
 
 /**

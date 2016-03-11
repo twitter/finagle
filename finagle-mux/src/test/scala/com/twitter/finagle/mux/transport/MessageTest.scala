@@ -18,6 +18,7 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
   val body = buf(4)
 
   val goodTags = Seq(8388607, 1, 123)
+  val goodVersions = Seq(100: Short, 200: Short, 300: Short)
   val goodTraceIds = Seq(None, Some(tracing.Trace.nextId))
   val goodBufs = Seq(ChannelBuffers.EMPTY_BUFFER, buf(1), buf(4), buf(100))
   val goodStrings = Seq("", "Hello, world!", "☺☹")
@@ -35,6 +36,18 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
 
   test("d(e(m)) == m") {
     val ms = mutable.Buffer[Message]()
+
+    ms ++= (for {
+      tag <- goodTags
+      version <- goodVersions
+      ctx <- goodContexts
+    } yield Tinit(tag, version, ctx))
+
+    ms ++= (for {
+      tag <- goodTags
+      version <- goodVersions
+      ctx <- goodContexts
+    } yield Rinit(tag, version, ctx))
 
     ms ++= (for {
       tag <- goodTags
@@ -118,7 +131,7 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
     } == BadMessageException("short message"))
     assert(intercept[BadMessageException] {
       decode(ChannelBuffers.wrappedBuffer(Array[Byte](0, 0, 0, 1)))
-    } == BadMessageException("bad message type: 0 [tag=1]"))
+    } == BadMessageException("unknown message type: 0 [tag=1]"))
   }
 
   test("extract control messages") {

@@ -264,7 +264,7 @@ class EndToEndTest extends FunSuite {
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
       .build(new MyService(serverRes))
-    val address = server.boundAddress
+    val address = server.boundAddress.asInstanceOf[InetSocketAddress]
     val factory = ClientBuilder()
       .codec(codec)
       .hosts(Seq(address))
@@ -289,7 +289,7 @@ class EndToEndTest extends FunSuite {
 
     val serverClient = ClientBuilder()
       .codec(codec)
-      .hosts(Seq(server.boundAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()
 
@@ -301,7 +301,7 @@ class EndToEndTest extends FunSuite {
 
     val factory = ClientBuilder()
       .codec(codec)
-      .hosts(Seq(proxy.boundAddress))
+      .hosts(Seq(proxy.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .buildFactory()
 
@@ -335,7 +335,7 @@ class EndToEndTest extends FunSuite {
 
     val client = ClientBuilder()
       .codec(Stream[StreamRequest]())
-      .hosts(Seq(server.boundAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()
 
@@ -362,7 +362,7 @@ class EndToEndTest extends FunSuite {
       })
     val client = ClientBuilder()
       .codec(codec)
-      .hosts(Seq(server.boundAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .retries(2)
       .build()
@@ -375,8 +375,8 @@ class EndToEndTest extends FunSuite {
     messages !! Buf.Utf8("1")
     assert((res.messages??) == Buf.Utf8("1"))
     assert(count == 1)
-    error !! EOF
     res.release()
+    error !! EOF
     val res2 = Await.result(f2, 1.second)
     assert(count == 2)
     res2.release()

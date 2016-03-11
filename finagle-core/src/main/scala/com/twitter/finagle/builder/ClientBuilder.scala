@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level
 import javax.net.ssl.SSLContext
 import org.jboss.netty.channel.{Channel, ChannelFactory}
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, varargs}
 
 /**
  * Factory for [[com.twitter.finagle.builder.ClientBuilder]] instances
@@ -171,8 +171,8 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  * A builder of Finagle [[com.twitter.finagle.Client Clients]].
  *
  * Please see the
- * [[http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6 Finagle user guide]]
- * for information on a newer set of client-construction APIs introduced in Finagle v6.
+ * [[http://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
+ * for information on the preferred `with`-style client-construction APIs.
  *
  * {{{
  * val client = ClientBuilder()
@@ -248,6 +248,9 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *  - `hostConnectionMaxIdleTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `hostConnectionMaxLifeTime`: [[com.twitter.util.Duration.Top Duration.Top]]
  *  - `sendBufferSize`, `recvBufferSize`: OS-defined default value
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Configuration.html user guide]]
+ *      for information on the preferred `with`-style APIs insead.
  */
 class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] private[finagle](
   client: StackBasedClient[Req, Rep]
@@ -285,8 +288,8 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * will be load balanced across these.  This is a shorthand form for
    * specifying a cluster.
    *
-   * One of the {{hosts}} variations or direct specification of the
-   * cluster (via {{cluster}}) is required.
+   * One of the `hosts` variations or direct specification of the
+   * cluster (via `cluster`) is required.
    *
    * @param hostnamePortCombinations comma-separated "host:port"
    * string.
@@ -299,22 +302,32 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   }
 
   /**
-   * A variant of {{hosts}} that takes a sequence of
-   * [[java.net.SocketAddress]] instead.
+   * A variant of `hosts` that takes a sequence of
+   * [[java.net.InetSocketAddress]] instead.
    */
   def hosts(
-    addrs: Seq[SocketAddress]
+    sockaddrs: Seq[InetSocketAddress]
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
-    dest(Name.bound(addrs:_*))
+    addrs(sockaddrs.map(Address(_)): _*)
 
   /**
    * A convenience method for specifying a one-host
    * [[java.net.SocketAddress]] client.
    */
   def hosts(
-    address: SocketAddress
+    address: InetSocketAddress
   ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
     hosts(Seq(address))
+
+  /**
+   * A convenience method for specifying a client with one or more
+   * [[com.twitter.finagle.Address]]s.
+   */
+  @varargs
+  def addrs(
+    addrs: Address*
+  ): ClientBuilder[Req, Rep, Yes, HasCodec, HasHostConnectionLimit] =
+    dest(Name.bound(addrs:_*))
 
   /**
    * The logical destination of requests dispatched through this
@@ -591,6 +604,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * It is a [[PartialFunction]] and as such multiple classifiers can be composed
    * together via [[PartialFunction.orElse]].
    *
+   * Response classification is independently configured on the client and server.
+   * For server-side response classification using [[com.twitter.finagle.builder.ServerBuilder]],
+   * see [[com.twitter.finagle.builder.ServerBuilder.responseClassifier]]
+   *
    * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
    * HTTP classification tools.
    *
@@ -753,6 +770,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     configured(params[Transporter.HttpProxy].copy(sa = Some(httpProxy)))
 
   /**
+    * Make connections via the given HTTP proxy by host name and port.
+    * The host name is resolved every transport connection.
+    * This API is experiment.
+    * If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
+    */
+  def expHttpProxy(hostName: String, port: Int): This =
+    configured(params[Transporter.HttpProxy].copy(sa = Some(InetSocketAddress.createUnresolved(hostName, port))))
+
+  /**
    * For the http proxy use these [[Credentials]] for authentication.
    */
   def httpProxyUsernameAndPassword(credentials: Credentials): This =
@@ -768,6 +794,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def socksProxy(socksProxy: Option[SocketAddress]): This =
     configured(params[Transporter.SocksProxy].copy(sa = socksProxy))
+
+  /**
+    * Make connections via the given HTTP proxy by host name and port.
+    * The host name is resolved every transport connection.
+    * This API is experiment.
+    * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
+    */
+  def expSocksProxy(hostName: String, port: Int): This =
+    configured(params[Transporter.HttpProxy].copy(sa = Some(InetSocketAddress.createUnresolved(hostName, port))))
 
   /**
    * For the socks proxy use this username for authentication.
@@ -1114,12 +1149,13 @@ private case class CodecClient[Req, Rep](
   def newClient(dest: Name, label: String): ServiceFactory[Req, Rep] = {
     val codec = codecFactory(ClientCodecConfig(label))
 
-    val prepConn = new Stack.Module1[Stats, ServiceFactory[Req, Rep]] {
-      val role = StackClient.Role.prepConn
-      val description = "Connection preparation phase as defined by a Codec"
-      def make(_stats: Stats, next: ServiceFactory[Req, Rep]) = {
-        val Stats(stats) = _stats
-        val underlying = codec.prepareConnFactory(next)
+    val prepConn = new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
+      override def parameters: Seq[Stack.Param[_]] = Nil
+      override val role = StackClient.Role.prepConn
+      override val description = "Connection preparation phase as defined by a Codec"
+      def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]) = {
+        val Stats(stats) = ps[Stats]
+        val underlying = codec.prepareConnFactory(next, ps)
         new ServiceFactoryProxy(underlying) {
           val stat = stats.stat("codec_connection_preparation_latency_ms")
           override def apply(conn: ClientConnection) = {

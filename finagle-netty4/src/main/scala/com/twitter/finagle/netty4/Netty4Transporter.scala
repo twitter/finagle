@@ -3,40 +3,25 @@ package com.twitter.finagle.netty4
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
-import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Throw, Future, Promise}
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.UnpooledByteBufAllocator
 import io.netty.channel._
+import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.util.concurrent.GenericFutureListener
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 
 private[netty4] object Netty4Transporter {
-  def apply[In, Out](
+
+  private[this] def build[In, Out](
+    init: ChannelInitializer[SocketChannel],
     params: Stack.Params,
-    enc: Option[FrameEncoder[In]],
-    decoderFactory: Option[() => FrameDecoder[Out]],
-    transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_)
+    transportP: Promise[Transport[In, Out]]
   ): Transporter[In, Out] = new Transporter[In, Out] {
     def apply(addr: SocketAddress): Future[Transport[In, Out]] = {
-
-      // transportP is passed to ConnectionHandler in
-      // Netty4ClientChannelInitializer and is satisfied when a
-      // connected Transport is created. Its interrupt handler
-      // should not be overridden.
-      val transportP = new Promise[Transport[In, Out]]
-
-      val channelInit =
-        new Netty4ClientChannelInitializer[In, Out](
-          transportP,
-          params,
-          enc,
-          decoderFactory
-        )
-
       val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
       val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
       val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
@@ -56,7 +41,7 @@ private[netty4] object Netty4Transporter {
           .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
           .option[JBool](ChannelOption.AUTO_READ, false) // backpressure! no reads on transport => no reads on the socket
           .option[JInt](ChannelOption.CONNECT_TIMEOUT_MILLIS, compensatedConnectTimeoutMs.toInt)
-          .handler(channelInit)
+          .handler(init)
 
       val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
       keepAlive.foreach(bootstrap.option[JBool](ChannelOption.SO_KEEPALIVE, _))
@@ -75,5 +60,34 @@ private[netty4] object Netty4Transporter {
 
       transportP
     }
+  }
+
+  /**
+   * transporter constructor for protocols that need direct access to the netty pipeline
+   * (ie; finagle-http)
+   */
+  def apply[In, Out](
+    pipeCb: ChannelPipeline => Unit,
+    params: Stack.Params
+  ): Transporter[In, Out] = {
+    val transportP = new Promise[Transport[In, Out]]
+    val init = new RawNetty4ClientChannelInitializer[In, Out](transportP, params, pipeCb)
+
+    build(init, params, transportP)
+  }
+
+  /**
+   * transporter constructor for protocols which are entirely implemented in
+   * dispatchers (ie; finagle-mux, finagle-mysql)
+   */
+  def apply[In, Out](
+    enc: Option[FrameEncoder[In]],
+    decoderFactory: Option[() => FrameDecoder[Out]],
+    params: Stack.Params
+  ): Transporter[In, Out] = {
+    val transportP = new Promise[Transport[In, Out]]
+    val init = new Netty4ClientChannelInitializer[In, Out](transportP, params, enc, decoderFactory)
+
+    build(init, params, transportP)
   }
 }

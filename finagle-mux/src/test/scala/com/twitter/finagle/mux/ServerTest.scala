@@ -2,7 +2,7 @@ package com.twitter.finagle.mux
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.BufChannelBuffer
@@ -14,6 +14,7 @@ import com.twitter.io.Buf.Utf8
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.security.cert.X509Certificate
+import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -271,11 +272,16 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     }
   }
 
-  private[this] class Server(svc: Service[Request, Response], peerCert: Option[X509Certificate] = None) {
+  private[this] class Server(
+      svc: Service[Request, Response],
+      peerCert: Option[X509Certificate] = None,
+      remoteAddr: SocketAddress = null)
+  {
     val serverToClient = new AsyncQueue[Message]
     val clientToServer = new AsyncQueue[Message]
     val transport = new QueueTransport(writeq=serverToClient, readq=clientToServer) {
       override def peerCertificate = peerCert
+      override val remoteAddress = remoteAddr
     }
     def ping() = Future.Done
 
@@ -331,6 +337,27 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
 
     val tag = 3
     val server = new Server(testService, Some(mockCert))
+    val req = Message.Treq(tag, None, BufChannelBuffer(Request.empty.body))
+
+    server.request(req)
+    val Some(Return(res)) = server.read().poll
+
+    assert(res == Message.RreqOk(tag, BufChannelBuffer(okResponse.body)))
+  }
+
+  test("propagates remote address to service dispatch") {
+    val mockAddr = mock[SocketAddress]
+    val okResponse = Response(Utf8("ok"))
+    val failResponse = Response(Utf8("fail"))
+
+    val testService = new Service[Request, Response] {
+      override def apply(request: Request): Future[Response] = Future.value {
+        if (Contexts.local.get(RemoteInfo.Upstream.AddressCtx) == Some(mockAddr)) okResponse else failResponse
+      }
+    }
+
+    val tag = 3
+    val server = new Server(testService, None, mockAddr)
     val req = Message.Treq(tag, None, BufChannelBuffer(Request.empty.body))
 
     server.request(req)

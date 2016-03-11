@@ -68,6 +68,14 @@ object StackClient {
     stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
 
     /**
+     * `ExceptionRemoteInfoFactory` fills in remote info (upstream addr/client id,
+     * downstream addr/client id, and trace id) in exceptions. This needs to be at the top
+     * of the endpoint stack so that failures anywhere lower in the stack have remote
+     * info added to them.
+     */
+    stk.push(ExceptionRemoteInfoFactory.module)
+
+    /**
      * `WriteTracingFilter` annotates traced requests. Annotations are timestamped
      * so this should be low in the stack to accurately delineate between wire time
      * and handling time.
@@ -175,6 +183,8 @@ object StackClient {
      * It is only evaluated at stack creation time.
      */
     stk.push(LatencyCompensation.module)
+
+
     stk.result
   }
 
@@ -391,6 +401,10 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
  * The standard template implementation for
  * [[com.twitter.finagle.client.StackClient]].
  *
+ * @see The [[http://twitter.github.io/finagle/guide/Clients.html user guide]]
+ *      for further details on Finagle clients and their configuration.
+  * @see [[StackClient.newStack]] for the default modules used by Finagle
+ *      clients.
  */
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   extends StackClient[Req, Rep]
@@ -492,12 +506,13 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
         val factory = addr match {
-          case ServiceFactorySocketAddress(sf: ServiceFactory[Req, Rep]) => sf
-          case _ =>
+          case com.twitter.finagle.exp.Address.ServiceFactory(sf: ServiceFactory[Req, Rep], _) => sf
+          case Address.Failed(e) => new FailingFactory[Req, Rep](e)
+          case Address.Inet(ia, _) =>
             val endpointClient = copy1(params=prms)
             val transporter = endpointClient.newTransporter()
             val mkFutureSvc: () => Future[Service[Req, Rep]] =
-              () => transporter(addr).map { trans =>
+              () => transporter(ia).map { trans =>
                 // we do not want to capture and request specific Locals
                 // that would live for the life of the session.
                 Contexts.letClear {

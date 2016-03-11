@@ -31,7 +31,7 @@ class SessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
    * This timeout also includes resolving logical destinations, but the cost of
    * resolution is amortized.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
    */
   def acquisitionTimeout(timeout: Duration): A =
     self.configured(TimeoutFactory.Param(timeout))
@@ -40,7 +40,7 @@ class SessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
    * Configures the session max idle time `timeout` - the maximum amount of time
    * a given session is allowed to be idle before it is closed (default: unbounded).
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
    */
   def maxIdleTime(timeout: Duration): A =
     self.configured(self.params[ExpiringService.Param].copy(idleTime = timeout))
@@ -49,7 +49,7 @@ class SessionParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
    * Configures the session lifetime `timeout` - the maximum amount of time a given
    * service is allowed to live before it is closed (default: unbounded).
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration]]
    */
   def maxLifeTime(timeout: Duration): A =
     self.configured(self.params[ExpiringService.Param].copy(lifeTime = timeout))

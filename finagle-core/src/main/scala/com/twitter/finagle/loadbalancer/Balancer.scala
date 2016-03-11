@@ -1,11 +1,9 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
-import com.twitter.finagle.util.{OnReady, Rng, Updater}
-import com.twitter.util.{Activity, Future, Promise, Time, Closable, Return, Throw}
-import java.util.concurrent.atomic.AtomicInteger
+import com.twitter.finagle.util.Updater
+import com.twitter.util.{Future, Time, Closable}
 import scala.annotation.tailrec
 
 /**
@@ -36,40 +34,9 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
   protected def statsReceiver: StatsReceiver
 
   /**
-   * The base type of nodes over which load is balanced.
-   * Nodes define the load metric that is used; distributors
-   * like P2C will use these to decide where to balance
-   * the next connection request.
-   */
-  protected trait NodeT extends ServiceFactory[Req, Rep] {
-    type This
-
-    /**
-     * The current load, in units of the active metric.
-     */
-    def load: Double
-
-    /**
-     * The number of pending requests to this node.
-     */
-    def pending: Int
-
-    /**
-     * A token is a random integer identifying the node.
-     * It persists through node updates.
-     */
-    def token: Int
-
-    /**
-     * The underlying service factory.
-     */
-    def factory: ServiceFactory[Req, Rep]
-  }
-
-  /**
    * The type of Node. Mixed in.
    */
-  protected type Node <: AnyRef with NodeT { type This = Node }
+  protected type Node <: AnyRef with NodeT[Req, Rep] { type This = Node }
 
   /**
    * Create a new node representing the given factory, with the given
@@ -87,44 +54,9 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
   protected def failingNode(cause: Throwable): Node
 
   /**
-   * The base type of the load balancer distributor. Distributors are
-   * updated nondestructively, but, as with nodes, may share some
-   * data across updates.
-  */
-  protected trait DistributorT {
-    type This
-
-    /**
-     * The vector of nodes over which we are currently balancing.
-     */
-    def vector: Vector[Node]
-
-    /**
-     * Pick the next node. This is the main load balancer.
-     */
-    def pick(): Node
-
-    /**
-     * True if this distributor needs to be rebuilt. (For example, it
-     * may need to be updated with current availabilities.)
-     */
-    def needsRebuild: Boolean
-
-    /**
-     * Rebuild this distributor.
-     */
-    def rebuild(): This
-
-    /**
-     * Rebuild this distributor with a new vector.
-     */
-    def rebuild(vector: Vector[Node]): This
-  }
-
-  /**
    * The type of Distributor. Mixed in.
    */
-  protected type Distributor <: DistributorT { type This = Distributor }
+  protected type Distributor <: DistributorT[Node] { type This = Distributor }
 
   /**
    * Create an initial distributor.
@@ -270,152 +202,3 @@ private trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] { self =>
     Closable.all(dist.vector:_*).close(deadline)
   }
 }
-
-/**
- * A Balancer mix-in to provide automatic updating via Activities.
- */
-private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
-  private[this] val ready = new Promise[Unit]
-  def onReady: Future[Unit] = ready
-
-  /**
-   * An activity representing the active set of ServiceFactories.
-   */
-  protected def activity: Activity[Traversable[ServiceFactory[Req, Rep]]]
-
-  /*
-   * Subscribe to the Activity and dynamically update the load
-   * balancer as it (succesfully) changes.
-   *
-   * The observation is terminated when the Balancer is closed.
-   */
-  private[this] val observation = activity.states.respond {
-    case Activity.Pending =>
-
-    case Activity.Ok(newList) =>
-      update(newList)
-      ready.setDone()
-
-    case Activity.Failed(_) =>
-      // On resolution failure, consider the
-      // load balancer ready (to serve errors).
-      ready.setDone()
-  }
-
-  override def close(deadline: Time): Future[Unit] = {
-    observation.close(deadline) transform { _ => super.close(deadline) } ensure {
-      ready.setDone()
-    }
-  }
-}
-
-/**
- * Provide Nodes whose 'load' is the current number of pending
- * requests and thus will result in least-loaded load balancer.
- */
-private trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
-  protected def rng: Rng
-
-  protected case class Node(factory: ServiceFactory[Req, Rep], counter: AtomicInteger, token: Int)
-    extends ServiceFactoryProxy[Req, Rep](factory)
-    with NodeT {
-
-    type This = Node
-
-    def load = counter.get
-    def pending = counter.get
-
-    override def apply(conn: ClientConnection) = {
-      counter.incrementAndGet()
-      super.apply(conn) transform {
-        case Return(svc) =>
-          Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time) =
-              super.close(deadline) ensure {
-                counter.decrementAndGet()
-              }
-          })
-
-        case t@Throw(_) =>
-          counter.decrementAndGet()
-          Future.const(t)
-      }
-    }
-  }
-
-  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) =
-    Node(factory, new AtomicInteger(0), rng.nextInt())
-
-  private[this] val failingLoad = new AtomicInteger(0)
-  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), failingLoad, 0)
-}
-
-/**
- * An O(1), concurrent, weighted fair load balancer. This uses the
- * ideas behind "power of 2 choices" [1] combined with O(1) biased
- * coin flipping through the aliasing method, described in
- * [[com.twitter.finagle.util.Drv Drv]].
- *
- * [1] Michael Mitzenmacher. 2001. The Power of Two Choices in
- * Randomized Load Balancing. IEEE Trans. Parallel Distrib. Syst. 12,
- * 10 (October 2001), 1094-1104.
- */
-private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
-  /**
-   * Our sturdy coin flipper.
-   */
-  protected def rng: Rng
-
-  protected class Distributor(val vector: Vector[Node]) extends DistributorT {
-    type This = Distributor
-
-    // Indicates if we've seen any down nodes during pick which we expected to be available
-    @volatile private[this] var sawDown = false
-
-    private[this] val nodeUp: Node => Boolean = { node =>
-      node.status == Status.Open
-    }
-
-    private[this] val (up, down) = vector.partition(nodeUp)
-
-    def needsRebuild: Boolean =
-      sawDown || (down.nonEmpty && down.exists(nodeUp))
-
-    def rebuild(): This = new Distributor(vector)
-    def rebuild(vec: Vector[Node]): This = new Distributor(vec)
-
-    // TODO: consider consolidating some of this code with `Aperture.Distributor.pick`
-    def pick(): Node = {
-      if (vector.isEmpty)
-        return failingNode(emptyException)
-
-      // if all nodes are down, we might as well try to send requests somewhere
-      // as our view of the world may be out of date.
-      val vec = if (up.isEmpty) down else up
-      val size = vec.size
-
-      if (size == 1) vec.head else {
-        val a = rng.nextInt(size)
-        var b = rng.nextInt(size)
-
-        // Try to pick b, b != a, up to 10 times.
-        var i = 10
-        while (a == b && i > 0) {
-          b = rng.nextInt(size)
-          i -= 1
-        }
-
-        val nodeA = vec(a)
-        val nodeB = vec(b)
-
-        if (nodeA.status != Status.Open || nodeB.status != Status.Open)
-          sawDown = true
-
-        if (nodeA.load < nodeB.load) nodeA else nodeB
-      }
-    }
-  }
-
-  protected def initDistributor() = new Distributor(Vector.empty)
-}
-

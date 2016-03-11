@@ -58,10 +58,13 @@ object ExpiringService {
 }
 
 /**
- * A service wrapper that expires the self service after a
+ * A service wrapper that expires the `self` service after a
  * certain amount of idle time. By default, expiring calls
- * ``.close()'' on the self channel, but this action is
+ * `close()` on the `self` channel, but this action is
  * customizable.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration user guide]]
+ *      for more details.
  */
 abstract class ExpiringService[Req, Rep](
   self: Service[Req, Rep],

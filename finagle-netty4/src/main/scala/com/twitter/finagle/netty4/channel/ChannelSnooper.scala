@@ -2,6 +2,7 @@ package com.twitter.finagle.netty4.channel
 
 import io.netty.buffer.ByteBuf
 import io.netty.channel._
+import io.netty.channel.ChannelHandler.Sharable
 import java.io.PrintStream
 import java.net.SocketAddress
 import java.nio.charset.Charset
@@ -39,8 +40,8 @@ private[netty4] trait ChannelSnooper extends ChannelDuplexHandler {
 }
 
 /** Log message events */
+@Sharable
 private[netty4] class ByteBufSnooper(val name: String) extends ChannelSnooper {
-  override val isSharable = true
 
   override def exceptionCaught(ctx: ChannelHandlerContext, exn: Throwable): Unit = {
     printer("Snooped exception", exn)

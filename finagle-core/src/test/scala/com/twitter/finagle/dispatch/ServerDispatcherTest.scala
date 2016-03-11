@@ -5,6 +5,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.tracing._ 
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Time, Local}
+import java.net.SocketAddress
 import java.security.cert.X509Certificate
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
@@ -68,6 +69,21 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     }
 
     val disp = new SerialServerDispatcher(trans, service, init)
+
+    readp.setValue("go")
+    verify(trans).write("ok")
+  })
+
+  test("Inject the transport remote address") ( new Ctx {
+    val mockAddr = mock[SocketAddress]
+    when(trans.remoteAddress).thenReturn(mockAddr)
+    val service = new Service[String, String] {
+      override def apply(request: String): Future[String] = Future.value {
+        if (Contexts.local.get(RemoteInfo.Upstream.AddressCtx) == Some(mockAddr)) "ok" else "not ok"
+      }
+    }
+
+    val disp = new SerialServerDispatcher(trans, service)
 
     readp.setValue("go")
     verify(trans).write("ok")

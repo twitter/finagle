@@ -9,7 +9,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
  *
  * @tparam A a [[Stack.Parameterized]] client to configure
  *
- * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
+ * @see [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
  */
 class DefaultLoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterized[A]) {
 
@@ -22,7 +22,7 @@ class DefaultLoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    * [[com.twitter.finagle.loadbalancer.Balancers.p2c power of two choices]] algorithm
    * to distribute load across endpoints, while picking the least loaded one.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
    */
   def apply(loadBalancer: LoadBalancerFactory): A =
     self.configured(LoadBalancerFactory.Param(loadBalancer))
@@ -38,7 +38,7 @@ class DefaultLoadBalancingParams[A <: Stack.Parameterized[A]](self: Stack.Parame
    * of its replica set. The client maintains stale entries as long as they are healthy
    * from its perspective.
    *
-   * @see [[http://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
+   * @see [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing]]
    */
   def probation: A =
     self.configured(LoadBalancerFactory.EnableProbation(enable = true))

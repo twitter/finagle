@@ -11,9 +11,11 @@ import com.twitter.util.Duration
  * response, `FailureAccrualFactory` calls `recordSuccess()`. On each failure,
  * `FailureAccrualFactory` calls `markDeadOnFailure()` to obtain the duration
  * to mark the endpoint dead for; (Some(Duration)), or None.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#failure-accrual user guide]]
+ *      for more details.
  */
-trait FailureAccrualPolicy {
-
+abstract class FailureAccrualPolicy {
   /** Invoked by FailureAccrualFactory when a request is successful. */
   def recordSuccess(): Unit
 
@@ -49,7 +51,7 @@ object FailureAccrualPolicy {
    * than the required success rate, `markDeadOnFailure()` will return
    * Some(Duration).
    *
-   * @see com.twitter.finagle.util.Ema for how the succes rate is computed
+   * @see com.twitter.finagle.util.Ema for how the success rate is computed
    *
    * @param requiredSuccessRate successRate that must be met
    *

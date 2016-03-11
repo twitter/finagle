@@ -9,7 +9,6 @@ import com.twitter.util.{Await, Future, NonFatal}
 import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
 import java.nio.file.{Path, Files}
-import org.jboss.netty.buffer._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -97,7 +96,7 @@ class SslTest extends FunSuite {
     def client =
       ClientBuilder()
         .name("http-client")
-        .hosts(server.boundAddress)
+        .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
         .codec(codec)
         .hostConnectionLimit(1)
         .tlsWithoutValidation()

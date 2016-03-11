@@ -7,7 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import org.mockito.Matchers._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 

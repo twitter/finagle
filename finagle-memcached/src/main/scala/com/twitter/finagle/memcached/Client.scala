@@ -892,7 +892,8 @@ private[finagle] class KetamaPartitionedClient(
 
   private case class Node(node: KetamaNode[Client], var state: NodeState.Value)
 
-  private[this] val ketamaNodeGrp: Group[(KetamaClientKey, KetamaNode[Client])] =
+  // exposed for testing
+  private[memcached] val ketamaNodeGrp: Group[(KetamaClientKey, KetamaNode[Client])] =
     cacheNodeGroup.map { node =>
       val key = KetamaClientKey.fromCacheNode(node)
       val underlying = TwemcacheClient(newService(node))
@@ -1046,12 +1047,7 @@ case class KetamaClientBuilder private[memcached](
 
   private def withLocalMemcached = {
     val Name.Bound(va) = localMemcachedName
-    copy(
-      _group = CacheNodeGroup(
-        Group.fromVarAddr(va),
-        useOnlyResolvedAddress = false
-      )
-    )
+    copy(_group = CacheNodeGroup.fromVarAddr(va))
   }
 
   def dest(
@@ -1063,13 +1059,7 @@ case class KetamaClientBuilder private[memcached](
     } else {
       name
     }
-
-    copy(
-      _group = CacheNodeGroup(
-        Group.fromVarAddr(va),
-        useOnlyResolvedAddress = useOnlyResolvedAddress
-      )
-    )
+    copy(_group = CacheNodeGroup.fromVarAddr(va, useOnlyResolvedAddress))
   }
 
   def dest(name: String): KetamaClientBuilder =
@@ -1152,6 +1142,8 @@ case class KetamaClientBuilder private[memcached](
       .statsReceiver.scope(label).scope("memcached_client")
 
     val healthBroker = new Broker[NodeHealth]
+
+    Memcached.registerClient(label, keyHasher.toString, isPipelining = false)
 
     def newService(node: CacheNode) = stackBasedClient
       .configured(Memcached.param.EjectFailedHost(_ejectFailedHost))

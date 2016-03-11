@@ -1,7 +1,7 @@
 package com.twitter.finagle.mux
 
 import org.junit.runner.RunWith
-import org.scalacheck.{Arbitrary, Gen, Shrink}
+import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

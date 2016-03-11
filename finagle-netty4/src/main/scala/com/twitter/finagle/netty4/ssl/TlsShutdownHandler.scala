@@ -1,7 +1,6 @@
 package com.twitter.finagle.netty4.ssl
 
 import java.lang.reflect.Method
-import java.util.logging.Logger
 import javax.net.ssl.SSLException
 import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 

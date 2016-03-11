@@ -1,6 +1,6 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.{SimpleFilter, Filter, Dtab, Service}
+import com.twitter.finagle.{Filter, Dtab, Service}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -41,15 +41,6 @@ class TracingFilterTest
     intercept[Exception] { Await.result(composed(4)) }
     verify(tracer, atLeastOnce()).record(captor.capture())
     captor.getAllValues.asScala
-  }
-
-  test("TracingFilter: should trace Finagle version") {
-    val filter = new TracingFilter[Int, Int](tracer, "tracerTest")
-    val versionKeyFound = record(filter) exists {
-      case Record(_, _, Annotation.BinaryAnnotation(key, _), _) => key == "finagle.version"
-      case _ => false
-    }
-    assert(versionKeyFound, "Finagle version wasn't traced as a binary record")
   }
 
   def testAnnotatingTracingFilter(

@@ -5,7 +5,6 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{DefaultLogger, Updater}
-import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
 import java.net.SocketAddress
@@ -35,8 +34,11 @@ object FailFastFactory {
   val role = Stack.Role("FailFast")
 
   /**
-   * For details on usage see the
+   * For details on why clients see [[FailedFastException]]s see the
    * [[https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s FAQ]]
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#fail-fast user guide]]
+   *      for more details.
    */
   case class FailFast(enabled: Boolean) {
     def mk(): (FailFast, Stack.Param[FailFast]) =
@@ -97,6 +99,9 @@ object FailFastFactory {
  * Inflight attempts to connect will continue uninterrupted. However, trying to
  * connect *after* being marked dead will fail fast until the background process
  * is able to establish a connection.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#fail-fast user guide]]
+ *      for more details.
  */
 private[finagle] class FailFastFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
@@ -104,7 +109,7 @@ private[finagle] class FailFastFactory[Req, Rep](
     timer: Timer,
     label: String,
     logger: Logger = DefaultLogger,
-    endpoint: SocketAddress = unconnected,
+    endpoint: Address = Address.failing,
     backoffs: Stream[Duration] = FailFastFactory.defaultBackoffs)
   extends ServiceFactoryProxy(underlying) {
   import FailFastFactory._

@@ -1,6 +1,5 @@
 package com.twitter.finagle.mux.transport
 
-import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame
 

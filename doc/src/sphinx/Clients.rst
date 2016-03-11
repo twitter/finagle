@@ -561,45 +561,36 @@ The module is implemented by :src:`FailureAccrualFactory <com/twitter/finagle/se
 See :ref:`Failure Accrual Stats <failure_accrual_stats>` for stats exported from the
 ``Failure Accrual`` module.
 
-The ``FailureAccrualFactory`` uses configurable ``FailureAccrualPolicy`` [#experimental]_ to
-determine whether to mark an endpoint dead upon a request failure. At this point, there are two
-setups are available out of the box.
+The ``FailureAccrualFactory`` is configurable in terms of used policy to determine whether to mark
+an endpoint dead upon a request failure. At this point, there are two setups available out of
+the box.
 
 1. A policy based on the requests success rate meaning (i.e, an endpoint marked dead if its success rate
    goes bellow the given threshold)
 2. A policy based on the number of consecutive failures occurred in the endpoint (i.e., an endpoint marked
    dead if there are at least ``N`` consecutive failures occurred in this endpoint)
 
-The default setup for the `Failure Accrual` module is to use ``FailureAccrualPolicy`` based on the
+The default setup for the `Failure Accrual` module is to use a policy based on the
 number of consecutive failures (default is 5) accompanied by equal jittered backoff [#backoff]_ producing
 durations for which an endpoint is marked dead.
 
-Use the following code snippet to override the default configuration of the ``FailureAccrualFactory``.
-
-.. code-block:: scala
-
-  import com.twitter.finagle.Http
-  import com.twitter.finagle.service.exp.FailureAccrualPolicy
-
-  val policy: FailureAccrualPolicy = ???
-  val twitter = Http.client
-    .withSessionQualifier.failureAccrualPolicy(policy)
-    .newService("twitter.com")
-
-Use ``FailureAccrualPolicy.successRate`` to construct an instance of ``FailureAccrualPolicy`` based on
-requests success rate [#example]_.
+Use ``FailureAccrualFactory.Param`` [#experimental]_ to configure Failure Accrual` based on requests
+success rate [#example]_.
 
 .. code-block:: scala
 
   import com.twitter.conversions.time._
-  import com.twitter.finagle.service.Backoff
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
   import com.twitter.finagle.service.exp.FailureAccrualPolicy
 
-  val policy: FailureAccrualPolicy = FailureAccrualPolicy.successRate(
-    requiredSuccessRate = 0.95,
-    window = 100,
-    markDeadFor = Backoff.const(30.seconds)
-  )
+  val twitter = Http.client
+    .configured(FailureAccrual.Param(() => FailureAccrualPolicy.successRate(
+      requiredSuccessRate = 0.95,
+      window = 100,
+      markDeadFor = Backoff.const(10.seconds)
+    )))
+    .newService("twitter.com")
 
 The ``successRate`` factory method takes three arguments:
 
@@ -608,22 +599,25 @@ The ``successRate`` factory method takes three arguments:
 3. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
    dead for
 
-To construct an instance of ``FailureAccrualPolicy`` based on a number of consecutive failures, use the
-``consecutiveFailures`` factory method [#example]_.
+To configure `Failure Accrual` based on a number of consecutive failures [#experimental]_, use the
+following snippet [#example]_.
 
 .. code-block:: scala
 
   import com.twitter.conversions.time._
-  import com.twitter.finagle.service.Backoff
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.service.{Backoff, FailureAccrualFactory}
   import com.twitter.finagle.service.exp.FailureAccrualPolicy
 
-  val policy: FailureAccrualPolicy =
-    FailureAccrualPolicy.consecutiveFailures(
-      consecutiveFailures = 10,
-      markDeadFor = Backoff.const(30.seconds)
-    )
 
-The ``consecutiveFailures`` factory method takes two arguments:
+  val twitter = Http.client
+    .configured(FailureAccrual.Param(() => FailureAccrualPolicy.consecutiveFailures(
+      numFailures = 10,
+      markDeadFor = Backoff.const(10.seconds)
+    )))
+    .newService("twitter.com")
+
+The ``consecutiveFailures`` method takes two arguments:
 
 1. `consecutiveFailures` - the number of failures after which an endpoint is marked dead
 2. `markDeadFor` - the backoff policy (an instance of ``Stream[Duration]``) used to mark an endpoint
@@ -723,120 +717,7 @@ and then slowly decays, based on the TTL.
 
 :ref:`Related stats <pool_stats>`
 
-Response Classification
------------------------
-
-To give Finagle visibility into application level success and failure
-developers can provide classification of responses by using
-:src:`response classifiers <com/twitter/finagle/service/package.scala>`.
-This gives Finagle the proper domain knowledge and improves the efficacy of
-:ref:`failure accrual <client_failure_accrual>` and more accurate
-:ref:`success rate stats <metrics_stats_filter>`.
-
-For HTTP clients, using ``HttpResponseClassifier.ServerErrorsAsFailures`` often works
-great as it classifies any HTTP 5xx response code as a failure. For Thrift/ThriftMux
-clients you may want to use ``ThriftResponseClassifier.ThriftExceptionsAsFailures``
-which classifies any deserialized Thrift Exception as a failure. For a large set of
-use cases these should suffice. Classifiers get wired up to your client in a
-straightforward manner, for example:
-
-.. code-block:: scala
-
-  import com.twitter.finagle.ThriftMux
-  import com.twitter.finagle.thrift.service.ThriftResponseClassifier
-
-  ThriftMux.client
-    ...
-    .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
-
-If a classifier is not specified on a client or if a user's classifier isn't
-defined for a given request/response pair then ``ResponseClassifier.Default``
-is used. This gives us the simple classification rules of responses that are
-``Returns`` are successful and ``Throws`` are failures.
-
-Custom Classifiers
-~~~~~~~~~~~~~~~~~~
-
-Writing a custom classifier requires understanding of the few classes used. A
-``ResponseClassifier`` is a ``PartialFunction`` from ``ReqRep`` to
-``ResponseClass``.
-
-Let's work our way backwards through those, beginning with ``ResponseClass``.
-This can be either ``Successful`` or ``Failed`` and those values are
-self-explanatory. There are three constants which will cover the vast majority
-of usage: ``Success``, ``NonRetryableFailure`` and ``RetryableFailure``. While
-as of today there is no distinction made between retryable and non-retryable
-failures, it was a good opportunity to lay the groundwork for use in the future.
-
-A ``ReqRep`` is a request/response struct with a request of type ``Any`` and a
-response of type ``Try[Any]``. While all of this functionality is called
-response classification, you’ll note that classifiers make judgements on both a
-request and response.
-
-Creating a custom ``ResponseClassifier`` is fairly straightforward for HTTP
-as the ``ReqRep`` is an ``http.Request`` and ``Try[http.Response]`` pair.
-Here is an example that counts HTTP 503s as failures:
-
-.. code-block:: scala
-
-  import com.twitter.finagle.http
-  import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-  import com.twitter.util.Return
-
-  val classifier: ResponseClassifier = {
-    case ReqRep(_, Return(r: http.Response)) if r.statusCode == 503 =>
-      ResponseClass.NonRetryableFailure
-  }
-
-Note that this ``PartialFunction`` isn't total which is ok due to Finagle
-always using user defined classifiers in combination with
-``ResponseClassifier.Default`` which will cover all cases.
-
-Thrift and ThriftMux Classifiers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Thrift and ThriftMux classifiers require a bit more care as the request and
-response types are not as obvious. This is because there is only a single
-``Service`` from ``Array[Byte]`` to ``Array[Byte]`` for all the methods of an
-IDL's service. To make this workable, there is support in Scrooge and
-``Thrift/ThriftMux.newService`` and ``Thrift/ThriftMux.newClient`` code to
-deserialize the responses into the expected application types so that
-classifiers can be written in terms of the Scrooge generated request type,
-``$Service.$Method.Args``, and the method's response type. Given an IDL:
-
-.. code-block:: none
-
-  exception NotFoundException { 1: string reason }
-
-  service SocialGraph {
-    i32 follow(1: i64 follower, 2: i64 followee) throws (1: NotFoundException ex)
-  }
-
-One possible classifier would be:
-
-.. code-block:: scala
-
-  import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
-
-  val classifier: ResponseClassifier = {
-    // #1
-    case ReqRep(_, Throw(_: NotFoundException)) =>
-      ResponseClass.NonRetryableFailure
-
-    // #2
-    case ReqRep(_, Return(x: Int)) if x == 0 =>
-      ResponseClass.NonRetryableFailure
-
-    // #3
-    case ReqRep(SocialGraph.Follow.Args(a, b), _) if a <= 0 =>
-      ResponseClass.NonRetryableFailure
-  }
-
-If you examine that classifier you'll note a few things. First (#1), the
-deserialized ``NotFoundException`` can be treated as a failure. Next (#2), a
-"successful" response can be examined to enable services using status codes to
-classify errors. Lastly (#3), the request can be introspected to make the
-decision.
+.. include:: shared-modules/ResponseClassification.rst
 
 .. rubric:: Footnotes
 

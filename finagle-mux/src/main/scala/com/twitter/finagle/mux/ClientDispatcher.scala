@@ -39,7 +39,7 @@ private[twitter] class ClientDispatcher(trans: Transport[Message, Message])
 
   // outstanding messages, each tagged with a unique int
   // between `MinTag` and `MaxTag`.
-  private[this] val tags = TagSet(Message.MinTag to Message.MaxTag)
+  private[this] val tags = TagSet(Message.Tags.MinTag to Message.Tags.MaxTag)
   private[this] val messages = TagMap[Updatable[Try[Message]]](tags)
 
   private[this] val processAndRead: Message => Future[Unit] =

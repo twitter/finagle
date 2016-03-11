@@ -8,7 +8,7 @@ import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, Resolver, Addr, WeightedInetSocketAddress}
+import com.twitter.finagle.{Group, Resolver, Addr, Address}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
@@ -41,23 +41,29 @@ class TwitterCacheResolver extends Resolver {
     arg.split("!") match {
       // twcache!<host1>:<port>:<weight>:<key>,<host2>:<port>:<weight>:<key>,<host3>:<port>:<weight>:<key>
       case Array(hosts) =>
-        val group = CacheNodeGroup(hosts) map {
-          case node: CacheNode => node: SocketAddress
-        }
-        group.set map { newSet => Addr.Bound(newSet) }
+        CacheNodeGroup(hosts).set.map(toUnresolvedAddr)
 
       // twcache!zkhost:2181!/twitter/service/cache/<stage>/<name>
       case Array(zkHosts, path) =>
         val zkClient = DefaultZkClientFactory.get(DefaultZkClientFactory.hostSet(zkHosts))._1
         val group = CacheNodeGroup.newZkCacheNodeGroup(
-          path, zkClient, ClientStatsReceiver.scope(scheme).scope(path)
-        ) map { case c: CacheNode => c: SocketAddress }
-        group.set map { newSet => Addr.Bound(newSet) }
+          path, zkClient, ClientStatsReceiver.scope(scheme).scope(path))
+        group.set.map(toUnresolvedAddr)
 
       case _ =>
         throw new TwitterCacheResolverException(
           "Invalid twcache format \"%s\"".format(arg))
     }
+  }
+
+  private def toUnresolvedAddr(g: Set[CacheNode]): Addr = {
+    val set: Set[Address] = g.map {
+      case CacheNode(host, port, weight, key) =>
+        val ia = InetSocketAddress.createUnresolved(host, port)
+        val metadata = CacheNodeMetadata(weight, key)
+        Address.Inet(ia, CacheNodeMetadata.toAddrMetadata(metadata))
+    }
+    Addr.Bound(set)
   }
 }
 
@@ -82,16 +88,13 @@ object CacheNodeGroup {
 
   def apply(group: Group[SocketAddress], useOnlyResolvedAddress: Boolean = false) = group collect {
     case node: CacheNode => node
-
-    // TODO: should we use the weights propagated here? The weights passed
-    // by WeightedInetSocketAddress are doubles -- should we discretize these?
-    case WeightedInetSocketAddress(ia, weight)
-    if useOnlyResolvedAddress && !ia.isUnresolved =>
+    // Note: we ignore weights here
+    case ia: InetSocketAddress if useOnlyResolvedAddress && !ia.isUnresolved =>
       //Note: unresolvedAddresses won't be added even if they are able
       // to be resolved after added
-      new CacheNode(ia.getHostName, ia.getPort, 1,
-        Some(ia.getAddress.getHostAddress + ":" + ia.getPort))
-    case WeightedInetSocketAddress(ia, weight) if !useOnlyResolvedAddress =>
+      val key = ia.getAddress.getHostAddress + ":" + ia.getPort
+      new CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+    case ia: InetSocketAddress if !useOnlyResolvedAddress =>
       new CacheNode(ia.getHostName, ia.getPort, 1, None)
   }
 
@@ -100,6 +103,22 @@ object CacheNodeGroup {
   def newZkCacheNodeGroup(
     path: String, zkClient: ZooKeeperClient, statsReceiver: StatsReceiver = NullStatsReceiver
   ) = new ZookeeperCacheNodeGroup(zkPath = path, zkClient = zkClient, statsReceiver = statsReceiver)
+
+  private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) = new Group[CacheNode] {
+    protected[finagle] val set: Var[Set[CacheNode]] = va map {
+      case Addr.Bound(addrs, _) =>
+        addrs.collect {
+          case Address.Inet(ia, CacheNodeMetadata(weight, key)) =>
+            CacheNode(ia.getHostName, ia.getPort, weight, key)
+          case Address.Inet(ia, _) if useOnlyResolvedAddress && !ia.isUnresolved =>
+            val key = ia.getAddress.getHostAddress + ":" + ia.getPort
+            CacheNode(ia.getHostName, ia.getPort, 1, Some(key))
+          case Address.Inet(ia, _) if !useOnlyResolvedAddress=>
+            CacheNode(ia.getHostName, ia.getPort, 1, None)
+        }
+      case _ => Set[CacheNode]()
+    }
+  }
 }
 
 /**

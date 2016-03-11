@@ -98,6 +98,11 @@ object TimeoutFilter {
  * @param timeout the timeout to apply to requests
  * @param exception an exception object to return in cases of timeout exceedance
  * @param timer a `Timer` object used to track elapsed time
+ *
+ * @see The sections on
+ *      [[https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration clients]]
+ *      and [[https://twitter.github.io/finagle/guide/Servers.html#request-timeout servers]]
+ *      in the user guide for more details.
  */
 class TimeoutFilter[Req, Rep](
     timeout: Duration,
@@ -112,7 +117,7 @@ class TimeoutFilter[Req, Rep](
 
     // If there's a current deadline, we combine it with the one derived
     // from our timeout.
-    val deadline = Contexts.broadcast.get(Deadline) match {
+    val deadline = Deadline.current match {
       case Some(current) =>
         Deadline.combined(timeoutDeadline, current)
       case None => timeoutDeadline

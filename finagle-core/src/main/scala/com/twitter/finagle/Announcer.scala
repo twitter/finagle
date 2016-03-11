@@ -40,7 +40,7 @@ class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer
  * Indicates that a forum string passed to an [[com.twitter.finagle.Announcer]]
  * was invalid according to the forum grammar [1].
  *
- * [1] http://twitter.github.io/finagle/guide/Names.html
+ * [1] https://twitter.github.io/finagle/guide/Names.html
  */
 class AnnouncerForumInvalid(forum: String)
   extends Exception("Announcer forum \"%s\" is not valid".format(forum))

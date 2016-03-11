@@ -2,16 +2,16 @@ package com.twitter.finagle.client
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
+import com.twitter.finagle.Address.failing
 import com.twitter.finagle.dispatch.SerialClientDispatcher
-import com.twitter.finagle.service.{ResponseClassifier, Backoff, FailureAccrualFactory}
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
-import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
-import com.twitter.util.TimeConversions.intToTimeableNumber
+import com.twitter.finagle.service.{ResponseClassifier, Backoff, FailureAccrualFactory}
 import com.twitter.finagle.stats.{StatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.finagle.util.DefaultLogger
-import com.twitter.finagle.util.InetSocketAddressUtil.unconnected
-import java.net.SocketAddress
+import com.twitter.util.TimeConversions.intToTimeableNumber
+import com.twitter.util.{Await, Future, MockTimer, Time, Var, Closable, Return}
+import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
@@ -48,9 +48,9 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
   trait ServiceHelper { self: QueueTransportHelper with DispatcherHelper =>
     val endPointer = Bridge[Int, Int, Int, Int](transporter, dispatcher)
     val name = "name"
-    val socket = new SocketAddress() {}
+    val socket = new InetSocketAddress(0)
     val client: Client[Int, Int]
-    lazy val service: Service[Int, Int] = client.newService(Name.bound(socket), name)
+    lazy val service: Service[Int, Int] = client.newService(Name.bound(Address(socket)), name)
   }
 
   trait BaseClientHelper extends ServiceHelper { self: QueueTransportHelper with DispatcherHelper =>
@@ -184,7 +184,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
     new DefaultClientHelper {
       @volatile var closed = false
 
-      val dest = Name.Bound.singleton(Var.async(Addr.Bound(Seq.empty[SocketAddress]: _*)) { _ =>
+      val dest = Name.Bound.singleton(Var.async(Addr.Bound(Seq.empty[Address]: _*)) { _ =>
         Closable.make { _ =>
           closed = true
           Future.Done
@@ -253,7 +253,7 @@ class DefaultClientTest extends FunSuite with Eventually with IntegrationPatienc
             FailureAccrualPolicy.consecutiveFailures(6, Backoff.const(3.seconds)),
             name,
             DefaultLogger,
-            unconnected,
+            failing,
             ResponseClassifier.Default)(
             timer) andThen factory
         }

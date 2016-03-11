@@ -2,12 +2,11 @@ package com.twitter.finagle.addr
 
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.finagle.builder.Cluster
-import com.twitter.finagle.Addr
+import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.util.{Future, Time, Timer, Duration, Var}
 import scala.collection.immutable.Queue
-import java.net.SocketAddress
 
 private[finagle] object StabilizingAddr {
   private[finagle/*(testing*/] object State extends Enumeration {
@@ -60,9 +59,9 @@ private[finagle] object StabilizingAddr {
      * transition resets the grace period.
      */
     def loop(
-        remq: Queue[(SocketAddress, Time)],
+        remq: Queue[(Address, Time)],
         h: Health,
-        active: Set[SocketAddress],
+        active: Set[Address],
         needPush: Boolean,
         srcAddr: Addr): Future[Unit] = {
       nq = remq.size

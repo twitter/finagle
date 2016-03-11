@@ -35,7 +35,8 @@ class ClientBuilderTest extends FunSuite
       preparedFactory.asInstanceOf[ServiceFactory[Any, Nothing]]
 
     val m = new MockChannel
-    when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenReturn preparedFactory
+    when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]], any[Stack.Params]))
+      .thenReturn(preparedFactory)
   }
 
   test("ClientBuilder should invoke prepareConnFactory on connection") {
@@ -43,7 +44,7 @@ class ClientBuilderTest extends FunSuite
       val client = m.build()
       val requestFuture = client("123")
 
-      verify(m.codec).prepareConnFactory(any[ServiceFactory[String, String]])
+      verify(m.codec).prepareConnFactory(any[ServiceFactory[String, String]], any[Stack.Params])
       verify(preparedFactory)()
 
       assert(!requestFuture.isDefined)

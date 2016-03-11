@@ -19,7 +19,7 @@ class ContextFilterTest extends FunSuite {
       new ClientContextFilter[Request, Response] andThen
       new ServerContextFilter[Request, Response] andThen
       Service.mk[Request, Response] { req =>
-        assert(Contexts.broadcast.get(Deadline).get == writtenDeadline)
+        assert(Deadline.current.get == writtenDeadline)
         Future.value(Response())
       }
 
@@ -30,7 +30,7 @@ class ContextFilterTest extends FunSuite {
       // Clear the deadline value in the context
       Contexts.broadcast.letClear(Deadline) {
         // ensure the deadline was cleared
-        assert(Contexts.broadcast.get(Deadline) == None)
+        assert(Deadline.current == None)
 
         val rsp = Await.result(service(req))
         assert(rsp.status == Status.Ok)

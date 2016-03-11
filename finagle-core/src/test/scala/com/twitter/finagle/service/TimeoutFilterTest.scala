@@ -68,7 +68,7 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
 
   class DeadlineCtx(val timeout: Duration) {
     val service = new Service[Unit, Option[Deadline]] {
-      def apply(req: Unit) = Future.value(Contexts.broadcast.get(Deadline))
+      def apply(req: Unit) = Future.value(Deadline.current)
     }
 
     val timer = new MockTimer

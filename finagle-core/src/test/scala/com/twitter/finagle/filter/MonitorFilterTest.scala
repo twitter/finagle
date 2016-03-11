@@ -1,18 +1,18 @@
 package com.twitter.finagle.filter
 
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import org.scalatest.mock.MockitoSugar
-import org.mockito.{Matchers, Mockito}
-import org.mockito.Matchers._
-import org.mockito.Mockito.{times, verify, when}
-import com.twitter.finagle.{ServiceFactory, ChannelException, SourcedException, Service, Status}
+import com.twitter.finagle._
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.integration.{StringCodec, IntegrationBase}
 import com.twitter.util._
-import java.util.logging.{Level, StreamHandler, Logger}
 import java.net.{InetAddress, InetSocketAddress}
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import java.util.logging.{Level, StreamHandler, Logger}
+import org.junit.runner.RunWith
+import org.mockito.Matchers._
+import org.mockito.Mockito.{times, verify, when}
+import org.mockito.{Matchers, Mockito}
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase {
@@ -90,7 +90,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     // that sits on top of "service". Therefore we need to create a client to initiates the requests.
     val client = ClientBuilder()
       .codec(StringCodec)
-      .hosts(Seq(server.boundAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()
 
@@ -125,7 +125,7 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
     when(preparedFactory.status) thenReturn(Status.Open)
 
     val m = new MockChannel
-    when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]])) thenReturn preparedFactory
+    when(m.codec.prepareConnFactory(any[ServiceFactory[String, String]], any[Stack.Params])) thenReturn preparedFactory
 
     val client = m.clientBuilder
       .monitor(_ => monitor)

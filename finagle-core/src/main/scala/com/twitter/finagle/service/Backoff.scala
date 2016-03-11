@@ -150,7 +150,12 @@ object Backoff {
   def constant(start: Duration): Stream[Duration] = const(start)
 
   /** See [[constant]] for a Java friendly API */
-  def const(start: Duration): Stream[Duration] = Stream.continually(start)
+  def const(start: Duration): Stream[Duration] = {
+    // We don't want to allocate a new cons on each element in the infinite
+    // stream as it's done in Stream.continually so we reuse it.
+    lazy val self: Stream[Duration] = Stream.cons(start, self)
+    self
+  }
 
   /**
    * Create backoffs with values produced by a given generation function.

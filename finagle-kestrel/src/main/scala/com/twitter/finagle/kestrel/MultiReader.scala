@@ -2,7 +2,7 @@ package com.twitter.finagle.kestrel
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Group, Name, ServiceFactory}
+import com.twitter.finagle.{Addr, Address, Group, Name, ServiceFactory}
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
@@ -516,16 +516,16 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
     }
 
     // Use a mutable Map so that we can modify it in-place on cluster change.
-    val currentHandles = mutable.Map.empty[SocketAddress, ReadHandle]
+    val currentHandles = mutable.Map.empty[Address, ReadHandle]
 
     val event = config.va.changes map {
-      case Addr.Bound(socketAddrs, _) => {
-        (currentHandles.keySet &~ socketAddrs) foreach { socketAddr =>
-          logger.info(s"Host ${socketAddr} left for reading queue ${config.queueName}")
+      case Addr.Bound(addrs, _) => {
+        (currentHandles.keySet &~ addrs) foreach { addr =>
+          logger.info(s"Host ${addr} left for reading queue ${config.queueName}")
         }
-        val newHandles = (socketAddrs &~ currentHandles.keySet) map { socketAddr =>
+        val newHandles = (addrs &~ currentHandles.keySet) map { addr =>
           val factory = baseClientBuilder
-            .hosts(socketAddr)
+            .addrs(addr)
             .buildFactory()
 
           val client = createClient(factory)
@@ -537,18 +537,18 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
           }
 
           handle.error foreach { case NonFatal(cause) =>
-            logger.warning(s"Closing service factory for address: ${socketAddr}")
+            logger.warning(s"Closing service factory for address: ${addr}")
             factory.close()
           }
 
-          logger.info(s"Host ${socketAddr} joined for reading ${config.queueName} " +
+          logger.info(s"Host ${addr} joined for reading ${config.queueName} " +
             s"(handle = ${_root_.java.lang.System.identityHashCode(handle)}).")
 
-          (socketAddr, handle)
+          (addr, handle)
         }
 
         synchronized {
-          currentHandles.retain { case (addr, _) => socketAddrs.contains(addr) }
+          currentHandles.retain { case (addr, _) => addrs.contains(addr) }
           currentHandles ++= newHandles
         }
 

@@ -1,7 +1,7 @@
 package com.twitter.finagle.service;
 
 import com.twitter.util.Duration;
-import com.twitter.util.Stopwatch$;
+import com.twitter.util.Stopwatches;
 
 /**
  * Java APIs for {@link RetryBudget}.
@@ -41,7 +41,7 @@ public final class RetryBudgets {
         ttl,
         minRetriesPerSec,
         percentCanRetry,
-        Stopwatch$.MODULE$.systemMillis());
+        Stopwatches.systemMillis());
   }
 
 }

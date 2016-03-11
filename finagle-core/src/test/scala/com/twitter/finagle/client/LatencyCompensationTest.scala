@@ -6,6 +6,7 @@ import com.twitter.finagle.service.TimeoutFilter
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle._
 import com.twitter.util._
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -103,7 +104,8 @@ class LatencyCompensationTest
      */
     def whileConnected(echoClient: Echo.Client)(f: Service[String, String] => Unit): Unit = {
       val server = Echo.serve("127.1:0", service)
-      val addr = Addr.Bound(Set(server.boundAddress), metadata)
+      val ia = server.boundAddress.asInstanceOf[InetSocketAddress]
+      val addr = Addr.Bound(Set[Address](Address(ia)), metadata)
       val client = echoClient.newService(Name.Bound(Var.value(addr), "id"), "label")
 
       try f(client)

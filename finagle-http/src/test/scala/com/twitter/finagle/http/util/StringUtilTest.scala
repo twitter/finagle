@@ -24,4 +24,19 @@ class StringUtilTest extends FunSuite {
     assert(StringUtil.toSomeLong("blarg") == 0L)
     assert(StringUtil.toSomeLong("1000000000000000000000") == 0L)
   }
+
+  test("toBoolean") {
+    assert(StringUtil.toBoolean("0") == false)
+    assert(StringUtil.toBoolean("blarg") == false)
+    assert(StringUtil.toBoolean("10") == false)
+    assert(StringUtil.toBoolean("false") == false)
+    assert(StringUtil.toBoolean("trues") == false)
+    assert(StringUtil.toBoolean("tr") == false)
+    assert(StringUtil.toBoolean("1") == true)
+    assert(StringUtil.toBoolean("t") == true)
+    assert(StringUtil.toBoolean("true") == true)
+    assert(StringUtil.toBoolean("T") == true)
+    assert(StringUtil.toBoolean("True") == true)
+    assert(StringUtil.toBoolean("TRUE") == true)
+  }
 }

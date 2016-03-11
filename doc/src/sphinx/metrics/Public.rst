@@ -20,9 +20,13 @@ StatsFilter
 
 **failures/<exception_name>+**
   A counter of the number of times a specific exception has been thrown.
+  If you are using a ``ResponseClassifier`` that classifies non-Exceptions
+  as failures, it will use a synthetic Exception,
+  ``com.twitter.finagle.service.ResponseClassificationSyntheticException``,
+  to account for these.
 
 **failures**
-  A counter of the number of times any exception has been thrown.
+  A counter of the number of times any failure has been observed.
 
 **sourcedfailures/<source_service_name>{/<exception_name>}+**
   A counter of the number of times a specific
@@ -89,3 +93,12 @@ RequestSemaphoreFilter
 **request_queue_size**
   A gauge of the total number of requests which are waiting because of the limit
   on simultaneous requests.
+
+PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+**request_payload_bytes**
+  A histogram of the number of bytes per request's payload.
+
+**response_payload_bytes**
+  A histogram of the number of bytes per response's payload.
