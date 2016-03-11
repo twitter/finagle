@@ -141,6 +141,10 @@ object Commands {
   val PFCOUNT           = "PFCOUNT"
   val PFMERGE           = "PFMERGE"
 
+  // Scripts
+  val EVAL              = "EVAL"
+  val EVALSHA           = "EVALSHA"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -265,7 +269,11 @@ object Commands {
     // HyperLogLogs
     PFADD             -> {PFAdd(_)},
     PFCOUNT           -> {PFCount(_)},
-    PFMERGE           -> {PFMerge(_)}
+    PFMERGE           -> {PFMerge(_)},
+
+    // Scripts
+    EVAL              -> {Eval(_)},
+    EVALSHA           -> {EvalSha(_)}
 
   )
 
@@ -410,6 +418,10 @@ object CommandBytes {
   val PFADD             = StringToChannelBuffer("PFADD")
   val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
   val PFMERGE           = StringToChannelBuffer("PFMERGE")
+
+  // Script
+  val EVAL              = StringToChannelBuffer("EVAL")
+  val EVALSHA           = StringToChannelBuffer("EVALSHA")
 }
 
 
@@ -439,11 +451,23 @@ class CommandCodec extends UnifiedProtocolCodec {
   }
 
   def decodeInlineRequest(c: Char) = readLine { line =>
-    val listOfArrays = (c + line).split(' ').toList.map {
+    val listOfArrays = splitUp(c + line).toList.map {
       args => args.getBytes(Charsets.Utf8)
     }
     val cmd = commandDecode(listOfArrays)
     emit(cmd)
+  }
+
+  private[this] def splitUp(string: String): Seq[String] = {
+    val parts = string.split('"')
+    if (parts.length > 1) {
+      val head = parts.head
+      val last = parts.tail.last
+      val middle = parts.tail.init
+      (head.split(" ") ++ middle ++ last.split(" ")).filter(_.nonEmpty)
+    } else {
+      string.split(" ")
+    }
   }
 
   def commandDecode(lines: List[Array[Byte]]): Command = {
