@@ -52,8 +52,8 @@
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><p>Please see the
-<a href="http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6" target="_blank">Finagle user guide</a>
-for information on a newer set of client-construction APIs introduced in Finagle v6.</p><pre><span class="kw">val</span> client = ClientBuilder()
+<a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
+for information on the preferred <code>with</code>-style client-construction APIs.</p><pre><span class="kw">val</span> client = ClientBuilder()
   .codec(Http)
   .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
   .hostConnectionLimit(<span class="num">1</span>)
@@ -87,7 +87,8 @@ affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    <a href="http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE" target="_blank">Java default</a>
    of <code>false</code> is used</li><li><code>readerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>writerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>sendBufferSize</code>, <code>recvBufferSize</code>: OS-defined default value
-</li></ul></div><div class="toggleContainer block">
+</li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
+     for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -237,6 +238,29 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#addrs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addrs(addrs:com.twitter.finagle.Address*):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
+      <a id="addrs(Address*):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addrs</span><span class="params">(<span name="addrs">addrs: <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>*</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@addrs(addrs:com.twitter.finagle.Address*):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A convenience method for specifying a client with one or more
+<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">com.twitter.finagle.Address</a>s.</p><div class="fullcomment"><div class="comment cmt"><p>A convenience method for specifying a client with one or more
+<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">com.twitter.finagle.Address</a>s.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@varargs</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -599,6 +623,48 @@ power-of-twos may be faster due to the use of modular
 arithmetic.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This will be integrated into the mainline pool, at
 which time the experimental option will go away.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#expHttpProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="expHttpProxy(hostName:String,port:Int):ClientBuilder.this.This"></a>
+      <a id="expHttpProxy(String,Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">expHttpProxy</span><span class="params">(<span name="hostName">hostName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@expHttpProxy(hostName:String,port:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Make connections via the given HTTP proxy by host name and port.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given HTTP proxy by host name and port.
+The host name is resolved every transport connection.
+This API is experiment.
+If this is defined concurrently with socksProxy, the order in which they are applied is undefined.
+</p></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#expSocksProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="expSocksProxy(hostName:String,port:Int):ClientBuilder.this.This"></a>
+      <a id="expSocksProxy(String,Int):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">expSocksProxy</span><span class="params">(<span name="hostName">hostName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@expSocksProxy(hostName:String,port:Int):ClientBuilder.this.This" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Make connections via the given HTTP proxy by host name and port.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given HTTP proxy by host name and port.
+The host name is resolved every transport connection.
+This API is experiment.
+If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
+</p></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#failFast" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="failFast(enabled:Boolean):ClientBuilder.this.This"></a>
       <a id="failFast(Boolean):This"></a>
@@ -843,41 +909,41 @@ connections than this limit.
     </span>
       <p class="shortcomment cmt">The maximum queue size for the connection pool.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="hosts(address:java.net.SocketAddress):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
-      <a id="hosts(SocketAddress):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
+      <a id="hosts(address:java.net.InetSocketAddress):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
+      <a id="hosts(InetSocketAddress):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hosts</span><span class="params">(<span name="address">address: <span class="extype" name="java.net.SocketAddress">SocketAddress</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
+        <span class="name">hosts</span><span class="params">(<span name="address">address: <span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hosts(address:java.net.SocketAddress):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hosts(address:java.net.InetSocketAddress):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">A convenience method for specifying a one-host
 <span class="extype" name="java.net.SocketAddress">java.net.SocketAddress</span> client.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="hosts(addrs:Seq[java.net.SocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
-      <a id="hosts(Seq[SocketAddress]):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
+      <a id="hosts(sockaddrs:Seq[java.net.InetSocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
+      <a id="hosts(Seq[InetSocketAddress]):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hosts</span><span class="params">(<span name="addrs">addrs: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
+        <span class="name">hosts</span><span class="params">(<span name="sockaddrs">sockaddrs: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="java.net.InetSocketAddress">InetSocketAddress</span>]</span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>, <a href="ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasCodec">HasCodec</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.HasHostConnectionLimit">HasHostConnectionLimit</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hosts(addrs:Seq[java.net.SocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@hosts(sockaddrs:Seq[java.net.InetSocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A variant of {{hosts}} that takes a sequence of
-<span class="extype" name="java.net.SocketAddress">java.net.SocketAddress</span> instead.</p>
+      <p class="shortcomment cmt">A variant of <code>hosts</code> that takes a sequence of
+<span class="extype" name="java.net.InetSocketAddress">java.net.InetSocketAddress</span> instead.</p>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hosts(hostnamePortCombinations:String):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
       <a id="hosts(String):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
@@ -896,8 +962,8 @@ connections than this limit.
     </span>
       <p class="shortcomment cmt">Specify the set of hosts to connect this client to.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the set of hosts to connect this client to.  Requests
 will be load balanced across these.  This is a shorthand form for
-specifying a cluster.</p><p>One of the {{hosts}} variations or direct specification of the
-cluster (via {{cluster}}) is required.
+specifying a cluster.</p><p>One of the <code>hosts</code> variations or direct specification of the
+cluster (via <code>cluster</code>) is required.
 </p></div><dl class="paramcmts block"><dt class="param">hostnamePortCombinations</dt><dd class="cmt"><p>comma-separated &quot;host:port&quot;
 string.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#httpProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1270,7 +1336,9 @@ code back from a server. To Finagle this is a successful request/response
 based solely on the transport level. The application developer may want to
 treat all 500 status codes as failures and can do so via a
 <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.</p><p>It is a <span class="extype" name="PartialFunction">PartialFunction</span> and as such multiple classifiers can be composed
-together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.
+together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.</p><p>Response classification is independently configured on the client and server.
+For server-side response classification using <a href="ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">com.twitter.finagle.builder.ServerBuilder</a>,
+see <a href="ServerBuilder.html#responseClassifier:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder#responseClassifier">com.twitter.finagle.builder.ServerBuilder.responseClassifier</a>
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
 <a href="../service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
 which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some

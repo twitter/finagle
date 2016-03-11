@@ -346,7 +346,8 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">A convenience method for creating <code>Services</code> from a <code>Function1</code> of
+<code>Req</code> to a <code>Future[Rep]</code>.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -414,9 +415,8 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Wrap an underlying service such that any synchronously thrown exceptions are lifted into
-Future.exception
-</p>
+      <p class="shortcomment cmt">Wrap the given service such that any synchronously thrown <code>NonFatal</code>
+exceptions are lifted into <code>Future.exceptions</code>.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

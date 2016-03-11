@@ -54,7 +54,7 @@ of a session. Some of these act as
 <a href=" https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern">circuit breakers</a>,
 instructing the load balancer to choose alternate paths. Effectively these enable your
 client to maintain higher success rates.
-</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>a <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Stack.Parameterized</a> client to configure</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a></p></span></dd></dl><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>a <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Stack.Parameterized</a> client to configure</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -244,34 +244,6 @@ client to maintain higher success rates.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.param.SessionQualificationParams#failureAccrualPolicy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="failureAccrualPolicy(policy:com.twitter.finagle.service.exp.FailureAccrualPolicy):A"></a>
-      <a id="failureAccrualPolicy(FailureAccrualPolicy):A"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">failureAccrualPolicy</span><span class="params">(<span name="policy">policy: <a href="../service/exp/FailureAccrualPolicy.html" class="extype" name="com.twitter.finagle.service.exp.FailureAccrualPolicy">FailureAccrualPolicy</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.SessionQualificationParams.A">A</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.param.SessionQualificationParams@failureAccrualPolicy(policy:com.twitter.finagle.service.exp.FailureAccrualPolicy):A" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Configures the Failure Accrual module of this client with given
-<span class="extype" name="FailureAccrualPolicy">policy</span> (default: mark an endpoint dead after
-5 consecutive failures).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the Failure Accrual module of this client with given
-<span class="extype" name="FailureAccrualPolicy">policy</span> (default: mark an endpoint dead after
-5 consecutive failures).</p><p>The Failure Accrual module is a Finagle per-request circuit breaker. It marks a
-host unavailable depending on the used <span class="extype" name="FailureAccrualPolicy">policy</span>. The default
-setup for the Failure Accrual module is to use a policy based on the number of
-consecutive failures (default is 5) accompanied by equal jittered backoff
-producing durations for which a host is marked unavailable.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a>
-     <a href="http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a>
-     <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -382,8 +354,8 @@ producing durations for which a host is marked unavailable.
       <p class="shortcomment cmt">Disables the Fail Fast module on this client (default: enabled).</p><div class="fullcomment"><div class="comment cmt"><p>Disables the Fail Fast module on this client (default: enabled).</p><p>The Fail Fast module is a Finagle per-session circuit breaker. It marks a host
 unavailable upon connection failure. The host remains dead until we successfully connect.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Usually, it's a good idea to disable Fail Fast for server sets with only
-      one host in the load balancer's replica set.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#fail-fast" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#fail-fast</a>
-     <a href="http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a>
+      one host in the load balancer's replica set.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#fail-fast" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#fail-fast</a>
+     <a href="https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a>
      <span class="extype" name="FailFastFactory">FailFastFactory</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.SessionQualificationParams#noFailureAccrual" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="noFailureAccrual:A"></a>
@@ -406,8 +378,9 @@ host unavailable depending on the used <span class="extype" name="FailureAccrual
 setup for the Failure Accrual module is to use a policy based on the number of
 consecutive failures (default is 5) accompanied by equal jittered backoff
 producing durations for which a host is marked unavailable.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a>
-     <a href="http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a>
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Configuring Failure Accrual is experimental so <code>.configured</code> with
+      <code>FailureAccrualFactory.Param</code> should be used to do that.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#failure-accrual</a>
+     <a href="https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#circuit-breaking</a>
      <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>

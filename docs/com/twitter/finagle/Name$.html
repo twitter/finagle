@@ -260,18 +260,18 @@ the current request-local delegation table.</p>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Name#bound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="bound(addrs:java.net.SocketAddress*):com.twitter.finagle.Name.Bound"></a>
-      <a id="bound(SocketAddress*):Bound"></a>
+      <a id="bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound"></a>
+      <a id="bound(Address*):Bound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bound</span><span class="params">(<span name="addrs">addrs: <span class="extype" name="java.net.SocketAddress">SocketAddress</span>*</span>)</span><span class="result">: <a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>
+        <span class="name">bound</span><span class="params">(<span name="addrs">addrs: <a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>*</span>)</span><span class="result">: <a href="Name$$Bound.html" class="extype" name="com.twitter.finagle.Name.Bound">Bound</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Name$@bound(addrs:java.net.SocketAddress*):com.twitter.finagle.Name.Bound" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Name$@bound(addrs:com.twitter.finagle.Address*):com.twitter.finagle.Name.Bound" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -392,8 +392,9 @@ the current request-local delegation table.</p>
       <p class="shortcomment cmt">Create a name from a group.</p><div class="fullcomment"><div class="comment cmt"><p>Create a name from a group.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Full Addr semantics cannot be recovered from Group. We
 take a conservative approach here: we will only provide bound
-addresses. Empty sets could indicate either pending or negative
-resolutions.</p></span></dd></dl></div>
+and failed addresses. Empty sets could indicate either pending or
+negative resolutions. A failed address is only returned if the Group
+contains a <span class="extype" name="SocketAddress">SocketAddress</span> that is not an <span class="extype" name="InetSocketAddress">InetSocketAddress</span>.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>

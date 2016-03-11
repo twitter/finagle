@@ -51,12 +51,14 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A standard template implementation for
 <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">com.twitter.finagle.server.StackServer</a>.
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</dd></dl><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</dd><dt>See also</dt><dd><span class="cmt"><p><a href="StackServer$.html#newStack[Req,Rep]:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]" class="extmbr" name="com.twitter.finagle.server.StackServer#newStack">StackServer.newStack</a> for the default modules used by Finagle
+     servers.</p></span><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Servers.html" target="_blank">user guide</a>
+     for further details on Finagle servers and their configuration.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="../param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="../param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <a href="StackBasedServer.html" class="extype" name="com.twitter.finagle.server.StackBasedServer">StackBasedServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>], <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">Server</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="../Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></div>
+            <div class="subClasses hiddenContent"><a href="../Thrift$$Server.html" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a>, <a href="../Http$$Server.html" class="extype" name="com.twitter.finagle.Http.Server">Server</a>, <a href="../Memcached$$Server.html" class="extype" name="com.twitter.finagle.Memcached.Server">Server</a>, <a href="../Mux$$Server.html" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>, <a href="../ThriftMux$$ServerMuxer.html" class="extype" name="com.twitter.finagle.ThriftMux.ServerMuxer">ServerMuxer</a></div>
           </div></div>
         
 
@@ -927,7 +929,40 @@ between the dispatch of the request and the receipt of the response.</p><h4> Ser
 spend handling the incoming request. Using the Finagle terminology, this is an amount
 of time after which a non-satisfied future returned from the user-defined service
 times out.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withResponseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withResponseClassifier(responseClassifier:com.twitter.finagle.service.ResponseClassifier):A"></a>
+      <a id="withResponseClassifier(ResponseClassifier):This"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withResponseClassifier</span><span class="params">(<span name="responseClassifier">responseClassifier: <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.StdStackServer@withResponseClassifier(responseClassifier:com.twitter.finagle.service.ResponseClassifier):A" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configure a <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
+which is used to determine the result of a request/response.</p><div class="fullcomment"><div class="comment cmt"><p>Configure a <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
+which is used to determine the result of a request/response.</p><p>This allows developers to give Finagle the additional application-specific
+knowledge necessary in order to properly classify responses. Without this,
+Finagle cannot make judgements about application-level failures as it only
+has a narrow understanding of failures (for example: transport level, timeouts,
+and nacks).</p><p>As an example take an HTTP server that returns a response with a 500 status
+code. To Finagle this is a successful request/response. However, the application
+developer may want to treat all 500 status codes as failures and can do so via
+setting a <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.</p><p>ResponseClassifier is a <span class="extype" name="PartialFunction">PartialFunction</span> and as such multiple classifiers can
+be composed together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.</p><p>Response classification is independently configured on the client and server.
+For client-side response classification using <a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">com.twitter.finagle.builder.ClientBuilder</a>,
+see <code>com.twitter.finagle.builder.ClientBuilder.responseClassifier</code>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
+<a href="../service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
+which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="../http/service/HttpResponseClassifier$.html" class="extype" name="com.twitter.finagle.http.service.HttpResponseClassifier">com.twitter.finagle.http.service.HttpResponseClassifier</a> for some
+HTTP classification tools.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>
       <a id="withStack(Stack[ServiceFactory[Req,Rep]]):This"></a>

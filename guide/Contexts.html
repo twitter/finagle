@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Contexts &mdash; Finagle 6.34.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '6.34.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
+    <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
+    <link rel="prev" title="Clients" href="Clients.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-39101739-4', 'twitter.github.io');
+    ga('send', 'pageview');
+
+  </script>
+
+  </head>
+  <body>
+  
+  
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Names.html" title="Names and Naming in Finagle"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Clients.html" title="Clients"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Finagle</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="contexts">
+<h1>Contexts<a class="headerlink" href="#contexts" title="Permalink to this headline">¶</a></h1>
+<p>Finagle uses <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala">Contexts</a>, which give you something akin to Java&#8217;s <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html">ThreadLocals</a>
+across <a class="reference internal" href="Futures.html"><em>asynchronous</em></a> code.
+They give you access to request-scoped state, such as a request&#8217;s deadline,
+throughout the logical life of a request without requiring them to be explicitly passed.
+Finagle explicitly manages them for you across threads and execution
+contexts such as <tt class="docutils literal"><span class="pre">Future</span></tt> composition, <tt class="docutils literal"><span class="pre">FuturePools</span></tt>, <tt class="docutils literal"><span class="pre">Timers</span></tt>,
+and in some cases — across the client/server boundary.</p>
+<p>Contexts can be either <em>local</em> or <em>broadcast</em>.
+Local contexts do not cross process boundaries while broadcast
+contexts may be marshalled and transmitted across process boundaries.</p>
+<p>Most <tt class="docutils literal"><span class="pre">Context</span></tt> usage is hidden behind other APIs, which means you may not
+realize you are using this functionality. This example shows how a <tt class="docutils literal"><span class="pre">ClientId</span></tt>
+is available within <tt class="docutils literal"><span class="pre">Timer</span></tt> functions:</p>
+<div class="highlight-scala"><pre>scala&gt; import com.twitter.conversions.time._, com.twitter.finagle.thrift.ClientId, com.twitter.finagle.util.HashedWheelTimer, com.twitter.util.{Await, Future}
+import com.twitter.conversions.time._
+import com.twitter.finagle.thrift.ClientId
+import com.twitter.finagle.util.HashedWheelTimer
+import com.twitter.util.{Await, Future}
+
+scala&gt; val aClientId = ClientId("test-client") // Create a ClientId to use
+aClientId: com.twitter.finagle.thrift.ClientId = ClientId(test-client)
+
+scala&gt; val clientIdInTimer: Future[String] =
+         // Put that ClientId into scope and schedule
+         // work on a Timer
+         aClientId.asCurrent {
+           HashedWheelTimer.Default.doLater(100.milliseconds) {
+             // Check the value when the Timer's function is
+             // evaluated 100 milliseconds later
+             ClientId.current match {
+               case Some(cId) =&gt; cId.name
+               case None =&gt; "no-client-id"
+             }
+           }
+         }
+clientIdInTimer: com.twitter.util.Future[String] = Promise@2147108131(state=Interruptible(List(),&lt;function1&gt;))
+
+scala&gt; println(s"Timer saw: '${Await.result(clientIdInTimer)}'")
+Timer saw: 'test-client'</pre>
+</div>
+<div class="section" id="commonly-used-instances">
+<h2>Commonly used instances<a class="headerlink" href="#commonly-used-instances" title="Permalink to this headline">¶</a></h2>
+<p>Because <tt class="docutils literal"><span class="pre">Context</span></tt>s are not passed directly into methods, discovery of which
+ones exist is challenging.
+To aid with this, here is a listing of some commonly used instances that Finagle
+makes available:</p>
+<div class="section" id="current-trace-id">
+<h3>Current trace id<a class="headerlink" href="#current-trace-id" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.tracing.Trace.id</span></tt> —
+A broadcast <tt class="docutils literal"><span class="pre">Context</span></tt> that represents this request&#8217;s distributed tracing <tt class="docutils literal"><span class="pre">TraceId</span></tt>.</p>
+</div>
+<div class="section" id="current-client-id">
+<h3>Current client id<a class="headerlink" href="#current-client-id" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.thrift.ClientId.current</span></tt> —
+A broadcast <tt class="docutils literal"><span class="pre">Context</span></tt> that represents the client identifier of a request.</p>
+</div>
+<div class="section" id="current-request-deadline">
+<h3>Current request deadline<a class="headerlink" href="#current-request-deadline" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.Deadline.current</span></tt> —
+A broadcast <tt class="docutils literal"><span class="pre">Context</span></tt> that represents when the request should be completed by.</p>
+</div>
+<div class="section" id="current-tls-peer-certificate">
+<h3>Current TLS peer certificate<a class="headerlink" href="#current-tls-peer-certificate" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.transport.Transport.peerCertificate</span></tt> —
+A local <tt class="docutils literal"><span class="pre">Context</span></tt> that represents the <tt class="docutils literal"><span class="pre">Transport</span></tt>s
+<tt class="docutils literal"><span class="pre">java.security.cert.Certificate</span></tt> if a TLS session is established.</p>
+</div>
+</div>
+<div class="section" id="creating-new-contexts">
+<h2>Creating new Contexts<a class="headerlink" href="#creating-new-contexts" title="Permalink to this headline">¶</a></h2>
+<p>Instances should be immutable or must provide proper memory visibility
+so that changes will be seen across thread boundaries.</p>
+<p>Care should be taken when creating new broadcast <tt class="docutils literal"><span class="pre">Context</span></tt>s as they
+will be sent across the entire downstream request graph. Considerations
+should include serialization/deserialization costs, serialized size, and
+schema evolution.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
+  <img class="logo" src="_static/logo_small.png" alt="Logo"/>
+</a></p><a href="index.html"><h3>Finagle</h3></a>
+<p>
+  Finagle is a network stack for distributed systems.
+</p>
+
+<h3>Useful Links</h3>
+<ul>
+  <li><a href="http://github.com/twitter/finagle">Finagle @ GitHub</a></li>
+  <li><a href="http://github.com/twitter/finagle/issues">Issue Tracker</a></li>
+</ul>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contexts</a><ul>
+<li><a class="reference internal" href="#commonly-used-instances">Commonly used instances</a><ul>
+<li><a class="reference internal" href="#current-trace-id">Current trace id</a></li>
+<li><a class="reference internal" href="#current-client-id">Current client id</a></li>
+<li><a class="reference internal" href="#current-request-deadline">Current request deadline</a></li>
+<li><a class="reference internal" href="#current-tls-peer-certificate">Current TLS peer certificate</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-new-contexts">Creating new Contexts</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="Clients.html" title="previous chapter">Clients</a></li>
+      <li>Next: <a href="Names.html" title="next chapter">Names and Naming in Finagle</a></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Search the contents of this site.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  <div class="footer">&copy; Copyright 2016 Twitter, Inc.</div>
+  
+  </body>
+</html>

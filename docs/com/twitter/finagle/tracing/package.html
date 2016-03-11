@@ -370,30 +370,6 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl></
     </span>
       <p class="shortcomment cmt">A logging Handler that sends log information via tracing
 </p>
-    </li><li name="com.twitter.finagle.tracing.TracingFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="TracingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
-      <a id="TracingFilter[Req,Rep]:TracingFilter[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="TracingFilter.html"><span class="name deprecated" title="Deprecated: (Since version 6.20.0) Use TraceInitializerFilter and (Client|Server)TracingFilter">TracingFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.tracing.TracingFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.TracingFilter.Rep">Rep</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.tracing.package@TracingFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The TracingFilter takes care of span lifecycle events.</p><div class="fullcomment"><div class="comment cmt"><p>The TracingFilter takes care of span lifecycle events. It is always
-placed first in the server filter chain so that protocols with
-trace support will override the span resets, and still be properly
-reported here.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 6.20.0)</i> Use TraceInitializerFilter and (Client|Server)TracingFilter</p></dd></dl></div>
     </li></ol>
             </div>
 

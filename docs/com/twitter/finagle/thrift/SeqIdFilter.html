@@ -187,7 +187,8 @@ failing any requests that do not.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+      <p class="shortcomment cmt">Terminates a filter chain in a <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>. For example,</p><pre>myFilter.andThen(myServiceFactory)</pre></div><dl class="paramcmts block"><dt class="param">factory</dt><dd class="cmt"><p>a service factory that takes the output request type and
+               the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen(f:ReqOut=&gt;com.twitter.util.Future[RepIn]):ReqIn=&gt;com.twitter.util.Future[RepOut]"></a>
       <a id="andThen((ThriftClientRequest)⇒Future[Array[Byte]]):(ThriftClientRequest)⇒Future[Array[Byte]]"></a>
@@ -221,7 +222,7 @@ failing any requests that do not.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Terminates a filter chain in a service.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a service. For example,</p><pre>myFilter.andThen(myService)</pre></div><dl class="paramcmts block"><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+      <p class="shortcomment cmt">Terminates a filter chain in a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>. For example,</p><pre>myFilter.andThen(myService)</pre></div><dl class="paramcmts block"><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen[Req2,Rep2](next:com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2]):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
       <a id="andThen[Req2,Rep2](Filter[ThriftClientRequest,Array[Byte],Req2,Rep2]):Filter[ThriftClientRequest,Array[Byte],Req2,Rep2]"></a>
@@ -238,9 +239,8 @@ failing any requests that do not.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Chains a series of filters together:</p><div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><pre>myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))</pre><p><b>Note:</b> synchronously thrown exceptions in the underlying service are automatically
-lifted into Future.exception.
-</p></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
+      <p class="shortcomment cmt">Chains a series of filters together:</p><div class="fullcomment"><div class="comment cmt"><p>Chains a series of filters together:</p><pre>myModularService = handleExceptions.andThen(thrift2Pojo.andThen(parseString))</pre></div><dl class="paramcmts block"><dt class="param">next</dt><dd class="cmt"><p>another filter to follow after this one</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd><dt>Note</dt><dd><span class="cmt"><p>synchronously thrown exceptions in the underlying service are automatically
+lifted into Future.exception.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThenIf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThenIf[Req2&gt;:ReqOut,Rep2&lt;:RepIn](condAndFilter:(Boolean,com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2])):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
       <a id="andThenIf[Req2&gt;:ThriftClientRequest,Rep2&lt;:Array[Byte]]((Boolean,Filter[ThriftClientRequest,Array[Byte],Req2,Rep2])):Filter[ThriftClientRequest,Array[Byte],Req2,Rep2]"></a>

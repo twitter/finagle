@@ -51,11 +51,12 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A service wrapper that expires the self service after a
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A service wrapper that expires the <code>self</code> service after a
 certain amount of idle time. By default, expiring calls
-<code><code>.close()<i> on the self channel, but this action is
+<code>close()</code> on the <code>self</code> channel, but this action is
 customizable.
-</i></code></code></p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a>[<span class="extype" name="com.twitter.finagle.service.ExpiringService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ExpiringService.Rep">Rep</span>], <span class="extype" name="scala.Proxy">Proxy</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.service.ExpiringService.Req">Req</span>, <span class="extype" name="com.twitter.finagle.service.ExpiringService.Rep">Rep</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<span class="extype" name="com.twitter.finagle.service.ExpiringService.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.service.ExpiringService.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -447,8 +448,8 @@ customizable.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Determines whether this service is available (can accept requests
-with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this service is available (can accept requests
+      <p class="shortcomment cmt">Determines whether this <code>Service</code> is available (can accept requests
+with a reasonable likelihood of success).</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether this <code>Service</code> is available (can accept requests
 with a reasonable likelihood of success).
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -569,7 +570,7 @@ with a reasonable likelihood of success).
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this Service.
+      <p class="shortcomment cmt">The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this <code>Service</code>.</p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="../Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this <code>Service</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../ServiceProxy.html" class="extype" name="com.twitter.finagle.ServiceProxy">ServiceProxy</a> → <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -679,32 +680,7 @@ with a reasonable likelihood of success).
 
         
 
-        <div id="values" class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.Service#release" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="release():Unit"></a>
-      <a id="release():Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use close() instead">release</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.ExpiringService@release():Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Relinquishes the use of this service instance.</p><div class="fullcomment"><div class="comment cmt"><p>Relinquishes the use of this service instance. Behavior is
-undefined if apply() is called after resources are relinquished.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use close() instead</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

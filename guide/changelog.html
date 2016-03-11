@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Finagle changelog &mdash; Finagle 6.33.0 documentation</title>
+    <title>Changelog &mdash; Finagle 6.34.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.33.0',
+        VERSION:     '6.34.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.33.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
     <link rel="next" title="License" href="license.html" />
     <link rel="prev" title="FAQ" href="FAQ.html" />
    
@@ -66,17 +66,116 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="finagle-changelog">
-<h1>Finagle changelog<a class="headerlink" href="#finagle-changelog" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
 <p>Below is a list of changes for each Finagle release.</p>
 <p>Note that <tt class="docutils literal"><span class="pre">RB_ID=#</span></tt> correspond to associated messages in commits.</p>
 <div class="section" id="x">
 <h2>6.x<a class="headerlink" href="#x" title="Permalink to this headline">¶</a></h2>
+</div>
 <div class="section" id="id1">
-<h3>6.33.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h2>6.34.0<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="runtime-behavior-changes">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#runtime-behavior-changes" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: GenSerialClientDispatcher fails pending and subsequent requests when
+its underlying transport closes. <tt class="docutils literal"><span class="pre">RB_ID=807590</span></tt></li>
+</ul>
+</div></blockquote>
 </div>
 <div class="section" id="new-features">
 <h3>New Features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li>finagle-core: Include upstream/downstream addresses/client ids and request trace id
+in exceptions that extend <cite>c.t.f.HasRemoteInfo</cite> (including <cite>c.t.f.SourcedException</cite>),
+accessible via the <cite>remoteInfo</cite> value. <tt class="docutils literal"><span class="pre">RB_ID=797082</span></tt></li>
+<li>finagle-core: Introduce <cite>c.t.f.service.ResponseClassifier</cite> for HTTP servers,
+which allows developers to give Finagle the additional application specific knowledge
+necessary in order to properly classify responses.``RB_ID=800179``</li>
+<li>finagle: Export two new histograms: <cite>request_payload_bytes</cite> and <cite>response_payload_bytes</cite>
+for the following protocols: HTTP (non-chunked), Mux, ThriftMux and Thrift. <tt class="docutils literal"><span class="pre">RB_ID=797821</span></tt></li>
+<li>finagle-core: Define <cite>c.t.f.Address</cite> to represent an endpoint&#8217;s physical location.
+Resolvers and namers may attach metadata such as weight to individual endpoint addresses.
+<tt class="docutils literal"><span class="pre">RB_ID=792209</span></tt></li>
+<li>finagle-http: Introduce convenience extractors to pattern match <cite>c.t.f.http.Response.status</cite>
+against the different categories. <tt class="docutils literal"><span class="pre">RB_ID=802953</span></tt></li>
+<li>finagle-http: Add <cite>toBoolean</cite> method in <cite>StringUtil</cite> to parse strings to boolean consistently.
+<tt class="docutils literal"><span class="pre">RB_ID=804056</span></tt></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="breaking-api-changes">
+<h3>Breaking API Changes<a class="headerlink" href="#breaking-api-changes" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul>
+<li><p class="first">finagle-core: <cite>c.t.f.Codec.prepareConnFactory(ServiceFactory)</cite> is marked <cite>final</cite>, override
+<cite>c.t.f.Codec.prepareConnFactory(ServiceFactory, Stack.Params)</cite> instead. <tt class="docutils literal"><span class="pre">RB_ID=797821</span></tt></p>
+</li>
+<li><p class="first">finagle-core: <cite>c.t.f.Codec.newClientDispatcher(Transport)</cite> is marked <cite>final</cite>, override
+<cite>c.t.f.Codec.newClientDispatcher(Transport, Stack.Params)</cite> instead. <tt class="docutils literal"><span class="pre">RB_ID=797821</span></tt></p>
+</li>
+<li><p class="first">finagle-core: Removed deprecations: <tt class="docutils literal"><span class="pre">RB_ID=800974</span></tt>
+- Removed <cite>c.t.f.Service.release</cite>, replace usage with <cite>Service.close()</cite>.
+- Removed <cite>c.t.f.ServiceFactory.make</cite>, replace usage with <cite>ServiceFactory.apply</cite>.
+- Removed <cite>c.t.f.ProxyServiceFactory</cite>, replace usage with <cite>ServiceFactoryProxy</cite>.
+- Removed deprecated <cite>c.t.f.service.FailureAccrualFactory</cite> constructor.
+- Removed <cite>c.t.f.netty3.ChannelBufferBuf.apply</cite>, replace usage with <cite>ChannelBufferBuf.Owned.apply</cite>.
+- Removed <cite>c.t.f.util.InetAddressUtil.Loopback</cite>, replace usage with <cite>java.net.InetAddress.getLoopbackAddress</cite>.
+- Removed <cite>c.t.f.tracing.TracingFilter</cite>, replace usage with <cite>TraceInitializationFilter</cite> and <cite>(Client|Server)TracingFilter</cite>.</p>
+</li>
+<li><p class="first">finagle-core: <cite>c.t.f.Addr.Bound.addr</cite> type changed from <cite>Set[SocketAddress]</cite> to
+<cite>Set[c.t.f.Address]</cite>. We provide a migration guide below for the most common cases.</p>
+<p>Callers of <cite>c.t.f.Addr.Bound.addr</cite> must handle <cite>Set[c.t.f.Address]</cite> instead of
+<cite>Set[SocketAddresses]</cite>. If you do something with the <cite>SocketAddress</cite> and expect the underlying
+type to be <cite>InetSocketAddress</cite>, use <cite>c.t.f.Address.Inet.addr</cite> to get the underlying
+<cite>InetSocketAddress</cite>.</p>
+<p><cite>c.t.f.Addr</cite> constructors and <cite>c.t.f.Name.bound</cite> method now accept <cite>c.t.f.Address</cite> instead
+of <cite>SocketAddress</cite>. For most cases, wrapping the <cite>InetSocketAddress</cite> in an <cite>Address.Inet</cite>
+will fix the compile error.</p>
+<p>Any other <cite>SocketAddress</cite> subclass is currently incompatible with <cite>c.t.f.Address</cite>. Instead,
+you should encode any additional information in the metadata field of <cite>c.t.f.Address.Inet</cite>
+or <cite>c.t.f.exp.Address.ServiceFactory</cite>.</p>
+<p><tt class="docutils literal"><span class="pre">RB_ID=792209</span></tt></p>
+</li>
+<li><p class="first">finagle-core: Delete <cite>c.t.f.ServiceFactorySocketAddress</cite> and replace usages with
+<cite>c.t.f.exp.Address.ServiceFactory</cite>. <tt class="docutils literal"><span class="pre">RB_ID=792209</span></tt></p>
+</li>
+<li><p class="first">finagle-core: Delete <cite>c.t.f.WeightedSocketAddress</cite> and instead use
+<cite>c.t.f.addr.WeightedAddress</cite> to represent address weights. <tt class="docutils literal"><span class="pre">RB_ID=792209</span></tt></p>
+</li>
+<li><p class="first">finagle-core: <cite>c.t.f.builder.ClientBuilder.hosts</cite> takes a Seq of <cite>InetSocketAddress</cite> instead of
+<cite>SocketAddress</cite>. If you get a compile error, change the static type to <cite>InetSocketAddress</cite> if
+you can. Otherwise, cast it at runtime to <cite>InetSocketAddress</cite>. <tt class="docutils literal"><span class="pre">RB_ID=792209</span></tt></p>
+</li>
+<li><p class="first">finagle-core: <cite>c.t.f.client.Transporter.EndpointAddr</cite> takes a <cite>c.t.f.Address</cite> as its
+parameter instead of <cite>SocketAddress</cite>. <tt class="docutils literal"><span class="pre">RB_ID=792209</span></tt></p>
+</li>
+<li><p class="first">finagle-core: <cite>c.t.f.service.FauilureAccrualFactory.Param(FailureAccrualPolicy)</cite> is removed -
+it&#8217;s not safe to configure Failure Accrual with a shareable instance of the policy, use
+<cite>() =&gt; FailureAccrualPolicy</cite> instead. <tt class="docutils literal"><span class="pre">RB_ID=802953</span></tt></p>
+</li>
+<li><p class="first">finagle-core: <cite>$Client.withSessionQualifier.failureAccrualPolicy</cite> has been removed from the API
+since it enables an experimental feature (use Stack&#8217;s <cite>.configured</cite> API instead). <tt class="docutils literal"><span class="pre">RB_ID=802953</span></tt></p>
+</li>
+<li><p class="first">finagle-core: <cite>c.t.f.service.exp.FailureAccrualPolicies</cite> (Java-friendly API) has bee removed -
+use <cite>c.t.f.service.exp.FailureAccrualPolicy</cite> instead.</p>
+</li>
+<li><p class="first">finagle-memcached: <cite>c.t.f.memcached.protocol.text.Memcached</cite> no longer takes a <cite>StatsReceiver</cite>,
+pass it to a <cite>(Client/Server)Builder</cite> instead. <tt class="docutils literal"><span class="pre">RB_ID=797821</span></tt></p>
+</li>
+<li><p class="first">finagle-redis: <cite>c.t.f.redis.Redis</cite> no longer takes a <cite>StatsReceiver</cite>, pass it to a
+<cite>(Client/Server)Builder</cite> instead. <tt class="docutils literal"><span class="pre">RB_ID=797821</span></tt></p>
+</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>6.33.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h3>New Features<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Introduce the <cite>c.t.f.service.PendingRequestFactory</cite> module in the client Stack.
@@ -104,6 +203,7 @@ between a conflict and a not found result.</li>
 <li>finagle-mux: Add a Wireshark dissector that can decode Mux messages. <tt class="docutils literal"><span class="pre">RB_ID=779482</span></tt></li>
 <li>finagle-stats: Define flag <cite>c.t.f.stats.statsFilterFile</cite> as GlobalFlag[Set[File]] to take
 comma-separated multiple files. <tt class="docutils literal"><span class="pre">RB_ID=793397</span></tt></li>
+<li>finagle-mux: Tinit/Rinit are now available and permit feature negotiation. <tt class="docutils literal"><span class="pre">RB_ID=793350</span></tt></li>
 </ul>
 </div></blockquote>
 </div>
@@ -116,30 +216,24 @@ comma-separated multiple files. <tt class="docutils literal"><span class="pre">R
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="breaking-api-changes">
-<h3>Breaking API Changes<a class="headerlink" href="#breaking-api-changes" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h3>Breaking API Changes<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <blockquote>
-<div><ul>
-<li><p class="first">finagle-core: All the deprecated exceptions from <cite>Exceptions.scala</cite> have been removed.
-<tt class="docutils literal"><span class="pre">RB_ID=774658</span></tt></p>
-</li>
-<li><p class="first">finagle-thrift: Remove the <cite>framed</cite> attributes from <cite>c.t.f.Thrift.Client</cite> and
-<cite>c.t.f.Thrift.Server</cite>.  This behavior may now be controlled with <cite>c.t.f.Thrift.param.Framed</cite>.</p>
-</li>
-<li><p class="first">finagle-core: Unused <cite>c.t.f.builder.NonShrinkingCluster</cite> has been removed.
-<tt class="docutils literal"><span class="pre">RB_ID=779001</span></tt></p>
-</li>
-<li><p class="first">finagle-thrift: <cite>c.t.f.ThriftRichClient</cite> has a new abstract protected method
-<cite>responseClassifier: ResponseClassifier</cite>. If your implementation does not need</p>
-<blockquote>
-<div><p>this, you can implement it with <cite>ResponseClassifier.Default</cite>. <tt class="docutils literal"><span class="pre">RB_ID=791470</span></tt></p>
-</div></blockquote>
-</li>
+<div><ul class="simple">
+<li>finagle-core: All the deprecated exceptions from <cite>Exceptions.scala</cite> have been removed.
+<tt class="docutils literal"><span class="pre">RB_ID=774658</span></tt></li>
+<li>finagle-thrift: Remove the <cite>framed</cite> attributes from <cite>c.t.f.Thrift.Client</cite> and
+<cite>c.t.f.Thrift.Server</cite>.  This behavior may now be controlled with <cite>c.t.f.Thrift.param.Framed</cite>.</li>
+<li>finagle-core: Unused <cite>c.t.f.builder.NonShrinkingCluster</cite> has been removed.
+<tt class="docutils literal"><span class="pre">RB_ID=779001</span></tt></li>
+<li>finagle-thrift: <cite>c.t.f.ThriftRichClient</cite> has a new abstract protected method
+<cite>responseClassifier: ResponseClassifier</cite>. If your implementation does not need
+this, you can implement it with <cite>ResponseClassifier.Default</cite>. <tt class="docutils literal"><span class="pre">RB_ID=791470</span></tt></li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="runtime-behavior-changes">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#runtime-behavior-changes" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id5">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-thrift,thriftmux: Deserialization of Thrift responses now happens as part
@@ -155,8 +249,8 @@ path instead. <tt class="docutils literal"><span class="pre">RB_ID=773649</span>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id2">
-<h3>Breaking API Changes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id6">
+<h3>Breaking API Changes<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-thrift: Remove the <cite>framed</cite> attributes from <cite>c.t.f.Thrift.Client</cite> and
@@ -164,15 +258,15 @@ path instead. <tt class="docutils literal"><span class="pre">RB_ID=773649</span>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id3">
-<h3>6.32.0<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id7">
+<h2>6.32.0<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <p>NOT RELEASED</p>
 </div>
-</div>
-<div class="section" id="id4">
-<h2>6.31.0<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id5">
-<h3>New Features<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id8">
+<h2>6.31.0<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h3>New Features<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>c.t.f.Server</cite> now has a <cite>serveAndAnnounce</cite> method that accepts a <cite>SocketAddress</cite>
@@ -198,8 +292,8 @@ filtering. <tt class="docutils literal"><span class="pre">RB_ID=764914</span></t
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id6">
-<h3>Deprecations<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id10">
+<h3>Deprecations<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: the #channelFactory method of <cite>c.t.f.builder.ServerBuilder</cite> has been deprecated
@@ -207,8 +301,8 @@ in favor of the <cite>c.t.f.netty3.numWorkers</cite> flag. <tt class="docutils l
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id7">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id11">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: The behavior for <cite>c.t.f.util.DefaultMonitor</cite> has changed such that
@@ -240,8 +334,8 @@ limit to 100 outstanding zookeeper requests at any one moment. <tt class="docuti
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id8">
-<h3>Breaking API Changes<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id12">
+<h3>Breaking API Changes<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>BackupRequestLost</cite> is no longer itself an <cite>Exception</cite>. Use
@@ -273,10 +367,10 @@ properly through <cite>newServiceIface</cite> <tt class="docutils literal"><span
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id9">
-<h2>6.30.0<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id10">
-<h3>New Features<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id13">
+<h2>6.30.0<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id14">
+<h3>New Features<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>com.twitter.finagle.client.LatencyCompensator</cite> allows its
@@ -291,8 +385,8 @@ host-&gt;ip map changes (such as the zk2 resolver and twemcache client).
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id11">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id15">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>RetryPolicy.tries</cite> now uses jittered backoffs instead of
@@ -308,8 +402,8 @@ closed exception.  <tt class="docutils literal"><span class="pre">RB_ID=753664</
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id12">
-<h3>Breaking API Changes<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id16">
+<h3>Breaking API Changes<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>TimerFromNettyTimer</cite> is renamed to <cite>HashedWheelTimer</cite> and
@@ -330,18 +424,18 @@ com.twitter.finagle.httpx to com.twitter.finagle.http. <tt class="docutils liter
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id13">
-<h2>6.29.0<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id14">
-<h3>Deprecations<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id17">
+<h2>6.29.0<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id18">
+<h3>Deprecations<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-http: Deprecated in favour of finagle-httpx and now removed.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id15">
-<h3>New Features<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id19">
+<h3>New Features<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Provides a <cite>RetryFilter</cite> which takes a
@@ -354,8 +448,8 @@ decoding via <cite>c.t.f.httpx.exp.Multipart</cite>. <tt class="docutils literal
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id16">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id20">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>InetResolver.bind</cite> will now succeed if any hostname resolution
@@ -376,8 +470,8 @@ a concurrent load balancer to help eliminate head-of-line blocking.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id17">
-<h3>Breaking API Changes<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id21">
+<h3>Breaking API Changes<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>RetryingFilter</cite>, which takes a RetryPolicy[Try[Nothing]]` and
@@ -399,13 +493,13 @@ finagle subprojects.</li>
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id18">
-<h2>6.28.0<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id19">
-<h3>New Features<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id22">
+<h2>6.28.0<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id23">
+<h3>New Features<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
 </div>
-<div class="section" id="id20">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id24">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Weights are no longer supported by the load balancers. They are moved
@@ -431,8 +525,8 @@ no longer exported. <tt class="docutils literal"><span class="pre">RB_ID=730309<
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id21">
-<h3>Breaking API Changes<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id25">
+<h3>Breaking API Changes<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>c.t.f.jsr166y</cite> has been replaced with Java 7 API. finagle: Replace JSR166y
@@ -455,10 +549,10 @@ moved out of exp package into mux package. <tt class="docutils literal"><span cl
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id22">
-<h2>6.27.0<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id23">
-<h3>New Features<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id26">
+<h2>6.27.0<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id27">
+<h3>New Features<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-http: Support nacks between Finagle Http clients and servers. When a server fails
@@ -468,8 +562,8 @@ to safely retry failed requests, and keep connections open. <tt class="docutils 
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id24">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id28">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: FailFast parameter renamed from <cite>onOrOff</cite> to <cite>enabled</cite>. <tt class="docutils literal"><span class="pre">RB_ID=720781</span></tt></li>
@@ -481,8 +575,8 @@ for &#8220;$statName.stddev&#8221;. <tt class="docutils literal"><span class="pr
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id25">
-<h3>Breaking API Changes<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id29">
+<h3>Breaking API Changes<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-stream: Introduce StreamRequest as a replacement for Netty&#8217;s
@@ -498,18 +592,18 @@ to <cite>ClassTag</cite>. <tt class="docutils literal"><span class="pre">RB_ID=7
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id26">
-<h2>6.26.0<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id27">
-<h3>Deprecations<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id30">
+<h2>6.26.0<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id31">
+<h3>Deprecations<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-memcached: Deprecated in favor of finagle-memcachedx and now removed.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id28">
-<h3>New Features<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id32">
+<h3>New Features<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-httpx: Support nacks between Finagle Http clients and servers. When a server fails
@@ -519,8 +613,8 @@ to safely retry failed requests, and keep connections open. <tt class="docutils 
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id29">
-<h3>Breaking API Changes<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id33">
+<h3>Breaking API Changes<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Moved netty3 specific things into a netty3 namespace. For
@@ -554,17 +648,17 @@ as the default <cite>com.twitter.finagle.util.ReporterFactory</cite>. <tt class=
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id30">
-<h3>New Features<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id34">
+<h3>New Features<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>finagle-thrift: Support for finagle Services per thrift method.</li>
 </ul>
 </div>
 </div>
-<div class="section" id="id31">
-<h2>6.25.0<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id32">
-<h3>Breaking API Changes<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id35">
+<h2>6.25.0<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id36">
+<h3>Breaking API Changes<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>c.t.f.builder.Server</cite> now implements <cite>c.t.f.ListeningServer</cite>.</li>
@@ -613,8 +707,8 @@ can explicitly wrap them using <cite>Parameter.wrap</cite>.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id33">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id37">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>com.twitter.finagle.service.StatsFilter</cite> no longer requires a
@@ -647,8 +741,8 @@ has also changed from &#8220;automatic&#8221; to &#8220;requeues&#8221;.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id34">
-<h3>Deprecations<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id38">
+<h3>Deprecations<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>c.t.f.builder.Server.localAddress</cite> is deprecated in favor of
@@ -656,8 +750,8 @@ has also changed from &#8220;automatic&#8221; to &#8220;requeues&#8221;.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id35">
-<h3>New Features<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id39">
+<h3>New Features<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul>
 <li><p class="first">finagle-core: <a class="reference external" href="https://twitter.github.io/finagle/guide/FAQ.html#why-do-clients-see-com-twitter-finagle-failedfastexception-s">Fail fast</a>
@@ -726,8 +820,8 @@ based Memcache client that uses pipelining.</p>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id36">
-<h3>Bug Fixes<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id40">
+<h3>Bug Fixes<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>c.t.f.Server.serveAndAnnounce</cite> for a <cite>Service</cite> had its usage
@@ -745,10 +839,10 @@ organization on GitHub</a>.</li>
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id37">
-<h2>6.24.0<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id38">
-<h3>Breaking API Changes<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id41">
+<h2>6.24.0<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id42">
+<h3>Breaking API Changes<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul>
 <li><p class="first">finagle-core: Remove <cite>c.t.f.client.StackClient.Role.loadBalancer</cite>, which
@@ -847,8 +941,8 @@ private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId] {
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id39">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id43">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-mux: Mark the ServiceFactory available again if the underlying
@@ -857,8 +951,8 @@ Service is no longer available.  This permits it to be closed and reused.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id40">
-<h3>Deprecations<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id44">
+<h3>Deprecations<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Deprecated the mechanisms of FailureAccrual that use
@@ -872,8 +966,8 @@ state instead of throw IllegalStateException</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id41">
-<h3>New Features<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id45">
+<h3>New Features<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: All <cite>Stack.Param`s used in `ClientBuilder</cite> and
@@ -904,10 +998,10 @@ See <cite>com.twitter.finagle.contexts.Context</cite> for more details.</li>
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id42">
-<h2>6.23.0<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id43">
-<h3>Breaking API Changes<a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id46">
+<h2>6.23.0<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id47">
+<h3>Breaking API Changes<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: <cite>c.t.f.Stackable`s maintained state about which parameters were
@@ -921,8 +1015,8 @@ rename size argument to capacity.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id44">
-<h3>Deprecations<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id48">
+<h3>Deprecations<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><cite>ServerBuilder.stack[Req1, Rep1](mk: Stack.Params =&gt; Server[Req1, Rep1])</cite> is
@@ -931,8 +1025,8 @@ deprecated in favor of
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id45">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id49">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li><cite>finagle</cite>: Improve allocation semantics for uses of Buf.</li>
@@ -940,10 +1034,10 @@ deprecated in favor of
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id46">
-<h2>6.22.0<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id47">
-<h3>Breaking API Changes<a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id50">
+<h2>6.22.0<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id51">
+<h3>Breaking API Changes<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Removed unused <cite>com.twitter.finagle.service.ProxyService</cite>. It wasn&#8217;t
@@ -957,8 +1051,8 @@ instead of () =&gt; Engine.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id48">
-<h3>New Features<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id52">
+<h3>New Features<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: BroadcastStatsReceiver, introduce specialized implementation</li>
@@ -970,8 +1064,8 @@ instead of () =&gt; Engine.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id49">
-<h3>Runtime Behavior Changes<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id53">
+<h3>Runtime Behavior Changes<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Add support for non-URLClassloaders to LoadService</li>
@@ -1011,8 +1105,8 @@ instead of () =&gt; Engine.</li>
 </ul>
 </div></blockquote>
 </div>
-<div class="section" id="id50">
-<h3>Bug Fixes<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id54">
+<h3>Bug Fixes<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><ul class="simple">
 <li>finagle-core: Fix a deadlock in Contexts</li>
@@ -1032,8 +1126,8 @@ instead of () =&gt; Engine.</li>
 </div></blockquote>
 </div>
 </div>
-<div class="section" id="id51">
-<h2>6.21.0<a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id55">
+<h2>6.21.0<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle</cite>: Upgrade to scala_2.10</li>
 <li><cite>finagle-core</cite>: Add weighted address support to InetResolver.</li>
@@ -1077,8 +1171,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-zipkin</cite>: Reduce allocations when tracing</li>
 </ul>
 </div>
-<div class="section" id="id52">
-<h2>6.20.0<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id56">
+<h2>6.20.0<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle</cite>: Smattering of minor cleanups in util and finagle</li>
 <li><cite>finagle</cite>: Upgrade sbt to 0.13</li>
@@ -1116,8 +1210,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-thrift</cite>: Remove usage of java_sources, should be able to depend on it normally</li>
 </ul>
 </div>
-<div class="section" id="id53">
-<h2>6.19.0<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id57">
+<h2>6.19.0<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Allow trailing semicolons in dtabs</li>
 <li><cite>finagle-core</cite>: Rescue exceptions thrown by filter in <cite>Filter.andthen(Filter)</cite></li>
@@ -1136,8 +1230,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-thriftmux</cite>: Don&#8217;t reuse InMemoryStatsReceiver in the same test</li>
 </ul>
 </div>
-<div class="section" id="id54">
-<h2>6.18.0<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id58">
+<h2>6.18.0<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-*</cite>: release scrooge v3.16.0</li>
 <li><cite>finagle-*</cite>: release util v6.18.0</li>
@@ -1168,8 +1262,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>wily</cite>: Add Dtab expansion</li>
 </ul>
 </div>
-<div class="section" id="id55">
-<h2>6.17.0<a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id59">
+<h2>6.17.0<a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle</cite>: Add list of Finagle adopters</li>
 <li><cite>finagle</cite>: Upgrade third-party dependencies</li>
@@ -1207,8 +1301,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-thriftmux</cite>: pass along ClientId with ClientBuilder API</li>
 </ul>
 </div>
-<div class="section" id="id56">
-<h2>6.16.0<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id60">
+<h2>6.16.0<a class="headerlink" href="#id60" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Add Stack#remove</li>
 <li><cite>finagle-core</cite>: Add a copy constructor to Stack{Client, Server}</li>
@@ -1242,8 +1336,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-{core,thrift,mux}</cite>: Clean up contexts, delimit Locals</li>
 </ul>
 </div>
-<div class="section" id="id57">
-<h2>6.15.0<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id61">
+<h2>6.15.0<a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Fixed DefaultClient to use the base close method</li>
 <li><cite>finagle-core</cite>: Fix a race condition when closing in DefaultServer</li>
@@ -1278,8 +1372,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-serversets</cite>: facade for ZooKeeper libraries</li>
 </ul>
 </div>
-<div class="section" id="id58">
-<h2>6.14.0<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id62">
+<h2>6.14.0<a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-*</cite>: Add com.twitter.io.Charsets and replace the use of org.jboss.netty.util.CharsetUtil</li>
 <li><cite>finagle-benchmark</cite>: Fix caliper failures due to new guava</li>
@@ -1310,8 +1404,9 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-thrift</cite>: workaround libthrift TBinaryProtocol.writeBinary bug</li>
 <li><cite>finagle-zipkin</cite>: Include service name in all traces</li>
 </ul>
-<div class="section" id="id59">
-<h3>6.13.1<a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id63">
+<h2>6.13.1<a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Case insensitive Dtab headers in HTTP codec</li>
 <li><cite>finagle-core</cite>: Introduce Stack.Params#contains</li>
@@ -1330,8 +1425,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: upgrade util to 6.13.2</li>
 </ul>
 </div>
-<div class="section" id="id60">
-<h3>6.13.0<a class="headerlink" href="#id60" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id64">
+<h2>6.13.0<a class="headerlink" href="#id64" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: ForkJoin scheduler: first draft</li>
 <li><cite>finagle-doc</cite>: Update URL to Finagle blog post. Motivation: Outdated URL</li>
@@ -1357,24 +1452,24 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: upgrade util to version 6.13.0</li>
 </ul>
 </div>
-<div class="section" id="id61">
-<h3>6.12.2<a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id65">
+<h2>6.12.2<a class="headerlink" href="#id65" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle</cite>: release scrooge version 3.12.3</li>
 <li><cite>finagle-exception</cite>: Drop scrooge in favor of pre-generated Thrift Java source code.</li>
 <li><cite>finagle-zipkin</cite>: Drop scrooge in favor of pre-generated Thrift Java source code.</li>
 </ul>
 </div>
-<div class="section" id="id62">
-<h3>6.12.1<a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id66">
+<h2>6.12.1<a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle</cite>: release ostrich version 9.3.1</li>
 <li><cite>finagle</cite>: release util version 6.12.1</li>
 <li><cite>finagle</cite>: Upgrade everyone to the new c.t.common.server-set</li>
 </ul>
 </div>
-<div class="section" id="id63">
-<h3>6.12.0<a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id67">
+<h2>6.12.0<a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Add a <cite>ServerBuilder.safeBuild(ServiceFactory)</cite> method for Java compatibility</li>
 <li><cite>finagle-core</cite>: Add basic Scaladocs for all Filters and Services</li>
@@ -1411,8 +1506,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: Use a more descriptive message for when client name resolution is negative</li>
 </ul>
 </div>
-<div class="section" id="id64">
-<h3>6.11.1<a class="headerlink" href="#id64" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id68">
+<h2>6.11.1<a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Masks cancellation on PipeliningDispatcher</li>
 <li><cite>finagle-doc</cite>: Fix finagle-websocket link on Finagle docs website.</li>
@@ -1420,8 +1515,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-kestrel</cite>: Add abort command to kestrel client</li>
 </ul>
 </div>
-<div class="section" id="id65">
-<h3>6.11.0<a class="headerlink" href="#id65" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id69">
+<h2>6.11.0<a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Add a &#8220;tries&#8221; scoped StatsFilter to ClientBuilder.</li>
 <li><cite>finagle-core</cite>: Allow clean shutdown for insoluble address in DelayedFactory.</li>
@@ -1447,8 +1542,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: s/setValue(())/setDone()/g</li>
 </ul>
 </div>
-<div class="section" id="id66">
-<h3>6.10.0<a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id70">
+<h2>6.10.0<a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Fix ServiceTimeoutException naming.</li>
 <li><cite>finagle-core</cite>: Increase default tcpConnectTimeout to 350ms.</li>
@@ -1457,8 +1552,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: Daemonize threads in ClientBuilders used in finagle.</li>
 </ul>
 </div>
-<div class="section" id="id67">
-<h3>6.9.0<a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id71">
+<h2>6.9.0<a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Avoid creating a new &#8216;NoStacktrace&#8217; array for each exception.</li>
 <li><cite>finagle-core</cite>: Better support for negative Addr resolution in StabilizingAddr.</li>
@@ -1471,16 +1566,16 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: Adhere to scala 2.10 pattern matching strictness.</li>
 </ul>
 </div>
-<div class="section" id="id68">
-<h3>6.8.1<a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id72">
+<h2>6.8.1<a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle</cite>: Upgrade ostrich to 9.2.1</li>
 <li><cite>finagle</cite>: Upgarde util to 6.8.1</li>
 <li><cite>finagle</cite>: Upgarde scrooge to 3.11.1</li>
 </ul>
 </div>
-<div class="section" id="id69">
-<h3>6.8.0<a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id73">
+<h2>6.8.0<a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-serversets</cite>: Higher fidelity addrs from ZK We do the best we can with the current server set implementation.</li>
 <li><cite>finagle-mysql</cite>: better type support</li>
@@ -1518,16 +1613,16 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-memcached</cite>: more performance and less allocations in Decoder</li>
 </ul>
 </div>
-<div class="section" id="id70">
-<h3>6.7.4<a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id74">
+<h2>6.7.4<a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Fail ChannelTransport read queue before closing the connection</li>
 <li><cite>finagle-mux</cite>: Add session for mux message passing and bidirectional RPC</li>
 <li><cite>finagle-zipkin</cite>: Depend on scrooge-core instead of scrooge-runtime</li>
 </ul>
 </div>
-<div class="section" id="id71">
-<h3>6.7.2<a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id75">
+<h2>6.7.2<a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: LoadService: skip empty lines</li>
 <li><cite>finagle-core</cite>: Improve GC profile of Var and Group</li>
@@ -1536,8 +1631,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-mysql</cite>: move protocol into a dispatcher and port to new style apis.</li>
 </ul>
 </div>
-<div class="section" id="id72">
-<h3>6.7.1<a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id76">
+<h2>6.7.1<a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-*</cite>: Tagging various tests as flaky</li>
 <li><cite>finagle-*</cite>: Fix and reenable some formerly-flaky tests Now that Time.withXXXX is threadsafe</li>
@@ -1574,12 +1669,12 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-thrift</cite>: Set the client id in thriftmux</li>
 </ul>
 </div>
-<div class="section" id="id73">
-<h3>6.7.0<a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id77">
+<h2>6.7.0<a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h2>
 <p>Release process failed. Rolled forward to 6.7.1.</p>
 </div>
-<div class="section" id="id74">
-<h3>6.6.2<a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id78">
+<h2>6.6.2<a class="headerlink" href="#id78" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Configurable loadBalancer for ClientConfig</li>
 <li><cite>finagle-core</cite>: Fix the memory leak due to the GlobalStatsReceiver</li>
@@ -1589,8 +1684,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: New ostrich version</li>
 </ul>
 </div>
-<div class="section" id="id75">
-<h3>6.6.0<a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id79">
+<h2>6.6.0<a class="headerlink" href="#id79" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Add a RetryPolicy constant for retrying on ChannelClosedExceptions.</li>
 <li><cite>finagle-core</cite>: ChannelSnooper: Print exceptions via Logger</li>
@@ -1624,8 +1719,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-zipkin</cite>: optimize scribe logging to not need slf4j</li>
 </ul>
 </div>
-<div class="section" id="id76">
-<h3>6.5.2<a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id80">
+<h2>6.5.2<a class="headerlink" href="#id80" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>finagle-ostrich4: set stats export URI to stats.json</li>
 <li>finagle-core: Introduce StabilizingGroup which cautiously removes items from a Group</li>
@@ -1636,8 +1731,8 @@ instead of () =&gt; Engine.</li>
 <li>finagle-memcache: added support for twemcache commands</li>
 </ul>
 </div>
-<div class="section" id="id77">
-<h3>6.5.1<a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id81">
+<h2>6.5.1<a class="headerlink" href="#id81" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-http</cite>: Move routing by path and method function to RoutingService</li>
 <li><cite>finagle-redis</cite>: Switching from Strings to ChannelBuffers for Scored Zrange commands</li>
@@ -1652,8 +1747,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: Open connection threshold et al</li>
 </ul>
 </div>
-<div class="section" id="id78">
-<h3>6.5.0<a class="headerlink" href="#id78" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id82">
+<h2>6.5.0<a class="headerlink" href="#id82" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: fix a bug in Trace.unwind in ruby</li>
 <li><cite>finagle-core</cite>: speed up tracing when a trace is unsampled.</li>
@@ -1671,8 +1766,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: Upgrade util to 6.3.6 and scrooge-runtime to 3.1.2</li>
 </ul>
 </div>
-<div class="section" id="id79">
-<h3>6.4.1<a class="headerlink" href="#id79" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id83">
+<h2>6.4.1<a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-http</cite>: CookieMap instead of CookieSet</li>
 <li><cite>finagle-memcached</cite>: remove items stats test since twemcache does not carry those</li>
@@ -1694,8 +1789,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: Update sbt project for (util, ostrich, finagle)</li>
 </ul>
 </div>
-<div class="section" id="id80">
-<h3>6.4.0<a class="headerlink" href="#id80" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id84">
+<h2>6.4.0<a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Add unmanaged cache pool cluster</li>
 <li><cite>finagle-core</cite>: Always enable TracingFilter even when no tracers are used.</li>
@@ -1734,8 +1829,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle</cite>: Upgrade util to 6.3.4</li>
 </ul>
 </div>
-<div class="section" id="id81">
-<h3>6.3.0<a class="headerlink" href="#id81" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id85">
+<h2>6.3.0<a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle</cite>: Upgrade util to 6.3.0</li>
 <li><cite>finagle-thrift</cite>: SocketAddress when serving an iface</li>
@@ -1743,15 +1838,15 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: DefaultClient/Server: Do not add TracingFilter if NullTracer is used</li>
 </ul>
 </div>
-<div class="section" id="id82">
-<h3>6.1.4<a class="headerlink" href="#id82" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id86">
+<h2>6.1.4<a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-zipkin</cite>: tracing improvements</li>
 <li><cite>finagle</cite>: Upgrade util to 6.2.5</li>
 </ul>
 </div>
-<div class="section" id="id83">
-<h3>6.1.3<a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id87">
+<h2>6.1.3<a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Add BroadcastCounter and BroadcastStat, refactor Broadcast and Rollup Receiver.</li>
 <li><cite>finagle</cite>: update sbt, add finagle-exp</li>
@@ -1765,8 +1860,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: CachingPool: Do not schedule timer tasks if ttl is Duration.Top</li>
 </ul>
 </div>
-<div class="section" id="id84">
-<h3>6.1.2<a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id88">
+<h2>6.1.2<a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h2>
 <p>Released 2013/03/21</p>
 <ul class="simple">
 <li><cite>finagle</cite>: Fix flakey tests</li>
@@ -1786,8 +1881,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-thrift</cite>: fix 2.10 build</li>
 </ul>
 </div>
-<div class="section" id="id85">
-<h3>6.1.1<a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id89">
+<h2>6.1.1<a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h2>
 <p>Released 2013/03/12</p>
 <ul class="simple">
 <li><cite>doc</cite>: Finagle user guide!</li>
@@ -1814,8 +1909,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-zipkin</cite>: new factory methods.</li>
 </ul>
 </div>
-<div class="section" id="id86">
-<h3>6.1.0<a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id90">
+<h2>6.1.0<a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h2>
 <p>Released 2013/01/30</p>
 <ul class="simple">
 <li><cite>finagle</cite>: update util and ostrich dependencies</li>
@@ -1830,15 +1925,15 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-http</cite>: add new-style client and server, including a primitive URL fetcher</li>
 </ul>
 </div>
-<div class="section" id="id87">
-<h3>6.0.5<a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id91">
+<h2>6.0.5<a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h2>
 <p>Released 2013/01/22</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: basic SOCKS support for finagle clients, intended for use with ssh -D.</li>
 </ul>
 </div>
-<div class="section" id="id88">
-<h3>6.0.4<a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id92">
+<h2>6.0.4<a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h2>
 <p>Released 2013/01/22</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: CachingPool owns connections and caches them even if upstream cancels</li>
@@ -1852,8 +1947,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-redis</cite>: expireAt command</li>
 </ul>
 </div>
-<div class="section" id="id89">
-<h3>6.0.3<a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id93">
+<h2>6.0.3<a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/12/18</p>
 <ul class="simple">
 <li><cite>finagle-mux</cite>: new session protocol</li>
@@ -1862,8 +1957,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-http RequestProxy</cite>: proxy response</li>
 </ul>
 </div>
-<div class="section" id="id90">
-<h3>6.0.2<a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id94">
+<h2>6.0.2<a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/12/11</p>
 <ul class="simple">
 <li><cite>TimerSpec, RefcountedSpec</cite>: make deterministic</li>
@@ -1879,26 +1974,23 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-redis</cite>: parse case-insensitive commands</li>
 </ul>
 </div>
-<div class="section" id="id91">
-<h3>6.0.1<a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id95">
+<h2>6.0.1<a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/11/26</p>
 <ul class="simple">
 <li>Use java.util.ArrayDeque in place of mutable.Queue due to <a class="reference external" href="https://issues.scala-lang.org/browse/SI-6690">https://issues.scala-lang.org/browse/SI-6690</a></li>
 </ul>
 </div>
-<div class="section" id="id92">
-<h3>6.0.0<a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id96">
+<h2>6.0.0<a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/11/26</p>
 <ul class="simple">
 <li>util 6.0.0 dependency</li>
 <li><cite>finagle-core</cite>: new client/server APIs; not yet exposed to users</li>
 </ul>
 </div>
-</div>
-<div class="section" id="id93">
-<h2>5.x<a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id94">
-<h3>5.3.23<a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id97">
+<h2>5.3.23<a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/11/21</p>
 <ul class="simple">
 <li><cite>finagle-spdy</cite>: new codec</li>
@@ -1908,8 +2000,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: don&#8217;t leak Spooled updates in the HeapBalancer</li>
 </ul>
 </div>
-<div class="section" id="id95">
-<h3>5.3.22<a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id98">
+<h2>5.3.22<a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/11/08</p>
 <ul class="simple">
 <li><cite>finagle-redis</cite>: String commands</li>
@@ -1918,8 +2010,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>BackupRequestFilter</cite>: experimental service filter to perform backup requests</li>
 </ul>
 </div>
-<div class="section" id="id96">
-<h3>5.3.20<a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id99">
+<h2>5.3.20<a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/10/26</p>
 <ul class="simple">
 <li><cite>finagle-redis</cite>: fix zrevrangebyscore (<a class="reference external" href="https://github.com/twitter/finagle/issues/114">https://github.com/twitter/finagle/issues/114</a>)</li>
@@ -1928,8 +2020,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: Introduce an experimental buffer-based pool</li>
 </ul>
 </div>
-<div class="section" id="id97">
-<h3>5.3.19<a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id100">
+<h2>5.3.19<a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/10/16</p>
 <ul class="simple">
 <li>Upgrade ostrich to 8.2.9</li>
@@ -1946,8 +2038,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-redis</cite>: added new commands</li>
 </ul>
 </div>
-<div class="section" id="id98">
-<h3>5.3.18<a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id101">
+<h2>5.3.18<a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/09/27</p>
 <ul class="simple">
 <li><cite>Doc</cite>: update README with working thrift Java example</li>
@@ -1965,8 +2057,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-redis</cite>: add list commands</li>
 </ul>
 </div>
-<div class="section" id="id99">
-<h3>5.3.9<a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id102">
+<h2>5.3.9<a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/09/07</p>
 <ul class="simple">
 <li><cite>finagle</cite>: Update/fix README</li>
@@ -1977,15 +2069,15 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: SSL: fix connection failure propagation in futures</li>
 </ul>
 </div>
-<div class="section" id="id100">
-<h3>5.3.8<a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id103">
+<h2>5.3.8<a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h2>
 <p>2012/08/24</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Upgrade to Netty 3.5.5</li>
 </ul>
 </div>
-<div class="section" id="id101">
-<h3>5.3.7<a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id104">
+<h2>5.3.7<a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/08/24</p>
 <ul class="simple">
 <li><cite>Doc</cite>: Fix mistake in finagLe README that claimed Future objects have a getContentAsync method</li>
@@ -1996,8 +2088,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-http</cite>: Fix file extension bug in finagle-http</li>
 </ul>
 </div>
-<div class="section" id="id102">
-<h3>5.3.6<a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id105">
+<h2>5.3.6<a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/06/17</p>
 <ul class="simple">
 <li><cite>Doc</cite>: Typos</li>
@@ -2007,8 +2099,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-memcached</cite>: Adding key length validation and refactor validation logic.</li>
 </ul>
 </div>
-<div class="section" id="id103">
-<h3>5.3.5<a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id106">
+<h2>5.3.5<a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/08/10</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Fixed stats visibility</li>
@@ -2019,8 +2111,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-stress</cite>: finagle: kill obsolete benchmark</li>
 </ul>
 </div>
-<div class="section" id="id104">
-<h3>5.3.4<a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id107">
+<h2>5.3.4<a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/08/02</p>
 <ul class="simple">
 <li><cite>finagle</cite>: patch public release of OSS libraries; catch up sbt</li>
@@ -2028,15 +2120,15 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: Timer: address review comments, fix tiny race</li>
 </ul>
 </div>
-<div class="section" id="id105">
-<h3>5.3.3<a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id108">
+<h2>5.3.3<a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/07/31</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Timer: dispose timeouts on cancellation</li>
 </ul>
 </div>
-<div class="section" id="id106">
-<h3>5.3.2<a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id109">
+<h2>5.3.2<a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/07/31</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Fix critical bug in Timer by refactoring the Timer model</li>
@@ -2047,8 +2139,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-zipkin</cite>: Add duration to the the JVM gc annotation.</li>
 </ul>
 </div>
-<div class="section" id="id107">
-<h3>5.3.1<a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id110">
+<h2>5.3.1<a class="headerlink" href="#id110" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/07/20</p>
 <ul class="simple">
 <li><cite>finagle-serversets</cite>: Use authenticated zookeeper client suggested for new SD cluster migration</li>
@@ -2057,8 +2149,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-serversets</cite>: bump up server-set version to 1.0.10 (latest) in finagle-serversets</li>
 </ul>
 </div>
-<div class="section" id="id108">
-<h3>5.3.0<a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id111">
+<h2>5.3.0<a class="headerlink" href="#id111" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/06/25</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: ClientBuilder and ServerBuilder&#8217;s MonitorFilter to report exception sources</li>
@@ -2067,8 +2159,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>Dispatcher</cite>: all write exceptions are wrapped with WriteException</li>
 </ul>
 </div>
-<div class="section" id="id109">
-<h3>5.1.0<a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id112">
+<h2>5.1.0<a class="headerlink" href="#id112" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/06/14</p>
 <ul class="simple">
 <li><cite>finagle</cite>: Upgrade util to 5.2.0, ostrich to 8.1.0</li>
@@ -2079,8 +2171,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: JvmFiler, trace jvm events</li>
 </ul>
 </div>
-<div class="section" id="id110">
-<h3>5.0.2<a class="headerlink" href="#id110" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id113">
+<h2>5.0.2<a class="headerlink" href="#id113" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/06/01</p>
 <ul class="simple">
 <li><cite>finagle-core</cite>: Refactor the new way of managing resources</li>
@@ -2089,8 +2181,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-exception</cite>: Upgrade jerkson to 0.5.0 and streamyj to 0.4.1</li>
 </ul>
 </div>
-<div class="section" id="id111">
-<h3>5.0.0<a class="headerlink" href="#id111" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id114">
+<h2>5.0.0<a class="headerlink" href="#id114" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/05/25</p>
 <ul class="simple">
 <li>Upgrade to scala 2.9.2</li>
@@ -2100,11 +2192,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-core</cite>: expand exception chain in StatsFilter</li>
 </ul>
 </div>
-</div>
-<div class="section" id="id112">
-<h2>4.x<a class="headerlink" href="#id112" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id113">
-<h3>4.0.0<a class="headerlink" href="#id113" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id115">
+<h2>4.0.0<a class="headerlink" href="#id115" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/05/08</p>
 <ul class="simple">
 <li><cite>http</cite>: add AddResponseHeadersFilter, CorsFilter</li>
@@ -2126,11 +2215,8 @@ instead of () =&gt; Engine.</li>
 <li>friendlier java interface for retries</li>
 </ul>
 </div>
-</div>
-<div class="section" id="id114">
-<h2>3.x<a class="headerlink" href="#id114" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id115">
-<h3>3.0.0<a class="headerlink" href="#id115" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id116">
+<h2>3.0.0<a class="headerlink" href="#id116" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/03/14</p>
 <ul class="simple">
 <li><cite>ServiceToChannelHandler</cite>: keep track of shutdowns with pending replies, don&#8217;t monitor errors that occur after cancellation.</li>
@@ -2150,11 +2236,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>memached</cite>: fix bug wherein we made requests with empty keys on retries</li>
 </ul>
 </div>
-</div>
-<div class="section" id="id116">
-<h2>2.x<a class="headerlink" href="#id116" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="id117">
-<h3>2.0.1<a class="headerlink" href="#id117" title="Permalink to this headline">¶</a></h3>
+<h2>2.0.1<a class="headerlink" href="#id117" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/03/01</p>
 <ul class="simple">
 <li><cite>commons-stats</cite>: memoize counters</li>
@@ -2163,7 +2246,7 @@ instead of () =&gt; Engine.</li>
 </ul>
 </div>
 <div class="section" id="id118">
-<h3>2.0.0<a class="headerlink" href="#id118" title="Permalink to this headline">¶</a></h3>
+<h2>2.0.0<a class="headerlink" href="#id118" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/02/27</p>
 <ul class="simple">
 <li>unify client and server factories</li>
@@ -2172,11 +2255,8 @@ instead of () =&gt; Engine.</li>
 <li>upgrade to newest util (and to Guava r11)</li>
 </ul>
 </div>
-</div>
 <div class="section" id="id119">
-<h2>1.x<a class="headerlink" href="#id119" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id120">
-<h3>1.11.1<a class="headerlink" href="#id120" title="Permalink to this headline">¶</a></h3>
+<h2>1.11.1<a class="headerlink" href="#id119" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/02/15</p>
 <ul class="simple">
 <li><cite>HeapBalancer</cite>: safely remove services from cluster when they have requests in flight</li>
@@ -2184,8 +2264,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>core</cite>: keep track of handler walltimes</li>
 </ul>
 </div>
-<div class="section" id="id121">
-<h3>1.11.0<a class="headerlink" href="#id121" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id120">
+<h2>1.11.0<a class="headerlink" href="#id120" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/02/13</p>
 <ul class="simple">
 <li><cite>finagle-redis</cite>: publish.</li>
@@ -2204,8 +2284,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>SummarizingStatsReceiver</cite>: fix bug where sort didn&#8217;t operate over a stable collection</li>
 </ul>
 </div>
-<div class="section" id="id122">
-<h3>1.10.0<a class="headerlink" href="#id122" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id121">
+<h2>1.10.0<a class="headerlink" href="#id121" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/01/24</p>
 <ul class="simple">
 <li><cite>http</cite>: Message.withX methods now have parameterized return types</li>
@@ -2218,8 +2298,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>redis</cite>: imported finagle redis client from Tumblr. not yet published.</li>
 </ul>
 </div>
-<div class="section" id="id123">
-<h3>1.9.12<a class="headerlink" href="#id123" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id122">
+<h2>1.9.12<a class="headerlink" href="#id122" title="Permalink to this headline">¶</a></h2>
 <p>Released 2012/01/05</p>
 <ul class="simple">
 <li><cite>SSLEngine</cite>: do not reuse between connections</li>
@@ -2234,22 +2314,22 @@ instead of () =&gt; Engine.</li>
 <li><cite>finagle-ostrich</cite>: remove, it&#8217;s obsoleted by finagle-ostrich4</li>
 </ul>
 </div>
-<div class="section" id="id124">
-<h3>1.9.10<a class="headerlink" href="#id124" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id123">
+<h2>1.9.10<a class="headerlink" href="#id123" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/12/02</p>
 <ul class="simple">
 <li>update to util 1.12.7</li>
 </ul>
 </div>
-<div class="section" id="id125">
-<h3>1.9.9<a class="headerlink" href="#id125" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id124">
+<h2>1.9.9<a class="headerlink" href="#id124" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/12/01</p>
 <ul class="simple">
 <li>update to util 1.12.6</li>
 </ul>
 </div>
-<div class="section" id="id126">
-<h3>1.9.8<a class="headerlink" href="#id126" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id125">
+<h2>1.9.8<a class="headerlink" href="#id125" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/11/30</p>
 <ul class="simple">
 <li>upgrade to netty 3.2.7.Final</li>
@@ -2257,8 +2337,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>native</cite>: fix content-length header</li>
 </ul>
 </div>
-<div class="section" id="id127">
-<h3>1.9.7<a class="headerlink" href="#id127" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id126">
+<h2>1.9.7<a class="headerlink" href="#id126" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/11/29</p>
 <ul class="simple">
 <li><cite>http</cite>: Propagate CancelledRequestException rather than continuing</li>
@@ -2271,8 +2351,8 @@ instead of () =&gt; Engine.</li>
 <li>kill off openConnectionsHealthThresholds (unused)</li>
 </ul>
 </div>
-<div class="section" id="id128">
-<h3>1.9.6<a class="headerlink" href="#id128" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id127">
+<h2>1.9.6<a class="headerlink" href="#id127" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/11/08</p>
 <ul class="simple">
 <li><cite>SSL</cite>: make native provider bootstrapping code work; refactor &#8216;Ssl&#8217; singleton</li>
@@ -2281,8 +2361,8 @@ instead of () =&gt; Engine.</li>
 <li>a more flexible retry filter</li>
 </ul>
 </div>
-<div class="section" id="id129">
-<h3>1.9.5<a class="headerlink" href="#id129" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id128">
+<h2>1.9.5<a class="headerlink" href="#id128" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/11/04</p>
 <ul class="simple">
 <li><cite>ExpiringService</cite>: add stats for idle and lifetime expiration. Deactivate() regardless of latch counter</li>
@@ -2297,8 +2377,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>Tracing</cite>: Add release method to Tracer trait, add tracerFactory to builders, deprecate tracer on builders</li>
 </ul>
 </div>
-<div class="section" id="id130">
-<h3>1.9.4<a class="headerlink" href="#id130" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id129">
+<h2>1.9.4<a class="headerlink" href="#id129" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/10/24</p>
 <ul class="simple">
 <li><cite>Service</cite>: response Future will now be cancelled if the client disconnects</li>
@@ -2309,8 +2389,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>some timer bug fixes, particularly</cite>: TimerToNettyTimer: actually cancel underlying task.</li>
 </ul>
 </div>
-<div class="section" id="id131">
-<h3>1.9.2<a class="headerlink" href="#id131" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id130">
+<h2>1.9.2<a class="headerlink" href="#id130" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/10/14</p>
 <ul class="simple">
 <li><cite>tracing</cite>: Change SpanId to use RichU64String</li>
@@ -2319,8 +2399,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>http</cite>: add common media types</li>
 </ul>
 </div>
-<div class="section" id="id132">
-<h3>1.9.1<a class="headerlink" href="#id132" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id131">
+<h2>1.9.1<a class="headerlink" href="#id131" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/09/28</p>
 <ul class="simple">
 <li><cite>memcached</cite>: new interface for partial results (ie. retrieval failures + successes)</li>
@@ -2332,15 +2412,15 @@ instead of () =&gt; Engine.</li>
 <li>upgrade to ostrich 4.9.0</li>
 </ul>
 </div>
-<div class="section" id="id133">
-<h3>1.9.0<a class="headerlink" href="#id133" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id132">
+<h2>1.9.0<a class="headerlink" href="#id132" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/08/29</p>
 <ul class="simple">
 <li><cite>http</cite>: new http library</li>
 </ul>
 </div>
-<div class="section" id="id134">
-<h3>1.8.4<a class="headerlink" href="#id134" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id133">
+<h2>1.8.4<a class="headerlink" href="#id133" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/08/23</p>
 <ul class="simple">
 <li><cite>tracing</cite>: fixed space leak</li>
@@ -2351,8 +2431,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>core</cite>: expose stats on failed retries</li>
 </ul>
 </div>
-<div class="section" id="id135">
-<h3>1.8.3<a class="headerlink" href="#id135" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id134">
+<h2>1.8.3<a class="headerlink" href="#id134" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/08/12</p>
 <ul class="simple">
 <li><cite>thrift</cite>: add a server-side buffered codec; fix tracing issue in buffered codec</li>
@@ -2363,8 +2443,8 @@ instead of () =&gt; Engine.</li>
 <li><cite>kestrel</cite>: buffered &amp; merging of ReadHandles</li>
 </ul>
 </div>
-<div class="section" id="id136">
-<h3>1.8.1<a class="headerlink" href="#id136" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id135">
+<h2>1.8.1<a class="headerlink" href="#id135" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/08/05</p>
 <ul class="simple">
 <li>upgrade to netty 3.2.5.Final</li>
@@ -2376,16 +2456,16 @@ instead of () =&gt; Engine.</li>
 <li>quench unecessary error reporting</li>
 </ul>
 </div>
-<div class="section" id="id137">
-<h3>1.8.0<a class="headerlink" href="#id137" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id136">
+<h2>1.8.0<a class="headerlink" href="#id136" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/08/02</p>
 <ul class="simple">
 <li><cite>SSL</cite>: perform hostname validation in the client. this is the reason for the minor bump: we change the .tls() ClientBuilder signature</li>
 <li>introduce util-codec dependency for use of the apache commons base 64 codec</li>
 </ul>
 </div>
-<div class="section" id="id138">
-<h3>1.7.5<a class="headerlink" href="#id138" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id137">
+<h2>1.7.5<a class="headerlink" href="#id137" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/07/29</p>
 <ul class="simple">
 <li>make it easier to use the NullStatsReceiver from java</li>
@@ -2400,16 +2480,16 @@ instead of () =&gt; Engine.</li>
 <li><cite>ChannelServiceFactory</cite>: encode exceptions from bootstrap.connect()</li>
 </ul>
 </div>
-<div class="section" id="id139">
-<h3>1.7.4<a class="headerlink" href="#id139" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id138">
+<h2>1.7.4<a class="headerlink" href="#id138" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/07/22</p>
 <ul class="simple">
 <li><cite>http</cite>: convert codec exceptions into 4xx errors; report them as such upstream</li>
 <li><cite>memcache</cite>: <cite>gets</cite> and <cite>cas</cite> support.</li>
 </ul>
 </div>
-<div class="section" id="id140">
-<h3>1.7.3<a class="headerlink" href="#id140" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id139">
+<h2>1.7.3<a class="headerlink" href="#id139" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/07/19</p>
 <ul class="simple">
 <li><cite>fix</cite>: 1.7.2 introduced a regression in the pool that may, under certain circumstances, admit connections beyond the high watermark.</li>
@@ -2417,8 +2497,8 @@ instead of () =&gt; Engine.</li>
 <li>Adds tracing support for the Memcached client. This only creates the client side annotations, no support for passing along ids and such to the memcached server.</li>
 </ul>
 </div>
-<div class="section" id="id141">
-<h3>1.7.2<a class="headerlink" href="#id141" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id140">
+<h2>1.7.2<a class="headerlink" href="#id140" title="Permalink to this headline">¶</a></h2>
 <p>Released 2011/07/18</p>
 <ul class="simple">
 <li>support end-to-end cancellation in finagle clients; fixes possible pool starvation conditions, and allows clients to cancel requests and reclaim resources</li>
@@ -2426,7 +2506,6 @@ instead of () =&gt; Engine.</li>
 <li>some doc fixes</li>
 <li>misc. bug fixes</li>
 </ul>
-</div>
 </div>
 </div>
 
@@ -2449,191 +2528,180 @@ instead of () =&gt; Engine.</li>
 </ul>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Finagle changelog</a><ul>
-<li><a class="reference internal" href="#x">6.x</a><ul>
-<li><a class="reference internal" href="#id1">6.33.0</a></li>
-<li><a class="reference internal" href="#new-features">New Features</a></li>
-<li><a class="reference internal" href="#deprecations">Deprecations</a></li>
-<li><a class="reference internal" href="#breaking-api-changes">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#x">6.x</a></li>
+<li><a class="reference internal" href="#id1">6.34.0</a><ul>
 <li><a class="reference internal" href="#runtime-behavior-changes">Runtime Behavior Changes</a></li>
-<li><a class="reference internal" href="#id2">Breaking API Changes</a></li>
-<li><a class="reference internal" href="#id3">6.32.0</a></li>
+<li><a class="reference internal" href="#new-features">New Features</a></li>
+<li><a class="reference internal" href="#breaking-api-changes">Breaking API Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id4">6.31.0</a><ul>
-<li><a class="reference internal" href="#id5">New Features</a></li>
-<li><a class="reference internal" href="#id6">Deprecations</a></li>
-<li><a class="reference internal" href="#id7">Runtime Behavior Changes</a></li>
-<li><a class="reference internal" href="#id8">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id2">6.33.0</a><ul>
+<li><a class="reference internal" href="#id3">New Features</a></li>
+<li><a class="reference internal" href="#deprecations">Deprecations</a></li>
+<li><a class="reference internal" href="#id4">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id5">Runtime Behavior Changes</a></li>
+<li><a class="reference internal" href="#id6">Breaking API Changes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id7">6.32.0</a></li>
+<li><a class="reference internal" href="#id8">6.31.0</a><ul>
+<li><a class="reference internal" href="#id9">New Features</a></li>
+<li><a class="reference internal" href="#id10">Deprecations</a></li>
+<li><a class="reference internal" href="#id11">Runtime Behavior Changes</a></li>
+<li><a class="reference internal" href="#id12">Breaking API Changes</a></li>
 <li><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id9">6.30.0</a><ul>
-<li><a class="reference internal" href="#id10">New Features</a></li>
-<li><a class="reference internal" href="#id11">Runtime Behavior Changes</a></li>
-<li><a class="reference internal" href="#id12">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id13">6.30.0</a><ul>
+<li><a class="reference internal" href="#id14">New Features</a></li>
+<li><a class="reference internal" href="#id15">Runtime Behavior Changes</a></li>
+<li><a class="reference internal" href="#id16">Breaking API Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id13">6.29.0</a><ul>
-<li><a class="reference internal" href="#id14">Deprecations</a></li>
-<li><a class="reference internal" href="#id15">New Features</a></li>
-<li><a class="reference internal" href="#id16">Runtime Behavior Changes</a></li>
-<li><a class="reference internal" href="#id17">Breaking API Changes</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id18">6.28.0</a><ul>
+<li><a class="reference internal" href="#id17">6.29.0</a><ul>
+<li><a class="reference internal" href="#id18">Deprecations</a></li>
 <li><a class="reference internal" href="#id19">New Features</a></li>
 <li><a class="reference internal" href="#id20">Runtime Behavior Changes</a></li>
 <li><a class="reference internal" href="#id21">Breaking API Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id22">6.27.0</a><ul>
+<li><a class="reference internal" href="#id22">6.28.0</a><ul>
 <li><a class="reference internal" href="#id23">New Features</a></li>
 <li><a class="reference internal" href="#id24">Runtime Behavior Changes</a></li>
 <li><a class="reference internal" href="#id25">Breaking API Changes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id26">6.26.0</a><ul>
-<li><a class="reference internal" href="#id27">Deprecations</a></li>
-<li><a class="reference internal" href="#id28">New Features</a></li>
+<li><a class="reference internal" href="#id26">6.27.0</a><ul>
+<li><a class="reference internal" href="#id27">New Features</a></li>
+<li><a class="reference internal" href="#id28">Runtime Behavior Changes</a></li>
 <li><a class="reference internal" href="#id29">Breaking API Changes</a></li>
-<li><a class="reference internal" href="#id30">New Features</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id31">6.25.0</a><ul>
-<li><a class="reference internal" href="#id32">Breaking API Changes</a></li>
-<li><a class="reference internal" href="#id33">Runtime Behavior Changes</a></li>
-<li><a class="reference internal" href="#id34">Deprecations</a></li>
-<li><a class="reference internal" href="#id35">New Features</a></li>
-<li><a class="reference internal" href="#id36">Bug Fixes</a></li>
+<li><a class="reference internal" href="#id30">6.26.0</a><ul>
+<li><a class="reference internal" href="#id31">Deprecations</a></li>
+<li><a class="reference internal" href="#id32">New Features</a></li>
+<li><a class="reference internal" href="#id33">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id34">New Features</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id35">6.25.0</a><ul>
+<li><a class="reference internal" href="#id36">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id37">Runtime Behavior Changes</a></li>
+<li><a class="reference internal" href="#id38">Deprecations</a></li>
+<li><a class="reference internal" href="#id39">New Features</a></li>
+<li><a class="reference internal" href="#id40">Bug Fixes</a></li>
 <li><a class="reference internal" href="#miscellaneous-cleanup">Miscellaneous Cleanup</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id37">6.24.0</a><ul>
-<li><a class="reference internal" href="#id38">Breaking API Changes</a></li>
-<li><a class="reference internal" href="#id39">Runtime Behavior Changes</a></li>
-<li><a class="reference internal" href="#id40">Deprecations</a></li>
-<li><a class="reference internal" href="#id41">New Features</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id42">6.23.0</a><ul>
-<li><a class="reference internal" href="#id43">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id41">6.24.0</a><ul>
+<li><a class="reference internal" href="#id42">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id43">Runtime Behavior Changes</a></li>
 <li><a class="reference internal" href="#id44">Deprecations</a></li>
-<li><a class="reference internal" href="#id45">Runtime Behavior Changes</a></li>
+<li><a class="reference internal" href="#id45">New Features</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id46">6.22.0</a><ul>
+<li><a class="reference internal" href="#id46">6.23.0</a><ul>
 <li><a class="reference internal" href="#id47">Breaking API Changes</a></li>
-<li><a class="reference internal" href="#id48">New Features</a></li>
+<li><a class="reference internal" href="#id48">Deprecations</a></li>
 <li><a class="reference internal" href="#id49">Runtime Behavior Changes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id50">6.22.0</a><ul>
+<li><a class="reference internal" href="#id51">Breaking API Changes</a></li>
+<li><a class="reference internal" href="#id52">New Features</a></li>
+<li><a class="reference internal" href="#id53">Runtime Behavior Changes</a></li>
 <li><a class="reference internal" href="#documentation">Documentation</a></li>
 <li><a class="reference internal" href="#optimization">Optimization</a></li>
-<li><a class="reference internal" href="#id50">Bug Fixes</a></li>
+<li><a class="reference internal" href="#id54">Bug Fixes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id51">6.21.0</a></li>
-<li><a class="reference internal" href="#id52">6.20.0</a></li>
-<li><a class="reference internal" href="#id53">6.19.0</a></li>
-<li><a class="reference internal" href="#id54">6.18.0</a></li>
-<li><a class="reference internal" href="#id55">6.17.0</a></li>
-<li><a class="reference internal" href="#id56">6.16.0</a></li>
-<li><a class="reference internal" href="#id57">6.15.0</a></li>
-<li><a class="reference internal" href="#id58">6.14.0</a><ul>
-<li><a class="reference internal" href="#id59">6.13.1</a></li>
-<li><a class="reference internal" href="#id60">6.13.0</a></li>
-<li><a class="reference internal" href="#id61">6.12.2</a></li>
-<li><a class="reference internal" href="#id62">6.12.1</a></li>
-<li><a class="reference internal" href="#id63">6.12.0</a></li>
-<li><a class="reference internal" href="#id64">6.11.1</a></li>
-<li><a class="reference internal" href="#id65">6.11.0</a></li>
-<li><a class="reference internal" href="#id66">6.10.0</a></li>
-<li><a class="reference internal" href="#id67">6.9.0</a></li>
-<li><a class="reference internal" href="#id68">6.8.1</a></li>
-<li><a class="reference internal" href="#id69">6.8.0</a></li>
-<li><a class="reference internal" href="#id70">6.7.4</a></li>
-<li><a class="reference internal" href="#id71">6.7.2</a></li>
-<li><a class="reference internal" href="#id72">6.7.1</a></li>
-<li><a class="reference internal" href="#id73">6.7.0</a></li>
-<li><a class="reference internal" href="#id74">6.6.2</a></li>
-<li><a class="reference internal" href="#id75">6.6.0</a></li>
-<li><a class="reference internal" href="#id76">6.5.2</a></li>
-<li><a class="reference internal" href="#id77">6.5.1</a></li>
-<li><a class="reference internal" href="#id78">6.5.0</a></li>
-<li><a class="reference internal" href="#id79">6.4.1</a></li>
-<li><a class="reference internal" href="#id80">6.4.0</a></li>
-<li><a class="reference internal" href="#id81">6.3.0</a></li>
-<li><a class="reference internal" href="#id82">6.1.4</a></li>
-<li><a class="reference internal" href="#id83">6.1.3</a></li>
-<li><a class="reference internal" href="#id84">6.1.2</a></li>
-<li><a class="reference internal" href="#id85">6.1.1</a></li>
-<li><a class="reference internal" href="#id86">6.1.0</a></li>
-<li><a class="reference internal" href="#id87">6.0.5</a></li>
-<li><a class="reference internal" href="#id88">6.0.4</a></li>
-<li><a class="reference internal" href="#id89">6.0.3</a></li>
-<li><a class="reference internal" href="#id90">6.0.2</a></li>
-<li><a class="reference internal" href="#id91">6.0.1</a></li>
-<li><a class="reference internal" href="#id92">6.0.0</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id93">5.x</a><ul>
-<li><a class="reference internal" href="#id94">5.3.23</a></li>
-<li><a class="reference internal" href="#id95">5.3.22</a></li>
-<li><a class="reference internal" href="#id96">5.3.20</a></li>
-<li><a class="reference internal" href="#id97">5.3.19</a></li>
-<li><a class="reference internal" href="#id98">5.3.18</a></li>
-<li><a class="reference internal" href="#id99">5.3.9</a></li>
-<li><a class="reference internal" href="#id100">5.3.8</a></li>
-<li><a class="reference internal" href="#id101">5.3.7</a></li>
-<li><a class="reference internal" href="#id102">5.3.6</a></li>
-<li><a class="reference internal" href="#id103">5.3.5</a></li>
-<li><a class="reference internal" href="#id104">5.3.4</a></li>
-<li><a class="reference internal" href="#id105">5.3.3</a></li>
-<li><a class="reference internal" href="#id106">5.3.2</a></li>
-<li><a class="reference internal" href="#id107">5.3.1</a></li>
-<li><a class="reference internal" href="#id108">5.3.0</a></li>
-<li><a class="reference internal" href="#id109">5.1.0</a></li>
-<li><a class="reference internal" href="#id110">5.0.2</a></li>
-<li><a class="reference internal" href="#id111">5.0.0</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id112">4.x</a><ul>
-<li><a class="reference internal" href="#id113">4.0.0</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id114">3.x</a><ul>
-<li><a class="reference internal" href="#id115">3.0.0</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id116">2.x</a><ul>
+<li><a class="reference internal" href="#id55">6.21.0</a></li>
+<li><a class="reference internal" href="#id56">6.20.0</a></li>
+<li><a class="reference internal" href="#id57">6.19.0</a></li>
+<li><a class="reference internal" href="#id58">6.18.0</a></li>
+<li><a class="reference internal" href="#id59">6.17.0</a></li>
+<li><a class="reference internal" href="#id60">6.16.0</a></li>
+<li><a class="reference internal" href="#id61">6.15.0</a></li>
+<li><a class="reference internal" href="#id62">6.14.0</a></li>
+<li><a class="reference internal" href="#id63">6.13.1</a></li>
+<li><a class="reference internal" href="#id64">6.13.0</a></li>
+<li><a class="reference internal" href="#id65">6.12.2</a></li>
+<li><a class="reference internal" href="#id66">6.12.1</a></li>
+<li><a class="reference internal" href="#id67">6.12.0</a></li>
+<li><a class="reference internal" href="#id68">6.11.1</a></li>
+<li><a class="reference internal" href="#id69">6.11.0</a></li>
+<li><a class="reference internal" href="#id70">6.10.0</a></li>
+<li><a class="reference internal" href="#id71">6.9.0</a></li>
+<li><a class="reference internal" href="#id72">6.8.1</a></li>
+<li><a class="reference internal" href="#id73">6.8.0</a></li>
+<li><a class="reference internal" href="#id74">6.7.4</a></li>
+<li><a class="reference internal" href="#id75">6.7.2</a></li>
+<li><a class="reference internal" href="#id76">6.7.1</a></li>
+<li><a class="reference internal" href="#id77">6.7.0</a></li>
+<li><a class="reference internal" href="#id78">6.6.2</a></li>
+<li><a class="reference internal" href="#id79">6.6.0</a></li>
+<li><a class="reference internal" href="#id80">6.5.2</a></li>
+<li><a class="reference internal" href="#id81">6.5.1</a></li>
+<li><a class="reference internal" href="#id82">6.5.0</a></li>
+<li><a class="reference internal" href="#id83">6.4.1</a></li>
+<li><a class="reference internal" href="#id84">6.4.0</a></li>
+<li><a class="reference internal" href="#id85">6.3.0</a></li>
+<li><a class="reference internal" href="#id86">6.1.4</a></li>
+<li><a class="reference internal" href="#id87">6.1.3</a></li>
+<li><a class="reference internal" href="#id88">6.1.2</a></li>
+<li><a class="reference internal" href="#id89">6.1.1</a></li>
+<li><a class="reference internal" href="#id90">6.1.0</a></li>
+<li><a class="reference internal" href="#id91">6.0.5</a></li>
+<li><a class="reference internal" href="#id92">6.0.4</a></li>
+<li><a class="reference internal" href="#id93">6.0.3</a></li>
+<li><a class="reference internal" href="#id94">6.0.2</a></li>
+<li><a class="reference internal" href="#id95">6.0.1</a></li>
+<li><a class="reference internal" href="#id96">6.0.0</a></li>
+<li><a class="reference internal" href="#id97">5.3.23</a></li>
+<li><a class="reference internal" href="#id98">5.3.22</a></li>
+<li><a class="reference internal" href="#id99">5.3.20</a></li>
+<li><a class="reference internal" href="#id100">5.3.19</a></li>
+<li><a class="reference internal" href="#id101">5.3.18</a></li>
+<li><a class="reference internal" href="#id102">5.3.9</a></li>
+<li><a class="reference internal" href="#id103">5.3.8</a></li>
+<li><a class="reference internal" href="#id104">5.3.7</a></li>
+<li><a class="reference internal" href="#id105">5.3.6</a></li>
+<li><a class="reference internal" href="#id106">5.3.5</a></li>
+<li><a class="reference internal" href="#id107">5.3.4</a></li>
+<li><a class="reference internal" href="#id108">5.3.3</a></li>
+<li><a class="reference internal" href="#id109">5.3.2</a></li>
+<li><a class="reference internal" href="#id110">5.3.1</a></li>
+<li><a class="reference internal" href="#id111">5.3.0</a></li>
+<li><a class="reference internal" href="#id112">5.1.0</a></li>
+<li><a class="reference internal" href="#id113">5.0.2</a></li>
+<li><a class="reference internal" href="#id114">5.0.0</a></li>
+<li><a class="reference internal" href="#id115">4.0.0</a></li>
+<li><a class="reference internal" href="#id116">3.0.0</a></li>
 <li><a class="reference internal" href="#id117">2.0.1</a></li>
 <li><a class="reference internal" href="#id118">2.0.0</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id119">1.x</a><ul>
-<li><a class="reference internal" href="#id120">1.11.1</a></li>
-<li><a class="reference internal" href="#id121">1.11.0</a></li>
-<li><a class="reference internal" href="#id122">1.10.0</a></li>
-<li><a class="reference internal" href="#id123">1.9.12</a></li>
-<li><a class="reference internal" href="#id124">1.9.10</a></li>
-<li><a class="reference internal" href="#id125">1.9.9</a></li>
-<li><a class="reference internal" href="#id126">1.9.8</a></li>
-<li><a class="reference internal" href="#id127">1.9.7</a></li>
-<li><a class="reference internal" href="#id128">1.9.6</a></li>
-<li><a class="reference internal" href="#id129">1.9.5</a></li>
-<li><a class="reference internal" href="#id130">1.9.4</a></li>
-<li><a class="reference internal" href="#id131">1.9.2</a></li>
-<li><a class="reference internal" href="#id132">1.9.1</a></li>
-<li><a class="reference internal" href="#id133">1.9.0</a></li>
-<li><a class="reference internal" href="#id134">1.8.4</a></li>
-<li><a class="reference internal" href="#id135">1.8.3</a></li>
-<li><a class="reference internal" href="#id136">1.8.1</a></li>
-<li><a class="reference internal" href="#id137">1.8.0</a></li>
-<li><a class="reference internal" href="#id138">1.7.5</a></li>
-<li><a class="reference internal" href="#id139">1.7.4</a></li>
-<li><a class="reference internal" href="#id140">1.7.3</a></li>
-<li><a class="reference internal" href="#id141">1.7.2</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#id119">1.11.1</a></li>
+<li><a class="reference internal" href="#id120">1.11.0</a></li>
+<li><a class="reference internal" href="#id121">1.10.0</a></li>
+<li><a class="reference internal" href="#id122">1.9.12</a></li>
+<li><a class="reference internal" href="#id123">1.9.10</a></li>
+<li><a class="reference internal" href="#id124">1.9.9</a></li>
+<li><a class="reference internal" href="#id125">1.9.8</a></li>
+<li><a class="reference internal" href="#id126">1.9.7</a></li>
+<li><a class="reference internal" href="#id127">1.9.6</a></li>
+<li><a class="reference internal" href="#id128">1.9.5</a></li>
+<li><a class="reference internal" href="#id129">1.9.4</a></li>
+<li><a class="reference internal" href="#id130">1.9.2</a></li>
+<li><a class="reference internal" href="#id131">1.9.1</a></li>
+<li><a class="reference internal" href="#id132">1.9.0</a></li>
+<li><a class="reference internal" href="#id133">1.8.4</a></li>
+<li><a class="reference internal" href="#id134">1.8.3</a></li>
+<li><a class="reference internal" href="#id135">1.8.1</a></li>
+<li><a class="reference internal" href="#id136">1.8.0</a></li>
+<li><a class="reference internal" href="#id137">1.7.5</a></li>
+<li><a class="reference internal" href="#id138">1.7.4</a></li>
+<li><a class="reference internal" href="#id139">1.7.3</a></li>
+<li><a class="reference internal" href="#id140">1.7.2</a></li>
 </ul>
 </li>
 </ul>

@@ -65,6 +65,8 @@ All the unhandled exceptions from a user-defined service flow through the ``Moni
 used by the given Finagle server. See :ref:`this example <configuring_monitors>` on how to
 override the default instance that simply logs exceptions onto a the standard output.
 
+.. include:: shared-modules/ResponseClassification.rst
+
 Concurrency Limit
 ^^^^^^^^^^^^^^^^^
 
@@ -93,7 +95,7 @@ The `Concurrency Limit` module is configured with two parameters:
 2. `maxWaiters` - the number of requests (on top of `maxConcurrentRequests`) allowed to be queued
 
 All the incoming requests on top of ``(maxConcurrentRequests + maxWaiters)`` will be
-`rejected`[#nack]_ by the server. That said, the `Concurrency Limit` module acts as
+`rejected` [#nack]_ by the server. That said, the `Concurrency Limit` module acts as
 `static admission controller` monitoring the current concurrency level of the incoming requests.
 
 See :ref:`Requests Concurrency metrics <requests_concurrency_limit>` for more details.

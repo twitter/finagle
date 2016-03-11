@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.33.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.34.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.33.0',
+        VERSION:     '6.34.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.33.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -97,9 +97,13 @@ They are also useful in diagnosing what contributes to request latency.</p>
 <dt><strong>pending</strong></dt>
 <dd>A gauge of the current total number of outstanding requests (same as &#8220;load&#8221;).</dd>
 <dt><strong>failures/&lt;exception_name&gt;+</strong></dt>
-<dd>A counter of the number of times a specific exception has been thrown.</dd>
+<dd>A counter of the number of times a specific exception has been thrown.
+If you are using a <tt class="docutils literal"><span class="pre">ResponseClassifier</span></tt> that classifies non-Exceptions
+as failures, it will use a synthetic Exception,
+<tt class="docutils literal"><span class="pre">com.twitter.finagle.service.ResponseClassificationSyntheticException</span></tt>,
+to account for these.</dd>
 <dt><strong>failures</strong></dt>
-<dd>A counter of the number of times any exception has been thrown.</dd>
+<dd>A counter of the number of times any failure has been observed.</dd>
 <dt><strong>sourcedfailures/&lt;source_service_name&gt;{/&lt;exception_name&gt;}+</strong></dt>
 <dd>A counter of the number of times a specific
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Exceptions.scala">SourcedException</a> or sourced
@@ -157,6 +161,15 @@ for example from a deadline or timeout. Not supported by all protocols.</dd>
 <dt><strong>request_queue_size</strong></dt>
 <dd>A gauge of the total number of requests which are waiting because of the limit
 on simultaneous requests.</dd>
+</dl>
+</div>
+<div class="section" id="payloadsizefilter-enabled-for-mux-http-non-chunked-thrift">
+<h3>PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)<a class="headerlink" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>request_payload_bytes</strong></dt>
+<dd>A histogram of the number of bytes per request&#8217;s payload.</dd>
+<dt><strong>response_payload_bytes</strong></dt>
+<dd>A histogram of the number of bytes per response&#8217;s payload.</dd>
 </dl>
 </div>
 </div>
@@ -278,6 +291,12 @@ manages failures.</p>
 <div class="section" id="failureaccrualfactory">
 <h3>FailureAccrualFactory<a class="headerlink" href="#failureaccrualfactory" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
+<dt><strong>removed_for_ms</strong></dt>
+<dd>A counter of the total time in milliseconds any host has spent in dead
+state due to failure accrual.</dd>
+<dt><strong>probes</strong></dt>
+<dd>A counter of the number of requests sent through failure accrual while
+a host was marked dead to probe for revival.</dd>
 <dt><strong>removals</strong></dt>
 <dd>A count of how many times any host has been removed due to failure
 accrual.  Note that there is no specificity on which host in the
@@ -754,6 +773,7 @@ responses are automatically retried by Finagle Http client.</dd>
 <li><a class="reference internal" href="#statsfactorywrapper">StatsFactoryWrapper</a></li>
 <li><a class="reference internal" href="#serverstatsfilter">ServerStatsFilter</a></li>
 <li><a class="reference internal" href="#requestsemaphorefilter">RequestSemaphoreFilter</a></li>
+<li><a class="reference internal" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift">PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#construction">Construction</a><ul>

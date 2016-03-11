@@ -28,10 +28,12 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img alt="Class" src="../../../lib/class_big.png" />
+        <a href="Mux$$Server$.html" title="See companion object"><img alt="Class/Object" src="../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../package.html" class="extype" name="com">com</a>.<a href="../package.html" class="extype" name="com.twitter">twitter</a>.<a href="package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">Mux</a></p>
-        <h1>Server</h1><h3><span class="morelinks"><div>Related Doc:
-            <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">package Mux</a>
+        <h1><a href="Mux$$Server$.html" title="See companion object">Server</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Mux$$Server$.html" title="See companion object">object Server</a>
+            | <a href="Mux$.html" class="extype" name="com.twitter.finagle.Mux">package Mux</a>
           </div></span></h3><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Mux$$Server" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
@@ -45,9 +47,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="defval" name='<span class="name"><a href="../../package.html">StackServer.newStack
-        .remove(TraceInitializerFilter.role)
-        .replace(StackServer.Role.protoTracing, new ServerProtoTracing)</a></span>'>...</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackServer.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Server$.html">Server.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackServer.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span><span class="result"> extends <a href="server/StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>, <a href="" class="extype" name="com.twitter.finagle.Mux.Server">Server</a>] with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -99,9 +99,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="defval" name='<span class="name"><a href="../../package.html">StackServer.newStack
-        .remove(TraceInitializerFilter.role)
-        .replace(StackServer.Role.protoTracing, new ServerProtoTracing)</a></span>'>...</span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackServer.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span>
+        <span class="name">Server</span><span class="params">(<span name="stack">stack: <a href="Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a>[<a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]] = <span class="symbol"><span class="name"><a href="Mux$$Server$.html">Server.stack</a></span></span></span>, <span name="params">params: <a href="Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a> = <span class="defval" name='<span class="name"><a href="param/ProtocolLibrary$.html">StackServer.defaultParams + ProtocolLibrary(&quot;mux&quot;)</a></span>'>...</span></span>)</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Mux$$Server@&lt;init&gt;(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.Mux.Server" title="Permalink" target="_top">
@@ -396,18 +394,18 @@ case class.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.Mux.Server#newDispatcher" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[Server.this.In,Server.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.mux.ServerDispatcher"></a>
-      <a id="newDispatcher(Transport[In,Out],Service[Request,Response]):ServerDispatcher"></a>
+      <a id="newDispatcher(transport:com.twitter.finagle.transport.Transport[Server.this.In,Server.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.util.Closable"></a>
+      <a id="newDispatcher(Transport[In,Out],Service[Request,Response]):Closable"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.Mux.Server.In">In</a>, <a href="#Out=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.Mux.Server.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.mux.ServerDispatcher">ServerDispatcher</span></span>
+        <span class="name">newDispatcher</span><span class="params">(<span name="transport">transport: <a href="transport/Transport.html" class="extype" name="com.twitter.finagle.transport.Transport">Transport</a>[<a href="#In=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.Mux.Server.In">In</a>, <a href="#Out=org.jboss.netty.buffer.ChannelBuffer" class="extmbr" name="com.twitter.finagle.Mux.Server.Out">Out</a>]</span>, <span name="service">service: <a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="mux/Request.html" class="extype" name="com.twitter.finagle.mux.Request">Request</a>, <a href="mux/Response.html" class="extype" name="com.twitter.finagle.mux.Response">Response</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Mux$$Server@newDispatcher(transport:com.twitter.finagle.transport.Transport[Server.this.In,Server.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.finagle.mux.ServerDispatcher" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Server@newDispatcher(transport:com.twitter.finagle.transport.Transport[Server.this.In,Server.this.Out],service:com.twitter.finagle.Service[com.twitter.finagle.mux.Request,com.twitter.finagle.mux.Response]):com.twitter.util.Closable" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -892,7 +890,40 @@ between the dispatch of the request and the receipt of the response.</p><h4> Ser
 spend handling the incoming request. Using the Finagle terminology, this is an amount
 of time after which a non-satisfied future returned from the user-defined service
 times out.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.CommonParams#withResponseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withResponseClassifier(responseClassifier:com.twitter.finagle.service.ResponseClassifier):A"></a>
+      <a id="withResponseClassifier(ResponseClassifier):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withResponseClassifier</span><span class="params">(<span name="responseClassifier">responseClassifier: <a href="service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">ResponseClassifier</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Mux.Server">Server</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Mux$$Server@withResponseClassifier(responseClassifier:com.twitter.finagle.service.ResponseClassifier):A" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Configure a <a href="service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
+which is used to determine the result of a request/response.</p><div class="fullcomment"><div class="comment cmt"><p>Configure a <a href="service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>
+which is used to determine the result of a request/response.</p><p>This allows developers to give Finagle the additional application-specific
+knowledge necessary in order to properly classify responses. Without this,
+Finagle cannot make judgements about application-level failures as it only
+has a narrow understanding of failures (for example: transport level, timeouts,
+and nacks).</p><p>As an example take an HTTP server that returns a response with a 500 status
+code. To Finagle this is a successful request/response. However, the application
+developer may want to treat all 500 status codes as failures and can do so via
+setting a <a href="service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.</p><p>ResponseClassifier is a <span class="extype" name="PartialFunction">PartialFunction</span> and as such multiple classifiers can
+be composed together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.</p><p>Response classification is independently configured on the client and server.
+For client-side response classification using <a href="builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">com.twitter.finagle.builder.ClientBuilder</a>,
+see <code>com.twitter.finagle.builder.ClientBuilder.responseClassifier</code>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
+<a href="service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
+which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http/service/HttpResponseClassifier$.html" class="extype" name="com.twitter.finagle.http.service.HttpResponseClassifier">com.twitter.finagle.http.service.HttpResponseClassifier</a> for some
+HTTP classification tools.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.server.StdStackServer#withStack" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withStack(stack:com.twitter.finagle.Stack[com.twitter.finagle.ServiceFactory[Req,Rep]]):This"></a>
       <a id="withStack(Stack[ServiceFactory[Request,Response]]):Server"></a>

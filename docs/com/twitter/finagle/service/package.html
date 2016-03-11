@@ -160,12 +160,13 @@ Promises are detached on interruption.</p></span></dd></dl></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A service wrapper that expires the self service after a
-certain amount of idle time.</p><div class="fullcomment"><div class="comment cmt"><p>A service wrapper that expires the self service after a
+      <p class="shortcomment cmt">A service wrapper that expires the <code>self</code> service after a
+certain amount of idle time.</p><div class="fullcomment"><div class="comment cmt"><p>A service wrapper that expires the <code>self</code> service after a
 certain amount of idle time. By default, expiring calls
-<code><code>.close()<i> on the self channel, but this action is
+<code>close()</code> on the <code>self</code> channel, but this action is
 customizable.
-</i></code></code></p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailedService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FailedServiceextendsConstantService[Any,Nothing]"></a>
       <a id="FailedService:FailedService"></a>
@@ -222,7 +223,8 @@ itself unavailable when deemed unhealthy according to its configuration.</p><p>T
 <a href="http://martinfowler.com/bliki/CircuitBreaker.html" target="_blank">circuit breaker</a>.</p><p>When used in a typical Finagle client, there is one instance per node
 and as such, the load balancer will avoid nodes that are marked down
 via failure accrual.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.KetamaShardingServiceBuilder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KetamaShardingServiceBuilder[Req,Rep]extendsProductwithSerializable"></a>
       <a id="KetamaShardingServiceBuilder[Req,Rep]:KetamaShardingServiceBuilder[Req,Rep]"></a>
@@ -355,6 +357,26 @@ for details.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.service.ResponseClassificationSyntheticException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ResponseClassificationSyntheticExceptionextendsExceptionwithNoStacktrace"></a>
+      <a id="ResponseClassificationSyntheticException:ResponseClassificationSyntheticException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ResponseClassificationSyntheticException.html"><span class="name">ResponseClassificationSyntheticException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.NoStacktrace" class="extype" target="_top">util.NoStacktrace</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.service.package@ResponseClassificationSyntheticExceptionextendsExceptionwithNoStacktrace" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Used by <a href="../param/ResponseClassifier.html" class="extype" name="com.twitter.finagle.param.ResponseClassifier">response classification</a>
+to indicate synthetic failures that are not <code>Exceptions</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Used by <a href="../param/ResponseClassifier.html" class="extype" name="com.twitter.finagle.param.ResponseClassifier">response classification</a>
+to indicate synthetic failures that are not <code>Exceptions</code>.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="StatsFilter.html" class="extype" name="com.twitter.finagle.service.StatsFilter">com.twitter.finagle.service.StatsFilter</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.ResponseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]"></a>
       <a id="ResponseClassifier:ResponseClassifier"></a>
@@ -473,7 +495,8 @@ responses as well as failures.</p></span></dd></dl></div>
 responses can be classified as retryable via the retryPolicy
 <a href="RetryPolicy.html" class="extype" name="com.twitter.finagle.service.RetryPolicy">com.twitter.finagle.service.RetryPolicy</a> argument.
 </p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>consider using a <span class="extype" name="Timer">Timer</span> with high resolution so that there is
-less correlation between retries. For example <span class="extype" name="HighResTimer.Default">HighResTimer.Default</span>.</p></span></dd></dl></div>
+less correlation between retries. For example <span class="extype" name="HighResTimer.Default">HighResTimer.Default</span>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Servers.html#request-timeout" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.RetryPolicy" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="RetryPolicy[-A]extendsA=&gt;Option[(com.twitter.util.Duration,com.twitter.finagle.service.RetryPolicy[A])]"></a>
       <a id="RetryPolicy[-A]:RetryPolicy[A]"></a>
@@ -609,7 +632,7 @@ request failures.</p></span></dd></dl></div>
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.service.TimeoutFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.TimeoutFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="TimeoutFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="TimeoutFilter[Req,Rep]:TimeoutFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -625,7 +648,11 @@ request failures.</p></span></dd></dl></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a global timeout to requests.</p>
+      <p class="shortcomment cmt">A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a global timeout to requests.</p><div class="fullcomment"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a global timeout to requests.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The sections on
+     <a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">clients</a>
+     and <a href="https://twitter.github.io/finagle/guide/Servers.html#request-timeout" target="_blank">servers</a>
+     in the user guide for more details.</p></span></dd></dl></div>
     </li></ol>
             </div>
 
@@ -771,7 +798,7 @@ the duration after which a request is to be retried.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A static <span class="extype" name="com.twitter.finagle.FailedService">com.twitter.finagle.FailedService</span> object.</p>
+      <p class="shortcomment cmt">A static <a href="FailedService.html" class="extype" name="com.twitter.finagle.service.FailedService">FailedService</a> object.</p>
     </li><li name="com.twitter.finagle.service.PendingRequestFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PendingRequestFilter"></a>
       <a id="PendingRequestFilter:PendingRequestFilter"></a>
@@ -824,7 +851,7 @@ requests per connection.</p>
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.service.Retries" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.Retries" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Retries"></a>
       <a id="Retries:Retries"></a>
       <h4 class="signature">
@@ -842,7 +869,11 @@ requests per connection.</p>
     </span>
       <p class="shortcomment cmt">The <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a> parameters and modules for configuring
 <b>which</b> and <b>how many</b> failed requests are retried for
-a client.</p>
+a client.</p><div class="fullcomment"><div class="comment cmt"><p>The <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">Stack</a> parameters and modules for configuring
+<b>which</b> and <b>how many</b> failed requests are retried for
+a client.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Servers.html#request-timeout" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.RetryBudget" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RetryBudget"></a>
       <a id="RetryBudget:RetryBudget"></a>

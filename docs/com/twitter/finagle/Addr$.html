@@ -102,7 +102,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Addr$$Bound.html"><span class="name">Bound</span></a><span class="params">(<span name="addrs">addrs: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="metadata">metadata: <a href="#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span><span class="result"> extends <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Addr$$Bound.html"><span class="name">Bound</span></a><span class="params">(<span name="addrs">addrs: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>, <span name="metadata">metadata: <a href="#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span><span class="result"> extends <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.Addr$@BoundextendsAddrwithProductwithSerializable" title="Permalink" target="_top">
@@ -110,7 +110,7 @@
       </a>
     </span>
       <p class="shortcomment cmt">A bound name.</p><div class="fullcomment"><div class="comment cmt"><p>A bound name. The object is replicated at each of the given
-socket addresses.</p><p>Bound addresses include an arbitrary Map of metadata that
+endpoint addresses.</p><p>Bound addresses include an arbitrary Map of metadata that
 Namers or Resolvers may set to provide additional configuration
 (e.g. geographical information) to client stacks.</p><p>Note: This currently protects the underlying addresses
 from access since we want to add partially resolved addresses

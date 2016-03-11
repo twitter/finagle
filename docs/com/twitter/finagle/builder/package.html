@@ -83,8 +83,8 @@
       </a>
     </span>
       <p class="shortcomment cmt">A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><div class="fullcomment"><div class="comment cmt"><p>A builder of Finagle <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Clients</a>.</p><p>Please see the
-<a href="http://twitter.github.io/finagle/guide/FAQ.html#configuring-finagle6" target="_blank">Finagle user guide</a>
-for information on a newer set of client-construction APIs introduced in Finagle v6.</p><pre><span class="kw">val</span> client = ClientBuilder()
+<a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">Finagle user guide</a>
+for information on the preferred <code>with</code>-style client-construction APIs.</p><pre><span class="kw">val</span> client = ClientBuilder()
   .codec(Http)
   .hosts(<span class="lit">"localhost:10000,localhost:10001,localhost:10003"</span>)
   .hostConnectionLimit(<span class="num">1</span>)
@@ -118,7 +118,8 @@ affect your application -- these options are typically only changed by expert
 users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
    <a href="http://docs.oracle.com/javase/7/docs/api/java/net/StandardSocketOptions.html?is-external=true#SO_KEEPALIVE" target="_blank">Java default</a>
    of <code>false</code> is used</li><li><code>readerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>writerIdleTimeout</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxIdleTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>hostConnectionMaxLifeTime</code>: <span class="extype" name="com.twitter.util.Duration.Top">Duration.Top</span></li><li><code>sendBufferSize</code>, <code>recvBufferSize</code>: OS-defined default value
-</li></ul></div></div>
+</li></ul></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
+     for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.IncompleteSpecification" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="IncompleteSpecificationextendsException"></a>
       <a id="IncompleteSpecification:IncompleteSpecification"></a>
@@ -204,7 +205,8 @@ make sure that you know exactly how they will affect your application --
 these options are typically only changed by expert users.</p><p>- <code>openConnectionsThresholds</code>: None
 - <code>maxConcurrentRequests</code>: Int.MaxValue
 - <code>backlog</code>: OS-defined default value
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="http://twitter.github.io/finagle/guide/Configuration.html" target="_blank">user guide</a>
+     for information on the preferred <code>with</code>-style APIs insead.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuildertoTwitterService" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ServerBuildertoTwitterService[Req,Rep]extendsService"></a>
       <a id="ServerBuildertoTwitterService[Req,Rep]:ServerBuildertoTwitterService[Req,Rep]"></a>

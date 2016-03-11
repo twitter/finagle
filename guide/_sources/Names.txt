@@ -301,7 +301,7 @@ computation); ``Addrs`` are in one of 3 states:
 ``Addr.Failed(cause: Throwable)``
 	The binding failed with the given ``cause``.
 
-``Addr.Bound(addrs: Set[SocketAddress])``
+``Addr.Bound(addrs: Set[Address])``
 	The binding succeeded with the given set of addresses, representing
 	concrete endpoints.
 

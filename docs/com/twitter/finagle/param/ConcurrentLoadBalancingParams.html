@@ -52,7 +52,7 @@
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A collection of methods for configuring the Load Balancing (concurrent) module
 of Finagle clients.</p><p>A concurrent load balancer balancers the traffic among multiple connections, which
 is useful for maintaining concurrency in pipelining protocols.
-</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>a <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Stack.Parameterized</a> client to configure</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="tparam">A</dt><dd class="cmt"><p>a <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Stack.Parameterized</a> client to configure</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="DefaultLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.DefaultLoadBalancingParams">DefaultLoadBalancingParams</a>[<span class="extype" name="com.twitter.finagle.param.ConcurrentLoadBalancingParams.A">A</span>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -191,7 +191,7 @@ implements a strategy for choosing one host/node from a replica set to service
 a request.</p><p>The default setup for a Finagle client is to use
 <a href="../loadbalancer/Balancers$.html#p2c(maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory" class="extmbr" name="com.twitter.finagle.loadbalancer.Balancers#p2c">power of two choices</a> algorithm
 to distribute load across endpoints, while picking the least loaded one.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DefaultLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.DefaultLoadBalancingParams">DefaultLoadBalancingParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DefaultLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.DefaultLoadBalancingParams">DefaultLoadBalancingParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -434,7 +434,7 @@ a flagged endpoint is also detected as unhealthy by a circuit breaker (e.g.
 fail-fast, failure accrual, etc) then the host is removed from the collection.</p><p>Put differently, this allows the client to have a soft dependency on the source
 of its replica set. The client maintains stale entries as long as they are healthy
 from its perspective.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DefaultLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.DefaultLoadBalancingParams">DefaultLoadBalancingParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">http://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DefaultLoadBalancingParams.html" class="extype" name="com.twitter.finagle.param.DefaultLoadBalancingParams">DefaultLoadBalancingParams</a></dd><dt>See also</dt><dd><span class="cmt"><p><a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">https://twitter.github.io/finagle/guide/Clients.html#load-balancing</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

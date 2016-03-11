@@ -377,7 +377,7 @@ disable failFast for codecs for which it isn't well-behaved.
       <a id="newClientDispatcher(Transport[Any,Any]):Service[Array[Byte],Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
@@ -500,24 +500,41 @@ Client/Server Builders rather than stacks.
       <p class="shortcomment cmt">The pipeline factory that implements the protocol.</p><div class="fullcomment"><div class="comment cmt"><p>The pipeline factory that implements the protocol.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">ThriftServerFramedCodec</a> → <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a></dd></dl></div>
     </li><li name="com.twitter.finagle.thrift.ThriftServerFramedCodec#prepareConnFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="prepareConnFactory(factory:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]):com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]"></a>
-      <a id="prepareConnFactory(ServiceFactory[Array[Byte],Array[Byte]]):ServiceFactory[Array[Byte],Array[Byte]]"></a>
+      <a id="prepareConnFactory(factory:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]"></a>
+      <a id="prepareConnFactory(ServiceFactory[Array[Byte],Array[Byte]],Params):ServiceFactory[Array[Byte],Array[Byte]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">prepareConnFactory</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+        <span class="name">prepareConnFactory</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>, <span name="params">params: <a href="../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a></span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.ThriftServerFramedCodec@prepareConnFactory(factory:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]):com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.thrift.ThriftServerFramedCodec@prepareConnFactory(factory:com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]],params:com.twitter.finagle.Stack.Params):com.twitter.finagle.ServiceFactory[Array[Byte],Array[Byte]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">ThriftServerFramedCodec</a> → <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Codec#prepareConnFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="prepareConnFactory(underlying:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
+      <a id="prepareConnFactory(ServiceFactory[Array[Byte],Array[Byte]]):ServiceFactory[Array[Byte],Array[Byte]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">prepareConnFactory</span><span class="params">(<span name="underlying">underlying: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>], <span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.thrift.ThriftServerFramedCodec@prepareConnFactory(underlying:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Prepare a connection factory.</p><div class="fullcomment"><div class="comment cmt"><p>Prepare a connection factory. Used to allow codec modifications
 to the service at the bottom of the stack (connection level).
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.thrift.ThriftServerFramedCodec">ThriftServerFramedCodec</a> → <a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Codec.html" class="extype" name="com.twitter.finagle.Codec">Codec</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Codec#prepareServiceFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="prepareServiceFactory(underlying:com.twitter.finagle.ServiceFactory[Req,Rep]):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
       <a id="prepareServiceFactory(ServiceFactory[Array[Byte],Array[Byte]]):ServiceFactory[Array[Byte],Array[Byte]]"></a>

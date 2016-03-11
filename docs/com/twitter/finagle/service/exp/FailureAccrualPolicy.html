@@ -28,7 +28,7 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="FailureAccrualPolicy$.html" title="See companion object"><img alt="Trait/Object" src="../../../../../lib/trait_to_object_big.png" /></a>
+        <a href="FailureAccrualPolicy$.html" title="See companion object"><img alt="Class/Object" src="../../../../../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.service">service</a>.<a href="package.html" class="extype" name="com.twitter.finagle.service.exp">exp</a></p>
         <h1><a href="FailureAccrualPolicy$.html" title="See companion object">FailureAccrualPolicy</a></h1><h3><span class="morelinks"><div>
             Related Docs:
@@ -43,8 +43,8 @@
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
         <span class="name">FailureAccrualPolicy</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
@@ -56,7 +56,8 @@ whether to mark an endpoint dead upon a request failure. On each successful
 response, <code>FailureAccrualFactory</code> calls <code>recordSuccess()</code>. On each failure,
 <code>FailureAccrualFactory</code> calls <code>markDeadOnFailure()</code> to obtain the duration
 to mark the endpoint dead for; (Some(Duration)), or None.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -93,7 +94,27 @@ to mark the endpoint dead for; (Some(Duration)), or None.
 
       <div id="template">
         <div id="allMembers">
-        
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="com.twitter.finagle.service.exp.FailureAccrualPolicy#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;():com.twitter.finagle.service.exp.FailureAccrualPolicy"></a>
+      <a id="&lt;init&gt;:FailureAccrualPolicy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FailureAccrualPolicy</span><span class="params">()</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.service.exp.FailureAccrualPolicy@&lt;init&gt;():com.twitter.finagle.service.exp.FailureAccrualPolicy" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
 
         
 

@@ -66,7 +66,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.pool.BufferingPool" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.pool.BufferingPool" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BufferingPool[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a>
       <a id="BufferingPool[Req,Rep]:BufferingPool[Req,Rep]"></a>
       <h4 class="signature">
@@ -82,7 +82,9 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Buffers up to <code>size</code> connections and produces/closes new ones beyond that limit.</p><div class="fullcomment"><div class="comment cmt"><p>Buffers up to <code>size</code> connections and produces/closes new ones beyond that limit.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#buffering-pool" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.pool.PoolBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PoolBenchextendsStdBenchAnnotations"></a>
       <a id="PoolBench:PoolBench"></a>
@@ -175,7 +177,8 @@ created), and won't start queueing requests until the high
 watermark has been reached. Put another way: up to <code>lowWatermark'
 items may persist indefinitely, while there are at no times more
 than </code>highWatermark' items in concurrent existence.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#watermark-pool" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li></ol>
             </div>
 

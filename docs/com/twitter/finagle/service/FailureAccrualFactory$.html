@@ -222,23 +222,24 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory#Param" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Param(failureAccrualPolicy:com.twitter.finagle.service.exp.FailureAccrualPolicy):com.twitter.finagle.service.FailureAccrualFactory.Param"></a>
-      <a id="Param(FailureAccrualPolicy):Param"></a>
+      <a id="Param(failureAccrualPolicy:()=&gt;com.twitter.finagle.service.exp.FailureAccrualPolicy):com.twitter.finagle.service.FailureAccrualFactory.Param"></a>
+      <a id="Param(()⇒FailureAccrualPolicy):Param"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">Param</span><span class="params">(<span name="failureAccrualPolicy">failureAccrualPolicy: <a href="exp/FailureAccrualPolicy.html" class="extype" name="com.twitter.finagle.service.exp.FailureAccrualPolicy">FailureAccrualPolicy</a></span>)</span><span class="result">: <a href="FailureAccrualFactory$$Param.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Param">Param</a></span>
+        <span class="name">Param</span><span class="params">(<span name="failureAccrualPolicy">failureAccrualPolicy: () ⇒ <a href="exp/FailureAccrualPolicy.html" class="extype" name="com.twitter.finagle.service.exp.FailureAccrualPolicy">FailureAccrualPolicy</a></span>)</span><span class="result">: <a href="FailureAccrualFactory$$Param.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory.Param">Param</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory$@Param(failureAccrualPolicy:com.twitter.finagle.service.exp.FailureAccrualPolicy):com.twitter.finagle.service.FailureAccrualFactory.Param" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.service.FailureAccrualFactory$@Param(failureAccrualPolicy:()=&gt;com.twitter.finagle.service.exp.FailureAccrualPolicy):com.twitter.finagle.service.FailureAccrualFactory.Param" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.
-</p></div><dl class="paramcmts block"><dt class="param">failureAccrualPolicy</dt><dd class="cmt"><p>The policy to use to determine when to mark an endpoint as dead.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">failureAccrualPolicy</dt><dd class="cmt"><p>The policy to use to determine when to mark an endpoint as dead.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory#Param" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Param(numFailures:Int,markDeadFor:com.twitter.util.Duration):com.twitter.finagle.service.FailureAccrualFactory.Param"></a>
       <a id="Param(Int,Duration):Param"></a>
@@ -256,7 +257,8 @@
       </a>
     </span>
       <p class="shortcomment cmt">Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.
-</p></div><dl class="paramcmts block"><dt class="param">numFailures</dt><dd class="cmt"><p>The number of consecutive failures before marking an endpoint as dead.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>The duration to mark an endpoint as dead.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numFailures</dt><dd class="cmt"><p>The number of consecutive failures before marking an endpoint as dead.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>The duration to mark an endpoint as dead.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory#Param" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Param(numFailures:Int,markDeadFor:()=&gt;com.twitter.util.Duration):com.twitter.finagle.service.FailureAccrualFactory.Param"></a>
       <a id="Param(Int,()⇒Duration):Param"></a>
@@ -274,7 +276,8 @@
       </a>
     </span>
       <p class="shortcomment cmt">Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Configures the <a href="FailureAccrualFactory.html" class="extype" name="com.twitter.finagle.service.FailureAccrualFactory">FailureAccrualFactory</a>.</p><p>Note there is a Java-friendly method in the API that takes <code>Duration</code> as a value, not a function.
-</p></div><dl class="paramcmts block"><dt class="param">numFailures</dt><dd class="cmt"><p>The number of consecutive failures before marking an endpoint as dead.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>The duration to mark an endpoint as dead.</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numFailures</dt><dd class="cmt"><p>The number of consecutive failures before marking an endpoint as dead.</p></dd><dt class="param">markDeadFor</dt><dd class="cmt"><p>The duration to mark an endpoint as dead.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.FailureAccrualFactory.ProbeClosed" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ProbeClosed"></a>
       <a id="ProbeClosed:ProbeClosed"></a>

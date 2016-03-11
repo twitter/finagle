@@ -66,30 +66,13 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.service.exp.FailureAccrualPolicies" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="FailureAccrualPoliciesextendsObject"></a>
-      <a id="FailureAccrualPolicies:FailureAccrualPolicies"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="FailureAccrualPolicies.html"><span class="name">FailureAccrualPolicies</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.service.exp.package@FailureAccrualPoliciesextendsObject" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.service.exp.FailureAccrualPolicy" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.service.exp.FailureAccrualPolicy" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="FailureAccrualPolicyextendsAnyRef"></a>
       <a id="FailureAccrualPolicy:FailureAccrualPolicy"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
         <a href="FailureAccrualPolicy.html"><span class="name">FailureAccrualPolicy</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
@@ -105,7 +88,8 @@ whether to mark an endpoint dead upon a request failure. On each successful
 response, <code>FailureAccrualFactory</code> calls <code>recordSuccess()</code>. On each failure,
 <code>FailureAccrualFactory</code> calls <code>markDeadOnFailure()</code> to obtain the duration
 to mark the endpoint dead for; (Some(Duration)), or None.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#failure-accrual" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li></ol>
             </div>
 

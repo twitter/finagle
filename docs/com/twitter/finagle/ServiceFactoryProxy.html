@@ -45,16 +45,16 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">ServiceFactoryProxy</span><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>] with <a href="ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>]</span>
+        <span class="name">ServiceFactoryProxy</span><span class="tparams">[<span name="Req">-Req</span>, <span name="Rep">+Rep</span>]</span><span class="result"> extends <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>] with <span class="extype" name="scala.Proxy">Proxy</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A simple proxy ServiceFactory that forwards all calls to another
-ServiceFactory.  This is is useful if you to wrap-but-modify an
-existing service factory.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> that proxies all calls to another
+ServiceFactory.  This can be useful if you want to modify
+and existing <code>ServiceFactory</code>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>], <span class="extype" name="scala.Proxy">Proxy</span>, <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<a href="ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>]], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Proxy">Proxy</span>, <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, (<a href="ClientConnection.html" class="extype" name="com.twitter.finagle.ClientConnection">ClientConnection</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>]], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
             <div class="subClasses hiddenContent"><a href="pool/BufferingPool.html" class="extype" name="com.twitter.finagle.pool.BufferingPool">BufferingPool</a>, <a href="netty3/channel/IdleConnectionFilter.html" class="extype" name="com.twitter.finagle.netty3.channel.IdleConnectionFilter">IdleConnectionFilter</a>, <a href="tracing/ServerDestTracingProxy.html" class="extype" name="com.twitter.finagle.tracing.ServerDestTracingProxy">ServerDestTracingProxy</a>, <a href="factory/StatsFactoryWrapper.html" class="extype" name="com.twitter.finagle.factory.StatsFactoryWrapper">StatsFactoryWrapper</a>, <a href="service/StatsServiceFactory.html" class="extype" name="com.twitter.finagle.service.StatsServiceFactory">StatsServiceFactory</a>, <a href="factory/TimeoutFactory.html" class="extype" name="com.twitter.finagle.factory.TimeoutFactory">TimeoutFactory</a></div>
@@ -75,7 +75,7 @@ existing service factory.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.ServiceFactoryProxy"><span>ServiceFactoryProxy</span></li><li class="in" name="com.twitter.finagle.ProxyServiceFactory"><span>ProxyServiceFactory</span></li><li class="in" name="scala.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.ServiceFactory"><span>ServiceFactory</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.ServiceFactoryProxy"><span>ServiceFactoryProxy</span></li><li class="in" name="scala.Proxy"><span>Proxy</span></li><li class="in" name="com.twitter.finagle.ServiceFactory"><span>ServiceFactory</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.Function1"><span>Function1</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -191,7 +191,7 @@ existing service factory.
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.ProxyServiceFactory#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ServiceFactoryProxy#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(conn:com.twitter.finagle.ClientConnection):com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a>
       <a id="apply(ClientConnection):Future[Service[Req,Rep]]"></a>
       <h4 class="signature">
@@ -211,7 +211,7 @@ existing service factory.
 underlying channel and the returned service has exclusive use of
 its underlying connection. To relinquish the use of the reserved
 Service, the user must call Service.close().
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a> → <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
     </li><li name="com.twitter.finagle.ServiceFactory#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply():com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a>
       <a id="apply():Future[Service[Req,Rep]]"></a>
@@ -269,7 +269,7 @@ Service, the user must call Service.close().
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.ProxyServiceFactory#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.ServiceFactoryProxy#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a>
       <a id="close(Time):Future[Unit]"></a>
       <h4 class="signature">
@@ -285,7 +285,7 @@ Service, the user must call Service.close().
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → Closable</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a> → Closable</dd></dl></div>
     </li><li name="com.twitter.util.Closable#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a>
       <a id="close(Duration):Future[Unit]"></a>
@@ -572,8 +572,8 @@ styles of factory wrappers.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a> → <a href="ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → Proxy</dd></dl></div>
-    </li><li name="com.twitter.finagle.ProxyServiceFactory#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a> → Proxy</dd></dl></div>
+    </li><li name="com.twitter.finagle.ServiceFactoryProxy#status" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="status:com.twitter.finagle.Status"></a>
       <a id="status:Status"></a>
       <h4 class="signature">
@@ -591,7 +591,7 @@ styles of factory wrappers.
     </span>
       <p class="shortcomment cmt">The current availability <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory
 </p><div class="fullcomment"><div class="comment cmt"><p>The current availability <a href="Status.html" class="extype" name="com.twitter.finagle.Status">Status</a> of this ServiceFactory
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a> → <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a> → <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -720,36 +720,11 @@ releases the service.
 
         
 
-        <div id="values" class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.ServiceFactory#make" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="make():com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a>
-      <a id="make():Future[Service[Req,Rep]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) use apply() instead">make</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.ServiceFactoryProxy@make():com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a></dd><dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> use apply() instead</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.ProxyServiceFactory">
-              <h3>Inherited from <a href="ProxyServiceFactory.html" class="extype" name="com.twitter.finagle.ProxyServiceFactory">ProxyServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>]</h3>
-            </div><div class="parent" name="scala.Proxy">
+        <div class="parent" name="scala.Proxy">
               <h3>Inherited from <span class="extype" name="scala.Proxy">Proxy</span></h3>
             </div><div class="parent" name="com.twitter.finagle.ServiceFactory">
               <h3>Inherited from <a href="ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Req">Req</span>, <span class="extype" name="com.twitter.finagle.ServiceFactoryProxy.Rep">Rep</span>]</h3>

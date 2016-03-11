@@ -88,6 +88,26 @@
                 <span class="name">@Threads</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.DistributorT" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="DistributorT[Node]extendsAnyRef"></a>
+      <a id="DistributorT[Node]:DistributorT[Node]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="DistributorT.html"><span class="name">DistributorT</span></a><span class="tparams">[<span name="Node">Node</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@DistributorT[Node]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The base type of the load balancer distributor.</p><div class="fullcomment"><div class="comment cmt"><p>The base type of the load balancer distributor. Distributors are
+updated nondestructively, but, as with nodes, may share some
+data across updates.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.HeapBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HeapBalancer[Req,Rep]extendsServiceFactory[Req,Rep]withOnReady"></a>
       <a id="HeapBalancer[Req,Rep]:HeapBalancer[Req,Rep]"></a>
@@ -146,7 +166,29 @@
       <p class="shortcomment cmt">A thin interface around a Balancer's constructor that allows Finagle to pass in
 context from the stack to the balancers at construction time.</p><div class="fullcomment"><div class="comment cmt"><p>A thin interface around a Balancer's constructor that allows Finagle to pass in
 context from the stack to the balancers at construction time.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> for a collection of available balancers.</p></span></dd></dl></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
+     for more details.</p></span><span class="cmt"><p><a href="Balancers$.html" class="extype" name="com.twitter.finagle.loadbalancer.Balancers">Balancers</a> for a collection of available balancers.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.NodeT" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="NodeT[Req,Rep]extendsServiceFactory[Req,Rep]"></a>
+      <a id="NodeT[Req,Rep]:NodeT[Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NodeT.html"><span class="name">NodeT</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.loadbalancer.NodeT.Req">Req</span>, <span class="extype" name="com.twitter.finagle.loadbalancer.NodeT.Rep">Rep</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@NodeT[Req,Rep]extendsServiceFactory[Req,Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The base type of nodes over which load is balanced.</p><div class="fullcomment"><div class="comment cmt"><p>The base type of nodes over which load is balanced.
+Nodes define the load metric that is used; distributors
+like P2C will use these to decide where to balance
+the next request.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.P2CBalancerBench" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="P2CBalancerBenchextendsStdBenchAnnotations"></a>
       <a id="P2CBalancerBench:P2CBalancerBench"></a>
@@ -229,7 +271,8 @@ context from the stack to the balancers at construction time.
       <p class="shortcomment cmt">Constructor methods for various load balancers.</p><div class="fullcomment"><div class="comment cmt"><p>Constructor methods for various load balancers. The methods take balancer
 specific parameters and return a <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> that allows you
 to easily inject a balancer into the Finagle stack via client configuration.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.ConcurrentLoadBalancerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConcurrentLoadBalancerFactory"></a>
       <a id="ConcurrentLoadBalancerFactory:ConcurrentLoadBalancerFactory"></a>

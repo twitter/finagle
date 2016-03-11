@@ -132,56 +132,37 @@ the ensemble <code>sdzookeeper.local.twitter.com:2181</code>.
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Finagle is an extensible RPC system.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle is an extensible RPC system.</p><p>Services are represented by class <a href="finagle/Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>.
-Clients make use of <a href="finagle/Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> objects while
-servers implement them.</p><p>Finagle contains a number of protocol implementations; each of these
-implement <a href="finagle/Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> and/or
-<a href="finagle/Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a>. For example, finagle's HTTP implementation,
-<a href="finagle/Http$.html" class="extype" name="com.twitter.finagle.Http">com.twitter.finagle.Http</a> (in package <code>finagle-http</code>), exposes both.</p><p>Thus a simple HTTP server is built like this:</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Service}
-<span class="kw">import</span> org.jboss.netty.handler.codec.http.{
-  HttpRequest, HttpResponse, DefaultHttpResponse}
-<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpVersion._
-<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpResponseStatus._
-<span class="kw">import</span> com.twitter.util.{Future, Await}
+      <p class="shortcomment cmt">Finagle is an extensible RPC system.</p><div class="fullcomment"><div class="comment cmt"><p>Finagle is an extensible RPC system.</p><p>Services are represented by class <a href="finagle/Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a>. Clients make use of
+<a href="finagle/Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> objects while servers implement them.</p><p>Finagle contains a number of protocol implementations; each of these implement
+<a href="finagle/Client.html" class="extype" name="com.twitter.finagle.Client">Client</a> and/or <a href="finagle/Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a>. For example, Finagle's
+HTTP implementation, <a href="finagle/Http$.html" class="extype" name="com.twitter.finagle.Http">com.twitter.finagle.Http</a> (in package <code>finagle-http</code>), exposes both.</p><p>Thus a simple HTTP server is built like this:</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Service}
+<span class="kw">import</span> com.twitter.finagle.http.{Request, Response}
+<span class="kw">import</span> com.twitter.util.{Await, Future}
 
-<span class="kw">val</span> service = <span class="kw">new</span> Service[HttpRequest, HttpResponse] {
-  <span class="kw">def</span> apply(req: HttpRequest) =
-    Future.value(<span class="kw">new</span> DefaultHttpResponse(HTTP_1_1, OK))
+<span class="kw">val</span> service = <span class="kw">new</span> Service[Request, Response] {
+  <span class="kw">def</span> apply(req: Request): Future[Response] =
+    Future.value(Response())
 }
-<span class="kw">val</span> server = Http.serve(<span class="lit">":8080"</span>, service)
-Await.ready(server)</pre><p>We first define a service to which requests are dispatched. In this case,
-the service returns immediately with a HTTP 200 OK response, and with
-no content.</p><p>This service is then served via the Http protocol on TCP port 8080. Finally
-we wait for the server to stop serving.</p><p>We can now query our web server:</p><p><pre>
-% curl -D - localhost:8080
-HTTP/1.1 200 OK
-
-%
-</pre></p><p>Building an HTTP client is also simple. (Note that type annotations are
-added for illustration.)</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Service}
-<span class="kw">import</span> org.jboss.netty.handler.codec.http.{
-  HttpRequest, HttpResponse, DefaultHttpRequest}
-<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpVersion._
-<span class="kw">import</span> org.jboss.netty.handler.codec.http.HttpMethod._
+<span class="kw">val</span> server = Http.server.serve(<span class="lit">":8080"</span>, service)
+Await.ready(server)</pre><p>We first define a service to which requests are dispatched. In this case, the service returns
+immediately with a HTTP 200 OK response, and with no content.</p><p>This service is then served via the Http protocol on TCP port 8080. Finally we wait for the server
+to stop serving.</p><p>We can now query our web server:</p><pre>% curl -D - localhost:<span class="num">8080</span>
+HTTP/<span class="num">1.1</span> <span class="num">200</span> OK</pre><p>Building an HTTP client is also simple. (Note that type annotations are added for illustration.)</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Service}
+<span class="kw">import</span> com.twitter.finagle.http.{Request, Response}
 <span class="kw">import</span> com.twitter.util.{Future, Return, Throw}
 
-<span class="kw">val</span> client: Service[HttpRequest, HttpResponse] =
-  Http.newService(<span class="lit">"localhost:8080"</span>)
-<span class="kw">val</span> f: Future[HttpResponse] =
-  client(<span class="kw">new</span> DefaultHttpRequest(HTTP_1_1, GET, <span class="lit">"/"</span>))
-f respond {
-  <span class="kw">case</span> Return(res) <span class="kw">=&gt;</span>
-    printf(<span class="lit">"Got HTTP response %s\n"</span>, res)
+<span class="kw">val</span> client: Service[Request, Response] = Http.client.newService(<span class="lit">"localhost:8080"</span>)
+<span class="kw">val</span> f: Future[Response] = client(Request()).respond {
+  <span class="kw">case</span> Return(rep) <span class="kw">=&gt;</span>
+    printf(<span class="lit">"Got HTTP response %s\n"</span>, rep)
   <span class="kw">case</span> Throw(exc) <span class="kw">=&gt;</span>
     printf(<span class="lit">"Got error %s\n"</span>, exc)
-}</pre><p><code>Http.newService(&quot;localhost:8080&quot;)</code> constructs a new
-<a href="finagle/Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance connected to
-localhost TCP port 8080. We then issue a HTTP/1.1 GET
-request to URI &quot;/&quot;. The service returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a>
-representing the result of the operation. We listen to
-this future, printing an appropriate message when the
-response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains
-useful documentation and resources for using Finagle.</p></div></div>
+}</pre><p><code>Http.client.newService(&quot;localhost:8080&quot;)</code> constructs a new <a href="finagle/Service.html" class="extype" name="com.twitter.finagle.Service">com.twitter.finagle.Service</a> instance
+connected to localhost TCP port 8080. We then issue a HTTP/1.1 GET request to URI &quot;/&quot;. The service
+returns a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> representing the result of the operation. We listen to this
+future, printing an appropriate message when the response arrives.</p><p>The <a href="http://twitter.github.io/finagle/" target="_blank">Finagle homepage</a> contains useful documentation and
+resources for using Finagle.
+</p></div></div>
     </li></ol>
             </div>
 

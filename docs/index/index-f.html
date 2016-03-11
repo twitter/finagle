@@ -36,7 +36,7 @@
       <div class="occurrences"><a href="../com/twitter/finagle/package.html" class="extype" name="com.twitter.finagle">finagle</a> </div>
     </div><div class="entry">
       <div class="name">Failed</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/Addr$.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> <a href="../com/twitter/finagle/service/ResponseClass$.html" class="extype" name="com.twitter.finagle.service.ResponseClass">ResponseClass</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/Addr$.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> <a href="../com/twitter/finagle/Address$.html" class="extype" name="com.twitter.finagle.Address">Address</a> <a href="../com/twitter/finagle/service/ResponseClass$.html" class="extype" name="com.twitter.finagle.service.ResponseClass">ResponseClass</a> </div>
     </div><div class="entry">
       <div class="name">FailedDependency</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/Status$.html" class="extype" name="com.twitter.finagle.http.Status">Status</a> </div>
@@ -64,9 +64,6 @@
     </div><div class="entry">
       <div class="name">FailureAccrualFactory</div>
       <div class="occurrences"><a href="../com/twitter/finagle/service/package.html" class="extype" name="com.twitter.finagle.service">service</a> </div>
-    </div><div class="entry">
-      <div class="name">FailureAccrualPolicies</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/service/exp/package.html" class="extype" name="com.twitter.finagle.service.exp">exp</a> </div>
     </div><div class="entry">
       <div class="name">FailureAccrualPolicy</div>
       <div class="occurrences"><a href="../com/twitter/finagle/service/exp/package.html" class="extype" name="com.twitter.finagle.service.exp">exp</a> </div>
@@ -195,7 +192,7 @@
       <div class="occurrences"><a href="../com/twitter/finagle/exp/mysql/FloatValue.html" class="extype" name="com.twitter.finagle.exp.mysql.FloatValue">FloatValue</a> </div>
     </div><div class="entry">
       <div class="name">factory</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/package.html" class="extype" name="com.twitter.finagle">finagle</a> <a href="../com/twitter/finagle/loadbalancer/HeapBalancer$Node.html" class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Node">Node</a> <a href="../com/twitter/finagle/thrift/Protocols$.html" class="extype" name="com.twitter.finagle.thrift.Protocols">Protocols</a> <a href="../com/twitter/finagle/tracing/ConsoleTracer$.html" class="extype" name="com.twitter.finagle.tracing.ConsoleTracer">ConsoleTracer</a> <a href="../com/twitter/finagle/tracing/NullTracer.html" class="extype" name="com.twitter.finagle.tracing.NullTracer">NullTracer</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/exp/Address$$ServiceFactory.html" class="extype" name="com.twitter.finagle.exp.Address.ServiceFactory">ServiceFactory</a> <a href="../com/twitter/finagle/package.html" class="extype" name="com.twitter.finagle">finagle</a> <a href="../com/twitter/finagle/loadbalancer/HeapBalancer$Node.html" class="extype" name="com.twitter.finagle.loadbalancer.HeapBalancer.Node">Node</a> <a href="../com/twitter/finagle/loadbalancer/NodeT.html" class="extype" name="com.twitter.finagle.loadbalancer.NodeT">NodeT</a> <a href="../com/twitter/finagle/thrift/Protocols$.html" class="extype" name="com.twitter.finagle.thrift.Protocols">Protocols</a> <a href="../com/twitter/finagle/tracing/ConsoleTracer$.html" class="extype" name="com.twitter.finagle.tracing.ConsoleTracer">ConsoleTracer</a> <a href="../com/twitter/finagle/tracing/NullTracer.html" class="extype" name="com.twitter.finagle.tracing.NullTracer">NullTracer</a> </div>
     </div><div class="entry">
       <div class="name">fail</div>
       <div class="occurrences"><a href="../com/twitter/finagle/Dtab$.html" class="extype" name="com.twitter.finagle.Dtab">Dtab</a> </div>
@@ -217,9 +214,6 @@
     </div><div class="entry">
       <div class="name">failureAccrualParams</div>
       <div class="occurrences"><a href="../com/twitter/finagle/builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a> <a href="../com/twitter/finagle/memcached/KetamaClientBuilder.html" class="extype" name="com.twitter.finagle.memcached.KetamaClientBuilder">KetamaClientBuilder</a> </div>
-    </div><div class="entry">
-      <div class="name">failureAccrualPolicy</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/param/SessionQualificationParams.html" class="extype" name="com.twitter.finagle.param.SessionQualificationParams">SessionQualificationParams</a> </div>
     </div><div class="entry">
       <div class="name">failureSeq</div>
       <div class="occurrences"><a href="../com/twitter/finagle/memcached/replication/FailedReplication.html" class="extype" name="com.twitter.finagle.memcached.replication.FailedReplication">FailedReplication</a> </div>
@@ -400,6 +394,9 @@
     </div><div class="entry">
       <div class="name">from</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/netty/Bijections$.html" class="extype" name="com.twitter.finagle.http.netty.Bijections">Bijections</a> </div>
+    </div><div class="entry">
+      <div class="name">fromAddrMetadata</div>
+      <div class="occurrences"><a href="../com/twitter/finagle/serverset2/addr/ZkMetadata$.html" class="extype" name="com.twitter.finagle.serverset2.addr.ZkMetadata">ZkMetadata</a> </div>
     </div><div class="entry">
       <div class="name">fromCacheNode</div>
       <div class="occurrences"><a href="../com/twitter/finagle/memcached/KetamaClientKey$.html" class="extype" name="com.twitter.finagle.memcached.KetamaClientKey">KetamaClientKey</a> </div>

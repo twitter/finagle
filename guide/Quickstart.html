@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Quickstart &mdash; Finagle 6.33.0 documentation</title>
+    <title>Quickstart &mdash; Finagle 6.34.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.33.0',
+        VERSION:     '6.34.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.33.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
     <link rel="next" title="Concurrent Programming with Futures" href="Futures.html" />
     <link rel="prev" title="User’s guide" href="index.html" />
    
@@ -89,7 +89,7 @@ name := &quot;quickstart&quot;
 
 version := &quot;1.0&quot;
 
-libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;6.33.0&quot;
+libraryDependencies += &quot;com.twitter&quot; %% &quot;finagle-http&quot; % &quot;6.34.0&quot;
 </pre>
 <p>Any file in this directory will now be compiled by <tt class="docutils literal"><span class="pre">sbt</span></tt>. In order to simplify
 installation, we recommend that you use the bootstrap <tt class="docutils literal"><span class="pre">sbt</span></tt> script available
@@ -180,17 +180,16 @@ and in return receive a <tt class="docutils literal"><span class="pre">Future[ht
 <tt class="docutils literal"><span class="pre">http.Response</span></tt> (or an error) some time in the future. We furnish
 <tt class="docutils literal"><span class="pre">newService</span></tt> with the <em>target</em> of the client: the host or set of hosts
 to which requests are dispatched.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">request</span>  <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
 <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="k">=</span> <span class="s">&quot;www.scala-lang.org&quot;</span>
 <span class="k">val</span> <span class="n">response</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
 </pre></div>
 </div>
 <p>Now that we have <tt class="docutils literal"><span class="pre">response</span></tt>, a <tt class="docutils literal"><span class="pre">Future[http.Response]</span></tt>, we can register
 a callback to notify us when the result is ready:</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">resp</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
-  <span class="n">println</span><span class="o">(</span><span class="s">&quot;GET success: &quot;</span> <span class="o">+</span> <span class="n">resp</span><span class="o">)</span>
-<span class="o">}</span>
-<span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">response</span><span class="o">)</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">rep</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
+  <span class="n">println</span><span class="o">(</span><span class="s">&quot;GET success: &quot;</span> <span class="o">+</span> <span class="n">rep</span><span class="o">)</span>
+<span class="o">})</span>
 </pre></div>
 </div>
 <p>Completing the client:</p>
@@ -200,13 +199,13 @@ a callback to notify us when the result is ready:</p>
 
 <span class="k">object</span> <span class="nc">Client</span> <span class="k">extends</span> <span class="nc">App</span> <span class="o">{</span>
   <span class="k">val</span> <span class="n">client</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">http.Request</span>, <span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;www.scala-lang.org:80&quot;</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">request</span> <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">request</span>  <span class="k">=</span> <span class="n">http</span><span class="o">.</span><span class="nc">Request</span><span class="o">(</span><span class="n">http</span><span class="o">.</span><span class="nc">Method</span><span class="o">.</span><span class="nc">Get</span><span class="o">,</span> <span class="s">&quot;/&quot;</span><span class="o">)</span>
   <span class="n">request</span><span class="o">.</span><span class="n">host</span> <span class="k">=</span> <span class="s">&quot;www.scala-lang.org&quot;</span>
   <span class="k">val</span> <span class="n">response</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="n">client</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
-  <span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">resp</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
-    <span class="n">println</span><span class="o">(</span><span class="s">&quot;GET success: &quot;</span> <span class="o">+</span> <span class="n">resp</span><span class="o">)</span>
-  <span class="o">}</span>
-  <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="n">response</span><span class="o">)</span>
+  <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="n">onSuccess</span> <span class="o">{</span> <span class="n">rep</span><span class="k">:</span> <span class="kt">http.Response</span> <span class="o">=&gt;</span>
+    <span class="n">println</span><span class="o">(</span><span class="s">&quot;GET success: &quot;</span> <span class="o">+</span> <span class="n">rep</span><span class="o">)</span>
+  <span class="o">})</span>
+
 <span class="o">}</span>
 </pre></div>
 </div>

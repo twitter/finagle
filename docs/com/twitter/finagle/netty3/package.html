@@ -94,7 +94,31 @@ package netty3 can move into its own package, so that only the
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.netty3.ChannelBufferBuf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.netty3.BufCodecBenchmark" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BufCodecBenchmarkextendsStdBenchAnnotations"></a>
+      <a id="BufCodecBenchmark:BufCodecBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BufCodecBenchmark.html"><span class="name">BufCodecBenchmark</span></a><span class="result"> extends <a href="../benchmark/StdBenchAnnotations.html" class="extype" name="com.twitter.finagle.benchmark.StdBenchAnnotations">StdBenchAnnotations</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.package@BufCodecBenchmarkextendsStdBenchAnnotations" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Benchmarks various buffer wrappers in the presence of length
+encoded fields.</p><div class="fullcomment"><div class="comment cmt"><p>Benchmarks various buffer wrappers in the presence of length
+encoded fields. This is useful since many of our protocols
+(e.g. Mux) make heavy use of length encoding.
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ChannelBufferBufextendsBuf"></a>
       <a id="ChannelBufferBuf:ChannelBufferBuf"></a>
       <h4 class="signature">
@@ -330,6 +354,23 @@ creates read-only ChannelBuffers based on <span class="extype" name="com.twitter
 <span class="extype" name="com.twitter.util.Buf">Buf</span>; no additional allocations are
 performed.
 </p></div></div>
+    </li><li name="com.twitter.finagle.netty3.BufCodecBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BufCodecBenchmark"></a>
+      <a id="BufCodecBenchmark:BufCodecBenchmark"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="BufCodecBenchmark$.html"><span class="name">BufCodecBenchmark</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.netty3.package@BufCodecBenchmark" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.netty3.ChannelBufferBuf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ChannelBufferBuf"></a>
       <a id="ChannelBufferBuf:ChannelBufferBuf"></a>

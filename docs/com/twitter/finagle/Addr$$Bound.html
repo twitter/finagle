@@ -47,12 +47,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Bound</span><span class="params">(<span name="addrs">addrs: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="metadata">metadata: <a href="Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span><span class="result"> extends <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">Bound</span><span class="params">(<span name="addrs">addrs: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>, <span name="metadata">metadata: <a href="Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span><span class="result"> extends <a href="Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A bound name. The object is replicated at each of the given
-socket addresses.</p><p>Bound addresses include an arbitrary Map of metadata that
+endpoint addresses.</p><p>Bound addresses include an arbitrary Map of metadata that
 Namers or Resolvers may set to provide additional configuration
 (e.g. geographical information) to client stacks.</p><p>Note: This currently protects the underlying addresses
 from access since we want to add partially resolved addresses
@@ -97,7 +97,7 @@ in the future. At this point, the API will be fixed.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.Addr.Bound#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(addrs:scala.collection.immutable.Set[java.net.SocketAddress],metadata:com.twitter.finagle.Addr.Metadata):com.twitter.finagle.Addr.Bound"></a>
+      <a id="&lt;init&gt;(addrs:scala.collection.immutable.Set[com.twitter.finagle.Address],metadata:com.twitter.finagle.Addr.Metadata):com.twitter.finagle.Addr.Bound"></a>
       <a id="&lt;init&gt;:Bound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,10 +105,10 @@ in the future. At this point, the API will be fixed.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Bound</span><span class="params">(<span name="addrs">addrs: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>, <span name="metadata">metadata: <a href="Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span>
+        <span class="name">Bound</span><span class="params">(<span name="addrs">addrs: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>, <span name="metadata">metadata: <a href="Addr$.html#Metadata=Map[String,Any]" class="extmbr" name="com.twitter.finagle.Addr.Metadata">Metadata</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Addr$$Bound@&lt;init&gt;(addrs:scala.collection.immutable.Set[java.net.SocketAddress],metadata:com.twitter.finagle.Addr.Metadata):com.twitter.finagle.Addr.Bound" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Addr$$Bound@&lt;init&gt;(addrs:scala.collection.immutable.Set[com.twitter.finagle.Address],metadata:com.twitter.finagle.Addr.Metadata):com.twitter.finagle.Addr.Bound" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -174,18 +174,18 @@ in the future. At this point, the API will be fixed.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Addr.Bound#addrs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addrs:scala.collection.immutable.Set[java.net.SocketAddress]"></a>
-      <a id="addrs:Set[SocketAddress]"></a>
+      <a id="addrs:scala.collection.immutable.Set[com.twitter.finagle.Address]"></a>
+      <a id="addrs:Set[Address]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">addrs</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<span class="extype" name="java.net.SocketAddress">SocketAddress</span>]</span>
+        <span class="name">addrs</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.collection.immutable.Set" class="extype" target="_top">Set</a>[<a href="Address.html" class="extype" name="com.twitter.finagle.Address">Address</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.Addr$$Bound@addrs:scala.collection.immutable.Set[java.net.SocketAddress]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.Addr$$Bound@addrs:scala.collection.immutable.Set[com.twitter.finagle.Address]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

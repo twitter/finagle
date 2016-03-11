@@ -50,6 +50,7 @@ User's guide
    Configuration
    Servers
    Clients
+   Contexts
    Names
    Protocols
    Extending
@@ -60,7 +61,7 @@ Notes
 -----
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    changelog
    license

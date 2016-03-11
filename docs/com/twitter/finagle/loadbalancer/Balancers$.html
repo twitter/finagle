@@ -52,7 +52,8 @@
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Constructor methods for various load balancers. The methods take balancer
 specific parameters and return a <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a> that allows you
 to easily inject a balancer into the Finagle stack via client configuration.
-</p></div><div class="toggleContainer block">
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#load-balancing" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -189,7 +190,8 @@ subset (&quot;aperture&quot;) of services so that:</p><ol class="decimal"><li>Th
  2. Services receive load proportional to the ratio of their
     weights.</li></ol><p>Unavailable services are not counted--the aperture expands as
 needed to cover those that are available.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -341,7 +343,8 @@ needed to cover those that are available.
 an internal heap.</p><div class="fullcomment"><div class="comment cmt"><p>An efficient strictly least-loaded balancer that maintains
 an internal heap. Note, because weights are not supported by
 the HeapBalancer they are ignored when the balancer is constructed.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#heap-least-loaded" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -462,7 +465,8 @@ to incorporate an endpoint's history. However, this assumption breaks down in th
 presence of long polling clients.
 </p></div><dl class="paramcmts block"><dt class="param">decayTime</dt><dd class="cmt"><p>The window of latency observations.</p></dd><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
 expend on a load balancing decision without reweighing.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
-deterministic tests.</p></dd></dl></div>
+deterministic tests.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#power-of-two-choices-p2c-least-loaded" target="_blank">user guide</a>
+     for more details.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

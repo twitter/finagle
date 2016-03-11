@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &mdash; Finagle 6.33.0 documentation</title>
+    <title>Configuration &mdash; Finagle 6.34.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.33.0',
+        VERSION:     '6.34.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.33.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -114,22 +114,22 @@ you&#8217;re doing.</p>
 <h2>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h2>
 <p>Finagle has many different components and we tried to faithfully model our configuration
 to help understand the constituents and the resulting behavior. For the sake of consistency,
-the current version of the <tt class="docutils literal"><span class="pre">with</span></tt> API is designed with following principles in mind.</p>
+the current version of the <tt class="docutils literal"><span class="pre">with</span></tt> API is designed with the following principles in mind.</p>
 <ol class="arabic simple">
 <li><strong>Reasonable grouping of parameters</strong>: We target for the fine grained API so most of the
-<tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods take a single argument. Although, there is common sense driven
+<tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods take a single argument. Although, there is a common sense driven
 exception from this rule: some of the parameters only make sense when viewed as a group
 rather than separately (e.g. it makes no sense to specify SOCKS proxy credentials when
-proxy itself is disabled).</li>
+the proxy itself is disabled).</li>
 <li><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
 reason about because their type doesn&#8217;t encode it&#8217;s mission in the domain (e.g. in
 most of the cases it&#8217;s impossible to tell what <tt class="docutils literal"><span class="pre">true</span></tt> or <tt class="docutils literal"><span class="pre">false</span></tt> means in a function
-call). Instead of boolean flags with use pair a methods <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">noX</span></tt> indicating
-whether the <tt class="docutils literal"><span class="pre">x</span></tt> feature enabled or disabled.</li>
-<li><strong>Less primitive number types in the API</strong>: We promote a sane level of and type-full
+call). Instead of boolean flags, we use a pair of methods <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">noX</span></tt> to indicate
+whether the <tt class="docutils literal"><span class="pre">x</span></tt> feature is enabled or disabled.</li>
+<li><strong>Less primitive number types in the API</strong>: We promote a sane level of type-full
 programming, where a reasonable level of guarantees is encoded into a type-system.
 Thus, we never use primitive number types for durations and storage units given that
-there are utility types <tt class="docutils literal"><span class="pre">Duration</span></tt> and <tt class="docutils literal"><span class="pre">StorageUnit</span></tt> exist.</li>
+there are utility types: <tt class="docutils literal"><span class="pre">Duration</span></tt> and <tt class="docutils literal"><span class="pre">StorageUnit</span></tt>.</li>
 <li><strong>No experimental and/or advanced features</strong>: While, it&#8217;s relatively safe to configure
 parameters exposed via <tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods, you should never assume the same about
 the <cite>Stack API</cite> (i.e., <tt class="docutils literal"><span class="pre">.configured</span></tt>). It&#8217;s <em>easy</em> to configure basic parameters; it&#8217;s
