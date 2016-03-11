@@ -53,6 +53,15 @@ private[http4] object Bijections {
 
         resp
 
+      case empty: NettyHttp.HttpResponse =>
+        val resp = FinagleHttp.Response(
+          versionToFinagle(rep.protocolVersion),
+          statusToFinagle(rep.status)
+        )
+        writeNettyHeadersToFinagle(rep.headers, resp.headerMap)
+
+        resp
+
       // note: HttpContent chunks are handled in the dispatcher
       case invalid =>
         throw new IllegalArgumentException("unexpected response type: " + invalid.toString)

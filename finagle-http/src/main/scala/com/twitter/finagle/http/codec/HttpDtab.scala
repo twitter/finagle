@@ -85,7 +85,7 @@ object HttpDtab {
    *
    * @return a Seq[(String, String)] containing the dtab header entries found.
    */
-  private[http] def strip(msg: Message): Seq[(String, String)] = {
+  private[finagle] def strip(msg: Message): Seq[(String, String)] = {
     var headerArr: ArrayBuffer[(String, String)] = null
     val headerIt = msg.headerMap.iterator
     while (headerIt.hasNext) {

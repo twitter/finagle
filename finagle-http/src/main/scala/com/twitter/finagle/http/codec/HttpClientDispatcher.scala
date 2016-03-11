@@ -41,11 +41,6 @@ class HttpClientDispatcher(
   def this(trans: Transport[Any, Any]) =
     this(trans, NullStatsReceiver)
 
-  // BUG: if there are multiple requests queued, this will close a connection
-  // with pending dispatches.  That is the right thing to do, but they should be
-  // re-queued. (Currently, wrapped in a WriteException, but in the future we
-  // should probably introduce an exception to indicate re-queueing -- such
-  // "errors" shouldn't be counted against the retry budget.)
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
     val dtabHeaders = HttpDtab.strip(req)
     if (dtabHeaders.nonEmpty) {
