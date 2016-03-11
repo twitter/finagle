@@ -3,19 +3,25 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.{Failure, Status}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Failure, Status}
 import com.twitter.util.{Await, Return}
+import java.net.SocketAddress
+import java.security.cert.{Certificate, X509Certificate}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
 import scala.collection.immutable.Queue
 
 @RunWith(classOf[JUnitRunner])
-private class HandshakeTest extends FunSuite with OneInstancePerTest {
+class HandshakeTest extends FunSuite
+  with OneInstancePerTest
+  with MockitoSugar {
+
   import Message.{encode => enc, decode => dec}
 
   val clientToServer = new AsyncQueue[ChannelBuffer]
@@ -59,6 +65,45 @@ private class HandshakeTest extends FunSuite with OneInstancePerTest {
 
     assert(serverNegotiated)
     assert(clientNegotiated)
+  }
+
+  test("sync operations are proxied") {
+    val remote = new java.net.SocketAddress { }
+    val local = new java.net.SocketAddress { }
+    val peerCert = Some(mock[X509Certificate])
+
+    val q = new AsyncQueue[ChannelBuffer]
+    val trans = new QueueTransport(q, q) {
+      override val localAddress: SocketAddress = local
+      override val remoteAddress: SocketAddress = remote
+      override def peerCertificate: Option[Certificate] = peerCert
+    }
+
+    val client = Handshake.client(
+      trans = trans,
+      version = 0x0001,
+      headers = Seq.empty,
+      negotiate = (_, trans) => {
+        trans.map(enc, dec)
+      }
+    )
+
+    assert(client.localAddress == local)
+    assert(client.remoteAddress == remote)
+    assert(client.peerCertificate == peerCert)
+
+    val server = Handshake.server(
+      trans = trans,
+      version = 0x0001,
+      headers = identity,
+      negotiate = (_, trans) => {
+        trans.map(enc, dec)
+      }
+    )
+
+    assert(server.localAddress == local)
+    assert(server.remoteAddress == remote)
+    assert(server.peerCertificate == peerCert)
   }
 
   test("exceptions in negotiate propagate") {
