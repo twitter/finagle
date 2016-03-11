@@ -341,22 +341,25 @@ object WriteException {
 }
 
 /**
- * Marker trait to indicate there was an exception while writing the request.
- * These exceptions should generally be retryable as the full request should
- * not have reached the other end.
+ * Marker trait to indicate there was an exception before writing any of the
+ * request.
+ * These exceptions should generally be retryable.
+ *
+ * @see [[com.twitter.finagle.service.RetryPolicy.RetryableWriteException]]
+ * @see [[com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly]]
  */
 trait WriteException extends Exception with SourcedException
 
 /**
- * Default implementation for WriteException that wraps an underlying exception.
+ * Default implementation for [[WriteException]] that wraps an underlying exception.
  */
 case class ChannelWriteException(underlying: Throwable)
   extends ChannelException(underlying)
   with WriteException
   with NoStacktrace
 {
-  override def fillInStackTrace = this
-  override def getStackTrace = underlying.getStackTrace
+  override def fillInStackTrace: NoStacktrace = this
+  override def getStackTrace: Array[StackTraceElement] = underlying.getStackTrace
 }
 
 /**
