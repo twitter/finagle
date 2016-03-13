@@ -1,6 +1,6 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.Service
 import com.twitter.finagle.tracing._ 
 import com.twitter.finagle.transport.Transport
@@ -83,7 +83,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
       }
     }
 
-    val disp = new SerialServerDispatcher(trans, service)
+    val disp = new SerialServerDispatcher(trans, service, init)
 
     readp.setValue("go")
     verify(trans).write("ok")

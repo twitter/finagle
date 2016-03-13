@@ -95,7 +95,7 @@ final class ServerDispatcherTracingTest
 
       ClientBuilder()
         .name("theClient")
-        .hosts(svc.boundAddress)
+        .hosts(svc.boundAddress.asInstanceOf[InetSocketAddress])
         .codec(StringClientCodec)
         .hostConnectionLimit(1)
         .build()

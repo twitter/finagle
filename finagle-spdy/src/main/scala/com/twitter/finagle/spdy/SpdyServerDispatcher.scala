@@ -12,8 +12,8 @@ class SpdyServerDispatcher(
   trans: Transport[HttpResponse, HttpRequest],
   service: Service[HttpRequest, HttpResponse],
   init: ServerDispatcherInitializer
-  ) extends ServerDispatcher[HttpRequest, HttpResponse, HttpRequest](init) {
-  
+  ) extends ServerDispatcher[HttpRequest, HttpResponse, HttpRequest] {
+
   private[this] def loop(): Unit = {
     trans.read() onFailure { exc =>
       service.close()

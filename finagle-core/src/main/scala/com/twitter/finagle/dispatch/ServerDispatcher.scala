@@ -18,8 +18,7 @@ import java.util.concurrent.atomic.AtomicReference
   *  [[com.twitter.finagle.transport.Transport Transport]]
   * @param init a [[ServerDispatcherInitializer]]
   */
-abstract class ServerDispatcher[Req, Rep, Out](init: ServerDispatcherInitializer)
-  extends Closable {
+abstract class ServerDispatcher[Req, Rep, Out] extends Closable {
 
   protected val RecordWireSend: Unit => Unit = _ => Trace.record(Annotation.WireSend)
 
@@ -56,9 +55,8 @@ abstract class ServerDispatcher[Req, Rep, Out](init: ServerDispatcherInitializer
   * @param fRep a function from `Response` type to
   *  [[com.twitter.finagle.tracing.TraceId TraceId]]
   */
-//case class ServerDispatcherInitializer[Req, Rep](tracer: Tracer,
-case class ServerDispatcherInitializer(tracer: Tracer,
-  fReq: Any => Option[TraceId], fRep: Any => Option[TraceId])
+case class ServerDispatcherInitializer(tracer: Tracer, fReq: Any => Option[TraceId], 
+  fRep: Any => Option[TraceId])
 
 object GenSerialServerDispatcher {
   private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
@@ -73,7 +71,7 @@ object GenSerialServerDispatcher {
  * allowing the implementor to furnish custom dispatchers & handlers.
  */
 abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In, Out],
-  init: ServerDispatcherInitializer) extends ServerDispatcher[Req, Rep, Out](init) {
+  init: ServerDispatcherInitializer) extends ServerDispatcher[Req, Rep, Out] {
 
   import GenSerialServerDispatcher._
 
@@ -157,13 +155,13 @@ class SerialServerDispatcher[Req, Rep](
       Trace.record(Annotation.WireRecv)
       service(req) ensure eos.setDone()
     }
-    case None          => service(req) ensure eos.setDone()
+    case None => service(req) ensure eos.setDone()
   }
 
   protected def handle(rep: Rep) = init.fRep(rep) match {
     case Some(traceId) => Trace.letTracerAndId(init.tracer, traceId) {
       trans.write(rep).onSuccess(RecordWireSend)
     }
-    case None          => trans.write(rep)
+    case None => trans.write(rep)
   }
 }

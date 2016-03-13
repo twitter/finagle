@@ -1,134 +1,5 @@
 package com.twitter.finagle.http
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-              "httpDechunker",
-              maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxChunkSize))
-              new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
-            "httpCodec", new HttpClientCodec(
-            pipeline.addLast(
-            pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
-          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
-          if (!_streaming)
-          if (_decompressionEnabled)
-          pipeline
-          pipeline.addLast(
-          val maxChunkSize = 8192
-          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
-          val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
-          val pipeline = Channels.pipeline()
-        ctx.sendUpstream(new UpstreamMessageEvent(
-        def getPipeline() = {
-        val channel = ctx.getChannel()
-        }
-      _annotateCipherHeader,
-      _channelBufferUsageTracker,
-      _compressionLevel,
-      _decompressionEnabled,
-      _enableTracing,
-      _maxHeaderSize,
-      _maxInitialLineLength,
-      _maxRequestSize,
-      _maxResponseSize,
-      _streaming,
-      case ex: Exception =>
-      def pipelineFactory = new ChannelPipelineFactory {
-      NullStatsReceiver)
-      }
-     super.handleUpstream(ctx, e)
-    // rescues exceptions from the upstream handlers and calls notifyHandlerException(),
-    // this only catches Codec exceptions -- when a handler calls sendUpStream(), it
-    // which doesn't throw exceptions.
-    _annotateCipherHeader: Option[String] = None,
-    _annotateCipherHeader: Option[String],
-    _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
-    _channelBufferUsageTracker: Option[ChannelBufferUsageTracker],
-    _compressionLevel: Int = -1,
-    _compressionLevel: Int,
-    _decompressionEnabled: Boolean = true,
-    _decompressionEnabled: Boolean,
-    _enableTracing: Boolean = false,
-    _enableTracing: Boolean,
-    _maxHeaderSize: StorageUnit = 8192.bytes,
-    _maxHeaderSize: StorageUnit,
-    _maxInitialLineLength: StorageUnit = 4096.bytes,
-    _maxInitialLineLength: StorageUnit,
-    _maxRequestSize: StorageUnit = 5.megabytes,
-    _maxRequestSize: StorageUnit,
-    _maxResponseSize: StorageUnit = 5.megabytes,
-    _maxResponseSize: StorageUnit,
-    _statsReceiver: StatsReceiver = NullStatsReceiver
-    _streaming: Boolean
-    _streaming: Boolean = false,
-    copy(_channelBufferUsageTracker = Some(usageTracker))
-    maxChunkSize: Int)
-    maxHeaderSize: Int,
-    maxInitialLineLength: Int,
-    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
-    new Codec[Request, Response] {
-    s"maxRequestSize should be less than 2 Gb, but was ${_maxRequestSize}")
-    s"maxResponseSize should be less than 2 Gb, but was ${_maxResponseSize}")
-    this(
-    try {
-    }
-    } catch {
-  ) =
-  def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
-  def apply(exception: Exception) =
-  def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) =
-  def client = { config =>
-  def compressionLevel(level: Int) = copy(_compressionLevel = level)
-  def decompressionEnabled(yesno: Boolean) = copy(_decompressionEnabled = yesno)
-  def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
-  def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
-  def maxInitialLineLength(length: StorageUnit) = copy(_maxInitialLineLength = length)
-  def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
-  def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
-  def streaming(enable: Boolean) = copy(_streaming = enable)
-  def this(
-  extends DefaultHttpRequest(httpVersion, method, uri)
-  extends HttpServerCodec(maxInitialLineLength, maxHeaderSize, maxChunkSize)
-  httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
-  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-  require(_maxRequestSize < 2.gigabytes,
-  require(_maxResponseSize < 2.gigabytes,
-  }
- *
- *
- *
- * @param _compressionLevel The compression level to use. If passed the default value (-1) then use
- * @param _maxRequestSize The maximum size of the inbound request an HTTP server constructed with
- * @param _maxResponseSize The maximum size of the inbound response an HTTP client constructed with
- * @param _streaming Streaming allows applications to work with HTTP messages
- * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]] which will
- * [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]] for all
- * `Int.MaxValue` bytes). Use streaming/chunked requests to handle larger messages.
- * `Int.MaxValue` bytes). Use streaming/chunked requests to handle larger messages.
- * `true`, the message content is available through a [[com.twitter.io.Reader]],
- * compress text-like content-types with the default compression level (6). Otherwise, use
- * content-types with specified compression level.
- * entire message content is buffered into a [[com.twitter.io.Buf]].
- * that have large (or infinite) content bodies. When this flag is set to
- * this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
- * this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
- * which gives the application a handle to the byte stream. If `false`, the
- */
-) extends CodecFactory[Request, Response] {
-/**
-/** Convert exceptions to BadHttpRequests */
-case class Http(
-class SafeHttpServerCodec(
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
 import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, ServerDispatcherInitializer}
@@ -141,16 +12,146 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, StorageUnit, Try}
 import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
 import org.jboss.netty.handler.codec.http._
-object BadHttpRequest {
+
 private[finagle] case class BadHttpRequest(
+  httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
+  extends DefaultHttpRequest(httpVersion, method, uri)
+
+object BadHttpRequest {
+  def apply(exception: Exception) =
+    new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
+}
+
+/** Convert exceptions to BadHttpRequests */
+class SafeHttpServerCodec(
+    maxInitialLineLength: Int,
+    maxHeaderSize: Int,
+    maxChunkSize: Int)
+  extends HttpServerCodec(maxInitialLineLength, maxHeaderSize, maxChunkSize)
 {
+  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    // this only catches Codec exceptions -- when a handler calls sendUpStream(), it
+    // rescues exceptions from the upstream handlers and calls notifyHandlerException(),
+    // which doesn't throw exceptions.
+    try {
+     super.handleUpstream(ctx, e)
+    } catch {
+      case ex: Exception =>
+        val channel = ctx.getChannel()
+        ctx.sendUpstream(new UpstreamMessageEvent(
+          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
+    }
+  }
 }
-}
+
+/**
+ * @param _compressionLevel The compression level to use. If passed the default value (-1) then use
+ * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]] which will
+ * compress text-like content-types with the default compression level (6). Otherwise, use
+ * [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]] for all
+ * content-types with specified compression level.
+ *
+ * @param _maxRequestSize The maximum size of the inbound request an HTTP server constructed with
+ * this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
+ * `Int.MaxValue` bytes). Use streaming/chunked requests to handle larger messages.
+ *
+ * @param _maxResponseSize The maximum size of the inbound response an HTTP client constructed with
+ * this codec can receive (default is 5 megabytes). Should be less than 2 gigabytes (up to
+ * `Int.MaxValue` bytes). Use streaming/chunked requests to handle larger messages.
+ *
+ * @param _streaming Streaming allows applications to work with HTTP messages
+ * that have large (or infinite) content bodies. When this flag is set to
+ * `true`, the message content is available through a [[com.twitter.io.Reader]],
+ * which gives the application a handle to the byte stream. If `false`, the
+ * entire message content is buffered into a [[com.twitter.io.Buf]].
+ */
+case class Http(
+    _compressionLevel: Int = -1,
+    _maxRequestSize: StorageUnit = 5.megabytes,
+    _maxResponseSize: StorageUnit = 5.megabytes,
+    _decompressionEnabled: Boolean = true,
+    _channelBufferUsageTracker: Option[ChannelBufferUsageTracker] = None,
+    _annotateCipherHeader: Option[String] = None,
+    _enableTracing: Boolean = false,
+    _maxInitialLineLength: StorageUnit = 4096.bytes,
+    _maxHeaderSize: StorageUnit = 8192.bytes,
+    _streaming: Boolean = false,
+    _statsReceiver: StatsReceiver = NullStatsReceiver
+) extends CodecFactory[Request, Response] {
+
+  def this(
+    _compressionLevel: Int,
+    _maxRequestSize: StorageUnit,
+    _maxResponseSize: StorageUnit,
+    _decompressionEnabled: Boolean,
+    _channelBufferUsageTracker: Option[ChannelBufferUsageTracker],
+    _annotateCipherHeader: Option[String],
+    _enableTracing: Boolean,
+    _maxInitialLineLength: StorageUnit,
+    _maxHeaderSize: StorageUnit,
+    _streaming: Boolean
+  ) =
+    this(
+      _compressionLevel,
+      _maxRequestSize,
+      _maxResponseSize,
+      _decompressionEnabled,
+      _channelBufferUsageTracker,
+      _annotateCipherHeader,
+      _enableTracing,
+      _maxInitialLineLength,
+      _maxHeaderSize,
+      _streaming,
+      NullStatsReceiver)
+
+  require(_maxRequestSize < 2.gigabytes,
+    s"maxRequestSize should be less than 2 Gb, but was ${_maxRequestSize}")
+
+  require(_maxResponseSize < 2.gigabytes,
+    s"maxResponseSize should be less than 2 Gb, but was ${_maxResponseSize}")
+
+  def compressionLevel(level: Int) = copy(_compressionLevel = level)
+  def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
+  def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
+  def decompressionEnabled(yesno: Boolean) = copy(_decompressionEnabled = yesno)
+  def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) =
+    copy(_channelBufferUsageTracker = Some(usageTracker))
+  def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
+  def enableTracing(enable: Boolean) = copy(_enableTracing = enable)
+  def maxInitialLineLength(length: StorageUnit) = copy(_maxInitialLineLength = length)
+  def maxHeaderSize(size: StorageUnit) = copy(_maxHeaderSize = size)
+  def streaming(enable: Boolean) = copy(_streaming = enable)
+
+  def client = { config =>
+    new Codec[Request, Response] {
+      def pipelineFactory = new ChannelPipelineFactory {
+        def getPipeline() = {
+          val pipeline = Channels.pipeline()
+          val maxInitialLineLengthInBytes = _maxInitialLineLength.inBytes.toInt
+          val maxHeaderSizeInBytes = _maxHeaderSize.inBytes.toInt
+          val maxChunkSize = 8192
+          pipeline.addLast(
+            "httpCodec", new HttpClientCodec(
+              maxInitialLineLengthInBytes, maxHeaderSizeInBytes, maxChunkSize))
+
+          if (!_streaming)
+            pipeline.addLast(
+              "httpDechunker",
+              new HttpChunkAggregator(_maxResponseSize.inBytes.toInt))
+
+          if (_decompressionEnabled)
+            pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
+
+          pipeline
+        }
+      }
+
       override def prepareServiceFactory(
         underlying: ServiceFactory[Request, Response]
       ): ServiceFactory[Request, Response] =
         underlying.map(new DelayedReleaseService(_))
 
+      
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response],
         params: Stack.Params
