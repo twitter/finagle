@@ -6,7 +6,7 @@ import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessor, nackOnExpiredLease}
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.BufChannelBuffer
-import com.twitter.finagle.stats.NullStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing.NullTracer
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.finagle.{Dtab, Failure, Path, Service}
@@ -351,8 +351,10 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val failResponse = Response(Utf8("fail"))
 
     val testService = new Service[Request, Response] {
-      override def apply(request: Request): Future[Response] = Future.value {
-        if (Contexts.local.get(RemoteInfo.Upstream.AddressCtx) == Some(mockAddr)) okResponse else failResponse
+      override def apply(request: Request): Future[Response] = {
+        val remoteInfo = Contexts.local.get(RemoteInfo.Upstream.AddressCtx)
+        val res = if (remoteInfo == Some(mockAddr)) okResponse else failResponse
+        Future.value(res)
       }
     }
 
@@ -364,5 +366,56 @@ class ServerTest extends FunSuite with MockitoSugar with AssertionsForJUnit {
     val Some(Return(res)) = server.read().poll
 
     assert(res == Message.RreqOk(tag, BufChannelBuffer(okResponse.body)))
+  }
+
+  test("interrupts writes on Tdiscarded") {
+    val writep = new Promise[Unit]
+    writep.setInterruptHandler { case exc => writep.setException(exc) }
+
+    val clientToServer = new AsyncQueue[Message]
+    val transport = new QueueTransport(new AsyncQueue[Message], clientToServer) {
+      override def write(in: Message) = writep
+    }
+
+    val svc = Service.mk { req: Request => Future.value(Response.empty) }
+    val server = ServerDispatcher.newRequestResponse(transport, svc)
+
+    clientToServer.offer(Message.Tdispatch(
+      20, Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER))
+
+    clientToServer.offer(Message.Tdiscarded(20, "timeout"))
+
+    intercept[ClientDiscardedRequestException] { Await.result(writep, 1.second) }
+  }
+
+  test("duplicate tags are serviced") {
+    val clientToServer = new AsyncQueue[Message]
+    val serverToClient = new AsyncQueue[Message]
+    val writep = new Promise[Unit]
+
+    val transport = new QueueTransport(serverToClient, clientToServer) {
+      override def write(in: Message) = writep.before {
+        super.write(in)
+      }
+    }
+
+    val sr = new InMemoryStatsReceiver
+
+    val svc = Service.mk { req: Request => Future.value(Response.empty) }
+    val server = ServerDispatcher.newRequestResponse(
+      transport, svc, Lessor.nil, NullTracer, sr)
+
+    val msg = Message.Tdispatch(tag = 10,
+      Seq.empty, Path.empty, Dtab.empty, ChannelBuffers.EMPTY_BUFFER)
+
+    clientToServer.offer(msg)
+    clientToServer.offer(msg)
+
+    assert(sr.counters(Seq("duplicate_tag")) == 1)
+
+    writep.setDone()
+
+    assert(Await.result(serverToClient.poll().liftToTry, 30.seconds).isReturn)
+    assert(Await.result(serverToClient.poll().liftToTry, 30.seconds).isReturn)
   }
 }
