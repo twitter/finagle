@@ -19,12 +19,14 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 /**
  *  Provides tests for server side content decoding.
  *
- * If and when client side compression is implemented, this test should probably be removed in favour of a complete
- * entry in [[EndToEndTest]]. Client side compression is currently made problematic by netty
+ * If and when client side compression is implemented, this test should probably
+ * be removed in favour of a complete entry in [[EndToEndTest]]. Client side
+ * compression is currently made problematic by netty
  * (see https://github.com/netty/netty/issues/4970).
  */
 @RunWith(classOf[JUnitRunner])
-class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks with BeforeAndAfterAll {
+class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
+                                     with BeforeAndAfterAll {
   // Echo server (with decoding)
   val server = finagle.Http.server
     .withLabel("server")
@@ -51,19 +53,20 @@ class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
   }
 
   // Makes sure everything is cleaned up
-  override def afterAll(): Unit = {
-    Closable.all(client, server)
-  }
+  override def afterAll(): Unit = Closable.all(client, server)
 
-  // Helper class - might be overkill to have a sum type for just one test, but it makes it simple to provide an
-  // Arbitrary instance for encoders and to make the actual test that much more readable.
+  // Helper class - might be overkill to have a sum type for just one test, but
+  // it makes it simple to provide an Arbitrary instance for encoders and to
+  // make the actual test that much more readable.
   sealed abstract class Encoder(val name: String) {
     def encodeWith(out: OutputStream): OutputStream
     def encode(string: String): Buf = {
       val bytes = new ByteArrayOutputStream()
       val out = new PrintStream(encodeWith(bytes), true, "UTF-8")
       out.print(string)
-      out.close() // Do not remove, filter streams absolutely need this to generate legal content.
+      // Do not remove, filter streams absolutely need this to generate legal
+      // content.
+      out.close()
       Buf.ByteArray.Shared(bytes.toByteArray)
     }
   }
@@ -80,7 +83,8 @@ class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
     override def encodeWith(out: OutputStream) = out
   }
 
-  implicit val arbEncoder: Arbitrary[Encoder] = Arbitrary(Gen.oneOf(Gzip, Deflate, Identity))
+  implicit val arbEncoder: Arbitrary[Encoder] =
+    Arbitrary(Gen.oneOf(Gzip, Deflate, Identity))
 
   test("decode client-side encoded entity bodies") {
     forAll { (content: String, encoder: Encoder) ⇒
@@ -89,7 +93,10 @@ class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
         .setHeader("Content-Type", "text/plain;charset=utf-8")
         .url(url)
 
-      assert(content == Await.result(client(req.buildPost(encoder.encode(content))), 1.second).contentString)
+      val res =
+        Await.result(client(req.buildPost(encoder.encode(content))), 1.second)
+
+      assert(content == res.contentString)
     }
   }
 }
