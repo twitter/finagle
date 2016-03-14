@@ -1,14 +1,14 @@
 package com.twitter.finagle.http
 
-import java.io.{ByteArrayOutputStream, OutputStream, PrintStream}
-import java.net.InetSocketAddress
-import java.util.zip.{DeflaterOutputStream, GZIPOutputStream}
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Closable, Future}
+import java.io.{ByteArrayOutputStream, OutputStream, PrintStream}
+import java.net.InetSocketAddress
+import java.util.zip.{DeflaterOutputStream, GZIPOutputStream}
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
