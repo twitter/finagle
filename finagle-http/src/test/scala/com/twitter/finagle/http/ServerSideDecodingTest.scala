@@ -12,12 +12,12 @@ import java.util.zip.{DeflaterOutputStream, GZIPOutputStream}
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 /**
- *  Provides tests for server side content decoding.
+ * Provides tests for server side content decoding.
  *
  * If and when client side compression is implemented, this test should probably
  * be removed in favour of a complete entry in [[EndToEndTest]]. Client side
@@ -25,36 +25,8 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
  * (see https://github.com/netty/netty/issues/4970).
  */
 @RunWith(classOf[JUnitRunner])
-class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
-                                     with BeforeAndAfterAll {
-  // Echo server (with decoding)
-  val server = finagle.Http.server
-    .withLabel("server")
-    .withDecompression(true)
-    .serve("localhost:*", new Service[Request, Response] {
-      def apply(request: Request) = {
-        val response = Response()
-        response.contentString = request.contentString
-        Future.value(response)
-      }
-    })
-
-  // Standard client
-  val client = ClientBuilder()
-    .codec(Http())
-    .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
-    .hostConnectionLimit(1)
-    .build()
-
-  // URL at which all requests should be made
-  val url: String = {
-    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    s"http://${addr.getHostName}:${addr.getPort}/"
-  }
-
-  // Makes sure everything is cleaned up
-  override def afterAll(): Unit = Closable.all(client, server)
-
+class ServerSideDecodingTest extends FunSuite
+                                     with GeneratorDrivenPropertyChecks {
   // Helper class - might be overkill to have a sum type for just one test, but
   // it makes it simple to provide an Arbitrary instance for encoders and to
   // make the actual test that much more readable.
@@ -87,6 +59,31 @@ class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
     Arbitrary(Gen.oneOf(Gzip, Deflate, Identity))
 
   test("decode client-side encoded entity bodies") {
+    // Echo server (with decoding)
+    val server = finagle.Http.server
+      .withLabel("server")
+      .withDecompression(true)
+      .serve("localhost:*", new Service[Request, Response] {
+        def apply(request: Request) = {
+          val response = Response()
+          response.contentString = request.contentString
+          Future.value(response)
+        }
+      })
+
+    // Standard client
+    val client = ClientBuilder()
+      .codec(Http())
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
+      .hostConnectionLimit(1)
+      .build()
+
+    // URL at which all requests should be made
+    val url: String = {
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+      s"http://${addr.getHostName}:${addr.getPort}/"
+    }
+
     forAll { (content: String, encoder: Encoder) ⇒
       val req = RequestBuilder()
         .setHeader("Content-Encoding", encoder.name)
@@ -98,5 +95,7 @@ class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
 
       assert(content == res.contentString)
     }
+
+    Closable.all(client, server)
   }
 }
