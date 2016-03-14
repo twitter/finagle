@@ -92,7 +92,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       Trace.letTracer(tracer)(f)
     }
 
-  def buf(b: Byte*) = Buf.ByteArray(b:_*)
+  def buf(b: Byte*) = Buf.ByteArray.Owned(b.toArray)
 
   test("handle concurrent requests, handling out of order replies") {
     val ctx = new Ctx

@@ -185,7 +185,7 @@ class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
 
   test("getByteArray boundary check 3") {
     val dst = new Array[Byte](4)
-    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray(1,2,3,4))
+    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
     intercept[IndexOutOfBoundsException] {
       wrappedBuf.getBytes(0, dst, -1, 4)
     }
@@ -199,7 +199,7 @@ class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
 
   test("getByteArray boundary check 4") {
     val dst = new Array[Byte](4)
-    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray(1,2,3,4))
+    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
     intercept[IndexOutOfBoundsException] {
       wrappedBuf.getBytes(0, dst, 1, 4)
     }
@@ -264,7 +264,7 @@ class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
     dst.position(1)
     dst.limit(3)
 
-    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray(1,2,3,4))
+    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
     wrappedBuf.getBytes(1, dst)
 
     assert(3 == dst.position())
@@ -288,7 +288,7 @@ class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
     dst.position(1)
     dst.limit(3)
 
-    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray(1,2,3,4))
+    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray.Owned(Array[Byte](1,2,3,4)))
     wrappedBuf.getBytes(1, dst)
 
     assert(3 == dst.position())
@@ -1345,7 +1345,7 @@ class BufAsByteBufTest extends FunSuite with BeforeAndAfter {
   }
 
   test("indexOf") {
-    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray(1,2,3,2,1))
+    val wrappedBuf = BufAsByteBuf.Owned(Buf.ByteArray.Owned(Array[Byte](1,2,3,2,1)))
 
     assertEquals(-1, wrappedBuf.indexOf(1, 4, 1: Byte))
     assertEquals(-1, wrappedBuf.indexOf(4, 1, 1: Byte))

@@ -38,7 +38,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
   val version = 6
 
   // Dummy argument values
-  val data = Buf.ByteArray(_data)
+  val data = Buf.ByteArray.Owned(_data)
   val id = Data.Id("scheme", "a")
   val acl = Data.ACL(3, id)
   val acls = List(acl)
@@ -78,7 +78,7 @@ class ApacheZooKeeperTest extends FlatSpec with MockitoSugar with OneInstancePer
   "sessionPasswd" should "return proper sessionPasswd" in {
     val pw = List[Byte](1, 2, 3, 4).toArray
     when(mockZK.getSessionPasswd).thenReturn(pw)
-    assert(zk.sessionPasswd == Buf.ByteArray(pw))
+    assert(zk.sessionPasswd == Buf.ByteArray.Owned(pw))
   }
 
   "sessionTimeout" should "return proper duration" in {

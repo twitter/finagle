@@ -22,7 +22,7 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
     extends ZooKeeperRW {
   private def fromZKData(data: Array[Byte]): Option[Buf] = data match {
     case null => None
-    case x => Some(Buf.ByteArray(x))
+    case x => Some(Buf.ByteArray.Owned(x))
   }
 
   /**
@@ -38,7 +38,7 @@ private[serverset2] class ApacheZooKeeper private[apache](zk: zookeeper.ZooKeepe
 
   def sessionId: Long = zk.getSessionId
 
-  def sessionPasswd: Buf = Buf.ByteArray(zk.getSessionPasswd)
+  def sessionPasswd: Buf = Buf.ByteArray.Owned(zk.getSessionPasswd)
 
   def sessionTimeout: Duration = Duration.fromMilliseconds(zk.getSessionTimeout)
 

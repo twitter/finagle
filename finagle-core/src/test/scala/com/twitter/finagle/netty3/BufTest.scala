@@ -13,8 +13,8 @@ class BufTest extends FunSuite {
     cb.writeBytes(Array[Byte](1,2,3,4,5,6,7,8,9))
     val buf = ChannelBufferBuf.Owned(cb)
     assert(buf.length == 9)
-    assert(buf.slice(2,4) == Buf.ByteArray(3,4))
-    assert(buf == Buf.ByteArray(1,2,3,4,5,6,7,8,9))
+    assert(buf.slice(2,4) == Buf.ByteArray.Owned(Array[Byte](3,4)))
+    assert(buf == Buf.ByteArray.Owned(Array[Byte](1,2,3,4,5,6,7,8,9)))
   }
 
   test("ChannelBufferBuf.slice: truncates on out-of-bounds indices") {
@@ -29,9 +29,9 @@ class BufTest extends FunSuite {
     val cb = ChannelBuffers.wrappedBuffer(bytes)
     val buf = ChannelBufferBuf.Shared(cb)
     bytes(0) = 0.toByte
-    assert(buf == Buf.ByteArray(1,2,3,4,5,6,7,8,9))
+    assert(buf == Buf.ByteArray.Owned(Array[Byte](1,2,3,4,5,6,7,8,9)))
     cb.clear()
-    assert(buf == Buf.ByteArray(1,2,3,4,5,6,7,8,9))
+    assert(buf == Buf.ByteArray.Owned(Array[Byte](1,2,3,4,5,6,7,8,9)))
   }
 
   test("ChannelBufferBuf.Direct.apply") {
@@ -39,7 +39,7 @@ class BufTest extends FunSuite {
     val cb = ChannelBuffers.wrappedBuffer(bytes)
     val buf = ChannelBufferBuf.Owned(cb)
     bytes(0) = 0.toByte
-    assert(buf == Buf.ByteArray(0,2,3,4,5,6,7,8,9))
+    assert(buf == Buf.ByteArray.Owned(Array[Byte](0,2,3,4,5,6,7,8,9)))
     cb.clear()
     assert(buf.length == 0)
   }
@@ -68,7 +68,7 @@ class BufTest extends FunSuite {
   }
 
   test("ChannelBufferBuf.coerce(ByteArray)") {
-    val orig = Buf.ByteArray(1,2,3,4,5,6,7,8,9)
+    val orig = Buf.ByteArray.Owned(Array[Byte](1,2,3,4,5,6,7,8,9))
     val coerced = ChannelBufferBuf.coerce(orig)
     assert(coerced == orig)
   }
