@@ -16,12 +16,13 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-/** Provides tests for server side content decoding.
-  *
-  * If and when client side compression is implemented, this test should probably be removed in favour of a complete
-  * entry in [[EndToEndTest]]. Client side compression is currently made problematic by netty
-  * (see https://github.com/netty/netty/issues/4970).
-  */
+/**
+ *  Provides tests for server side content decoding.
+ *
+ * If and when client side compression is implemented, this test should probably be removed in favour of a complete
+ * entry in [[EndToEndTest]]. Client side compression is currently made problematic by netty
+ * (see https://github.com/netty/netty/issues/4970).
+ */
 @RunWith(classOf[JUnitRunner])
 class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks with BeforeAndAfterAll {
   // Echo server (with decoding)
