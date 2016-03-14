@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import java.io.{ByteArrayOutputStream, OutputStream, PrintStream}
 import java.net.InetSocketAddress
 import java.util.zip.{DeflaterOutputStream, GZIPOutputStream}
-
+import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
@@ -88,7 +88,7 @@ class ServerSideDecodingTest extends FunSuite with GeneratorDrivenPropertyChecks
         .setHeader("Content-Type", "text/plain;charset=utf-8")
         .url(url)
 
-      assert(content == Await.result(client(req.buildPost(encoder.encode(content)))).contentString)
+      assert(content == Await.result(client(req.buildPost(encoder.encode(content))), 1.second).contentString)
     }
   }
 }
