@@ -39,6 +39,9 @@ New Features
   * finagle-http: Add `toBoolean` method in `StringUtil` to parse strings to boolean consistently.
     ``RB_ID=804056``
 
+  * finagle-http: Servers now actually decompress requests when decompression is turned on.
+    ``RB_ID=810629``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

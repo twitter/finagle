@@ -205,6 +205,9 @@ case class Http(
             pipeline.addLast("httpCompressor", new TextualContentCompressor)
           }
 
+          if (_decompressionEnabled)
+            pipeline.addLast("httpDecompressor", new HttpContentDecompressor)
+
           // The payload size handler should come before the RespondToExpectContinue handler so that we don't
           // send a 100 CONTINUE for oversize requests we have no intention of handling.
           pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSizeInBytes))
