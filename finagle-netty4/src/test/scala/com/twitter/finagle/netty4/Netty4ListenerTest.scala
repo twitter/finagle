@@ -3,7 +3,6 @@ package com.twitter.finagle.netty4
 
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.dispatch.SerialServerDispatcher
-//import com.twitter.finagle.netty4.transport.SocketChannelTransport CSL-2050
 import com.twitter.finagle.param.{Stats, Label}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport

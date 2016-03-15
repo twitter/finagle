@@ -4,13 +4,10 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Return, Time}
-import io.netty.channel.{
-  Channel, ChannelHandlerContext, ChannelFutureListener, ChannelFuture,
-  SimpleChannelInboundHandler
-}
+import io.netty.channel.{ChannelException => _, _}
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
 
 /**
  * A [[Transport]] implementation based on Netty's [[Channel]].
@@ -20,13 +17,21 @@ import java.util.concurrent.atomic.AtomicBoolean
  * handlers inserted after that won't get any of the inbound traffic.
  */
 private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[In, Out] {
+
   private[this] val queue = new AsyncQueue[Out]
 
   private[this] val failed = new AtomicBoolean(false)
   private[this] val closed = new Promise[Throwable]
 
+  // tracks the number of reads that need to be satisfied when the channel
+  // transport is configured with auto-reading off.
+  private[this] val msgsNeeded = new AtomicInteger(0)
+
   private[this] val readInterruptHandler: PartialFunction[Throwable, Unit] = {
-    case e => fail(e)
+    case e =>
+      // technically we should decrement `msgsNeeded` here but since we fail
+      // the transport on read interrupts, that becomes moot.
+      fail(e)
   }
 
   val onClose: Future[Throwable] = closed
@@ -79,7 +84,10 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
   }
 
   def read(): Future[Out] = {
-    ch.read()
+    if (!ch.config.isAutoRead) {
+      msgsNeeded.incrementAndGet()
+      ch.read()
+    }
 
     // This is fine, but we should consider being a little more fine-grained
     // here. For example, if a read behind another read interrupts, perhaps the
@@ -120,7 +128,14 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
   ch.pipeline().addLast("finagleChannelTransport", new SimpleChannelInboundHandler[Out]() {
+
+    override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
+      if (!ch.config.isAutoRead && msgsNeeded.get > 0) ch.read()
+      super.channelReadComplete(ctx)
+    }
+
     override def channelRead0(ctx: ChannelHandlerContext, msg: Out): Unit = {
+      if (!ch.config.isAutoRead) msgsNeeded.decrementAndGet()
       queue.offer(msg)
     }
 
