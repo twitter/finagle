@@ -1,10 +1,8 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.Deadline
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{param, Service, ServiceFactory, SimpleFilter, Stack, Stackable}
-import com.twitter.util.{Future, Stopwatch, Time, Duration}
+import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.TimeUnit
 
 private[finagle] object ServerStatsFilter {
@@ -19,13 +17,10 @@ private[finagle] object ServerStatsFilter {
       val description = "Record elapsed execution time, transit latency, deadline budget, of underlying service"
       def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = _stats
-        new ServerStatsFilter(statsReceiver).andThen(next)
+        if (statsReceiver.isNull) next
+        else new ServerStatsFilter(statsReceiver).andThen(next)
       }
     }
-
-  /** Used as a sentinel with reference equality to indicate the absence of a deadline */
-  private val NoDeadline = Deadline(Time.Undefined, Time.Undefined)
-  private val NoDeadlineFn = () => NoDeadline
 }
 
 /**

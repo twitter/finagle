@@ -1,13 +1,14 @@
 package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack.Param
+import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{DeadlineFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
+import com.twitter.finagle.tracing.TraceInitializerFilter.Module
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
@@ -18,7 +19,18 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 
 object StackServer {
+
   private[this] val newJvmFilter = new MkJvmFilter(Jvm())
+
+  private[this] class JvmTracing[Req, Rep] extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
+    override def role: Role = Role.jvmTracing
+    override def description: String = "Server-side JVM tracing"
+    override def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
+      val param.Tracer(tracer) = _tracer
+      if (tracer.isNull) next
+      else newJvmFilter[Req, Rep].andThen(next)
+    }
+  }
 
   /**
    * Canonical Roles for each Server-related Stack modules.
@@ -71,8 +83,7 @@ object StackServer {
     stk.push(RequestSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
-    stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
-      newJvmFilter[Req, Rep]() andThen next))
+    stk.push(new JvmTracing)
     stk.push(ServerStatsFilter.module)
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ServerTracingFilter.module)

@@ -73,6 +73,11 @@ trait Tracer {
   def record(record: Record): Unit
 
   /**
+   * Indicates whether or not this tracer instance is [[NullTracer]].
+   */
+  def isNull: Boolean = false
+
+  /**
    * Should we sample this trace or not? Could be decided
    * that a percentage of all traces will be let through for example.
    * True: keep it
@@ -86,6 +91,7 @@ class NullTracer extends Tracer {
   val factory: Tracer.Factory = () => this
   def record(record: Record): Unit = {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
+  override def isNull: Boolean = true
 }
 
 object NullTracer extends NullTracer
