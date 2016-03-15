@@ -26,6 +26,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
     val deadlineFilter = new DeadlineFilter[String, String](
       10.seconds, 10.seconds, 0.2, statsReceiver, Stopwatch.timeMillis)
     val deadlineService = deadlineFilter.andThen(service)
+    val deadlineEx = "exceeded request deadline"
   }
 
   test("When there is no deadline set, DeadlineFilter should service the request") {
@@ -106,9 +107,12 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
 
     Time.withCurrentTimeFrozen { tc =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
-        for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
+        for (i <- 0 until 5)  Await.result(deadlineService("marco"), 1.second)
         tc.advance(2.seconds)
-        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        val f = intercept[Failure] {
+          Await.result(deadlineService("marco"), 1.second)
+        }
+        assert(f.toString.contains(deadlineEx))
         assert(statsReceiver.stats(Seq("deadline_budget_ms")).length == 6)
       }
     }
@@ -125,7 +129,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
         tc.advance(2.seconds)
-        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        val f = intercept[Failure] {
+          Await.result(deadlineService("marco"), 1.second)
+        }
+        assert(f.toString.contains(deadlineEx))
         assert(statsReceiver.stats(Seq("transit_latency_ms")).length == 6)
       }
     }
@@ -163,18 +170,17 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
           for (i <- 0 until 3) Await.result(deadlineService("marco"), 1.second)
           tc.advance(2.seconds)
-          val res = deadlineService("marco")
+          assert(Await.result(deadlineService("marco"), 1.second) == "polo")
           assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
           assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
           assert(statsReceiver.counters.get(List("rejected")) == None)
-          assert(Await.result(res, 1.second) == "polo")
         }
       }
     }
 
   test("When the deadline is exceeded and within the tolerance threshold, and " +
     "the reject token bucket contains sufficient tokens, DeadlineFilter " +
-    "should service the request and increment the exceeded and rejected stats") {
+    "should not service the request and increment the exceeded and rejected stats") {
       val h = new DeadlineFilterHelper
       import h._
 
@@ -184,7 +190,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
           for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
           tc.advance(2.seconds)
-          assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+          val f = intercept[Failure] {
+            Await.result(deadlineService("marco"), 1.second)
+          }
+          assert(f.toString.contains(deadlineEx))
           assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
           assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
           assert(statsReceiver.counters.get(List("rejected")) == Some(1))
@@ -205,7 +214,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         tc.advance(2.seconds)
 
         // 5 tokens should have been added, so we should be able to reject
-        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        val f = intercept[Failure] {
+          Await.result(deadlineService("marco"), 1.second)
+        }
+        assert(f.toString.contains(deadlineEx))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
     }
@@ -227,7 +239,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         tc.advance(2.seconds)
 
         // 5 tokens should have been added, so we should be able to reject
-        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        val f = intercept[Failure] {
+          Await.result(deadlineService("marco"), 1.second)
+        }
+        assert(f.toString.contains(deadlineEx))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
     }
@@ -246,6 +261,11 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
 
         // 5 tokens should have been added, so we should be able to reject
+        val f = intercept[Failure] {
+          Await.result(deadlineService("marco"), 1.second)
+        }
+        assert(f.toString.contains(deadlineEx))
+
         assert(Await.result(deadlineService("marco"), 1.second) == "polo")
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
@@ -262,7 +282,10 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
         for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
         tc.advance(2.seconds)
-        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        val f = intercept[Failure] {
+          Await.result(deadlineService("marco"), 1.second)
+        }
+        assert(f.toString.contains(deadlineEx))
         assert(statsReceiver.counters.get(List("rejected")) == Some(1))
       }
 
@@ -324,10 +347,12 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
 
     Time.withCurrentTimeFrozen { tc =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(5.seconds)) {
-        Await.result(service("marco"), 1.second)
-        Await.result(service("marco"), 1.second)
+        for (i <- 0 until 5) Await.result(service("marco"), 1.second)
         tc.advance(7.seconds)
-        assert(Await.result(service("marco"), 1.second) == "polo")
+        val f = intercept[Failure] {
+          Await.result(service("marco"), 1.second)
+        }
+        assert(f.toString.contains(deadlineEx))
         assert(statsReceiver.counters.get(List("admission_control", "deadline", "exceeded")) == Some(1))
         assert(statsReceiver.counters.get(List("admission_control", "deadline", "exceeded_beyond_tolerance")) == None)
         assert(statsReceiver.counters.get(List("admission_control", "deadline", "rejected")) == Some(1))

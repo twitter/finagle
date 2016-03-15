@@ -26,6 +26,9 @@ New Features
     which allows developers to give Finagle the additional application specific knowledge
     necessary in order to properly classify responses.``RB_ID=800179``
 
+  * finagle-core: Server-side DeadlineFilter discards requests past their deadline.
+    ``RB_ID=811038``
+
   * finagle: Export two new histograms: `request_payload_bytes` and `response_payload_bytes`
     for the following protocols: HTTP (non-chunked), Mux, ThriftMux and Thrift. ``RB_ID=797821``
 

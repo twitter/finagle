@@ -131,8 +131,6 @@ separately:
 
 See :ref:`Deadline Admission Control metrics <deadline_admission_control_stats>` for more details.
 
-.. note:: The `Request Deadline` module is currently in an experimental mode where it doesn't actually
-          reject any of the `expired` requests, but only maintains metrics.
 
 Request Timeout
 ^^^^^^^^^^^^^^^
