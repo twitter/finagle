@@ -13,7 +13,7 @@ import java.net.InetSocketAddress;
 
 public class HttpServer {
 
-    static InetSocketAddress addr = new InetSocketAddress(InetAddress.getLoopbackAddress(), 8888);
+    private final static InetSocketAddress addr = new InetSocketAddress(InetAddress.getLoopbackAddress(), 8888);
 
     public static void main(String[] args) throws Exception {
         LoggingFilter accessLog = new LoggingFilter();

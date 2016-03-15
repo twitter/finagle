@@ -3,7 +3,7 @@ package com.twitter.finagle.example.java.http;
 import java.util.HashMap;
 
 public class CatsDB {
-    static HashMap<Integer, Cat> db = new HashMap<>();
+    private final static HashMap<Integer, Cat> db = new HashMap<>();
 
     public Cat get(Integer id) {
         if (db.isEmpty())

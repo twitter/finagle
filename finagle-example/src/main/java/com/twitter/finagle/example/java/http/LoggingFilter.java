@@ -8,6 +8,7 @@ import com.twitter.util.Duration;
 import com.twitter.util.Function;
 import com.twitter.util.Future;
 import com.twitter.util.Stopwatch$;
+import scala.Function0;
 
 /**
  * A simple Finagle filter that logs the Request total time in milliseconds.
@@ -16,12 +17,13 @@ public final class LoggingFilter extends SimpleFilter<Request, Response> {
 
     @Override
     public Future<Response> apply(Request req, Service<Request, Response> service) {
-        final Duration e = Stopwatch$.MODULE$.start().apply();
+        final Function0<Duration> start = Stopwatch$.MODULE$.start();
 
         return service.apply(req).map(new Function<Response, Response>() {
             @Override
             public Response apply(Response resp) {
-                System.out.println("Took: " + e.inMilliseconds() + "ms to complete.");
+                Duration elapsed = start.apply();
+                System.out.println("Took: " + elapsed.inMilliseconds() + "ms to complete.");
 
                 return resp;
             }
