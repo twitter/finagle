@@ -158,7 +158,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
             && rejectBucket.tryGet(rejectWithdrawal)) {
           exceededStat.incr()
           rejectedStat.incr()
-          Future.exception(Failure.rejected(deadlineExceeded(deadline, -remaining, now)))
+          service(request)  // When turned on this will be Future.exception
         } else {
           if (-remaining > tolerance) beyondToleranceStat.incr()
           else if (remaining < Duration.Zero) exceededStat.incr()
