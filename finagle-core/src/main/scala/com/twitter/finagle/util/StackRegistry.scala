@@ -31,6 +31,8 @@ object StackRegistry {
 
     val name: String = params[Label].label
     val protocolLibrary: String = params[ProtocolLibrary].name
+
+    println(s"CREATED registry entry name=$name, protocolLib=$protocolLibrary")
   }
 
   /**

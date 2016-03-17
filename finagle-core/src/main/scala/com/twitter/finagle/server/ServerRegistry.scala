@@ -5,7 +5,7 @@ import com.twitter.logging.Level
 import java.net.SocketAddress
 import java.util.logging.Logger
 
-private[twitter] object ServerRegistry extends StackRegistry {
+object ServerRegistry extends StackRegistry {
   private val log = Logger.getLogger(getClass.getName)
   private var addrNames = Map[SocketAddress, String]()
 
