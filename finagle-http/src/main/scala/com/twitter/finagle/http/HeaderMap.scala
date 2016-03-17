@@ -105,9 +105,13 @@ class MapHeaderMap extends HeaderMap {
   }
 
   // For Map/MapLike
-  def += (kv: (String, String)): MapHeaderMap.this.type = {
+  def +=(kv: (String, String)): MapHeaderMap.this.type = {
     val t = HeaderValuePair(kv._1, kv._2)
-    underlying(t.canonicalName) = List(t)
+
+    // this slightly complicated logic is here to be backward compatible
+    underlying(t.canonicalName) =
+      underlying.getOrElse(t.canonicalName, Nil)
+        .filterNot(_.header == t.header) :+ t
     this
   }
 

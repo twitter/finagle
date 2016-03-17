@@ -130,4 +130,11 @@ class MapHeaderMapTest extends FunSuite {
     val map2 = new MapHeaderMap(mutable.Map("a" -> Seq("1", "3"), "A" -> Seq("2")))
     assert(map2.iterator.toSet == Set("a" -> "1", "a" -> "3", "A" -> "2"))
   }
+
+  test("preserves the legacy behavior of +=") {
+    val map = MapHeaderMap("a" -> "1", "a" -> "3", "A" -> "2")
+    map += ("a" -> "4")
+
+    assert(map.iterator.toSet == Set("a" -> "4", "A" -> "2"))
+  }
 }
