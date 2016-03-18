@@ -326,7 +326,7 @@ class ClusterClientTest
   test("Ketama ClusterClient using a distributor - use custom keys") {
     // create my cluster client solely based on a zk client and a path
     val mycluster = CachePoolCluster.newZkCluster(zkPath, zookeeperClient)
-    mycluster.ready() // give it sometime for the cluster to get the initial set of memberships
+    Await.result(mycluster.ready) // give it sometime for the cluster to get the initial set of memberships
 
     val customKey = "key-"
     var shardId = -1
