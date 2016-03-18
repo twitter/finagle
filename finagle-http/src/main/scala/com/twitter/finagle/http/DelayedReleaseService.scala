@@ -1,10 +1,24 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.util.AsyncLatch
-import com.twitter.finagle.{Service, ServiceProxy}
+import com.twitter.finagle._
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicBoolean
+
+private[finagle] object DelayedRelease {
+  val role = StackClient.Role.prepFactory
+  val description = "Prevents an HTTP service from being closed until its response completes"
+  val module: Stackable[ServiceFactory[Request, Response]] =
+    new Stack.Module1[FactoryToService.Enabled, ServiceFactory[Request, Response]] {
+      val role = DelayedRelease.role
+      val description = DelayedRelease.description
+      def make(_enabled: FactoryToService.Enabled, next: ServiceFactory[Request, Response]) =
+        if (_enabled.enabled) next.map(new DelayedReleaseService(_))
+        else next
+    }
+}
 
 /**
  * Delay release of the connection until all chunks have been received.
@@ -13,13 +27,13 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
   service: Service[Req, Response]
 ) extends ServiceProxy[Req, Response](service) {
 
-  protected[this] val counter = new AsyncLatch
+  protected[this] val latch = new AsyncLatch
 
   private[this] def proxy(in: Response) = {
     val released = new AtomicBoolean(false)
     def done() {
       if (released.compareAndSet(false, true)) {
-        counter.decr()
+        latch.decr()
       }
     }
 
@@ -46,19 +60,19 @@ private[finagle] class DelayedReleaseService[-Req <: Request](
   }
 
   override def apply(request: Req): Future[Response] = {
-    counter.incr()
+    latch.incr()
     service(request) transform {
       case Return(r) if r.isChunked =>
         Future.value(proxy(r))
       case t =>
-        counter.decr()
+        latch.decr()
         Future.const(t)
     }
   }
 
   override final def close(deadline: Time): Future[Unit] = {
     val p = new Promise[Unit]
-    counter.await { p.become(service.close(deadline)) }
+    latch.await { p.become(service.close(deadline)) }
     p
   }
 

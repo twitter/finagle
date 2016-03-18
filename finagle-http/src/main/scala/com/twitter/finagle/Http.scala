@@ -4,7 +4,7 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
-import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
+import com.twitter.finagle.http.{DelayedRelease, HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.netty3._
@@ -106,6 +106,9 @@ object Http extends Client[Request, Response] with HttpRichClient
   object Client {
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
+        // XXX this prepConn is not exactly equivalent with prepareConnFactory in Codec.scala
+        .replace(StackClient.Role.prepConn, DelayedRelease.module)
+        .replace(StackClient.Role.prepFactory, DelayedRelease.module)
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
         .prepend(nonChunkedPayloadSize)

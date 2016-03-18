@@ -7,6 +7,11 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+  * finagle-http: Ensure that service closure is delayed until chunked response bodies
+    have been processed.
+
 6.34.0
 ------
 
