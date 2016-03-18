@@ -104,6 +104,16 @@ Breaking API Changes
   * finagle-redis: `c.t.f.redis.Redis` no longer takes a `StatsReceiver`, pass it to a
     `(Client/Server)Builder` instead. ``RB_ID=797821``
 
+  * finagle-core: `c.t.f.http.MapHeaderMap` no longer takes a `mutable.Map[String, Seq[String]]` as
+    a constructor parameter. `apply` method provides a similar functionality.
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: Fixed `getAll` method on `c.t.f.http.MapHeaderMap`, now it is case insensitive.
+    `apply` method was altering the provided header names. This is fixed it is now possible to
+    iterate on the original header names.
+
 6.33.0
 ------
 
