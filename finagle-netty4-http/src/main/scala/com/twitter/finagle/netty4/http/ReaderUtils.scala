@@ -1,4 +1,4 @@
-package com.twitter.finagle.http4
+package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.netty4.{BufAsByteBuf, ByteBufAsBuf}
 import com.twitter.finagle.transport.Transport
@@ -6,7 +6,7 @@ import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Return}
 import io.netty.handler.codec.{http => NettyHttp}
 
-private[http4] object ReaderUtils {
+private[http] object ReaderUtils {
   /**
    * Serialize a http chunk into a Buf.
    */
@@ -15,7 +15,7 @@ private[http4] object ReaderUtils {
       Future.None
 
     case chunk: NettyHttp.HttpContent =>
-      Future.value(Some(ByteBufAsBuf.Owned(chunk.content.duplicate)))
+      Future.value(Some(ByteBufAsBuf.Shared(chunk.content)))
 
     case invalid =>
       Future.exception(
@@ -28,7 +28,7 @@ private[http4] object ReaderUtils {
    * of stream.
    */
   def chunkOfBuf(buf: Buf): NettyHttp.HttpContent =
-    new NettyHttp.DefaultHttpContent(BufAsByteBuf.Owned(buf))
+    new NettyHttp.DefaultHttpContent(BufAsByteBuf.Shared(buf))
 
   /**
    * Continuously read from a Reader, writing everything to a Transport.

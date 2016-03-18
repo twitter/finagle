@@ -1,7 +1,7 @@
 scala_library(name='scala',
   provides = scala_artifact(
     org = 'com.twitter',
-    name = 'finagle-http-netty4',
+    name = 'finagle-netty4-http',
     repo = artifactory,
   ),
   dependencies=[

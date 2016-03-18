@@ -1,4 +1,4 @@
-package com.twitter.finagle.http4
+package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.http.filter.HttpNackFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
@@ -9,10 +9,10 @@ import com.twitter.finagle.http.{Fields, Status, Request, Response}
 import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
 import com.twitter.util.{Throw, Return, Future, Promise}
-import com.twitter.finagle.http4.ReaderUtils.{readChunk, streamChunks}
+import com.twitter.finagle.netty4.http.ReaderUtils.{readChunk, streamChunks}
 import io.netty.handler.codec.{http => NettyHttp}
 
-private[http4] object HttpClientDispatcher {
+private[http] object HttpClientDispatcher {
   val NackFailure = Throw(Failure.rejected("The request was nacked by the server"))
   private val log = Logger(getClass.getName)
   private val isNack = { res: NettyHttp.HttpResponse =>
@@ -26,7 +26,7 @@ private[http4] object HttpClientDispatcher {
  *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
-private[http4] class HttpClientDispatcher(
+private[http] class HttpClientDispatcher(
     trans: Transport[Any, Any],
     statsReceiver: StatsReceiver)
   extends GenSerialClientDispatcher[Request, Response, Any, Any](trans, statsReceiver) {

@@ -28,6 +28,7 @@ private[codec] object PayloadSizeHandler {
   def mkTooLargeResponse(version: HttpVersion): HttpResponse = {
     val resp = new DefaultHttpResponse(version, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE)
     HttpHeaders.setHeader(resp, HttpHeaders.Names.CONNECTION, "close")
+    HttpHeaders.setHeader(resp, HttpHeaders.Names.CONTENT_LENGTH, 0)
     resp
   }
 }

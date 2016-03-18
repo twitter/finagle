@@ -1,4 +1,4 @@
-package com.twitter.finagle.http4
+package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.http._
 import com.twitter.io.{BufReader, Buf}

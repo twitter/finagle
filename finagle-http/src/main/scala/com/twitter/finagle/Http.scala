@@ -44,6 +44,31 @@ object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
   object param {
+
+    /**
+     * when streaming, the maximum size of http chunks.
+     */
+    case class MaxChunkSize(size: StorageUnit)
+    implicit object MaxChunkSize extends Stack.Param[MaxChunkSize] {
+      val default = MaxChunkSize(8.kilobytes)
+    }
+
+    /**
+     * the maximum size of all headers.
+     */
+    case class MaxHeaderSize(size: StorageUnit)
+    implicit object MaxHeaderSize extends Stack.Param[MaxHeaderSize] {
+      val default = MaxHeaderSize(8.kilobytes)
+    }
+
+    /**
+     * the maximum size of the initial line.
+     */
+    case class MaxInitialLineSize(size: StorageUnit)
+    implicit object MaxInitialLineSize extends Stack.Param[MaxInitialLineSize] {
+      val default = MaxInitialLineSize(4.kilobytes)
+    }
+
     case class MaxRequestSize(size: StorageUnit) {
       require(size < 2.gigabytes,
         s"MaxRequestSize should be less than 2 Gb, but was $size")
@@ -83,10 +108,12 @@ object Http extends Client[Request, Response] with HttpRichClient
           .streaming(params[Streaming].enabled)
           .decompressionEnabled(params[Decompression].enabled)
           .compressionLevel(params[CompressionLevel].level)
+          .maxInitialLineLength(params[MaxInitialLineSize].size)
+          .maxHeaderSize(params[MaxHeaderSize].size)
   }
 
   // Only record payload sizes when streaming is disabled.
-  private[this] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
+  private[finagle] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module2[param.Streaming, Stats, ServiceFactory[Request, Response]] {
       override def role: Stack.Role = PayloadSizeFilter.Role
       override def description: String = PayloadSizeFilter.Description
@@ -153,6 +180,12 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withTls(hostname: String): Client = withTransport.tls(hostname)
 
     def withTlsWithoutValidation: Client = withTransport.tlsWithoutValidation
+
+    def withMaxHeaderSize(size: StorageUnit): Client =
+      configured(param.MaxHeaderSize(size))
+
+    def withMaxInitialLineSize(size: StorageUnit): Client =
+      configured(param.MaxInitialLineSize(size))
 
     def withMaxRequestSize(size: StorageUnit): Client =
       configured(param.MaxRequestSize(size))

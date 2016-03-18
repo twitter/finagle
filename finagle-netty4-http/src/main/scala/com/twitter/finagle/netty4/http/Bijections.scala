@@ -1,11 +1,13 @@
-package com.twitter.finagle.http4
+package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.http.HeaderMap
 import com.twitter.finagle.netty4.{ByteBufAsBuf, BufAsByteBuf}
 import com.twitter.finagle.{http => FinagleHttp}
 import io.netty.handler.codec.{http => NettyHttp}
 
-private[http4] object Bijections {
+// note: all byte buffers are copied since netty4 ref-counts which means we can't
+// share the buffers between the n4 pipeline / codecs and application code.
+private[http] object Bijections {
 
   object netty {
     def headersToFinagle(headers: NettyHttp.HttpHeaders): FinagleHttp.HeaderMap =
@@ -30,7 +32,7 @@ private[http4] object Bijections {
         version = versionToFinagle(r.protocolVersion)
       )
       writeNettyHeadersToFinagle(r.headers, result.headerMap)
-      result.content = ByteBufAsBuf.Owned(r.content)
+      result.content = ByteBufAsBuf.Shared(r.content)
       result
     }
 
@@ -49,7 +51,7 @@ private[http4] object Bijections {
           statusToFinagle(rep.status)
         )
         writeNettyHeadersToFinagle(rep.headers, resp.headerMap)
-        resp.content = ByteBufAsBuf.Owned(full.content)
+        resp.content = ByteBufAsBuf.Shared(full.content)
 
         resp
 
@@ -94,7 +96,7 @@ private[http4] object Bijections {
       new NettyHttp.DefaultFullHttpResponse(
         versionToNetty(r.version),
         statusToNetty(r.status),
-        BufAsByteBuf.Owned(r.content),
+        BufAsByteBuf.Shared(r.content),
         headersToNetty(r.headerMap),
         NettyHttp.EmptyHttpHeaders.INSTANCE // only chunked messages have trailing headers
       )
@@ -107,7 +109,7 @@ private[http4] object Bijections {
         versionToNetty(r.version),
         methodToNetty(r.method),
         r.uri,
-        BufAsByteBuf.Owned(r.content),
+        BufAsByteBuf.Shared(r.content),
         headersToNetty(r.headerMap),
         NettyHttp.EmptyHttpHeaders.INSTANCE // only chunked messages have trailing headers
       )

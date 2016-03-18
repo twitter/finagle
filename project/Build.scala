@@ -189,7 +189,7 @@ object Finagle extends Build {
     finagleHttp, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy, finagleRedis, finagleHttpNetty4
+    finagleSpdy, finagleRedis, finagleNetty4Http 
 
     // finagleBenchmark
 
@@ -373,13 +373,13 @@ object Finagle extends Build {
     )
   ).dependsOn(finagleCore)
 
-  lazy val finagleHttpNetty4 = Project(
-    id = "finagle-http-netty4",
-    base = file("finagle-http-netty4"),
+  lazy val finagleNetty4Http = Project(
+    id = "finagle-netty4-http",
+    base = file("finagle-netty4-http"),
     settings = Defaults.coreDefaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-http-netty4",
+    name := "finagle-netty4-http",
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6",

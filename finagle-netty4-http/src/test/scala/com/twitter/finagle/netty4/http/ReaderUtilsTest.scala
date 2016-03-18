@@ -1,4 +1,4 @@
-package com.twitter.finagle.http4
+package com.twitter.finagle.netty4.http
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._

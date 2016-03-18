@@ -1,4 +1,4 @@
-package com.twitter.finagle.http4
+package com.twitter.finagle.netty4.http
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
@@ -77,6 +77,24 @@ class HttpClientDispatcherTest extends FunSuite {
     convert.status == fin.status &&
     convert.headerMap == fin.headerMap &&
     convert.content == fin.content
+  }
+
+  test("request with payload, unchunked response") {
+    val (clientT, serverT) = mkPair[Any,Any]
+    val disp = new HttpClientDispatcher(clientT)
+    val httpRes =
+      new DefaultFullHttpResponse(
+        NettyHttp.HttpVersion.HTTP_1_1,
+        NettyHttp.HttpResponseStatus.OK,
+        Unpooled.wrappedBuffer("hello".getBytes("UTF-8"))
+      )
+    val req = Request()
+    req.contentString = "some content"
+    val f = disp(req)
+    Await.result(serverT.read(), timeout)
+    serverT.write(httpRes)
+    val res = Await.result(f, timeout)
+    assert(respEquiv(res, httpRes))
   }
 
   test("unchunked response") {
@@ -389,37 +407,6 @@ class HttpClientDispatcherTest extends FunSuite {
     intercept[WriteException] { Await.result(d, 2.seconds) }
   }
 
-  val stallT = new Transport[Any, Any] {
-
-    def write(req: Any): Future[Unit] = Future.never
-
-    def remoteAddress: SocketAddress = ???
-
-    def peerCertificate: Option[Certificate] = ???
-
-    def localAddress: SocketAddress = new java.net.SocketAddress{}
-
-    def status: Status = ???
-
-    def read(): Future[Any] = Future.never
-
-    val onClose: Future[Throwable] = Future.exception(new Exception)
-
-    def close(deadline: Time): Future[Unit] = Future.Done
-
-  }
-  test("pending requests are failed") {
-    val disp = new HttpClientDispatcher(stallT)
-
-    val d1 = disp(Request())
-    val d2 = disp(Request())
-    val d3 = disp(Request())
-    Await.ready(disp.close(), 2.seconds)
-
-
-    Thread.sleep(2000)
-    val x = 123
-  }
 
   object OpTransport {
     sealed trait Op[In, Out]

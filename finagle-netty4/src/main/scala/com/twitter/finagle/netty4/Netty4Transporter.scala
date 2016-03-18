@@ -14,7 +14,7 @@ import io.netty.util.concurrent.GenericFutureListener
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 
-private[netty4] object Netty4Transporter {
+private[finagle] object Netty4Transporter {
 
   private[this] def build[In, Out](
     init: ChannelInitializer[SocketChannel],

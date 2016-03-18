@@ -1,4 +1,4 @@
-package com.twitter.finagle.http4
+package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.http.{HeaderMap => FinagleHeaders}
 import io.netty.handler.codec.http.{DefaultHttpHeaders => NettyHeaders}
