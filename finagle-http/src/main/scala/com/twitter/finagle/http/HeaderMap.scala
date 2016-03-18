@@ -70,14 +70,6 @@ class MapHeaderMap extends HeaderMap {
 
   private[this] val underlying = mutable.Map.empty[String, List[HeaderValuePair]]
 
-  // This is here to provide backward compatibility
-  def this(underlying: mutable.Map[String, Seq[String]]) {
-    this
-    for ((k, vs) <- underlying; v <- vs) yield {
-      add(k, v)
-    }
-  }
-
   def getAll(key: String): Iterable[String] =
     underlying.getOrElse(HeaderValuePair.canonicalName(key), Nil).map(_.value)
 

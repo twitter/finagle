@@ -123,14 +123,6 @@ class MapHeaderMapTest extends FunSuite {
     assert(map.keySet == Set("a", "A", "b", "B"))
   }
 
-  test("supports constructing from a map for legacy reasons") {
-    val map1 = new MapHeaderMap(mutable.Map.empty)
-    assert(map1.iterator.isEmpty == true)
-
-    val map2 = new MapHeaderMap(mutable.Map("a" -> Seq("1", "3"), "A" -> Seq("2")))
-    assert(map2.iterator.toSet == Set("a" -> "1", "a" -> "3", "A" -> "2"))
-  }
-
   test("preserves the legacy behavior of +=") {
     val map = MapHeaderMap("a" -> "1", "a" -> "3", "A" -> "2")
     map += ("a" -> "4")
