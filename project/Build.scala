@@ -189,7 +189,7 @@ object Finagle extends Build {
     finagleHttp, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy, finagleRedis, finagleHttpNetty4 
+    finagleSpdy, finagleRedis, finagleHttpNetty4
 
     // finagleBenchmark
 
@@ -383,7 +383,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6",
-      netty4Http 
+      netty4Http
     )
   ).dependsOn(finagleCore, finagleNetty4, finagleHttp)
 
@@ -545,8 +545,15 @@ object Finagle extends Build {
       "org.slf4j" %  "slf4j-nop" % "1.7.7" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
-    finagleCore, finagleThrift, finagleMemcached, finagleKestrel,
-    finagleRedis, finagleMySQL, finagleOstrich4, finagleStats)
+    finagleCore,
+    finagleHttp,
+    finagleMemcached,
+    finagleKestrel,
+    finagleMySQL,
+    finagleOstrich4,
+    finagleRedis,
+    finagleStats,
+    finagleThrift)
 
   lazy val finagleBenchmarkThrift = Project(
     id = "finagle-benchmark-thrift",
