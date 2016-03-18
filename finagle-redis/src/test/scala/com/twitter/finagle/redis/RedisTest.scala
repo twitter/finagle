@@ -11,6 +11,7 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import java.net.InetSocketAddress
 import com.twitter.finagle.Service
 import com.twitter.finagle.redis.Client
+import com.twitter.finagle.redis.SentinelClient
 
 trait RedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
@@ -60,6 +61,74 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
         .hostConnectionLimit(1)
         .buildFactory())
     Await.result(client.flushAll)
+    try {
+      testCode(client)
+    }
+    finally {
+      client.release
+    }
+  }
+}
+
+trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
+
+  override def beforeAll(): Unit = {
+    RedisCluster.start(count = count, mode = RedisMode.Standalone)
+    RedisCluster.start(count = sentinelCount, mode = RedisMode.Sentinel)
+  }
+  override def afterAll(): Unit = RedisCluster.stop()
+
+  val sentinelCount: Int
+
+  val count: Int
+
+  def hostAndPort(address: InetSocketAddress) = {
+    (address.getHostString, address.getPort)
+  }
+
+  def stopRedis(index: Int) = {
+    RedisCluster.instanceStack(index).stop()
+  }
+
+  def redisAddress(index: Int) = {
+    RedisCluster.address(sentinelCount + index).get
+  }
+
+  def sentinelAddress(index: Int) = {
+    RedisCluster.address(index).get
+  }
+
+  protected def withRedisClient(testCode: TransactionalClient => Any) {
+    withRedisClient(sentinelCount, sentinelCount + count)(testCode)
+  }
+
+  protected def withRedisClient(index: Int)(testCode: TransactionalClient => Any) {
+    withRedisClient(sentinelCount + index, sentinelCount + index + 1)(testCode)
+  }
+
+  protected def withRedisClient(from: Int, until: Int)(testCode: TransactionalClient => Any) {
+    val client = TransactionalClient(
+      ClientBuilder()
+        .codec(new Redis())
+        .hosts(RedisCluster.hostAddresses(from, until))
+        .hostConnectionLimit(1)
+        .buildFactory())
+    try {
+      testCode(client)
+    }
+    finally {
+      client.release
+    }
+  }
+
+  protected def withSentinelClient(index: Int)(testCode: SentinelClient => Any) {
+    val client = SentinelClient(
+      ClientBuilder()
+        .codec(new Redis())
+        .hosts(RedisCluster.hostAddresses(from = index, until = index + 1))
+        .hostConnectionLimit(1)
+        .buildFactory()
+        .toService)
     try {
       testCode(client)
     }
@@ -136,7 +205,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
       }
       case r: Reply => fail("Expected MBulkReply, got %s".format(r))
       case _ => fail("Expected MBulkReply")
-    }
+  }
 
   def assertBulkReply(reply: Future[Reply], expects: String) = Await.result(reply) match {
     case BulkReply(msg) => assert(BytesToString(msg.array) == expects)

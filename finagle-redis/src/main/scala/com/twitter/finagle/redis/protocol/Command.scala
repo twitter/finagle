@@ -90,6 +90,7 @@ object Commands {
   val QUIT              = "QUIT"
   val SLAVEOF           = "SLAVEOF"
   val CONFIG            = "CONFIG"
+  val SENTINEL          = "SENTINEL"
 
   // Hash Sets
   val HDEL              = "HDEL"
@@ -217,6 +218,7 @@ object Commands {
     QUIT              -> {_ => Quit},
     SLAVEOF           -> {SlaveOf(_)},
     CONFIG            -> {Config(_)},
+    SENTINEL          -> {Sentinel.fromBytes(_)},
 
     // hash sets
     HDEL              -> {HDel(_)},
@@ -273,7 +275,7 @@ object Commands {
     _(args)
   }.getOrElse(throw ClientError("Unsupported command: " + cmd))
 
-  def trimList(list: Seq[Array[Byte]], count: Int, from: String = "") = {
+  def trimList[T](list: Seq[T], count: Int, from: String = ""): Seq[T] = {
     RequireClientProtocol(list != null, "%s Empty list found".format(from))
     RequireClientProtocol(
       list.length == count,
@@ -361,6 +363,7 @@ object CommandBytes {
   val QUIT              = StringToChannelBuffer("QUIT")
   val SLAVEOF           = StringToChannelBuffer("SLAVEOF")
   val CONFIG            = StringToChannelBuffer("CONFIG")
+  val SENTINEL          = StringToChannelBuffer("SENTINEL")
 
   // Hash Sets
   val HDEL              = StringToChannelBuffer("HDEL")
