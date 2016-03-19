@@ -194,6 +194,7 @@ class FailFastFactoryTest extends FunSuite
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("maintains separate exception state in separate threads") {
     Time.withCurrentTimeFrozen { tc =>
       val conductor = new Conductor
