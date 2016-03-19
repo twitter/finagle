@@ -14,6 +14,13 @@ trait SentinelCommands { self: BaseClient =>
 
   import SentinelClient._
 
+  private[redis] def returnMap(messages: Seq[String]): Map[String, String] = {
+    assert(messages.length % 2 == 0, "Odd number of items in response")
+    messages.grouped(2).collect {
+      case Seq(a, b) => (a, b)
+    }.toMap
+  }
+
   /**
    * Show a list of monitored masters and their state.
    */

@@ -1,17 +1,18 @@
 package com.twitter.finagle.redis.naggati
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
-import com.twitter.finagle.redis.{Redis, TransactionalClient}
-import com.twitter.util.{Await, Future, Time}
+import com.twitter.finagle.redis.{Client, TransactionalClient, SentinelClient}
+import com.twitter.finagle.{Redis, redis}
+import com.twitter.util.{Await, Awaitable, Duration, Future, Time, Try}
+import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import java.net.InetSocketAddress
-import com.twitter.finagle.Service
-import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.SentinelClient
+import scala.language.implicitConversions
 
 trait RedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
@@ -24,6 +25,26 @@ trait RedisTest extends FunSuite {
   protected val boo = StringToChannelBuffer("boo")
   protected val moo = StringToChannelBuffer("moo")
   protected val num = StringToChannelBuffer("num")
+
+  def result[T](awaitable: Awaitable[T], timeout: Duration = 1.second): T =
+    Await.result(awaitable, timeout)
+
+  def ready[T <: Awaitable[_]](awaitable: T, timeout: Duration = 1.second): T =
+    Await.ready(awaitable, timeout)
+
+  def waitUntil(message: String, countDown: Int = 10)(ready: => Boolean): Unit = {
+    if (countDown > 0) {
+      if (!ready) {
+        Thread.sleep(1000)
+        waitUntil(message, countDown - 1)(ready)
+      }
+    }
+    else throw new IllegalStateException(s"Timeout: ${message}")
+  }
+
+  def waitUntilAsserted(message: String, countDown: Int = 10)(assert: => Unit): Unit = {
+    waitUntil(message, countDown)(Try(assert).isReturn)
+  }
 }
 
 trait RedisResponseTest extends RedisTest {
@@ -50,22 +71,20 @@ trait RedisRequestTest extends RedisTest {
 
 trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
+  implicit def s2cb(s: String): ChannelBuffer = StringToChannelBuffer(s)
+  implicit def cb2s(cb: ChannelBuffer): String = CBToString(cb)
+
   override def beforeAll(): Unit = RedisCluster.start()
   override def afterAll(): Unit = RedisCluster.stop()
 
-  protected def withRedisClient(testCode: TransactionalClient => Any) {
-    val client = TransactionalClient(
-      ClientBuilder()
-        .codec(new Redis())
-        .hosts(RedisCluster.hostAddresses())
-        .hostConnectionLimit(1)
-        .buildFactory())
+  protected def withRedisClient(testCode: Client => Any): Unit = {
+    val client = Redis.newRichClient(RedisCluster.hostAddresses())
     Await.result(client.flushAll)
     try {
       testCode(client)
     }
     finally {
-      client.release
+      client.close()
     }
   }
 }
@@ -107,9 +126,9 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
   }
 
   protected def withRedisClient(from: Int, until: Int)(testCode: TransactionalClient => Any) {
-    val client = TransactionalClient(
+    val client = new TransactionalClient(
       ClientBuilder()
-        .codec(new Redis())
+        .codec(new redis.Redis())
         .hosts(RedisCluster.hostAddresses(from, until))
         .hostConnectionLimit(1)
         .buildFactory())
@@ -117,23 +136,22 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
       testCode(client)
     }
     finally {
-      client.release
+      client.close()
     }
   }
 
   protected def withSentinelClient(index: Int)(testCode: SentinelClient => Any) {
     val client = SentinelClient(
       ClientBuilder()
-        .codec(new Redis())
+        .codec(new redis.Redis())
         .hosts(RedisCluster.hostAddresses(from = index, until = index + 1))
         .hostConnectionLimit(1)
-        .buildFactory()
-        .toService)
+        .buildFactory())
     try {
       testCode(client)
     }
     finally {
-      client.release
+      client.close()
     }
   }
 }
@@ -142,7 +160,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   private[this] lazy val svcClient = ClientBuilder()
     .name("redis-client")
-    .codec(Redis())
+    .codec(redis.Redis())
     .hosts(RedisCluster.hostAddresses())
     .hostConnectionLimit(2)
     .retries(2)
@@ -156,7 +174,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   private[this] val server = ServerBuilder()
     .name("redis-server")
-    .codec(Redis())
+    .codec(redis.Redis())
     .bindTo(new InetSocketAddress(0))
     .build(service)
 
@@ -165,14 +183,14 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   protected val OKStatusReply = StatusReply("OK")
 
-  protected def withRedisClient(testCode: Service[Command, Reply] => Any) {
+  protected def withRedisClient(testCode: Service[Command, Reply] => Any): Unit = {
     val client = ClientBuilder()
-          .name("redis-client")
-          .codec(Redis())
-          .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
-          .hostConnectionLimit(1)
-          .retries(2)
-          .build()
+      .name("redis-client")
+      .codec(redis.Redis())
+      .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
+      .hostConnectionLimit(1)
+      .retries(2)
+      .build()
     Await.result(client(FlushAll))
     try {
       testCode(client)

@@ -49,6 +49,8 @@ New Features
 
   * finagle-redis: Add support for SENTINEL commands. ``RB_ID=810663``
 
+  * finagle-redis: Support for Pub/Sub. ``RB_ID=810610``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

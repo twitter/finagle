@@ -48,7 +48,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       j <- 1 to slavesPerMaster
     } withRedisClient(i + masterCount * j) { client =>
       val (host, port) = hostAndPort(redisAddress(i))
-      ready(client.slaveOf("127.0.0.1", port))
+      ready(client.slaveOf("127.0.0.1", port.toString))
     }
   }
 

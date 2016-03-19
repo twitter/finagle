@@ -13,13 +13,13 @@ object SentinelClient {
    * @param host a String of host:port combination.
    */
   def apply(host: String): SentinelClient = {
-    SentinelClient(com.twitter.finagle.Redis.newService(host))
+    SentinelClient(com.twitter.finagle.Redis.newClient(host))
   }
 
   /**
    * Construct a sentinel client from a single Service.
    */
-  def apply(raw: Service[Command, Reply]): SentinelClient =
+  def apply(raw: ServiceFactory[Command, Reply]): SentinelClient =
     new SentinelClient(raw)
   
   sealed trait Node {
@@ -66,6 +66,7 @@ object SentinelClient {
   }
 }
 
-class SentinelClient(service: Service[Command, Reply])
-    extends BaseClient(service)
+class SentinelClient(factory: ServiceFactory[Command, Reply])
+    extends BaseClient(factory)
     with SentinelCommands
+    with ServerCommands
