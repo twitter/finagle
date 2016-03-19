@@ -15,6 +15,19 @@ import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 
 private[finagle] object Netty4Transporter {
+  /**
+   * A [[com.twitter.finagle.Stack.Param]] used to configure the ability to
+   * exert backpressure by only reading from the Channel when the [[Transport]] is
+   * read.
+   */
+  private[finagle] case class Backpressure(backpressure: Boolean) {
+    def mk(): (Backpressure, Stack.Param[Backpressure]) = (this, Backpressure.param)
+  }
+
+  private[finagle] object Backpressure {
+    implicit val param: Stack.Param[Backpressure] =
+      Stack.Param(Backpressure(backpressure = true))
+  }
 
   private[this] def build[In, Out](
     init: ChannelInitializer[SocketChannel],
@@ -26,6 +39,7 @@ private[finagle] object Netty4Transporter {
       val LatencyCompensation.Compensation(compensation) = params[LatencyCompensation.Compensation]
       val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
       val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
+      val Backpressure(backpressure) = params[Backpressure]
 
       // max connect timeout is ~24.8 days
       val compensatedConnectTimeoutMs =
@@ -39,7 +53,7 @@ private[finagle] object Netty4Transporter {
           .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
           .option[JBool](ChannelOption.TCP_NODELAY, noDelay)
           .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
-          .option[JBool](ChannelOption.AUTO_READ, false) // backpressure! no reads on transport => no reads on the socket
+          .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket
           .option[JInt](ChannelOption.CONNECT_TIMEOUT_MILLIS, compensatedConnectTimeoutMs.toInt)
           .handler(init)
 

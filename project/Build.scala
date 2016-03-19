@@ -29,6 +29,7 @@ object Finagle extends Build {
     "io.netty" % "netty-transport" % netty4Version
   )
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
+  val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
   val jacksonLibs = Seq(
@@ -186,7 +187,7 @@ object Finagle extends Build {
     finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
     // Protocols
-    finagleHttp, finagleHttpCompat, finagleStream, finagleNative,
+    finagleHttp, finagleHttp2, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
     finagleSpdy, finagleRedis, finagleNetty4Http 
@@ -357,8 +358,6 @@ object Finagle extends Build {
 
   // Protocol support
 
-  // see https://finagle.github.io/blog/2014/10/20/upgrading-finagle-to-netty-4/
-  // for an explanation of the role of transitional -x packages in the netty4 migration.
   lazy val finagleHttp = Project(
     id = "finagle-http",
     base = file("finagle-http"),
@@ -386,6 +385,20 @@ object Finagle extends Build {
       netty4Http
     )
   ).dependsOn(finagleCore, finagleNetty4, finagleHttp)
+
+  lazy val finagleHttp2 = Project(
+    id = "finagle-http2",
+    base = file("finagle-http2"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-http2",
+    libraryDependencies ++= Seq(
+      netty4Http2,
+      util("core"),
+      nettyLib
+    ) ++ netty4Libs
+  ).dependsOn(finagleCore, finagleNetty4)
 
   lazy val finagleHttpCompat = Project(
     id = "finagle-http-compat",
