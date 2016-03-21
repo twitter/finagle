@@ -80,25 +80,6 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     }
   }
 
-  test("core events are traced in the DefaultClient/DefaultServer") {
-    testCoreTraces { (serverTracer, clientTracer) =>
-      val server = DefaultServer[String, String, String, String](
-        name = "theServer",
-        listener = Netty3Listener("theServer", StringServerPipeline),
-        serviceTransport = new SerialServerDispatcher(_, _),
-        tracer = serverTracer)
-
-      val client = DefaultClient[String, String](
-        name = "theClient",
-        endpointer = Bridge[String, String, String, String](
-          Netty3Transporter("theClient", StringClientPipeline), new SerialClientDispatcher(_)),
-        tracer = clientTracer)
-
-      val svc = server.serve("localhost:*", Svc)
-      client.newService(svc)
-    }
-  }
-
   test("core events are traced in the ClientBuilder/ServerBuilder") {
     testCoreTraces { (serverTracer, clientTracer) =>
       val svc = ServerBuilder()

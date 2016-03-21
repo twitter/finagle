@@ -17,7 +17,7 @@ New Features
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
-  * finagle-core: GenSerialClientDispatcher fails pending and subsequent requests when 
+  * finagle-core: GenSerialClientDispatcher fails pending and subsequent requests when
     its underlying transport closes. ``RB_ID=807590``
 
 New Features
@@ -83,9 +83,7 @@ Breaking API Changes
 
     Any other `SocketAddress` subclass is currently incompatible with `c.t.f.Address`. Instead,
     you should encode any additional information in the metadata field of `c.t.f.Address.Inet`
-    or `c.t.f.exp.Address.ServiceFactory`.
-
-    ``RB_ID=792209``
+    or `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
 
   * finagle-core: Delete `c.t.f.ServiceFactorySocketAddress` and replace usages with
     `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
@@ -109,6 +107,9 @@ Breaking API Changes
 
   * finagle-core: `c.t.f.service.exp.FailureAccrualPolicies` (Java-friendly API) has bee removed -
     use `c.t.f.service.exp.FailureAccrualPolicy` instead.
+
+  * finagle-core: DefaultServer is removed. Protocol implementors should use StackServer instead.
+  ``RB_ID=811918``
 
   * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
     pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``

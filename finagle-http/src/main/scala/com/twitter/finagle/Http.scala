@@ -184,20 +184,48 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withMaxHeaderSize(size: StorageUnit): Client =
       configured(param.MaxHeaderSize(size))
 
+    /**
+     * Configures the maximum initial line length the client can
+     * receive from a server.
+     */
     def withMaxInitialLineSize(size: StorageUnit): Client =
       configured(param.MaxInitialLineSize(size))
 
+    /**
+     * Configures the maximum request size that the client can send.
+     */
     def withMaxRequestSize(size: StorageUnit): Client =
       configured(param.MaxRequestSize(size))
 
+    /**
+     * Configures the maximum response size that client can receive.
+     */
     def withMaxResponseSize(size: StorageUnit): Client =
       configured(param.MaxResponseSize(size))
 
+    /**
+     * Streaming allows applications to work with HTTP messages that have large
+     * (or infinite) content bodies. When this set to `true`, the message content is
+     * available through a [[com.twitter.io.Reader]], which gives the application a
+     * handle to the byte stream. If `false`, the entire message content is buffered
+     * into a [[com.twitter.io.Buf]].
+     */
     def withStreaming(enabled: Boolean): Client =
       configured(param.Streaming(enabled))
 
+    /**
+     * Enables decompression of http content bodies.
+     */
     def withDecompression(enabled: Boolean): Client =
       configured(param.Decompression(enabled))
+
+    /**
+     * The compression level to use. If passed the default value (-1) then it will use
+     * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]]
+     * which will compress text-like content-types with the default compression level (6).
+     * Otherwise, use [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]]
+     * for all content-types with specified compression level.
+     */
 
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
@@ -287,20 +315,50 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withTls(cfg: Netty3ListenerTLSConfig): Server =
       configured(Transport.TLSServerEngine(Some(cfg.newEngine)))
 
+    /**
+     * Configures the maximum request size this server can receive.
+     */
     def withMaxRequestSize(size: StorageUnit): Server =
       configured(param.MaxRequestSize(size))
 
+    /**
+     * Configures the maximum response size this server can send.
+     */
     def withMaxResponseSize(size: StorageUnit): Server =
       configured(param.MaxResponseSize(size))
 
+    /**
+     * Streaming allows applications to work with HTTP messages that have large
+     * (or infinite) content bodies. When this set to `true`, the message content is
+     * available through a [[com.twitter.io.Reader]], which gives the application a
+     * handle to the byte stream. If `false`, the entire message content is buffered
+     * into a [[com.twitter.io.Buf]].
+     */
     def withStreaming(enabled: Boolean): Server =
       configured(param.Streaming(enabled))
 
+    /**
+     * Enables decompression of http content bodies.
+     */
     def withDecompression(enabled: Boolean): Server =
       configured(param.Decompression(enabled))
 
+    /**
+     * The compression level to use. If passed the default value (-1) then it will use
+     * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]]
+     * which will compress text-like content-types with the default compression level (6).
+     * Otherwise, use [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]]
+     * for all content-types with specified compression level.
+     */
     def withCompressionLevel(level: Int): Server =
       configured(param.CompressionLevel(level))
+
+    /**
+     * Configures the maximum initial http line length the server is
+     * willing to accept.
+     */
+    def withMaxInitialLineSize(size: StorageUnit): Server =
+      configured(param.MaxInitialLineSize(size))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
