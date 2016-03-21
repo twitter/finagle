@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 
 import com.twitter.finagle.Http
 import com.twitter.finagle.example.zookeeper.ServiceProvider.EchoServer
-import com.twitter.finagle.http.{Http => _, _}
+import com.twitter.finagle.http.{Method, Request, Version}
 import com.twitter.io.Reader
 import com.twitter.util.Await
 
@@ -20,9 +20,9 @@ object ServiceConsumer {
   def main(args: Array[String]): Unit = {
 
     //use zookeeper to discover service
-    val client = Http.client.
-      withSessionPool.maxSize(10).
-      newService(ServiceProvider.buildConsumerPath(EchoServer.servicePath), "echo-client")
+    val client = Http.client
+      .withSessionPool.maxSize(10)
+      .newService(ServiceProvider.buildConsumerPath(EchoServer.servicePath), "echo-client")
 
     //create a "Greetings!" request.
     val data = Reader.fromStream(new ByteArrayInputStream("Greetings!".getBytes(StandardCharsets.UTF_8)))

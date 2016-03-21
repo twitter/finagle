@@ -2,7 +2,7 @@ package com.twitter.finagle.example.zookeeper
 
 import java.net.InetSocketAddress
 
-import com.twitter.finagle.http.{Http => _, _}
+import com.twitter.finagle.http.{Request, Response, Status, Version}
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.{Await, Future}
 
@@ -46,9 +46,9 @@ object ServiceProvider {
 
     //start your service on port 8080 and register to zookeeper
     Await.ready(
-      Http.server.
-        withLabel("echo-server").
-        serveAndAnnounce(
+      Http.server
+        .withLabel("echo-server")
+        .serveAndAnnounce(
           echoServicePath,
           new InetSocketAddress(8080),
           new EchoServer))
