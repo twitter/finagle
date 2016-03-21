@@ -5,8 +5,8 @@ import com.twitter.util.TwitterDateFormat
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, TimeZone}
 import scala.annotation.varargs
-import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 /**
  * Mutable message headers map.
@@ -52,67 +52,84 @@ abstract class HeaderMap
   def += (kv: (String, Date)): HeaderMap =
     += ((kv._1, HeaderMap.format(kv._2)))
 
-  override def empty: HeaderMap = new MapHeaderMap(mutable.Map.empty)
+  override def empty: HeaderMap = MapHeaderMap()
 }
 
+private[finagle] case class HeaderValuePair(header: String, value: String) {
+  val canonicalName = HeaderValuePair.canonicalName(header)
+}
+
+private[finagle] object HeaderValuePair {
+  def canonicalName(header: String) = header.toLowerCase(Locale.US)
+}
 
 /** Mutable-Map-backed [[HeaderMap]] */
-class MapHeaderMap(underlying: mutable.Map[String, Seq[String]]) extends HeaderMap {
+class MapHeaderMap extends HeaderMap {
+
+  private[this] val underlying = mutable.Map.empty[String, Vector[HeaderValuePair]]
 
   def getAll(key: String): Iterable[String] =
-    underlying.getOrElse(key, Nil)
+    underlying.getOrElse(HeaderValuePair.canonicalName(key), Vector.empty).map(_.value)
 
   def add(k: String, v: String): MapHeaderMap = {
-    underlying(k) = underlying.getOrElse(k, Nil) :+ v
+    val t = HeaderValuePair(k, v)
+    underlying(t.canonicalName) = underlying.getOrElse(t.canonicalName, Vector.empty) :+ t
     this
   }
 
   def set(key: String, value: String): MapHeaderMap = {
-    underlying.retain { case (a, _) => !a.equalsIgnoreCase(key) }
-    underlying(key) = Seq(value)
+    val t = HeaderValuePair(key, value)
+    underlying(t.canonicalName) = Vector(t)
     this
   }
 
   // For Map/MapLike
   def get(key: String): Option[String] = {
-    underlying.find { case (k, v) => k.equalsIgnoreCase(key) }.flatMap { _._2.headOption }
+    getAll(key).headOption
   }
 
   // For Map/MapLike
   def iterator: Iterator[(String, String)] = {
-    for ((k, vs) <- underlying.iterator; v <- vs) yield
-      (k, v)
+    for ((_, vs) <- underlying.iterator; v <- vs) yield
+      (v.header, v.value)
   }
 
   // For Map/MapLike
-  def += (kv: (String, String)): MapHeaderMap.this.type = {
-    underlying(kv._1) = Seq(kv._2)
+  def +=(kv: (String, String)): MapHeaderMap.this.type = {
+    val t = HeaderValuePair(kv._1, kv._2)
+
+    // this slightly complicated logic is here to be backward compatible
+    // such that if your denormalized header names differ, you can append
+    // to the list for that canonical header name. header values with same
+    // denormalized name are replaced.
+    // see `add()` to always append to the list of values.
+    underlying(t.canonicalName) =
+      underlying.getOrElse(t.canonicalName, Vector.empty)
+        .filterNot(_.header == t.header) :+ t
     this
   }
 
   // For Map/MapLike
   def -= (key: String): MapHeaderMap.this.type = {
-    underlying.retain { case (a, b) => !a.equalsIgnoreCase(key) }
+    underlying.remove(HeaderValuePair.canonicalName(key))
     this
   }
 
   override def keys: Iterable[String] =
-    underlying.keys
+    keySet
 
   override def keySet: Set[String] =
-    underlying.keySet.toSet
+    underlying.values.flatten.map(_.header).toSet
 
   override def keysIterator: Iterator[String] =
-    underlying.keysIterator
+    keySet.iterator
 }
-
 
 object MapHeaderMap {
   def apply(headers: Tuple2[String, String]*): MapHeaderMap = {
-    val map = headers
-      .groupBy { case (k, v) => k.toLowerCase }
-      .mapValues { case values => values.map { _._2 } } // remove keys
-    new MapHeaderMap(mutable.Map() ++ map)
+    val tmp = new MapHeaderMap
+    headers.foreach(t => tmp.add(t._1, t._2))
+    tmp
   }
 }
 
