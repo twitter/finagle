@@ -4,6 +4,7 @@ import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.client.LatencyCompensation
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Future, Duration, Timer}
 
@@ -29,10 +30,11 @@ object TimeoutFilter {
    * for use in clients.
    */
   def clientModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[
+    new Stack.Module4[
         TimeoutFilter.Param,
         param.Timer,
         LatencyCompensation.Compensation,
+        param.Stats,
         ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
@@ -41,6 +43,7 @@ object TimeoutFilter {
         _param: Param,
         _timer: param.Timer,
         _compensation: LatencyCompensation.Compensation,
+        _stats: param.Stats,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val timeout = _param.timeout + _compensation.howlong
@@ -50,7 +53,9 @@ object TimeoutFilter {
         } else {
           val param.Timer(timer) = _timer
           val exc = new IndividualRequestTimeoutException(timeout)
-          val filter = new TimeoutFilter[Req, Rep](timeout, exc, timer)
+          val param.Stats(stats) = _stats
+          val filter = new TimeoutFilter[Req, Rep](
+            timeout, exc, timer, stats.scope("timeout"))
           filter.andThen(next)
         }
       }
@@ -61,22 +66,26 @@ object TimeoutFilter {
    * for use in servers.
    */
   def serverModule[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[
+    new Stack.Module3[
         TimeoutFilter.Param,
         param.Timer,
+        param.Stats,
         ServiceFactory[Req, Rep]] {
       val role = TimeoutFilter.role
       val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
       def make(
         _param: Param,
         _timer: param.Timer,
+        _stats: param.Stats,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
         val Param(timeout) = _param
         val param.Timer(timer) = _timer
+        val param.Stats(stats) = _stats
         if (!timeout.isFinite || timeout <= Duration.Zero) next else {
           val exc = new IndividualRequestTimeoutException(timeout)
-          val filter = new TimeoutFilter[Req, Rep](timeout, exc, timer)
+          val filter = new TimeoutFilter[Req, Rep](
+            timeout, exc, timer, stats.scope("timeout"))
           filter.andThen(next)
         }
       }
@@ -107,21 +116,48 @@ object TimeoutFilter {
 class TimeoutFilter[Req, Rep](
     timeout: Duration,
     exception: RequestTimeoutException,
-    timer: Timer)
+    timer: Timer,
+    statsReceiver: StatsReceiver)
   extends SimpleFilter[Req, Rep] {
+
+  def this(timeout: Duration, exception: RequestTimeoutException, timer: Timer) =
+    this(timeout, exception, timer, NullStatsReceiver)
+
   def this(timeout: Duration, timer: Timer) =
     this(timeout, new IndividualRequestTimeoutException(timeout), timer)
 
+  private[this] val timestampStat = statsReceiver.stat("timestamp_ms")
+  private[this] val timeoutStat = statsReceiver.stat("timeout_ms")
+  private[this] val incomingDeadlineStat = statsReceiver.stat("incoming_deadline_ms")
+
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val timeoutDeadline = Deadline.ofTimeout(timeout)
+
+    timeoutStat.add(timeout.inMillis)
+    timestampStat.add(timeoutDeadline.timestamp.inMillis)
+
+    Trace.recordBinary(
+      "finagle.timeoutFilter.timeoutDeadline.timestamp_ms", timeoutDeadline.timestamp.inMillis)
+    Trace.recordBinary(
+      "finagle.timeoutFilter.timeoutDeadline.deadline_ms", timeoutDeadline.deadline.inMillis)
 
     // If there's a current deadline, we combine it with the one derived
     // from our timeout.
     val deadline = Deadline.current match {
       case Some(current) =>
+        incomingDeadlineStat.add(current.remaining.inMillis)
+        Trace.recordBinary(
+          "finagle.timeoutFilter.incomingDeadline.timestamp_ms", current.timestamp.inMillis)
+        Trace.recordBinary(
+          "finagle.timeoutFilter.incomingDeadline.deadline_ms", current.deadline.inMillis)
         Deadline.combined(timeoutDeadline, current)
       case None => timeoutDeadline
     }
+
+    Trace.recordBinary(
+      "finagle.timeoutFilter.outgoingDeadline.timestamp_ms", deadline.timestamp.inMillis)
+    Trace.recordBinary(
+      "finagle.timeoutFilter.outgoingDeadline.deadline_ms", deadline.deadline.inMillis)
 
     Contexts.broadcast.let(Deadline, deadline) {
       val res = service(request)

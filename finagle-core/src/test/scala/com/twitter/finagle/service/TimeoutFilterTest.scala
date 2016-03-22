@@ -1,13 +1,18 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.tracing._
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.{atLeastOnce, spy, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
+import scala.collection.JavaConverters._
 import scala.language.reflectiveCalls
 
 private object TimeoutFilterTest {
@@ -73,7 +78,8 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
 
     val timer = new MockTimer
     val exception = new IndividualRequestTimeoutException(timeout)
-    val timeoutFilter = new TimeoutFilter[Unit, Option[Deadline]](timeout, exception, timer)
+    val statsReceiver = new InMemoryStatsReceiver
+    val timeoutFilter = new TimeoutFilter[Unit, Option[Deadline]](timeout, exception, timer, statsReceiver)
     val timeoutService = timeoutFilter andThen service
   }
 
@@ -104,6 +110,58 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
         timeoutService((): Unit)
       }
       assert(Await.result(f) == Some(Deadline(Time.now, Time.now+1.second)))
+    }
+  }
+
+  test("stats recorded") {
+    val ctx = new DeadlineCtx(200.milliseconds)
+
+    import ctx._
+
+    Time.withCurrentTimeFrozen { tc =>
+      val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+1.second)) {
+        timeoutService((): Unit)
+      }
+      assert(Await.result(f) == Some(Deadline(Time.now, Time.now+200.milliseconds)))
+
+      assert(statsReceiver.stats(Seq("timestamp_ms"))(0) == Time.now.inMillis)
+      assert(statsReceiver.stats(Seq("timeout_ms"))(0) == 200)
+      assert(statsReceiver.stats(Seq("incoming_deadline_ms"))(0) == 1.second.inMillis)
+    }
+  }
+
+  test("trace recorded") {
+    def withExpectedTrace(
+      f: => Unit,
+      expected: Seq[Annotation]
+    ) {
+      val tracer: Tracer = spy(new NullTracer)
+      val captor: ArgumentCaptor[Record] = ArgumentCaptor.forClass(classOf[Record])
+      Trace.letTracer(tracer) { f }
+      verify(tracer, atLeastOnce()).record(captor.capture())
+      val annotations = captor.getAllValues.asScala collect { case Record(_, _, a, _) => a }
+      assert(expected == annotations)
+    }
+
+    Time.withCurrentTimeFrozen { tc =>
+      withExpectedTrace({
+        val ctx = new DeadlineCtx(200.milliseconds)
+        import ctx._
+
+
+        val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+1.second)) {
+          timeoutService((): Unit)
+        }
+        assert(Await.result(f, 1.second) == Some(Deadline(Time.now, Time.now+200.milliseconds)))
+      },
+      Seq(
+        Annotation.BinaryAnnotation("finagle.timeoutFilter.timeoutDeadline.timestamp_ms", Time.now.inMillis),
+        Annotation.BinaryAnnotation("finagle.timeoutFilter.timeoutDeadline.deadline_ms", (Time.now+200.millis).inMillis),
+        Annotation.BinaryAnnotation("finagle.timeoutFilter.incomingDeadline.timestamp_ms", (Time.now-1.second).inMillis),
+        Annotation.BinaryAnnotation("finagle.timeoutFilter.incomingDeadline.deadline_ms", (Time.now+1.second).inMillis),
+        Annotation.BinaryAnnotation("finagle.timeoutFilter.outgoingDeadline.timestamp_ms", Time.now.inMillis),
+        Annotation.BinaryAnnotation("finagle.timeoutFilter.outgoingDeadline.deadline_ms", (Time.now+200.milliseconds).inMillis)
+      ))
     }
   }
 

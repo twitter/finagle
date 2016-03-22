@@ -3,14 +3,16 @@ package com.twitter.finagle.service
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.tracing._
 import com.twitter.util._
 import com.twitter.util.TimeConversions._
 import org.junit.runner.RunWith
-import org.mockito.Matchers
-import org.mockito.Mockito.when
+import org.mockito.{ArgumentCaptor, Matchers}
+import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+import scala.collection.JavaConverters._
 
 
 @RunWith(classOf[JUnitRunner])
@@ -39,7 +41,21 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
     assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
     assert(statsReceiver.counters.get(List("rejected")) == None)
     assert(Await.result(res, 1.second) == "polo")
+  }
 
+  test("When there is a deadline set, DeadlineFilter should record the current time") {
+    val h = new DeadlineFilterHelper
+    import h._
+
+    promise.setValue("polo")
+
+    Time.withCurrentTimeFrozen { tc =>
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
+        val res = deadlineService("marco")
+        assert(statsReceiver.stats(Seq("current_time_ms"))(0) == Time.now.inMillis)
+        assert(Await.result(res, 1.second) == "polo")
+      }
+    }
   }
 
   test("When the deadline is not exceeded, DeadlineFilter should service the request") {
@@ -127,6 +143,23 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         tc.advance(2.seconds)
         assert(Await.result(deadlineService("marco"), 1.second) == "polo")
         assert(statsReceiver.stats(Seq("transit_latency_ms")).length == 6)
+      }
+    }
+  }
+
+  test("When the request is rejected, DeadlineFilter should record " +
+    "a negative value for the remaining budget") {
+    val h = new DeadlineFilterHelper
+    import h._
+
+    promise.setValue("polo")
+
+    Time.withCurrentTimeFrozen { tc =>
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
+        for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
+        tc.advance(2.seconds)
+        assert(Await.result(deadlineService("marco"), 1.second) == "polo")
+        assert(statsReceiver.stats(Seq("deadline_budget_ms"))(5) == -1000)
       }
     }
   }
@@ -292,6 +325,39 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         Await.result(deadlineService("marco"), 1.second)
         assert(statsReceiver.counters.get(List("rejected")) == None)
       }
+    }
+  }
+
+  test("trace recorded") {
+    val h = new DeadlineFilterHelper
+    import h._
+
+    promise.setValue("polo")
+
+    def withExpectedTrace(
+      f: => Unit,
+      expected: Seq[Annotation]
+    ) {
+      val tracer: Tracer = spy(new NullTracer)
+      val captor: ArgumentCaptor[Record] = ArgumentCaptor.forClass(classOf[Record])
+      Trace.letTracer(tracer) { f }
+      verify(tracer, atLeastOnce()).record(captor.capture())
+      val annotations = captor.getAllValues.asScala collect { case Record(_, _, a, _) => a }
+      assert(expected == annotations)
+    }
+
+    Time.withCurrentTimeFrozen { tc =>
+      withExpectedTrace({
+        Contexts.broadcast.let(Deadline, Deadline.ofTimeout(200.millis)) {
+          tc.advance(2.seconds)
+          Await.result(deadlineService("marco"), 1.second)
+        }
+      },
+      Seq(
+        Annotation.BinaryAnnotation("finagle.deadlineFilter.deadline.timestamp_ms", Time.now.inMillis),
+        Annotation.BinaryAnnotation("finagle.deadlineFilter.deadline.deadline_ms", (Time.now + 200.millis).inMillis),
+        Annotation.BinaryAnnotation("finagle.deadlineFilter.now_ms", (Time.now + 2.seconds).inMillis)
+      ))
     }
   }
 

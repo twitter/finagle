@@ -13,3 +13,7 @@ Deadline Admission Control
 
 **admission_control/deadline/rejected**
   A counter of the number of requests rejected for being past their deadline.
+
+**admission_control/deadline/current_time_ms**
+  The current time, in milliseconds since the epoch, as seen by DeadlineFilter.
+  Temporary stat to aid in debugging.

@@ -102,3 +102,18 @@ PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
 
 **response_payload_bytes**
   A histogram of the number of bytes per response's payload.
+
+TimeoutFilter
+<<<<<<<<<<<<<
+
+**timeout/timestamp_ms**
+  A stat of the current time timestamp, in milliseconds since the epoch,
+  as set in TimeoutFilter. Temporary stat to aid in debugging.
+
+**timeout/timeout_ms**
+  A stat of timeout configured in TimeoutFilter, in milliseconds. Temporary
+  stat to aid in debugging.
+
+**timeout/incoming_deadline_ms**
+  A stat of the remaining time in the incoming deadline from the request, in
+  milliseconds. Temporary stat to aid in debugging.

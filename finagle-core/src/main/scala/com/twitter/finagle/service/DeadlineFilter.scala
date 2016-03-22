@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.tracing.Trace
 import com.twitter.util.{Duration, Future, Stopwatch, Time, TokenBucket}
 
 object DeadlineFilter {
@@ -119,6 +120,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
   private[this] val rejectedStat = statsReceiver.counter("rejected")
   private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
   private[this] val budgetTimeStat = statsReceiver.stat("deadline_budget_ms")
+  private[this] val currentTimeStat = statsReceiver.stat("current_time_ms")
 
   private[this] val serviceDeposit =
     DeadlineFilter.RejectBucketScaleFactor.toInt
@@ -149,7 +151,12 @@ private[finagle] class DeadlineFilter[Req, Rep](
         val remaining = deadline.deadline - now
 
         transitTimeStat.add((now - deadline.timestamp).max(Duration.Zero).inMilliseconds)
-        budgetTimeStat.add(remaining.max(Duration.Zero).inMilliseconds)
+        budgetTimeStat.add(remaining.inMilliseconds)
+        currentTimeStat.add(now.inMillis)
+
+        Trace.recordBinary("finagle.deadlineFilter.deadline.timestamp_ms", deadline.timestamp.inMillis)
+        Trace.recordBinary("finagle.deadlineFilter.deadline.deadline_ms", deadline.deadline.inMillis)
+        Trace.recordBinary("finagle.deadlineFilter.now_ms", now.inMillis)
 
         // Exceeded the deadline within tolerance, and there are enough
         // tokens to reject the request
