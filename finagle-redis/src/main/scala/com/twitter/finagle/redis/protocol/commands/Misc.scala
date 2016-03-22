@@ -52,6 +52,11 @@ object Info {
   }
 }
 
+case object Ping extends Command {
+  def command = Commands.PING
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.PING))
+}
+
 case object Quit extends Command {
   def command = Commands.QUIT
   val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.QUIT))

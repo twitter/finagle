@@ -82,6 +82,7 @@ object Commands {
   val BRANGE            = "BRANGE"
 
   // Miscellaneous
+  val PING              = "PING"
   val FLUSHALL          = "FLUSHALL"
   val FLUSHDB           = "FLUSHDB"
   val SELECT            = "SELECT"
@@ -218,6 +219,7 @@ object Commands {
     BGET              -> {BGet(_)},
 
     // miscellaneous
+    PING              -> {_ => Ping},
     FLUSHALL          -> {_ => FlushAll},
     FLUSHDB           -> {_ => FlushDB},
     SELECT            -> {Select(_)},
@@ -366,6 +368,7 @@ object CommandBytes {
   val BRANGE            = StringToChannelBuffer("BRANGE")
 
   // Miscellaneous
+  val PING              = StringToChannelBuffer("PING")
   val FLUSHALL          = StringToChannelBuffer("FLUSHALL")
   val FLUSHDB           = StringToChannelBuffer("FLUSHDB")
   val SELECT            = StringToChannelBuffer("SELECT")

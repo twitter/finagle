@@ -6,7 +6,13 @@ import org.jboss.netty.buffer.ChannelBuffer
 
 trait BasicConnectionCommands { self: BaseClient =>
 
-  // TODO: PING without argument
+  /**
+    * Sends a PING to Redis instance
+    */
+  def ping(): Future[Unit] =
+    doRequest(Ping) {
+      case StatusReply("PONG") => Future.Unit
+    }
 
   /**
    * Closes connection to Redis instance
