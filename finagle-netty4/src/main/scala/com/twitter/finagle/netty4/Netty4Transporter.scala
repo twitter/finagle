@@ -1,18 +1,19 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Failure, Stack}
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
+import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Throw, Future, Promise}
+import com.twitter.util.{Future, Promise, NonFatal}
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.UnpooledByteBufAllocator
 import io.netty.channel._
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.util.concurrent.GenericFutureListener
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
+import java.nio.channels.UnresolvedAddressException
 
 private[finagle] object Netty4Transporter {
   /**
@@ -29,10 +30,15 @@ private[finagle] object Netty4Transporter {
       Stack.Param(Backpressure(backpressure = true))
   }
 
+  // this is marked as rejected for historical reasons--we marked it as a WriteException
+  // in the netty3 implementation, and we don't want to change behavior when moving to
+  // netty4.
+  private[this] val CancelledConnectionEstablishment =
+    Failure.rejected("connection establishment was cancelled")
+
   private[this] def build[In, Out](
     init: ChannelInitializer[SocketChannel],
-    params: Stack.Params,
-    transportP: Promise[Transport[In, Out]]
+    params: Stack.Params
   ): Transporter[In, Out] = new Transporter[In, Out] {
     def apply(addr: SocketAddress): Future[Transport[In, Out]] = {
       val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
@@ -64,12 +70,19 @@ private[finagle] object Netty4Transporter {
 
       val nettyConnectF = bootstrap.connect(addr)
 
+      val transportP = Promise[Transport[In, Out]]()
       // try to cancel the connect attempt if the transporter's promise is interrupted.
       transportP.setInterruptHandler { case _ => nettyConnectF.cancel(true /* mayInterruptIfRunning */) }
 
-      nettyConnectF.addListener(new GenericFutureListener[ChannelPromise] {
-        def operationComplete(channelP: ChannelPromise): Unit =
-          if (channelP.cause != null) transportP.updateIfEmpty(Throw(channelP.cause))
+      nettyConnectF.addListener(new ChannelFutureListener {
+        def operationComplete(channelF: ChannelFuture): Unit = {
+          if (channelF.isCancelled()) transportP.setException(CancelledConnectionEstablishment)
+          else if (channelF.cause != null) transportP.setException(channelF.cause match {
+            case e: UnresolvedAddressException => e
+            case NonFatal(e) => Failure.rejected(e)
+          })
+          else transportP.setValue(new ChannelTransport[In, Out](channelF.channel()))
+        }
       })
 
       transportP
@@ -84,10 +97,9 @@ private[finagle] object Netty4Transporter {
     pipeCb: ChannelPipeline => Unit,
     params: Stack.Params
   ): Transporter[In, Out] = {
-    val transportP = new Promise[Transport[In, Out]]
-    val init = new RawNetty4ClientChannelInitializer[In, Out](transportP, params, pipeCb)
+    val init = new RawNetty4ClientChannelInitializer[In, Out](params, pipeCb)
 
-    build(init, params, transportP)
+    build(init, params)
   }
 
   /**
@@ -99,9 +111,8 @@ private[finagle] object Netty4Transporter {
     decoderFactory: Option[() => FrameDecoder[Out]],
     params: Stack.Params
   ): Transporter[In, Out] = {
-    val transportP = new Promise[Transport[In, Out]]
-    val init = new Netty4ClientChannelInitializer[In, Out](transportP, params, enc, decoderFactory)
+    val init = new Netty4ClientChannelInitializer[In, Out](params, enc, decoderFactory)
 
-    build(init, params, transportP)
+    build(init, params)
   }
 }
