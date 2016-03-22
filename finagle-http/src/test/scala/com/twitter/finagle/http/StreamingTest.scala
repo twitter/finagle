@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, Reader, Writer}
 import com.twitter.util.{Await, Closable, Future, Promise}
@@ -101,6 +101,52 @@ class StreamingTest extends FunSuite with Eventually {
 
     assertSecondRequestOk()
   })
+
+  test("client: server disconnect on pending response should fail request") {
+    // flaky -- does not fail reliably
+    (0 to 99).foreach { _ =>
+      val fail = new Promise[Unit]
+      val server = startServer(neverRespond, transport => {
+        if (!fail.isDefined) fail.ensure { transport.close() }
+        transport
+      })
+      val client = connect(server.boundAddress, identity)
+
+      val resF = client(get("/"))
+      assert(!resF.isDefined)
+      fail.setDone()
+      intercept[ChannelClosedException] { await(resF) }
+
+      await(client.close())
+      await(server.close())
+    }
+  }
+
+  test("client: client closes transport after server disconnects") {
+    val serverClose, clientClosed = new Promise[Unit]
+    val service = Service.mk[Request, Response] { req =>
+      Future.value(Response())
+    }
+    val server = startServer(service, transport => {
+      if (!serverClose.isDefined) serverClose.ensure { transport.close() }
+      transport
+    })
+    val client = connect(server.boundAddress, transport => {
+      new TransportProxy(transport) {
+        def read() = transport.read()
+        def write(m: Any) = transport.write(m)
+        override def close(t: Time) = {
+          clientClosed.setDone()
+          transport.close(t)
+        }
+      }
+    })
+
+    val res = await(client(get("/")))
+    assert(await(res.reader.read(1)) == None)
+    serverClose.setDone()
+    await(clientClosed)
+  }
 
   test("client: fail request writer") (new ClientCtx {
     val exc = new Exception
@@ -324,6 +370,7 @@ object StreamingTest {
   val echo = new Service[Request, Response] {
     def apply(req: Request) = Future.value(ok(req.reader))
   }
+  val neverRespond = Service.mk[Request, Response] { _ => Future.never }
 
   def get(uri: String) = {
     val req = Request(uri)
