@@ -7,6 +7,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: DefaultClient has been removed. Implementors should prefer `c.t.f.StackClient`
+    ``RB_ID=812681``.
+
 New Features
 ~~~~~~~~~~~~
   * finagle-http: new stack params MaxChunkSize, MaxHeaderSize, and MaxInitialLineLength
@@ -83,7 +89,12 @@ Breaking API Changes
 
     Any other `SocketAddress` subclass is currently incompatible with `c.t.f.Address`. Instead,
     you should encode any additional information in the metadata field of `c.t.f.Address.Inet`
+<<<<<<< HEAD
+    or `c.t.f.exp.Address.ServiceFactory`.
+    ``RB_ID=792209``
+=======
     or `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
+>>>>>>> master
 
   * finagle-core: Delete `c.t.f.ServiceFactorySocketAddress` and replace usages with
     `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
