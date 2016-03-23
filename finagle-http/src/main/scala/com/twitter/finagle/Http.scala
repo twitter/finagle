@@ -4,7 +4,7 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
-import com.twitter.finagle.http.{HttpClientTraceInitializer, HttpServerTraceInitializer, HttpTransport, Request, Response}
+import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
 import com.twitter.finagle.netty3._
@@ -44,6 +44,17 @@ object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
   object param {
+    /**
+     * the transporter, useful for changing underlying http implementations
+     */
+    private[finagle] case class ParameterizableTransporter(
+      transporterFn: Stack.Params => Transporter[Any, Any]) {
+    }
+
+    private[finagle] implicit object ParameterizableTransporter extends
+        Stack.Param[ParameterizableTransporter] {
+      val default = com.twitter.finagle.http.netty.Netty3
+    }
 
     /**
      * when streaming, the maximum size of http chunks.
@@ -100,7 +111,7 @@ object Http extends Client[Request, Response] with HttpRichClient
       val default = CompressionLevel(-1)
     }
 
-    private[Http] def applyToCodec(
+    private[finagle] def applyToCodec(
       params: Stack.Params, codec: http.Http): http.Http =
         codec
           .maxRequestSize(params[MaxRequestSize].size)
@@ -148,16 +159,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
-    protected def newTransporter(): Transporter[Any, Any] = {
-      val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
-      val codec = param.applyToCodec(params, http.Http())
-        .client(ClientCodecConfig(label))
-      val Stats(stats) = params[Stats]
-      val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
-      Netty3Transporter(
-        codec.pipelineFactory,
-        params + Netty3Transporter.TransportFactory(newTransport))
-    }
+    protected def newTransporter(): Transporter[Any, Any] =
+      params[param.ParameterizableTransporter].transporterFn(params)
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
@@ -229,6 +232,9 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
+
+    private[finagle] def withTransporter(transporter: param.ParameterizableTransporter): Client =
+      configured(transporter)
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
