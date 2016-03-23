@@ -6,7 +6,7 @@ import com.twitter.common.zookeeper.testing.ZooKeeperTestServer
 import com.twitter.common.zookeeper.{CompoundServerSet, ZooKeeperUtils, ServerSets, ZooKeeperClient}
 import com.twitter.conversions.time._
 import com.twitter.finagle.Group
-import com.twitter.finagle.cacheresolver.{CacheNode, CachePoolConfig, ZookeeperCacheNodeGroup}
+import com.twitter.finagle.cacheresolver.{CacheNodeGroup, CacheNode, CachePoolConfig}
 import com.twitter.util.{Duration, Stopwatch, TimeoutException}
 import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
@@ -65,18 +65,18 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
 
   if (!sys.props.contains("SKIP_FLAKY")) // CSL-1735
   test("doesn't blow up") {
-    val myPool = new ZookeeperCacheNodeGroup(zkPath, zookeeperClient)
+    val myPool = CacheNodeGroup.newZkCacheNodeGroup(zkPath, zookeeperClient)
     assert(waitForMemberSize(myPool, 0, 5))
     assert(myPool.members forall(_.key.isDefined))
   }
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) test("add and remove") {
     // the cluster initially must have 5 members
-    val myPool = new ZookeeperCacheNodeGroup(zkPath, zookeeperClient)
+    val myPool = CacheNodeGroup.newZkCacheNodeGroup(zkPath, zookeeperClient)
     assert(waitForMemberSize(myPool, 0, 5))
     var currentMembers = myPool.members
 
-    /***** start 5 more memcached servers and join the cluster ******/
+    /***** start 5 more memcached servers and join the cluster *****/
     // cache pool should remain the same size at this moment
     addShards(List(5, 6, 7, 8, 9))
     assert(waitForMemberSize(myPool, 5, 5))
@@ -89,7 +89,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
     assert(myPool.members != currentMembers)
     currentMembers = myPool.members
 
-    /***** remove 2 servers from the zk serverset ******/
+    /***** remove 2 servers from the zk serverset *****/
     // cache pool should remain the same size at this moment
     testServers(0)._2.leave()
     testServers(1)._2.leave()
@@ -103,7 +103,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
     assert(myPool.members != currentMembers)
     currentMembers = myPool.members
 
-    /***** remove 2 more then add 3 ******/
+    /***** remove 2 more then add 3 *****/
     // cache pool should remain the same size at this moment
     testServers(2)._2.leave()
     testServers(3)._2.leave()
@@ -126,7 +126,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
     zookeeperClient.get().setData(zkPath, output.toByteArray, -1)
 
     // the cluster initially must have 5 members
-    val myPool = new ZookeeperCacheNodeGroup(zkPath, zookeeperClient)
+    val myPool = CacheNodeGroup.newZkCacheNodeGroup(zkPath, zookeeperClient)
     assert(waitForMemberSize(myPool, 0, 5))
     var currentMembers = myPool.members
 
@@ -161,7 +161,7 @@ class CacheNodeGroupTest extends FunSuite with BeforeAndAfterEach {
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) test("zk failures test") {
     // the cluster initially must have 5 members
-    val myPool = new ZookeeperCacheNodeGroup(zkPath, zookeeperClient)
+    val myPool = CacheNodeGroup.newZkCacheNodeGroup(zkPath, zookeeperClient)
     assert(waitForMemberSize(myPool, 0, 5))
     var currentMembers = myPool.members
 

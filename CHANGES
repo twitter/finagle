@@ -15,14 +15,23 @@ Breaking API Changes
 
 New Features
 ~~~~~~~~~~~~
+
   * finagle-http: new stack params MaxChunkSize, MaxHeaderSize, and MaxInitialLineLength
     are available to configure the http codec. ``RB_ID=811129``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-cache-resolver: `c.t.f.cacheresolver.ZookeeperCacheNodeGroup` has been removed from the
+    API since we no longer check for the zookeeper data for the cache pool size to refresh for the
+    changes in the serverset. ``RB_ID=811190``
 
 6.34.0
 ------
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
   * finagle-core: GenSerialClientDispatcher fails pending and subsequent requests when
     its underlying transport closes. ``RB_ID=807590``
 
@@ -116,7 +125,7 @@ Breaking API Changes
   * finagle-core: `$Client.withSessionQualifier.failureAccrualPolicy` has been removed from the API
     since it enables an experimental feature (use Stack's `.configured` API instead). ``RB_ID=802953``
 
-  * finagle-core: `c.t.f.service.exp.FailureAccrualPolicies` (Java-friendly API) has bee removed -
+  * finagle-core: `c.t.f.service.exp.FailureAccrualPolicies` (Java-friendly API) has been removed -
     use `c.t.f.service.exp.FailureAccrualPolicy` instead.
 
   * finagle-core: DefaultServer is removed. Protocol implementors should use StackServer instead.
