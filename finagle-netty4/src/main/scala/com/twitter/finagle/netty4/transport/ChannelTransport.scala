@@ -3,8 +3,11 @@ package com.twitter.finagle.netty4.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Promise, Return, Time}
 import io.netty.channel.{ChannelException => _, _}
+import com.twitter.util._
+import io.netty.channel.{
+  Channel, ChannelHandlerContext, ChannelFutureListener, ChannelFuture, SimpleChannelInboundHandler
+}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
@@ -61,7 +64,7 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
     // We support Netty's channel-level backpressure thereby respecting
     // slow receivers on the other side.
     if (!ch.isWritable) {
-      // Note: It's up to the layer above a transport to decided whether or
+      // Note: It's up to the layer above a transport to decide whether or
       // not to requeue a canceled write.
       Future.exception(new DroppedWriteException)
     } else {

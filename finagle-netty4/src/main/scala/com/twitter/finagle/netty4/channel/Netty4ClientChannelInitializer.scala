@@ -1,14 +1,12 @@
-package com.twitter.finagle.netty4
+package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
-import com.twitter.finagle.netty4.channel.WriteCompletionTimeoutHandler
-import com.twitter.finagle.netty4.codec.{EncodeHandler, DecodeHandler}
-import com.twitter.finagle.param.Timer
+import com.twitter.finagle.netty4.codec.{DecodeHandler, EncodeHandler}
+import com.twitter.finagle.param.{Stats, Logger}
 import com.twitter.finagle.transport.Transport
 import io.netty.channel._
-import io.netty.channel.socket.SocketChannel
-import io.netty.handler.timeout.ReadTimeoutHandler
+import io.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
 
 private[netty4] object Netty4ClientChannelInitializer {
   val FrameDecoderHandlerKey = "frame decoder"
@@ -38,7 +36,7 @@ private[netty4] class Netty4ClientChannelInitializer[In, Out](
   private[this] val encodeHandler = encoder.map(new EncodeHandler[In](_))
   private[this] val decodeHandler = decoderFactory.map(new DecodeHandler[Out](_))
 
-  override def initChannel(ch: SocketChannel): Unit = {
+  override def initChannel(ch: Channel): Unit = {
     super.initChannel(ch)
 
     // read timeout => decode handler => encode handler => write timeout => cxn handler
@@ -59,12 +57,16 @@ private[netty4] class Netty4ClientChannelInitializer[In, Out](
  */
 private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
     params: Stack.Params)
-  extends ChannelInitializer[SocketChannel] {
+  extends ChannelInitializer[Channel] {
     import Netty4ClientChannelInitializer._
-    private[this] val Timer(timer) = params[Timer]
-    private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
 
-    def initChannel(ch: SocketChannel): Unit = {
+    private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
+    private[this] val Logger(logger) = params[Logger]
+    private[this] val Stats(stats) = params[Stats]
+
+    private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
+
+    def initChannel(ch: Channel): Unit = {
       val pipe = ch.pipeline
 
       if (readTimeout.isFinite) {
@@ -72,8 +74,12 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
         pipe.addFirst(ReadTimeoutHandlerKey, new ReadTimeoutHandler(timeoutValue, timeoutUnit))
       }
 
-      if (writeTimeout.isFinite)
-        pipe.addLast(WriteTimeoutHandlerKey, new WriteCompletionTimeoutHandler(timer, writeTimeout))
+      if (writeTimeout.isFinite) {
+        val (timeoutValue, timeoutUnit) = writeTimeout.inTimeUnit
+        pipe.addLast(WriteTimeoutHandlerKey, new WriteTimeoutHandler(timeoutValue, timeoutUnit))
+      }
+
+      pipe.addLast("exception handler", exceptionHandler)
     }
   }
 
@@ -89,7 +95,7 @@ private[netty4] class RawNetty4ClientChannelInitializer[In, Out](
     pipeCb: ChannelPipeline => Unit)
   extends AbstractNetty4ClientChannelInitializer[In, Out](params) {
 
-  override def initChannel(ch: SocketChannel): Unit = {
+  override def initChannel(ch: Channel): Unit = {
     super.initChannel(ch)
     pipeCb(ch.pipeline)
   }

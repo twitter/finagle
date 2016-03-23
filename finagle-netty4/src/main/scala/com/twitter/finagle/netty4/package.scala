@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.app.GlobalFlag
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.jvm.numProcs
+import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
 import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.{ExecutorService, Executors}
 
@@ -21,4 +22,13 @@ package object netty4 {
   )
 
   private[netty4] object WorkerPool extends NioEventLoopGroup(numWorkers(), Executor)
+
+  object param {
+
+    private[netty4] case class Allocator(allocator: ByteBufAllocator)
+    private[netty4] implicit object Allocator extends Stack.Param[Allocator] {
+      // TODO investigate pooled allocator CSL-2089
+      override val default: Allocator = Allocator(UnpooledByteBufAllocator.DEFAULT)
+    }
+  }
 }

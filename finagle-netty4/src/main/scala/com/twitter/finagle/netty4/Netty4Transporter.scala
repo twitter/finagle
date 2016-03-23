@@ -4,12 +4,11 @@ import com.twitter.finagle.{Failure, Stack}
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
 import com.twitter.finagle.netty4.transport.ChannelTransport
+import com.twitter.finagle.netty4.channel._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, NonFatal}
 import io.netty.bootstrap.Bootstrap
-import io.netty.buffer.UnpooledByteBufAllocator
 import io.netty.channel._
-import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
@@ -37,7 +36,7 @@ private[finagle] object Netty4Transporter {
     Failure.rejected("connection establishment was cancelled")
 
   private[this] def build[In, Out](
-    init: ChannelInitializer[SocketChannel],
+    init: ChannelInitializer[Channel],
     params: Stack.Params
   ): Transporter[In, Out] = new Transporter[In, Out] {
     def apply(addr: SocketAddress): Future[Transport[In, Out]] = {
@@ -46,6 +45,7 @@ private[finagle] object Netty4Transporter {
       val Transporter.ConnectTimeout(connectTimeout) = params[Transporter.ConnectTimeout]
       val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
       val Backpressure(backpressure) = params[Backpressure]
+      val param.Allocator(allocator) = params[param.Allocator]
 
       // max connect timeout is ~24.8 days
       val compensatedConnectTimeoutMs =
@@ -55,8 +55,7 @@ private[finagle] object Netty4Transporter {
         new Bootstrap()
           .group(WorkerPool)
           .channel(classOf[NioSocketChannel])
-          // todo: investigate pooled allocator CSL-2089
-          .option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+          .option(ChannelOption.ALLOCATOR, allocator)
           .option[JBool](ChannelOption.TCP_NODELAY, noDelay)
           .option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
           .option[JBool](ChannelOption.AUTO_READ, !backpressure) // backpressure! no reads on transport => no reads on the socket

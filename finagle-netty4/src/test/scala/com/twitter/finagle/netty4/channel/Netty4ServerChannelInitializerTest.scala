@@ -16,7 +16,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class Netty4ChannelInitializerTest
+class Netty4ServerChannelInitializerTest
   extends FunSuite
   with Eventually
   with IntegrationPatience {
@@ -40,17 +40,18 @@ class Netty4ChannelInitializerTest
   }
 
 
-  test("Netty4ChannelInitializer channel writes can time out") {
+  test("Netty4ServerChannelInitializer channel writes can time out") {
     new Ctx {
       val params = baseParams + Transport.Liveness(
         readTimeout = Duration.Top,
         writeTimeout = Duration.fromMilliseconds(1),
         keepAlive = None)
 
-      val init = new Netty4ChannelInitializer(_ => (), params, () => nop)
+      val init = new Netty4ServerChannelInitializer(_ => (), params, () => nop)
       init.initChannel(srv)
 
-      srv.pipeline.addBefore("writeCompletionTimeout", "writeDiscardHandler", writeDiscardHandler)
+      srv.pipeline.addBefore(Netty4ServerChannelInitializer.WriteTimeoutHandlerKey,
+        "writeDiscardHandler", writeDiscardHandler)
 
       // WriteCompletionTimeoutHandler throws a WriteTimeOutException after the message is lost.
       srv.writeAndFlush("hi")
@@ -62,14 +63,14 @@ class Netty4ChannelInitializerTest
     }
   }
 
-  test("Netty4ChannelInitializer channel reads can time out") {
+  test("Netty4ServerChannelInitializer channel reads can time out") {
     new Ctx {
       val params = baseParams + Transport.Liveness(
         readTimeout = Duration.fromMilliseconds(1),
         writeTimeout = Duration.Top,
         keepAlive = None)
 
-      val init = new Netty4ChannelInitializer(_ => (), params, () => nop)
+      val init = new Netty4ServerChannelInitializer(_ => (), params, () => nop)
       init.initChannel(srv)
 
       srv.pipeline.fireChannelActive()

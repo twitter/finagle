@@ -1,9 +1,9 @@
-package com.twitter.finagle.netty4
+package com.twitter.finagle.netty4.channel
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
 import com.twitter.util.{Await, Promise}
-import io.netty.buffer.{Unpooled, ByteBuf}
+import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
@@ -14,9 +14,10 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class Netty4ClientChannelInitializerTest extends FunSuite {
+
   test("raw channel initializer exposes netty pipeline") {
-    val reverser = new ChannelOutboundHandlerAdapter{
-      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = msg match {
+    val reverser = new ChannelOutboundHandlerAdapter {
+      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = msg match {
         case b: ByteBuf =>
           val bytes = new Array[Byte](b.readableBytes)
           b.readBytes(bytes)
@@ -25,6 +26,7 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
         case _ => fail("expected ByteBuf message")
       }
     }
+
     val init =
       new RawNetty4ClientChannelInitializer[ByteBuf, ByteBuf](Params.empty, _.addLast(reverser))
 
@@ -40,6 +42,7 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
         case _ => fail("expected ByteBuf message")
       }
     })
+
     val bytes = Array(1.toByte, 2.toByte, 3.toByte)
     channel.write(Unpooled.wrappedBuffer(bytes))
 

@@ -305,10 +305,18 @@ class ChannelClosedException(underlying: Throwable, remoteAddress: SocketAddress
 }
 
 /**
- * Indicates that a write to a given `remoteAddress` timed out. See
- * [[com.twitter.finagle.netty3.channel.WriteCompletionTimeoutHandler]] for details.
+ * Indicates that a write to a given `remoteAddress` timed out.
  */
-class WriteTimedOutException(remoteAddress: SocketAddress) extends ChannelException(null, remoteAddress) {
+class WriteTimedOutException(
+    remoteAddress: SocketAddress) extends ChannelException(null, remoteAddress) {
+  def this() = this(null)
+}
+
+/**
+ * Indicates that a read from a given `remoteAddress` timed out.
+ */
+class ReadTimedOutException(
+    remoteAddress: SocketAddress) extends ChannelException(null, remoteAddress) {
   def this() = this(null)
 }
 

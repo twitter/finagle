@@ -2,18 +2,14 @@ package com.twitter.finagle.netty4
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
-import com.twitter.finagle.{WriteTimedOutException, Failure}
+import com.twitter.finagle.{ReadTimedOutException, WriteTimedOutException, Failure}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.codec.{FrameEncoder, FixedLengthDecoder}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.io.Buf
-import com.twitter.util.{Duration, Await, Promise}
+import com.twitter.util.{Duration, Await}
 import io.netty.channel._
-import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.handler.timeout.ReadTimeoutException
 import java.net.{Socket, InetSocketAddress, InetAddress, ServerSocket}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -128,7 +124,7 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     }
 
     eventually {
-      assert(observedExn.isInstanceOf[ReadTimeoutException])
+      assert(observedExn.isInstanceOf[ReadTimedOutException])
     }
   }
 
