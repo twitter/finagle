@@ -43,21 +43,6 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
     assert(Await.result(res, 1.second) == "polo")
   }
 
-  test("When there is a deadline set, DeadlineFilter should record the current time") {
-    val h = new DeadlineFilterHelper
-    import h._
-
-    promise.setValue("polo")
-
-    Time.withCurrentTimeFrozen { tc =>
-      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(1.seconds)) {
-        val res = deadlineService("marco")
-        assert(statsReceiver.stats(Seq("current_time_ms"))(0) == Time.now.inMillis)
-        assert(Await.result(res, 1.second) == "polo")
-      }
-    }
-  }
-
   test("When the deadline is not exceeded, DeadlineFilter should service the request") {
     val h = new DeadlineFilterHelper
     import h._
@@ -221,6 +206,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
           assert(statsReceiver.counters.get(List("exceeded")) == Some(1))
           assert(statsReceiver.counters.get(List("exceeded_beyond_tolerance")) == None)
           assert(statsReceiver.counters.get(List("rejected")) == Some(1))
+          assert(statsReceiver.stats(Seq("past_deadline_ms"))(0) == 1.second.inMillis)
         }
       }
     }
@@ -343,20 +329,23 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
       Trace.letTracer(tracer) { f }
       verify(tracer, atLeastOnce()).record(captor.capture())
       val annotations = captor.getAllValues.asScala collect { case Record(_, _, a, _) => a }
-      assert(expected == annotations)
+      assert(expected.forall(annotations.contains(_)))
     }
 
     Time.withCurrentTimeFrozen { tc =>
       withExpectedTrace({
         Contexts.broadcast.let(Deadline, Deadline.ofTimeout(200.millis)) {
           tc.advance(2.seconds)
+          for (i <- 0 until 5) Await.result(deadlineService("marco"), 1.second)
           Await.result(deadlineService("marco"), 1.second)
         }
       },
       Seq(
         Annotation.BinaryAnnotation("finagle.deadlineFilter.deadline.timestamp_ms", Time.now.inMillis),
         Annotation.BinaryAnnotation("finagle.deadlineFilter.deadline.deadline_ms", (Time.now + 200.millis).inMillis),
-        Annotation.BinaryAnnotation("finagle.deadlineFilter.now_ms", (Time.now + 2.seconds).inMillis)
+        Annotation.BinaryAnnotation("finagle.deadlineFilter.now_ms", (Time.now + 2.seconds).inMillis),
+        Annotation.BinaryAnnotation("finagle.deadlineFilter.remaining_ms", (2.seconds - 200.millis).inMillis),
+        Annotation.Message("finagle.deadlineFilter.rejected")
       ))
     }
   }

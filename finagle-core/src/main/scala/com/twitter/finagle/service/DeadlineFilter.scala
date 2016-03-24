@@ -120,7 +120,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
   private[this] val rejectedStat = statsReceiver.counter("rejected")
   private[this] val transitTimeStat = statsReceiver.stat("transit_latency_ms")
   private[this] val budgetTimeStat = statsReceiver.stat("deadline_budget_ms")
-  private[this] val currentTimeStat = statsReceiver.stat("current_time_ms")
+  private[this] val amountPastDeadlineStat = statsReceiver.stat("past_deadline_ms")
 
   private[this] val serviceDeposit =
     DeadlineFilter.RejectBucketScaleFactor.toInt
@@ -152,7 +152,6 @@ private[finagle] class DeadlineFilter[Req, Rep](
 
         transitTimeStat.add((now - deadline.timestamp).max(Duration.Zero).inMilliseconds)
         budgetTimeStat.add(remaining.inMilliseconds)
-        currentTimeStat.add(now.inMillis)
 
         Trace.recordBinary("finagle.deadlineFilter.deadline.timestamp_ms", deadline.timestamp.inMillis)
         Trace.recordBinary("finagle.deadlineFilter.deadline.deadline_ms", deadline.deadline.inMillis)
@@ -165,6 +164,9 @@ private[finagle] class DeadlineFilter[Req, Rep](
             && rejectBucket.tryGet(rejectWithdrawal)) {
           exceededStat.incr()
           rejectedStat.incr()
+          amountPastDeadlineStat.add(-remaining.inMilliseconds)
+          Trace.recordBinary("finagle.deadlineFilter.remaining_ms", -remaining.inMillis)
+          Trace.record("finagle.deadlineFilter.rejected")
           service(request)  // When turned on this will be Future.exception
         } else {
           if (-remaining > tolerance) beyondToleranceStat.incr()
