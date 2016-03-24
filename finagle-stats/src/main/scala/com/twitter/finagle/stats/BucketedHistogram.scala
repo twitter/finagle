@@ -267,7 +267,7 @@ private[stats] class BucketedHistogram(
    * the bucket's upper and lower limits and a count of the number 
    * of times a value in range of the limits was added.
    */
-  def toSeq: Seq[BucketAndCount] = {
+  def bucketAndCounts: Seq[BucketAndCount] = {
     counts.zipWithIndex.collect {
       case (count, idx) if count != 0 =>
         // counts is 1 bucket longer than limits
