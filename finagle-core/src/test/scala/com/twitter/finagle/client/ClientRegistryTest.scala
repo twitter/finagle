@@ -3,7 +3,7 @@ package com.twitter.finagle.client
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.util.{StackRegistry, TestParam, TestParam2}
-import com.twitter.util.{Var, Return, Activity, Future, Await}
+import com.twitter.util._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 import com.twitter.conversions.time.intToTimeableNumber
 import org.junit.runner.RunWith
@@ -16,13 +16,21 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 object crtnamer {
-  val va = Var[Addr](Addr.Pending)
+  @volatile var observationsOpened = 0
+  @volatile var observationsClosed = 0
+  val e = Event[Addr]
+  val va = Var.async[Addr](Addr.Pending) { u =>
+    observationsOpened += 1
+    val obs = e.register(Witness(u))
+    Closable.make { deadline =>
+      observationsClosed += 1
+      obs.close(deadline)
+    }
+  }
 }
 
 class crtnamer extends Namer {
   import crtnamer._
-
-  def enum(prefix: Path): Activity[Dtab] = Activity.pending
 
   def lookup(path: Path): Activity[NameTree[Name]] = {
     Activity(Var.value(Activity.Ok(NameTree.Leaf(Name.Bound(va, new Object())))))
@@ -119,10 +127,25 @@ class ClientRegistryTest extends FunSuite
     val c = stackClient.newClient(Name.Path(path), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
     assert(allResolved.poll == None)
-    crtnamer.va() = Addr.Bound(Set.empty[Address])
+    crtnamer.e.notify(Addr.Bound(Set.empty[Address]))
     eventually {
       assert(allResolved.poll == Some(Return(Set("foo"))))
     }
+    c.close()
+  })
+
+  test("ClientRegistry does not release Var observations")(new Ctx {
+    // reset observation counters in crtnamer, since other tests may alter them
+    crtnamer.observationsOpened = 0
+    crtnamer.observationsClosed = 0
+    val path = Path.read("/$/com.twitter.finagle.client.crtnamer/foo")
+    assert(crtnamer.observationsOpened == 0)
+    val c = stackClient.newClient(Name.Path(path), "foo")
+    assert(crtnamer.observationsOpened == 1) // check that we kicked off resolution
+    assert(crtnamer.observationsClosed == 0)
+    c.close()
+    assert(crtnamer.observationsOpened == 1)
+    assert(crtnamer.observationsClosed == 1)
   })
 
   test("ClientRegistry registers clients in registry")(new Ctx {

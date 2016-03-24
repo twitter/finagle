@@ -13,6 +13,9 @@ Breaking API Changes
   * finagle-core: DefaultClient has been removed. Implementors should prefer `c.t.f.StackClient`
     ``RB_ID=812681``.
 
+  * finagle-core: When a client is created, its server set resolution is started eagerly.
+  ``RB_ID=806940``
+
 New Features
 ~~~~~~~~~~~~
 
