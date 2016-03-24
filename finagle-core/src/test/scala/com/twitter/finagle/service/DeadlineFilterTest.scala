@@ -360,7 +360,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
     assert((ps[Param] match { case Param(t, d) => (t, d)}) == ((1.second, 0.5)))
   }
 
-  test("module configured correctly using stack params") {
+  test("module configured correctly using stack params: tolerance") {
     val h = new DeadlineFilterHelper
     import h._
 
@@ -375,7 +375,7 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
 
     val ps: Stack.Params = Stack.Params.empty + param.Stats(h.statsReceiver)
 
-    val service = s.make(ps + DeadlineFilter.Param(10.seconds, 0.5)).toService
+    val service = s.make(ps + DeadlineFilter.Param(10.seconds, 0.2)).toService
 
     Time.withCurrentTimeFrozen { tc =>
       Contexts.broadcast.let(Deadline, Deadline.ofTimeout(5.seconds)) {
@@ -385,7 +385,38 @@ class DeadlineFilterTest extends FunSuite with MockitoSugar {
         assert(Await.result(service("marco"), 1.second) == "polo")
         assert(statsReceiver.counters.get(List("admission_control", "deadline", "exceeded")) == Some(1))
         assert(statsReceiver.counters.get(List("admission_control", "deadline", "exceeded_beyond_tolerance")) == None)
-        assert(statsReceiver.counters.get(List("admission_control", "deadline", "rejected")) == Some(1))
+      }
+    }
+  }
+
+  // Because a new DeadlineFilter is created per service factory application,
+  // we don't test configuration of a non-zero rejection percentage.
+  // This is tested in in `com.twitter.finagle.http.service.DeadlineFilterEndToEndTest`.
+  test("module configured correctly using stack params: maxRejectPercentage = 0") {
+    val h = new DeadlineFilterHelper
+    import h._
+
+    val underlyingService = mock[Service[String, String]]
+    when(underlyingService(Matchers.anyString)) thenReturn Future.value("polo")
+
+    val underlying = mock[ServiceFactory[String, String]]
+    when(underlying()) thenReturn Future.value(underlyingService)
+
+    val s: Stack[ServiceFactory[String, String]] =
+      DeadlineFilter.module[String, String].toStack(Stack.Leaf(Stack.Role("Service"), underlying))
+
+    val ps: Stack.Params = Stack.Params.empty + param.Stats(h.statsReceiver)
+
+    val service = s.make(ps + DeadlineFilter.Param(10.seconds, 0.0)).toService
+
+    Time.withCurrentTimeFrozen { tc =>
+      Contexts.broadcast.let(Deadline, Deadline.ofTimeout(5.seconds)) {
+        Await.result(service("marco"), 1.second)
+        Await.result(service("marco"), 1.second)
+        tc.advance(7.seconds)
+        assert(Await.result(service("marco"), 1.second) == "polo")
+        assert(statsReceiver.counters.get(List("admission_control", "deadline", "exceeded")) == None)
+        assert(statsReceiver.counters.get(List("admission_control", "deadline", "exceeded_beyond_tolerance")) == None)
       }
     }
   }
