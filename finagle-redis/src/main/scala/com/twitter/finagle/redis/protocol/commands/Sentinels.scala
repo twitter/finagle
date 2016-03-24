@@ -1,11 +1,9 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands._
 import com.twitter.finagle.redis.util._
-import com.twitter.finagle.redis.ClientError
 import com.twitter.io.Charsets
-import java.net.InetSocketAddress
 
 case class SentinelMaster(name: String)
   extends Sentinel(SentinelMaster.command, Seq(name))

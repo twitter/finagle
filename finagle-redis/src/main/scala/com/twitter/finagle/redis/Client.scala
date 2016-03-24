@@ -1,13 +1,14 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.{ClientConnection, Service, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.{ClientConnection, ServiceFactory, ServiceProxy}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.exp.{RedisPool, SubscribeCommands}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util._
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future, Time, Timer}
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.buffer.ChannelBuffer
 
 object Client {
 
@@ -164,7 +165,15 @@ class TransactionalClient(factory: ServiceFactory[Command, Reply])
    * Marks given keys to be watched for conditional execution of a transaction
    * @param keys to watch
    */
+  @deprecated("remove netty3 types from public API", "2016-03-15")
   def watch(keys: Seq[ChannelBuffer]): Future[Unit] =
+    watches(keys.map(ChannelBufferBuf.Owned(_)))
+
+  /**
+   * Marks given keys to be watched for conditional execution of a transaction
+   * @param keys to watch
+   */
+  def watches(keys: Seq[Buf]): Future[Unit] =
     doRequest(Watch(keys)) {
       case StatusReply(message) =>
         _watch = true

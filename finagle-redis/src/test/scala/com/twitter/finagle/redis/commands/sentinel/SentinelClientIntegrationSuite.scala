@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.integration
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.naggati.SentinelClientTest
 import com.twitter.finagle.redis.tags.{ RedisTest, ClientTest }
-import com.twitter.finagle.redis.util.{ CBToString, StringToChannelBuffer }
+import com.twitter.finagle.redis.util.{BufToString, StringToBuf, CBToString, StringToChannelBuffer}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger
 import com.twitter.util.{ Await, Awaitable, Duration, Future, Time }
@@ -220,10 +220,10 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   test("Correctly perform the FLUSHCONFIG command", RedisTest, ClientTest) {
     withSentinelClient(0) { client =>
-      val configFile = result(client.info("server"))
-        .flatMap { cb =>
+      val configFile = result(client.info(StringToBuf("server")))
+        .flatMap { buf =>
           val prefix = "config_file:"
-          (cb: String).trim
+          BufToString(buf).trim
             .split("\n")
             .find(_.startsWith(prefix))
             .map(_.substring(prefix.length))

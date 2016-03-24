@@ -421,7 +421,7 @@ object CommandBytes {
   val EXEC              = StringToChannelBuffer("EXEC")
   val MULTI             = StringToChannelBuffer("MULTI")
   val UNWATCH           = StringToChannelBuffer("UNWATCH")
-  val WATCH             = StringToChannelBuffer("WATCH")
+  val WATCH             = StringToBuf("WATCH")
 
   // HyperLogLogs
   val PFADD             = StringToChannelBuffer("PFADD")

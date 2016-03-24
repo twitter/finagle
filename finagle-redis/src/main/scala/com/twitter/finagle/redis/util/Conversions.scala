@@ -1,10 +1,12 @@
 package com.twitter.finagle.redis.util
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
+import com.twitter.finagle.redis.protocol.Commands.trimList
+import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf.StringCoder
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.finagle.redis.protocol.Commands.trimList
-import com.twitter.io.Charsets
 
 trait ErrorConversion {
   def getException(msg: String): Throwable
@@ -54,6 +56,15 @@ object StringToChannelBuffer {
     ChannelBuffers.wrappedBuffer(string.getBytes(charset))
   }
 }
+
+object StringToBuf {
+  def apply(string: String): Buf = Buf.Utf8(string)
+}
+
+object BufToString {
+  def apply(buf: Buf): String = Buf.Utf8.unapply(buf).get
+}
+
 object CBToString {
   def apply(arg: ChannelBuffer, charset: Charset = Charsets.Utf8) = {
     arg.toString(charset)
@@ -102,7 +113,7 @@ object NumberFormat {
 object ReplyFormat {
   def toString(items: List[Reply]): List[String] = {
     items flatMap {
-      case BulkReply(message)   => List(BytesToString(message.array))
+      case BulkReply(message)   => List(BufToString(message))
       case EmptyBulkReply()     => EmptyBulkReplyString
       case IntegerReply(id)     => List(id.toString)
       case StatusReply(message) => List(message)
@@ -115,7 +126,7 @@ object ReplyFormat {
 
   def toChannelBuffers(items: List[Reply]): List[ChannelBuffer] = {
     items flatMap {
-      case BulkReply(message)   => List(message)
+      case BulkReply(message)   => List(ChannelBufferBuf.Owned.extract(message))
       case EmptyBulkReply()     => EmptyBulkReplyChannelBuffer
       case IntegerReply(id)     => List(ChannelBuffers.wrappedBuffer(Array(id.toByte)))
       case StatusReply(message) => List(StringToChannelBuffer(message))

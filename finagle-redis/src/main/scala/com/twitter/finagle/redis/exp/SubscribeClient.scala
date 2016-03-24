@@ -1,10 +1,11 @@
 package com.twitter.finagle.redis.exp
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.{Service, ServiceClosedException, ServiceFactory}
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.StringToChannelBuffer
+import com.twitter.finagle.redis.util.{BufToString, StringToChannelBuffer}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Charsets
 import com.twitter.logging.Logger
@@ -192,9 +193,17 @@ trait SubscribeCommands {
     def onMessage(message: Reply): Unit = {
       message match {
         case MBulkReply(BulkReply(MessageBytes.MESSAGE) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
-          subManager.handleMessage(channel, (channel, message))
+          subManager.handleMessage(
+            ChannelBufferBuf.Owned.extract(channel),
+            (ChannelBufferBuf.Owned.extract(channel), ChannelBufferBuf.Owned.extract(message)))
         case MBulkReply(BulkReply(MessageBytes.PMESSAGE) :: BulkReply(pattern) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
-          pSubManager.handleMessage(pattern, (pattern, channel, message))
+          pSubManager.handleMessage(
+            ChannelBufferBuf.Owned.extract(pattern),
+            (ChannelBufferBuf.Owned.extract(pattern),
+              ChannelBufferBuf.Owned.extract(channel),
+              ChannelBufferBuf.Owned.extract(message)
+            )
+          )
         case MBulkReply(BulkReply(tpe) :: BulkReply(channel) :: IntegerReply(count) :: Nil) =>
           tpe match {
             case MessageBytes.PSUBSCRIBE
@@ -206,7 +215,7 @@ trait SubscribeCommands {
               // is sent. Nothing is going to be done here. We match against them just to
               // detect something unexpected.
             case _ =>
-              throw new IllegalArgumentException(s"Unsupported message type: ${tpe.toString(Charsets.Utf8)}")
+              throw new IllegalArgumentException(s"Unsupported message type: ${BufToString(tpe)}")
           }
         case _ =>
           throw new IllegalArgumentException(s"Unexpected reply type: ${message.getClass.getSimpleName}")

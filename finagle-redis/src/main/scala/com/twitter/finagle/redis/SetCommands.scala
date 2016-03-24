@@ -1,6 +1,7 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Long => JLong,Boolean => JBoolean}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import scala.collection.immutable.{Set => ImmutableSet}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
@@ -78,7 +79,7 @@ trait Sets { self: BaseClient =>
    */
   def sPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
     doRequest(SPop(key)) {
-      case BulkReply(message) => Future.value(Some(message))
+      case BulkReply(message) => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply() => Future.value(None)
     }
 
@@ -91,7 +92,7 @@ trait Sets { self: BaseClient =>
     */
   def sRandMember(key: ChannelBuffer, count: Option[Int] = None): Future[Seq[ChannelBuffer]] =
     doRequest(SRandMember(key, count)) {
-      case BulkReply(message) => Future.value(Seq(message))
+      case BulkReply(message) => Future.value(Seq(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply() => Future.Nil
       case MBulkReply(messages) => Future.value(ReplyFormat.toChannelBuffers(messages))
       case EmptyMBulkReply() => Future.Nil

@@ -2,9 +2,7 @@ package com.twitter.finagle.redis
 
 import _root_.java.lang.{Boolean => JBoolean, Double => JDouble, Long => JLong}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.BytesToString
-import com.twitter.finagle.redis.util.NumberFormat
-import com.twitter.finagle.redis.util.ReplyFormat
+import com.twitter.finagle.redis.util.{BufToString, BytesToString, NumberFormat, ReplyFormat}
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -146,7 +144,7 @@ trait SortedSets { self: BaseClient =>
   def zScore(key: ChannelBuffer, member: ChannelBuffer): Future[Option[JDouble]] =
     doRequest(ZScore(key, member)) {
       case BulkReply(message)   =>
-        Future.value(Some(NumberFormat.toDouble(BytesToString(message.array))))
+        Future.value(Some(NumberFormat.toDouble(BufToString(message))))
       case EmptyBulkReply()     => Future.value(None)
     }
 
@@ -174,7 +172,7 @@ trait SortedSets { self: BaseClient =>
   def zIncrBy(key: ChannelBuffer, amount: JDouble, member: ChannelBuffer): Future[Option[JDouble]] =
     doRequest(ZIncrBy(key, amount, member)) {
       case BulkReply(message) =>
-        Future.value(Some(NumberFormat.toDouble(BytesToString(message.array))))
+        Future.value(Some(NumberFormat.toDouble(BufToString(message))))
       case EmptyBulkReply()   => Future.value(None)
     }
 

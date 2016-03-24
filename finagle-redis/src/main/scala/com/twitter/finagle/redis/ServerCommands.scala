@@ -1,6 +1,8 @@
 package com.twitter.finagle.redis
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol.StatusReply
+import com.twitter.io.Buf
 import com.twitter.util.Future
 import com.twitter.finagle.redis.protocol._
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -19,13 +21,31 @@ trait BasicServerCommands { self: BaseClient =>
 
   /**
    * Returns information and statistics about the server
-   * @param section Optional parameter can be used to select a specific section of information
+   * @param section used to select a specific section of information
    * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
    */
+  @deprecated("remove netty3 types from public API", "2016-03-15")
   def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
+    info(ChannelBufferBuf.Owned(section)).map { opt =>
+      opt.map(ChannelBufferBuf.Owned.extract(_))
+    }
+
+  /**
+   * Returns information and statistics about the server
+   * @return Buf with collection of \r\n terminated lines of the default info section
+   */
+  def info(): Future[Option[Buf]] =
+    info(Buf.Empty)
+
+  /**
+   * Returns information and statistics about the server
+   * @param section used to select a specific section of information.
+   * @return a collection of \r\n terminated lines if server has info on the section
+   */
+  def info(section: Buf): Future[Option[Buf]] =
     doRequest(Info(section)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply() => Future.value(None)
     }
 
   // TODO: ROLE

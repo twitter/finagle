@@ -348,7 +348,7 @@ final class ResponseDecodingSuite extends RedisResponseTest {
   private[this] def decomposeSingleElemDecoding(reply: List[AnyRef]): (String, String) =
     reply match {
       case reply :: Nil => reply match {
-        case BulkReply(msg) => (CBToString(msg), "")
+        case BulkReply(msg) => (BufToString(msg), "")
         case _ => ("USE FAILURE MSG, NOT THIS VALUE", "Expected BulkReply, got something else")
       }
       case _ => ("USE FAILURE MSG, NOT THIS VALUE", "Found no or multiple reply lines")
@@ -358,11 +358,11 @@ final class ResponseDecodingSuite extends RedisResponseTest {
     reply match {
       case fooR :: booR :: Nil => {
         val fooMsg = fooR match {
-          case BulkReply(msg) => CBToString(msg)
+          case BulkReply(msg) => BufToString(msg)
           case _              => "Expected Bulk Reply"
         }
         val barMsg = booR match {
-          case BulkReply(msg) => CBToString(msg)
+          case BulkReply(msg) => BufToString(msg)
           case _              => "Expected Bulk Reply"
         }
         (fooMsg, barMsg)

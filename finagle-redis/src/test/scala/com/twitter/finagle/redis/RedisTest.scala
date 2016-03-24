@@ -8,6 +8,7 @@ import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
 import com.twitter.finagle.redis.{Client, TransactionalClient, SentinelClient}
 import com.twitter.finagle.{Redis, redis}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Duration, Future, Time, Try}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
@@ -18,6 +19,8 @@ trait RedisTest extends FunSuite {
   protected def wrap(s: String): ChannelBuffer = StringToChannelBuffer(s)
   protected def string2ChanBuf(s: String): ChannelBuffer = wrap(s)
   protected def chanBuf2String(cb: ChannelBuffer): String = CBToString(cb)
+
+  protected val bufFoo = StringToBuf("foo")
 
   protected val foo = StringToChannelBuffer("foo")
   protected val bar = StringToChannelBuffer("bar")
@@ -73,6 +76,9 @@ trait RedisClientTest extends RedisTest with BeforeAndAfterAll {
 
   implicit def s2cb(s: String): ChannelBuffer = StringToChannelBuffer(s)
   implicit def cb2s(cb: ChannelBuffer): String = CBToString(cb)
+
+  implicit def s2b(s: String): Buf = StringToBuf(s)
+  implicit def b2s(b: Buf): String = BufToString(b)
 
   override def beforeAll(): Unit = RedisCluster.start()
   override def afterAll(): Unit = RedisCluster.stop()
@@ -226,7 +232,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
   }
 
   def assertBulkReply(reply: Future[Reply], expects: String) = Await.result(reply) match {
-    case BulkReply(msg) => assert(BytesToString(msg.array) == expects)
+    case BulkReply(msg) => assert(BufToString(msg) == expects)
     case _ => fail("Expected BulkReply")
   }
 }

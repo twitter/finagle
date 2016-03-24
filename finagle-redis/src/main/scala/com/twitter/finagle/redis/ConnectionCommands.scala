@@ -1,6 +1,8 @@
 package com.twitter.finagle.redis
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
+import com.twitter.io.Buf
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -29,7 +31,15 @@ trait ConnectionCommands extends BasicConnectionCommands { self: BaseClient =>
    * Authorizes to db
    * @param password
    */
+  @deprecated("remove netty3 types from public API", "2016-03-15")
   def auth(password: ChannelBuffer): Future[Unit] =
+    auth(ChannelBufferBuf.Owned(password))
+
+  /**
+   * Authorizes to db
+   * @param password
+   */
+  def auth(password: Buf): Future[Unit] =
     doRequest(Auth(password)) {
       case StatusReply(message) => Future.Unit
     }

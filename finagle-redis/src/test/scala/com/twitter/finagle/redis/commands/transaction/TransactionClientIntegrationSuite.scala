@@ -83,7 +83,7 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
       intercept[ServerError] {
         Await.result(
         client.transactionSupport { tx =>
-          tx.watch(Seq(foo)).unit before
+          tx.watches(Seq(bufFoo)).unit before
           tx.set(foo, boo).unit before
           tx.transaction {
             tx.get(foo)
@@ -98,14 +98,14 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
       val txResult = Await.result(
         client.transactionSupport { tx =>
           tx.set(foo, bar).unit before
-          tx.watch(Seq(foo)).unit before
+          tx.watches(Seq(bufFoo)).unit before
           tx.set(foo, boo).unit before
           tx.unwatch().unit before
           tx.transaction {
             tx.get(foo)
           }
         })
-      assert(ReplyFormat.toString(txResult.toList) == Seq("boo"))
+      assert(ReplyFormat.toString(txResult.toList) === Seq("boo"))
     }
   }
 
@@ -116,7 +116,7 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
           tx.set(foo, bar).unit before
           tx.get(foo)
         })
-      assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "bar"))
+      assert(ReplyFormat.toString(txResult.toList) === Seq("OK", "bar"))
     }
   }
 }

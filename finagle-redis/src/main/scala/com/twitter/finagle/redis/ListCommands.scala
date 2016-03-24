@@ -1,5 +1,6 @@
 package com.twitter.finagle.redis
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
@@ -29,7 +30,7 @@ trait Lists { self: BaseClient =>
    */
   def lIndex(key: ChannelBuffer, index: JLong): Future[Option[ChannelBuffer]] =
     doRequest(LIndex(key, index)) {
-      case BulkReply(message) => Future.value(Some(message))
+      case BulkReply(message) => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply()   => Future.value(None)
     }
 
@@ -79,7 +80,7 @@ trait Lists { self: BaseClient =>
    */
   def lPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
     doRequest(LPop(key)) {
-      case BulkReply(message) => Future.value(Some(message))
+      case BulkReply(message) => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply() => Future.value(None)
     }
 
@@ -143,7 +144,7 @@ trait Lists { self: BaseClient =>
    */
   def rPop(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
     doRequest(RPop(key)) {
-      case BulkReply(message) => Future.value(Some(message))
+      case BulkReply(message) => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply() => Future.value(None)
     }
 
