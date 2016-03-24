@@ -478,7 +478,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
       if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
       rawGet(Get(keys))
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For keys: " + keys))
     }
   }
   def getsResult(keys: Iterable[String]): Future[GetsResult] = {
@@ -486,7 +486,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
       if (keys==null) throw new IllegalArgumentException("Invalid keys: keys cannot be null")
       rawGet(Gets(keys)).map { GetsResult(_) }
     }  catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For keys: " + keys))
     }
   }
 
@@ -498,7 +498,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _        => throw new IllegalStateException
       }
     } catch {
-      case t:IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -512,7 +512,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _          => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -525,7 +525,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -538,7 +538,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -551,7 +551,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -564,7 +564,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -577,7 +577,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _            => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -590,7 +590,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _             => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
@@ -603,7 +603,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
         case _             => Future.exception(new IllegalStateException)
       }
     } catch {
-      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage))
+      case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
     }
   }
 
