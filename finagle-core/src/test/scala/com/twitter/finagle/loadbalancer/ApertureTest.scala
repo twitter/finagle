@@ -9,12 +9,12 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
-private trait ApertureTesting {
+trait ApertureTesting {
   val N = 100000
 
   class Empty extends Exception
 
-  protected trait TestBal extends Balancer[Unit, Unit] with Aperture[Unit, Unit] {
+  trait TestBal extends Balancer[Unit, Unit] with Aperture[Unit, Unit] {
     protected val rng = Rng(12345L)
     protected val emptyException = new Empty
     protected val maxEffort = 10
@@ -85,9 +85,9 @@ private trait ApertureTesting {
 }
 
 @RunWith(classOf[JUnitRunner])
-private class ApertureTest extends FunSuite with ApertureTesting {
+class ApertureTest extends FunSuite with ApertureTesting {
 
-  protected class Bal extends TestBal with LeastLoaded[Unit, Unit]
+  class Bal extends TestBal with LeastLoaded[Unit, Unit]
 
   test("Balance only within the aperture") {
     val counts = new Counts
@@ -180,7 +180,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
 
 
 @RunWith(classOf[JUnitRunner])
-private class LoadBandTest extends FunSuite with ApertureTesting {
+class LoadBandTest extends FunSuite with ApertureTesting {
 
   val rng = Rng()
 
