@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger
  *     arranges load in a manner that ensures a higher level of per-service
  *     concurrency.
  */
-private class ApertureLoadBandBalancer[Req, Rep](
+private[loadbalancer] class ApertureLoadBandBalancer[Req, Rep](
     protected val activity: Activity[Traversable[ServiceFactory[Req, Rep]]],
     protected val smoothWin: Duration,
     protected val lowLoad: Double,
@@ -85,7 +85,7 @@ object Aperture {
  * harmless to adjust apertures frequently, since underlying nodes
  * are typically backed by pools, and will be warm on average.
  */
-private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
+private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   import Aperture._
 
   protected def rng: Rng
@@ -211,7 +211,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
  * The upshot is that `lowLoad` and `highLoad` define an acceptable
  * band of load for each serving unit.
  */
-private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, Rep] =>
+private[loadbalancer] trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, Rep] =>
   /**
    * The time-smoothing factor used to compute the capacity-adjusted
    * load. Exponential smoothing is used to absorb large spikes or
