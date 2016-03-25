@@ -4,7 +4,6 @@ import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.io.{Buf, Charsets}
-import com.twitter.io.Buf.StringCoder
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
@@ -124,20 +123,23 @@ object ReplyFormat {
     }
   }
 
-  def toChannelBuffers(items: List[Reply]): List[ChannelBuffer] = {
+  def toChannelBuffers(items: List[Reply]): List[ChannelBuffer] =
+    toBuf(items).map(ChannelBufferBuf.Owned.extract(_))
+
+  def toBuf(items: List[Reply]): List[Buf] = {
     items flatMap {
-      case BulkReply(message)   => List(ChannelBufferBuf.Owned.extract(message))
+      case BulkReply(message)   => List(message)
       case EmptyBulkReply()     => EmptyBulkReplyChannelBuffer
-      case IntegerReply(id)     => List(ChannelBuffers.wrappedBuffer(Array(id.toByte)))
-      case StatusReply(message) => List(StringToChannelBuffer(message))
-      case ErrorReply(message)  => List(StringToChannelBuffer(message))
-      case MBulkReply(messages) => ReplyFormat.toChannelBuffers(messages)
+      case IntegerReply(id)     => List(Buf.ByteArray.Owned(Array(id.toByte)))
+      case StatusReply(message) => List(StringToBuf(message))
+      case ErrorReply(message)  => List(StringToBuf(message))
+      case MBulkReply(messages) => ReplyFormat.toBuf(messages)
       case EmptyMBulkReply()    => EmptyBulkReplyChannelBuffer
       case _                    => Nil
     }
   }
 
-  private val EmptyBulkReplyString = List(RedisCodec.NIL_VALUE.toString)
-  private val EmptyMBulkReplyString = List(BytesToString(RedisCodec.NIL_VALUE_BA.array))
-  private val EmptyBulkReplyChannelBuffer = List(RedisCodec.NIL_VALUE_BA)
+  private val EmptyBulkReplyString: List[String] = List(RedisCodec.NIL_VALUE.toString)
+  private val EmptyMBulkReplyString: List[String] = List(BytesToString(RedisCodec.NIL_VALUE_BA.array))
+  private val EmptyBulkReplyChannelBuffer: List[Buf] = List(RedisCodec.NIL_VALUE_BUF)
 }

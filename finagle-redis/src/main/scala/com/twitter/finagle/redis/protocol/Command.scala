@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.protocol
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.finagle.redis.util._
-import com.twitter.io.Charsets
+import com.twitter.io.{Buf, Charsets}
 
 object RequireClientProtocol extends ErrorConversion {
   override def getException(msg: String) = new ClientError(msg)
@@ -301,23 +301,23 @@ object Commands {
 
 object CommandBytes {
   // Key Commands
-  val DEL               = StringToChannelBuffer("DEL")
-  val DUMP              = StringToChannelBuffer("DUMP")
-  val EXISTS            = StringToChannelBuffer("EXISTS")
-  val EXPIRE            = StringToChannelBuffer("EXPIRE")
-  val EXPIREAT          = StringToChannelBuffer("EXPIREAT")
-  val KEYS              = StringToChannelBuffer("KEYS")
-  val MOVE              = StringToChannelBuffer("MOVE")
-  val PERSIST           = StringToChannelBuffer("PERSIST")
-  val PEXPIRE           = StringToChannelBuffer("PEXPIRE")
-  val PEXPIREAT         = StringToChannelBuffer("PEXPIREAT")
-  val PTTL              = StringToChannelBuffer("PTTL")
-  val RANDOMKEY         = StringToChannelBuffer("RANDOMKEY")
-  val RENAME            = StringToChannelBuffer("RENAME")
-  val RENAMENX          = StringToChannelBuffer("RENAMENX")
-  val SCAN              = StringToChannelBuffer("SCAN")
-  val TTL               = StringToChannelBuffer("TTL")
-  val TYPE              = StringToChannelBuffer("TYPE")
+  val DEL: Buf               = StringToBuf("DEL")
+  val DUMP: Buf              = StringToBuf("DUMP")
+  val EXISTS: Buf            = StringToBuf("EXISTS")
+  val EXPIRE: Buf            = StringToBuf("EXPIRE")
+  val EXPIREAT: Buf          = StringToBuf("EXPIREAT")
+  val KEYS: Buf              = StringToBuf("KEYS")
+  val MOVE: Buf              = StringToBuf("MOVE")
+  val PERSIST: Buf           = StringToBuf("PERSIST")
+  val PEXPIRE: Buf           = StringToBuf("PEXPIRE")
+  val PEXPIREAT: Buf         = StringToBuf("PEXPIREAT")
+  val PTTL: Buf              = StringToBuf("PTTL")
+  val RANDOMKEY: Buf         = StringToBuf("RANDOMKEY")
+  val RENAME: Buf            = StringToBuf("RENAME")
+  val RENAMENX: Buf          = StringToBuf("RENAMENX")
+  val SCAN: Buf              = StringToBuf("SCAN")
+  val TTL: Buf               = StringToBuf("TTL")
+  val TYPE: Buf              = StringToBuf("TYPE")
 
   // String Commands
   val APPEND            = StringToChannelBuffer("APPEND")

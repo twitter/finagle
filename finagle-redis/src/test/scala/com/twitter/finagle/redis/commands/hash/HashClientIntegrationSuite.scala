@@ -119,7 +119,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly get all the values", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.del(Seq(foo)))
+      Await.result(client.dels(Seq(bufFoo)))
       Await.result(client.hMSet(foo, Map(baz -> bar, moo -> boo)))
       assert(Await.result(client.hVals(foo)).map(CBToString(_)) == Seq("bar", "boo"))
     }

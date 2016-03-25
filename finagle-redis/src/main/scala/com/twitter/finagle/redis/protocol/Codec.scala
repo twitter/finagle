@@ -47,13 +47,15 @@ private[redis] object RedisCodec {
   val POS_INFINITY_BA     = StringToChannelBuffer("+inf")
   val NEG_INFINITY_BA     = StringToChannelBuffer("-inf")
 
-  val BULK_REPLY_BUF       = StringToBuf("$")
-  val MBULK_REPLY_BUF      = StringToBuf("*")
+  val BULK_REPLY_BUF: Buf       = StringToBuf("$")
+  val MBULK_REPLY_BUF: Buf      = StringToBuf("*")
 
-  val ARG_COUNT_MARKER_BUF = MBULK_REPLY_BUF
-  val ARG_SIZE_MARKER_BUF  = BULK_REPLY_BUF
+  val ARG_COUNT_MARKER_BUF: Buf = MBULK_REPLY_BUF
+  val ARG_SIZE_MARKER_BUF: Buf  = BULK_REPLY_BUF
 
-  val EOL_DELIMITER_BUF    = StringToBuf(EOL_DELIMITER)
+  val EOL_DELIMITER_BUF: Buf    = StringToBuf(EOL_DELIMITER)
+
+  val NIL_VALUE_BUF: Buf        = Buf.Empty
 
 
   def toUnifiedFormat(args: Seq[ChannelBuffer], includeHeader: Boolean = true): ChannelBuffer = {

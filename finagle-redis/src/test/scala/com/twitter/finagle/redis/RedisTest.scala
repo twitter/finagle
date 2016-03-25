@@ -21,6 +21,11 @@ trait RedisTest extends FunSuite {
   protected def chanBuf2String(cb: ChannelBuffer): String = CBToString(cb)
 
   protected val bufFoo = StringToBuf("foo")
+  protected val bufBar = StringToBuf("bar")
+  protected val bufBaz = StringToBuf("baz")
+  protected val bufBoo = StringToBuf("boo")
+  protected val bufMoo = StringToBuf("moo")
+  protected val bufNum = StringToBuf("num")
 
   protected val foo = StringToChannelBuffer("foo")
   protected val bar = StringToChannelBuffer("bar")
