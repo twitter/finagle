@@ -7,8 +7,15 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-http: Local Dtabs are now encoded into the `Dtab-Local` header.  `X-Dtab` headers
+    may still be read but should be considered deprecated.
+
 New Features
 ~~~~~~~~~~~~
+
   * finagle-http: new stack params MaxChunkSize, MaxHeaderSize, and MaxInitialLineLength
     are available to configure the http codec. ``RB_ID=811129``
 

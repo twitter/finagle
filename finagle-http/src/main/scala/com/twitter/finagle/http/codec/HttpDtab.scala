@@ -114,7 +114,7 @@ object HttpDtab {
   }
 
   /**
-   * Write X-Dtab header pairs into the given message.
+   * Write a Dtab-local header into the given message.
    */
   def write(dtab: Dtab, msg: Message): Unit = {
     if (dtab.isEmpty)
@@ -125,12 +125,7 @@ object HttpDtab {
         "Dtabs with length greater than 100 are not serializable with HTTP")
     }
 
-    for ((Dentry(prefix, dst), i) <- dtab.zipWithIndex) {
-      // TODO: now that we have a proper Dtab grammar,
-      // should just embed this directly instead.
-      msg.headerMap.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
-      msg.headerMap.set(Prefix+indexstr(i)+"-B", b64Encode(dst.show))
-    }
+    msg.headerMap.set(Header, dtab.show)
   }
 
   /**
