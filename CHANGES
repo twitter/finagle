@@ -107,12 +107,7 @@ Breaking API Changes
 
     Any other `SocketAddress` subclass is currently incompatible with `c.t.f.Address`. Instead,
     you should encode any additional information in the metadata field of `c.t.f.Address.Inet`
-<<<<<<< HEAD
-    or `c.t.f.exp.Address.ServiceFactory`.
-    ``RB_ID=792209``
-=======
     or `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
->>>>>>> master
 
   * finagle-core: Delete `c.t.f.ServiceFactorySocketAddress` and replace usages with
     `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
