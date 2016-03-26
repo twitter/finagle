@@ -9,15 +9,19 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
   * finagle-core: DeadlineFilter is now per-connection, so the max rejection percentage
     is not shared across clients. This prevents a single client from exceeding the rejection
     budget. ``RB_ID=813731``.
+
+  * finagle-http: Local Dtabs are now encoded into the `Dtab-Local` header.  `X-Dtab` headers
+    may still be read but should be considered deprecated. ``RB_ID=815092``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: DefaultClient has been removed. Implementors should prefer `c.t.f.StackClient`
-    ``RB_ID=812681``.
+  ``RB_ID=812681``.
 
   * finagle-core: When a client is created, its server set resolution is started eagerly.
   ``RB_ID=806940``
