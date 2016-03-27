@@ -37,8 +37,6 @@ class StreamingTest extends FunSuite with Eventually {
   // 7. Server: fails response writer
   // 8. Server: discards request reader
 
-  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
-
   // We call write repeatedly for `streamChunks` to *be sure* to notice
   // transport failure.
   def writeLots(writer: Writer, buf: Buf): Future[Unit] =
@@ -367,6 +365,8 @@ class StreamingTest extends FunSuite with Eventually {
 
 object StreamingTest {
 
+  def await[A](f: Future[A]): A = Await.result(f, 5.seconds)
+
   val echo = new Service[Request, Response] {
     def apply(req: Request) = Future.value(ok(req.reader))
   }
@@ -396,13 +396,15 @@ object StreamingTest {
       .name("server")
       .build(service)
 
-  def connect(addr: SocketAddress, mod: Modifier, name: String = "client") =
-    ClientBuilder()
+  def connect(addr: SocketAddress, mod: Modifier, name: String = "client") = {
+    val fac = ClientBuilder()
       .codec(new Custom(mod, identity))
       .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .name(name)
-      .build()
+      .buildFactory()
+    await(fac())
+  }
 
   class Custom(cmod: Modifier, smod: Modifier)
     extends CodecFactory[Request, Response] {
