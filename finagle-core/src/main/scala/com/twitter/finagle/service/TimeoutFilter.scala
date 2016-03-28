@@ -129,6 +129,7 @@ class TimeoutFilter[Req, Rep](
   private[this] val timestampStat = statsReceiver.stat("timestamp_ms")
   private[this] val timeoutStat = statsReceiver.stat("timeout_ms")
   private[this] val incomingDeadlineStat = statsReceiver.stat("incoming_deadline_ms")
+  private[this] val expiredDeadlineStat = statsReceiver.stat("expired_deadline_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val timeoutDeadline = Deadline.ofTimeout(timeout)
@@ -152,6 +153,10 @@ class TimeoutFilter[Req, Rep](
           "finagle.timeoutFilter.incomingDeadline.deadline_ms", current.deadline.inMillis)
         Deadline.combined(timeoutDeadline, current)
       case None => timeoutDeadline
+    }
+
+    if (deadline.expired) {
+      expiredDeadlineStat.add(-deadline.remaining.inMillis)
     }
 
     Trace.recordBinary(

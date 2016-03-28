@@ -117,3 +117,7 @@ TimeoutFilter
 **timeout/incoming_deadline_ms**
   A stat of the remaining time in the incoming deadline from the request, in
   milliseconds. Temporary stat to aid in debugging.
+
+**timeout/expired_deadline_ms**
+  A stat of the elapsed time since expiry if a deadline has expired, in
+  milliseconds. Temporary stat to aid in debugging.

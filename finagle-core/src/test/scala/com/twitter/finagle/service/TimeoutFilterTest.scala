@@ -130,6 +130,23 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
     }
   }
 
+  test("bug verification: TimeoutFilter incorrectly sends expired deadlines") {
+    val ctx = new DeadlineCtx(1.second)
+
+    import ctx._
+
+    Time.withCurrentTimeFrozen { tc =>
+      val now = Time.now
+      val f = Contexts.broadcast.let(Deadline, Deadline(now, now+1.second)) {
+        tc.advance(5.seconds)
+        timeoutService((): Unit)
+      }
+      assert(Await.result(f) == Some(Deadline(now + 5.seconds, now + 1.second)))
+
+      assert(statsReceiver.stats(Seq("expired_deadline_ms"))(0) == 4.seconds.inMillis)
+    }
+  }
+
   test("trace recorded") {
     def withExpectedTrace(
       f: => Unit,
