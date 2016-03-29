@@ -26,6 +26,8 @@ Breaking API Changes
   * finagle-core: When a client is created, its server set resolution is started eagerly.
   ``RB_ID=806940``
 
+  * finagle-core: Dentry now takes a Dentry.Prefix instead of a Path.
+
 New Features
 ~~~~~~~~~~~~
 

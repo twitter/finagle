@@ -145,7 +145,7 @@ object Dentry {
    * dentry     ::= prefix '=>' tree
    * }}}
    *
-   * where the production `prefix` is from the grammer documented in
+   * where the production `prefix` is from the grammar documented in
    * [[Prefix.read]] and the production `tree` is from the grammar
    * documented in [[com.twitter.finagle.NameTree.read
    * NameTree.read]].
