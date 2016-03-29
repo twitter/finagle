@@ -9,7 +9,6 @@ import com.twitter.util.Await
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import java.util.concurrent.locks.ReentrantLock
 
 @Ignore
 @RunWith(classOf[JUnitRunner])

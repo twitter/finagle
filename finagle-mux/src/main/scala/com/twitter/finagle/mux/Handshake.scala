@@ -3,7 +3,6 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Failure, Status}
-import com.twitter.io.Charsets
 import com.twitter.util.{Future, Return, Throw, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate

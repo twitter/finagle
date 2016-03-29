@@ -2,7 +2,7 @@ package com.twitter.finagle.stats
 
 import com.twitter.common.stats.Stats
 import org.junit.runner.RunWith
-import org.scalatest.{BeforeAndAfter, OneInstancePerTest, FunSuite, Assertions}
+import org.scalatest.{BeforeAndAfter, OneInstancePerTest, FunSuite}
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])

@@ -2,7 +2,7 @@ package com.twitter.finagle.failters
 
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{Return, Throw, Future, Var}
+import com.twitter.util.{Future, Var}
 
 /**
  * A blackholeter rejects/fails by returning a promise from a service which will never be fulfilled.

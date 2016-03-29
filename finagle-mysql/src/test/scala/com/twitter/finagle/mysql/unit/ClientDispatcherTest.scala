@@ -2,8 +2,8 @@ package com.twitter.finagle.exp.mysql
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter, Packet}
-import com.twitter.finagle.transport.{Transport, QueueTransport}
-import com.twitter.util.{Await, Future, Try}
+import com.twitter.finagle.transport.QueueTransport
+import com.twitter.util.Await
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

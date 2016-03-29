@@ -3,7 +3,7 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
 import com.twitter.io.Charsets
-import com.twitter.util.{Duration, Time, Updatable}
+import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ReadOnlyChannelBuffer}
 import scala.collection.mutable.ArrayBuffer
 

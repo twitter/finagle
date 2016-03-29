@@ -4,7 +4,7 @@ import com.google.common.io.{Files => GuavaFiles, Resources}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.http._
-import com.twitter.io.{Buf, TempFile}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, NonFatal}
 import java.io.File
 import java.net.{InetAddress, InetSocketAddress}

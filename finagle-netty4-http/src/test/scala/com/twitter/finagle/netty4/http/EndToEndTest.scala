@@ -2,7 +2,6 @@ package com.twitter.finagle.netty4.http
 
 import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
-import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http.{Fields, Status, Response, Request}
@@ -14,7 +13,7 @@ import com.twitter.finagle.tracing.Trace
 import com.twitter.io.{Reader, Buf, Writer}
 import com.twitter.util.{Await, Closable, Future, JavaTimer, Promise, Return, Throw, Time}
 import java.io.{PrintWriter, StringWriter}
-import java.net.{InetAddress, InetSocketAddress}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner

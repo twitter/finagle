@@ -8,8 +8,6 @@ import java.io.{BufferedReader, InputStreamReader}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
-import scala.annotation.tailrec
-import scala.collection.mutable.ArrayBuffer
 
 @RunWith(classOf[JUnitRunner])
 class ValidateNaiveTimeoutFilter extends FunSuite {

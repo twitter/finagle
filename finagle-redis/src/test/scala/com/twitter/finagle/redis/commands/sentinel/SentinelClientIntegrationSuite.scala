@@ -6,9 +6,7 @@ import com.twitter.finagle.redis.tags.{ RedisTest, ClientTest }
 import com.twitter.finagle.redis.util.{BufToString, StringToBuf, CBToString, StringToChannelBuffer}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger
-import com.twitter.util.{ Await, Awaitable, Duration, Future, Time }
-import java.io.File
-import java.net.InetAddress
+import com.twitter.util.{ Await, Awaitable, Future, Time }
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -20,7 +18,7 @@ import scala.language.implicitConversions
 final class SentinelClientIntegrationSuite extends SentinelClientTest {
 
   val log = Logger(getClass)
-  
+
   implicit def s2cb(s: String) = StringToChannelBuffer(s)
   implicit def cb2s(cb: ChannelBuffer) = CBToString(cb)
 
@@ -32,7 +30,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
   val master1 = masterName(1)
   val noSuchMaster = masterName(999)
   val defaultTimeout = 1.second
-  
+
   def ready[T <: Awaitable[_]](awaitable: T): T = {
     Await.ready(awaitable, defaultTimeout)
   }

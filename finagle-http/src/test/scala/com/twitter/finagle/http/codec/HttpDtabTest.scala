@@ -3,7 +3,6 @@ package com.twitter.finagle.http.codec
 import com.google.common.io.BaseEncoding
 import com.twitter.finagle.{Failure, Dentry, Dtab, NameTree, Path}
 import com.twitter.finagle.http.{Message, Method, Request, Version}
-import com.twitter.util.Try
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -173,4 +172,3 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     assert(dtabHeaders == foundHeaders)
   }
 }
-

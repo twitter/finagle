@@ -1,12 +1,12 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{ChannelClosedException, Service, Status}
+import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http
 import com.twitter.finagle.http.{BadHttpRequest, Request, Response, Version}
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.{QueueTransport, Transport}
-import com.twitter.io.{Reader, Buf}
+import com.twitter.io.Reader
 import com.twitter.util.{Await, Future, Promise}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}

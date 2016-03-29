@@ -1,7 +1,6 @@
 package com.twitter.finagle.mux.lease.exp
 
 import java.lang.management.{GarbageCollectorMXBean, MemoryPoolMXBean, MemoryUsage}
-import java.lang.{Boolean => JBoolean}
 import javax.management.ObjectName
 import com.twitter.conversions.storage.longToStorageUnitableWholeNumber
 import com.twitter.util.StorageUnit

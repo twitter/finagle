@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.integration
 import com.twitter.finagle.redis.protocol.{Limit, ZInterval}
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
-import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.CBToString
 import com.twitter.util.Await
 import org.junit.Ignore
 import org.junit.runner.RunWith

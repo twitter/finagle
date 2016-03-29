@@ -6,7 +6,7 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.mux.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.mux.transport.{Message, Netty3Framer}
+import com.twitter.finagle.mux.transport.Netty3Framer
 import com.twitter.finagle.param.{WithDefaultLoadBalancer, ProtocolLibrary}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._

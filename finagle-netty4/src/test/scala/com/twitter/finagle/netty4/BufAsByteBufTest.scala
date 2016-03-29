@@ -4,7 +4,7 @@ import com.twitter.io.Buf
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.util.CharsetUtil
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.nio.{ByteBuffer, ByteOrder, ReadOnlyBufferException}
+import java.nio.{ByteBuffer, ReadOnlyBufferException}
 import java.util._
 import org.junit.Assert._
 import org.junit.runner.RunWith

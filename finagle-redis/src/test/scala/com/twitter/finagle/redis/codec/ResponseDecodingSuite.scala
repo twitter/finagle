@@ -1,14 +1,9 @@
 package com.twitter.finagle.redis.naggati
 
-import com.twitter.finagle.redis.{ClientError, ServerError}
+import com.twitter.finagle.redis.ServerError
 import com.twitter.finagle.redis.util._
-import com.twitter.util.Time
-import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.redis.protocol.{BulkReply, ErrorReply, IntegerReply, MBulkReply,
-                                          StatusReply, ReplyCodec}
-import com.twitter.finagle.redis.util.StringToChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffer
-import org.scalatest.FunSuite
+                                          StatusReply}
 import com.twitter.finagle.redis.protocol.{EmptyBulkReply, EmptyMBulkReply}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

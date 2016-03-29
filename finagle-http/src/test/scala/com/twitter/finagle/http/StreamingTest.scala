@@ -3,7 +3,6 @@ package com.twitter.finagle.http
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, Reader, Writer}

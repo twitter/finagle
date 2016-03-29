@@ -3,7 +3,7 @@ package com.twitter.finagle.failters
 
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.util.{Throw, Return, Future, Var}
+import com.twitter.util.{Future, Var}
 import java.util.concurrent.RejectedExecutionException
 
 /**

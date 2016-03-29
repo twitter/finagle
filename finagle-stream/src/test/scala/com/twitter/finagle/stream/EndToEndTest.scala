@@ -350,7 +350,7 @@ class EndToEndTest extends FunSuite {
   test("Streams: delay release until complete response") {
     @volatile var count: Int = 0
     val c = new WorkItContext()
-    import c.{synchronized => _sync, _}
+    import c.{synchronized => _, _}
 
     val server = ServerBuilder()
       .codec(codec)

@@ -8,7 +8,6 @@ import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.finagle.redis.util.{StringToBuf, StringToChannelBuffer}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Time}
-import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

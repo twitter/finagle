@@ -3,8 +3,7 @@ package com.twitter.finagle.redis.integration
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.util.Await
-import com.twitter.finagle.redis.util.{StringToBuf, BufToString, CBToString, StringToChannelBuffer}
-import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.finagle.redis.util.{StringToBuf, BufToString}
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

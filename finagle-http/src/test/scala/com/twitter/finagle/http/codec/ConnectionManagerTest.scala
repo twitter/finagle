@@ -4,9 +4,7 @@ import com.twitter.finagle.http.{
   HttpTransport, Request, Version, Method, Response, Fields, Status
 }
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Promise, Return, Future, Time}
-import java.net.InetSocketAddress
-import java.nio.charset.Charset
+import com.twitter.util.{Promise, Return, Future}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 import org.junit.runner.RunWith

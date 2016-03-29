@@ -9,7 +9,7 @@ import com.twitter.finagle.redis.util._
 import com.twitter.finagle.redis.{Client, TransactionalClient, SentinelClient}
 import com.twitter.finagle.{Redis, redis}
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Awaitable, Duration, Future, Time, Try}
+import com.twitter.util.{Await, Awaitable, Duration, Future, Try}
 import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.{BeforeAndAfterAll, FunSuite}

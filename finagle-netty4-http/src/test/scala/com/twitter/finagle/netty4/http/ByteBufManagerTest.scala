@@ -4,7 +4,7 @@ import com.twitter.conversions.storage._
 import com.twitter.finagle.ChannelBufferUsageException
 import com.twitter.finagle.http.codec.ChannelBufferUsageTracker
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelPromise, DefaultChannelPromise, Channel, ChannelHandlerContext}
+import io.netty.channel.{ChannelPromise, ChannelHandlerContext}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

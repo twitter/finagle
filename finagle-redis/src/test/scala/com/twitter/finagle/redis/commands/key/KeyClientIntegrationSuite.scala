@@ -4,7 +4,7 @@ import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import com.twitter.finagle.redis.util.{BufToString, StringToBuf, CBToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.{BufToString, StringToBuf, StringToChannelBuffer}
 import java.util.Arrays
 import org.junit.Ignore
 import org.junit.runner.RunWith
