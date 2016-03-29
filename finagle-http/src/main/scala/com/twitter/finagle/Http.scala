@@ -144,6 +144,8 @@ object Http extends Client[Request, Response] with HttpRichClient
   object Client {
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
+        .replace(StackClient.Role.prepConn, DelayedRelease.module)
+        .replace(StackClient.Role.prepFactory, DelayedRelease.module)
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
         .prepend(nonChunkedPayloadSize)

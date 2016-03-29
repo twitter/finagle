@@ -32,6 +32,11 @@ New Features
   * finagle-http: new stack params MaxChunkSize, MaxHeaderSize, and MaxInitialLineLength
     are available to configure the http codec. ``RB_ID=811129``
 
+Bug Fixes
+~~~~~~~~~~~~~~~~~~~~~~~~
+  * finagle-http: Ensure that service closure is delayed until chunked response bodies
+    have been processed. ``RB_ID=813110``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

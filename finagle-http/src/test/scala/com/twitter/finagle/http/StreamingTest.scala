@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
-import com.twitter.finagle._
+import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.transport.Transport
@@ -293,6 +293,30 @@ class StreamingTest extends FunSuite with Eventually {
     val res2 = await(f2)
     await(Reader.readAll(res2.reader))
     Closable.all(server, client1, client2).close()
+  }
+
+  test("end-to-end: client may process multiple streaming requests simultaneously") {
+    val service = Service.mk[Request, Response] { req =>
+      val writable = Reader.writable() // never gets closed
+      Future.value(Response(req.version, Status.Ok, writable))
+    }
+    val server = FinagleHttp.server.withStreaming(true).serve(":*", service)
+    val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
+    val client = FinagleHttp.client.withStreaming(true).newService(s"/$$/inet/127.1/$port")
+    try {
+      val req0 = Request("/0")
+      val rep0 = Await.result(client(req0), 2.seconds)
+      assert(rep0.status == Status.Ok)
+      assert(rep0.isChunked)
+
+      val req1 = Request("/1")
+      val rep1 = Await.result(client(req1), 2.seconds)
+      assert(rep1.status == Status.Ok)
+      assert(rep1.isChunked)
+    } finally {
+      client.close()
+      server.close()
+    }
   }
 }
 
