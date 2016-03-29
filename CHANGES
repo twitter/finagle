@@ -45,11 +45,6 @@ Bug Fixes
   * finagle-http: Ensure that service closure is delayed until chunked response bodies
     have been processed. ``RB_ID=813110``
 
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
->>>>>>> master
-
-
 6.34.0
 ------
 
