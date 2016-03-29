@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis
 
 import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.{ClientConnection, ServiceFactory, ServiceProxy}
+import com.twitter.finagle.{Service, ClientConnection, ServiceFactory, ServiceProxy}
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.exp.{RedisPool, SubscribeCommands}
 import com.twitter.finagle.redis.protocol._
@@ -32,8 +32,8 @@ object Client {
 }
 
 class Client(
-    factory: ServiceFactory[Command, Reply],
-    private[redis] val timer: Timer = DefaultTimer.twitter)
+  override val factory: ServiceFactory[Command, Reply],
+  private[redis] val timer: Timer = DefaultTimer.twitter)
   extends BaseClient(factory)
   with NormalCommands
   with SubscribeCommands
@@ -57,14 +57,15 @@ trait NormalCommands
 trait Transactions { self: Client =>
   private[this] def singletonFactory(): ServiceFactory[Command, Reply] =
     new ServiceFactory[Command, Reply] {
-      val svc = RedisPool.forTransaction(factory)
+      val svc: Future[Service[Command, Reply]] = RedisPool.forTransaction(factory)
       // Because the `singleton` is used in the context of a `FactoryToService` we override
       // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
-      val proxiedService = svc.map { svc =>
-        new ServiceProxy(svc) {
-          override def close(deadline: Time) = Future.Done
+      val proxiedService: Future[ServiceProxy[Command, Reply]] =
+        svc.map { underlying =>
+          new ServiceProxy(underlying) {
+            override def close(deadline: Time) = Future.Done
+          }
         }
-      }
 
       def apply(conn: ClientConnection) = proxiedService
       def close(deadline: Time): Future[Unit] = svc.map(_.close(deadline))
@@ -87,10 +88,10 @@ trait Transactions { self: Client =>
 
 /**
  * Connects to a single Redis host
- * @param service: Finagle service object built with the Redis codec
+ * @param factory: Finagle service factory object built with the Redis codec
  */
 abstract class BaseClient(
-    protected val factory: ServiceFactory[Command, Reply])
+  protected val factory: ServiceFactory[Command, Reply])
   extends Closable {
 
   /**
