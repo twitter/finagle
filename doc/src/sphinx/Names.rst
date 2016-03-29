@@ -112,6 +112,31 @@ to
 Note that prefixes match on path `components`, not characters; e.g.
 `/s` is a prefix of `/s/crawler`, but not of `/s#/foo/bar/crawler`.
 
+Furthermore, prefixes may contain the wildcard character `*` to match
+any component. For example
+
+::
+
+	/s#/*/bar	=>	/t/bah
+
+rewrites the paths 
+
+::
+
+	/s#/foo/bar/baz
+
+or
+
+::
+
+	/s#/boo/bar/baz
+        
+to
+
+::
+
+	/t/bah/baz
+
 Paths beginning with ``/$/`` are called "system paths." They are interpreted
 specially by Finagle, similarly to resolver schemes. Paths of the form
 
