@@ -134,6 +134,22 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
     } == BadMessageException("unknown message type: 0 [tag=1]"))
   }
 
+  test("decode fragments") {
+    val msgs = Seq(
+      Tdispatch(Message.Tags.setMsb(goodTags.head),
+        goodContexts.head,
+        goodDests.head,
+        Dtab.empty,
+        goodBufs.head),
+      RdispatchOk(Message.Tags.setMsb(goodTags.last),
+        goodContexts.last,
+        goodBufs.last))
+
+    for (m <- msgs) {
+      assert(decode(encode(m)) == Fragment(m.typ, m.tag, m.buf))
+    }
+  }
+
   test("extract control messages") {
     val tag = 0
     val buf = ChannelBuffers.EMPTY_BUFFER

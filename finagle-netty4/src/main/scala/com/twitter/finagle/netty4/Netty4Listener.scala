@@ -29,11 +29,11 @@ private[finagle] object Netty4Listener {
   val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
 }
 
-private[netty4] case class PipelineInit(cf: ChannelPipeline => Unit) {
+private[finagle] case class PipelineInit(cf: ChannelPipeline => Unit) {
   def mk(): (PipelineInit, Stack.Param[PipelineInit]) =
     (this, PipelineInit.param)
 }
-private[netty4] object PipelineInit {
+private[finagle] object PipelineInit {
   implicit val param = Stack.Param(PipelineInit(_ => ()))
 }
 

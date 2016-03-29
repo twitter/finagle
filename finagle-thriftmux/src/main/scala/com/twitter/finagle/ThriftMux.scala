@@ -314,8 +314,8 @@ object ThriftMux
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
         version = Mux.LatestVersion,
-        headers = _ => Nil,
-        negotiate = mux.Handshake.NoopNegotiator)
+        headers = Mux.Server.headers,
+        negotiate = Mux.negotiate)
 
       mux.ServerDispatcher.newRequestResponse(
         negotiatedTrans,
