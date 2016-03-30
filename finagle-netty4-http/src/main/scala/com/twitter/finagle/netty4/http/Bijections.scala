@@ -7,7 +7,7 @@ import io.netty.handler.codec.{http => NettyHttp}
 
 // note: all byte buffers are copied since netty4 ref-counts which means we can't
 // share the buffers between the n4 pipeline / codecs and application code.
-private[http] object Bijections {
+private[finagle] object Bijections {
 
   object netty {
     def headersToFinagle(headers: NettyHttp.HttpHeaders): FinagleHttp.HeaderMap =

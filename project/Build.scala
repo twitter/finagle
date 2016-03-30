@@ -398,7 +398,7 @@ object Finagle extends Build {
       util("core"),
       nettyLib
     ) ++ netty4Libs
-  ).dependsOn(finagleCore, finagleNetty4)
+  ).dependsOn(finagleCore, finagleHttp, finagleNetty4, finagleNetty4Http)
 
   lazy val finagleHttpCompat = Project(
     id = "finagle-http-compat",
