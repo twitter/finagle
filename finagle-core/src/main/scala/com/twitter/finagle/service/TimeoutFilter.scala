@@ -126,43 +126,21 @@ class TimeoutFilter[Req, Rep](
   def this(timeout: Duration, timer: Timer) =
     this(timeout, new IndividualRequestTimeoutException(timeout), timer)
 
-  private[this] val timestampStat = statsReceiver.stat("timestamp_ms")
-  private[this] val timeoutStat = statsReceiver.stat("timeout_ms")
-  private[this] val incomingDeadlineStat = statsReceiver.stat("incoming_deadline_ms")
   private[this] val expiredDeadlineStat = statsReceiver.stat("expired_deadline_ms")
 
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
     val timeoutDeadline = Deadline.ofTimeout(timeout)
 
-    timeoutStat.add(timeout.inMillis)
-    timestampStat.add(timeoutDeadline.timestamp.inMillis)
-
-    Trace.recordBinary(
-      "finagle.timeoutFilter.timeoutDeadline.timestamp_ms", timeoutDeadline.timestamp.inMillis)
-    Trace.recordBinary(
-      "finagle.timeoutFilter.timeoutDeadline.deadline_ms", timeoutDeadline.deadline.inMillis)
-
     // If there's a current deadline, we combine it with the one derived
     // from our timeout.
     val deadline = Deadline.current match {
-      case Some(current) =>
-        incomingDeadlineStat.add(current.remaining.inMillis)
-        Trace.recordBinary(
-          "finagle.timeoutFilter.incomingDeadline.timestamp_ms", current.timestamp.inMillis)
-        Trace.recordBinary(
-          "finagle.timeoutFilter.incomingDeadline.deadline_ms", current.deadline.inMillis)
-        Deadline.combined(timeoutDeadline, current)
+      case Some(current) => Deadline.combined(timeoutDeadline, current)
       case None => timeoutDeadline
     }
 
     if (deadline.expired) {
       expiredDeadlineStat.add(-deadline.remaining.inMillis)
     }
-
-    Trace.recordBinary(
-      "finagle.timeoutFilter.outgoingDeadline.timestamp_ms", deadline.timestamp.inMillis)
-    Trace.recordBinary(
-      "finagle.timeoutFilter.outgoingDeadline.deadline_ms", deadline.deadline.inMillis)
 
     Contexts.broadcast.let(Deadline, deadline) {
       val res = service(request)

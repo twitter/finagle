@@ -113,23 +113,6 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
     }
   }
 
-  test("stats recorded") {
-    val ctx = new DeadlineCtx(200.milliseconds)
-
-    import ctx._
-
-    Time.withCurrentTimeFrozen { tc =>
-      val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+1.second)) {
-        timeoutService((): Unit)
-      }
-      assert(Await.result(f) == Some(Deadline(Time.now, Time.now+200.milliseconds)))
-
-      assert(statsReceiver.stats(Seq("timestamp_ms"))(0) == Time.now.inMillis)
-      assert(statsReceiver.stats(Seq("timeout_ms"))(0) == 200)
-      assert(statsReceiver.stats(Seq("incoming_deadline_ms"))(0) == 1.second.inMillis)
-    }
-  }
-
   test("bug verification: TimeoutFilter incorrectly sends expired deadlines") {
     val ctx = new DeadlineCtx(1.second)
 
@@ -144,41 +127,6 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
       assert(Await.result(f) == Some(Deadline(now + 5.seconds, now + 1.second)))
 
       assert(statsReceiver.stats(Seq("expired_deadline_ms"))(0) == 4.seconds.inMillis)
-    }
-  }
-
-  test("trace recorded") {
-    def withExpectedTrace(
-      f: => Unit,
-      expected: Seq[Annotation]
-    ) {
-      val tracer: Tracer = spy(new NullTracer)
-      val captor: ArgumentCaptor[Record] = ArgumentCaptor.forClass(classOf[Record])
-      Trace.letTracer(tracer) { f }
-      verify(tracer, atLeastOnce()).record(captor.capture())
-      val annotations = captor.getAllValues.asScala collect { case Record(_, _, a, _) => a }
-      assert(expected == annotations)
-    }
-
-    Time.withCurrentTimeFrozen { tc =>
-      withExpectedTrace({
-        val ctx = new DeadlineCtx(200.milliseconds)
-        import ctx._
-
-
-        val f = Contexts.broadcast.let(Deadline, Deadline(Time.now-1.second, Time.now+1.second)) {
-          timeoutService((): Unit)
-        }
-        assert(Await.result(f, 1.second) == Some(Deadline(Time.now, Time.now+200.milliseconds)))
-      },
-      Seq(
-        Annotation.BinaryAnnotation("finagle.timeoutFilter.timeoutDeadline.timestamp_ms", Time.now.inMillis),
-        Annotation.BinaryAnnotation("finagle.timeoutFilter.timeoutDeadline.deadline_ms", (Time.now+200.millis).inMillis),
-        Annotation.BinaryAnnotation("finagle.timeoutFilter.incomingDeadline.timestamp_ms", (Time.now-1.second).inMillis),
-        Annotation.BinaryAnnotation("finagle.timeoutFilter.incomingDeadline.deadline_ms", (Time.now+1.second).inMillis),
-        Annotation.BinaryAnnotation("finagle.timeoutFilter.outgoingDeadline.timestamp_ms", Time.now.inMillis),
-        Annotation.BinaryAnnotation("finagle.timeoutFilter.outgoingDeadline.deadline_ms", (Time.now+200.milliseconds).inMillis)
-      ))
     }
   }
 
