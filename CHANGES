@@ -26,6 +26,8 @@ Breaking API Changes
   * finagle-core: When a client is created, its server set resolution is started eagerly.
   ``RB_ID=806940``
 
+  * finagle-core: Dentry now takes a Dentry.Prefix instead of a Path. ``RB_ID=813914``
+
   * finagle-cache-resolver: `c.t.f.cacheresolver.ZookeeperCacheNodeGroup` has been removed from the
     API since we no longer check for the zookeeper data for the cache pool size to refresh for the
     changes in the serverset. ``RB_ID=811190``
@@ -40,8 +42,11 @@ New Features
     This helps with head-of-line blocking in the presence of large payloads and allows
     long transmissions to be interrupted. ``RB_ID=794641``.
 
+  * finagle-core: Dtabs allow wildcard path elements in prefixes. ``RB_ID=813914``
+
 Bug Fixes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
   * finagle-http: Ensure that service closure is delayed until chunked response bodies
     have been processed. ``RB_ID=813110``
 

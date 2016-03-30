@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.app.Flaggable
+import com.twitter.io.Buf
 import com.twitter.util.Local
 import java.io.PrintWriter
 import scala.collection.generic.CanBuildFrom
@@ -32,7 +33,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
    */
   def lookup(path: Path): NameTree[Name.Path] = {
     val matches = dentries.collect {
-      case Dentry(prefix, dst) if path.startsWith(prefix) =>
+      case Dentry(prefix, dst) if prefix.matches(path) =>
         val suff = path.drop(prefix.size)
         dst.map { pfx => Name.Path(pfx ++ suff) }
     }
@@ -127,32 +128,139 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
  * the paths that the entry applies to. `dst` describes the resulting
  * tree for this prefix on lookup.
  */
-case class Dentry(prefix: Path, dst: NameTree[Path]) {
+case class Dentry(prefix: Dentry.Prefix, dst: NameTree[Path]) {
   def show = "%s=>%s".format(prefix.show, dst.show)
   override def toString = "Dentry("+show+")"
 }
 
 object Dentry {
+
+  /** Build a [[Dentry]] with a [[Path]] prefix. */
+  def apply(path: Path, dst: NameTree[Path]): Dentry =
+    Dentry(Prefix(path.elems.map(Prefix.Label(_)):_*), dst)
+
   /**
    * Parse a Dentry from the string `s` with concrete syntax:
    * {{{
-   * dentry     ::= path '=>' tree
+   * dentry     ::= prefix '=>' tree
    * }}}
    *
-   * where the productions `path` and `tree` are from the grammar
-   * documented in [[com.twitter.finagle.NameTree.read NameTree.read]].
+   * where the production `prefix` is from the grammar documented in
+   * [[Prefix.read]] and the production `tree` is from the grammar
+   * documented in [[com.twitter.finagle.NameTree.read
+   * NameTree.read]].
    */
   def read(s: String): Dentry = NameTreeParsers.parseDentry(s)
 
   // The prefix to this is an illegal path in the sense that the
   // concrete syntax will not admit it. It will do for a no-op.
-  val nop: Dentry = Dentry(Path.Utf8("/"), NameTree.Neg)
+  val nop: Dentry = Dentry(Prefix(Prefix.Label("/")), NameTree.Neg)
 
   implicit val equiv: Equiv[Dentry] = new Equiv[Dentry] {
     def equiv(d1: Dentry, d2: Dentry): Boolean = (
       d1.prefix == d2.prefix &&
       d1.dst.simplified == d2.dst.simplified
     )
+  }
+
+  /**
+   * A Prefix comprises a [[Path]]-matching expression.
+   *
+   * Each element in a prefix may be either a [[Label]] or [[AnyElem]].
+   * When matching a [[Path]], Label-elements must match exactly,
+   * while Any-elements are ignored.
+   */
+  case class Prefix(elems: Prefix.Elem*) {
+
+    def matches(path: Path): Boolean = {
+      if (this.size > path.size)
+        return false
+      var i = 0
+      while (i != this.size)
+        elems(i) match {
+          case Prefix.Label(buf) if buf != path.elems(i) =>
+            return false
+          case _ => // matches
+            i += 1
+        }
+      true
+    }
+
+    // A prefix acts somewhat like a Seq[Elem]
+    def take(n: Int) = Prefix(elems.take(n):_*)
+    def drop(n: Int) = Prefix(elems.drop(n):_*)
+    def ++(that: Prefix): Prefix =
+      if (that.isEmpty) this
+      else Prefix((elems ++ that.elems):_*)
+    def size: Int = elems.size
+    def isEmpty: Boolean = elems.isEmpty
+
+    def ++(path: Path): Prefix =
+      if (path.isEmpty) this
+      else this ++ Prefix(path)
+
+    lazy val showElems = elems.map(_.show)
+    lazy val show = showElems.mkString("/", "/", "")
+    override def toString = s"""Prefix(${showElems.mkString(",")})"""
+  }
+
+  object Prefix {
+
+    def apply(path: Path): Prefix =
+      Prefix(path.elems.map(Label(_)):_*)
+
+    /**
+     * Parse `s` as a prefix matching expression with concrete syntax
+     *
+     * {{{
+     * path       ::= '/' elems | '/'
+     *
+     * elems      ::= elem '/' elem | elem
+     *
+     * elem       ::= '*' | label
+     *
+     * label      ::= (\\x[a-f0-9][a-f0-9]|[0-9A-Za-z:.#$%-_])+
+     *
+     * }}}
+     *
+     * for example
+     *
+     * {{{
+     * /foo/bar/baz
+     * /foo&#47;*&#47;bar/baz
+     * /
+     * }}}
+     *
+     * parses into the path
+     *
+     * {{{
+     * Prefix(Label(foo),Label(bar),Label(baz))
+     * Prefix(Label(foo),AnyElem,Label(bar),Label(baz))
+     * Prefix()
+     * }}}
+     *
+     * @throws IllegalArgumentException when `s` is not a syntactically valid path.
+     */
+    def read(s: String): Prefix = NameTreeParsers.parseDentryPrefix(s)
+
+    val empty = new Prefix()
+
+    sealed trait Elem {
+      def show: String
+    }
+
+    object AnyElem extends Elem {
+      val show = "*"
+    }
+
+    case class Label(buf: Buf) extends Elem {
+      require(!buf.isEmpty)
+      lazy val show = Path.showElem(buf)
+    }
+
+    object Label {
+      def apply(s: String): Label = Label(Buf.Utf8(s))
+    }
   }
 }
 
@@ -168,8 +276,8 @@ object Dtab {
   }
 
   /**
-    * A failing delegation table.
-    */
+   * A failing delegation table.
+   */
   val fail: Dtab = Dtab.read("/=>!")
 
   /**

@@ -11,11 +11,11 @@ import java.nio.charset.Charset
 @RunWith(classOf[JUnitRunner])
 class HttpDtabTest extends FunSuite with AssertionsForJUnit {
   val okDests = Vector("/$/inet/10.0.0.1/9000", "/foo/bar", "/")
-  val okPrefixes = Vector("/foo", "/")
+  val okPrefixes = Vector("/foo", "/", "/foo/*/bar")
   val okDentries = for {
     prefix <- okPrefixes
     dest <- okDests
-  } yield Dentry(Path.read(prefix), NameTree.read(dest))
+  } yield Dentry(Dentry.Prefix.read(prefix), NameTree.read(dest))
 
   val Utf8 = Charset.forName("UTF-8")
   val Base64 = BaseEncoding.base64()
@@ -94,7 +94,7 @@ class HttpDtabTest extends FunSuite with AssertionsForJUnit {
     m.headers.set("X-Dtab-01-B", "L2Zhcg==") // /far
     val result = HttpDtab.read(m)
     val failure = intercept[Failure] { result.get() }
-    assert(failure.why == "Invalid path: /foo => /far")
+    assert(failure.why == "Invalid prefix: /foo => /far")
   }
 
   test("X-Dtab: Invalid name") {
