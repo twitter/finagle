@@ -16,7 +16,6 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
 import java.net.SocketAddress
-import org.jboss.netty.channel.Channel
 
 /**
  * A rich client with a *very* basic URL fetcher. (It does not handle
@@ -53,7 +52,19 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     private[finagle] implicit object ParameterizableTransporter extends
         Stack.Param[ParameterizableTransporter] {
-      val default = com.twitter.finagle.http.netty.Netty3
+      val default = com.twitter.finagle.http.netty.Netty3HttpTransporter
+    }
+
+    /**
+     * the listener, useful for changing underlying http implementations
+     */
+    private[finagle] case class ParameterizableListener(
+      listenerFn: Stack.Params => Listener[Any, Any]) {
+    }
+
+    private[finagle] implicit object ParameterizableListener extends
+      Stack.Param[ParameterizableListener] {
+      val default = com.twitter.finagle.http.netty.Netty3HttpListener
     }
 
     /**
@@ -110,17 +121,6 @@ object Http extends Client[Request, Response] with HttpRichClient
     implicit object CompressionLevel extends Stack.Param[CompressionLevel] {
       val default = CompressionLevel(-1)
     }
-
-    private[finagle] def applyToCodec(
-      params: Stack.Params, codec: http.Http): http.Http =
-        codec
-          .maxRequestSize(params[MaxRequestSize].size)
-          .maxResponseSize(params[MaxResponseSize].size)
-          .streaming(params[Streaming].enabled)
-          .decompressionEnabled(params[Decompression].enabled)
-          .compressionLevel(params[CompressionLevel].level)
-          .maxInitialLineLength(params[MaxInitialLineSize].size)
-          .maxHeaderSize(params[MaxHeaderSize].size)
   }
 
   // Only record payload sizes when streaming is disabled.
@@ -295,14 +295,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
-    protected def newListener(): Listener[Any, Any] = {
-      val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
-      val httpPipeline =
-        param.applyToCodec(params, http.Http())
-          .server(ServerCodecConfig(label, new SocketAddress{}))
-          .pipelineFactory
-      Netty3Listener(httpPipeline, params)
-    }
+    protected def newListener(): Listener[Any, Any] =
+      params[param.ParameterizableListener].listenerFn(params)
 
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {
