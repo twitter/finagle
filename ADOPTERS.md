@@ -14,6 +14,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Crimson Hexagon](http://www.crimsonhexagon.com/)
 * [Despegar](http://www.despegar.com/)
 * [DICE](http://dice.se/)
+* [Dwango](http://dwango.co.jp/)
 * [Foursquare](https://foursquare.com/)
 * [Gigya](https://www.gigya.com/)
 * [Globo.com](http://globo.com/)
