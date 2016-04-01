@@ -42,8 +42,12 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
    */
   private[finagle] val negotiate: Handshake.Negotiator = (headers, trans) => {
     val window = Handshake.valueOf(MuxFramer.Header.KeyBuf, headers)
-    if (window.isEmpty) trans.map(Message.encode, Message.decode)
-    else MuxFramer(trans, MuxFramer.Header.decodeFrameSize(window.get))
+      .map { cb => MuxFramer.Header.decodeFrameSize(cb) }
+    if (window.nonEmpty && window.get < Int.MaxValue) {
+      MuxFramer(trans, window.get)
+    } else {
+      trans.map(Message.encode, Message.decode)
+    }
   }
 
   private[finagle] abstract class ProtoTracing(
