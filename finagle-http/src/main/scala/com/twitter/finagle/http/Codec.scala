@@ -6,20 +6,32 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, DefaultStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, StorageUnit, Try}
+import java.net.InetSocketAddress
 import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
 import org.jboss.netty.handler.codec.http._
 
 private[finagle] case class BadHttpRequest(
   httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
-  extends DefaultHttpRequest(httpVersion, method, uri)
+    extends DefaultHttpRequest(httpVersion, method, uri)
 
 object BadHttpRequest {
-  def apply(exception: Exception) =
+  def apply(exception: Exception): BadHttpRequest =
     new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
+}
+
+private[http] case class BadRequest(httpRequest: HttpRequest, exception: Exception)
+  extends Request {
+  lazy val remoteSocketAddress = new InetSocketAddress(0)
+}
+
+private[http] object BadRequest {
+  def apply(msg: BadHttpRequest): BadRequest =
+    new BadRequest(msg, msg.exception)
 }
 
 /** Convert exceptions to BadHttpRequests */
