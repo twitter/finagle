@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.google.common.io.BaseEncoding
-import com.twitter.finagle.{Failure, Dentry, Dtab, NameTree, Path}
+import com.twitter.finagle.{Failure, Dentry, Dtab, NameTree}
 import com.twitter.finagle.http.{Message, Method, Request, Version}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

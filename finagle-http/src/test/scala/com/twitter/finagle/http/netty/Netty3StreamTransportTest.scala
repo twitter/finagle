@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.http.{Request, Status, Version}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.{Buf, Charsets}
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith

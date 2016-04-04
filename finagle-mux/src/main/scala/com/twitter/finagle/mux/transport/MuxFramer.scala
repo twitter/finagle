@@ -5,12 +5,11 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Failure
 import com.twitter.finagle.Status
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Charsets
 import com.twitter.util._
 import java.net.SocketAddress
 import java.security.cert.Certificate
-import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.ConcurrentLinkedQueue
 import org.jboss.netty.buffer.ChannelBuffers.{unmodifiableBuffer, wrappedBuffer}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
