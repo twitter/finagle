@@ -161,6 +161,23 @@ is bound by Finagle to the Internet address ``localhost:8080``. Similarly,
 is the path describing the serverset_ ``/foo/bar`` on the ZooKeeper
 ensemble ``zk.local.twitter.com:2181``.
 
+Dtabs may contain line-oriented comments beginning with ``#``.  For
+example, this Dtab with commentary:
+
+::
+
+        # delegation for /s
+        /s => /a      # prefer /b
+            | ( /b    # or share traffic between /b and /c
+              & /c
+              );
+
+is equivalent to this Dtab without commentary:
+
+::
+
+       /s => /t | (/u & /v);
+
 We use dtabs to define how logical names (e.g. ``/s/crawler``)
 translate into addresses. Because rewriting is abstracted away, we can
 adapt a Finagle process to its environment by manipulating its dtab.
