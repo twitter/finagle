@@ -2,10 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.finagle
 import com.twitter.finagle.client._
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher}
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
-import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
@@ -27,6 +26,12 @@ trait RedisRichClient { self: Client[Command, Reply] =>
 
   def newSentinelClient(dest: Name, label: String): redis.SentinelClient =
     redis.SentinelClient(newClient(dest, label))
+
+  def newTransactionalClient(dest: String): redis.TransactionalClient =
+    redis.TransactionalClient(newClient(dest))
+
+  def newTransactionalClient(dest: Name, label: String): redis.TransactionalClient =
+    redis.TransactionalClient(newClient(dest, label))
 }
 
 object Redis extends Client[Command, Reply] with RedisRichClient {

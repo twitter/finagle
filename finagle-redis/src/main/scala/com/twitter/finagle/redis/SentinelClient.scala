@@ -1,10 +1,7 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.{ Service, ServiceFactory }
-import com.twitter.util.Future
-import org.jboss.netty.buffer.{ ChannelBuffers, ChannelBuffer }
+import com.twitter.finagle.ServiceFactory
 
 object SentinelClient {
 

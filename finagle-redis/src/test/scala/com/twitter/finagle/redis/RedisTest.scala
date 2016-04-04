@@ -137,12 +137,7 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
   }
 
   protected def withRedisClient(from: Int, until: Int)(testCode: TransactionalClient => Any) {
-    val client = new TransactionalClient(
-      ClientBuilder()
-        .codec(new redis.Redis())
-        .hosts(RedisCluster.hostAddresses(from, until))
-        .hostConnectionLimit(1)
-        .buildFactory())
+    val client = Redis.newTransactionalClient(RedisCluster.hostAddresses(from, until))
     try {
       testCode(client)
     }
