@@ -161,8 +161,9 @@ is bound by Finagle to the Internet address ``localhost:8080``. Similarly,
 is the path describing the serverset_ ``/foo/bar`` on the ZooKeeper
 ensemble ``zk.local.twitter.com:2181``.
 
-Dtabs may contain line-oriented comments beginning with ``#``.  For
-example, this Dtab with commentary:
+Dtabs may contain line-oriented comments beginning with ``#``. ``#``
+must be preceded by a whitespace character or delimeter such as ``;``,
+``|``, or ``&``.  For example, this Dtab with commentary:
 
 ::
 
@@ -176,7 +177,7 @@ is equivalent to this Dtab without commentary:
 
 ::
 
-       /s => /t | (/u & /v);
+       /s => /a | (/b & /c);
 
 We use dtabs to define how logical names (e.g. ``/s/crawler``)
 translate into addresses. Because rewriting is abstracted away, we can
