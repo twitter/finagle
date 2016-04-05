@@ -50,7 +50,7 @@ script:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exp/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http-compat/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http-netty4/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-netty4-http/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http2/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-integration/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-kestrel/test
@@ -64,10 +64,8 @@ script:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-spdy/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stats/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stream/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-testers/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thrift/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thriftmux/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-validate/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-zipkin/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
 

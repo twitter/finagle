@@ -184,7 +184,7 @@ object Finagle extends Build {
     finagleCore, finagleStats, finagleNetty4,
     finagleZipkin, finagleServersets, finagleCacheResolver,
     finagleException, finagleIntegration, finagleCommonsStats,
-    finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
+    finagleExp, finagleMdns, finagleOstrich4,
 
     // Protocols
     finagleHttp, finagleHttp2, finagleHttpCompat, finagleStream, finagleNative,
@@ -604,15 +604,6 @@ object Finagle extends Build {
     finagleThriftMux,
     finagleZipkin
   )
-
-  lazy val finagleTesters = Project(
-    id = "finagle-testers",
-    base = file("finagle-testers"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).settings(
-    name := "finagle-testers"
-  ).dependsOn(finagleCore)
 
   lazy val finagleSpdy = Project(
     id = "finagle-spdy",
