@@ -45,7 +45,7 @@ final class SortedSetClientServerIntegrationSuite extends RedisClientServerInteg
 
   test("ZCARD should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Set(foo, bar))) == StatusReply("OK"))
+      assert(Await.result(client(Set(bufFoo, bufBar))) == StatusReply("OK"))
       initialize(client)
       assert(Await.result(client(ZCard(ZKEY))) == IntegerReply(3))
       assert(Await.result(client(ZCard("nosuchkey"))) == IntegerReply(0))

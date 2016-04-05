@@ -19,6 +19,7 @@ Runtime Behavior Changes
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+  * finagle-redis: Deprecated ChannelBuffer exposing apis for string commands. ``RB_ID=817766``.
 
   * finagle-core: DefaultClient has been removed. Implementors should prefer `c.t.f.StackClient`
   ``RB_ID=812681``.

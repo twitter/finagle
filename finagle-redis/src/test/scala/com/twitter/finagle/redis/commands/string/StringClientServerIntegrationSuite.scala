@@ -5,6 +5,7 @@ import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.finagle.redis.util.{BytesToString, StringToBuf, StringToChannelBuffer}
+import com.twitter.io.Buf
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
@@ -16,6 +17,7 @@ import scala.language.implicitConversions
 @RunWith(classOf[JUnitRunner])
 final class StringClientServerIntegrationSuite extends RedisClientServerIntegrationTest {
   implicit def convertToChannelBuffer(s: String): ChannelBuffer = StringToChannelBuffer(s)
+  implicit def convertToChannelBuf(s: String): Buf = StringToBuf(s)
 
   test("APPEND should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
@@ -65,33 +67,33 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
 
   test("DECR should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Set(foo, bar))) == StatusReply("OK"))
+      assert(Await.result(client(Set(bufFoo, bufBar))) == StatusReply("OK"))
 
       assert(Await.result(client(Decr("decr1"))) == IntegerReply(-1))
       assert(Await.result(client(Decr("decr1"))) == IntegerReply(-2))
-      assert(Await.result(client(Decr(foo))).isInstanceOf[ErrorReply])
+      assert(Await.result(client(Decr(bufFoo))).isInstanceOf[ErrorReply])
     }
   }
 
   test("DECRBY should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Set(foo, bar))) == StatusReply("OK"))
+      assert(Await.result(client(Set(bufFoo, bufBar))) == StatusReply("OK"))
 
       assert(Await.result(client(DecrBy("decrby1", 1))) == IntegerReply(-1))
       assert(Await.result(client(DecrBy("decrby1", 10))) == IntegerReply(-11))
-      assert(Await.result(client(DecrBy(foo, 1))).isInstanceOf[ErrorReply])
+      assert(Await.result(client(DecrBy(bufFoo, 1))).isInstanceOf[ErrorReply])
     }
   }
 
   test("GET should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Set(foo, bar))) == StatusReply("OK"))
+      assert(Await.result(client(Set(bufFoo, bufBar))) == StatusReply("OK"))
 
       assert(Await.result(client(Get("thing"))).isInstanceOf[EmptyBulkReply])
-      assertBulkReply(client(Get(foo)), "bar")
+      assertBulkReply(client(Get(bufFoo)), "bar")
 
       intercept[ClientError] {
-        Await.result(client(Get(null: ChannelBuffer)))
+        Await.result(client(Get(null: Buf)))
       }
 
       intercept[ClientError] {
@@ -111,7 +113,7 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
 
   test("GETRANGE should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val key = StringToChannelBuffer("getrange")
+      val key = Buf.Utf8("getrange")
       val value = "This is a string"
       assert(Await.result(client(Set(key, value))) == StatusReply("OK"))
       assertBulkReply(client(GetRange(key, 0, 3)), "This")
@@ -123,7 +125,7 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
 
   test("GETSET should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val key = StringToChannelBuffer("getset")
+      val key = Buf.Utf8("getset")
       assert(Await.result(client(Incr(key))) == IntegerReply(1))
       assertBulkReply(client(GetSet(key, "0")), "1")
       assertBulkReply(client(Get(key)), "0")
@@ -133,36 +135,36 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
 
   test("INCR should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Set(foo, bar))) == StatusReply("OK"))
+      assert(Await.result(client(Set(bufFoo, bufBar))) == StatusReply("OK"))
 
       assert(Await.result(client(Incr("incr1"))) == IntegerReply(1))
       assert(Await.result(client(Incr("incr1"))) == IntegerReply(2))
-      assert(Await.result(client(Incr(foo))).isInstanceOf[ErrorReply])
+      assert(Await.result(client(Incr(bufFoo))).isInstanceOf[ErrorReply])
     }
   }
 
   test("INCRBY should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Set(foo, bar))) == StatusReply("OK"))
+      assert(Await.result(client(Set(bufFoo, bufBar))) == StatusReply("OK"))
 
       assert(Await.result(client(IncrBy("incrby1", 1))) == IntegerReply(1))
       assert(Await.result(client(IncrBy("incrby1", 10))) == IntegerReply(11))
-      assert(Await.result(client(IncrBy(foo, 1))).isInstanceOf[ErrorReply])
+      assert(Await.result(client(IncrBy(bufFoo, 1))).isInstanceOf[ErrorReply])
     }
   }
 
   test("MGET should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Set(foo, bar))) == StatusReply("OK"))
+      assert(Await.result(client(Set(bufFoo, bufBar))) == StatusReply("OK"))
 
       val expects = List(
         BytesToString(RedisCodec.NIL_VALUE_BA.array),
         BytesToString(bar.array)
         )
-      val req = client(MGet(List(StringToChannelBuffer("thing"), foo)))
+      val req = client(MGet(List(Buf.Utf8("thing"), bufFoo)))
       assertMBulkReply(req, expects)
       intercept[ClientError] {
-        Await.result(client(MGet(List[ChannelBuffer]())))
+        Await.result(client(MGet(List.empty[Buf])))
       }
     }
   }
@@ -170,14 +172,14 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
   test("MSET should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
       val input = Map(
-        StringToChannelBuffer("thing")   -> StringToChannelBuffer("thang"),
-        foo       -> bar,
-        StringToChannelBuffer("stuff")   -> StringToChannelBuffer("bleh")
+        Buf.Utf8("thing")   -> Buf.Utf8("thang"),
+        bufFoo       -> bufBar,
+        Buf.Utf8("stuff")   -> Buf.Utf8("bleh")
         )
       assert(Await.result(client(MSet(input))) == StatusReply("OK"))
-      val req = client(MGet(List(StringToChannelBuffer("thing"), foo,
-        StringToChannelBuffer("noexists"),
-        StringToChannelBuffer("stuff"))))
+      val req = client(MGet(List(Buf.Utf8("thing"), bufFoo,
+        Buf.Utf8("noexists"),
+        Buf.Utf8("stuff"))))
       val expects = List("thang", "bar", BytesToString(RedisCodec.NIL_VALUE_BA.array), "bleh")
       assertMBulkReply(req, expects)
     }
@@ -186,19 +188,19 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
   test("MSETNX should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
       val input1 = Map(
-        StringToChannelBuffer("msnx.key1") -> StringToChannelBuffer("Hello"),
-        StringToChannelBuffer("msnx.key2") -> StringToChannelBuffer("there")
+        Buf.Utf8("msnx.key1") -> Buf.Utf8("Hello"),
+        Buf.Utf8("msnx.key2") -> Buf.Utf8("there")
         )
       assert(Await.result(client(MSetNx(input1))) == IntegerReply(1))
       val input2 = Map(
-        StringToChannelBuffer("msnx.key2") -> StringToChannelBuffer("there"),
-        StringToChannelBuffer("msnx.key3") -> StringToChannelBuffer("world")
+        Buf.Utf8("msnx.key2") -> Buf.Utf8("there"),
+        Buf.Utf8("msnx.key3") -> Buf.Utf8("world")
         )
       assert(Await.result(client(MSetNx(input2))) == IntegerReply(0))
       val expects = List("Hello", "there", BytesToString(RedisCodec.NIL_VALUE_BA.array))
-      assertMBulkReply(client(MGet(List(StringToChannelBuffer("msnx.key1"),
-        StringToChannelBuffer("msnx.key2"),
-        StringToChannelBuffer("msnx.key3")))), expects)
+      assertMBulkReply(client(MGet(List(Buf.Utf8("msnx.key1"),
+        Buf.Utf8("msnx.key2"),
+        Buf.Utf8("msnx.key3")))), expects)
     }
   }
 
@@ -247,10 +249,9 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
 
   test("SETEX should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val key = StringToChannelBuffer("setex")
-      val key2 = StringToBuf("setex")
+      val key = StringToBuf("setex")
       assert(Await.result(client(SetEx(key, 10, "Hello"))) == StatusReply("OK"))
-      Await.result(client(Ttl(key2))) match {
+      Await.result(client(Ttl(key))) match {
           //TODO: match must beCloseTo(10, 2)
         case IntegerReply(seconds) => assert(seconds.toInt - 10 < 2)
         case _ => fail("Expected IntegerReply")

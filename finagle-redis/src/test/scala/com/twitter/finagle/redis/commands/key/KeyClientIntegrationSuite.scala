@@ -4,7 +4,7 @@ import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.io.Buf
 import com.twitter.util.Await
-import com.twitter.finagle.redis.util.{BufToString, StringToBuf, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.{BufToString, StringToBuf}
 import java.util.Arrays
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -16,18 +16,18 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the DEL command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       Await.result(client.dels(Seq(bufFoo)))
-      assert(Await.result(client.get(foo)) == None)
+      assert(Await.result(client.get(bufFoo)) == None)
     }
   }
 
   test("Correctly perform the DUMP command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val k = StringToChannelBuffer("mykey")
-      val v = StringToChannelBuffer("10")
-      val key = StringToBuf("mykey")
-      val value = StringToBuf("10")
+      val k = Buf.Utf8("mykey")
+      val v = Buf.Utf8("10")
+      val key = Buf.Utf8("mykey")
+      val value = Buf.Utf8("10")
       val expectedBytes: Array[Byte] = Array(0, -64, 10, 6, 0, -8, 114, 63, -59, -5, -5, 95, 40)
 
       Await.result(client.set(k, v))
@@ -43,8 +43,8 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
   // the tests can be uncommented.
   ignore("Correctly perform the SCAN command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.set(foo, bar))
-      Await.result(client.set(baz, boo))
+      Await.result(client.set(bufFoo, bufBar))
+      Await.result(client.set(bufBaz, bufBoo))
       assert(BufToString(Await.result(client.scans(0, None, None)).apply(1)) == "baz")
 
       val withCount = Await.result(client.scans(0, Some(10), None))
@@ -61,14 +61,14 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the EXISTS command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       assert(Await.result(client.exists(bufFoo)) == true)
     }
   }
 
   test("Correctly perform the TTL command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       val time = 20L
 
       assert(Await.result(client.expire(bufFoo, time)) == true)
@@ -83,7 +83,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the EXPIREAT command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
 
       // TODO: this isn't actually a TTL, which means that the second assertion
       // below is true for uninteresting reasons.
@@ -108,9 +108,9 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       Await.result(client.select(fromDb))
 
       // This following fails with an exceptions since bar is not a database.
-      // assert(Await.result(client.move(foo, bar)) == false)
+      // assert(Await.result(client.move(bufFoo, bufBar)) == false)
 
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       assert(Await.result(client.move(bufFoo, StringToBuf(toDb.toString))) == true)
 
       Await.result(client.dels(Seq(bufFoo))) // clean up
@@ -120,7 +120,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform the PEXPIRE & PTL commands", RedisTest, ClientTest) {
     withRedisClient { client =>
       val ttl = 100000L
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       assert(Await.result(client.pExpire(bufFoo, ttl)) == true)
 
       val result = Await.result(client.pTtl(bufFoo)) match {
@@ -135,7 +135,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val horizon = 20000L
       val ttl = System.currentTimeMillis() + horizon
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       assert(Await.result(client.pExpireAt(bufFoo, ttl)) == true)
 
       val result = Await.result(client.pTtl(bufFoo)) match {

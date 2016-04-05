@@ -3,6 +3,7 @@ package com.twitter.finagle.redis.integration
 import com.twitter.finagle.Redis
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
+import com.twitter.io.Buf
 import com.twitter.util.Await
 import java.util.UUID
 import org.jboss.netty.buffer.ChannelBuffer
@@ -90,11 +91,11 @@ final class BtreeClientIntegrationSuite extends FunSuite with BeforeAndAfterAll 
     val value = "optimus"
 
     println("Setting " + key + "->" + value)
-    client.set(StringToChannelBuffer(key), StringToChannelBuffer(value))
+    client.set(Buf.Utf8(key), Buf.Utf8(value))
     println("Getting value for key " + key)
-    val getResult = Await.result(client.get(StringToChannelBuffer(key)))
+    val getResult = Await.result(client.get(Buf.Utf8(key)))
     getResult match {
-      case Some(n) => println("Got result: " + new String(n.array))
+      case Some(n) => println("Got result: " + Buf.Utf8.unapply(n).get)
       case None => println("Didn't get the value!")
     }
   }

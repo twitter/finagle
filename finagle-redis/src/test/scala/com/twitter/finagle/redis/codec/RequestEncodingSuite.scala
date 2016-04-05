@@ -2,6 +2,7 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.naggati.RedisRequestTest
 import com.twitter.finagle.redis.tags.CodecTest
+import com.twitter.io.Buf
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -9,12 +10,12 @@ import org.scalatest.junit.JUnitRunner
 final class RequestEncodingSuite extends RedisRequestTest {
 
   test("Correctly encode inline requests", CodecTest) {
-    assert(codec.send(Get(foo)) == List("*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n"))
+    assert(codec.send(Get(bufFoo)) == List("*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n"))
   }
 
   test("Correctly encode unified requests", CodecTest) {
     val value = "bar\r\nbaz"
-    assert(codec.send(Set(foo, string2ChanBuf(value))) ==
+    assert(codec.send(Set(bufFoo, Buf.Utf8(value))) ==
       List("*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$%d\r\n%s\r\n".format(8, value)))
   }
 

@@ -15,20 +15,20 @@ final class ServerClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform the FLUSHALL command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.select(15))
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       Await.result(client.select(1))
       Await.result(client.flushAll())
       Await.result(client.select(15))
 
-      assert(Await.result(client.get(foo)) == None)
+      assert(Await.result(client.get(bufFoo)) == None)
     }
   }
 
   test("Correctly perform the FLUSHDB command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.set(foo, bar))
+      Await.result(client.set(bufFoo, bufBar))
       Await.result(client.flushDB())
-      assert(Await.result(client.get(foo)) == None)
+      assert(Await.result(client.get(bufFoo)) == None)
     }
   }
 

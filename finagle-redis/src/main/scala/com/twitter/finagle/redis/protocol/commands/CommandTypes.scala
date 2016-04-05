@@ -28,7 +28,7 @@ trait StrictKeysCommand extends KeysCommand {
 }
 
 trait ValueCommand extends Command {
-  val value: ChannelBuffer
+  def value: ChannelBuffer
 }
 trait StrictValueCommand extends ValueCommand {
   RequireClientProtocol(value != null && value.readableBytes > 0,

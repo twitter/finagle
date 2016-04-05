@@ -16,15 +16,15 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly set and get transaction", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val txResult = Await.result(client.transaction(Seq(Set(foo, bar), Set(baz, boo))))
+      val txResult = Await.result(client.transaction(Seq(Set(bufFoo, bufBar), Set(bufBaz, bufBoo))))
       assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "OK"))
     }
 
     withRedisClient { client =>
       val txResult = Await.result(
         client.transaction { tx =>
-          tx.set(foo, bar).unit before
-          tx.set(baz, boo)
+          tx.set(bufFoo, bufBar).unit before
+          tx.set(bufBaz, bufBoo)
         })
       assert(ReplyFormat.toString(txResult.toList) == Seq("OK", "OK"))
     }
@@ -54,7 +54,7 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform key command on incorrect data type", RedisTest, ClientTest) {
     withRedisClient { client =>
       val txResult = Await.result(
-        client.transaction(Seq(HSet(foo, boo, moo), Get(foo), HDel(foo, Seq(boo)))))
+        client.transaction(Seq(HSet(foo, boo, moo), Get(bufFoo), HDel(foo, Seq(boo)))))
       txResult.toList match {
         case Seq(IntegerReply(1), ErrorReply(message), IntegerReply(1)) =>
           // TODO: the exact error message varies in different versions of redis. fix this later
@@ -66,7 +66,7 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
       val txResult = Await.result(
         client.transaction { tx =>
           tx.hSet(foo, boo, moo).unit before
-          tx.get(foo).unit before
+          tx.get(bufFoo).unit before
           tx.hDel(foo, Seq(boo))
         })
       txResult.toList match {
@@ -83,9 +83,9 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
         Await.result(
         client.transactionSupport { tx =>
           tx.watches(Seq(bufFoo)).unit before
-          tx.set(foo, boo).unit before
+          tx.set(bufFoo, bufBoo).unit before
           tx.transaction {
-            tx.get(foo)
+            tx.get(bufFoo)
           }
         })
       }
@@ -96,12 +96,12 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val txResult = Await.result(
         client.transactionSupport { tx =>
-          tx.set(foo, bar).unit before
+          tx.set(bufFoo, bufBar).unit before
           tx.watches(Seq(bufFoo)).unit before
-          tx.set(foo, boo).unit before
+          tx.set(bufFoo, bufBoo).unit before
           tx.unwatch().unit before
           tx.transaction {
-            tx.get(foo)
+            tx.get(bufFoo)
           }
         })
       assert(ReplyFormat.toString(txResult.toList) === Seq("boo"))
@@ -112,8 +112,8 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val txResult = Await.result(
         client.transaction { tx =>
-          tx.set(foo, bar).unit before
-          tx.get(foo)
+          tx.set(bufFoo, bufBar).unit before
+          tx.get(bufFoo)
         })
       assert(ReplyFormat.toString(txResult.toList) === Seq("OK", "bar"))
     }
