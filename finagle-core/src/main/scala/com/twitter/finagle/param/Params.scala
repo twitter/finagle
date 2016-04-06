@@ -1,6 +1,7 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.service.StatsFilter
+import com.twitter.finagle.tracing.{Trace, TraceId}
 import com.twitter.finagle.util.DefaultMonitor
 import com.twitter.finagle.{stats, tracing, util, Stack}
 import com.twitter.util.JavaTimer
@@ -192,5 +193,20 @@ object ExceptionStatsHandler {
     // Note, this is lazy to avoid potential failures during
     // static initialization.
     lazy val default = ExceptionStatsHandler(StatsFilter.DefaultExceptions)
+  }
+}
+
+/**
+  * A class eligible for configuring a 
+  *  [[com.twitter.finagle.dispatch.ServerDispatcher ServerDispatcher]]
+  * @param fReq a function from Any to TraceId
+  * @param fRep a function from Any to TraceId
+  */
+case class ReqRepToTraceId(fReq: Any => Option[TraceId], fRep: Any => Option[TraceId])
+object ReqRepToTraceId {
+  val Default = new ReqRepToTraceId((a: Any) => None, (a: Any) => None)
+
+  implicit val param: Stack.Param[ReqRepToTraceId] = new Stack.Param[ReqRepToTraceId] {
+    implicit val default = Default
   }
 }

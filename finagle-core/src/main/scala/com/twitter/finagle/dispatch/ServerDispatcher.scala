@@ -1,30 +1,26 @@
 package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
+import com.twitter.finagle.tracing.{Annotation, Trace, Tracer, TraceId}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 
-object GenSerialServerDispatcher {
-  private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
-  // We don't use Future.never here, because object equality is important here
-  private val Idle = new NoFuture
-  private val Closed = new NoFuture
-}
-
 /**
- * A generic version of
- * [[com.twitter.finagle.dispatch.SerialServerDispatcher SerialServerDispatcher]],
- * allowing the implementor to furnish custom dispatchers & handlers.
- */
-abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In, Out])
-    extends Closable {
+  * A base Dispatcher type to allow for easy tracing upon `WireRecv` and
+  * `WireSend` by the 
+  * [[com.twitter.finagle.transport.Transport transporter]]. Clients should
+  * provided custom behavior via the handle and dispatch methods
+  * @tparam Req the type of Request
+  * @tparam Rep the type of Response
+  * @tparam Out the type of message coming "out" of a
+  *  [[com.twitter.finagle.transport.Transport Transport]]
+  * @param init a [[ServerDispatcherInitializer]]
+  */
+abstract class ServerDispatcher[Req, Rep, Out] extends Closable {
 
-  import GenSerialServerDispatcher._
-
-  private[this] val state = new AtomicReference[Future[_]](Idle)
-  private[this] val cancelled = new CancelledRequestException
+  protected val RecordWireSend: Unit => Unit = _ => Trace.record(Annotation.WireSend)
 
   /**
    * Dispatches a request. The first argument is the request. The second
@@ -38,7 +34,49 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
    * [[com.twitter.finagle.http.codec.HttpServerDispatcher]].
    */
   protected def dispatch(req: Out, eos: Promise[Unit]): Future[Rep]
+
+  /**
+    * Handles "business logic" of a protocol writing a `response` to the wire
+    * via a [[com.twitter.finagle.transport.Transport Transport]]
+    *
+    * @param rep the Reponse to send out
+    */
   protected def handle(rep: Rep): Future[Unit]
+}
+
+/**
+  * Used by the [[ServerDispatcher]] to initialize tracing
+  *
+  * @tparam Req the Request type of the [[ServerDispatcher]]
+  * @tparam Rep the Response type of the [[ServerDispatcher]]
+  * @param tracer the Tracer to be used
+  * @param fReq a function from `Request` type to 
+  *  [[com.twitter.finagle.tracing.TraceId TraceId]]
+  * @param fRep a function from `Response` type to
+  *  [[com.twitter.finagle.tracing.TraceId TraceId]]
+  */
+case class ServerDispatcherInitializer(tracer: Tracer, fReq: Any => Option[TraceId], 
+  fRep: Any => Option[TraceId])
+
+object GenSerialServerDispatcher {
+  private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
+  // We don't use Future.never here, because object equality is important here
+  private val Idle = new NoFuture
+  private val Closed = new NoFuture
+}
+
+/**
+ * A generic version of
+ * [[com.twitter.finagle.dispatch.SerialServerDispatcher SerialServerDispatcher]],
+ * allowing the implementor to furnish custom dispatchers & handlers.
+ */
+abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In, Out],
+  init: ServerDispatcherInitializer) extends ServerDispatcher[Req, Rep, Out] {
+
+  import GenSerialServerDispatcher._
+
+  private[this] val state = new AtomicReference[Future[_]](Idle)
+  private[this] val cancelled = new CancelledRequestException
 
   private[this] def loop(): Future[Unit] = {
     state.set(Idle)
@@ -93,22 +131,37 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
 
 /**
  * Dispatch requests from transport one at a time, queueing
- * concurrent requests.
+ * concurrent requests. Transport errors are considered fatal; 
+ * the service will be released after any error.
  *
- * Transport errors are considered fatal; the service will be
- * released after any error.
+ * @tparam Req the `Request` type for the [[ServerDispatcher]]
+ * @tparam Rep the `Response` type for the [[ServerDispatcher]]
+ * @param trans a [[com.twitter.finagle.transport.Transport Transport]]
+ * @param service 
+ * @param init a [[ServerDispatcherInitializer]] used to init tracing
  */
 class SerialServerDispatcher[Req, Rep](
     trans: Transport[Rep, Req],
-    service: Service[Req, Rep])
-    extends GenSerialServerDispatcher[Req, Rep, Rep, Req](trans) {
+    service: Service[Req, Rep],
+    init: ServerDispatcherInitializer)
+    extends GenSerialServerDispatcher[Req, Rep, Rep, Req](trans, init) {
 
   trans.onClose ensure {
     service.close()
   }
 
-  protected def dispatch(req: Req, eos: Promise[Unit]) =
-    service(req) ensure eos.setDone()
+  protected def dispatch(req: Req, eos: Promise[Unit]) = init.fReq(req) match {
+    case Some(traceId) => Trace.letTracerAndId(init.tracer, traceId) {
+      Trace.record(Annotation.WireRecv)
+      service(req) ensure eos.setDone()
+    }
+    case None => service(req) ensure eos.setDone()
+  }
 
-  protected def handle(rep: Rep) = trans.write(rep)
+  protected def handle(rep: Rep) = init.fRep(rep) match {
+    case Some(traceId) => Trace.letTracerAndId(init.tracer, traceId) {
+      trans.write(rep).onSuccess(RecordWireSend)
+    }
+    case None => trans.write(rep)
+  }
 }

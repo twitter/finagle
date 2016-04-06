@@ -3,6 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Http => FinagleHttp, _}
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, Reader, Writer}
@@ -376,8 +377,9 @@ object StreamingTest {
           codec.newClientDispatcher(cmod(transport), params)
         override def newServerDispatcher(
           transport: Transport[Any, Any],
-          service: Service[Request, Response]
-        ) = codec.newServerDispatcher(smod(transport), service)
+          service: Service[Request, Response],
+          init: ServerDispatcherInitializer
+        ) = codec.newServerDispatcher(smod(transport), service, init)
       }
 
     val factory = Http().streaming(true)

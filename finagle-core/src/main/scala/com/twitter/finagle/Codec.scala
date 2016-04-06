@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, ServerDispatcher,
+  ServerDispatcherInitializer, SerialServerDispatcher}
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
@@ -67,9 +68,10 @@ trait Codec[Req, Rep] {
 
   def newServerDispatcher(
     transport: Transport[Any, Any],
-    service: Service[Req, Rep]
+    service: Service[Req, Rep],
+    init: ServerDispatcherInitializer
   ): Closable =
-    new SerialServerDispatcher[Req, Rep](Transport.cast[Rep, Req](transport), service)
+    new SerialServerDispatcher[Req, Rep](Transport.cast[Rep, Req](transport), service, init)
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to

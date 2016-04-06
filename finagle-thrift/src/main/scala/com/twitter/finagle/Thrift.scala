@@ -1,7 +1,8 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{StdStackClient, StackClient, Transporter}
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, 
+  SerialServerDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.server.{StdStackServer, StackServer, Listener}
@@ -310,9 +311,10 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
 
     protected def newDispatcher(
       transport: Transport[In, Out],
-      service: Service[Array[Byte], Array[Byte]]
+      service: Service[Array[Byte], Array[Byte]],
+      init: ServerDispatcherInitializer
     ) =
-      new SerialServerDispatcher(transport, service)
+      new SerialServerDispatcher(transport, service, init)
 
     def withProtocolFactory(protocolFactory: TProtocolFactory): Server =
       configured(param.ProtocolFactory(protocolFactory))
@@ -326,6 +328,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       new ServerAdmissionControlParams(this)
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams(this)
+    override val withServerDispatcher: ServerDispatcherParams[Server] =
+      new ServerDispatcherParams(this)
 
     override def withLabel(label: String): Server = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Server =

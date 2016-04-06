@@ -38,11 +38,13 @@ class TraceInitializationTest extends FunSuite {
       Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
       Annotation.ServiceName("theClient"),
       Annotation.ClientSend(),
+      Annotation.WireRecv,
       Annotation.Rpc("GET"),
       Annotation.BinaryAnnotation("http.uri", "/this/is/a/uri/path"),
       Annotation.ServiceName("theServer"),
       Annotation.ServerRecv(),
       Annotation.ServerSend(),
+      Annotation.WireRecv,
       Annotation.ClientRecv()))
 
     assert(tracer.map(_.traceId).toSet.size == 1)
@@ -52,6 +54,7 @@ class TraceInitializationTest extends FunSuite {
     testTraces { (serverTracer, clientTracer) =>
       import com.twitter.finagle
       val server = finagle.Http.server
+        .withServerDispatcher.requestToTraceId(TraceInfo.requestToTraceId)
         .configured(param.Tracer(serverTracer))
         .configured(param.Label("theServer")).serve(":*", Svc)
       val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort
@@ -68,6 +71,8 @@ class TraceInitializationTest extends FunSuite {
         .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
         .codec(Http(_enableTracing = true))
         .tracer(serverTracer)
+        .requestToTraceId(TraceInfo.requestToTraceId)
+        .responseToTraceId(TraceInfo.responseToTraceId)
         .build(Svc)
 
       val port = server.boundAddress.asInstanceOf[InetSocketAddress].getPort

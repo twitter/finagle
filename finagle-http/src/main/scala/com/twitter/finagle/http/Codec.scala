@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
@@ -163,6 +163,7 @@ case class Http(
       ): ServiceFactory[Request, Response] =
         underlying.map(new DelayedReleaseService(_))
 
+      
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response],
         params: Stack.Params
@@ -241,9 +242,10 @@ case class Http(
 
       override def newServerDispatcher(
         transport: Transport[Any, Any],
-        service: Service[Request, Response]
+        service: Service[Request, Response],
+        init: ServerDispatcherInitializer
       ): Closable =
-        new HttpServerDispatcher(new HttpTransport(transport), service)
+        new HttpServerDispatcher(new HttpTransport(transport), service, init)
 
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response],
@@ -307,21 +309,18 @@ object HttpTracing {
 private object TraceInfo {
   import HttpTracing._
 
+  val requestToTraceId: (Any) => Option[TraceId] = (a: Any) => a match {
+    case r: Request => traceIdFromRequest(r)
+    case _          => None
+  }
+  val responseToTraceId: (Any) => Option[TraceId] = (a: Any) => a match {
+    case r: Response => traceIdFromResponse(r)
+    case _           => None
+  }
+
   def letTraceIdFromRequestHeaders[R](request: Request)(f: => R): R = {
-    val id = if (Header.Required.forall { request.headers.contains(_) }) {
-      val spanId = SpanId.fromString(request.headers.get(Header.SpanId))
-
-      spanId map { sid =>
-        val traceId = SpanId.fromString(request.headers.get(Header.TraceId))
-        val parentSpanId = SpanId.fromString(request.headers.get(Header.ParentSpanId))
-
-        val sampled = Option(request.headers.get(Header.Sampled)) flatMap { sampled =>
-          Try(sampled.toBoolean).toOption
-        }
-
-        val flags = getFlags(request)
-        TraceId(traceId, parentSpanId, sid, sampled, flags)
-      }
+    val traceId = if (hasAllTracingHeaders(request)) {
+      traceIdFromRequest(request)
     } else if (request.headers.contains(Header.Flags)) {
       // even if there are no id headers we want to get the debug flag
       // this is to allow developers to just set the debug flag to ensure their
@@ -334,16 +333,15 @@ private object TraceInfo {
     // remove so the header is not visible to users
     Header.All foreach { request.headers.remove(_) }
 
-    id match {
-      case Some(id) =>
-        Trace.letId(id) {
-    traceRpc(request)
-          f
-  }
+    traceId match {
+      case Some(id) => Trace.letId(id) {
+        traceRpc(request)
+        f
+      }
       case None =>
         traceRpc(request)
         f
-    }
+      }
   }
 
   def setClientRequestHeaders(request: Request): Unit = {
@@ -381,6 +379,45 @@ private object TraceInfo {
       case _: Throwable => Flags()
     }
   }
+
+  def getRepFlags(response: Response): Flags = try {
+    Flags(Option(response.headers.get(Header.Flags)).map(_.toLong).getOrElse(0L))
+  } catch {
+    case _: Throwable => Flags()
+  }
+
+  private[this] def traceIdFromRequest(req: Request): Option[TraceId] = {
+    val spanId = SpanId.fromString(req.headers.get(Header.SpanId))
+ 
+    spanId map { sid: SpanId =>
+      val traceId      = SpanId.fromString(req.headers.get(Header.TraceId))
+      val parentSpanId = SpanId.fromString(req.headers.get(Header.ParentSpanId))
+      val sampled = Option(req.headers.get(Header.Sampled)) flatMap { sampled =>
+        Try(sampled.toBoolean).toOption
+      }
+
+      val flags = getFlags(req)
+      TraceId(traceId, parentSpanId, sid, sampled, flags)
+    }
+  }
+
+  private[this] def traceIdFromResponse(rep: Response): Option[TraceId] = {
+    val spanId = SpanId.fromString(rep.headers.get(Header.SpanId))
+ 
+    spanId map { sid: SpanId =>
+      val traceId      = SpanId.fromString(rep.headers.get(Header.TraceId))
+      val parentSpanId = SpanId.fromString(rep.headers.get(Header.ParentSpanId))
+      val sampled = Option(rep.headers.get(Header.Sampled)) flatMap { sampled =>
+        Try(sampled.toBoolean).toOption
+      }
+
+      val flags = getRepFlags(rep)
+      TraceId(traceId, parentSpanId, sid, sampled, flags)
+    }
+  }
+
+  private[this] def hasAllTracingHeaders(request: Request): Boolean =
+    Header.Required.forall { request.headers.contains(_) }
 }
 
 private[finagle] class HttpServerTraceInitializer[Req <: Request, Rep]

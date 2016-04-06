@@ -4,6 +4,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
+import com.twitter.finagle.dispatch.ServerDispatcherInitializer
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{DeadlineFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
@@ -148,6 +149,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   with Stack.Parameterized[This]
   with CommonParams[This]
   with WithServerTransport[This]
+  with WithServerDispatcher[This]
   with WithServerAdmissionControl[This] { self =>
 
   /**
@@ -174,7 +176,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    *
    * @see [[com.twitter.finagle.dispatch.GenSerialServerDispatcher]]
    */
-  protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]): Closable
+  protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep],
+    init: ServerDispatcherInitializer): Closable
 
   /**
    * Creates a new StackServer with parameter `p`.
@@ -217,6 +220,11 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       val Reporter(reporter) = params[Reporter]
       val Stats(stats) = params[Stats]
       val Label(label) = params[Label]
+
+      val param.ReqRepToTraceId(fReq, fRep) = params[param.ReqRepToTraceId]
+      val com.twitter.finagle.param.Tracer(tracer) = params[com.twitter.finagle.param.Tracer]
+      val dispatcherInit = new ServerDispatcherInitializer(tracer, fReq, fRep)
+
       // For historical reasons, we have to respect the ServerRegistry
       // for naming addresses (i.e. label=addr). Until we deprecate
       // its usage, it takes precedence for identifying a server as
@@ -260,7 +268,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       val underlying = listener.listen(addr) { transport =>
         serviceFactory(newConn(transport)) respond {
           case Return(service) =>
-            val d = server.newDispatcher(transport, service)
+            val d = server.newDispatcher(transport, service, dispatcherInit)
             connections.add(d)
             transport.onClose ensure connections.remove(d)
           case Throw(exc) =>
@@ -271,7 +279,8 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
             val d = server.newDispatcher(
               transport,
               Service.const(Future.exception(
-                Failure.rejected("Terminating session and ignoring request", exc)))
+                Failure.rejected("Terminating session and ignoring request", exc))),
+              dispatcherInit
             )
             connections.add(d)
             transport.onClose ensure connections.remove(d)

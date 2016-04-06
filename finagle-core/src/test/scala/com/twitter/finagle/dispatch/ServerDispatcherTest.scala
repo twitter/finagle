@@ -1,14 +1,15 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.finagle.Service
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
+import com.twitter.finagle.Service
+import com.twitter.finagle.tracing._ 
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Future, Promise, Time, Local}
 import java.net.SocketAddress
 import java.security.cert.X509Certificate
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{when, never, verify, times}
 import org.mockito.Matchers.any
+import org.mockito.Mockito.{when, never, verify, times}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -24,12 +25,17 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     when(trans.read()).thenReturn(readp)
     val writep = new Promise[Unit]
     when(trans.write(any[String])).thenReturn(writep)
+
+    val traceId = TraceId(None, None, SpanId(71L), None, Flags(Flags.Debug))
+    val f = (s: Any) => Some(traceId)
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, f, f)
   }
 
   test("Dispatch one at a time") (new Ctx {
     val service = mock[Service[String, String]]
     when(service.close(any[Time])).thenReturn(Future.Done)
-    val disp = new SerialServerDispatcher(trans, service)
+    val disp = new SerialServerDispatcher(trans, service, init)
 
     verify(trans).read()
     verify(trans, never()).write(any[String])
@@ -62,7 +68,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
       }
     }
 
-    val disp = new SerialServerDispatcher(trans, service)
+    val disp = new SerialServerDispatcher(trans, service, init)
 
     readp.setValue("go")
     verify(trans).write("ok")
@@ -77,7 +83,7 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
       }
     }
 
-    val disp = new SerialServerDispatcher(trans, service)
+    val disp = new SerialServerDispatcher(trans, service, init)
 
     readp.setValue("go")
     verify(trans).write("ok")
@@ -97,12 +103,47 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     }
 
     l() = "orig"
-    val disp = new SerialServerDispatcher(trans, s)
+    val disp = new SerialServerDispatcher(trans, s, init)
 
     readp.setValue("blah")
     assert(ncall == 1)
     assert(l() == Some("orig"))
     verify(trans).write("undefined")
+  })
+
+  test("Record WireRecv and WireSend annotations") (new Ctx {
+    val testTracer = new BufferingTracer()
+    val initializer = ServerDispatcherInitializer(testTracer, f, f)
+    
+    val service = mock[Service[String, String]]
+    when(service.close(any[Time])).thenReturn(Future.Done)
+    val disp = new SerialServerDispatcher(trans, service, initializer)
+
+
+    val servicep = new Promise[String]
+    when(service(any[String])).thenReturn(servicep)
+
+    readp.setValue("ok")
+    verify(service).apply("ok")
+    verify(trans, never()).write(any[String])
+
+    servicep.setValue("ack")
+    verify(trans).write("ack")
+
+    verify(trans).read()
+
+    when(trans.read()).thenReturn(new Promise[String])
+    writep.setDone()
+
+    def assertAnnotationsInOrder(records: Seq[Record], annos: Seq[Annotation]) {
+      assert(records.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
+    }
+
+    assertAnnotationsInOrder(testTracer.toSeq, Seq(
+      Annotation.WireRecv,
+      Annotation.WireSend
+    ))
+    assert(testTracer.map(_.traceId).toSet.size == 1)
   })
 
   trait Ictx {
@@ -123,7 +164,11 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val readp = new Promise[String]
     when(trans.read()).thenReturn(readp)
 
-    val disp = new SerialServerDispatcher(trans, service)
+    val f = (s: Any) => None
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, f, f)
+
+    val disp = new SerialServerDispatcher(trans, service, init)
   }
 
 
@@ -172,7 +217,11 @@ class SerialServerDispatcherTest extends FunSuite with MockitoSugar {
     val readp = new Promise[String]
     when(trans.read()).thenReturn(readp)
 
-    val disp = new SerialServerDispatcher(trans, service)
+    val f = (s: Any) => None
+    val tracer = new BufferingTracer()
+    val init = ServerDispatcherInitializer(tracer, f, f)
+
+    val disp = new SerialServerDispatcher(trans, service, init)
     verify(trans).read()
   }
 

@@ -1,10 +1,10 @@
 package com.twitter.finagle.stream
 
-import com.twitter.finagle.dispatch.GenSerialClientDispatcher
+import com.twitter.finagle._
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle._
 import com.twitter.util.{Future, Promise, Time, Closable}
 import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, Channel}
 import org.jboss.netty.handler.codec.http.{HttpClientCodec, HttpServerCodec}
@@ -59,8 +59,9 @@ class Stream[Req: RequestType] extends CodecFactory[Req, StreamResponse] {
 
       override def newServerDispatcher(
           transport: Transport[Any, Any],
-          service: Service[Req, StreamResponse]): Closable =
-        new StreamServerDispatcher(transport, service)
+          service: Service[Req, StreamResponse],
+          init: ServerDispatcherInitializer
+      ): Closable = new StreamServerDispatcher(transport, service, init)
     }
   }
 

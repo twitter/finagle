@@ -5,8 +5,9 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle.cacheresolver.{CacheNode, CacheNodeGroup}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispatcher, 
+  SerialServerDispatcher, ServerDispatcherInitializer}
 import com.twitter.finagle.client.{ClientRegistry, DefaultPool, StackClient, StdStackClient, Transporter}
-import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialServerDispatcher, PipeliningDispatcher}
 import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
@@ -23,8 +24,8 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.hashing
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Duration, Future, Monitor}
 import com.twitter.util.registry.GlobalRegistry
+import com.twitter.util.{Closable, Duration, Future, Monitor}
 import scala.collection.mutable
 
 /**
@@ -369,8 +370,9 @@ object Memcached extends finagle.Client[Command, Response]
 
     protected def newDispatcher(
       transport: Transport[In, Out],
-      service: Service[Command, Response]
-    ): Closable = new SerialServerDispatcher(transport, service)
+      service: Service[Command, Response],
+      init: ServerDispatcherInitializer
+    ): Closable = new SerialServerDispatcher(transport, service, init)
 
     // Java-friendly forwarders
     //See https://issues.scala-lang.org/browse/SI-8905
@@ -378,6 +380,8 @@ object Memcached extends finagle.Client[Command, Response]
       new ServerAdmissionControlParams(this)
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams(this)
+    override val withServerDispatcher: ServerDispatcherParams[Server] =
+      new ServerDispatcherParams[Server](this)
 
     override def withLabel(label: String): Server = super.withLabel(label)
     override def withStatsReceiver(statsReceiver: StatsReceiver): Server =

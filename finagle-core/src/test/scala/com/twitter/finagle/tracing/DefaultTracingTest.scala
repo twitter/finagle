@@ -1,13 +1,14 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch._
 import com.twitter.finagle.netty3._
+import com.twitter.finagle.param.ReqRepToTraceId
 import com.twitter.finagle.server._
+import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Charsets
@@ -37,6 +38,12 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
+  val serviceTransport: (Transport[String, String], Service[String, String],
+    ServerDispatcherInitializer) => Closable = 
+        (t: Transport[String, String], s: Service[String, String], 
+          sdi: ServerDispatcherInitializer) => 
+          new SerialServerDispatcher(t, s, sdi)
+
   /**
    * Ensure all annotations have the same TraceId (unique to server and client though)
    * Ensure core annotations are present and properly ordered
@@ -56,6 +63,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
     assert(serverTracer.map(_.traceId).toSet.size == 1)
     assert(clientTracer.map(_.traceId).toSet.size == 1)
+
 
     assertAnnotationsInOrder(combinedTracer.toSeq, Seq(
       Annotation.ServiceName("theClient"),
