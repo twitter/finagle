@@ -22,7 +22,7 @@ class IdentityStreamTransportTest extends FunSuite {
     import ctx._
 
     out.offer(0)
-    assert(Await.result(identityTransport.read(), 5.seconds) == ((0, Future.Done)))
+    assert(Await.result(identityTransport.read(), 5.seconds) == Multi(0, Future.Done))
   }
 
   test("reads one object at a time from the underlying transport") {
@@ -31,8 +31,8 @@ class IdentityStreamTransportTest extends FunSuite {
 
     out.offer(0)
     out.offer(1)
-    assert(Await.result(identityTransport.read(), 5.seconds) == ((0, Future.Done)))
-    assert(Await.result(identityTransport.read(), 5.seconds) == ((1, Future.Done)))
+    assert(Await.result(identityTransport.read(), 5.seconds) == Multi(0, Future.Done))
+    assert(Await.result(identityTransport.read(), 5.seconds) == Multi(1, Future.Done))
   }
 
   test("writes one object at a time to the underlying transport") {

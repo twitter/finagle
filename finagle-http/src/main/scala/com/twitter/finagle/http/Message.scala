@@ -423,6 +423,8 @@ abstract class Message {
     }
   }
 
+  private[http] def isKeepAlive: Boolean = HttpHeaders.isKeepAlive(httpMessage)
+
   protected[finagle] def headers(): HttpHeaders =
     httpMessage.headers()
 

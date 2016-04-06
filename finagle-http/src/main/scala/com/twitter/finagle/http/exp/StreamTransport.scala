@@ -7,11 +7,17 @@ import java.net.SocketAddress
 import java.security.cert.Certificate
 
 /**
+ * A multi-part object with a single read handle, and a future that is satisfied
+ * when the handle is fully materialized.
+ */
+private[finagle] case class Multi[A](readHandle: A, onFinish: Future[Unit])
+
+/**
  * A stream transport bridges the idea that a single object might represent
  * multiple underlying streamed pieces, and we may want to track both the start
  * and the finish.
  */
-private[finagle] trait StreamTransport[In, Out] extends Transport[In, (Out, Future[Unit])] {
+private[finagle] trait StreamTransport[In, Out] extends Transport[In, Multi[Out]] {
 
   /**
    * Writes a multipart object to the wire, where the [[Future]] is satisfied
@@ -26,10 +32,12 @@ private[finagle] trait StreamTransport[In, Out] extends Transport[In, (Out, Futu
    * read off of, and the inner [[Future]] is satisfied once the read handle has
    * finished writing the entire stream off the wire.
    */
-  def read(): Future[(Out, Future[Unit])]
+  def read(): Future[Multi[Out]]
 }
 
-private[finagle] abstract class StreamTransportProxy[In, Out](self: Transport[_, _]) extends StreamTransport[In, Out] {
+private[finagle] abstract class StreamTransportProxy[In, Out](self: Transport[_, _])
+  extends StreamTransport[In, Out] {
+
   def status: Status = self.status
   val onClose: Future[Throwable] = self.onClose
   def localAddress: SocketAddress = self.localAddress

@@ -3,7 +3,7 @@ package com.twitter.finagle.http.netty
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
 import com.twitter.finagle.http.{Request, Response, Message, BadHttpRequest, BadRequest}
 import com.twitter.finagle.http.ReaderUtils.{readChunk, streamChunks}
-import com.twitter.finagle.http.exp.StreamTransportProxy
+import com.twitter.finagle.http.exp.{StreamTransportProxy, Multi}
 import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
@@ -23,13 +23,13 @@ private[finagle] class Netty3StreamTransport[
   extends StreamTransportProxy[In, Out](rawTransport) {
 
   private[this] val transport = Transport.cast[NettyIn, NettyOut](rawTransport)
-  private[this] val readFn: NettyOut => Future[(Out, Future[Unit])] = {
+  private[this] val readFn: NettyOut => Future[Multi[Out]] = {
     case res if !res.isChunked =>
       val reader = BufReader(ChannelBufferBuf.Owned(res.getContent))
-      Future.value((mkMessage(res, reader), Future.Done))
+      Future.value(Multi(mkMessage(res, reader), Future.Done))
     case res =>
       val coll: Reader with Future[Unit] = Transport.collate(transport, readChunk)
-      Future.value((mkMessage(res, coll), coll))
+      Future.value(Multi(mkMessage(res, coll), coll))
   }
 
   def write(msg: In): Future[Unit] = {
@@ -38,7 +38,7 @@ private[finagle] class Netty3StreamTransport[
     }
   }
 
-  def read(): Future[(Out, Future[Unit])] = {
+  def read(): Future[Multi[Out]] = {
     transport.read().flatMap(readFn)
   }
 }

@@ -2,6 +2,7 @@ package com.twitter.finagle.http.netty
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
+import com.twitter.finagle.http.exp.Multi
 import com.twitter.finagle.http.{Request, Status, Version}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.{Buf, Charsets}
@@ -38,7 +39,7 @@ class Netty3StreamTransportTest extends FunSuite {
     import ctx._
 
     out.offer(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
-    val (rep, future) = Await.result(transport.read(), 5.seconds)
+    val Multi(rep, future) = Await.result(transport.read(), 5.seconds)
     assert(rep.version == Version.Http11)
     assert(rep.status == Status.Ok)
     assert(!rep.isChunked)
@@ -101,7 +102,7 @@ class Netty3StreamTransportTest extends FunSuite {
 
     // enqueue the headers, which lets them know to read, and gives them a handle
     out.offer(nettyRep)
-    val (rep, future) = Await.result(transport.read(), 5.seconds)
+    val Multi(rep, future) = Await.result(transport.read(), 5.seconds)
     assert(rep.version == Version.Http11)
     assert(rep.status == Status.Ok)
     assert(rep.isChunked)

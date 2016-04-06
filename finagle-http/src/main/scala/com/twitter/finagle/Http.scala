@@ -1,21 +1,33 @@
 package com.twitter.finagle
 
+import com.twitter.app.GlobalFlag
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
-import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
+import com.twitter.finagle.http.exp.{StreamTransport, HttpTransport => ExpHttpTransport,
+  HttpClientDispatcher => ExpHttpClientDispatcher}
+import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter,
+  ServerContextFilter}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
+import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _,
+  Tracer => _, _}
 import com.twitter.finagle.server._
 import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
+import com.twitter.io.Reader
 import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
 import java.net.SocketAddress
+
+/**
+ * NOTE: DO NOT USE, will be removed
+ */
+object expStreamTransport extends GlobalFlag(false, "experimental http stream transport, WILL BE REMOVED")
 
 /**
  * A rich client with a *very* basic URL fetcher. (It does not handle
@@ -47,8 +59,7 @@ object Http extends Client[Request, Response] with HttpRichClient
      * the transporter, useful for changing underlying http implementations
      */
     private[finagle] case class ParameterizableTransporter(
-      transporterFn: Stack.Params => Transporter[Any, Any]) {
-    }
+        transporterFn: Stack.Params => Transporter[Any, Any])
 
     private[finagle] implicit object ParameterizableTransporter extends
         Stack.Param[ParameterizableTransporter] {
@@ -161,6 +172,11 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
+    protected def newStreamTransport(
+      transport: Transport[Any, Any]
+    ): StreamTransport[Request, Response] =
+      new ExpHttpTransport(new Netty3ClientStreamTransport(transport))
+
     protected def newTransporter(): Transporter[Any, Any] =
       params[param.ParameterizableTransporter].transporterFn(params)
 
@@ -170,7 +186,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): Client = copy(stack, params)
 
     protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] = {
-      val dispatcher = new HttpClientDispatcher(
+      val dispatcher = if (expStreamTransport()) new ExpHttpClientDispatcher(
+        newStreamTransport(transport),
+        params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+      ) else new HttpClientDispatcher(
         transport,
         params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
