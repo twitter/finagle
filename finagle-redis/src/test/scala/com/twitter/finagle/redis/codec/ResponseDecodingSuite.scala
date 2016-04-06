@@ -1,14 +1,9 @@
 package com.twitter.finagle.redis.naggati
 
-import com.twitter.finagle.redis.{ClientError, ServerError}
+import com.twitter.finagle.redis.ServerError
 import com.twitter.finagle.redis.util._
-import com.twitter.util.Time
-import org.jboss.netty.buffer.ChannelBuffer
 import com.twitter.finagle.redis.protocol.{BulkReply, ErrorReply, IntegerReply, MBulkReply,
-                                          StatusReply, ReplyCodec}
-import com.twitter.finagle.redis.util.StringToChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffer
-import org.scalatest.FunSuite
+                                          StatusReply}
 import com.twitter.finagle.redis.protocol.{EmptyBulkReply, EmptyMBulkReply}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -348,7 +343,7 @@ final class ResponseDecodingSuite extends RedisResponseTest {
   private[this] def decomposeSingleElemDecoding(reply: List[AnyRef]): (String, String) =
     reply match {
       case reply :: Nil => reply match {
-        case BulkReply(msg) => (CBToString(msg), "")
+        case BulkReply(msg) => (BufToString(msg), "")
         case _ => ("USE FAILURE MSG, NOT THIS VALUE", "Expected BulkReply, got something else")
       }
       case _ => ("USE FAILURE MSG, NOT THIS VALUE", "Found no or multiple reply lines")
@@ -358,11 +353,11 @@ final class ResponseDecodingSuite extends RedisResponseTest {
     reply match {
       case fooR :: booR :: Nil => {
         val fooMsg = fooR match {
-          case BulkReply(msg) => CBToString(msg)
+          case BulkReply(msg) => BufToString(msg)
           case _              => "Expected Bulk Reply"
         }
         val barMsg = booR match {
-          case BulkReply(msg) => CBToString(msg)
+          case BulkReply(msg) => BufToString(msg)
           case _              => "Expected Bulk Reply"
         }
         (fooMsg, barMsg)

@@ -2,6 +2,7 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.dispatch.ServerDispatcherInitializer
+import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http
 import com.twitter.finagle.http.{BadHttpRequest, Request, Response, Version}
 import com.twitter.finagle.netty3.ChannelBufferBuf

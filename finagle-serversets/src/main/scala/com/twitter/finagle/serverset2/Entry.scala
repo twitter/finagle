@@ -2,7 +2,6 @@ package com.twitter.finagle.serverset2
 
 import collection.JavaConverters._
 import collection.mutable.ArrayBuffer
-import java.net.InetSocketAddress
 
 import com.twitter.util.Memoize
 

@@ -1,9 +1,7 @@
 package com.twitter.finagle.netty4
 
-
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.dispatch.SerialServerDispatcher
-//import com.twitter.finagle.netty4.transport.SocketChannelTransport CSL-2050
 import com.twitter.finagle.param.{Stats, Label}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
@@ -21,7 +19,6 @@ import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
-
 
 @RunWith(classOf[JUnitRunner])
 class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatience {

@@ -5,9 +5,9 @@ import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
-import com.twitter.finagle.redis.util.{StringToChannelBuffer}
-import com.twitter.util.{Await, Future, Time}
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.finagle.redis.util.{StringToBuf, StringToChannelBuffer}
+import com.twitter.io.Buf
+import com.twitter.util.{Await, Time}
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -20,14 +20,14 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
       assert(Await.result(client(Set(moo, baz))) == OKStatusReply)
-      assert(Await.result(client(Del(List(foo, moo)))) == IntegerReply(2))
+      assert(Await.result(client(Del(List(bufFoo, bufMoo)))) == IntegerReply(2))
     }
   }
 
   test("DELETE should throw ClientError when given null list", ClientServerTest, RedisTest) {
     withRedisClient { client =>
       intercept[ClientError] {
-        Await.result(client(Del(null:List[ChannelBuffer])))
+        Await.result(client(Del(null:List[Buf])))
       }
     }
   }
@@ -35,7 +35,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
   test("DELETE should throw ClientError when given an empty List", ClientServerTest, RedisTest) {
     withRedisClient { client =>
       intercept[ClientError] {
-        Await.result(client(Del(List[ChannelBuffer]())))
+        Await.result(client(Del(List[Buf]())))
       }
     }
   }
@@ -44,17 +44,19 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     withRedisClient { client =>
       val k = StringToChannelBuffer("mykey")
       val v = StringToChannelBuffer("10")
+      val key = StringToBuf("mykey")
+      val value = StringToBuf("10")
       assert(Await.result(client(Set(k, v))) == OKStatusReply)
-      assert(Await.result(client(Dump(k))).isInstanceOf[BulkReply])
-      assert(Await.result(client(Del(List(k)))) == IntegerReply(1))
-      assert(Await.result(client(Dump(k))) == EmptyBulkReply())
+      assert(Await.result(client(Dump(key))).isInstanceOf[BulkReply])
+      assert(Await.result(client(Del(List(key)))) == IntegerReply(1))
+      assert(Await.result(client(Dump(key))) == EmptyBulkReply())
     }
   }
 
   test("EXISTS should return an IntegerReply of 0 for a non-existent key",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Exists(string2ChanBuf("nosuchkey")))) == IntegerReply(0))
+      assert(Await.result(client(Exists(StringToBuf("nosuchkey")))) == IntegerReply(0))
     }
   }
 
@@ -62,7 +64,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
-      assert(Await.result(client(Exists(foo))) == IntegerReply(1))
+      assert(Await.result(client(Exists(bufFoo))) == IntegerReply(1))
     }
   }
 
@@ -70,7 +72,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       intercept[ClientError] {
-        Await.result(client(Exists(null:ChannelBuffer)))
+        Await.result(client(Exists(null:Buf)))
       }
     }
   }
@@ -78,7 +80,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
   test("EXPIRE should return an IntegerReply of 0 to verify a INVALID timeout was set",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Expire(baz, 30))) == IntegerReply(0))
+      assert(Await.result(client(Expire(bufBaz, 30))) == IntegerReply(0))
     }
   }
 
@@ -86,14 +88,14 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
-      assert(Await.result(client(Expire(foo, 30))) == IntegerReply(1))
+      assert(Await.result(client(Expire(bufFoo, 30))) == IntegerReply(1))
     }
   }
 
   test("EXPIRE should throw ClientError when given a null key", ClientServerTest, RedisTest) {
     withRedisClient { client =>
       intercept[ClientError] {
-        Await.result(client(Expire(null:ChannelBuffer, 30)))
+        Await.result(client(Expire(null:Buf, 30)))
       }
     }
   }
@@ -101,7 +103,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
   test("EXPIREAT should return an IntegerReply of 0 to verify a INVALID timeout was set",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(ExpireAt(boo, Time.now + 3600.seconds))) == IntegerReply(0))
+      assert(Await.result(client(ExpireAt(bufBoo, Time.now + 3600.seconds))) == IntegerReply(0))
     }
   }
 
@@ -109,14 +111,14 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
-      assert(Await.result(client(ExpireAt(foo, Time.now + 3600.seconds))) == IntegerReply(1))
+      assert(Await.result(client(ExpireAt(bufFoo, Time.now + 3600.seconds))) == IntegerReply(1))
     }
   }
 
   test("EXPIREAT should throw ClientError when given a null key", ClientServerTest, RedisTest) {
     withRedisClient { client =>
       intercept[ClientError] {
-        Await.result(client(ExpireAt(null:ChannelBuffer, Time.now + 3600.seconds)))
+        Await.result(client(ExpireAt(null:Buf, Time.now + 3600.seconds)))
       }
     }
   }
@@ -125,19 +127,19 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
-      assertMBulkReply(client(Keys(string2ChanBuf("*"))), List("foo"), true)
+      assertMBulkReply(client(Keys(StringToBuf("*"))), List("foo"), true)
     }
   }
 
   test("MOVE should throw ClientError when given an empty or null key",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val toDBDoesNotMatter = string2ChanBuf("71")
-      val blankKey = string2ChanBuf("")
+      val toDBDoesNotMatter = StringToBuf("71")
+      val blankKey = StringToBuf("")
       intercept[ClientError] {
         Await.result(client(Move(blankKey, toDBDoesNotMatter)))
       }
-      val nullKey = null: ChannelBuffer
+      val nullKey = null: Buf
       intercept[ClientError] {
         Await.result(client(Move(nullKey, toDBDoesNotMatter)))
       }
@@ -147,13 +149,13 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
   test("MOVE should throw ClientError when given an empty or null toDatabase",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val blankToDb = string2ChanBuf("")
+      val blankToDb = StringToBuf("")
       intercept[ClientError] {
-        Await.result(client(Move(moo, blankToDb)))
+        Await.result(client(Move(bufMoo, blankToDb)))
       }
-      val nullToDb = null:ChannelBuffer
+      val nullToDb = null:Buf
       intercept[ClientError] {
-        Await.result(client(Move(moo, nullToDb)))
+        Await.result(client(Move(bufMoo, nullToDb)))
       }
     }
   }
@@ -164,10 +166,10 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
       val fromDb = 14
       val toDb = 15
       assert(Await.result(client(Select(toDb))) == OKStatusReply)
-      Await.result(client(Del(List(baz))))
+      Await.result(client(Del(List(bufBaz))))
       assert(Await.result(client(Select(fromDb))) == OKStatusReply)
       assert(Await.result(client(Set(baz, bar))) == OKStatusReply)
-      assert(Await.result(client(Move(baz, string2ChanBuf(toDb.toString)))) == IntegerReply(1))
+      assert(Await.result(client(Move(bufBaz, StringToBuf(toDb.toString)))) == IntegerReply(1))
     }
   }
 
@@ -175,15 +177,15 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       Await.result(client(Select(1)))
-      val toDb = string2ChanBuf("14")
-      assert(Await.result(client(Move(moo, toDb))) == IntegerReply(0))
+      val toDb = StringToBuf("14")
+      assert(Await.result(client(Move(bufMoo, toDb))) == IntegerReply(0))
     }
   }
 
   test("PERSIST should return an IntegerReply of 0 when no key is found",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Persist(string2ChanBuf("nosuchKey")))) == IntegerReply(0))
+      assert(Await.result(client(Persist(StringToBuf("nosuchKey")))) == IntegerReply(0))
     }
   }
 
@@ -191,7 +193,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
-      assert(Await.result(client(Persist(foo))) == IntegerReply(0))
+      assert(Await.result(client(Persist(bufFoo))) == IntegerReply(0))
     }
   }
 
@@ -199,10 +201,10 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(baz, bar))) == OKStatusReply)
-      assert(Await.result(client(Expire(baz, 30))) == IntegerReply(1),
+      assert(Await.result(client(Expire(bufBaz, 30))) == IntegerReply(1),
         "FATAL could not expire existing key")
 
-      assert(Await.result(client(Persist(baz))) == IntegerReply(1))
+      assert(Await.result(client(Persist(bufBaz))) == IntegerReply(1))
     }
   }
 
@@ -210,20 +212,21 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       val originalKeyName = string2ChanBuf("rename1")
+      val keyName = StringToBuf("rename1")
       assert(Await.result(client(Set(originalKeyName, bar))) == OKStatusReply)
 
       assert(
-        Await.result(client(Rename(originalKeyName, originalKeyName))).isInstanceOf[ErrorReply])
+        Await.result(client(Rename(keyName, keyName))).isInstanceOf[ErrorReply])
     }
   }
 
   test("RENAME should return an ErrorReply when renaming a key that does not exist",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val noSuchKey = string2ChanBuf("noSuchKey")
+      val noSuchKey = StringToBuf("noSuchKey")
       assert(
         Await.result(
-          client(Rename(noSuchKey, string2ChanBuf("DOES NOT MATTER")))).isInstanceOf[ErrorReply])
+          client(Rename(noSuchKey, StringToBuf("DOES NOT MATTER")))).isInstanceOf[ErrorReply])
     }
   }
 
@@ -231,9 +234,10 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       val rename1 = string2ChanBuf("rename1")
-      val rename2 = string2ChanBuf("rename2")
+      val rename = StringToBuf("rename1")
+      val rename2 = StringToBuf("rename2")
       assert(Await.result(client(Set(rename1, bar))) == OKStatusReply)
-      assert(Await.result(client(Rename(rename1, rename2))) == OKStatusReply)
+      assert(Await.result(client(Rename(rename, rename2))) == OKStatusReply)
     }
   }
 
@@ -243,18 +247,18 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
       val originalKeyName = string2ChanBuf("rename1")
       assert(Await.result(client(Set(originalKeyName, bar))) == OKStatusReply)
       assert(
-        Await.result(client(RenameNx(originalKeyName, originalKeyName))).isInstanceOf[ErrorReply])
+        Await.result(client(RenameNx(StringToBuf("rename1"), StringToBuf("rename1")))).isInstanceOf[ErrorReply])
     }
   }
 
   test("RENAMENX should return an ErrorReply when renaming a key that does not exist",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val noSuchKey = string2ChanBuf("noSuchKey")
+      val noSuchKey = StringToBuf("noSuchKey")
 
       assert(
         Await.result(
-          client(RenameNx(noSuchKey, string2ChanBuf("DOES NOT MATTER")))).isInstanceOf[ErrorReply])
+          client(RenameNx(noSuchKey, StringToBuf("DOES NOT MATTER")))).isInstanceOf[ErrorReply])
     }
   }
 
@@ -262,20 +266,22 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       val rename1 = string2ChanBuf("rename1")
-      val rename2 = string2ChanBuf("rename2")
+      val rename = StringToBuf("rename1")
+      val rename2 = StringToBuf("rename2")
       assert(Await.result(client(Set(rename1, bar))) == OKStatusReply)
-      assert(Await.result(client(RenameNx(rename1, rename2))) == IntegerReply(1))
+      assert(Await.result(client(RenameNx(rename, rename2))) == IntegerReply(1))
     }
   }
 
   test("RENAMENX should return an IntegerReply of 0 to verify a key rename did not occur when the" +
     " the new key name already exists", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val rename1 = string2ChanBuf("rename1")
-      assert(Await.result(client(Set(rename1, bar))) == OKStatusReply)
+      val rename = string2ChanBuf("rename1")
+      val rename1 = StringToBuf("rename1")
+      assert(Await.result(client(Set(rename, bar))) == OKStatusReply)
 
-      val rename2 = string2ChanBuf("rename2")
-      assert(Await.result(client(Set(rename2, baz))) == OKStatusReply)
+      val rename2 = StringToBuf("rename2")
+      assert(Await.result(client(Set(rename, baz))) == OKStatusReply)
 
       assert(Await.result(client(RenameNx(rename1, rename2))) == IntegerReply(0))
     }
@@ -289,7 +295,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
 
   test("TTL should throw a ClientError when given an empty key", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      val emptyKey = string2ChanBuf("")
+      val emptyKey = StringToBuf("")
 
       intercept[ClientError] {
         Await.result(client(Ttl(emptyKey)))
@@ -301,7 +307,7 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
-      assert(Await.result(client(Ttl(foo))) == IntegerReply(-1))
+      assert(Await.result(client(Ttl(bufFoo))) == IntegerReply(-1))
     }
   }
 
@@ -309,14 +315,14 @@ final class KeyClientServerIntegrationSuite extends RedisClientServerIntegration
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
       assert(Await.result(client(Set(foo, bar))) == OKStatusReply)
-      assert(Await.result(client(Type(foo))) == StatusReply("string"))
+      assert(Await.result(client(Type(bufFoo))) == StatusReply("string"))
     }
   }
 
   test("TYPE should return a StatusReply(\"none\") when given a key with no assicated value",
     ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(Type(moo))) == StatusReply("none"))
+      assert(Await.result(client(Type(bufMoo))) == StatusReply("none"))
     }
   }
 }

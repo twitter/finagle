@@ -261,4 +261,26 @@ private[stats] class BucketedHistogram(
   def average: Double =
     if (num == 0) 0.0 else total/num.toDouble
 
+  /**
+   * Returns a seq containing nonzero values of the histogram.
+   * The sequence contains instances of BucketAndCount which are
+   * the bucket's upper and lower limits and a count of the number 
+   * of times a value in range of the limits was added.
+   */
+  def bucketAndCounts: Seq[BucketAndCount] = {
+    counts.zipWithIndex.collect {
+      case (count, idx) if count != 0 =>
+        // counts is 1 bucket longer than limits
+        // The last bucket of counts tracks added
+        // values greater than or equal to Int.MaxValue
+        val upperLimit = if (idx != limits.length) {
+          limits(idx)
+        } else Int.MaxValue
+        val lowerLimit = if (idx != 0){
+          limits(idx - 1)
+        } else 0
+        BucketAndCount(lowerLimit, upperLimit, count)
+    }.toSeq
+  }
+
 }

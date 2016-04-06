@@ -123,6 +123,7 @@ object Balancers {
    *  1. The concurrent load, measured over a window specified by
    *     `smoothWin`, to each service stays within the load band, delimited
    *     by `lowLoad` and `highLoad`.
+   *
    *  2. Services receive load proportional to the ratio of their
    *     weights.
    *
@@ -153,6 +154,32 @@ object Balancers {
           gauge.remove()
           super.close(when)
         }
+      }
+    }
+  }
+
+  /**
+   * A simple round robin balancer that chooses the next backend in
+   * the list for each request.
+   *
+   * WARNING: Unlike other balancers available in finagle, this does
+   * not take latency into account and will happily direct load to
+   * slow or oversubscribed services. We recommend using one of the
+   * other load balancers for typical production use.
+   *
+   * @param maxEffort the maximum amount of "effort" we're willing to
+   * expend on a load balancing decision without reweighing.
+   */
+  def roundRobin(
+    maxEffort: Int = MaxEffort
+  ): LoadBalancerFactory = new LoadBalancerFactory {
+    def newBalancer[Req, Rep](
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+      sr: StatsReceiver,
+      exc: NoBrokersAvailableException
+    ): ServiceFactory[Req, Rep] = {
+      new RoundRobinBalancer(endpoints, sr, exc) {
+        private[this] val gauge = sr.addGauge("round_robin")(1)
       }
     }
   }

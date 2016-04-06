@@ -70,7 +70,7 @@ class ChannelTransportTest extends FunSuite
   test("write (failure)") {
     val e = new Exception()
     channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = {
+      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
         // we fail every single write to the pipeline
         promise.setFailure(e)
       }
@@ -82,22 +82,15 @@ class ChannelTransportTest extends FunSuite
   }
 
   test("write (ok)") {
-    channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = {
-        // we succeed every single write to the pipeline
-        promise.setSuccess()
-      }
-    })
-
     forAll { s: String =>
-      assert(transport.write(s).poll == Some(Return.Unit))
+      assert(transport.write(s).map(_ => channel.readOutbound[String]).poll == Some(Return(s)))
     }
   }
 
   test("write (interrupted by caller)") {
     var p: Option[ChannelPromise] = None
     channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = {
+      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
         // we store pending promise to make sure it's canceled
         p = Some(promise)
       }
@@ -114,7 +107,7 @@ class ChannelTransportTest extends FunSuite
 
   test("write (canceled by callee)") {
     channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
-      override def write(ctx: ChannelHandlerContext, msg: scala.Any, promise: ChannelPromise): Unit = {
+      override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
         // we cancel every single write
         promise.cancel(false /*mayInterruptIfRunning*/)
       }
@@ -160,7 +153,7 @@ class ChannelTransportTest extends FunSuite
     assert(!transport.onClose.isDefined)
 
     Await.ready(transport.close(), timeout)
-    intercept[ChannelClosedException](throw Await.result(transport.onClose, timeout))
+    assert(Await.result(transport.onClose, timeout).isInstanceOf[ChannelClosedException])
     assert(transport.status == Status.Closed)
     assert(!channel.isOpen)
   }

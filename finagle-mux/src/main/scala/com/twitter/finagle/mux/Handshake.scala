@@ -3,7 +3,6 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Failure, Status}
-import com.twitter.io.Charsets
 import com.twitter.util.{Future, Return, Throw, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
@@ -141,7 +140,7 @@ private[finagle] object Handshake {
       }
 
     handshake.onFailure { _ => msgTrans.close() }
-    new DeferredTransport(handshake)
+    new DeferredTransport(msgTrans, handshake)
   }
 
   /**
@@ -211,32 +210,36 @@ private[finagle] object Handshake {
       }
 
     handshake.onFailure { _ => msgTrans.close() }
-    new DeferredTransport(handshake)
+    new DeferredTransport(msgTrans, handshake)
   }
 }
 
 /**
- * Implements a [[Transport]] in terms of a future transport (`trans`). All async
+ * Implements a [[Transport]] in terms of a future transport. All async
  * operations are composed via future composition and callers can safely
- * interrupt the returned Futures without affecting the result of `trans`.
- * The synchronous operations return sane defaults until `trans` is resolved.
+ * interrupt the returned futures without affecting the result of `underlying`.
+ *
+ * @param init the transport to proxy synchronous operations to.
+ *
+ * @param underlying the transport which will be used once its containing future
+ * is satisfied.
  */
-private class DeferredTransport(trans: Future[Transport[Message, Message]])
+private class DeferredTransport(
+    init: Transport[Message, Message],
+    underlying: Future[Transport[Message, Message]])
   extends Transport[Message, Message] {
 
-  import DeferredTrans._
-
-  // we create a derivative promise while `trans` is not defined
+  // we create a derivative promise while `underlying` is not defined
   // because the transport is multiplexed and interrupting on one
   // stream shouldn't affect the result of the handshake.
-  private[this] def gate() = trans.interruptible()
+  private[this] def gate() = underlying.interruptible()
 
   def write(msg: Message): Future[Unit] = gate().flatMap(_.write(msg))
 
   private[this] val read0: Transport[Message, Message] => Future[Message] = _.read()
   def read(): Future[Message] = gate().flatMap(read0)
 
-  def status: Status = trans.poll match {
+  def status: Status = underlying.poll match {
     case Some(Return(t)) => t.status
     case None => Status.Busy
     case _ => Status.Closed
@@ -244,24 +247,9 @@ private class DeferredTransport(trans: Future[Transport[Message, Message]])
 
   val onClose: Future[Throwable] = gate().flatMap(_.onClose)
 
-  def localAddress: SocketAddress = trans.poll match {
-    case Some(Return(t)) => t.localAddress
-    case _ => UnknownSocketAddress
-  }
-
-  def remoteAddress: SocketAddress = trans.poll match {
-    case Some(Return(t)) => t.remoteAddress
-    case _ => UnknownSocketAddress
-  }
-
-  def peerCertificate: Option[Certificate] = trans.poll match {
-    case Some(Return(t)) => t.peerCertificate
-    case _ => None
-  }
+  def localAddress: SocketAddress = init.localAddress
+  def remoteAddress: SocketAddress = init.remoteAddress
+  def peerCertificate: Option[Certificate] = init.peerCertificate
 
   def close(deadline: Time): Future[Unit] = gate().flatMap(_.close(deadline))
-}
-
-private object DeferredTrans {
-  object UnknownSocketAddress extends SocketAddress
 }

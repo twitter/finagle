@@ -13,8 +13,7 @@ private[finagle] object TraceInitializerFilter {
     val description = "Initialize the tracing system"
     def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
       val param.Tracer(tracer) = _tracer
-      val traceInitializer = new TraceInitializerFilter[Req,Rep](tracer, newId)
-      traceInitializer andThen next
+      new TraceInitializerFilter[Req,Rep](tracer, newId).andThen(next)
     }
   }
 
@@ -142,12 +141,16 @@ object ServerTracingFilter {
     finagleVersion)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ServerTracingFilter.role
       val description = "Report finagle information and server recv/send events"
-      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
-        val param.Label(label) = _label
-        TracingFilter[Req, Rep](label) andThen next
+      def make(_label: param.Label, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val param.Label(label) = _label
+          TracingFilter[Req, Rep](label).andThen(next)
+        }
       }
     }
 }

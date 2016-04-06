@@ -4,7 +4,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.conversions.storage.intToStorageUnitableWholeNumber
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, DefaultStatsReceiver}
-import com.twitter.util.{Duration, Stopwatch, StorageUnit, Timer, Time, NilStopwatch}
+import com.twitter.util.{Duration, Stopwatch, StorageUnit, NilStopwatch}
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger

@@ -16,7 +16,6 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
 import java.net.SocketAddress
-import org.jboss.netty.channel.Channel
 
 /**
  * A rich client with a *very* basic URL fetcher. (It does not handle
@@ -44,6 +43,54 @@ object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
   object param {
+    /**
+     * the transporter, useful for changing underlying http implementations
+     */
+    private[finagle] case class ParameterizableTransporter(
+      transporterFn: Stack.Params => Transporter[Any, Any]) {
+    }
+
+    private[finagle] implicit object ParameterizableTransporter extends
+        Stack.Param[ParameterizableTransporter] {
+      val default = com.twitter.finagle.http.netty.Netty3HttpTransporter
+    }
+
+    /**
+     * the listener, useful for changing underlying http implementations
+     */
+    private[finagle] case class ParameterizableListener(
+      listenerFn: Stack.Params => Listener[Any, Any]) {
+    }
+
+    private[finagle] implicit object ParameterizableListener extends
+      Stack.Param[ParameterizableListener] {
+      val default = com.twitter.finagle.http.netty.Netty3HttpListener
+    }
+
+    /**
+     * when streaming, the maximum size of http chunks.
+     */
+    case class MaxChunkSize(size: StorageUnit)
+    implicit object MaxChunkSize extends Stack.Param[MaxChunkSize] {
+      val default = MaxChunkSize(8.kilobytes)
+    }
+
+    /**
+     * the maximum size of all headers.
+     */
+    case class MaxHeaderSize(size: StorageUnit)
+    implicit object MaxHeaderSize extends Stack.Param[MaxHeaderSize] {
+      val default = MaxHeaderSize(8.kilobytes)
+    }
+
+    /**
+     * the maximum size of the initial line.
+     */
+    case class MaxInitialLineSize(size: StorageUnit)
+    implicit object MaxInitialLineSize extends Stack.Param[MaxInitialLineSize] {
+      val default = MaxInitialLineSize(4.kilobytes)
+    }
+
     case class MaxRequestSize(size: StorageUnit) {
       require(size < 2.gigabytes,
         s"MaxRequestSize should be less than 2 Gb, but was $size")
@@ -74,19 +121,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     implicit object CompressionLevel extends Stack.Param[CompressionLevel] {
       val default = CompressionLevel(-1)
     }
-
-    private[Http] def applyToCodec(
-      params: Stack.Params, codec: http.Http): http.Http =
-        codec
-          .maxRequestSize(params[MaxRequestSize].size)
-          .maxResponseSize(params[MaxResponseSize].size)
-          .streaming(params[Streaming].enabled)
-          .decompressionEnabled(params[Decompression].enabled)
-          .compressionLevel(params[CompressionLevel].level)
   }
 
   // Only record payload sizes when streaming is disabled.
-  private[this] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
+  private[finagle] val nonChunkedPayloadSize: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module2[param.Streaming, Stats, ServiceFactory[Request, Response]] {
       override def role: Stack.Role = PayloadSizeFilter.Role
       override def description: String = PayloadSizeFilter.Description
@@ -106,6 +144,8 @@ object Http extends Client[Request, Response] with HttpRichClient
   object Client {
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
+        .replace(StackClient.Role.prepConn, DelayedRelease.module)
+        .replace(StackClient.Role.prepFactory, DelayedRelease.module)
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
         .prepend(http.TlsFilter.module)
         .prepend(nonChunkedPayloadSize)
@@ -121,16 +161,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
-    protected def newTransporter(): Transporter[Any, Any] = {
-      val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
-      val codec = param.applyToCodec(params, http.Http())
-        .client(ClientCodecConfig(label))
-      val Stats(stats) = params[Stats]
-      val newTransport = (ch: Channel) => codec.newClientTransport(ch, stats)
-      Netty3Transporter(
-        codec.pipelineFactory,
-        params + Netty3Transporter.TransportFactory(newTransport))
-    }
+    protected def newTransporter(): Transporter[Any, Any] =
+      params[param.ParameterizableTransporter].transporterFn(params)
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
@@ -154,20 +186,57 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     def withTlsWithoutValidation: Client = withTransport.tlsWithoutValidation
 
+    def withMaxHeaderSize(size: StorageUnit): Client =
+      configured(param.MaxHeaderSize(size))
+
+    /**
+     * Configures the maximum initial line length the client can
+     * receive from a server.
+     */
+    def withMaxInitialLineSize(size: StorageUnit): Client =
+      configured(param.MaxInitialLineSize(size))
+
+    /**
+     * Configures the maximum request size that the client can send.
+     */
     def withMaxRequestSize(size: StorageUnit): Client =
       configured(param.MaxRequestSize(size))
 
+    /**
+     * Configures the maximum response size that client can receive.
+     */
     def withMaxResponseSize(size: StorageUnit): Client =
       configured(param.MaxResponseSize(size))
 
+    /**
+     * Streaming allows applications to work with HTTP messages that have large
+     * (or infinite) content bodies. When this set to `true`, the message content is
+     * available through a [[com.twitter.io.Reader]], which gives the application a
+     * handle to the byte stream. If `false`, the entire message content is buffered
+     * into a [[com.twitter.io.Buf]].
+     */
     def withStreaming(enabled: Boolean): Client =
       configured(param.Streaming(enabled))
 
+    /**
+     * Enables decompression of http content bodies.
+     */
     def withDecompression(enabled: Boolean): Client =
       configured(param.Decompression(enabled))
 
+    /**
+     * The compression level to use. If passed the default value (-1) then it will use
+     * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]]
+     * which will compress text-like content-types with the default compression level (6).
+     * Otherwise, use [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]]
+     * for all content-types with specified compression level.
+     */
+
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
+
+    private[finagle] def withTransporter(transporter: param.ParameterizableTransporter): Client =
+      configured(transporter)
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
@@ -226,14 +295,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
-    protected def newListener(): Listener[Any, Any] = {
-      val com.twitter.finagle.param.Label(label) = params[com.twitter.finagle.param.Label]
-      val httpPipeline =
-        param.applyToCodec(params, http.Http())
-          .server(ServerCodecConfig(label, new SocketAddress{}))
-          .pipelineFactory
-      Netty3Listener(httpPipeline, params)
-    }
+    protected def newListener(): Listener[Any, Any] =
+      params[param.ParameterizableListener].listenerFn(params)
 
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response],
@@ -255,20 +318,50 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withTls(cfg: Netty3ListenerTLSConfig): Server =
       configured(Transport.TLSServerEngine(Some(cfg.newEngine)))
 
+    /**
+     * Configures the maximum request size this server can receive.
+     */
     def withMaxRequestSize(size: StorageUnit): Server =
       configured(param.MaxRequestSize(size))
 
+    /**
+     * Configures the maximum response size this server can send.
+     */
     def withMaxResponseSize(size: StorageUnit): Server =
       configured(param.MaxResponseSize(size))
 
+    /**
+     * Streaming allows applications to work with HTTP messages that have large
+     * (or infinite) content bodies. When this set to `true`, the message content is
+     * available through a [[com.twitter.io.Reader]], which gives the application a
+     * handle to the byte stream. If `false`, the entire message content is buffered
+     * into a [[com.twitter.io.Buf]].
+     */
     def withStreaming(enabled: Boolean): Server =
       configured(param.Streaming(enabled))
 
+    /**
+     * Enables decompression of http content bodies.
+     */
     def withDecompression(enabled: Boolean): Server =
       configured(param.Decompression(enabled))
 
+    /**
+     * The compression level to use. If passed the default value (-1) then it will use
+     * [[com.twitter.finagle.http.codec.TextualContentCompressor TextualContentCompressor]]
+     * which will compress text-like content-types with the default compression level (6).
+     * Otherwise, use [[org.jboss.netty.handler.codec.http.HttpContentCompressor HttpContentCompressor]]
+     * for all content-types with specified compression level.
+     */
     def withCompressionLevel(level: Int): Server =
       configured(param.CompressionLevel(level))
+
+    /**
+     * Configures the maximum initial http line length the server is
+     * willing to accept.
+     */
+    def withMaxInitialLineSize(size: StorageUnit): Server =
+      configured(param.MaxInitialLineSize(size))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

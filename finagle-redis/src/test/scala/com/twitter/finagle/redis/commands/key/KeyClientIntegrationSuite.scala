@@ -2,8 +2,10 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
+import com.twitter.io.Buf
 import com.twitter.util.Await
-import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.{BufToString, StringToBuf, StringToChannelBuffer}
+import java.util.Arrays
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -15,7 +17,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform the DEL command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
-      Await.result(client.del(Seq(foo)))
+      Await.result(client.dels(Seq(bufFoo)))
       assert(Await.result(client.get(foo)) == None)
     }
   }
@@ -24,13 +26,16 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val k = StringToChannelBuffer("mykey")
       val v = StringToChannelBuffer("10")
+      val key = StringToBuf("mykey")
+      val value = StringToBuf("10")
       val expectedBytes: Array[Byte] = Array(0, -64, 10, 6, 0, -8, 114, 63, -59, -5, -5, 95, 40)
 
       Await.result(client.set(k, v))
-      assert(Await.result(client.dump(k)).fold(fail("Expected result for DUMP"))(_.array) ==
-        expectedBytes)
-      Await.result(client.del(Seq(foo)))
-      assert(Await.result(client.dump(foo)) == None)
+      val actualResult =
+        Await.result(client.dump(key)).fold(fail("Expected result for DUMP"))(Buf.ByteArray.Owned.extract(_))
+      assert(Arrays.equals(actualResult, expectedBytes))
+      Await.result(client.dels(Seq(bufFoo)))
+      assert(Await.result(client.dump(bufFoo)) == None)
     }
   }
 
@@ -40,24 +45,24 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
       Await.result(client.set(baz, boo))
-      assert(CBToString(Await.result(client.scan(0, None, None)).apply(1)) == "baz")
+      assert(BufToString(Await.result(client.scans(0, None, None)).apply(1)) == "baz")
 
-      val withCount = Await.result(client.scan(0, Some(10), None))
-      assert(CBToString(withCount(0)) == "0")
-      assert(CBToString(withCount(1)) == "baz")
-      assert(CBToString(withCount(2)) == "foo")
+      val withCount = Await.result(client.scans(0, Some(10), None))
+      assert(BufToString(withCount(0)) == "0")
+      assert(BufToString(withCount(1)) == "baz")
+      assert(BufToString(withCount(2)) == "foo")
 
-      val pattern = StringToChannelBuffer("b*")
-      val withPattern = Await.result(client.scan(0, None, Some(pattern)))
-      assert(CBToString(withPattern(0)) == "0")
-      assert(CBToString(withPattern(1)) == "baz")
+      val pattern = StringToBuf("b*")
+      val withPattern = Await.result(client.scans(0, None, Some(pattern)))
+      assert(BufToString(withPattern(0)) == "0")
+      assert(BufToString(withPattern(1)) == "baz")
     }
   }
 
   test("Correctly perform the EXISTS command", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.exists(foo)) == true)
+      assert(Await.result(client.exists(bufFoo)) == true)
     }
   }
 
@@ -66,9 +71,9 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       Await.result(client.set(foo, bar))
       val time = 20L
 
-      assert(Await.result(client.expire(foo, time)) == true)
+      assert(Await.result(client.expire(bufFoo, time)) == true)
 
-      val result = Await.result(client.ttl(foo)) match {
+      val result = Await.result(client.ttl(bufFoo)) match {
         case Some(num) => num
         case None      => fail("Could not retrieve key for TTL test")
       }
@@ -84,9 +89,9 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       // below is true for uninteresting reasons.
       val ttl = System.currentTimeMillis() + 20000L
 
-      assert(Await.result(client.expireAt(foo, ttl)) == true)
+      assert(Await.result(client.expireAt(bufFoo, ttl)) == true)
 
-      val result = Await.result(client.ttl(foo)) match {
+      val result = Await.result(client.ttl(bufFoo)) match {
         case Some(num) => num
         case None      => fail("Could not retrieve key for TTL")
       }
@@ -99,16 +104,16 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       val fromDb = 14
       val toDb   = 15
       Await.result(client.select(toDb))
-      Await.result(client.del(Seq(foo)))
+      Await.result(client.dels(Seq(bufFoo)))
       Await.result(client.select(fromDb))
 
       // This following fails with an exceptions since bar is not a database.
       // assert(Await.result(client.move(foo, bar)) == false)
 
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.move(foo, StringToChannelBuffer(toDb.toString))) == true)
+      assert(Await.result(client.move(bufFoo, StringToBuf(toDb.toString))) == true)
 
-      Await.result(client.del(Seq(foo))) // clean up
+      Await.result(client.dels(Seq(bufFoo))) // clean up
     }
   }
 
@@ -116,9 +121,9 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val ttl = 100000L
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.pExpire(foo, ttl)) == true)
+      assert(Await.result(client.pExpire(bufFoo, ttl)) == true)
 
-      val result = Await.result(client.pTtl(foo)) match {
+      val result = Await.result(client.pTtl(bufFoo)) match {
         case Some(num) => num
         case None      => fail("Could not retrieve pTtl for key")
       }
@@ -131,9 +136,9 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       val horizon = 20000L
       val ttl = System.currentTimeMillis() + horizon
       Await.result(client.set(foo, bar))
-      assert(Await.result(client.pExpireAt(foo, ttl)) == true)
+      assert(Await.result(client.pExpireAt(bufFoo, ttl)) == true)
 
-      val result = Await.result(client.pTtl(foo)) match {
+      val result = Await.result(client.pTtl(bufFoo)) match {
         case Some(num) => num
         case None      => fail("Could not retrieve pTtl for key")
       }

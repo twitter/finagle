@@ -44,5 +44,6 @@ junit_tests(name='serversets',
     'com/twitter/finagle/serverset2/*.scala',
     'com/twitter/finagle/serverset2/addr/*.scala',
     'com/twitter/finagle/zookeeper/*.scala',
-  )
+  ),
+  known_to_fail="TRFC-679",
 )

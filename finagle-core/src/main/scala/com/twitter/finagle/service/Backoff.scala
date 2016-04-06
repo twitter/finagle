@@ -9,9 +9,12 @@ import scala.collection.JavaConverters._
 /**
  * Implements various backoff strategies.
  *
- * Strategies are defined by a `Stream[Duration]` and are intended for use
- * with [[RetryFilter.apply]] and [[RetryPolicy.backoff]] to determine
- * the duration after which a request is to be retried.
+ * Strategies are defined by a `Stream[Duration]` and are intended for use with
+ * [[RetryFilter.apply]] and [[RetryPolicy.backoff]] to determine the duration after which a request
+ * is to be retried.
+ *
+ * @note All backoffs created by factory methods on this object are infinite. Use `Stream.take` to
+ *       make them terminate.
  */
 object Backoff {
   private[this] def durations(next: Duration, f: Duration => Duration): Stream[Duration] =
@@ -21,7 +24,7 @@ object Backoff {
     durations(next, f)
 
   /**
-   * Create backoffs that grow exponentially by `multiplier`.
+   * Create infinite backoffs that grow exponentially by `multiplier`.
    *
    * @see [[exponentialJittered]] for a version that incorporates jitter.
    */
@@ -29,7 +32,7 @@ object Backoff {
     exponential(start, multiplier, Duration.Top)
 
   /**
-   * Create backoffs that grow exponentially by `multiplier`, capped at `maximum`.
+   * Create infinite backoffs that grow exponentially by `multiplier`, capped at `maximum`.
    *
    * @see [[exponentialJittered]] for a version that incorporates jitter.
    */
@@ -37,7 +40,7 @@ object Backoff {
     Backoff(start) { prev => maximum.min(prev * multiplier) }
 
   /**
-   * Create backoffs that grow exponentially by 2, capped at `maximum`,
+   * Create infinite backoffs that grow exponentially by 2, capped at `maximum`,
    * with each backoff having jitter, or randomness, between 0 and the
    * exponential backoff value.
    *
@@ -72,7 +75,7 @@ object Backoff {
   }
 
   /**
-   * Create backoffs that have jitter with a random distribution
+   * Create infinite backoffs that have jitter with a random distribution
    * between `start `and 3 times the previously selected value, capped at `maximum`.
    *
    * @param start must be greater than 0 and less than or equal to `maximum`.
@@ -107,7 +110,7 @@ object Backoff {
   }
 
   /**
-   * Create backoffs that keep half of the exponential growth, and jitter
+   * Create infinite backoffs that keep half of the exponential growth, and jitter
    * between 0 and that amount.
    *
    * @see [[exponentialJittered]] and [[decorrelatedJittered]] for alternative jittered approaches.
@@ -135,13 +138,13 @@ object Backoff {
   }
 
   /**
-   * Create backoffs that grow linear by `offset`.
+   * Create infinite backoffs that grow linear by `offset`.
    */
   def linear(start: Duration, offset: Duration): Stream[Duration] =
     linear(start, offset, Duration.Top)
 
   /**
-   * Create backoffs that grow linear by `offset`, capped at `maximum`.
+   * Create infinite backoffs that grow linear by `offset`, capped at `maximum`.
    */
   def linear(start: Duration, offset: Duration, maximum: Duration): Stream[Duration] =
     Backoff(start) { prev => maximum.min(prev + offset) }
@@ -158,7 +161,7 @@ object Backoff {
   }
 
   /**
-   * Create backoffs with values produced by a given generation function.
+   * Create infinite backoffs with values produced by a given generation function.
    */
   def fromFunction(f: () => Duration): Stream[Duration] = Stream.continually(f())
 

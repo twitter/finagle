@@ -3,7 +3,7 @@ package com.twitter.finagle.redis.integration
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.util.Await
-import com.twitter.finagle.redis.util.{CBToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.{StringToBuf, BufToString}
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -34,13 +34,13 @@ final class ServerClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the INFO command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val info = new String(Await.result(client.info()).get.array, "UTF8")
+      val info = BufToString(Await.result(client.info()).get)
       assert(info.contains("# Server") == true)
       assert(info.contains("redis_version:") == true)
       assert(info.contains("# Clients") == true)
 
-      val cpuCB = StringToChannelBuffer("cpu")
-      val cpu = new String(Await.result(client.info(cpuCB)).get.array, "UTF8")
+      val cpuCB = StringToBuf("cpu")
+      val cpu = BufToString(Await.result(client.info(cpuCB)).get)
       assert(cpu.contains("# CPU") == true)
       assert(cpu.contains("used_cpu_sys:") == true)
       assert(cpu.contains("redis_version:") == false)

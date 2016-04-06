@@ -1,6 +1,7 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
@@ -81,7 +82,7 @@ trait Strings { self: BaseClient =>
    */
   def get(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
     doRequest(Get(key)) {
-      case BulkReply(message)   => Future.value(Some(message))
+      case BulkReply(message)   => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply()     => Future.value(None)
     }
 
@@ -106,7 +107,7 @@ trait Strings { self: BaseClient =>
    */
   def getRange(key: ChannelBuffer, start: Long, end: Long): Future[Option[ChannelBuffer]] =
     doRequest(GetRange(key, start, end)) {
-      case BulkReply(message)   => Future.value(Some(message))
+      case BulkReply(message)   => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply()     => Future.value(None)
     }
 
@@ -121,7 +122,7 @@ trait Strings { self: BaseClient =>
    */
   def getSet(key: ChannelBuffer, value: ChannelBuffer): Future[Option[ChannelBuffer]] =
     doRequest(GetSet(key, value)) {
-      case BulkReply(message)   => Future.value(Some(message))
+      case BulkReply(message)   => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply()     => Future.value(None)
     }
 
@@ -160,7 +161,7 @@ trait Strings { self: BaseClient =>
     doRequest(MGet(keys)) {
       case MBulkReply(messages) => Future {
         messages.map {
-          case BulkReply(message) => Some(message)
+          case BulkReply(message) => Some(ChannelBufferBuf.Owned.extract(message))
           case EmptyBulkReply()   => None
           case _ => throw new IllegalStateException()
         }.toSeq

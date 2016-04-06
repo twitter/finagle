@@ -1,7 +1,7 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.util.{Await, Closable, Future, Time}
+import com.twitter.finagle.Service
+import com.twitter.util.Future
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}

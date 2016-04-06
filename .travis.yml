@@ -44,14 +44,20 @@ script:
 
   # run for all environments
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-commons-stats/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-cacheresolver/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-core/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exception/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exp/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http-compat/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http-netty4/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http2/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-integration/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-kestrel/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mdns/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mux/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mysql/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-netty4/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-ostrich4/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-redis/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-serversets/test
@@ -61,6 +67,7 @@ script:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-testers/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thrift/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thriftmux/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-validate/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-zipkin/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
 

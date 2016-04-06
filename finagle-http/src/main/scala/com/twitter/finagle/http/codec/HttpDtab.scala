@@ -41,20 +41,20 @@ object HttpDtab {
   private def decodingFailure(value: String) =
     Failure("Value not b64-encoded: "+value)
 
-  private def pathFailure(path: String, cause: IllegalArgumentException) =
-    Failure("Invalid path: "+path, cause)
+  private def prefixFailure(prefix: String, cause: IllegalArgumentException) =
+    Failure("Invalid prefix: "+prefix, cause)
 
   private def nameFailure(name: String, cause: IllegalArgumentException) =
     Failure("Invalid name: "+name, cause)
 
-  private def decodePath(b64path: String): Try[Path] =
-      b64Decode(b64path) match {
-        case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64path))
-        case Throw(e) => Throw(e)
-        case Return(pathStr) =>
-          Try(Path.read(pathStr)).rescue {
-            case iae: IllegalArgumentException => Throw(pathFailure(pathStr, iae))
-          }
+  private def decodePrefix(b64pfx: String): Try[Dentry.Prefix] =
+    b64Decode(b64pfx) match {
+      case Throw(e: IllegalArgumentException) => Throw(decodingFailure(b64pfx))
+      case Throw(e) => Throw(e)
+      case Return(pfxStr) =>
+        Try(Dentry.Prefix.read(pfxStr)).rescue {
+          case iae: IllegalArgumentException => Throw(prefixFailure(pfxStr, iae))
+        }
     }
 
   private def decodeName(b64name: String): Try[NameTree[Path]] =
@@ -85,7 +85,7 @@ object HttpDtab {
    *
    * @return a Seq[(String, String)] containing the dtab header entries found.
    */
-  private[http] def strip(msg: Message): Seq[(String, String)] = {
+  private[finagle] def strip(msg: Message): Seq[(String, String)] = {
     var headerArr: ArrayBuffer[(String, String)] = null
     val headerIt = msg.headerMap.iterator
     while (headerIt.hasNext) {
@@ -114,7 +114,7 @@ object HttpDtab {
   }
 
   /**
-   * Write X-Dtab header pairs into the given message.
+   * Write a Dtab-local header into the given message.
    */
   def write(dtab: Dtab, msg: Message): Unit = {
     if (dtab.isEmpty)
@@ -125,12 +125,7 @@ object HttpDtab {
         "Dtabs with length greater than 100 are not serializable with HTTP")
     }
 
-    for ((Dentry(prefix, dst), i) <- dtab.zipWithIndex) {
-      // TODO: now that we have a proper Dtab grammar,
-      // should just embed this directly instead.
-      msg.headerMap.set(Prefix+indexstr(i)+"-A", b64Encode(prefix.show))
-      msg.headerMap.set(Prefix+indexstr(i)+"-B", b64Encode(dst.show))
-    }
+    msg.headerMap.set(Header, dtab.show)
   }
 
   /**
@@ -198,9 +193,9 @@ object HttpDtab {
 
       val tryDentry =
         for {
-          path <- decodePath(msg.headerMap(prefix))
+          pfx <- decodePrefix(msg.headerMap(prefix))
           name <- decodeName(msg.headerMap(dest))
-        } yield Dentry(path,  name)
+        } yield Dentry(pfx,  name)
 
       dentries(i) =
         tryDentry match {

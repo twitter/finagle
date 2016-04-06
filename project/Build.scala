@@ -18,7 +18,7 @@ object Finagle extends Build {
   val scroogeVersion = "4.6.0" + suffix
 
   val libthriftVersion = "0.5.0-1"
-  val netty4Version = "4.1.0.CR1"
+  val netty4Version = "4.1.0.CR5"
 
   val commonsCodecLib = "commons-codec" % "commons-codec" % "1.9"
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
@@ -29,6 +29,7 @@ object Finagle extends Build {
     "io.netty" % "netty-transport" % netty4Version
   )
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
+  val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
   val jacksonVersion = "2.4.4"
   val jacksonLibs = Seq(
@@ -186,10 +187,10 @@ object Finagle extends Build {
     finagleExp, finagleMdns, finagleTesters, finagleOstrich4,
 
     // Protocols
-    finagleHttp, finagleHttpCompat, finagleStream, finagleNative,
+    finagleHttp, finagleHttp2, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy, finagleRedis, finagleHttpNetty4 
+    finagleSpdy, finagleRedis, finagleNetty4Http 
 
     // finagleBenchmark
 
@@ -357,8 +358,6 @@ object Finagle extends Build {
 
   // Protocol support
 
-  // see https://finagle.github.io/blog/2014/10/20/upgrading-finagle-to-netty-4/
-  // for an explanation of the role of transitional -x packages in the netty4 migration.
   lazy val finagleHttp = Project(
     id = "finagle-http",
     base = file("finagle-http"),
@@ -373,19 +372,33 @@ object Finagle extends Build {
     )
   ).dependsOn(finagleCore)
 
-  lazy val finagleHttpNetty4 = Project(
-    id = "finagle-http-netty4",
-    base = file("finagle-http-netty4"),
+  lazy val finagleNetty4Http = Project(
+    id = "finagle-netty4-http",
+    base = file("finagle-netty4-http"),
     settings = Defaults.coreDefaultSettings ++
       sharedSettings
   ).settings(
-    name := "finagle-http-netty4",
+    name := "finagle-netty4-http",
     libraryDependencies ++= Seq(
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6",
-      netty4Http 
+      netty4Http
     )
   ).dependsOn(finagleCore, finagleNetty4, finagleHttp)
+
+  lazy val finagleHttp2 = Project(
+    id = "finagle-http2",
+    base = file("finagle-http2"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-http2",
+    libraryDependencies ++= Seq(
+      netty4Http2,
+      util("core"),
+      nettyLib
+    ) ++ netty4Libs
+  ).dependsOn(finagleCore, finagleHttp, finagleNetty4, finagleNetty4Http)
 
   lazy val finagleHttpCompat = Project(
     id = "finagle-http-compat",
@@ -545,8 +558,15 @@ object Finagle extends Build {
       "org.slf4j" %  "slf4j-nop" % "1.7.7" % "provided"
     ) ++ scroogeLibs
   ).dependsOn(
-    finagleCore, finagleThrift, finagleMemcached, finagleKestrel,
-    finagleRedis, finagleMySQL, finagleOstrich4, finagleStats)
+    finagleCore,
+    finagleHttp,
+    finagleMemcached,
+    finagleKestrel,
+    finagleMySQL,
+    finagleOstrich4,
+    finagleRedis,
+    finagleStats,
+    finagleThrift)
 
   lazy val finagleBenchmarkThrift = Project(
     id = "finagle-benchmark-thrift",

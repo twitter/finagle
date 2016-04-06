@@ -7,7 +7,7 @@ import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.http.{MediaType, RequestParamMap, Response, Request, Status}
+import com.twitter.finagle.http.{MediaType, RequestParamMap, Response, Request}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger

@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, Packet}
+import com.twitter.finagle.exp.mysql.transport.{Buffer, Packet}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -166,4 +166,3 @@ class BinaryResultSetTest extends FunSuite with HexDump {
     }
   }
 }
-

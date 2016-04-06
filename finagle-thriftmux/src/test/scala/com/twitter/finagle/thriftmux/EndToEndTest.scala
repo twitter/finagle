@@ -66,12 +66,14 @@ class EndToEndTest extends FunSuite
               Future.value(dtab.show)
           }
       })
+
+    val boundAddress = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
   }
 
   test("end-to-end thriftmux") {
     new ThriftMuxTestServer {
       val client = ThriftMux.newIface[TestService.FutureIface](
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+        Name.bound(boundAddress), "client")
       assert(Await.result(client.query("ok")) == "okok", 5.seconds)
     }
   }
@@ -79,7 +81,7 @@ class EndToEndTest extends FunSuite
   test("end-to-end thriftmux: propagate Contexts") {
     new ThriftMuxTestServer {
       val client = ThriftMux.newIface[TestService.FutureIface](
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+        Name.bound(boundAddress), "client")
 
       assert(Await.result(client.query("ok"), 5.seconds) == "okok")
 
@@ -740,8 +742,9 @@ class EndToEndTest extends FunSuite
             def query(x: String) = Future.value(x+x)
           })
 
+      val boundAddress = Address(server.boundAddress.asInstanceOf[InetSocketAddress])
       val tcompactClient = ThriftMux.client.withProtocolFactory(pf)
-        .newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+        .newIface[TestService.FutureIface](Name.bound(boundAddress), "client")
       assert(Await.result(tcompactClient.query("ok"), 5.seconds) == "okok")
 
       val tbinaryClient = ThriftMux.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")

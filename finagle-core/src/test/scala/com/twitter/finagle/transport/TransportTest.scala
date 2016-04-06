@@ -127,7 +127,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       val reader = Reader.writable()
       val done = Transport.copyToWriter(t, reader) {
         case None => Future.exception(exc)
-        case Some(b) => Future.value(Some(Buf.ByteArray(Array(b))))
+        case Some(b) => Future.value(Some(Buf.ByteArray.Owned(Array(b))))
       } respond {
         case Return(()) => reader.close()
         case Throw(exc) => reader.fail(exc)

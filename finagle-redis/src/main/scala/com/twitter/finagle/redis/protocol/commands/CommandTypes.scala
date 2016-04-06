@@ -3,7 +3,8 @@ package com.twitter.finagle.redis.protocol
 import org.jboss.netty.buffer.ChannelBuffer
 
 trait KeyCommand extends Command {
-  val key: ChannelBuffer
+  // TODO: remove this method after netty3
+  def key: ChannelBuffer
   protected def validate() {
     RequireClientProtocol(key != null && key.readableBytes > 0, "Empty Key found")
   }
@@ -13,7 +14,8 @@ trait StrictKeyCommand extends KeyCommand {
 }
 
 trait KeysCommand extends Command {
-  val keys: Seq[ChannelBuffer]
+  // TODO: remove this method after netty3
+  def keys: Seq[ChannelBuffer]
   protected def validate() {
     RequireClientProtocol(keys != null && !keys.isEmpty, "Empty KeySet found")
     keys.foreach { key =>

@@ -20,6 +20,9 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.junit.JUnitRunner
 import scala.language.reflectiveCalls
 
+// note: while we're maintaining the netty3 version of http 1.1
+// this class needs to keep parity with the same class
+// in c.t.f.netty4.http.
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with BeforeAndAfter {
   var saveBase: Dtab = Dtab.empty

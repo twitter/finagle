@@ -5,7 +5,7 @@ import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.util.{StackRegistry, Showable}
 import com.twitter.finagle._
-import com.twitter.util.{Future, Time}
+import com.twitter.util.{Closable, Future, Time}
 import java.util.logging.Level
 
 private[twitter] object ClientRegistry extends StackRegistry {
@@ -81,6 +81,8 @@ private[finagle] object RegistryEntryLifecycle {
         case Name.Bound(va) => va
         case Name.Path(path) => Namer.resolve(baseDtab(), path)
       }
+      // prevent closing this Var producer during the lifetime of this client.
+      val observation = va.changes.respond { _ => }
 
       val shown = Showable.show(dest)
       val registeredParams = params + LoadBalancerFactory.Dest(va)
@@ -90,7 +92,7 @@ private[finagle] object RegistryEntryLifecycle {
         new ServiceFactoryProxy[Req, Rep](factory) {
           override def close(deadline: Time): Future[Unit] = {
             ClientRegistry.unregister(shown, next, params)
-            self.close(deadline)
+            Closable.all(observation, self).close(deadline)
           }
         }
       }) +: next

@@ -4,7 +4,7 @@ import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
-import com.twitter.finagle.redis.util.{BytesToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.{BytesToString, StringToBuf, StringToChannelBuffer}
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
@@ -248,8 +248,9 @@ final class StringClientServerIntegrationSuite extends RedisClientServerIntegrat
   test("SETEX should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
       val key = StringToChannelBuffer("setex")
+      val key2 = StringToBuf("setex")
       assert(Await.result(client(SetEx(key, 10, "Hello"))) == StatusReply("OK"))
-      Await.result(client(Ttl(key))) match {
+      Await.result(client(Ttl(key2))) match {
           //TODO: match must beCloseTo(10, 2)
         case IntegerReply(seconds) => assert(seconds.toInt - 10 < 2)
         case _ => fail("Expected IntegerReply")

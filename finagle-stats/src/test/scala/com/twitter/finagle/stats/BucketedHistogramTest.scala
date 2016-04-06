@@ -145,6 +145,35 @@ class BucketedHistogramTest extends FunSuite
     h.add(Long.MaxValue)
   }
 
+  test("exporting counts starts empty") {
+    val h = BucketedHistogram()
+    assert(h.bucketAndCounts == Seq.empty)
+  }
+
+  test("exporting counts tracks negative and extreme values") {
+    val h = BucketedHistogram()
+    h.add(-1)
+    h.add(0)
+    h.add(1)
+    h.add(1)
+    h.add(1)
+    h.add(Int.MaxValue)
+    h.add(Int.MaxValue)
+    assert(h.bucketAndCounts == Seq(BucketAndCount(0, 1, 2), BucketAndCount(1, 2, 3), 
+      BucketAndCount(2137204091, Int.MaxValue, 2)))
+  }
+
+  test("exporting counts responds to clear") {
+    val h = BucketedHistogram()
+    h.add(-1)
+    h.add(0)
+    h.add(1)
+    h.add(5)
+    h.add(Int.MaxValue)
+    h.clear()
+    assert(h.bucketAndCounts == Seq.empty)
+  }
+
   test("percentile and min and max stays within error bounds") {
     forAll(BucketedHistogramTest.generator) { case (samples: List[Int], p: Double) =>
       // although this uses Gen.nonEmptyContainerOf I observed an empty List

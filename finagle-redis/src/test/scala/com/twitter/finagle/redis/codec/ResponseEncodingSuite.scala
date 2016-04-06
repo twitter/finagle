@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.naggati
 
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.CodecTest
-import com.twitter.finagle.redis.util.StringToChannelBuffer
+import com.twitter.finagle.redis.util.StringToBuf
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -26,13 +26,13 @@ final class ResponseEncodingSuite extends RedisResponseTest {
   }
 
   test("Correctly encode bulk replies", CodecTest) {
-    assert(codec.send(BulkReply(StringToChannelBuffer("foo\r\nbar"))) ==
+    assert(codec.send(BulkReply(StringToBuf("foo\r\nbar"))) ==
       List("$8\r\nfoo\r\nbar\r\n"))
   }
 
   test("Correctly encode multi bulk replies", CodecTest) {
-    val messages = List(BulkReply(StringToChannelBuffer("foo")),
-      BulkReply(StringToChannelBuffer("bar")))
+    val messages = List(BulkReply(StringToBuf("foo")),
+      BulkReply(StringToBuf("bar")))
     assert(codec.send(MBulkReply(messages)) == List("*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"))
   }
 }

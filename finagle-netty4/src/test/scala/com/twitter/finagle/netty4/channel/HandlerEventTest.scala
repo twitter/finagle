@@ -1,19 +1,14 @@
 package com.twitter.finagle.netty4.channel
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.Duration
 import io.netty.channel._
-import io.netty.channel.embedded.{EmbeddedChannel, EmbeddedEventLoop}
+import io.netty.channel.embedded.EmbeddedChannel
 import java.net.SocketAddress
-import io.netty.channel.local.{LocalEventLoopGroup, LocalChannel}
-import io.netty.channel.nio.{NioEventLoopGroup, NioEventLoop}
-import io.netty.channel.socket.nio.NioSocketChannel
+import io.netty.channel.nio.NioEventLoopGroup
 import org.scalatest.FunSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-
 
 @RunWith(classOf[JUnitRunner])
 class HandlerEventTest extends FunSuite with MockitoSugar {
@@ -23,8 +18,7 @@ class HandlerEventTest extends FunSuite with MockitoSugar {
     new ChannelRequestStatsHandler(new InMemoryStatsReceiver),
     new ChannelStatsHandler(new InMemoryStatsReceiver),
     new SimpleChannelSnooper("test"),
-    new ByteBufSnooper("test"),
-    new WriteCompletionTimeoutHandler(DefaultTimer.twitter, Duration.fromSeconds(10))
+    new ByteBufSnooper("test")
   )
   val loop = new NioEventLoopGroup()
 

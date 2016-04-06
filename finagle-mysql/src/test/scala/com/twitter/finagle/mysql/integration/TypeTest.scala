@@ -1,11 +1,10 @@
 package com.twitter.finagle.exp.mysql.integration
 
 import com.twitter.finagle.exp.mysql._
-import com.twitter.util.{Await, Time, TwitterDateFormat}
+import com.twitter.util.{Await, TwitterDateFormat}
 import java.sql.Timestamp
-import java.util.{Calendar, TimeZone}
+import java.util.TimeZone
 import org.junit.runner.RunWith
-import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 

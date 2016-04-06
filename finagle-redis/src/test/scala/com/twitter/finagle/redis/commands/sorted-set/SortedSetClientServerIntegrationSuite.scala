@@ -1,11 +1,10 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.naggati.RedisClientServerIntegrationTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
-import com.twitter.finagle.redis.util.{BytesToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.StringToChannelBuffer
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore

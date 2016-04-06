@@ -22,4 +22,10 @@ final class ConnectionClientIntegrationSuite extends RedisClientTest {
       assert(Await.result(client.quit().liftToTry) == Return.Unit)
     }
   }
+
+  test("Correctly perform the PING command without arguments", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      assert(Await.result(client.ping().liftToTry) == Return.Unit)
+    }
+  }
 }

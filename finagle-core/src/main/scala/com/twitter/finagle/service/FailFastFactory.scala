@@ -7,9 +7,7 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{DefaultLogger, Updater}
 import com.twitter.logging.Level
 import com.twitter.util.{Future, Duration, Time, Throw, Return, Timer, TimerTask}
-import java.net.SocketAddress
 import java.util.logging.Logger
-import scala.util.Random
 
 object FailFastFactory {
   private sealed trait State
@@ -28,8 +26,7 @@ object FailFastFactory {
     val Success, Fail, Timeout, TimeoutFail, Close = Value
   }
 
-  private val defaultBackoffs = (Backoff.exponential(1.second, 2) take 5) ++ Backoff.const(32.seconds)
-  private val rng = new Random
+  private val defaultBackoffs: Stream[Duration] = Backoff.exponentialJittered(1.second, 32.seconds)
 
   val role = Stack.Role("FailFast")
 
@@ -137,12 +134,6 @@ private[finagle] class FailFastFactory[Req, Rep](
       }
     }
 
-  private[this] def getBackoffs(): Stream[Duration] = backoffs map { duration =>
-    // Add a 10% jitter to reduce correlation.
-    val ms = duration.inMilliseconds
-    (ms + ms*(rng.nextFloat()*0.10)).toInt.milliseconds
-  }
-
   @volatile private[this] var state: State = Ok
 
   private[this] val update = new Updater[Observation.t] {
@@ -156,7 +147,7 @@ private[finagle] class FailFastFactory[Req, Rep](
         state = Ok
 
       case Observation.Fail if state == Ok =>
-        val (wait, rest) = getBackoffs() match {
+        val (wait, rest) = backoffs match {
           case Stream.Empty => (Duration.Zero, Stream.empty[Duration])
           case wait #:: rest => (wait, rest)
         }

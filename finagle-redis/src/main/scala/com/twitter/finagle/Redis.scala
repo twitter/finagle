@@ -6,6 +6,7 @@ import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, PipeliningDispat
 import com.twitter.finagle.netty3.Netty3Transporter
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
+import com.twitter.finagle.redis.exp.RedisPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -16,13 +17,19 @@ import com.twitter.util.{Duration, Monitor}
 trait RedisRichClient { self: Client[Command, Reply] =>
 
   def newRichClient(dest: String): redis.Client =
-     redis.Client(newService(dest))
+    redis.Client(newClient(dest))
 
   def newRichClient(dest: Name, label: String): redis.Client =
-    redis.Client(newService(dest, label))
+    redis.Client(newClient(dest, label))
+
+  def newSentinelClient(dest: String): redis.SentinelClient =
+    redis.SentinelClient(newClient(dest))
+
+  def newSentinelClient(dest: Name, label: String): redis.SentinelClient =
+    redis.SentinelClient(newClient(dest, label))
 }
 
-object Redis extends Client[Command, Reply] {
+object Redis extends Client[Command, Reply] with RedisRichClient {
 
   object Client {
     /**
@@ -35,7 +42,7 @@ object Redis extends Client[Command, Reply] {
      * A default client stack which supports the pipelined redis client.
      */
     def newStack: Stack[ServiceFactory[Command, Reply]] = StackClient.newStack
-      .replace(DefaultPool.Role, SingletonPool.module[Command, Reply])
+      .insertBefore(DefaultPool.Role, RedisPool.module)
   }
 
   case class Client(
@@ -57,10 +64,7 @@ object Redis extends Client[Command, Reply] {
       Netty3Transporter(redis.RedisClientPipelineFactory, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Reply] =
-      new PipeliningDispatcher(
-        transport,
-        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
-      )
+      RedisPool.newDispatcher(transport, params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

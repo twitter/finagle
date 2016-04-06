@@ -8,7 +8,7 @@ import com.twitter.util.{Time, Activity, Future, Promise}
  * A Balancer mix-in which provides the collection over which to load balance
  * by observing `activity`.
  */
-private trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
+private[loadbalancer] trait Updating[Req, Rep] extends Balancer[Req, Rep] with OnReady {
   private[this] val ready = new Promise[Unit]
   def onReady: Future[Unit] = ready
 

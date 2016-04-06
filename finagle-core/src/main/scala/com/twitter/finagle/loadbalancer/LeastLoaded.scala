@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * Provide Nodes whose 'load' is the current number of pending
  * requests and thus will result in least-loaded load balancer.
  */
-private trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
+private[loadbalancer] trait LeastLoaded[Req, Rep] { self: Balancer[Req, Rep] =>
   protected def rng: Rng
 
   protected case class Node(

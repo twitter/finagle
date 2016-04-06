@@ -102,3 +102,10 @@ PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
 
 **response_payload_bytes**
   A histogram of the number of bytes per response's payload.
+
+TimeoutFilter
+<<<<<<<<<<<<<
+
+**timeout/expired_deadline_ms**
+  A stat of the elapsed time since expiry if a deadline has expired, in
+  milliseconds. Temporary stat to aid in debugging.

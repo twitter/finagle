@@ -8,12 +8,11 @@ import com.twitter.common.zookeeper._
 import com.twitter.concurrent.Spool
 import com.twitter.concurrent.Spool.*::
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Group, Resolver, Addr, Address}
+import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.stats.{ClientStatsReceiver, StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.zookeeper.{ZkGroup, DefaultZkClientFactory, ZookeeperServerSetCluster}
 import com.twitter.finagle.{Group, Resolver}
-import com.twitter.thrift.ServiceInstance
 import com.twitter.thrift.Status.ALIVE
 import com.twitter.util._
 import scala.collection.mutable
@@ -48,6 +47,10 @@ class TwitterCacheResolver extends Resolver {
         val zkClient = DefaultZkClientFactory.get(DefaultZkClientFactory.hostSet(zkHosts))._1
         val group = CacheNodeGroup.newZkCacheNodeGroup(
           path, zkClient, ClientStatsReceiver.scope(scheme).scope(path))
+
+        val underlyingSizeGauge = ClientStatsReceiver.scope(scheme).scope(path).addGauge("underlyingPoolSize") {
+          group.members.size
+        }
         group.set.map(toUnresolvedAddr)
 
       case _ =>
@@ -102,7 +105,14 @@ object CacheNodeGroup {
 
   def newZkCacheNodeGroup(
     path: String, zkClient: ZooKeeperClient, statsReceiver: StatsReceiver = NullStatsReceiver
-  ) = new ZookeeperCacheNodeGroup(zkPath = path, zkClient = zkClient, statsReceiver = statsReceiver)
+  ): Group[CacheNode] = {
+    new ZkGroup(new ServerSetImpl(zkClient, path), path) collect {
+      case inst if inst.getStatus == ALIVE =>
+        val ep = inst.getServiceEndpoint
+        val shardInfo = if (inst.isSetShard) Some(inst.getShard.toString) else None
+        CacheNode(ep.getHost, ep.getPort, 1, shardInfo)
+    }
+  }
 
   private[finagle] def fromVarAddr(va: Var[Addr], useOnlyResolvedAddress: Boolean = false) = new Group[CacheNode] {
     protected[finagle] val set: Var[Set[CacheNode]] = va map {
@@ -212,7 +222,6 @@ trait CachePoolCluster extends Cluster[CacheNode] {
     cachePoolChanges = newTail
   }
 }
-
 
 /**
  * Cache pool config data object
@@ -351,73 +360,6 @@ class ZookeeperCachePoolCluster private[cacheresolver](
           // this should not happen in general as this code generally is only for first time pool
           // manager initialization
           waitForClusterComplete(currentSet - node, expectedSize, tail)
-      }
-    }
-  }
-}
-
-/**
- * Zookeeper based cache node group with a serverset as the underlying pool.
- * It will monitor the underlying serverset changes and report the detected underlying pool size.
- * It will monitor the serverset parent node for cache pool config data, cache node group
- * update will be triggered whenever cache config data change event happens.
- *
- * @param zkPath the zookeeper path representing the cache pool
- * @param zkClient zookeeper client talking to the zookeeper, it will only be used to read zookeeper
- * @param statsReceiver Optional, the destination to report the stats to
- */
-class ZookeeperCacheNodeGroup(
-  protected val zkPath: String,
-  protected val zkClient: ZooKeeperClient,
-  protected val statsReceiver: StatsReceiver = NullStatsReceiver
-) extends Group[CacheNode] with ZookeeperStateMonitor {
-
-  protected[finagle] val set = Var(Set[CacheNode]())
-
-  @volatile private var detectKeyRemapping = false
-
-  private val zkGroup =
-    new ZkGroup(new ServerSetImpl(zkClient, zkPath), zkPath) collect {
-      case inst if inst.getStatus == ALIVE =>
-        val ep = inst.getServiceEndpoint
-        val shardInfo = if (inst.isSetShard) Some(inst.getShard.toString) else None
-        CacheNode(ep.getHost, ep.getPort, 1, shardInfo)
-    }
-
-  private[this] val underlyingSizeGauge = statsReceiver.addGauge("underlyingPoolSize") {
-    zkGroup.members.size
-  }
-
-  def applyZKData(data: Array[Byte]) {
-    if(data != null) {
-      val cachePoolConfig = CachePoolConfig.jsonCodec.deserialize(new ByteArrayInputStream(data))
-
-      detectKeyRemapping = cachePoolConfig.detectKeyRemapping
-
-      // apply the cache pool config to the cluster
-      val expectedGroupSize = cachePoolConfig.cachePoolSize
-      if (expectedGroupSize != zkGroup.members.size)
-        throw new IllegalStateException("Underlying group size not equal to expected size")
-
-      set() = zkGroup.members
-    }
-  }
-
-  // when enabled, monitor and apply new members in case of pure cache node key remapping
-  override def applyZKChildren(children: List[String]) = if (detectKeyRemapping) {
-    val newMembers = zkGroup.members
-    if (newMembers.size != children.size)
-      throw new IllegalStateException("Underlying children size not equal to expected children size")
-
-    if (newMembers.size == members.size) {
-      val removed = (members &~ newMembers)
-      val added = (newMembers &~ members)
-
-      // pick up the diff only if new members contains exactly the same set of cache node keys,
-      // e.g. certain cache node key is re-assigned to another host
-      if (removed.forall(_.key.isDefined) && added.forall(_.key.isDefined) &&
-          removed.size == added.size && removed.map(_.key.get) == added.map(_.key.get)) {
-        set() = newMembers
       }
     }
   }

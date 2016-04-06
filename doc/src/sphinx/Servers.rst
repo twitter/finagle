@@ -85,7 +85,7 @@ that might be handled concurrently by your server, use the following example [#e
   val server = Http.server
     .withAdmissionControl.concurrencyLimit(
       maxConcurrentRequests = 10,
-      maxWaiters = 0,
+      maxWaiters = 0
     )
     .serve(":8080", service)
 

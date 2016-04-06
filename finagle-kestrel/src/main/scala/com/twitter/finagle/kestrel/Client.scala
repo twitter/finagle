@@ -557,7 +557,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
   def set(queueName: String, value: Buf, expiry: Time = Time.epoch): Future[Response] = {
     val timeout = safeLongToInt(expiry.inMilliseconds)
     withClient[Response](client =>
-      client.put(queueName, List(Buf.toByteBuffer(value)), timeout).map {
+      client.put(queueName, List(Buf.ByteBuffer.Owned.extract(value)), timeout).map {
         _ => Stored()
       })
   }
@@ -567,7 +567,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
     withClient[Option[Buf]](client =>
       client.get(queueName, 1, waitUpToMsec).map {
         case Seq() => None
-        case Seq(item: Item) => Some(Buf.ByteBuffer(item.data))
+        case Seq(item: Item) => Some(Buf.ByteBuffer.Owned(item.data))
         case _ => throw new IllegalArgumentException
       })
   }
@@ -592,7 +592,7 @@ protected[kestrel] class ThriftConnectedClient(underlying: FinagledClientFactory
   def read(queueName: String): ReadHandle =
     read(
       (response: Seq[Item]) => response match {
-        case Seq(Item(data, id)) => Return(Some((Buf.ByteBuffer(data), id)))
+        case Seq(Item(data, id)) => Return(Some((Buf.ByteBuffer.Owned(data), id)))
         case Seq() => Return(None)
         case _ => Throw(new IllegalArgumentException("invalid reply from kestrel"))
       },

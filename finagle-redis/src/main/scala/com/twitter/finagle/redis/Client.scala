@@ -1,10 +1,14 @@
 package com.twitter.finagle.redis
 
+import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.{Service, ClientConnection, ServiceFactory, ServiceProxy}
 import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.finagle.redis.exp.{RedisPool, SubscribeCommands}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.{Service, ServiceFactory}
-import com.twitter.util.Future
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.Buf
+import com.twitter.util.{Closable, Future, Time, Timer}
+import org.jboss.netty.buffer.ChannelBuffer
 
 object Client {
 
@@ -18,19 +22,25 @@ object Client {
       .hostConnectionLimit(1)
       .codec(Redis())
       .daemon(true)
-      .build())
+      .buildFactory())
 
   /**
    * Construct a client from a single Service.
    */
-  def apply(raw: Service[Command, Reply]): Client =
+  def apply(raw: ServiceFactory[Command, Reply]): Client =
     new Client(raw)
-
 }
 
-class Client(service: Service[Command, Reply])
-  extends BaseClient(service)
-  with Keys
+class Client(
+  override val factory: ServiceFactory[Command, Reply],
+  private[redis] val timer: Timer = DefaultTimer.twitter)
+  extends BaseClient(factory)
+  with NormalCommands
+  with SubscribeCommands
+  with Transactions
+
+trait NormalCommands
+  extends Keys
   with Strings
   with Hashes
   with SortedSets
@@ -38,79 +48,66 @@ class Client(service: Service[Command, Reply])
   with Sets
   with BtreeSortedSetCommands
   with HyperLogLogs
+  with PubSubs
+  with ServerCommands
+  with ConnectionCommands {
+  self: BaseClient =>
+}
+
+trait Transactions { self: Client =>
+  private[this] def singletonFactory(): ServiceFactory[Command, Reply] =
+    new ServiceFactory[Command, Reply] {
+      val svc: Future[Service[Command, Reply]] = RedisPool.forTransaction(factory)
+      // Because the `singleton` is used in the context of a `FactoryToService` we override
+      // `Service#close` to ensure that we can control the checkout lifetime of the `Service`.
+      val proxiedService: Future[ServiceProxy[Command, Reply]] =
+        svc.map { underlying =>
+          new ServiceProxy(underlying) {
+            override def close(deadline: Time) = Future.Done
+          }
+        }
+
+      def apply(conn: ClientConnection) = proxiedService
+      def close(deadline: Time): Future[Unit] = svc.map(_.close(deadline))
+    }
+
+  def transaction[T](cmds: Seq[Command]): Future[Seq[Reply]] =
+    transactionSupport(_.transaction(cmds))
+
+  def transaction[T](f: NormalCommands => Future[_]): Future[Seq[Reply]] =
+    transactionSupport(_.transaction(f))
+
+  def transactionSupport[T](f: TransactionalClient => Future[T]): Future[T] = {
+    val singleton = singletonFactory()
+    val client = new TransactionalClient(singleton)
+    f(client).ensure {
+      client.reset().ensure(singleton.close())
+    }
+  }
+}
 
 /**
  * Connects to a single Redis host
- * @param service: Finagle service object built with the Redis codec
+ * @param factory: Finagle service factory object built with the Redis codec
  */
-class BaseClient(service: Service[Command, Reply]) {
+abstract class BaseClient(
+  protected val factory: ServiceFactory[Command, Reply])
+  extends Closable {
 
   /**
-   * Authorizes to db
-   * @param password
+   * Releases underlying service factory object
    */
-  def auth(password: ChannelBuffer): Future[Unit] =
-    doRequest(Auth(password)) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Returns information and statistics about the server
-   * @param section Optional parameter can be used to select a specific section of information
-   * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
-   */
-  def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
-    doRequest(Info(section)) {
-      case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
-    }
-
-  /**
-   * Deletes all keys in all databases
-   */
-  def flushAll(): Future[Unit] =
-    doRequest(FlushAll) {
-      case StatusReply(_) => Future.Unit
-    }
-
-  /**
-   * Deletes all keys in current DB
-   */
-  def flushDB(): Future[Unit] =
-    doRequest(FlushDB) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Closes connection to Redis instance
-   */
-  def quit(): Future[Unit] =
-    doRequest(Quit) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Select DB with specified zero-based index
-   * @param index
-   */
-  def select(index: Int): Future[Unit] =
-    doRequest(Select(index)) {
-      case StatusReply(message) => Future.Unit
-    }
-
-  /**
-   * Releases underlying service object
-   */
-  def release() = service.close()
+  def close(deadline: Time): Future[Unit] = factory.close(deadline)
 
   /**
    * Helper function for passing a command to the service
    */
-  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]) =
-    service(cmd) flatMap (handler orElse {
-      case ErrorReply(message)  => Future.exception(new ServerError(message))
-      case _                    => Future.exception(new IllegalStateException)
-    })
+  private[redis] def doRequest[T](cmd: Command)(handler: PartialFunction[Reply, Future[T]]): Future[T] = {
+    factory.toService.apply(cmd).flatMap (handler orElse {
+      case ErrorReply(message)   => Future.exception(new ServerError(message))
+      case StatusReply("QUEUED") => Future.Done.asInstanceOf[Future[Nothing]]
+      case _                     => Future.exception(new IllegalStateException)
+    })}
 
   /**
    * Helper function to convert a Redis multi-bulk reply into a map of pairs
@@ -122,45 +119,9 @@ class BaseClient(service: Service[Command, Reply]) {
       case _ => None
     }
   }
-
-}
-
-
-/**
- * Client connected over a single connection to a
- * single redis instance, supporting transactions
- */
-trait TransactionalClient extends Client {
-
-  /**
-   * Flushes all previously watched keys for a transaction
-   */
-  def unwatch(): Future[Unit] =
-    doRequest(UnWatch) {
-      case StatusReply(message)  => Future.Unit
-    }
-
-  /**
-   * Marks given keys to be watched for conditional execution of a transaction
-   * @param keys to watch
-   */
-  def watch(keys: Seq[ChannelBuffer]): Future[Unit] =
-    doRequest(Watch(keys)) {
-      case StatusReply(message)  => Future.Unit
-    }
-
-  /**
-   * Executes given vector of commands as a Redis transaction
-   * The order of the commands queued on the Redis server is not guaranteed
-   * @param Sequence of commands to be executed
-   * @return Results of each command in order
-   */
-  def transaction(cmds: Seq[Command]): Future[Seq[Reply]]
-
 }
 
 object TransactionalClient {
-
   /**
    * Construct a client from a single host with transaction commands
    * @param host a String of host:port combination.
@@ -178,47 +139,102 @@ object TransactionalClient {
    * @param raw ServiceFactory
    */
   def apply(raw: ServiceFactory[Command, Reply]): TransactionalClient =
-    new ConnectedTransactionalClient(raw)
-
+    new TransactionalClient(raw)
 }
 
 /**
- * Connects to a single Redis host supporting transactions
+ * Client connected over a single connection to a
+ * single redis instance, supporting transactions
  */
-private[redis] class ConnectedTransactionalClient(
-  serviceFactory: ServiceFactory[Command, Reply]
-) extends Client(serviceFactory.toService) with TransactionalClient {
+class TransactionalClient(factory: ServiceFactory[Command, Reply])
+  extends BaseClient(factory) with NormalCommands {
 
-  def transaction(cmds: Seq[Command]): Future[Seq[Reply]] = {
-    serviceFactory() flatMap { svc =>
-      multi(svc) before {
-        val cmdQueue = cmds map { cmd => svc(cmd) }
-        Future.collect(cmdQueue).unit before exec(svc)
-      } rescue { case e =>
-        svc(Discard).unit before {
-          Future.exception(ClientError("Transaction failed: " + e.toString))
-        }
-      } ensure {
-        svc.close()
-      }
+  private[this] var _multi = false
+  private[this] var _watch = false
+
+  /**
+   * Flushes all previously watched keys for a transaction
+   */
+  def unwatch(): Future[Unit] =
+    doRequest(UnWatch) {
+      case StatusReply(message) =>
+        _watch = false
+        Future.Unit
+    }
+
+  /**
+   * Marks given keys to be watched for conditional execution of a transaction
+   * @param keys to watch
+   */
+  @deprecated("remove netty3 types from public API", "2016-03-15")
+  def watch(keys: Seq[ChannelBuffer]): Future[Unit] =
+    watches(keys.map(ChannelBufferBuf.Owned(_)))
+
+  /**
+   * Marks given keys to be watched for conditional execution of a transaction
+   * @param keys to watch
+   */
+  def watches(keys: Seq[Buf]): Future[Unit] =
+    doRequest(Watch(keys)) {
+      case StatusReply(message) =>
+        _watch = true
+        Future.Unit
+    }
+
+  def multi(): Future[Unit] =
+    doRequest(Multi) {
+      case StatusReply(message) =>
+        _multi = true
+        Future.Unit
+    }
+
+  def exec(): Future[Seq[Reply]] =
+    doRequest(Exec) {
+      case MBulkReply(messages) =>
+        _watch = false
+        _multi = false
+        Future.value(messages)
+      case EmptyMBulkReply() =>
+        _watch = false
+        _multi = false
+        Future.Nil
+      case NilMBulkReply() =>
+        _watch = false
+        _multi = false
+        Future.exception(new ServerError("One or more keys were modified before transaction"))
+    }
+
+  def discard(): Future[Unit] =
+    doRequest(Multi) {
+      case StatusReply(message) =>
+        _multi = false
+        _watch = false
+        Future.Unit
+    }
+
+  def transaction[T](cmds: Seq[Command]): Future[Seq[Reply]] = {
+    transaction {
+      cmds.iterator
+        .map(cmd => factory().flatMap(_(cmd)).unit)
+        .reduce(_ before _)
     }
   }
 
-  private def multi(svc: Service[Command, Reply]): Future[Unit] =
-    svc(Multi) flatMap {
-      case StatusReply(message)  => Future.Unit
-      case ErrorReply(message)   => Future.exception(new ServerError(message))
-      case _                     => Future.exception(new IllegalStateException)
+  def transaction[T](f: => Future[_]): Future[Seq[Reply]] = {
+    multi() before {
+      f.unit before exec()
+    } ensure {
+      reset()
+    }
   }
 
-  private def exec(svc: Service[Command, Reply]): Future[Seq[Reply]] =
-    svc(Exec) flatMap {
-      case MBulkReply(messages)  => Future.value(messages)
-      case EmptyMBulkReply()     => Future.Nil
-      case NilMBulkReply()       => Future.exception(
-        new ServerError("One or more keys were modified before transaction"))
-      case ErrorReply(message)   => Future.exception(new ServerError(message))
-      case _                     => Future.exception(new IllegalStateException)
-    }
+  private[redis] def transaction[T](f: NormalCommands => Future[_]): Future[Seq[Reply]] = {
+    transaction(f(this))
+  }
 
+  private[redis] def reset(): Future[Unit] = {
+    if (_multi) discard()
+    else if (_watch) unwatch()
+    else Future.Done
+  }
 }

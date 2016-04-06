@@ -1,10 +1,8 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.StorageUnit
 
 /**
  * A collection of methods for configuring the [[Transport]] for Finagle servers.
@@ -37,11 +35,10 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     caCertificatePath: Option[String],
     ciphers: Option[String],
     nextProtocols: Option[String]
-  ): A = self.configured(Transport.TLSServerEngine(
-    Some(() =>
+  ): A = self
+    .configured(Transport.TLSServerEngine(Some(() =>
       Ssl.server(
         certificatePath, keyPath, caCertificatePath.orNull, ciphers.orNull, nextProtocols.orNull
       )
-    )
-  ))
+    )))
 }

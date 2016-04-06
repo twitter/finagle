@@ -42,7 +42,7 @@ object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabl
  * and coordinating draining.
  */
 private class Tracker[T] {
-  private[this] val pending = new ConcurrentHashMap[Int, Future[T]]
+  private[this] val pending = new ConcurrentHashMap[Int, Future[Unit]]
   private[this] val _drained: Promise[Unit] = new Promise
 
   // The state of a tracker is a single integer. Its absolute
@@ -75,35 +75,36 @@ private class Tracker[T] {
     } else if (!state.compareAndSet(n, n-1)) exit()
   }
 
-  private[this] val closedExit = (_: Try[Unit]) => exit()
-
   /**
    * Track a transaction. `track` manages the lifetime of a tag
-   * and its reply. Function `process` handles the result of `reply`.
-   * The ordering here is important: the tag is relinquished after
-   * `reply` is satisfied but before `process` is invoked, but is still
-   * considered pending until `process` completes. This is because:
-   * (1) the tag is freed once a client receives the reply, and, since
+   * including its reply and write. Function `process` handles the result
+   * of `reply`. The tag is freed once a client receives the reply, and, since
    * write completion is not synchronous with processing the next
    * request, there is a race between acknowledging the write and
    * receiving the next request from the client (which may then reuse
-   * the tag); (2) we can't complete draining until we've acknowledged
+   * the tag); We also can't complete draining until we've acknowledged
    * the write for the last request processed.
+   *
+   * @note `track` isn't synchronized across threads so this may have
+   * races in a multithreaded environment. In our case, each instance
+   * is owned by exactly one thread (i.e. we inherit netty's threading
+   * model).
    */
   def track(tag: Int, reply: Future[T])(process: Try[T] => Future[Unit]): Future[Unit] = {
     if (!enter()) return reply.transform(process)
 
-    pending.put(tag, reply)
-    reply transform { r =>
+    val f = reply.transform(process)
+    pending.put(tag, f)
+    f.ensure {
       pending.remove(tag)
-      process(r).respond(closedExit)
+      exit()
     }
   }
 
   /**
-   * Retrieve the value for the pending request matching `tag`.
+   * Retrieve the value for the pending transaction matching `tag`.
    */
-  def get(tag: Int): Option[Future[T]] =
+  def get(tag: Int): Option[Future[Unit]] =
     Option(pending.get(tag))
 
   /**
@@ -214,30 +215,38 @@ private[twitter] class ServerDispatcher(
 
   private[this] def process(m: Message): Unit = m match {
     case (_: Message.Tdispatch | _: Message.Treq) if isAccepting =>
-      // A misbehaving client is sending duplicate pending tags.
-      // Note that, since the client is managing multiple outstanding
-      // requests for this tag, and we're returning an Rerr here, there
-      // are no guarantees about client behavior in this case. Possibly
-      // we should terminate the session in this case.
-      //
-      // TODO: introduce uniform handling of tag tracking
-      // (across all request types), and also uniform handling
-      // (e.g., session termination).
-      if (tracker.isTracking(m.tag)) {
-        log.warning(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
-        write(Message.Rerr(m.tag, s"Duplicate tag ${m.tag}"))
-        return
-      }
-
       lessor.observeArrival()
       val elapsed = Stopwatch.start()
-      tracker.track(m.tag, service(m)) {
+
+      val reply: Try[Message] => Future[Unit] = {
         case Return(rep) =>
           lessor.observe(elapsed())
           write(rep)
         case Throw(exc) =>
           log.log(Level.WARNING, s"Error processing message $m", exc)
           write(Message.Rerr(m.tag, exc.toString))
+      }
+
+      if (!tracker.isTracking(m.tag)) {
+        tracker.track(m.tag, service(m))(reply)
+      } else {
+        // This can mean two things:
+        //
+        // 1. We have a pathalogical client which is sending duplicate tags.
+        // We push the responsibility of resolving the duplicate on the client
+        // and service the request.
+        //
+        // 2. We lost a race with the client where it reused a tag before we were
+        // able to cleanup the tracker. This is possible since we cleanup state on
+        // write closures which can be executed on a separate thread from the event
+        // loop thread (in netty3). We take extra precaution in the `ChannelTransport.write`
+        // to a avoid this, but technically it isn't guaranteed by netty3.
+        //
+        // In both cases, we forfeit the ability to track (and thus drain or interrupt)
+        // the request, but we can still service it.
+        log.fine(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
+        statsReceiver.counter("duplicate_tag").incr()
+        service(m).transform(reply)
       }
 
     // Dispatch when !isAccepting

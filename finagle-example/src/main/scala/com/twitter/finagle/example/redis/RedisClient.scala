@@ -22,7 +22,7 @@ object RedisClient {
     }
 
     println("Closing client...")
-    client.release()
+    client.close()
     println("Stopping Redis instance...")
     RedisCluster.stop()
     println("Done!")

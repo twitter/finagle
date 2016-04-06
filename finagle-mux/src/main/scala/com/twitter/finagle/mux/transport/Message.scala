@@ -3,7 +3,7 @@ package com.twitter.finagle.mux.transport
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
 import com.twitter.io.Charsets
-import com.twitter.util.{Duration, Time, Updatable}
+import com.twitter.util.{Duration, Time}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ReadOnlyChannelBuffer}
 import scala.collection.mutable.ArrayBuffer
 
@@ -48,6 +48,7 @@ private[twitter] object Message {
     val Rping = -65: Byte
 
     val Tdiscarded = 66: Byte
+    val Rdiscarded = -66: Byte
 
     val Tlease = 67: Byte
 
@@ -73,6 +74,8 @@ private[twitter] object Message {
 
     def extractType(header: Int): Byte = (header >> 24 & 0xff).toByte
     def extractTag(header: Int): Int = header & 0x00ffffff
+    def isFragment(tag: Int): Boolean = (tag >> 23 & 1) == 1
+    def setMsb(tag: Int): Int = tag | TagMSB
   }
 
   private def mkByte(b: Byte) =
@@ -332,6 +335,12 @@ private[twitter] object Message {
       contexts: Seq[(ChannelBuffer, ChannelBuffer)])
     extends Rdispatch(2, contexts, ChannelBuffers.EMPTY_BUFFER)
 
+  /**
+   * A fragment, as defined by the mux spec, is a message with its tag MSB
+   * set to 1.
+   */
+  case class Fragment(typ: Byte, tag: Int, buf: ChannelBuffer) extends Message
+
   /** Indicates to the client to stop sending new requests. */
   case class Tdrain(tag: Int) extends EmptyMessage { def typ = Types.Tdrain }
 
@@ -392,6 +401,11 @@ private[twitter] object Message {
           (which >> 8 & 0xff).toByte,
           (which & 0xff).toByte)),
       encodeString(why))
+  }
+
+  case class Rdiscarded(tag: Int) extends Message {
+    def typ = Types.Rdiscarded
+    def buf: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER
   }
 
   object Tlease {
@@ -599,7 +613,9 @@ private[twitter] object Message {
     val head = buf.readInt()
     val typ = Tags.extractType(head)
     val tag = Tags.extractTag(head)
-    typ match {
+    if (Tags.isFragment(tag))
+      Fragment(typ, tag, buf)
+    else typ match {
       case Types.Tinit =>
         val (version, ctx) = Init.decode(buf)
         Tinit(tag, version, ctx)
@@ -615,6 +631,7 @@ private[twitter] object Message {
       case Types.Tping => Tping(tag)
       case Types.Rping => Rping(tag)
       case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(buf))
+      case Types.Rdiscarded => Rdiscarded(tag)
       case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(buf)
       case Types.Tlease => decodeTlease(buf)
       case unknown => throw new BadMessageException(s"unknown message type: $unknown [tag=$tag]")

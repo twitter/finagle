@@ -2,7 +2,6 @@ package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Future, Stopwatch, Time, TokenBucket}
 
@@ -65,16 +64,22 @@ object DeadlineFilter {
       ) = {
         val Param(tolerance, maxRejectPercentage) = _param
         val param.Stats(statsReceiver) = _stats
+        val scopedStatsReceiver = statsReceiver.scope("admission_control", "deadline")
 
-        if (maxRejectPercentage <= 0.0) next
-        else
-          new DeadlineFilter(
-            tolerance,
-            DefaultRejectPeriod,
-            maxRejectPercentage,
-            statsReceiver.scope("admission_control", "deadline")).andThen(next)
+        new ServiceFactoryProxy[Req, Rep](next) {
+          override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =
+            next(conn).map { service =>
+              if (maxRejectPercentage <= 0.0) service
+              else
+                new DeadlineFilter(
+                  tolerance,
+                  DefaultRejectPeriod,
+                  maxRejectPercentage,
+                  scopedStatsReceiver).andThen(service)
+            }
+        }
       }
-  }
+    }
 }
 
 /**
@@ -149,7 +154,7 @@ private[finagle] class DeadlineFilter[Req, Rep](
         val remaining = deadline.deadline - now
 
         transitTimeStat.add((now - deadline.timestamp).max(Duration.Zero).inMilliseconds)
-        budgetTimeStat.add(remaining.max(Duration.Zero).inMilliseconds)
+        budgetTimeStat.add(remaining.inMilliseconds)
 
         // Exceeded the deadline within tolerance, and there are enough
         // tokens to reject the request

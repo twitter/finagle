@@ -387,7 +387,7 @@ class TraceTest extends FunSuite with MockitoSugar with BeforeAndAfter with OneI
   test("trace ID serialization: throw in handle on invalid size") {
     val bytes = new Array[Byte](33)
     
-    Trace.idCtx.tryUnmarshal(Buf.ByteArray(bytes)) match {
+    Trace.idCtx.tryUnmarshal(Buf.ByteArray.Owned(bytes)) match {
       case Throw(_: IllegalArgumentException) =>
       case rv => fail(s"Got $rv")
     }

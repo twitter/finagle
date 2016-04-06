@@ -7,12 +7,56 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: DeadlineFilter is now per-connection, so the max rejection percentage
+    is not shared across clients. This prevents a single client from exceeding the rejection
+    budget. ``RB_ID=813731``.
+
+  * finagle-http: Local Dtabs are now encoded into the `Dtab-Local` header.  `X-Dtab` headers
+    may still be read but should be considered deprecated. ``RB_ID=815092``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: DefaultClient has been removed. Implementors should prefer `c.t.f.StackClient`
+  ``RB_ID=812681``.
+
+  * finagle-core: When a client is created, its server set resolution is started eagerly.
+  ``RB_ID=806940``
+
+  * finagle-core: Dentry now takes a Dentry.Prefix instead of a Path. ``RB_ID=813914``
+
+  * finagle-cache-resolver: `c.t.f.cacheresolver.ZookeeperCacheNodeGroup` has been removed from the
+    API since we no longer check for the zookeeper data for the cache pool size to refresh for the
+    changes in the serverset. ``RB_ID=811190``
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-http: new stack params MaxChunkSize, MaxHeaderSize, and MaxInitialLineLength
+    are available to configure the http codec. ``RB_ID=811129``
+
+  * finagle-mux: Mux now has support for fragmenting Tdispatch and Rdispatch payloads.
+    This helps with head-of-line blocking in the presence of large payloads and allows
+    long transmissions to be interrupted. ``RB_ID=794641``.
+
+  * finagle-core: Dtabs allow wildcard path elements in prefixes. ``RB_ID=813914``
+
+Bug Fixes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-http: Ensure that service closure is delayed until chunked response bodies
+    have been processed. ``RB_ID=813110``
+
 6.34.0
 ------
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
-  * finagle-core: GenSerialClientDispatcher fails pending and subsequent requests when 
+
+  * finagle-core: GenSerialClientDispatcher fails pending and subsequent requests when
     its underlying transport closes. ``RB_ID=807590``
 
 New Features
@@ -38,6 +82,13 @@ New Features
 
   * finagle-http: Add `toBoolean` method in `StringUtil` to parse strings to boolean consistently.
     ``RB_ID=804056``
+
+  * finagle-http: Servers now actually decompress requests when decompression is turned on.
+    ``RB_ID=810629``
+
+  * finagle-redis: Add support for SENTINEL commands. ``RB_ID=810663``
+
+  * finagle-redis: Support for Pub/Sub. ``RB_ID=810610``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -71,9 +122,7 @@ Breaking API Changes
 
     Any other `SocketAddress` subclass is currently incompatible with `c.t.f.Address`. Instead,
     you should encode any additional information in the metadata field of `c.t.f.Address.Inet`
-    or `c.t.f.exp.Address.ServiceFactory`.
-
-    ``RB_ID=792209``
+    or `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
 
   * finagle-core: Delete `c.t.f.ServiceFactorySocketAddress` and replace usages with
     `c.t.f.exp.Address.ServiceFactory`. ``RB_ID=792209``
@@ -95,14 +144,27 @@ Breaking API Changes
   * finagle-core: `$Client.withSessionQualifier.failureAccrualPolicy` has been removed from the API
     since it enables an experimental feature (use Stack's `.configured` API instead). ``RB_ID=802953``
 
-  * finagle-core: `c.t.f.service.exp.FailureAccrualPolicies` (Java-friendly API) has bee removed -
+  * finagle-core: `c.t.f.service.exp.FailureAccrualPolicies` (Java-friendly API) has been removed -
     use `c.t.f.service.exp.FailureAccrualPolicy` instead.
+
+  * finagle-core: DefaultServer is removed. Protocol implementors should use StackServer instead.
+  ``RB_ID=811918``
 
   * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
     pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``
 
   * finagle-redis: `c.t.f.redis.Redis` no longer takes a `StatsReceiver`, pass it to a
     `(Client/Server)Builder` instead. ``RB_ID=797821``
+
+  * finagle-core: `c.t.f.http.MapHeaderMap` no longer takes a `mutable.Map[String, Seq[String]]` as
+    a constructor parameter. `apply` method provides a similar functionality.
+
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: Fixed `getAll` method on `c.t.f.http.MapHeaderMap`, now it is case insensitive.
+    `apply` method was altering the provided header names. This is fixed it is now possible to
+    iterate on the original header names.
 
 6.33.0
 ------

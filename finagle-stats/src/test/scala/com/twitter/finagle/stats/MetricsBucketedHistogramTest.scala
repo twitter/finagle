@@ -36,7 +36,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
         assert(snap0.percentiles().map(_.getValue) === Array(0, 0))
       }
 
-      // roll to window 2 (this should make data A visibile after a call to snapshot)
+      // roll to window 2 (this should make data A visible after a call to snapshot)
       roll()
       val snap1 = h.snapshot()
       withClue(snap1) {
@@ -90,6 +90,81 @@ class MetricsBucketedHistogramTest extends FunSuite {
         assert(snap4.sum() == 0)
         assert(snap4.avg() == 0)
         assert(snap4.percentiles().map(_.getValue) === Array(0, 0))
+      }
+    }
+  }
+
+  test("histogram snapshot respects refresh window") {
+    Time.withTimeAt(Time.fromSeconds(1439242122)) { tc =>
+      val h = new MetricsBucketedHistogram(name = "h")
+      val details = h.histogramDetail
+      
+      def roll(): Unit = {
+        tc.advance(60.seconds)
+      }
+
+      // add some data (A) to the 1st window
+      Seq(1L, Int.MaxValue).foreach(h.add)
+
+      // initial user access to start histogram snapshots
+      val init = details.counts 
+      assert(init == Nil)
+      // call .snapshot() to recompute counts
+      h.snapshot()
+      val countsSnap0 = details.counts
+      // since we have not rolled to the next window, we should not see A
+      withClue(countsSnap0) {
+        assert(countsSnap0 == Nil)
+      }
+
+      // roll to window 2 (this should make data A visibile after a call to snapshot)
+      roll()
+      h.snapshot()
+      val countsSnap1 = details.counts
+      withClue(countsSnap1) {
+        assert(countsSnap1 == Seq(BucketAndCount(1, 2, 1), 
+          BucketAndCount(2137204091, Int.MaxValue, 1)))
+      }
+    }
+  }
+
+  test("histogram snapshot erases old data on refresh") {
+    Time.withTimeAt(Time.fromSeconds(1439242122)) { tc =>
+      val h = new MetricsBucketedHistogram(name = "h")
+      val details = h.histogramDetail
+      
+      def roll(): Unit = {
+        tc.advance(60.seconds)
+      }
+
+      // add some data (A) to the 1st window and roll
+      Seq(1L, Int.MaxValue).foreach(h.add)
+      // initial snapshot call
+      h.snapshot()
+      // roll A over
+      roll()
+      h.snapshot()
+      // initial user access to histogram snapshots
+      val init = details.counts
+      // should not see A here because we haven't made 
+      // any .counts calls (the first .counts call causes 
+      // .snapshot to recompute histogramCounts)
+      assert(init == Nil)
+      // add some data (B) to the 2nd window 
+      Seq(-1L, 1L).foreach(h.add)
+      roll()   
+      h.snapshot()
+      val countsSnap0 = details.counts
+      withClue(countsSnap0) {
+        assert(countsSnap0 == Seq(BucketAndCount(0, 1, 1), BucketAndCount(1, 2, 1)))
+      }
+ 
+      // Roll to the next window, histogram should get cleared
+      roll()
+      h.snapshot()
+      val countsSnap1 = details.counts
+      withClue(countsSnap1) {
+        assert(countsSnap1 == Seq.empty)
       }
     }
   }

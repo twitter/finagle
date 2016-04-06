@@ -3,8 +3,7 @@ package com.twitter.finagle.serverset2
 import com.google.common.cache.{CacheLoader, CacheBuilder, LoadingCache}
 import com.twitter.cache.EvictingCache
 import com.twitter.cache.guava.LoadingFutureCache
-import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{Gauge, StatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.Future

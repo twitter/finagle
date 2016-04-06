@@ -59,9 +59,9 @@ class Zk2ResolverTest
   private[this] def zk2resolve(path: String): Name =
     Resolver.eval("zk2!"+inst.zookeeperConnectString+"!"+path)
 
-  private[this] def address(ia: InetSocketAddress): Address =
+  private[this] def address(ia: InetSocketAddress, shardIdOpt: Option[Int] = Some(shardId)): Address =
     WeightedAddress(Address.Inet(ia, ZkMetadata.toAddrMetadata(
-      ZkMetadata(Some(shardId)))), 1.0)
+      ZkMetadata(shardIdOpt))), 1.0)
 
   test("end-to-end: service endpoint") {
     val Name.Bound(va) = zk2resolve("/foo/bar")
@@ -111,6 +111,28 @@ class Zk2ResolverTest
       assert(va1.sample() == Addr.Neg,
         "resolution is not negative after the serverset disappears")
       assert(va2.sample() == Addr.Neg,
+        "resolution is not negative after the serverset disappears")
+    }
+  }
+  
+  test("end-to-end: no shard ID") {
+    val Name.Bound(va) = zk2resolve("/foo/bar")
+    eventually {
+      assert(va.sample() == Addr.Neg,
+        "resolution is not negative before serverset exists")
+    }
+
+    val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar")
+    val joinAddr = RandomSocket()
+    val status = serverSet.join(joinAddr, Map.empty[String, InetSocketAddress].asJava)
+    eventually {
+      assert(va.sample() == Addr.Bound(address(joinAddr, None)),
+        "resolution is not bound once the serverset exists")
+    }
+
+    status.leave()
+    eventually(stabilizationTimeout, stabilizationInterval) {
+      assert(va.sample() == Addr.Neg,
         "resolution is not negative after the serverset disappears")
     }
   }

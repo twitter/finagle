@@ -1,6 +1,5 @@
 package com.twitter.finagle.netty4
 
-import java.nio.CharBuffer
 
 import com.twitter.io.Buf
 import io.netty.buffer.Unpooled

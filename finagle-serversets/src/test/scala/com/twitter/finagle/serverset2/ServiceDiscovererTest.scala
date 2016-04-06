@@ -46,7 +46,7 @@ class ServiceDiscovererTest extends FunSuite with MockitoSugar with Eventually w
     serviceInstance.setShard(1)
     serviceInstance.setStatus(thrift.Status.ALIVE)
     serviceInstance.setServiceEndpoint(new thrift.Endpoint(s"$id.0.0.12", 32123))
-    ByteArray(ServerSets.serializeServiceInstance(serviceInstance, jsonCodec))
+    ByteArray.Owned(ServerSets.serializeServiceInstance(serviceInstance, jsonCodec))
   }
 
   test("ServiceDiscoverer.zipWithWeights") {

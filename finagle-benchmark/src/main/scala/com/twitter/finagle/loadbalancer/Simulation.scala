@@ -3,6 +3,7 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{StatsReceiver, SummarizingStatsReceiver, Stat}
+import com.twitter.finagle.tracing.Trace
 import com.twitter.finagle.util.{Drv, Rng, DefaultTimer}
 import com.twitter.util.{Function => _, _}
 import java.util.concurrent.atomic.AtomicInteger
@@ -139,9 +140,16 @@ private[finagle] class LatencyFactory(sr: StatsReceiver) {
 private[finagle] object Simulation extends com.twitter.app.App {
 
   val qps = flag("qps", 1250, "QPS at which to run the benchmark")
+  // TODO: add an option to always make a fixed number of requests.
   val dur = flag("dur", 45.seconds, "Benchmark duration")
   val nstable = flag("stable", 10, "Number of stable hosts")
   val bal = flag("bal", "p2c", "Load balancer")
+  val coldstart = flag("coldstart", true, "Add a cold start backend")
+  // we need a client that gets slow and then speeds up again
+  val slowmiddle = flag("slowmiddle", false, "Adds a fast-then-slow-then-fast again backend")
+  val showprogress = flag("showprogress", true, "print stats each second")
+  val showsummary = flag("showsummary", true,
+    "prints a Stats summary or else print each response time")
 
   def main() {
     val Qpms = qps()/1000
@@ -176,19 +184,45 @@ private[finagle] object Simulation extends com.twitter.app.App {
           activity,
           statsReceiver=stats.scope("aperture"),
           noBrokers)
+
+      case "rr" =>
+        Balancers.roundRobin().newBalancer(
+          activity,
+          statsReceiver=stats.scope("round_robin"),
+          noBrokers)
     }
 
     val balancer = factory.toService
-
     val latstat = stats.stat("latency")
-    def call() = Stat.timeFuture(latstat, TimeUnit.MILLISECONDS) { balancer(()) }
+
+    val call: () => Unit = if (showsummary()) {
+      () => { Stat.timeFuture(latstat, TimeUnit.MILLISECONDS) { balancer(()) } }
+    } else {
+      () => {
+        val profileStopWatch = Stopwatch.start()
+        balancer().ensure {
+          Trace.recordBinary("balancer", profileStopWatch().inMilliseconds)
+        }
+      }
+    }
 
     val stopWatch = Stopwatch.start()
     val p = new LatencyProfile(stopWatch)
 
-    val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
-    underlying() += newFactory(nstable()+1, coldStart(dist))
-    underlying() += newFactory(nstable()+2, p.slowBy(2)(dist))
+    var n = 1
+    if (coldstart()) {
+      val coldStart = p.warmup(10.seconds)_ andThen p.slowWithin(19.seconds, 23.seconds, 10)
+      underlying() += newFactory(nstable()+n, coldStart(dist))
+      n += 1
+      underlying() += newFactory(nstable()+n, p.slowBy(2)(dist))
+      n += 1
+    }
+
+    if (slowmiddle()) {
+      val slowMiddle = p.slowWithin(15.seconds, 45.seconds, 10)_
+      underlying() += newFactory(nstable() + n, slowMiddle(dist))
+      n += 1
+    }
 
     var ms = 0
     while (stopWatch() < dur()) {
@@ -204,16 +238,20 @@ private[finagle] object Simulation extends com.twitter.app.App {
 
       ms += 1
 
-      if (ms%1000==0) {
-        println("-"*100)
-        println("Requests at %s".format(stopWatch()))
+      if (showprogress()) {
+        if (ms%1000==0) {
+          println("-"*100)
+          println("Requests at %s".format(stopWatch()))
 
-        val lines = for ((name, fn) <- stats.gauges.toSeq) yield (name.mkString("/"), fn())
-        for ((name, value) <- lines.sortBy(_._1))
-          println(name+" "+value)
+          val lines = for ((name, fn) <- stats.gauges.toSeq) yield (name.mkString("/"), fn())
+          for ((name, value) <- lines.sortBy(_._1))
+            println(name+" "+value)
+        }
       }
     }
 
-    println(stats.summary(includeTails = true))
+    if (showsummary()) {
+      println(stats.summary(includeTails = true))
+    }
   }
 }

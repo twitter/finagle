@@ -1,13 +1,18 @@
 package com.twitter.finagle.service
 
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
 import com.twitter.finagle._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.tracing._
+import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.{atLeastOnce, spy, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.mock.MockitoSugar
+import scala.collection.JavaConverters._
 import scala.language.reflectiveCalls
 
 private object TimeoutFilterTest {
@@ -73,7 +78,8 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
 
     val timer = new MockTimer
     val exception = new IndividualRequestTimeoutException(timeout)
-    val timeoutFilter = new TimeoutFilter[Unit, Option[Deadline]](timeout, exception, timer)
+    val statsReceiver = new InMemoryStatsReceiver
+    val timeoutFilter = new TimeoutFilter[Unit, Option[Deadline]](timeout, exception, timer, statsReceiver)
     val timeoutService = timeoutFilter andThen service
   }
 
@@ -104,6 +110,23 @@ class TimeoutFilterTest extends FunSuite with MockitoSugar {
         timeoutService((): Unit)
       }
       assert(Await.result(f) == Some(Deadline(Time.now, Time.now+1.second)))
+    }
+  }
+
+  test("bug verification: TimeoutFilter incorrectly sends expired deadlines") {
+    val ctx = new DeadlineCtx(1.second)
+
+    import ctx._
+
+    Time.withCurrentTimeFrozen { tc =>
+      val now = Time.now
+      val f = Contexts.broadcast.let(Deadline, Deadline(now, now+1.second)) {
+        tc.advance(5.seconds)
+        timeoutService((): Unit)
+      }
+      assert(Await.result(f) == Some(Deadline(now + 5.seconds, now + 1.second)))
+
+      assert(statsReceiver.stats(Seq("expired_deadline_ms"))(0) == 4.seconds.inMillis)
     }
   }
 

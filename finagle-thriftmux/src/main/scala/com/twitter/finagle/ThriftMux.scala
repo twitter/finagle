@@ -1,7 +1,6 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
-import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
@@ -315,8 +314,8 @@ object ThriftMux
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
         version = Mux.LatestVersion,
-        headers = _ => Nil,
-        negotiate = mux.Handshake.NoopNegotiator)
+        headers = Mux.Server.headers,
+        negotiate = Mux.negotiate)
 
       mux.ServerDispatcher.newRequestResponse(
         negotiatedTrans,

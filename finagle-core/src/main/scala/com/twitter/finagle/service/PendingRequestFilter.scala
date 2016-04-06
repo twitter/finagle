@@ -13,7 +13,10 @@ object PendingRequestFilter {
 
   val role = Stack.Role("PendingRequestLimit")
 
-  case class Param(limit: Option[Int])
+  case class Param(limit: Option[Int]) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
 
   object Param {
     implicit val param = Stack.Param(Param(None))

@@ -11,7 +11,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
 import com.twitter.io.Buf
-import com.twitter.util.{Await, Future, Promise, Return, Throw, Time}
+import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
@@ -92,7 +92,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       Trace.letTracer(tracer)(f)
     }
 
-  def buf(b: Byte*) = Buf.ByteArray(b:_*)
+  def buf(b: Byte*) = Buf.ByteArray.Owned(b.toArray)
 
   test("handle concurrent requests, handling out of order replies") {
     val ctx = new Ctx
@@ -259,7 +259,10 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
   }
 
   test("failure detection") {
-    val config = FailureDetector.ThresholdConfig(10.milliseconds)
+    val config = FailureDetector.ThresholdConfig(
+      minPeriod = 10.milliseconds,
+      closeTimeout = Duration.Top)
+
     val ctx = new Ctx(config)
     import ctx._
 
@@ -280,9 +283,7 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       f.before(loop())
     }
     loop()
-    eventually {
-      assert(client.status == Status.Open)
-    }
+    eventually { assert(client.status == Status.Open) }
   }
 }
 

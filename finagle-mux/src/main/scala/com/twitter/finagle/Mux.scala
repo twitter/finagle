@@ -1,20 +1,32 @@
 package com.twitter.finagle
 
+import com.twitter.app.GlobalFlag
+import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.filter.PayloadSizeFilter
-import com.twitter.finagle.mux.FailureDetector
 import com.twitter.finagle.mux.lease.exp.Lessor
+import com.twitter.finagle.mux.transport.{Message, MuxFramer, Netty3Framer}
+import com.twitter.finagle.mux.{Handshake, FailureDetector}
 import com.twitter.finagle.netty3._
-import com.twitter.finagle.mux.transport.{Message, Netty3Framer}
 import com.twitter.finagle.param.{WithDefaultLoadBalancer, ProtocolLibrary}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, Future}
+import com.twitter.util.{Closable, Future, StorageUnit}
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
+
+package mux {
+  /**
+   * Experimental support for mux payload framing.
+   */
+  object maxFrameSize extends GlobalFlag[StorageUnit](
+    Int.MaxValue.bytes,
+    "The maximum size of a mux frame. Any message that is larger "+
+    "than this value is fragmented across multiple transmissions.")
+}
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
@@ -24,6 +36,19 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
    * The current version of the mux protocol.
    */
   val LatestVersion: Short = 0x0001
+
+  /**
+   * Extract feature flags from `headers` and decorate `trans`.
+   */
+  private[finagle] val negotiate: Handshake.Negotiator = (headers, trans) => {
+    val window = Handshake.valueOf(MuxFramer.Header.KeyBuf, headers)
+      .map { cb => MuxFramer.Header.decodeFrameSize(cb) }
+    if (window.nonEmpty && window.get < Int.MaxValue) {
+      MuxFramer(trans, window.get)
+    } else {
+      trans.map(Message.encode, Message.decode)
+    }
+  }
 
   private[finagle] abstract class ProtoTracing(
     process: String,
@@ -44,22 +69,25 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   private[finagle] class ClientProtoTracing extends ProtoTracing("clnt", StackClient.Role.protoTracing)
 
-  /** Prepends bound residual paths to outbound Mux requests's destinations. */
-  private[finagle] object MuxBindingFactory
-    extends BindingFactory.Module[mux.Request, mux.Response] {
-
-    protected[this] def boundPathFilter(residual: Path) =
-      Filter.mk[mux.Request, mux.Response, mux.Request, mux.Response] { (req, service) =>
-        service(mux.Request(residual ++ req.destination, req.body))
-      }
-  }
-
   object Client {
+    /** Prepends bound residual paths to outbound Mux requests's destinations. */
+    private object MuxBindingFactory extends BindingFactory.Module[mux.Request, mux.Response] {
+      protected[this] def boundPathFilter(residual: Path) =
+        Filter.mk[mux.Request, mux.Response, mux.Request, mux.Response] { (req, service) =>
+          service(mux.Request(residual ++ req.destination, req.body))
+        }
+    }
+
     val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackClient.newStack
       .replace(StackClient.Role.pool, SingletonPool.module[mux.Request, mux.Response])
       .replace(StackClient.Role.protoTracing, new ClientProtoTracing)
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+
+    private def headers: Handshake.Headers = Seq(
+      MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(
+        mux.maxFrameSize().inBytes.toInt)
+    )
   }
 
   case class Client(
@@ -90,8 +118,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val negotiatedTrans = mux.Handshake.client(
         trans = transport,
         version = LatestVersion,
-        headers = Nil,
-        negotiate = mux.Handshake.NoopNegotiator)
+        headers = Client.headers,
+        negotiate = negotiate)
 
       val session = new mux.ClientSession(
         negotiatedTrans,
@@ -115,9 +143,19 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
 
   object Server {
     val stack: Stack[ServiceFactory[mux.Request, mux.Response]] = StackServer.newStack
-        .remove(TraceInitializerFilter.role)
-        .replace(StackServer.Role.protoTracing, new ServerProtoTracing)
-        .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+      .remove(TraceInitializerFilter.role)
+      .replace(StackServer.Role.protoTracing, new ServerProtoTracing)
+      .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
+
+    /**
+     * Determine the server headers based on `clientHeaders`.
+     */
+    private[finagle] def headers(clientHeaders: Handshake.Headers): Handshake.Headers = {
+      val frameSize = Handshake.valueOf(MuxFramer.Header.KeyBuf, clientHeaders)
+      if (frameSize.isEmpty) Nil
+      else Seq(MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(
+        mux.maxFrameSize().inBytes.toInt))
+    }
   }
 
   case class Server(
@@ -151,8 +189,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
         version = LatestVersion,
-        headers = _ => Nil,
-        negotiate = mux.Handshake.NoopNegotiator)
+        headers = Server.headers,
+        negotiate = negotiate)
 
       mux.ServerDispatcher.newRequestResponse(
         negotiatedTrans,

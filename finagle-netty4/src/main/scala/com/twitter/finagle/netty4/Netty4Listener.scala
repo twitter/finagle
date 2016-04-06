@@ -2,14 +2,13 @@ package com.twitter.finagle.netty4
 
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
-import com.twitter.finagle.netty4.channel.{ServerBridge, Netty4ChannelInitializer}
+import com.twitter.finagle.netty4.channel.{ServerBridge, Netty4ServerChannelInitializer}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.buffer.UnpooledByteBufAllocator
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
@@ -30,11 +29,11 @@ private[finagle] object Netty4Listener {
   val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
 }
 
-private[netty4] case class PipelineInit(cf: ChannelPipeline => Unit) {
+private[finagle] case class PipelineInit(cf: ChannelPipeline => Unit) {
   def mk(): (PipelineInit, Stack.Param[PipelineInit]) =
     (this, PipelineInit.param)
 }
-private[netty4] object PipelineInit {
+private[finagle] object PipelineInit {
   implicit val param = Stack.Param(PipelineInit(_ => ()))
 }
 
@@ -61,6 +60,9 @@ private[finagle] case class Netty4Listener[In, Out](
 
   // listener params
   private[this] val Listener.Backlog(backlog) = params[Listener.Backlog]
+
+  // netty4 params
+  private[this] val param.Allocator(allocator) = params[param.Allocator]
 
   /**
    * Listen for connections and apply the `serveTransport` callback on connected [[Transport transports]].
@@ -89,9 +91,9 @@ private[finagle] case class Netty4Listener[In, Out](
       bootstrap.group(bossLoop, WorkerPool)
       bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
 
-      //todo: investigate pooled allocator CSL-2089
-      bootstrap.option(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
-      bootstrap.childOption(ChannelOption.ALLOCATOR, UnpooledByteBufAllocator.DEFAULT)
+      bootstrap.option(ChannelOption.ALLOCATOR, allocator)
+      bootstrap.childOption(ChannelOption.ALLOCATOR, allocator)
+
       bootstrap.option[JBool](ChannelOption.SO_REUSEADDR, reuseAddr)
       bootstrap.option[JInt](ChannelOption.SO_LINGER, 0)
       backlog.foreach(bootstrap.option[JInt](ChannelOption.SO_BACKLOG, _))
@@ -103,7 +105,7 @@ private[finagle] case class Netty4Listener[In, Out](
         bootstrap.childOption[JInt](Netty4Listener.TrafficClass, tc)
       }
 
-      val initializer = new Netty4ChannelInitializer(pipelineInit, params, newBridge)
+      val initializer = new Netty4ServerChannelInitializer(pipelineInit, params, newBridge)
       bootstrap.childHandler(initializer)
 
       // Block until listening socket is bound. `ListeningServer`
