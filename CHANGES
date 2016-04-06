@@ -40,6 +40,9 @@ Breaking API Changes
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-core: Multi-line Dtabs may now contain line-oriented comments beginning with '#'.
+    Comments are omitted from parsed Dtabs. ``RB_ID=818752``
+
   * finagle-http: new stack params MaxChunkSize, MaxHeaderSize, and MaxInitialLineLength
     are available to configure the http codec. ``RB_ID=811129``
 

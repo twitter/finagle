@@ -55,8 +55,17 @@ private class NameTreeParsers private (str: String) {
   }
 
   private[this] def eatWhitespace() {
-    while (!atEnd && str(idx).isWhitespace)
+    while (!atEnd && (str(idx).isWhitespace || str(idx) == '#')) {
+      if (str(idx) == '#') eatLine()
+      else next()
+    }
+  }
+
+  private[this] def eatLine() {
+    while (!atEnd && str(idx) != '\n')
       next()
+    if (!atEnd)
+      eat('\n')
   }
 
   private[this] def atEnd() = idx >= size

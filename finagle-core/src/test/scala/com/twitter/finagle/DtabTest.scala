@@ -27,6 +27,26 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     """))
   }
 
+  test("Dtab.read ignores comment lines with #") {
+    val withComments = Dtab.read("""
+# a comment
+      /#foo => /biz  # another comment
+             | ( /bliz & # yet another comment
+                 /bluth ) # duh bluths
+             ; #finalmente
+      #/ignore=>/me;
+    """)
+    assert(withComments == Dtab(IndexedSeq(
+      Dentry(Path.Utf8("#foo"), NameTree.Alt(
+        NameTree.Leaf(Path.Utf8("biz")),
+        NameTree.Union(
+          NameTree.Weighted(NameTree.Weighted.defaultWeight, NameTree.Leaf(Path.Utf8("bliz"))),
+          NameTree.Weighted(NameTree.Weighted.defaultWeight, NameTree.Leaf(Path.Utf8("bluth")))
+        )
+      ))
+    )))
+  }
+
   test("d1 ++ Dtab.empty") {
     val d1 = Dtab.read("/foo=>/bar;/biz=>/baz")
 
