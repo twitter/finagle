@@ -2,21 +2,18 @@ package com.twitter.finagle.http
 
 import com.google.common.base.Charsets
 import com.twitter.collection.RecordSchema
-import com.twitter.finagle.http.netty.{HttpResponseProxy, Bijections}
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.io.Reader
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
-import org.jboss.netty.handler.codec.http.{
-  DefaultHttpResponse, HttpResponse, HttpResponseDecoder, HttpResponseEncoder,
-  HttpResponseStatus
-}
+import org.jboss.netty.handler.codec.http._
 
 import Bijections._
 
 /**
  * Rich HttpResponse
  */
-abstract class Response extends Message with HttpResponseProxy {
+abstract class Response extends Message {
 
   /**
    * Arbitrary user-defined context associated with this response object.
@@ -29,13 +26,13 @@ abstract class Response extends Message with HttpResponseProxy {
 
   def isRequest = false
 
-  def status: Status          = from(getStatus)
-  def status_=(value: Status) { setStatus(from(value)) }
-  def statusCode: Int                     = getStatus.getCode
-  def statusCode_=(value: Int)            { setStatus(HttpResponseStatus.valueOf(value)) }
+  def status: Status = from(getStatus)
+  def status_=(value: Status): Unit = { setStatus(from(value)) }
+  def statusCode: Int = getStatus.getCode
+  def statusCode_=(value: Int): Unit = { setStatus(HttpResponseStatus.valueOf(value)) }
 
-  def getStatusCode(): Int      = statusCode
-  def setStatusCode(value: Int) { statusCode = value }
+  def getStatusCode(): Int = statusCode
+  def setStatusCode(value: Int): Unit = { statusCode = value }
 
   /** Encode as an HTTP message */
   def encodeString(): String = {
@@ -47,6 +44,16 @@ abstract class Response extends Message with HttpResponseProxy {
 
   override def toString =
     "Response(\"" + version + " " + status + "\")"
+
+  protected[finagle] def httpResponse: HttpResponse
+
+  protected[finagle] def getHttpResponse(): HttpResponse = httpResponse
+  protected[finagle] def httpMessage: HttpMessage = httpResponse
+
+  protected[finagle] def getStatus(): HttpResponseStatus = httpResponse.getStatus()
+  protected[finagle] def setStatus(status: HttpResponseStatus): Unit = {
+    httpResponse.setStatus(status)
+  }
 }
 
 object Response {
@@ -115,6 +122,6 @@ object Response {
   private[http] def apply(httpRequest: Request): Response =
     new Response {
       final val httpResponse =
-        new DefaultHttpResponse(httpRequest.getProtocolVersion, HttpResponseStatus.OK)
+        new DefaultHttpResponse(from(httpRequest.version), HttpResponseStatus.OK)
     }
 }

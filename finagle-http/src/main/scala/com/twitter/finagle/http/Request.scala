@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.collection.RecordSchema
 import com.twitter.finagle.http.exp.Multipart
-import com.twitter.finagle.http.netty.{HttpRequestProxy, Bijections}
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.io.{Charsets, Reader}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.{AbstractMap, List => JList, Map => JMap, Set => JSet}
@@ -21,7 +21,7 @@ import Bijections._
  *
  * Use RequestProxy to create an even richer subclass.
  */
-abstract class Request extends Message with HttpRequestProxy {
+abstract class Request extends Message {
 
   /**
    * Arbitrary user-defined context associated with this request object.
@@ -206,6 +206,15 @@ abstract class Request extends Message with HttpRequestProxy {
 
   override def toString: String =
     "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
+
+  protected[finagle] def httpRequest: HttpRequest
+  protected[finagle] def getHttpRequest(): HttpRequest = httpRequest
+  protected[finagle] def httpMessage: HttpMessage = httpRequest
+
+  protected[finagle] def getMethod(): HttpMethod = httpRequest.getMethod
+  protected[finagle] def setMethod(method: HttpMethod) { httpRequest.setMethod(method) }
+  protected[finagle] def getUri(): String = httpRequest.getUri()
+  protected[finagle] def setUri(uri: String) { httpRequest.setUri(uri) }
 }
 
 

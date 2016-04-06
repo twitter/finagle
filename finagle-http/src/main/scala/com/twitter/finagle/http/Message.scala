@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.io.{Buf, Reader => BufReader, Writer => BufWriter}
 import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
-import com.twitter.finagle.http.netty.{HttpMessageProxy, Bijections}
+import com.twitter.finagle.http.netty.Bijections
 import com.twitter.util.{Await, Duration, Closable}
 import java.io.{InputStream, InputStreamReader, OutputStream, OutputStreamWriter, Reader, Writer}
 import java.util.{Iterator => JIterator}
@@ -14,6 +14,7 @@ import org.jboss.netty.buffer.{
   ChannelBufferInputStream, DynamicChannelBuffer, ChannelBuffer,
   ChannelBufferOutputStream, ChannelBuffers
 }
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage, HttpVersion}
 import scala.collection.JavaConverters._
 
 import Bijections._
@@ -24,8 +25,9 @@ import Bijections._
  * Base class for Request and Response.  There are both input and output
  * methods, though only one set of methods should be used.
  */
-abstract class Message extends HttpMessageProxy {
+abstract class Message {
 
+  protected[finagle] def httpMessage: HttpMessage
   private[this] val readerWriter = BufReader.writable()
 
   /**
@@ -47,8 +49,8 @@ abstract class Message extends HttpMessageProxy {
   def content: Buf = ChannelBufferBuf.Owned(getContent())
   def content_=(content: Buf) { setContent(BufChannelBuffer(content)) }
 
-  def version: Version = from(getProtocolVersion())
-  def version_=(version: Version) { setProtocolVersion(from(version)) }
+  def version: Version = from(httpMessage.getProtocolVersion())
+  def version_=(version: Version) { httpMessage.setProtocolVersion(from(version)) }
 
   lazy val headerMap: HeaderMap = new MessageHeaderMap(this)
 
@@ -420,6 +422,20 @@ abstract class Message extends HttpMessageProxy {
       if (future.isDefined) Await.result(future)
     }
   }
+
+  protected[finagle] def headers(): HttpHeaders =
+    httpMessage.headers()
+
+  protected[finagle] def getContent(): ChannelBuffer =
+    httpMessage.getContent()
+
+  protected[finagle] def setContent(content: ChannelBuffer): Unit =
+    httpMessage.setContent(content)
+
+  def isChunked: Boolean = httpMessage.isChunked()
+
+  def setChunked(chunked: Boolean): Unit =
+    httpMessage.setChunked(chunked)
 }
 
 

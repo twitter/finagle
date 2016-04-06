@@ -91,7 +91,7 @@ class AdaptorsTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (resp, body)  <- arbResponse
       version       <- arbNettyVersion
     } yield {
-      resp.httpResponse.setProtocolVersion(version)
+      resp.version = from(version)
       (resp.httpResponse, body)
     }
 
@@ -100,7 +100,7 @@ class AdaptorsTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (req, body) <- arbRequest
       version     <- arbNettyVersion
     } yield {
-      req.setProtocolVersion(version)
+      req.version = from(version)
       (req.getHttpRequest, body)
     }
 

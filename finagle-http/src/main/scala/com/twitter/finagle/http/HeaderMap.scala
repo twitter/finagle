@@ -1,6 +1,5 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.netty.HttpMessageProxy
 import com.twitter.util.TwitterDateFormat
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale, TimeZone}
@@ -137,7 +136,7 @@ object MapHeaderMap {
 /**
  * Mutable HttpMessage-backed [[HeaderMap]].
  */
-private[finagle] class MessageHeaderMap(httpMessage: HttpMessageProxy) extends HeaderMap {
+private[finagle] class MessageHeaderMap(httpMessage: Message) extends HeaderMap {
   def get(key: String): Option[String] =
     Option(httpMessage.headers.get(key))
 
