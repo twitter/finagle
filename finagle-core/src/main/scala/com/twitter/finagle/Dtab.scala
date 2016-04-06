@@ -240,6 +240,8 @@ object Dentry {
      * }}}
      *
      * @throws IllegalArgumentException when `s` is not a syntactically valid path.
+     *
+     * Note: There is a Java-friendly API for this method: [[Dentry.readPrefix]].
      */
     def read(s: String): Prefix = NameTreeParsers.parseDentryPrefix(s)
 
@@ -262,6 +264,11 @@ object Dentry {
       def apply(s: String): Label = Label(Buf.Utf8(s))
     }
   }
+
+  /**
+   * Java compatibility method for `Dentry.Prefix.read`
+   */
+  def readPrefix(s: String): Prefix = Prefix.read(s)
 }
 
 /**
