@@ -8,7 +8,7 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
 import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.{StreamTransport, HttpTransport => ExpHttpTransport,
-  HttpClientDispatcher => ExpHttpClientDispatcher}
+  HttpClientDispatcher => ExpHttpClientDispatcher, HttpServerDispatcher => ExpHttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter,
   ServerContextFilter}
 import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
@@ -317,6 +317,11 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newListener(): Listener[Any, Any] =
       params[param.ParameterizableListener].listenerFn(params)
 
+    protected def newStreamTransport(
+      transport: Transport[Any, Any]
+    ): StreamTransport[Response, Request] =
+      new ExpHttpTransport(new Netty3ServerStreamTransport(transport))
+
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {
       val dtab = new DtabFilter.Finagle[Request]
@@ -325,7 +330,11 @@ object Http extends Client[Request, Response] with HttpRichClient
 
       val endpoint = dtab.andThen(context).andThen(service)
 
-      new HttpServerDispatcher(new HttpTransport(transport), endpoint, stats.scope("dispatch"))
+      if (expStreamTransport()) new ExpHttpServerDispatcher(
+        newStreamTransport(transport),
+        endpoint,
+        stats.scope("dispatch"))
+      else new HttpServerDispatcher(new HttpTransport(transport), endpoint, stats.scope("dispatch"))
     }
 
     protected def copy1(

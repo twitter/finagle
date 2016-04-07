@@ -5,7 +5,7 @@ import com.twitter.util.Future
 
 /**
  * The HTTP connection manager implements connection management in
- * accordance with RFC 2616 § 8. This is just the state machine: the
+ * accordance with RFC 2616 § 8. This is just the state machine; the
  * codec implementations are in {Server,Client}ConnectionManager.
  */
 private[http] class ConnectionManager {
@@ -41,6 +41,7 @@ private[http] class ConnectionManager {
     handleIfStream(onFinish)
   }
 
+  // this can be unsynchronized because all callers are synchronized.
   private[this] def handleIfStream(onFinish: Future[Unit]): Unit = {
     if (!onFinish.isDefined) {
       activeStreams += 1
