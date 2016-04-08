@@ -1,7 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.conversions.time._
-import com.twitter.util.Time
+import com.twitter.util.{Time, TimeControl}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -94,78 +94,81 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
-  test("histogram snapshot respects refresh window") {
-    Time.withTimeAt(Time.fromSeconds(1439242122)) { tc =>
-      val h = new MetricsBucketedHistogram(name = "h")
-      val details = h.histogramDetail
-      
-      def roll(): Unit = {
-        tc.advance(60.seconds)
-      }
+  class Ctx(tc: TimeControl) {
+    val h = new MetricsBucketedHistogram(name = "h")
+    val details = h.histogramDetail
+
+    def roll(): Unit = {
+      tc.advance(60.seconds)
+      h.snapshot()
+    }
+  }
+
+  test("histogram snapshot is available on first request") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = new Ctx(tc)
+      import ctx._
 
       // add some data (A) to the 1st window
-      Seq(1L, Int.MaxValue).foreach(h.add)
+      h.add(1)
 
       // initial user access to start histogram snapshots
-      val init = details.counts 
-      assert(init == Nil)
+      val init = details.counts
+      assert(init == Seq(BucketAndCount(1, 2, 1)))
+    }
+  }
+
+  test("histogram snapshot respects refresh window") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = new Ctx(tc)
+      import ctx._
+
+      // add some data (A) to the 1st window
+      h.add(1)
+
+      // initial user access to start histogram snapshots
+      val init = details.counts
+      assert(init == Seq(BucketAndCount(1, 2, 1)))
+
       // call .snapshot() to recompute counts
       h.snapshot()
       val countsSnap0 = details.counts
-      // since we have not rolled to the next window, we should not see A
-      withClue(countsSnap0) {
-        assert(countsSnap0 == Nil)
-      }
+      assert(countsSnap0 == Seq(BucketAndCount(1, 2, 1)))
 
-      // roll to window 2 (this should make data A visibile after a call to snapshot)
+      h.add(Int.MaxValue)
+      // roll to window 2 (this should make data A visible after a call to snapshot)
       roll()
-      h.snapshot()
       val countsSnap1 = details.counts
-      withClue(countsSnap1) {
-        assert(countsSnap1 == Seq(BucketAndCount(1, 2, 1), 
-          BucketAndCount(2137204091, Int.MaxValue, 1)))
-      }
+      assert(countsSnap1 == Seq(BucketAndCount(1, 2, 1),
+        BucketAndCount(2137204091, Int.MaxValue, 1)))
     }
   }
 
   test("histogram snapshot erases old data on refresh") {
-    Time.withTimeAt(Time.fromSeconds(1439242122)) { tc =>
-      val h = new MetricsBucketedHistogram(name = "h")
-      val details = h.histogramDetail
-      
-      def roll(): Unit = {
-        tc.advance(60.seconds)
-      }
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = new Ctx(tc)
+      import ctx._
 
       // add some data (A) to the 1st window and roll
-      Seq(1L, Int.MaxValue).foreach(h.add)
-      // initial snapshot call
-      h.snapshot()
-      // roll A over
+      h.add(1)
       roll()
-      h.snapshot()
+
       // initial user access to histogram snapshots
       val init = details.counts
-      // should not see A here because we haven't made 
-      // any .counts calls (the first .counts call causes 
-      // .snapshot to recompute histogramCounts)
-      assert(init == Nil)
-      // add some data (B) to the 2nd window 
+
+      assert(init == Seq(BucketAndCount(1, 2, 1)))
+      roll()
+
+      // add some data (B) to the 2nd window
       Seq(-1L, 1L).foreach(h.add)
-      roll()   
-      h.snapshot()
+      roll()
       val countsSnap0 = details.counts
-      withClue(countsSnap0) {
-        assert(countsSnap0 == Seq(BucketAndCount(0, 1, 1), BucketAndCount(1, 2, 1)))
-      }
- 
+      assert(countsSnap0 == Seq(BucketAndCount(0, 1, 1), BucketAndCount(1, 2, 1)))
+
       // Roll to the next window, histogram should get cleared
       roll()
-      h.snapshot()
       val countsSnap1 = details.counts
-      withClue(countsSnap1) {
-        assert(countsSnap1 == Seq.empty)
-      }
+      assert(countsSnap1 == Seq.empty)
     }
   }
 }

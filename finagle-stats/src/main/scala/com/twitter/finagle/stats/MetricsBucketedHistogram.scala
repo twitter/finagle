@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{Histogram, HistogramInterface, Percentile, Snapshot}
+import com.twitter.concurrent.Once
 import com.twitter.conversions.time._
 import com.twitter.util.{Duration, Time}
 import java.util.concurrent.atomic.AtomicReference
@@ -48,10 +49,17 @@ private[stats] class MetricsBucketedHistogram(
    */
   private[this] val hd: HistogramDetail = {
     new HistogramDetail {
-      def counts: Seq[BucketAndCount] = {
+      private[this] val fn = Once {
         isHistogramRequested = true
+        current.synchronized {
+          histogramCountsSnap.recomputeFrom(current)
+        }
+      }
+
+      def counts: Seq[BucketAndCount] = {
+        fn()
         histogramCountsSnap.counts
-      }  
+      }
     }
   }
 
