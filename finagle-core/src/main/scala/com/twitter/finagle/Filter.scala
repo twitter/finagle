@@ -59,6 +59,13 @@ abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
     else AndThen(service => andThen(next.andThen(service)))
 
   /**
+   * Convert the [[TypeAgnostic]] filter to a Filter and chain it with
+   * `andThen`.
+   */
+  def agnosticAndThen(next: Filter.TypeAgnostic): Filter[ReqIn, RepOut, ReqOut, RepIn] =
+    andThen(next.toFilter[ReqOut, RepIn])
+
+  /**
    * Terminates a filter chain in a [[Service]]. For example,
    *
    * {{{
@@ -199,6 +206,36 @@ object Filter {
         def toFilter[Req, Rep] =
           self.toFilter[Req, Rep].andThen(next.toFilter[Req, Rep])
       }
+
+    /**
+     * Convert this to an appropriately-typed [[Filter]] and compose
+     * with `andThen`.
+     */
+    def andThen[ReqIn, RepOut, ReqOut, RepIn](
+      next: Filter[ReqIn, RepOut, ReqOut, RepIn]
+    ): Filter[ReqIn, RepOut, ReqOut, RepIn] =
+      toFilter[ReqIn, RepOut].andThen(next)
+
+    /**
+     * Convert this to an appropriately-typed [[Filter]] and compose
+     * with `andThen`.
+     */
+    def andThen[Req, Rep](f: Req => Future[Rep]): Req => Future[Rep] =
+      toFilter[Req, Rep].andThen(f)
+
+    /**
+     * Convert this to an appropriately-typed [[Filter]] and compose
+     * with `andThen`.
+     */
+    def andThen[Req, Rep](svc: Service[Req, Rep]): Service[Req, Rep] =
+      toFilter[Req, Rep].andThen(svc)
+
+    /**
+     * Convert this to an appropriately-typed [[Filter]] and compose
+     * with `andThen`.
+     */
+    def andThen[Req, Rep](factory: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+      toFilter[Req, Rep].andThen(factory)
   }
 
   object TypeAgnostic {
