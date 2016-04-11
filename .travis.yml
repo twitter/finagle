@@ -1,17 +1,18 @@
-# This is necessary until https://github.com/travis-ci/travis-ci/issues/3120 is
-# fixed
-sudo: required
+# container-based build
+sudo: false
 
 language: scala
 
 env:
-  - SKIP_FLAKY=true
+  - JAVA_OPTS="-Xmx4G -DSKIP_FLAKY=1"
 
 # These directories are cached to S3 at the end of the build
 cache:
   directories:
-   - $HOME/.ivy2/cache
+   - $HOME/.m2
+   - $HOME/.ivy2
    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+   - $HOME/.gitshas
 
 scala:
   - 2.10.6
@@ -32,15 +33,23 @@ notifications:
 before_script:
   # default $SBT_OPTS is irrelevant to sbt lancher
   - unset SBT_OPTS
-  - ./bin/travisci
-  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION update
+  - mkdir -p $HOME/.gitshas
+  - env GIT_SHA_DIR=$HOME/.gitshas ./bin/travisci
+  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+  - >
+    if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
+      ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/update
+    fi
 
 script:
   # don't test these projects because they don't pass on travis-ci
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
   # run conditionally because they don't pass with openjdks
-  - if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-native/test; fi
+  - >
+    if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
+      ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-native/test;
+    fi
 
   # run for all environments
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-commons-stats/test
@@ -67,6 +76,5 @@ script:
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thrift/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thriftmux/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-zipkin/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
 
-after_success: ./sbt ++$TRAVIS_SCALA_VERSION coveralls
+after_success: ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate coveralls
