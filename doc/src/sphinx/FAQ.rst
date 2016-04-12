@@ -104,11 +104,24 @@ Old ``ClientBuilder`` APIs:
 
   import com.twitter.finagle.builder.ClientBuilder
   import com.twitter.finagle.http.Http
+  import com.twitter.finagle.stats.StatsReceiver
+  import com.twitter.finagle.tracing.Tracer
+  import com.twitter.util.Duration
+
+  val statsReceiver: StatsReceiver = ???
+  val tracer: Tracer = ???
+  val requestTimeout: Duration = ???
+  val connectTimeout: Duration = ???
 
   val client = ClientBuilder()
     .codec(Http)
-    .hosts("localhost:10000,localhost:10001,localhost:10003")
+    .name("clientname")
+    .reportTo(statsReceiver)
+    .tracer(tracer)
+    .requestTimeout(requestTimeout)
+    .connectTimeout(connectTimeout)
     .hostConnectionLimit(1)
+    .hosts("localhost:10000,localhost:10001,localhost:10003")
     .build()
 
 New ``Stack`` APIs:
@@ -116,55 +129,39 @@ New ``Stack`` APIs:
 .. code-block:: scala
 
   import com.twitter.finagle.Http
+  import com.twitter.finagle.stats.StatsReceiver
+  import com.twitter.finagle.tracing.Tracer
+  import com.twitter.util.Duration
+
+  val statsReceiver: StatsReceiver = ???
+  val tracer: Tracer = ???
+  val requestTimeout: Duration = ???
+  val connectTimeout: Duration = ???
 
   val client = Http.client
+    .withLabel("clientname")
+    // if `withStatsReceiver` is not specified, it will use the
+    // `c.t.f.stats.DefaultStatsReceiver` scoped to the value of `newClient` or
+    // `newService`'s label. If that is not provided, it will be scoped to the
+    // value of `withLabel`.
+    .withStatsReceiver(statsReceiver)
+    .withTracer(tracer)
+    .withRequestTimeout(requestTimeout)
+    .withSession.acquisitionTimeout(connectTimeout)
     .withSessionPool.maxSize(1)
     .newService("localhost:10000,localhost:10001")
 
-The new APIs make timeouts more explicit, but we think we have a pretty good reason
-for changing the API this way.
-
-Timeouts are typically used in two cases:
-
-A.  Liveness detection (TCP connect timeout)
-B.  Application requirements (global timeout)
-
-For liveness detection, it is actually fine for timeouts to be long.  We have a
-default of 1 second.
-
-For application requirements, you can use a service normally and then use
-``Future#raiseWithin``.
-
-.. code-block:: scala
-
-  import com.twitter.conversions.time._
-  import com.twitter.util.Future
-  import com.twitter.finagle.Http
-  import com.twitter.finagle.http
-
-  val get: Future[http.Response] = Http.fetchUrl("http://twitter.com/")
-  get.raiseWithin(1.ms)
-
-We found that having all of the extremely granular timeouts was making it harder
-for people to use Finagle, since it was hard to reason about what all of the
-timeouts did without knowledge of Finagle internals.  How is ``tcpConnectTimeout``
-different from ``connectTimeout``?  How is a ``requestTimeout`` different from a
-``timeout``?  What is an ``idleReaderTimeout``?  How is it different from
-``idleWriterTimeout``?  People would often cargo-cult bad configuration settings,
-and it would be difficult to recover from the bad situation.  We also found that
-they were rarely being used correctly, and usually only by very sophisticated
-users.
-
-Of course, there are some points where there are rough edges, and we haven't
-figured out exactly what the right default should be.  We're actively looking
-for input, and would love for the greater Finagle community to help us find good
-defaults. We've also been experimenting with some new abstractions that should
-make configuration a lot more flexible. Stay tuned and of course reach out to
-the mailing list with any questions.
+More configuration options and the details about them are available for
+:ref:`clients <finagle_clients>` and :ref:`servers <finagle_servers>`.
+Additionally, the Scaladocs for most methods on ``ServerBuilder`` and
+``ClientBuilder`` include the Stack-based API's alternative. A few methods do
+not yet have one-to-one equivalents, such as ``ClientBuilder.retries`` and
+for these you should continue to use ``ClientBuilder`` along with the
+``ClientBuilder.stack`` method.
 
 .. [#] Protocol implementors are encouraged to provide sensible
        defaults and leave room for application specific behavior
-       to be built on top of the base layer via filters or
+       to be built on top of the base layer via ``Filters`` or
        synchronization mechanisms.
 
 .. _faq_failedfastexception:

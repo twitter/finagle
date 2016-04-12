@@ -115,6 +115,10 @@ private[builder] final class ServerConfig[Req, Rep, HasCodec, HasBindTo, HasName
  * a port).  This class is subclassable. Override copy() and build()
  * to do your own dirty work.
  *
+ * Please see the
+ * [[http://twitter.github.io/finagle/guide/Configuration.html Finagle user guide]]
+ * for information on the preferred `with`-style client-construction APIs.
+ *
  * The main class to use is [[com.twitter.finagle.builder.ServerBuilder]], as so
  * {{{
  * ServerBuilder()
@@ -194,18 +198,45 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   ): ServerBuilder[Req, Rep, HasCodec1, HasBindTo1, HasName1] =
     copy(params + param, mk)
 
+  /**
+   * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
+   * instead. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ServerBuilder().stack(Http.server)
+   * }}}
+   */
   def codec[Req1, Rep1](
     codec: Codec[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     this.codec((_: ServerCodecConfig) => codec)
       .configured(ProtocolLibrary(codec.protocolLibraryName))
 
+  /**
+   * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
+   * instead. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ServerBuilder().stack(Http.server)
+   * }}}
+   */
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
     this.codec(codecFactory.server)
       .configured(ProtocolLibrary(codecFactory.protocolLibraryName))
 
+  /**
+   * To migrate to the Stack-based APIs, use `ServerBuilder.stack(Protocol.server)`
+   * instead. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ServerBuilder().stack(Http.server)
+   * }}}
+   */
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Server
   ): ServerBuilder[Req1, Rep1, Yes, HasBindTo, HasName] =
@@ -302,21 +333,68 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
     copy(params, withParams)
   }
 
+  /**
+   * To migrate to the Stack-based APIs, use `CommonParams.withStatsReceiver`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withStatsReceiver(receiver)
+   * }}}
+   */
   def reportTo(receiver: StatsReceiver): This =
     configured(Stats(receiver))
 
+  /**
+   * To migrate to the Stack-based APIs, use `CommonParams.withLabel`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withLabel("my_server")
+   * }}}
+   */
   def name(value: String): ServerBuilder[Req, Rep, HasCodec, HasBindTo, Yes] =
     configured(Label(value))
 
+  /**
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.sendBufferSize`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.sendBufferSize(value)
+   * }}}
+   */
  def sendBufferSize(value: Int): This =
-    configured(params[Transport.BufferSizes].copy(send = Some(value)))
+   configured(params[Transport.BufferSizes].copy(send = Some(value)))
 
+  /**
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.receiveBufferSize`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.receiveBufferSize(value)
+   * }}}
+   */
   def recvBufferSize(value: Int): This =
     configured(params[Transport.BufferSizes].copy(recv = Some(value)))
 
   def backlog(value: Int): This =
     configured(Listener.Backlog(Some(value)))
 
+  /**
+   * To migrate to the Stack-based APIs, use `Server.serve`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.Service
+   *
+   * val service: Service[Req, Rep] = ???
+   * Http.server.serve(address, service)
+   * }}}
+   */
   def bindTo(address: SocketAddress): ServerBuilder[Req, Rep, HasCodec, Yes, HasName] =
     configured(BindTo(address))
 
@@ -324,12 +402,40 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def channelFactory(cf: ServerChannelFactory): This =
     configured(Netty3Listener.ChannelFactory(cf))
 
+  /**
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.param
+   *
+   * Http.server.configured(param.Logger(logger))
+   * }}}
+   */
   def logger(logger: java.util.logging.Logger): This =
     configured(Logger(logger))
 
+  /**
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.verbose`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.verbose
+   * }}}
+   */
   def logChannelActivity(v: Boolean): This =
     configured(Transport.Verbose(v))
 
+  /**
+   * To migrate to the Stack-based APIs, use `ServerTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.tls(...)
+   * }}}
+   */
   def tls(certificatePath: String, keyPath: String,
           caCertificatePath: String = null, ciphers: String = null, nextProtos: String = null): This =
     newFinagleSslEngine(() => Ssl.server(certificatePath, keyPath, caCertificatePath, ciphers, nextProtos))
@@ -350,6 +456,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * with a `Failure.Rejected` exception. Note, this failure signals
    * a graceful rejection which is transmitted to clients by certain
    * protocols in Finagle (e.g. Http, ThriftMux).
+   *
+   * To migrate to the Stack-based APIs, use `ServerAdmissionControlParams.concurrencyLimit`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withAdmissionControl.concurrencyLimit(10, 0)
+   * }}}
    */
   def maxConcurrentRequests(max: Int): This = {
     val sem =
@@ -362,23 +476,70 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   /**
    * Configure admission control filters in the server Stack.
    *
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.filter.ServerAdmissionControl
+   *
+   * Http.server.configured(ServerAdmissionControl.Param(enable))
+   * }}}
+   *
    * @see [[com.twitter.finagle.filter.ServerAdmissionControl]]
    */
   def enableAdmissionControl(enable: Boolean): This =
     configured(ServerAdmissionControl.Param(enable))
 
+  /**
+   * To migrate to the Stack-based APIs, use `CommonParams.withRequestTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withRequestTimeout(howlong)
+   * }}}
+   */
   def requestTimeout(howlong: Duration): This =
     configured(TimeoutFilter.Param(howlong))
 
   def keepAlive(value: Boolean): This =
     configured(params[Transport.Liveness].copy(keepAlive = Some(value)))
 
+  /**
+   * To migrate to the Stack-based APIs, use `TransportParams.readTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.readTimeout(howlong)
+   * }}}
+   */
   def readTimeout(howlong: Duration): This =
     configured(params[Transport.Liveness].copy(readTimeout = howlong))
 
+  /**
+   * To migrate to the Stack-based APIs, use `TransportParams.writeTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTransport.writeTimeout(howlong)
+   * }}}
+   */
   def writeCompletionTimeout(howlong: Duration): This =
     configured(params[Transport.Liveness].copy(writeTimeout = howlong))
 
+  /**
+   * To migrate to the Stack-based APIs, use `CommonParams.withMonitor`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.util.Monitor
+   *
+   * val monitor: Monitor = ???
+   * Http.server.withMonitor(monitor)
+   * }}}
+   */
   def monitor(mFactory: (String, SocketAddress) => util.Monitor): This =
     configured(MonitorFactory(mFactory))
 
@@ -391,12 +552,32 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def tracerFactory(t: com.twitter.finagle.tracing.Tracer): This =
     tracer(t)
 
+  /**
+   * To migrate to the Stack-based APIs, use `CommonParams.withTracer`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withTracer(t)
+   * }}}
+   */
   def tracer(t: com.twitter.finagle.tracing.Tracer): This =
     configured(Tracer(t))
 
   /**
    * Cancel pending futures whenever the the connection is shut down.
    * This defaults to true.
+   *
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.filter.MaskCancelFilter
+   *
+   * Http.server.configured(MaskCancelFilter.Param(!yesOrNo))
+   * }}}
+   *
+   * @see [[com.twitter.finagle.filter.ServerAdmissionControl]]
    */
   def cancelOnHangup(yesOrNo: Boolean): This = {
     // Note: We invert `yesOrNo` as the param here because the filter's
@@ -416,6 +597,15 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   /**
    * Configures the traffic class.
    *
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.server.Listener
+   *
+   * Http.server.configured(Listener.TrafficClass(value))
+   * }}}
+   *
    * @see [[Listener.TrafficClass]]
    */
   def trafficClass(value: Option[Int]): This =
@@ -425,6 +615,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * When true, the server is daemonized. As with java threads, a
    * process can only exit only when all remaining servers are daemonized.
    * False by default.
+   *
+   * The default for the Stack-based APIs is for the server to
+   * be daemonized.
    */
   def daemon(daemonize: Boolean): This =
     configured(Daemonize(daemonize))
@@ -451,6 +644,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * For client-side response classification using [[com.twitter.finagle.builder.ClientBuilder]],
    * see `com.twitter.finagle.builder.ClientBuilder.responseClassifier`
    *
+   * To migrate to the Stack-based APIs, use `CommonParams.withResponseClassifier`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withResponseClassifier(classifier)
+   * }}}
+   *
    * @see [[com.twitter.finagle.http.service.HttpResponseClassifier]] for some
    * HTTP classification tools.
    *
@@ -475,6 +676,14 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * a "failures" stat.  Typical implementations may report any
    * cancellations or validation errors separately so success rate
    * considers only valid non cancelled requests.
+   *
+   * To migrate to the Stack-based APIs, use `CommonParams.withExceptionStatsHandler`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.server.withExceptionStatsHandler(exceptionStatsHandler)
+   * }}}
    *
    * @param exceptionStatsHandler function to record failure details.
    */

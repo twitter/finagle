@@ -181,8 +181,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *   .hostConnectionLimit(1)
  *   .tcpConnectTimeout(1.second)        // max time to spend establishing a TCP connection.
  *   .retries(2)                         // (1) per-request retries
- *   .reportTo(new OstrichStatsReceiver) // export host-level load data to ostrich
- *   .logger(Logger.getLogger("http"))
+ *   .reportTo(DefaultStatsReceiver)     // export host-level load data to the loaded-StatsReceiver
  *   .build()
  * }}}
  *
@@ -206,8 +205,7 @@ private[builder] final class ClientConfig[Req, Rep, HasCluster, HasCodec, HasHos
  *      .hostConnectionLimit(1)
  *      .tcpConnectTimeout(1.second)
  *      .retries(2)
- *      .reportTo(new OstrichStatsReceiver())
- *      .logger(Logger.getLogger("http")))
+ *      .reportTo(DefaultStatsReceiver)
  * }}}
  *
  * Alternatively, using the `unsafeBuild` method on `ClientBuilder`
@@ -291,6 +289,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * One of the `hosts` variations or direct specification of the
    * cluster (via `cluster`) is required.
    *
+   * To migrate to the Stack-based APIs, pass the hostname and port
+   * pairs into `com.twitter.finagle.Client.newService(String)`. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.newService("hostnameA:portA,hostnameB:portB")
+   * }}}
+   *
    * @param hostnamePortCombinations comma-separated "host:port"
    * string.
    */
@@ -304,6 +310,18 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * A variant of `hosts` that takes a sequence of
    * [[java.net.InetSocketAddress]] instead.
+   *
+   * To migrate to the Stack-based APIs,
+   * use `com.twitter.finagle.Client.newService(Name, String)`.
+   * For the label String, use the scope you want for your [[StatsReceiver]].
+   * For example:
+   * {{{
+   * import com.twitter.finagle.{Address, Http, Name}
+   *
+   * val addresses: Seq[Address] = sockaddrs.map(Address(_))
+   * val name: Name = Name.bound(addresses: _*)
+   * Http.client.newService(name, "the_client_name")
+   * }}}
    */
   def hosts(
     sockaddrs: Seq[InetSocketAddress]
@@ -313,6 +331,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * A convenience method for specifying a one-host
    * [[java.net.SocketAddress]] client.
+   *
+   * To migrate to the Stack-based APIs,
+   * use `com.twitter.finagle.Client.newService(Name, String)`.
+   * For the label String, use the scope you want for your [[StatsReceiver]].
+   * For example:
+   * {{{
+   * import com.twitter.finagle.{Address, Http, Name}
+   *
+   * val name: Name = Name.bound(Address(address))
+   * Http.client.newService(name, "the_client_name")
+   * }}}
    */
   def hosts(
     address: InetSocketAddress
@@ -322,6 +351,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * A convenience method for specifying a client with one or more
    * [[com.twitter.finagle.Address]]s.
+   *
+   * To migrate to the Stack-based APIs,
+   * use `com.twitter.finagle.Client.newService(Name, String)`.
+   * For the label String, use the scope you want for your [[StatsReceiver]].
+   * For example:
+   * {{{
+   * import com.twitter.finagle.{Http, Name}
+   *
+   * val name: Name = Name.bound(addrs: _*)
+   * Http.client.newService(name, "the_client_name")
+   * }}}
    */
   @varargs
   def addrs(
@@ -333,6 +373,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The logical destination of requests dispatched through this
    * client, as evaluated by a resolver. If the name evaluates a
    * label, this replaces the builder's current name.
+   *
+   * To migrating to the Stack-based APIs, you pass the destination
+   * to `newClient` or `newService`. If the `addr` is labeled,
+   * additionally, use `CommonParams.withLabel`
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client
+   *   .withLabel("client_name")
+   *   .newService(name)
+   * }}}
    */
   def dest(
     addr: String
@@ -354,6 +405,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * The logical destination of requests dispatched through this
    * client.
+   *
+   * To migrate to the Stack-based APIs, use this in the call to `newClient`
+   * or `newService`. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.newService(name)
+   * }}}
    */
   def dest(
     name: Name
@@ -364,6 +423,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The base [[com.twitter.finagle.Dtab]] used to interpret logical
    * destinations for this client. (This is given as a function to
    * permit late initialization of [[com.twitter.finagle.Dtab.base]].)
+   *
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.factory.BindingFactory
+   *
+   * Http.client.configured(BindingFactory.BaseDtab(baseDtab))
+   * }}}
    */
   def baseDtab(baseDtab: () => Dtab): This =
     configured(BindingFactory.BaseDtab(baseDtab))
@@ -386,7 +454,15 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Specify a load balancer.  The load balancer implements
-   * a strategy for choosing one from a set of hosts to service a request
+   * a strategy for choosing one host from a set to service a request.
+   *
+   * To migrate to the Stack-based APIs, use `withLoadBalancer(LoadBalancerFactory)`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withLoadBalancer(loadBalancer)
+   * }}}
    */
   def loadBalancer(loadBalancer: LoadBalancerFactory): This =
     configured(LoadBalancerFactory.Param(loadBalancer))
@@ -395,6 +471,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Specify the codec. The codec implements the network protocol
    * used by the client, and consequently determines the `Req` and `Rep`
    * type variables. One of the codec variations is required.
+   *
+   * To migrate to the Stack-based APIs, use `ClientBuilder.stack(Protocol.client)`
+   * instead. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ClientBuilder().stack(Http.client)
+   * }}}
    */
   def codec[Req1, Rep1](
     codec: Codec[Req1, Rep1]
@@ -406,6 +490,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * A variation of `codec` that supports codec factories.  This is
    * used by codecs that need dynamic construction, but should be
    * transparent to the user.
+   *
+   * To migrate to the Stack-based APIs, use `ClientBuilder.stack(Protocol.client)`
+   * instead. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ClientBuilder().stack(Http.client)
+   * }}}
    */
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]
@@ -415,6 +507,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * A variation of codec for codecs that support only client-codecs.
+   *
+   * To migrate to the Stack-based APIs, use `ClientBuilder.stack(Protocol.client)`
+   * instead. For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ClientBuilder().stack(Http.client)
+   * }}}
    */
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Client
@@ -446,6 +546,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Specify the TCP connection timeout.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.connectTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.connectTimeout(duration)
+   * }}}
    */
   def tcpConnectTimeout(duration: Duration): This =
     configured(Transporter.ConnectTimeout(duration))
@@ -456,6 +564,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * timeout is applied only after a connection has been acquired.
    * That is: it is applied to the interval between the dispatch of
    * the request and the receipt of the response.
+   *
+   * To migrate to the Stack-based APIs, use `CommonParams.withRequestTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withRequestTimeout(duration)
+   * }}}
    */
   def requestTimeout(duration: Duration): This =
     configured(TimeoutFilter.Param(duration))
@@ -472,6 +588,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * queueing and physical connection time, so in the worst case the
    * time to acquire a service may be double the given duration before
    * timing out.
+   *
+   * To migrate to the Stack-based APIs, use `SessionParams.acquisitionTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSession.acquisitionTimeout(duration)
+   * }}}
    */
   def connectTimeout(duration: Duration): This =
     configured(TimeoutFactory.Param(duration))
@@ -483,6 +607,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * than this.
    *
    * Applicable only to service-builds (`build()`)
+   *
+   * To migrate to the Stack-based APIs, use this method in conjunction with
+   * `ClientBuilder.stack`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ClientBuilder()
+   *   .stack(Http.client)
+   *   .timeout(duration)
+   * }}}
    */
   def timeout(duration: Duration): This =
     configured(GlobalTimeout(duration))
@@ -495,12 +630,28 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * The maximum time a connection may have received no data.
+   *
+   * To migrate to the Stack-based APIs, use `TransportParams.readTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.readTimeout(duration)
+   * }}}
    */
   def readerIdleTimeout(duration: Duration): This =
     configured(params[Transport.Liveness].copy(readTimeout = duration))
 
   /**
    * The maximum time a connection may not have sent any data.
+   *
+   * To migrate to the Stack-based APIs, use `TransportParams.writeTimeout`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.writeTimeout(duration)
+   * }}}
    */
   def writerIdleTimeout(duration: Duration): This =
     configured(params[Transport.Liveness].copy(writeTimeout = duration))
@@ -509,6 +660,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Report stats to the given `StatsReceiver`.  This will report
    * verbose global statistics and counters, that in turn may be
    * exported to monitoring applications.
+   *
+   * To migrate to the Stack-based APIs, use `CommonParams.withStatsReceiver`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withStatsReceiver(receiver)
+   * }}}
    *
    * @note Per hosts statistics will '''NOT''' be exported to this receiver
    *
@@ -521,12 +680,29 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Report per host stats to the given `StatsReceiver`.
    * The statsReceiver will be scoped per client, like this:
    * client/connect_latency_ms_max/0.0.0.0:64754
+   *
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.loadbalancer.LoadBalancerFactory
+   *
+   * Http.client.configured(LoadBalancerFactory.HostStats(receiver))
+   * }}}
    */
   def reportHostStats(receiver: StatsReceiver): This =
     configured(LoadBalancerFactory.HostStats(receiver))
 
   /**
    * Give a meaningful name to the client. Required.
+   *
+   * To migrate to the Stack-based APIs, use `CommonParams.withLabel`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withLabel("my_cool_client")
+   * }}}
    */
   def name(value: String): This =
     configured(Label(value))
@@ -535,12 +711,28 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The maximum number of connections that are allowed per host.
    * Required.  Finagle guarantees to never have more active
    * connections than this limit.
+   *
+   * To migrate to the Stack-based APIs, use `SessionPoolingParams.maxSize`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSessionPool.maxSize(value)
+   * }}}
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
     configured(params[DefaultPool.Param].copy(high = value))
 
   /**
    * The core size of the connection pool: the pool is not shrinked below this limit.
+   *
+   * To migrate to the Stack-based APIs, use `SessionPoolingParams.minSize`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSessionPool.minSize(value)
+   * }}}
    */
   def hostConnectionCoresize(value: Int): This =
     configured(params[DefaultPool.Param].copy(low = value))
@@ -555,18 +747,42 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * The maximum queue size for the connection pool.
+   *
+   * To migrate to the Stack-based APIs, use `SessionPoolingParams.maxWaiters`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSessionPool.maxWaiters(nWaiters)
+   * }}}
    */
   def hostConnectionMaxWaiters(nWaiters: Int): This =
     configured(params[DefaultPool.Param].copy(maxWaiters = nWaiters))
 
   /**
    * The maximum time a connection is allowed to linger unused.
+   *
+   * To migrate to the Stack-based APIs, use `SessionParams.maxIdleTime`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSession.maxIdleTime(timeout)
+   * }}}
    */
   def hostConnectionMaxIdleTime(timeout: Duration): This =
     configured(params[ExpiringService.Param].copy(idleTime = timeout))
 
   /**
    * The maximum time a connection is allowed to exist, regardless of occupancy.
+   *
+   * To migrate to the Stack-based APIs, use `SessionParams.maxLifeTime`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSession.maxLifeTime(timeout)
+   * }}}
    */
   def hostConnectionMaxLifeTime(timeout: Duration): This =
     configured(params[ExpiringService.Param].copy(lifeTime = timeout))
@@ -608,6 +824,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * For server-side response classification using [[com.twitter.finagle.builder.ServerBuilder]],
    * see [[com.twitter.finagle.builder.ServerBuilder.responseClassifier]]
    *
+   * To migrate to the Stack-based APIs, use `CommonParams.withResponseClassifier`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withResponseClassifier(classifier)
+   * }}}
+   *
    * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
    * HTTP classification tools.
    *
@@ -636,6 +860,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * The configured policy has jittered backoffs between retries.
    *
+   * To migrate to the Stack-based APIs, use this method in conjunction with
+   * `ClientBuilder.stack`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ClientBuilder()
+   *   .stack(Http.client)
+   *   .retries(value)
+   * }}}
+   *
    * @param value the maximum number of attempts (including retries) that
    *              can be made.
    *               - A value of `1` means one attempt and no retries
@@ -660,6 +895,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * Retry failed requests according to the given [[RetryPolicy]].
    *
+   * To migrate to the Stack-based APIs, use this method in conjunction with
+   * `ClientBuilder.stack`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * ClientBuilder()
+   *   .stack(Http.client)
+   *   .retryPolicy(value)
+   * }}}
+   *
    * @note The failures seen in the client will '''not include'''
    *       application level failures. This is particularly important for
    *       codecs that include exceptions, such as `Thrift`.
@@ -678,6 +924,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Helps prevent clients from overwhelming the downstream service.
    *
+   * To migrate to the Stack-based APIs, use `ClientParams.withRetryBudget`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withRetryBudget(budget)
+   * }}}
+   *
    * @see [[retryPolicy]] for per-request rules on which failures are
    * eligible for retries.
    */
@@ -691,6 +945,17 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Helps prevent clients from overwhelming the downstream service.
    *
+   * To migrate to the Stack-based APIs, use `ClientParams.withRetryBudget`
+   * and `ClientParams.withRetryBackoff`
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client
+   *   .withRetryBudget(budget)
+   *   .withRetryBackoff(backoffSchedule)
+   * }}}
+   *
    * @see [[retryPolicy]] for per-request rules on which failures are
    * eligible for retries.
    */
@@ -699,12 +964,28 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Sets the TCP send buffer size.
+   *
+   * To migrate to the Stack-based APIs, use `TransportParams.sendBufferSize`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.sendBufferSize(value)
+   * }}}
    */
   def sendBufferSize(value: Int): This =
     configured(params[Transport.BufferSizes].copy(send = Some(value)))
 
   /**
    * Sets the TCP recv buffer size.
+   *
+   * To migrate to the Stack-based APIs, use `TransportParams.receiveBufferSize`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.receiveBufferSize(value)
+   * }}}
    */
   def recvBufferSize(value: Int): This =
     configured(params[Transport.BufferSizes].copy(recv = Some(value)))
@@ -721,6 +1002,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * Encrypt the connection with SSL.  Hostname verification will be
    * provided against the given hostname.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.tls(hostname)
+   * }}}
    */
   def tls(hostname: String): This = {
     configured((Transport.TLSClientEngine(Some({
@@ -734,6 +1023,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Encrypt the connection with SSL.  The Engine to use can be passed into the client.
    * This allows the user to use client certificates
    * No SSL Hostname Validation is performed
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.tls`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.tls(sslContext)
+   * }}}
    */
   def tls(sslContext: SSLContext): This =
     configured((Transport.TLSClientEngine(Some({
@@ -755,6 +1052,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Do not perform TLS validation. Probably dangerous.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.tlsWithoutValidation`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.tlsWithoutValidation
+   * }}}
    */
   def tlsWithoutValidation(): This =
     configured(Transport.TLSClientEngine(Some({
@@ -791,6 +1096,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * Make connections via the given SOCKS proxy.
    * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
+   *
+   * To migrate to the Stack-based APIs, use `ClientTransportParams.socksProxy`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTransport.socksProxy(socketAddress, socksProxy)
+   * }}}
    */
   def socksProxy(socksProxy: Option[SocketAddress]): This =
     configured(params[Transporter.SocksProxy].copy(sa = socksProxy))
@@ -827,15 +1140,43 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
+   *
+   * To migrate to the Stack-based APIs, use `CommonParams.withTracer`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withTracer(t)
+   * }}}
    */
   def tracer(t: com.twitter.finagle.tracing.Tracer): This =
     configured(Tracer(t))
 
+  /**
+   * To migrate to the Stack-based APIs, use `CommonParams.withMonitor`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.util.Monitor
+   *
+   * val monitor: Monitor = ???
+   * Http.client.withMonitor(monitor)
+   * }}}
+   */
   def monitor(mFactory: String => com.twitter.util.Monitor): This =
     configured(MonitorFactory(mFactory))
 
   /**
    * Log very detailed debug information to the given logger.
+   *
+   * To migrate to the Stack-based APIs, use `configured`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   * import com.twitter.finagle.param.Logger
+   *
+   * Http.client.configured(Logger(logger))
+   * }}}
    */
   def logger(logger: java.util.logging.Logger): This =
     configured(Logger(logger))
@@ -857,6 +1198,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * Disables [[FailureAccrualFactory]].
    *
    * To replace the [[FailureAccrualFactory]] use `failureAccrualFactory`.
+   *
+   * To migrate to the Stack-based APIs, use `SessionQualificationParams.noFailureAccrual`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSessionQualifier.noFailureAccrual
+   * }}}
    */
   def noFailureAccrual: This =
     configured(FailureAccrualFactory.Disabled)
@@ -882,6 +1231,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * until we successfully connect. Intermediate connection attempts
    * *are* respected, but host availability is turned off during the
    * reconnection period.
+   *
+   * To migrate to the Stack-based APIs, use `SessionQualificationParams.noFailFast`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withSessionQualifier.noFailFast
+   * }}}
    */
   def failFast(enabled: Boolean): This =
     configured(FailFast(enabled))
@@ -890,6 +1247,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * When true, the client is daemonized. As with java threads, a
    * process can exit only when all remaining clients are daemonized.
    * False by default.
+   *
+   * The default for the Stack-based APIs is for the client to
+   * be daemonized.
    */
   def daemon(daemonize: Boolean): This =
     configured(Daemonize(daemonize))
@@ -899,6 +1259,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * a "failures" stat.  Typical implementations may report any
    * cancellations or validation errors separately so success rate
    * considers only valid non cancelled requests.
+   *
+   * To migrate to the Stack-based APIs, use `CommonParams.withExceptionStatsHandler`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.withExceptionStatsHandler(exceptionStatsHandler)
+   * }}}
    *
    * @param exceptionStatsHandler function to record failure details.
    */
@@ -927,6 +1295,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   /**
    * Construct a ServiceFactory. This is useful for stateful protocols
    * (e.g., those that support transactions or authentication).
+   *
+   * To migrate to the Stack-based APIs, use `Client.newClient`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.newClient(destination)
+   * }}}
    */
   def buildFactory()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
@@ -946,6 +1322,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   /**
    * Construct a Service.
+   *
+   * To migrate to the Stack-based APIs, use `Client.newService`.
+   * For example:
+   * {{{
+   * import com.twitter.finagle.Http
+   *
+   * Http.client.newService(destination)
+   * }}}
    */
   def build()(
     implicit THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
