@@ -21,6 +21,9 @@ Runtime Behavior Changes
   * finagle-http: Local Dtabs are now encoded into the `Dtab-Local` header.  `X-Dtab` headers
     may still be read but should be considered deprecated. ``RB_ID=815092``
 
+  * finagle-thrift: Removed duplicate "thrift" label on Thrift/ThriftMux scrooge-related
+    server stats. ``RB_ID=816825``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
   * finagle-redis: Deprecated ChannelBuffer exposing apis for string commands. ``RB_ID=817766``.

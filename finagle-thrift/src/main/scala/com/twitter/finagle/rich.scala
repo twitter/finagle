@@ -1,5 +1,6 @@
 package com.twitter.finagle
 
+import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
@@ -484,7 +485,9 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
 
   protected val serverLabel = "thrift"
 
-  protected lazy val serverStats: StatsReceiver = ServerStatsReceiver.scope(serverLabel)
+  protected def params: Stack.Params
+
+  protected lazy val Stats(serverStats) = params[Stats]
 
   /**
    * $serveIface

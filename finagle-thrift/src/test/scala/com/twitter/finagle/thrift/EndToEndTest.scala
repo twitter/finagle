@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ResponseClass, ReqRep, ResponseClassifier}
 import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{LoadedStatsReceiver, InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
@@ -448,6 +448,35 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
     server.close()
+  }
+
+  test("Thrift server stats are properly scoped") {
+    val iface: Echo.FutureIface = new Echo.FutureIface {
+      def echo(x: String) =
+        Future.value(x)
+    }
+
+    // Save loaded StatsReceiver
+    val preSr = LoadedStatsReceiver.self
+
+    val sr = new InMemoryStatsReceiver
+    LoadedStatsReceiver.self = sr
+
+    val server = Thrift.server
+      .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
+
+    val client = Thrift.client.newIface[Echo.FutureIface](
+      Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
+    assert(Await.result(client.echo("hi"), 1.second) == "hi")
+    assert(sr.counters(Seq("srv", "thrift", "echo", "requests")) == 1)
+    assert(sr.counters(Seq("srv", "thrift", "echo", "success")) == 1)
+    assert(sr.counters(Seq("srv", "requests")) == 1)
+
+    server.close()
+
+    // Restore previously loaded StatsReceiver
+    LoadedStatsReceiver.self = preSr
   }
 
   private[this] val servers: Seq[(String, (StatsReceiver, Echo.FutureIface) => ListeningServer)] = Seq(
