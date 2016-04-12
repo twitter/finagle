@@ -48,4 +48,15 @@ class HttpContextTest extends FunSuite {
       assert(Contexts.broadcast.marshal.isEmpty)
     }
   }
+
+  test("removing deadline") {
+    val m = newMsg()
+    val deadlineKey = "Finagle-Ctx-com.twitter.finagle.Deadline"
+    Contexts.broadcast.let(Deadline, Deadline.ofTimeout(5.seconds)) {
+      HttpContext.write(m)
+      assert(m.headerMap.contains(deadlineKey))
+      HttpContext.removeDeadline(m)
+      assert(!m.headerMap.contains(deadlineKey))
+    }
+  }
 }
