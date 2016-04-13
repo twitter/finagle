@@ -84,4 +84,28 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
     Some(socketAddress),
     credentials.map(c => (c.username, c.password))
   ))
+
+
+  /**
+   * Enables TCP tunnelling through HTTP proxy [1] on this client (default: disabled).
+   *
+   * TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
+   * establish an HTTPS (TLS/SSL over HTTP) connection to a remote HTTP server through a proxy.
+   *
+   * When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
+   * to proxy the traffic to a given ultimate destination, specified as `host`.
+   *
+   * [1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
+   *
+   * @param host the ultimate host a proxy server connects to
+   *
+   * @param credentials optional credentials for a proxy server
+   *
+   * @note This is only enabled for finagle-netty4 right now. Applying this to a Netty 3 based
+   *       client has no effect.
+   */
+  def httpProxyTo(
+    host: String,
+    credentials: Option[Transporter.Credentials]
+  ): A = self.configured(Transporter.HttpProxyTo(Some(host -> credentials)))
 }

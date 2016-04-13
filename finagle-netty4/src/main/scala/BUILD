@@ -6,6 +6,7 @@ scala_library(name='scala',
   ),
   dependencies=[
     '3rdparty/jvm/io/netty:netty4',
+    '3rdparty/jvm/io/netty:netty4-http',
     'finagle/finagle-core',
     'util/util-core'
   ],

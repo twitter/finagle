@@ -247,7 +247,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-netty4",
     libraryDependencies ++= Seq(util("core")),
-    libraryDependencies ++= netty4Libs
+    libraryDependencies ++= Seq(netty4Libs, netty4Http)
   ).dependsOn(finagleCore)
 
   lazy val finagleOstrich4 = Project(

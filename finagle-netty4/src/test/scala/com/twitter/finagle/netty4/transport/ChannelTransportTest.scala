@@ -22,7 +22,6 @@ class ChannelTransportTest extends FunSuite
     // We have to remove EmbedChannels' LastInboundHandler to make sure inbound messages
     // reach our own ChannelTransport.
     ch.pipeline().removeFirst()
-
     (tr, ch)
   }
 

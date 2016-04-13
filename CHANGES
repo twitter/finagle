@@ -55,6 +55,8 @@ New Features
 
   * finagle-core: Dtabs allow wildcard path elements in prefixes. ``RB_ID=813914``
 
+  * finagle-netty4: HTTP proxy support for any Finagle Netty 4 client. ``RB_ID=819752``
+
 Bug Fixes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

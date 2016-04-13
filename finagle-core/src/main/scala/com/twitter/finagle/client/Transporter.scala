@@ -95,6 +95,11 @@ object Transporter {
     implicit val param = Stack.Param(HttpProxy(None, None))
   }
 
+  case class HttpProxyTo(hostAndCredentials: Option[(String, Option[Credentials])])
+  object HttpProxyTo {
+    implicit val param = Stack.Param(HttpProxyTo(None))
+  }
+
   /**
    * This class wraps the username, password that we use for http proxy auth
    */
