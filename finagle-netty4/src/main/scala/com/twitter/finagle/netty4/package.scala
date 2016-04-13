@@ -5,6 +5,7 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.jvm.numProcs
 import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
 import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.util.internal.PlatformDependent
 import java.util.concurrent.{ExecutorService, Executors}
 
 /**
@@ -23,12 +24,19 @@ package object netty4 {
 
   private[netty4] object WorkerPool extends NioEventLoopGroup(numWorkers(), Executor)
 
+  // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
+  //     because we need to disable the leak-detector.
+  private[netty4] val UnpooledAllocator = new UnpooledByteBufAllocator(
+    /* preferDirect */ PlatformDependent.directBufferPreferred(),
+    /* disableLeakDetector */ true
+  )
+
   object param {
 
     private[netty4] case class Allocator(allocator: ByteBufAllocator)
     private[netty4] implicit object Allocator extends Stack.Param[Allocator] {
       // TODO investigate pooled allocator CSL-2089
-      override val default: Allocator = Allocator(UnpooledByteBufAllocator.DEFAULT)
+      override val default: Allocator = Allocator(UnpooledAllocator)
     }
   }
 }

@@ -9,12 +9,17 @@ private[finagle] object ByteBufAsBuf {
   object Owned {
     /**
      * Construct a [[Buf]] wrapper for ``ByteBuf``.
+     *
+     * @note this wrapper does not support ref-counting and therefore should either
+     *       be used with unpooled and non-leak detecting allocators or managed
+     *       via the ref-counting methods of the wrapped `buf`. Non-empty buffers
+     *       are `retain`ed.
      */
     def apply(buf: ByteBuf): Buf =
       if (buf.readableBytes == 0)
         Buf.Empty
       else
-        new ByteBufAsBuf(buf)
+        new ByteBufAsBuf(buf.retain())
 
     /**
      * Extract a [[ByteBufAsBuf]]'s underlying ByteBuf without copying.

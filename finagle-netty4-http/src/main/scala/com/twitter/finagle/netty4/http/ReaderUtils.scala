@@ -15,7 +15,7 @@ private[http] object ReaderUtils {
       Future.None
 
     case chunk: NettyHttp.HttpContent =>
-      Future.value(Some(ByteBufAsBuf.Shared(chunk.content)))
+      Future.value(Some(ByteBufAsBuf.Owned(chunk.content)))
 
     case invalid =>
       Future.exception(
@@ -28,7 +28,7 @@ private[http] object ReaderUtils {
    * of stream.
    */
   def chunkOfBuf(buf: Buf): NettyHttp.HttpContent =
-    new NettyHttp.DefaultHttpContent(BufAsByteBuf.Shared(buf))
+    new NettyHttp.DefaultHttpContent(BufAsByteBuf.Owned(buf))
 
   /**
    * Continuously read from a Reader, writing everything to a Transport.
