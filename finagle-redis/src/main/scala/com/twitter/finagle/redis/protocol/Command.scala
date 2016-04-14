@@ -75,11 +75,18 @@ object Commands {
   val ZUNIONSTORE       = "ZUNIONSTORE"
 
   // Btree Sorted Set
+  // These are twitter-internal commands and will be removed eventually
   val BADD              = "BADD"
   val BCARD             = "BCARD"
   val BREM              = "BREM"
   val BGET              = "BGET"
   val BRANGE            = "BRANGE"
+
+  // Topology
+  // These are twitter-internal commands and will be removed eventually
+  val TOPOLOGYADD       = "TOPOLOGYADD"
+  val TOPOLOGYGET       = "TOPOLOGYGET"
+  val TOPOLOGYDELETE    = "TOPOLOGYDELETE"
 
   // Miscellaneous
   val PING              = "PING"
@@ -213,10 +220,17 @@ object Commands {
     ZUNIONSTORE       -> {ZUnionStore(_)},
 
     // Btree Sorted Set
+    // These are twitter-internal commands and will be removed eventually
     BADD              -> {BAdd(_)},
     BCARD             -> {BCard(_)},
     BREM              -> {BRem(_)},
     BGET              -> {BGet(_)},
+
+    // Topology
+    // These are twitter-internal commands and will be removed eventually
+    TOPOLOGYADD       -> {TopologyAdd(_)},
+    TOPOLOGYGET       -> {TopologyGet(_)},
+    TOPOLOGYDELETE    -> {TopologyDelete(_)},
 
     // miscellaneous
     PING              -> {_ => Ping},
@@ -361,11 +375,18 @@ object CommandBytes {
   val ZUNIONSTORE       = StringToChannelBuffer("ZUNIONSTORE")
 
   // Btree Sorted Set
+  // These are twitter-internal commands and will be removed eventually
   val BADD              = StringToChannelBuffer("BADD")
   val BCARD             = StringToChannelBuffer("BCARD")
   val BREM              = StringToChannelBuffer("BREM")
   val BGET              = StringToChannelBuffer("BGET")
   val BRANGE            = StringToChannelBuffer("BRANGE")
+
+  // Topology
+  // These are twitter-internal commands and will be removed eventually
+  val TOPOLOGYADD      = StringToBuf("TOPOLOGYADD")
+  val TOPOLOGYGET      = StringToBuf("TOPOLOGYGET")
+  val TOPOLOGYDELETE   = StringToBuf("TOPOLOGYDELETE")
 
   // Miscellaneous
   val PING              = StringToChannelBuffer("PING")

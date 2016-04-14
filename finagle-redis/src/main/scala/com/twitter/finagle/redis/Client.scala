@@ -47,6 +47,7 @@ trait NormalCommands
   with Lists
   with Sets
   with BtreeSortedSetCommands
+  with TopologyCommands
   with HyperLogLogs
   with PubSubs
   with ServerCommands

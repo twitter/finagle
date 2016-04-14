@@ -8,6 +8,10 @@ import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 import util.ReplyFormat
 
+/**
+ * These commands are specific to twitter's internal fork of redis
+ * and will be removed eventually
+ */
 trait BtreeSortedSetCommands { self: BaseClient =>
 
   /**
