@@ -190,7 +190,7 @@ object Finagle extends Build {
     finagleHttp, finagleHttp2, finagleHttpCompat, finagleStream, finagleNative,
     finagleThrift, finagleMemcached, finagleKestrel,
     finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy, finagleRedis, finagleNetty4Http 
+    finagleSpdy, finagleRedis, finagleNetty4Http
 
     // finagleBenchmark
 
@@ -246,8 +246,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-netty4",
-    libraryDependencies ++= Seq(util("core")),
-    libraryDependencies ++= Seq(netty4Libs, netty4Http)
+    libraryDependencies ++= Seq(util("core"), netty4Http) ++ netty4Libs
   ).dependsOn(finagleCore)
 
   lazy val finagleOstrich4 = Project(
