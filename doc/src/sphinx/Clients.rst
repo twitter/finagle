@@ -585,7 +585,7 @@ success rate [#example]_.
   import com.twitter.finagle.service.exp.FailureAccrualPolicy
 
   val twitter = Http.client
-    .configured(FailureAccrual.Param(() => FailureAccrualPolicy.successRate(
+    .configured(FailureAccrualFactory.Param(() => FailureAccrualPolicy.successRate(
       requiredSuccessRate = 0.95,
       window = 100,
       markDeadFor = Backoff.const(10.seconds)
