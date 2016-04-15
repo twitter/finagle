@@ -9,9 +9,11 @@ import com.twitter.finagle.dispatch.PipeliningDispatcher
 import com.twitter.finagle.param.{Tracer => PTracer, Label, Stats}
 import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier, Retries, RetryBudget}
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.thrift.{ClientId, Protocols, ThriftClientFramedCodec, ThriftClientRequest}
 import com.twitter.finagle.thriftmux.service.ThriftMuxResponseClassifier
-import com.twitter.finagle.thriftmux.thriftscala.{InvalidQueryException, TestService, TestService$FinagleClient, TestService$FinagleService}
+import com.twitter.finagle.thriftmux.thriftjava
+import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.transport.Transport
@@ -501,7 +503,7 @@ class EndToEndTest extends FunSuite
     await(server.close())
   }
 
-  val classifier: ResponseClassifier =
+  private val scalaClassifier: ResponseClassifier =
     ResponseClassifier.named("EndToEndTestClassifier") {
       case ReqRep(TestService.Query.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
         ResponseClass.Success
@@ -509,7 +511,16 @@ class EndToEndTest extends FunSuite
         ResponseClass.NonRetryableFailure
       case ReqRep(_, Return(s: String)) =>
         ResponseClass.NonRetryableFailure
-    }
+  }
+
+  private val javaClassifier: ResponseClassifier = {
+    case ReqRep(x:thriftjava.TestService.query_args, Throw(_: thriftjava.InvalidQueryException)) if x.x == "ok" =>
+      ResponseClass.Success
+    case ReqRep(_, Throw(_: thriftjava.InvalidQueryException)) =>
+      ResponseClass.NonRetryableFailure
+    case ReqRep(_, Return(s: String)) =>
+      ResponseClass.NonRetryableFailure
+  }
 
   def serverForClassifier(): ListeningServer  = {
     val iface = new TestService.FutureIface {
@@ -523,7 +534,7 @@ class EndToEndTest extends FunSuite
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
   }
 
-  def testFailureClassification(
+  private def testScalaFailureClassification(
     sr: InMemoryStatsReceiver,
     client: TestService.FutureIface
   ): Unit = {
@@ -562,41 +573,96 @@ class EndToEndTest extends FunSuite
     }
   }
 
-  test("thriftmux stack client deserialized response classification") {
+  private def testJavaFailureClassification(
+    sr: InMemoryStatsReceiver,
+    client: thriftjava.TestService.ServiceIface
+  ): Unit = {
+    val ex = intercept[thriftjava.InvalidQueryException] {
+      Await.result(client.query("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+
+    // test that we can examine the request as well.
+    intercept[thriftjava.InvalidQueryException] {
+      Await.result(client.query("ok"), 5.seconds)
+    }
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.query("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 3)
+    assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "failures")) == 2)
+  }
+
+  test("scala thriftmux stack client deserialized response classification") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = ThriftMux.client
       .configured(Stats(sr))
-      .withResponseClassifier(classifier)
+      .withResponseClassifier(scalaClassifier)
       .newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-    testFailureClassification(sr, client)
-
-    await(server.close())
+    testScalaFailureClassification(sr, client)
+    server.close()
   }
 
-  test("thriftmux ClientBuilder deserialized response classification") {
+  test("java thriftmux stack client deserialized response classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = ThriftMux.client
+      .configured(Stats(sr))
+      .withResponseClassifier(javaClassifier)
+      .newIface[thriftjava.TestService.ServiceIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
+    testJavaFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thriftmux ClientBuilder deserialized response classification") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val clientBuilder = ClientBuilder()
       .stack(ThriftMux.client)
       .name("client")
       .reportTo(sr)
-      .responseClassifier(classifier)
+      .responseClassifier(scalaClassifier)
       .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
       .build()
     val client = new TestService.FinagledClient(
       clientBuilder,
       serviceName = "client",
       stats = sr,
-      responseClassifier = classifier
+      responseClassifier = scalaClassifier
     )
 
-    testFailureClassification(sr, client)
-    await(server.close())
+    testScalaFailureClassification(sr, client)
+    server.close()
   }
 
-  test("thriftmux response classification using ThriftExceptionsAsFailures") {
+  test("java thriftmux ClientBuilder deserialized response classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val clientBuilder = ClientBuilder()
+      .stack(ThriftMux.client)
+      .name("client")
+      .reportTo(sr)
+      .responseClassifier(javaClassifier)
+      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+      .build()
+    val client = new thriftjava.TestService.ServiceToClient(
+      clientBuilder,
+      Protocols.binaryFactory(),
+      javaClassifier)
+
+    testJavaFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thriftmux response classification using ThriftExceptionsAsFailures") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = ThriftMux.client
@@ -616,6 +682,29 @@ class EndToEndTest extends FunSuite
     assert(sr.counters(Seq("client", "requests")) == 2)
     assert(sr.counters(Seq("client", "success")) == 1)
     await(server.close())
+  }
+
+  test("java thriftmux response classification using ThriftExceptionsAsFailures") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = ThriftMux.client
+      .configured(Stats(sr))
+      .withResponseClassifier(ThriftMuxResponseClassifier.ThriftExceptionsAsFailures)
+      .newIface[thriftjava.TestService.ServiceIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
+    val ex = intercept[thriftjava.InvalidQueryException] {
+      Await.result(client.query("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.query("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+    assert(sr.counters(Seq("client", "failures")) == 1)
+    server.close()
   }
 
   test("thriftmux server + thrift client w/o protocol upgrade but w/ pipelined dispatch") {

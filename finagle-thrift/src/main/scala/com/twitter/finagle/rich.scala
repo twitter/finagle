@@ -4,6 +4,7 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
+import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.util.Showable
 import com.twitter.util.NonFatal
 import java.lang.reflect.{Constructor, Method}
@@ -17,6 +18,9 @@ private[twitter] object ThriftUtil {
 
   private val thriftFinagleClientParamTypes =
     Seq(classOf[Service[_, _]], classOf[TProtocolFactory])
+
+  private val thriftFinagleClientWithRepClassifierParamTypes =
+    Seq(classOf[Service[_, _]], classOf[TProtocolFactory], classOf[ResponseClassifier])
 
   private val scrooge2FinagleClientParamTypes =
     Seq(
@@ -98,6 +102,13 @@ private[twitter] object ThriftUtil {
   ): Iface = {
     val clsName = cls.getName
 
+    def tryThriftFinagleClientRepClassifier: Option[Iface] =
+      for {
+        baseName   <- findRootWithSuffix(clsName, "$ServiceIface")
+        clientCls  <- findClass[Iface](baseName + "$ServiceToClient")
+        cons       <- findConstructor(clientCls, thriftFinagleClientWithRepClassifierParamTypes: _*)
+      } yield cons.newInstance(underlying, protocolFactory, responseClassifier)
+
     def tryThriftFinagleClient: Option[Iface] =
       for {
         baseName   <- findRootWithSuffix(clsName, "$ServiceIface")
@@ -144,6 +155,7 @@ private[twitter] object ThriftUtil {
       }
 
     val iface =
+      tryThriftFinagleClientRepClassifier orElse
       tryThriftFinagleClient orElse
       tryScrooge3FinagleClient orElse
       tryScrooge3FinagledClientRepClassifier orElse

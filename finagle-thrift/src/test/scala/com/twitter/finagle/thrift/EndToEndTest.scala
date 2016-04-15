@@ -8,6 +8,7 @@ import com.twitter.finagle.service.{ResponseClass, ReqRep, ResponseClassifier}
 import com.twitter.finagle.ssl.Ssl
 import com.twitter.finagle.stats.{LoadedStatsReceiver, InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
+import com.twitter.finagle.thrift.thriftjava
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
 import com.twitter.finagle.transport.Transport
@@ -356,10 +357,17 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
 
   runThriftTests()
 
-  private val classifier: ResponseClassifier = {
+  private val scalaClassifier: ResponseClassifier = {
     case ReqRep(Echo.Echo.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
       ResponseClass.Success
     case ReqRep(_, Throw(_: InvalidQueryException)) => ResponseClass.NonRetryableFailure
+    case ReqRep(_, Return(s: String)) => ResponseClass.NonRetryableFailure
+  }
+
+  private val javaClassifier: ResponseClassifier = {
+    case ReqRep(x:thriftjava.Echo.echo_args, Throw(_: thriftjava.InvalidQueryException)) if x.msg == "ok" =>
+      ResponseClass.Success
+    case ReqRep(_, Throw(_: thriftjava.InvalidQueryException)) => ResponseClass.NonRetryableFailure
     case ReqRep(_, Return(s: String)) => ResponseClass.NonRetryableFailure
   }
 
@@ -375,10 +383,10 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .serve(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), svc)
   }
 
-  private def testFailureClassification(
-    sr: InMemoryStatsReceiver,
-    client: Echo.FutureIface
-  ): Unit = {
+  private def testScalaFailureClassification(
+     sr: InMemoryStatsReceiver,
+     client: Echo.FutureIface
+   ): Unit = {
     val ex = intercept[InvalidQueryException] {
       Await.result(client.echo("hi"), 5.seconds)
     }
@@ -399,36 +407,90 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert(sr.counters(Seq("client", "success")) == 1)
   }
 
+  private def testJavaFailureClassification(
+    sr: InMemoryStatsReceiver,
+    client: thriftjava.Echo.ServiceIface
+  ): Unit = {
+    val ex = intercept[thriftjava.InvalidQueryException] {
+      Await.result(client.echo("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
 
-  test("thrift stack client deserialized response classification") {
+    // test that we can examine the request as well.
+    intercept[thriftjava.InvalidQueryException] {
+      Await.result(client.echo("ok"), 5.seconds)
+    }
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.echo("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 3)
+    assert(sr.counters(Seq("client", "success")) == 1)
+  }
+
+  test("scala thrift stack client deserialized response classification") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = Thrift.client
       .configured(Stats(sr))
-      .withResponseClassifier(classifier)
+      .withResponseClassifier(scalaClassifier)
       .newIface[Echo.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
-    testFailureClassification(sr, client)
+    testScalaFailureClassification(sr, client)
     server.close()
   }
 
-  test("thrift ClientBuilder deserialized response classification") {
+  test("java thrift stack client deserialized response classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = Thrift.client
+      .configured(Stats(sr))
+      .withResponseClassifier(javaClassifier)
+      .newIface[thriftjava.Echo.ServiceIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
+    testJavaFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thrift ClientBuilder deserialized response classification") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val clientBuilder = ClientBuilder()
       .stack(Thrift.client)
       .name("client")
       .reportTo(sr)
-      .responseClassifier(classifier)
+      .responseClassifier(scalaClassifier)
       .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
       .build()
     val client = new Echo.FinagledClient(clientBuilder)
 
-    testFailureClassification(sr, client)
+    testScalaFailureClassification(sr, client)
     server.close()
   }
 
-  test("thrift response classification using ThriftExceptionsAsFailures") {
+  test("java thrift ClientBuilder deserialized response classification") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val clientBuilder = ClientBuilder()
+      .stack(Thrift.client)
+      .name("client")
+      .reportTo(sr)
+      .responseClassifier(javaClassifier)
+      .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
+      .build()
+    val client = new thriftjava.Echo.ServiceToClient(
+      clientBuilder,
+      Protocols.binaryFactory(),
+      javaClassifier)
+
+    testJavaFailureClassification(sr, client)
+    server.close()
+  }
+
+  test("scala thrift client response classification using ThriftExceptionsAsFailures") {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = Thrift.client
@@ -437,6 +499,28 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .newIface[Echo.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     val ex = intercept[InvalidQueryException] {
+      Await.result(client.echo("hi"), 5.seconds)
+    }
+    assert("hi".length == ex.errorCode)
+    assert(sr.counters(Seq("client", "requests")) == 1)
+    assert(sr.counters.get(Seq("client", "success")) == None)
+
+    // test that we can mark a successfully deserialized result as a failure
+    assert("safe" == Await.result(client.echo("safe")))
+    assert(sr.counters(Seq("client", "requests")) == 2)
+    assert(sr.counters(Seq("client", "success")) == 1)
+    server.close()
+  }
+
+  test("java thrift client response classification using ThriftExceptionsAsFailures") {
+    val server = serverForClassifier()
+    val sr = new InMemoryStatsReceiver()
+    val client = Thrift.client
+      .configured(Stats(sr))
+      .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
+      .newIface[thriftjava.Echo.ServiceIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+
+    val ex = intercept[thriftjava.InvalidQueryException] {
       Await.result(client.echo("hi"), 5.seconds)
     }
     assert("hi".length == ex.errorCode)
