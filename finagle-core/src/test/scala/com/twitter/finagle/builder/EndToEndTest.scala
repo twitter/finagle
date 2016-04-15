@@ -11,7 +11,7 @@ import com.twitter.finagle.service.{Retries, RetryPolicy}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.Trace
-import com.twitter.util.{Await, CountDownLatch, Future, Promise}
+import com.twitter.util._
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -19,6 +19,38 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite with StringClient with StringServer {
+
+  test("IndividualRequestTimeoutException should include RemoteInfo") {
+    val timer = new MockTimer
+
+    Time.withCurrentTimeFrozen { tc =>
+      val svc = new Service[String, String] {
+        def apply(request: String) = Future.never
+      }
+
+      val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
+      val server = stringServer.serve(address, svc)
+      val client = stringClient
+        .configured(param.Timer(timer))
+        .withRequestTimeout(1.seconds)
+        .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "B")
+
+      val traceId = Trace.id
+
+      val e = intercept[IndividualRequestTimeoutException] {
+        Trace.letId(traceId, true) {
+          val res = client("hi")
+          tc.advance(5.seconds)
+          timer.tick()
+          Await.result(res, 2.seconds)
+        }
+      }
+
+      assert(e.remoteInfo ==
+        RemoteInfo.Available(None, None, Some(server.boundAddress), Some(ClientId("B")), traceId))
+      Await.ready(server.close(), 1.second)
+    }
+  }
 
   test("A -> B: Exception returned to A from B should include downstream address of B") {
     val hre = new Service[String, String] {

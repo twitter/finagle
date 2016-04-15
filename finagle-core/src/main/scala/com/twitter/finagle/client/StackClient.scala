@@ -68,14 +68,6 @@ object StackClient {
     stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
 
     /**
-     * `ExceptionRemoteInfoFactory` fills in remote info (upstream addr/client id,
-     * downstream addr/client id, and trace id) in exceptions. This needs to be at the top
-     * of the endpoint stack so that failures anywhere lower in the stack have remote
-     * info added to them.
-     */
-    stk.push(ExceptionRemoteInfoFactory.module)
-
-    /**
      * `WriteTracingFilter` annotates traced requests. Annotations are timestamped
      * so this should be low in the stack to accurately delineate between wire time
      * and handling time.
@@ -120,6 +112,15 @@ object StackClient {
      */
     stk.push(TimeoutFilter.clientModule)
 
+    /**
+     * `ExceptionRemoteInfoFactory` fills in remote info (upstream addr/client id,
+     * downstream addr/client id, and trace id) in exceptions. This needs to be near the top
+     * of the stack so that failures anywhere lower in the stack have remote
+     * info added to them, but below the stats, tracing, and monitor filters so these filters
+     * see exceptions with remote info added.
+     */
+    stk.push(ExceptionRemoteInfoFactory.module)
+    
     /**
      * `FailureAccrualFactory` accrues request failures per endpoint updating its
      * status so that modules higher in the stack may route around an unhealthy
