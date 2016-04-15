@@ -330,11 +330,10 @@ object Http extends Client[Request, Response] with HttpRichClient
 
       val endpoint = dtab.andThen(context).andThen(service)
 
-      if (expStreamTransport()) new ExpHttpServerDispatcher(
+      new ExpHttpServerDispatcher(
         newStreamTransport(transport),
         endpoint,
         stats.scope("dispatch"))
-      else new HttpServerDispatcher(new HttpTransport(transport), endpoint, stats.scope("dispatch"))
     }
 
     protected def copy1(
