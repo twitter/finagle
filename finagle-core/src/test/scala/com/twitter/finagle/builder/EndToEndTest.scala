@@ -22,16 +22,21 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
   test("IndividualRequestTimeoutException should include RemoteInfo") {
     val timer = new MockTimer
+    val reqMade = new Promise[Unit]
 
     Time.withCurrentTimeFrozen { tc =>
       val svc = new Service[String, String] {
-        def apply(request: String) = Future.never
+        def apply(request: String) = {
+          reqMade.setValue()
+          Future.never
+        }
       }
 
       val address = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
       val server = stringServer.serve(address, svc)
       val client = stringClient
         .configured(param.Timer(timer))
+        .withSession.acquisitionTimeout(1.seconds)
         .withRequestTimeout(1.seconds)
         .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "B")
 
@@ -40,9 +45,13 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
       val e = intercept[IndividualRequestTimeoutException] {
         Trace.letId(traceId, true) {
           val res = client("hi")
+
+          // Wait until the request has reached the server so we know it's passed through
+          // TimeoutFilter
+          Await.result(reqMade, 1.second)
           tc.advance(5.seconds)
           timer.tick()
-          Await.result(res, 2.seconds)
+          Await.result(res, 5.seconds)
         }
       }
 
@@ -121,7 +130,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
     val e = intercept[HasRemoteInfo] {
       Trace.letId(traceId, true) {
-        Await.result(clientA("hi"), 1.second)
+        Await.result(clientA("hi"), 3.seconds)
       }
     }
 
@@ -297,7 +306,7 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
         Await.result(client("hi"), 1.second)
       }
     }
-    
+
     val serviceCreationFailures =
       mem.counters(Seq("client", "service_creation", "failures"))
     val requeues =
