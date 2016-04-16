@@ -18,23 +18,23 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
    * open during the lifetime of a given client/pool per-host sessions of this client's
    * pool (default: unbounded).
    *
-   * @note The session pool will not have more active sessions than `sessionsPerHost`.
+   * @note The session pool will not have more active sessions than `sessions`.
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
-  def maxSize(sessionsPerHost: Int): A =
-    self.configured(self.params[DefaultPool.Param].copy(high = sessionsPerHost))
+  def maxSize(sessions: Int): A =
+    self.configured(self.params[DefaultPool.Param].copy(high = sessions))
 
   /**
    * Configures the number of per-host persistent (remain open during the
    * lifetime of a given client/pool) sessions of this client's pool (default: 0).
    *
-   * @note The session pool will not be shrinked below `sessionsPerHost`.
+   * @note The session pool will not be shrinked below `sessions`.
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
-  def minSize(sessionsPerHost: Int): A =
-    self.configured(self.params[DefaultPool.Param].copy(low = sessionsPerHost))
+  def minSize(sessions: Int): A =
+    self.configured(self.params[DefaultPool.Param].copy(low = sessions))
 
   /**
    *
@@ -44,6 +44,6 @@ class SessionPoolingParams[A <: Stack.Parameterized[A]](self: Stack.Parameterize
    *
    * @see [[https://twitter.github.io/finagle/guide/Clients.html#pooling]]
    */
-  def maxWaiters(maxWaitersPerHost: Int): A =
-    self.configured(self.params[DefaultPool.Param].copy(maxWaiters = maxWaitersPerHost))
+  def maxWaiters(maxWaiters: Int): A =
+    self.configured(self.params[DefaultPool.Param].copy(maxWaiters = maxWaiters))
 }
