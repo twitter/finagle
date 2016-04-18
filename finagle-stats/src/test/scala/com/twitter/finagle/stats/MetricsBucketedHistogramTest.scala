@@ -127,20 +127,79 @@ class MetricsBucketedHistogramTest extends FunSuite {
       h.add(1)
 
       // initial user access to start histogram snapshots
-      val init = details.counts
-      assert(init == Seq(BucketAndCount(1, 2, 1)))
+      assert(details.counts == Seq(BucketAndCount(1, 2, 1)))
 
       // call .snapshot() to recompute counts
       h.snapshot()
-      val countsSnap0 = details.counts
-      assert(countsSnap0 == Seq(BucketAndCount(1, 2, 1)))
+      assert(details.counts == Seq(BucketAndCount(1, 2, 1)))
 
       h.add(Int.MaxValue)
       // roll to window 2 (this should make data A visible after a call to snapshot)
       roll()
-      val countsSnap1 = details.counts
-      assert(countsSnap1 == Seq(BucketAndCount(1, 2, 1),
+      assert(details.counts == Seq(BucketAndCount(1, 2, 1),
         BucketAndCount(2137204091, Int.MaxValue, 1)))
+    }
+  }
+
+  test("histogram snapshot stays up-to-date when snapshots are missed") {
+    Time.withCurrentTimeFrozen { tc =>
+      val ctx = new Ctx(tc)
+      import ctx._
+
+      h.add(1)
+      roll()
+      assert(details.counts == Seq(BucketAndCount(1, 2, 1)))
+
+      // Advance several minutes without snapshotting (i.e. to
+      // simulate no reads). Subsequent reads should be stable.
+      h.add(2)
+      tc.advance(1.minute)
+      h.add(3)
+      tc.advance(1.minute)
+      h.add(4)
+      tc.advance(1.minute)
+      h.add(5)
+      tc.advance(1.minute)
+      h.snapshot()
+      val expectedCounts = Seq(
+        BucketAndCount(1, 2, 1),
+        BucketAndCount(2, 3, 1),
+        BucketAndCount(3, 4, 1),
+        BucketAndCount(4, 5, 1),
+        BucketAndCount(5, 6, 1)
+      )
+      assert(details.counts == expectedCounts)
+
+      h.add(6)
+      tc.advance(1.second)
+      h.snapshot()
+      assert(details.counts == expectedCounts)
+
+      h.add(7)
+      tc.advance(1.second)
+      h.snapshot()
+      assert(details.counts == expectedCounts)
+
+      h.add(8)
+      tc.advance(1.second)
+      h.snapshot()
+      assert(details.counts == expectedCounts)
+
+      h.add(9)
+      tc.advance(1.second)
+      h.snapshot()
+      assert(details.counts == expectedCounts)
+
+      h.add(10)
+      tc.advance(1.minute - 4.seconds)
+      h.snapshot()
+      assert(details.counts == Seq(
+        BucketAndCount(6, 7, 1),
+        BucketAndCount(7, 8, 1),
+        BucketAndCount(8, 9, 1),
+        BucketAndCount(9, 10, 1),
+        BucketAndCount(10, 11, 1)
+      ))
     }
   }
 
