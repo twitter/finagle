@@ -113,6 +113,7 @@ private[finagle] class InetResolver(
    * Resolve hostnames asynchronously and concurrently.
    */
   private[this] val dnsCond = new AsyncSemaphore(100)
+  private val waitersGauge = statsReceiver.addGauge("queue_size") { dnsCond.numWaiters }
   protected def resolveHost(host: String): Future[Seq[InetAddress]] = {
     dnsCond.acquire().flatMap { permit =>
       FuturePool.unboundedPool(InetAddress.getAllByName(host).toSeq)

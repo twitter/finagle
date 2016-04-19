@@ -57,6 +57,8 @@ New Features
 
   * finagle-netty4: HTTP proxy support for any Finagle Netty 4 client. ``RB_ID=819752``
 
+  * finagle-core: Gauge for dns resolutions awaiting lookups. ``RB_ID=822410``
+
 Bug Fixes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
