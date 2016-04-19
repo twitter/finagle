@@ -18,4 +18,6 @@ private class Latch {
     p = new Promise[Unit]
     oldp.setDone()
   }
+
+  def setDone(): Unit = { p.setDone() }
 }

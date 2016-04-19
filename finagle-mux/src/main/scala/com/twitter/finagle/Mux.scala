@@ -1,6 +1,5 @@
 package com.twitter.finagle
 
-import com.twitter.app.GlobalFlag
 import com.twitter.conversions.storage._
 import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
@@ -8,25 +7,17 @@ import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.{Message, MuxFramer, Netty3Framer}
 import com.twitter.finagle.mux.{Handshake, FailureDetector}
-import com.twitter.finagle.netty3._
+import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.param.{WithDefaultLoadBalancer, ProtocolLibrary}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{param => fparam}
 import com.twitter.util.{Closable, Future, StorageUnit}
 import java.net.SocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
-
-package mux {
-  /**
-   * Experimental support for mux payload framing.
-   */
-  object maxFrameSize extends GlobalFlag[StorageUnit](
-    Int.MaxValue.bytes,
-    "The maximum size of a mux frame. Any message that is larger "+
-    "than this value is fragmented across multiple transmissions.")
-}
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
@@ -38,15 +29,58 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
   val LatestVersion: Short = 0x0001
 
   /**
-   * Extract feature flags from `headers` and decorate `trans`.
+   * Mux-specific stack params.
    */
-  private[finagle] val negotiate: Handshake.Negotiator = (headers, trans) => {
-    val window = Handshake.valueOf(MuxFramer.Header.KeyBuf, headers)
+  object param {
+    /**
+     * A class eligible for configuring the maximum size of a mux frame.
+     * Any message that is larger than this value is fragmented across multiple
+     * transmissions. Clients and Servers can use this to set an upper bound
+     * on the size of messages they are willing to receive. The value is exchanged
+     * and applied during the mux handshake.
+     */
+    case class MaxFrameSize(size: StorageUnit) {
+      assert(size.inBytes <= Int.MaxValue, s"$size is not <= Int.MaxValue bytes")
+      assert(size.inBytes > 0, s"$size must be positive")
+
+      def mk(): (MaxFrameSize, Stack.Param[MaxFrameSize]) =
+        (this, MaxFrameSize.param)
+    }
+    object MaxFrameSize {
+      implicit val param = Stack.Param(MaxFrameSize(Int.MaxValue.bytes))
+    }
+  }
+
+  /**
+   * Extract feature flags from peer headers and decorate the trans.
+   *
+   * @param maxFrameSize the maximum frame size that was sent to the peer.
+   *
+   * @param statsReceiver the stats receiver used to configure various modules
+   * configured during negotiation.
+   */
+  private[finagle] def negotiate(
+    maxFrameSize: StorageUnit,
+    statsReceiver: StatsReceiver
+  ): Handshake.Negotiator = (peerHeaders, trans) => {
+    val remoteMaxFrameSize = Handshake.valueOf(MuxFramer.Header.KeyBuf, peerHeaders)
       .map { cb => MuxFramer.Header.decodeFrameSize(cb) }
-    if (window.nonEmpty && window.get < Int.MaxValue) {
-      MuxFramer(trans, window.get)
-    } else {
-      trans.map(Message.encode, Message.decode)
+    // Decorate the transport with the MuxFramer. We need to handle the
+    // cross product of local and remote configuration. The idea is that
+    // both clients and servers can specify the maximum frame size they
+    // would like their peer to send.
+    val framerStats = statsReceiver.scope("framer")
+    (maxFrameSize, remoteMaxFrameSize) match {
+      // The remote peer has suggested a max frame size less than the
+      // sentinal value. We need to configure the framer to fragment.
+      case (_, s@Some(remote)) if remote < Int.MaxValue =>
+        MuxFramer(trans, s, framerStats)
+      // The local instance has requested a max frame size less than the
+      // sentinal value. We need to be prepared for the remote to send
+      // fragments.
+      case (local, _) if local.inBytes < Int.MaxValue =>
+        MuxFramer(trans, None, framerStats)
+      case (_, _) => trans.map(Message.encode, Message.decode)
     }
   }
 
@@ -84,9 +118,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .replace(BindingFactory.role, MuxBindingFactory)
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
-    private def headers: Handshake.Headers = Seq(
+    /**
+     * Returns the headers that a client sends to a server.
+     *
+     * @param maxFrameSize the maximum mux fragment size the client is willing to
+     * receive from a server.
+     */
+    private def headers(maxFrameSize: StorageUnit): Handshake.Headers = Seq(
       MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(
-        mux.maxFrameSize().inBytes.toInt)
+        maxFrameSize.inBytes.toInt)
     )
   }
 
@@ -104,28 +144,29 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected type In = ChannelBuffer
     protected type Out = ChannelBuffer
 
+    private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
+
     protected def newTransporter(): Transporter[In, Out] =
       Netty3Transporter(Netty3Framer, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]
     ): Service[mux.Request, mux.Response] = {
-      val param.Stats(sr) = params[param.Stats]
-      val param.Label(name) = params[param.Label]
-
+      val fparam.Label(name) = params[fparam.Label]
+      val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
       val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
 
       val negotiatedTrans = mux.Handshake.client(
         trans = transport,
         version = LatestVersion,
-        headers = Client.headers,
-        negotiate = negotiate)
+        headers = Client.headers(maxFrameSize),
+        negotiate = negotiate(maxFrameSize, statsReceiver))
 
       val session = new mux.ClientSession(
         negotiatedTrans,
         detectorConfig,
         name,
-        sr.scope("mux"))
+        statsReceiver)
 
       mux.ClientDispatcher.newRequestResponse(session)
     }
@@ -148,13 +189,20 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       .prepend(PayloadSizeFilter.module(_.body.length, _.body.length))
 
     /**
-     * Determine the server headers based on `clientHeaders`.
+     * Returns the headers that a server sends to a client.
+     *
+     * @param clientHeaders The headers received from the client. This is useful since
+     * the headers the server responds with can be based on the clients.
+     *
+     * @param maxFrameSize the maximum mux fragment size the server is willing to
+     * receive from a client.
      */
-    private[finagle] def headers(clientHeaders: Handshake.Headers): Handshake.Headers = {
-      val frameSize = Handshake.valueOf(MuxFramer.Header.KeyBuf, clientHeaders)
-      if (frameSize.isEmpty) Nil
-      else Seq(MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(
-        mux.maxFrameSize().inBytes.toInt))
+    private[finagle] def headers(
+      clientHeaders: Handshake.Headers,
+      maxFrameSize: StorageUnit
+    ): Handshake.Headers = {
+      Seq(MuxFramer.Header.KeyBuf -> MuxFramer.Header.encodeFrameSize(
+        maxFrameSize.inBytes.toInt))
     }
   }
 
@@ -171,10 +219,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected type In = ChannelBuffer
     protected type Out = ChannelBuffer
 
-    private[this] val statsReceiver = {
-      val param.Stats(statsReceiver) = params[param.Stats]
-      statsReceiver.scope("mux")
-    }
+    private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
     protected def newListener(): Listener[In, Out] =
       Netty3Listener(Netty3Framer, params)
@@ -183,14 +228,15 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       transport: Transport[In, Out],
       service: Service[mux.Request, mux.Response]
     ): Closable = {
-      val param.Tracer(tracer) = params[param.Tracer]
+      val fparam.Tracer(tracer) = params[fparam.Tracer]
+      val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
       val Lessor.Param(lessor) = params[Lessor.Param]
 
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
         version = LatestVersion,
-        headers = Server.headers,
-        negotiate = negotiate)
+        headers = Server.headers(_, maxFrameSize),
+        negotiate = negotiate(maxFrameSize, statsReceiver))
 
       mux.ServerDispatcher.newRequestResponse(
         negotiatedTrans,

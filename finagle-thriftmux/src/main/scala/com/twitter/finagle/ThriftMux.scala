@@ -310,12 +310,13 @@ object ThriftMux
       service: Service[mux.Request, mux.Response]
     ): Closable = {
       val param.Tracer(tracer) = params[param.Tracer]
+      val Mux.param.MaxFrameSize(frameSize) = params[Mux.param.MaxFrameSize]
 
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
         version = Mux.LatestVersion,
-        headers = Mux.Server.headers,
-        negotiate = Mux.negotiate)
+        headers = Mux.Server.headers(_, frameSize),
+        negotiate = Mux.negotiate(frameSize, muxStatsReceiver))
 
       mux.ServerDispatcher.newRequestResponse(
         negotiatedTrans,

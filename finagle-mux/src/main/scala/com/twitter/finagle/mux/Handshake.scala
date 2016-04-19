@@ -175,9 +175,9 @@ private[finagle] object Handshake {
       msgTrans.read().transform {
         // A Tinit with a matching version
         case Return(Message.Tinit(tag, ver, clientHeaders)) if ver == version =>
-          val hdrs = headers(clientHeaders)
-          msgTrans.write(Message.Rinit(tag, version, hdrs)).before {
-            Future(negotiate(hdrs, trans))
+          val serverHeaders = headers(clientHeaders)
+          msgTrans.write(Message.Rinit(tag, version, serverHeaders)).before {
+            Future(negotiate(clientHeaders, trans))
           }
 
         // A Tinit with a version mismatch. Write an Rerr and then return

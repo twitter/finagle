@@ -19,3 +19,22 @@
 **serverhangup**
   A counter of the number of times sessions have been abruptly terminated by
   the server.
+
+**<label>/mux/framer/write_stream_bytes**
+  A histogram of the number of bytes written to the transport when
+  mux framing is enabled.
+
+**<label>/mux/framer/read_stream_bytes**
+  A histogram of the number of bytes read from the transport when
+  mux framing is enabled.
+
+**<label>/mux/framer/pending_write_streams**
+  A guage of the number of outstanding write streams when mux framing is enabled.
+
+**<label>/mux/framer/pending_read_streams**
+  A guage of the number of outstanding read streams when mux framing is enabled.
+
+**<label>/mux/framer/write_window_bytes**
+  A guage indicating the maximum size of fragments when mux framing is enabled.
+  A value of -1 means that writes are not fragmented.
+
