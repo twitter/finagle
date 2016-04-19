@@ -105,6 +105,9 @@ object BroadcastTracer {
   }
 
   private class Two(first: Tracer, second: Tracer) extends Tracer {
+    override def toString: String =
+      s"BroadcastTracer($first, $second)"
+
     def record(record: Record): Unit = {
       first.record(record)
       second.record(record)
@@ -123,6 +126,10 @@ object BroadcastTracer {
   }
 
   private class N(tracers: Seq[Tracer]) extends Tracer {
+
+    override def toString: String =
+      s"BroadcastTracer(${tracers.mkString(", ")})"
+
     def record(record: Record): Unit = {
       tracers foreach { _.record(record) }
     }

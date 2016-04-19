@@ -137,6 +137,8 @@ object ThriftResponseClassifier {
    */
   private[finagle] val DeserializeCtxOnly: ResponseClassifier =
     new ResponseClassifier {
+      override def toString: String = "DefaultThriftResponseClassifier"
+
       // we want the side-effect of deserialization if it has not
       // yet been done
       private[this] def deserializeIfPossible(rep: Try[Any]): Unit = {

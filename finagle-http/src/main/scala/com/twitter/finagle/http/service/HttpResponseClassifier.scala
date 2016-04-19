@@ -28,6 +28,9 @@ object HttpResponseClassifier {
   def apply(
     underlying: PartialFunction[(Request, Response), ResponseClass]
   ): ResponseClassifier = new ResponseClassifier {
+    override def toString: String =
+      s"HttpResponseClassifier($underlying)"
+
     def isDefinedAt(x: ReqRep): Boolean = x match {
       case ReqRep(req: Request, Return(rep: Response)) => underlying.isDefinedAt((req, rep))
       case _ => false

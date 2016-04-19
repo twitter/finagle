@@ -39,6 +39,7 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "P2cLoadBalancerFactory"
     def newBalancer[Req, Rep](
       endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
@@ -77,6 +78,7 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "P2cPeakEwmaLoadBalancerFactory"
     def newBalancer[Req, Rep](
       endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
@@ -101,6 +103,7 @@ object Balancers {
    */
   def heap(rng: Random = new Random): LoadBalancerFactory =
     new LoadBalancerFactory {
+      override def toString: String = "HeapLoadBalancerFactory"
       def newBalancer[Req, Rep](
         endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
         sr: StatsReceiver,
@@ -142,6 +145,7 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "ApertureLoadBalancerFactory"
     def newBalancer[Req, Rep](
       endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
@@ -173,6 +177,7 @@ object Balancers {
   def roundRobin(
     maxEffort: Int = MaxEffort
   ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "RoundRobinLoadBalancerFactory"
     def newBalancer[Req, Rep](
       endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
