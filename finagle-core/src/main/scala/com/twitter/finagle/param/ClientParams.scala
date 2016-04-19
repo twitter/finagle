@@ -1,7 +1,7 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.service.{Retries, RetryBudget}
-import com.twitter.finagle.{service, Stack}
+import com.twitter.finagle.Stack
 import com.twitter.util.Duration
 
 /**
