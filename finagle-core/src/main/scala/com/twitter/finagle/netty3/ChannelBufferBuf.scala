@@ -30,7 +30,11 @@ class ChannelBufferBuf(protected val underlying: ChannelBuffer) extends Buf {
 
     if (j <= i || i >= length) Buf.Empty
     else if (i == 0 && j >= length) this
-    else new ChannelBufferBuf(underlying.slice(i, (j-i) min (length-i)))
+    else {
+      val from = i + underlying.readerIndex
+      val until = math.min(j-i, length-i)
+      new ChannelBufferBuf(underlying.slice(from, until))
+    }
   }
 
   override def equals(other: Any): Boolean = other match {
