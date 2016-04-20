@@ -70,12 +70,13 @@ if [ "$FINAGLE_BRANCH" != "master" ]; then
     orig_sha=$(get_cached_sha scrooge-core)
     new_sha=$(git rev-list -1 --abbrev-commit HEAD)
     if [ "$orig_sha" != "$new_sha" ]; then
-      ./sbt ++$SCALA_VERSION scrooge-core/publishLocal
+      ./sbt ++$SCALA_VERSION scrooge-publish-local/publish-local
     fi
     update_sha scrooge-core $new_sha
   else
-    ./sbt ++$SCALA_VERSION scrooge-core/publishLocal
+    ./sbt ++$SCALA_VERSION scrooge-publish-local/publish-local
   fi
+  ./sbt scrooge-sbt-plugin/publish-local
 
   # clean up
   cd $FINAGLE_DIR
