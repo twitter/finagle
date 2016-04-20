@@ -1,6 +1,8 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.finagle.{Failure, ConnectionFailedException}
+import com.twitter.finagle.{
+  CancelledConnectionException, ChannelClosedException, Failure, ConnectionFailedException
+}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
@@ -12,7 +14,7 @@ import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
 import java.net.SocketAddress
 
 /**
- * An internal handler that upgrades the pipeline to delay connect-promise satisfaction, until the
+ * An internal handler that upgrades the pipeline to delay connect-promise satisfaction until the
  * remote HTTP proxy server is ready to proxy traffic to an ultimate destination represented as
  * `host` (i.e., HTTP proxy connect procedure is successful).
  *
@@ -26,7 +28,7 @@ import java.net.SocketAddress
  *       don't want to bypass Finagle's load balancers while resolving the proxy endpoint.
  *
  * @note This mixes in a [[BufferingChannelOutboundHandler]] so we can protect ourselves from
- *       channel handlers that write on `channelAdded`.
+ *       channel handlers that write on `channelAdded` or `channelActive`.
  *
  * [1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
  * [2]: http://wiki.squid-cache.org/Features/HTTPS
@@ -50,6 +52,11 @@ private[netty4] class HttpProxyConnectHandler(
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 
+  private[this] def fail(ctx: ChannelHandlerContext, t: Throwable): Unit = {
+    connectPromise.tryFailure(t)
+    failPendingWrites(ctx, t)
+  }
+
   override def connect(
     ctx: ChannelHandlerContext,
     remote: SocketAddress,
@@ -62,19 +69,20 @@ private[netty4] class HttpProxyConnectHandler(
     promise.addListener(new GenericFutureListener[NettyFuture[Any]] {
       override def operationComplete(f: NettyFuture[Any]): Unit =
         if (f.isCancelled) {
-          // The connect request was cancelled so the channel was never active. Since no writes
-          // are expected from the previous handler, no need to fail the pending writes.
-          proxyConnectPromise.cancel(true /*mayInterruptIfRunning*/)
+          if (!proxyConnectPromise.cancel(true) && proxyConnectPromise.isSuccess) {
+            // New connect promise wasn't cancelled because it was already satisfied (connected) so
+            // we need to close the channel to prevent resource leaks.
+            // See https://github.com/twitter/finagle/issues/345
+            failPendingWrites(ctx, new CancelledConnectionException())
+            ctx.close()
+          }
         }
     })
 
     // Fail old promise if a new one is failed.
     proxyConnectPromise.addListener(new GenericFutureListener[NettyFuture[Any]] {
       override def operationComplete(f: NettyFuture[Any]): Unit =
-        if (!f.isSuccess && !f.isCancelled) {
-          promise.setFailure(f.cause())
-          failPendingWrites(ctx, f.cause())
-        } else if (f.isSuccess) {
+        if (f.isSuccess) {
           // Add HTTP client codec so we can talk to an HTTP proxy.
           ctx.pipeline().addBefore(ctx.name(), httpCodecKey, httpClientCodec)
 
@@ -91,9 +99,13 @@ private[netty4] class HttpProxyConnectHandler(
           if (!ctx.channel().config().isAutoRead) {
             ctx.read()
           }
+        } else {
+          // The connect request was cancelled or failed so the channel was never active. Since no
+          // writes are expected from the previous handler, no need to fail the pending writes.
+          if (!f.isCancelled) {
+            promise.setFailure(f.cause())
+          }
         }
-        // We don't need to fail pending writes here (on `f.isCancelled`) since we expect that a
-        // channel was never active and no handlers write into a non-active channel.
     })
 
     // We propagate the pipeline with a new promise thereby delaying the original connect's
@@ -108,8 +120,7 @@ private[netty4] class HttpProxyConnectHandler(
       // need HTTP proxy pieces in the pipeline.
       if (rep.status() == HttpResponseStatus.OK) {
         ctx.pipeline().remove(httpCodecKey)
-        // This handler drains pending writes when removed.
-        ctx.pipeline().remove(self)
+        ctx.pipeline().remove(self) // drains pending writes when removed
 
         connectPromise.trySuccess()
         // We don't release `req` since by specs, we don't expect any payload sent back from a
@@ -120,19 +131,21 @@ private[netty4] class HttpProxyConnectHandler(
           ctx.channel().remoteAddress()
         )
 
-        connectPromise.tryFailure(failure)
-        failPendingWrites(ctx, failure)
-
+        fail(ctx, failure)
         ctx.close()
       }
     case other => ctx.fireChannelRead(other)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable): Unit = {
-    // We don't call `super.exceptionCaught` here since we don't want `cause` be propagated to
-    // the pipeline given that we already took an action (closed the channel).
-    connectPromise.tryFailure(cause)
-    failPendingWrites(ctx, cause)
-    ctx.close()
+    fail(ctx, cause)
+    ctx.fireExceptionCaught(cause) // we don't call super.exceptionCaught since we've already filed
+                                   // both connect promise and pending writes in `fail`
+    ctx.close() // close a channel since we've failed to perform an HTTP proxy handshake
+  }
+
+  override def channelInactive(ctx: ChannelHandlerContext): Unit = {
+    fail(ctx, new ChannelClosedException(ctx.channel().remoteAddress()))
+    ctx.fireChannelInactive()
   }
 }
