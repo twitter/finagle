@@ -25,11 +25,6 @@ import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
 import java.net.SocketAddress
 
 /**
- * NOTE: DO NOT USE, will be removed
- */
-object expStreamTransport extends GlobalFlag(false, "experimental http stream transport, WILL BE REMOVED")
-
-/**
  * A rich client with a *very* basic URL fetcher. (It does not handle
  * redirects, does not have a cookie jar, etc.)
  */
@@ -186,11 +181,8 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): Client = copy(stack, params)
 
     protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] = {
-      val dispatcher = if (expStreamTransport()) new ExpHttpClientDispatcher(
+      val dispatcher = new ExpHttpClientDispatcher(
         newStreamTransport(transport),
-        params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
-      ) else new HttpClientDispatcher(
-        transport,
         params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
 
