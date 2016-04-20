@@ -342,8 +342,7 @@ class FailureAccrualFactory[Req, Rep] private[finagle](
 
     reviveTimerTask = Some(timerTask)
 
-    if (logger.isLoggable(Level.DEBUG))
-      logger.log(Level.DEBUG, s"""FailureAccrualFactory marking connection to "$label" as dead. Remote Address: ${endpoint.toString}""")
+    logger.log(Level.INFO, s"""FailureAccrualFactory marking connection to "$label" as dead. Remote Address: ${endpoint.toString}""")
     removedForCounter.incr(duration.inMilliseconds.toInt)
 
     didMarkDead()
