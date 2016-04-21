@@ -78,7 +78,7 @@ if [ "$FINAGLE_BRANCH" != "master" ]; then
   fi
   # See notes in Scrooge's Build.scala's scrooge-publish-local project.
   # sbt plugins can currently only be built using Scala 2.10.
-  ./sbt ++2.10.6 scrooge-sbt-plugin/publishLocal
+  ./sbt ++2.10.6 scrooge-generator/publishLocal scrooge-sbt-plugin/publishLocal
 
   # clean up
   cd $FINAGLE_DIR
