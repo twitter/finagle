@@ -70,13 +70,15 @@ if [ "$FINAGLE_BRANCH" != "master" ]; then
     orig_sha=$(get_cached_sha scrooge-core)
     new_sha=$(git rev-list -1 --abbrev-commit HEAD)
     if [ "$orig_sha" != "$new_sha" ]; then
-      ./sbt ++$SCALA_VERSION scrooge-publish-local/publish-local
+      ./sbt ++$SCALA_VERSION scrooge-publish-local/publishLocal
     fi
     update_sha scrooge-core $new_sha
   else
-    ./sbt ++$SCALA_VERSION scrooge-publish-local/publish-local
+    ./sbt ++$SCALA_VERSION scrooge-publish-local/publishLocal
   fi
-  ./sbt scrooge-sbt-plugin/publish-local
+  # See notes in Scrooge's Build.scala's scrooge-publish-local project.
+  # sbt plugins can currently only be built using Scala 2.10.
+  ./sbt ++2.10.6 scrooge-sbt-plugin/publishLocal
 
   # clean up
   cd $FINAGLE_DIR
