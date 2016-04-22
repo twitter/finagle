@@ -17,11 +17,22 @@ import scala.collection.JavaConverters._
  *       make them terminate.
  */
 object Backoff {
-  private[this] def durations(next: Duration, f: Duration => Duration): Stream[Duration] =
-    next #:: durations(f(next), f)
 
-  def apply(next: Duration)(f: Duration => Duration): Stream[Duration] =
-    durations(next, f)
+  /**
+   * This is a smarter version of [[Stream.iterate]] in the way that it goes to
+   * [[Backoff.const]] (to save allocations) as long as `f` doesn't change its input.
+   */
+  private[this] def tailless(start: Duration)(f: Duration => Duration): Stream[Duration] = {
+    val next = f(start)
+    start #:: (if (next == start) const(next) else tailless(next)(f))
+  }
+
+  /**
+   * Create infinite backoffs that start with `start` and change by `f`.
+   *
+   * @note This is an exact version of [[Stream.iterate]].
+   */
+  def apply(start: Duration)(f: Duration => Duration): Stream[Duration] = Stream.iterate(start)(f)
 
   /**
    * Create infinite backoffs that grow exponentially by `multiplier`.
@@ -37,7 +48,7 @@ object Backoff {
    * @see [[exponentialJittered]] for a version that incorporates jitter.
    */
   def exponential(start: Duration, multiplier: Int, maximum: Duration): Stream[Duration] =
-    Backoff(start) { prev => maximum.min(prev * multiplier) }
+    tailless(start)(prev => maximum.min(prev * multiplier))
 
   /**
    * Create infinite backoffs that grow exponentially by 2, capped at `maximum`,
@@ -51,7 +62,6 @@ object Backoff {
   def exponentialJittered(start: Duration, maximum: Duration): Stream[Duration] =
     exponentialJittered(start, maximum, Rng.threadLocal)
 
-  private[this] val MinJitter = Duration.fromMilliseconds(1)
   // Don't shift left more than 62 bits to avoid Long overflow.
   private[this] val MaxBitShift = 62
 
@@ -131,8 +141,9 @@ object Backoff {
     def next(attempt: Int): Stream[Duration] = {
       val shift = math.min(attempt - 1, MaxBitShift)
       val halfExp = start * (1L << shift)
-      val backoff = maximum.min(halfExp + Duration.fromNanoseconds(rng.nextLong(halfExp.inNanoseconds)))
-      backoff #:: next(attempt + 1)
+      val backoff = halfExp + Duration.fromNanoseconds(rng.nextLong(halfExp.inNanoseconds))
+      if (backoff < maximum) backoff #:: next(attempt + 1)
+      else const(maximum)
     }
     start #:: next(1)
   }
@@ -147,7 +158,7 @@ object Backoff {
    * Create infinite backoffs that grow linear by `offset`, capped at `maximum`.
    */
   def linear(start: Duration, offset: Duration, maximum: Duration): Stream[Duration] =
-    Backoff(start) { prev => maximum.min(prev + offset) }
+    tailless(start)(prev => maximum.min(prev + offset))
 
   /** Alias for [[const]], which is a reserved word in Java */
   def constant(start: Duration): Stream[Duration] = const(start)
@@ -162,6 +173,8 @@ object Backoff {
 
   /**
    * Create infinite backoffs with values produced by a given generation function.
+   *
+   * @note This is an exact version of [[Stream.continually]].
    */
   def fromFunction(f: () => Duration): Stream[Duration] = Stream.continually(f())
 
