@@ -65,6 +65,9 @@ Bug Fixes
   * finagle-http: Ensure that service closure is delayed until chunked response bodies
     have been processed. ``RB_ID=813110``
 
+  * finagle-stats: Ensure that histogram snapshotting does not fall behind if snapshot()
+    is not called at least once per interval.
+
 6.34.0
 ------
 
