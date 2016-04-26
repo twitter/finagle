@@ -1,17 +1,16 @@
 package com.twitter.finagle
 
-import com.twitter.app.GlobalFlag
 import com.twitter.conversions.storage._
+import com.twitter.finagle.Http.param.HttpImpl
 import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
 import com.twitter.finagle.http.exp.{StreamTransport, HttpTransport => ExpHttpTransport,
   HttpClientDispatcher => ExpHttpClientDispatcher, HttpServerDispatcher => ExpHttpServerDispatcher}
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter,
   ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport, Netty3HttpTransporter, Netty3HttpListener}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _,
   Tracer => _, _}
@@ -20,7 +19,6 @@ import com.twitter.finagle.service.RetryBudget
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.Reader
 import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
 import java.net.SocketAddress
 
@@ -50,28 +48,33 @@ object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
   object param {
+
     /**
      * the transporter, useful for changing underlying http implementations
      */
     private[finagle] case class ParameterizableTransporter(
-        transporterFn: Stack.Params => Transporter[Any, Any])
-
-    private[finagle] implicit object ParameterizableTransporter extends
-        Stack.Param[ParameterizableTransporter] {
-      val default = com.twitter.finagle.http.netty.Netty3HttpTransporter
-    }
+      transporterFn: Stack.Params => Transporter[Any, Any])
 
     /**
-     * the listener, useful for changing underlying http implementations
+     * configure alternative http 1.1 implementations
      */
-    private[finagle] case class ParameterizableListener(
-      listenerFn: Stack.Params => Listener[Any, Any]) {
+    private[finagle] case class HttpImpl(
+      clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
+      serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
+      transporter: Stack.Params => Transporter[Any, Any],
+      listener: Stack.Params => Listener[Any, Any]
+    )
+
+    private[finagle] implicit object HttpImpl extends Stack.Param[HttpImpl] {
+      val default = Netty3Impl
     }
 
-    private[finagle] implicit object ParameterizableListener extends
-      Stack.Param[ParameterizableListener] {
-      val default = com.twitter.finagle.http.netty.Netty3HttpListener
-    }
+    private[finagle] val Netty3Impl: HttpImpl = HttpImpl(
+      new Netty3ClientStreamTransport(_),
+      new Netty3ServerStreamTransport(_),
+      Netty3HttpTransporter,
+      Netty3HttpListener
+    )
 
     /**
      * when streaming, the maximum size of http chunks.
@@ -127,6 +130,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     implicit object CompressionLevel extends Stack.Param[CompressionLevel] {
       val default = CompressionLevel(-1)
     }
+
   }
 
   // Only record payload sizes when streaming is disabled.
@@ -157,6 +161,7 @@ object Http extends Client[Request, Response] with HttpRichClient
         .prepend(nonChunkedPayloadSize)
   }
 
+
   case class Client(
       stack: Stack[ServiceFactory[Request, Response]] = Client.stack,
       params: Stack.Params = StackClient.defaultParams + ProtocolLibrary("http"))
@@ -170,10 +175,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newStreamTransport(
       transport: Transport[Any, Any]
     ): StreamTransport[Request, Response] =
-      new ExpHttpTransport(new Netty3ClientStreamTransport(transport))
+      new ExpHttpTransport(params[HttpImpl].clientTransport(transport))
 
     protected def newTransporter(): Transporter[Any, Any] =
-      params[param.ParameterizableTransporter].transporterFn(params)
+      params[param.HttpImpl].transporter(params)
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
@@ -246,9 +251,6 @@ object Http extends Client[Request, Response] with HttpRichClient
     def withCompressionLevel(level: Int): Client =
       configured(param.CompressionLevel(level))
 
-    private[finagle] def withTransporter(transporter: param.ParameterizableTransporter): Client =
-      configured(transporter)
-
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withSessionPool: SessionPoolingParams[Client] =
@@ -307,12 +309,12 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type Out = Any
 
     protected def newListener(): Listener[Any, Any] =
-      params[param.ParameterizableListener].listenerFn(params)
+      params[param.HttpImpl].listener(params)
 
     protected def newStreamTransport(
       transport: Transport[Any, Any]
     ): StreamTransport[Response, Request] =
-      new ExpHttpTransport(new Netty3ServerStreamTransport(transport))
+      new ExpHttpTransport(params[HttpImpl].serverTransport(transport))
 
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {

@@ -2,41 +2,41 @@ package com.twitter.finagle.http.exp
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.exp.{StreamTransport, GenSerialServerDispatcher}
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
-import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Reader, BufReader}
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Throwables}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.frame.TooLongFrameException
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+
+private[http] object HttpServerDispatcher {
+  val handleHttp10: PartialFunction[Throwable, Response] = {
+    case _ => Response(Version.Http10, Status.InternalServerError)
+  }
+
+  val handleHttp11: PartialFunction[Throwable, Response] = {
+    case _ => Response(Version.Http11, Status.InternalServerError)
+  }
+}
 
 class HttpServerDispatcher(
     trans: StreamTransport[Response, Request],
     service: Service[Request, Response],
     stats: StatsReceiver)
   extends GenSerialServerDispatcher[Request, Response, Response, Request](trans) {
+  import HttpServerDispatcher._
 
   private[this] val failureReceiver =
     new RollupStatsReceiver(stats.scope("stream")).scope("failures")
-
-  import ReaderUtils.{readChunk, streamChunks}
 
   trans.onClose.ensure {
     service.close()
   }
 
   protected def dispatch(m: Request): Future[Response] = m match {
-    case badReq: BadRequest =>
-      val response = badReq.exception match {
-        case ex: TooLongFrameException =>
-          // this is very brittle :(
-          if (ex.getMessage().startsWith("An HTTP line is larger than "))
-            Response(badReq.version, Status.RequestURITooLong)
-          else
-            Response(badReq.version, Status.RequestHeaderFieldsTooLarge)
+    case badReq: BadReq =>
+      val resp = badReq match {
+        case _: UriTooLong =>
+          Response(badReq.version, Status.RequestURITooLong)
+        case _: HeaderFieldsTooLarge =>
+          Response(badReq.version, Status.RequestHeaderFieldsTooLarge)
         case _ =>
           Response(badReq.version, Status.BadRequest)
       }
@@ -48,12 +48,14 @@ class HttpServerDispatcher(
       // in handle, and trans.close will be called in
       // the respond statement of loop().
       close()
-      Future.value(response)
+      Future.value(resp)
 
     case req: Request =>
-      service(req).handle {
-        case _ => Response(req.version, Status.InternalServerError)
+      val handleFn = req.version match {
+        case Version.Http10 => handleHttp10
+        case _ => handleHttp11
       }
+      service(req).handle(handleFn)
 
     case invalid =>
       Future.exception(new IllegalArgumentException("Invalid message "+invalid))
@@ -67,7 +69,8 @@ class HttpServerDispatcher(
       // this is likely an issue with the Netty content
       // compressors, which (should?) adjust headers regardless of
       // transfer encoding.
-      rep.headers.remove(Fields.ContentLength)
+      rep.headerMap.remove(Fields.ContentLength)
+      rep.headerMap.set(Fields.TransferEncoding, "chunked")
 
       val p = new Promise[Unit]
       val f = trans.write(rep)

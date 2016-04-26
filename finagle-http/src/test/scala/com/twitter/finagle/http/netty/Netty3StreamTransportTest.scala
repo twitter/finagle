@@ -3,7 +3,7 @@ package com.twitter.finagle.http.netty
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle.http.exp.Multi
-import com.twitter.finagle.http.{Request, Status, Version}
+import com.twitter.finagle.http._
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.Await
@@ -20,6 +20,18 @@ class Netty3StreamTransportTest extends FunSuite {
     val out = new AsyncQueue[Any]
     val qTransport = new QueueTransport(in, out)
     val transport = new Netty3ClientStreamTransport(qTransport)
+  }
+
+  test("BadHttpRequest instances are identified as finagle BadReq") {
+    val in = new AsyncQueue[Any]
+    val out = new AsyncQueue[Any]
+    val qTransport = new QueueTransport(in, out)
+    val transport = new Netty3ServerStreamTransport(qTransport)
+
+    val bad: DefaultHttpRequest = BadHttpRequest(new Exception)
+    out.offer(bad)
+    val Multi(rep, _) = Await.result(transport.read(), 5.seconds)
+    assert(rep.isInstanceOf[BadReq])
   }
 
   test("writing unchunked content gets turned into a single whole request") {

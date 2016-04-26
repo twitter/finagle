@@ -6,8 +6,7 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, DefaultStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Closable, StorageUnit, Try}
@@ -16,22 +15,64 @@ import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, Ch
 import org.jboss.netty.handler.codec.http._
 
 private[finagle] case class BadHttpRequest(
-  httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Exception)
+  httpVersion: HttpVersion, method: HttpMethod, uri: String, exception: Throwable)
     extends DefaultHttpRequest(httpVersion, method, uri)
 
 object BadHttpRequest {
-  def apply(exception: Exception): BadHttpRequest =
+  def apply(exception: Throwable): BadHttpRequest =
     new BadHttpRequest(HttpVersion.HTTP_1_0, HttpMethod.GET, "/bad-http-request", exception)
 }
 
-private[http] case class BadRequest(httpRequest: HttpRequest, exception: Exception)
-  extends Request {
+private[finagle] sealed trait BadReq
+private[finagle] trait UriTooLong extends BadReq
+private[finagle] trait HeaderFieldsTooLarge extends BadReq
+
+private[http] case class BadRequest(httpRequest: HttpRequest, exception: Throwable)
+  extends Request with BadReq {
   lazy val remoteSocketAddress = new InetSocketAddress(0)
 }
 
-private[http] object BadRequest {
+private[finagle] object BadRequest {
+
   def apply(msg: BadHttpRequest): BadRequest =
     new BadRequest(msg, msg.exception)
+
+  def apply(exn: Throwable): BadRequest = {
+    val msg = new BadHttpRequest(
+      HttpVersion.HTTP_1_0,
+      HttpMethod.GET,
+      "/bad-http-request",
+      exn
+    )
+
+    apply(msg)
+  }
+
+  def uriTooLong(msg: BadHttpRequest): BadRequest with UriTooLong =
+    new BadRequest(msg, msg.exception) with UriTooLong
+
+  def uriTooLong(exn: Throwable): BadRequest with UriTooLong = {
+    val msg = new BadHttpRequest(
+      HttpVersion.HTTP_1_0,
+      HttpMethod.GET,
+      "/bad-http-request",
+      exn
+    )
+    uriTooLong(msg)
+  }
+
+  def headerTooLong(msg: BadHttpRequest): BadRequest with HeaderFieldsTooLarge  =
+    new BadRequest(msg, msg.exception) with HeaderFieldsTooLarge
+
+  def headerTooLong(exn: Throwable): BadRequest with HeaderFieldsTooLarge = {
+    val msg = new BadHttpRequest(
+      HttpVersion.HTTP_1_0,
+      HttpMethod.GET,
+      "/bad-http-request",
+      exn
+    )
+    headerTooLong(msg)
+  }
 }
 
 /** Convert exceptions to BadHttpRequests */

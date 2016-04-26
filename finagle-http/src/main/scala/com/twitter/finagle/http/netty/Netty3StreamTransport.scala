@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.netty
 
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
-import com.twitter.finagle.http.{Request, Response, Message, BadHttpRequest, BadRequest}
+import com.twitter.finagle.http._
 import com.twitter.finagle.http.ReaderUtils.{readChunk, streamChunks}
 import com.twitter.finagle.http.exp.{StreamTransportProxy, Multi}
 import com.twitter.finagle.http.netty.Bijections._
@@ -10,7 +10,9 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Reader, BufReader}
 import com.twitter.util.Future
 import java.net.InetSocketAddress
+import org.jboss.netty.handler.codec.frame.TooLongFrameException
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMessage}
+
 
 private[finagle] class Netty3StreamTransport[
   In <: Message,
@@ -32,15 +34,12 @@ private[finagle] class Netty3StreamTransport[
       Future.value(Multi(mkMessage(res, coll), coll))
   }
 
-  def write(msg: In): Future[Unit] = {
+  def write(msg: In): Future[Unit] =
     transport.write(from[In, NettyIn](msg)).rescue(wrapWriteException).before {
       if (msg.isChunked) streamChunks(rawTransport, msg.reader) else Future.Done
     }
-  }
 
-  def read(): Future[Multi[Out]] = {
-    transport.read().flatMap(readFn)
-  }
+  def read(): Future[Multi[Out]] = transport.read().flatMap(readFn)
 }
 
 private[finagle] class Netty3ClientStreamTransport(transport: Transport[Any, Any])
@@ -57,7 +56,17 @@ private[finagle] class Netty3ServerStreamTransport(transport: Transport[Any, Any
   extends Netty3StreamTransport[Response, Request, HttpResponse, HttpRequest](
     transport,
     {
-      case (req: BadHttpRequest, _) => BadRequest(req)
+      case (badReq: BadHttpRequest, _) =>
+        badReq.exception match {
+          case ex: TooLongFrameException =>
+            if (ex.getMessage().startsWith("An HTTP line is larger than "))
+              BadRequest.uriTooLong(badReq)
+            else
+              BadRequest.headerTooLong(badReq)
+          case _ =>
+            BadRequest(badReq)
+        }
+
       case (req: HttpRequest, reader: Reader) =>
         Request(
           req,
