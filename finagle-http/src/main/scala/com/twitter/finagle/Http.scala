@@ -57,6 +57,9 @@ object Http extends Client[Request, Response] with HttpRichClient
 
     /**
      * configure alternative http 1.1 implementations
+     *
+     * note: the listener and transporter don't strictly need to be
+     *       coupled but we do so for ease of configuration.
      */
     private[finagle] case class HttpImpl(
       clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
