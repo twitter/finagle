@@ -49,10 +49,11 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Implements various backoff strategies.</p><p>Strategies are defined by a <code>Stream[Duration]</code> and are intended for use
-with <a href="RetryFilter$.html#apply[Req,Rep](backoffs:Stream[com.twitter.util.Duration],statsReceiver:com.twitter.finagle.stats.StatsReceiver)(shouldRetry:PartialFunction[(Req,com.twitter.util.Try[Rep]),Boolean])(implicittimer:com.twitter.util.Timer):com.twitter.finagle.service.RetryFilter[Req,Rep]" class="extmbr" name="com.twitter.finagle.service.RetryFilter#apply">RetryFilter.apply</a> and <a href="RetryPolicy$.html#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">RetryPolicy.backoff</a> to determine
-the duration after which a request is to be retried.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Implements various backoff strategies.</p><p>Strategies are defined by a <code>Stream[Duration]</code> and are intended for use with
+<a href="RetryFilter$.html#apply[Req,Rep](backoffs:Stream[com.twitter.util.Duration],statsReceiver:com.twitter.finagle.stats.StatsReceiver)(shouldRetry:PartialFunction[(Req,com.twitter.util.Try[Rep]),Boolean])(implicittimer:com.twitter.util.Timer):com.twitter.finagle.service.RetryFilter[Req,Rep]" class="extmbr" name="com.twitter.finagle.service.RetryFilter#apply">RetryFilter.apply</a> and <a href="RetryPolicy$.html#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">RetryPolicy.backoff</a> to determine the duration after which a request
+is to be retried.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>All backoffs created by factory methods on this object are infinite. Use <code>Stream.take</code> to
+      make them terminate.</p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
@@ -148,8 +149,8 @@ the duration after which a request is to be retried.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.service.Backoff#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(next:com.twitter.util.Duration)(f:com.twitter.util.Duration=&gt;com.twitter.util.Duration):Stream[com.twitter.util.Duration]"></a>
+    </li><li name="com.twitter.finagle.service.Backoff#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(start:com.twitter.util.Duration)(f:com.twitter.util.Duration=&gt;com.twitter.util.Duration):Stream[com.twitter.util.Duration]"></a>
       <a id="apply(Duration)((Duration)⇒Duration):Stream[Duration]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -157,14 +158,15 @@ the duration after which a request is to be retried.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="next">next: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="params">(<span name="f">f: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>
+        <span class="name">apply</span><span class="params">(<span name="start">start: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="params">(<span name="f">f: (<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.service.Backoff$@apply(next:com.twitter.util.Duration)(f:com.twitter.util.Duration=&gt;com.twitter.util.Duration):Stream[com.twitter.util.Duration]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.service.Backoff$@apply(start:com.twitter.util.Duration)(f:com.twitter.util.Duration=&gt;com.twitter.util.Duration):Stream[com.twitter.util.Duration]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Create infinite backoffs that start with <code>start</code> and change by <code>f</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create infinite backoffs that start with <code>start</code> and change by <code>f</code>.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This is an exact version of <span class="extype" name="Stream.iterate">Stream.iterate</span>.</p></span></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -255,8 +257,8 @@ the duration after which a request is to be retried.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs that have jitter with a random distribution
-between <code>start </code>and 3 times the previously selected value, capped at <code>maximum</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create backoffs that have jitter with a random distribution
+      <p class="shortcomment cmt">Create infinite backoffs that have jitter with a random distribution
+between <code>start </code>and 3 times the previously selected value, capped at <code>maximum</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create infinite backoffs that have jitter with a random distribution
 between <code>start </code>and 3 times the previously selected value, capped at <code>maximum</code>.
 </p></div><dl class="paramcmts block"><dt class="param">start</dt><dd class="cmt"><p>must be greater than 0 and less than or equal to <code>maximum</code>.</p></dd><dt class="param">maximum</dt><dd class="cmt"><p>must be greater than 0 and greater than or equal to <code>start</code>.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#exponentialJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#exponentialJittered">exponentialJittered</a> and <a href="#equalJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#equalJittered">equalJittered</a> for alternative jittered approaches.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -292,8 +294,8 @@ between <code>start </code>and 3 times the previously selected value, capped at 
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs that keep half of the exponential growth, and jitter
-between 0 and that amount.</p><div class="fullcomment"><div class="comment cmt"><p>Create backoffs that keep half of the exponential growth, and jitter
+      <p class="shortcomment cmt">Create infinite backoffs that keep half of the exponential growth, and jitter
+between 0 and that amount.</p><div class="fullcomment"><div class="comment cmt"><p>Create infinite backoffs that keep half of the exponential growth, and jitter
 between 0 and that amount.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#exponentialJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#exponentialJittered">exponentialJittered</a> and <a href="#decorrelatedJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#decorrelatedJittered">decorrelatedJittered</a> for alternative jittered approaches.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -329,7 +331,7 @@ between 0 and that amount.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs that grow exponentially by <code>multiplier</code>, capped at <code>maximum</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create backoffs that grow exponentially by <code>multiplier</code>, capped at <code>maximum</code>.
+      <p class="shortcomment cmt">Create infinite backoffs that grow exponentially by <code>multiplier</code>, capped at <code>maximum</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create infinite backoffs that grow exponentially by <code>multiplier</code>, capped at <code>maximum</code>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#exponentialJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#exponentialJittered">exponentialJittered</a> for a version that incorporates jitter.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.Backoff#exponential" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exponential(start:com.twitter.util.Duration,multiplier:Int):Stream[com.twitter.util.Duration]"></a>
@@ -347,7 +349,7 @@ between 0 and that amount.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs that grow exponentially by <code>multiplier</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create backoffs that grow exponentially by <code>multiplier</code>.
+      <p class="shortcomment cmt">Create infinite backoffs that grow exponentially by <code>multiplier</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create infinite backoffs that grow exponentially by <code>multiplier</code>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#exponentialJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#exponentialJittered">exponentialJittered</a> for a version that incorporates jitter.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.Backoff#exponentialJittered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="exponentialJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]"></a>
@@ -365,9 +367,9 @@ between 0 and that amount.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs that grow exponentially by 2, capped at <code>maximum</code>,
+      <p class="shortcomment cmt">Create infinite backoffs that grow exponentially by 2, capped at <code>maximum</code>,
 with each backoff having jitter, or randomness, between 0 and the
-exponential backoff value.</p><div class="fullcomment"><div class="comment cmt"><p>Create backoffs that grow exponentially by 2, capped at <code>maximum</code>,
+exponential backoff value.</p><div class="fullcomment"><div class="comment cmt"><p>Create infinite backoffs that grow exponentially by 2, capped at <code>maximum</code>,
 with each backoff having jitter, or randomness, between 0 and the
 exponential backoff value.
 </p></div><dl class="paramcmts block"><dt class="param">start</dt><dd class="cmt"><p>must be greater than 0 and less than or equal to <code>maximum</code>.</p></dd><dt class="param">maximum</dt><dd class="cmt"><p>must be greater than 0 and greater than or equal to <code>start</code>.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#decorrelatedJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#decorrelatedJittered">decorrelatedJittered</a> and <a href="#equalJittered(start:com.twitter.util.Duration,maximum:com.twitter.util.Duration):Stream[com.twitter.util.Duration]" class="extmbr" name="com.twitter.finagle.service.Backoff#equalJittered">equalJittered</a> for alternative jittered approaches.</p></span></dd></dl></div>
@@ -394,7 +396,7 @@ exponential backoff value.
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.service.Backoff#fromFunction" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.service.Backoff#fromFunction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fromFunction(f:()=&gt;com.twitter.util.Duration):Stream[com.twitter.util.Duration]"></a>
       <a id="fromFunction(()⇒Duration):Stream[Duration]"></a>
       <h4 class="signature">
@@ -410,7 +412,8 @@ exponential backoff value.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs with values produced by a given generation function.</p>
+      <p class="shortcomment cmt">Create infinite backoffs with values produced by a given generation function.</p><div class="fullcomment"><div class="comment cmt"><p>Create infinite backoffs with values produced by a given generation function.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This is an exact version of <span class="extype" name="Stream.continually">Stream.continually</span>.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -478,7 +481,7 @@ exponential backoff value.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs that grow linear by <code>offset</code>, capped at <code>maximum</code>.</p>
+      <p class="shortcomment cmt">Create infinite backoffs that grow linear by <code>offset</code>, capped at <code>maximum</code>.</p>
     </li><li name="com.twitter.finagle.service.Backoff#linear" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="linear(start:com.twitter.util.Duration,offset:com.twitter.util.Duration):Stream[com.twitter.util.Duration]"></a>
       <a id="linear(Duration,Duration):Stream[Duration]"></a>
@@ -495,7 +498,7 @@ exponential backoff value.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create backoffs that grow linear by <code>offset</code>.</p>
+      <p class="shortcomment cmt">Create infinite backoffs that grow linear by <code>offset</code>.</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>

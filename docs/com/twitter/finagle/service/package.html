@@ -676,10 +676,11 @@ request failures.</p></span></dd></dl></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Implements various backoff strategies.</p><div class="fullcomment"><div class="comment cmt"><p>Implements various backoff strategies.</p><p>Strategies are defined by a <code>Stream[Duration]</code> and are intended for use
-with <a href="RetryFilter$.html#apply[Req,Rep](backoffs:Stream[com.twitter.util.Duration],statsReceiver:com.twitter.finagle.stats.StatsReceiver)(shouldRetry:PartialFunction[(Req,com.twitter.util.Try[Rep]),Boolean])(implicittimer:com.twitter.util.Timer):com.twitter.finagle.service.RetryFilter[Req,Rep]" class="extmbr" name="com.twitter.finagle.service.RetryFilter#apply">RetryFilter.apply</a> and <a href="RetryPolicy$.html#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">RetryPolicy.backoff</a> to determine
-the duration after which a request is to be retried.
-</p></div></div>
+      <p class="shortcomment cmt">Implements various backoff strategies.</p><div class="fullcomment"><div class="comment cmt"><p>Implements various backoff strategies.</p><p>Strategies are defined by a <code>Stream[Duration]</code> and are intended for use with
+<a href="RetryFilter$.html#apply[Req,Rep](backoffs:Stream[com.twitter.util.Duration],statsReceiver:com.twitter.finagle.stats.StatsReceiver)(shouldRetry:PartialFunction[(Req,com.twitter.util.Try[Rep]),Boolean])(implicittimer:com.twitter.util.Timer):com.twitter.finagle.service.RetryFilter[Req,Rep]" class="extmbr" name="com.twitter.finagle.service.RetryFilter#apply">RetryFilter.apply</a> and <a href="RetryPolicy$.html#backoff[A](backoffs:Stream[com.twitter.util.Duration])(shouldRetry:PartialFunction[A,Boolean]):com.twitter.finagle.service.RetryPolicy[A]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#backoff">RetryPolicy.backoff</a> to determine the duration after which a request
+is to be retried.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>All backoffs created by factory methods on this object are infinite. Use <code>Stream.take</code> to
+      make them terminate.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.service.BackoffBenchmark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="BackoffBenchmark"></a>
       <a id="BackoffBenchmark:BackoffBenchmark"></a>

@@ -472,7 +472,7 @@ was reset by a peer or a proxy.</p>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Default implementation for WriteException that wraps an underlying exception.</p>
+      <p class="shortcomment cmt">Default implementation for <a href="WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteException</a> that wraps an underlying exception.</p>
     </li><li name="com.twitter.finagle.Client" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Client[Req,Rep]extendsAnyRef"></a>
       <a id="Client[Req,Rep]:Client[Req,Rep]"></a>
@@ -637,7 +637,7 @@ e.g., to account for variable latencies in message deliveries.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Dentry.html"><span class="name">Dentry</span></a><span class="params">(<span name="prefix">prefix: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>, <span name="dst">dst: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Dentry.html"><span class="name">Dentry</span></a><span class="params">(<span name="prefix">prefix: <a href="Dentry$$Prefix.html" class="extype" name="com.twitter.finagle.Dentry.Prefix">Prefix</a></span>, <span name="dst">dst: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@DentryextendsProductwithSerializable" title="Permalink" target="_top">
@@ -1299,6 +1299,23 @@ hierarchically-addressed object.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.ReadTimedOutException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReadTimedOutExceptionextendsChannelException"></a>
+      <a id="ReadTimedOutException:ReadTimedOutException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ReadTimedOutException.html"><span class="name">ReadTimedOutException</span></a><span class="result"> extends <a href="ChannelException.html" class="extype" name="com.twitter.finagle.ChannelException">ChannelException</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@ReadTimedOutExceptionextendsChannelException" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that a read from a given <code>remoteAddress</code> timed out.</p>
     </li><li name="com.twitter.finagle.RedisRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="RedisRichClientextendsAnyRef"></a>
       <a id="RedisRichClient:RedisRichClient"></a>
@@ -2034,11 +2051,12 @@ become available from a client's connection pool.</p>
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Marker trait to indicate there was an exception while writing the request.</p><div class="fullcomment"><div class="comment cmt"><p>Marker trait to indicate there was an exception while writing the request.
-These exceptions should generally be retryable as the full request should
-not have reached the other end.
-</p></div></div>
-    </li><li name="com.twitter.finagle.WriteTimedOutException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <p class="shortcomment cmt">Marker trait to indicate there was an exception before writing any of the
+request.</p><div class="fullcomment"><div class="comment cmt"><p>Marker trait to indicate there was an exception before writing any of the
+request.
+These exceptions should generally be retryable.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="service/RetryPolicy$.html#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a></p></span><span class="cmt"><p><a href="service/RetryPolicy$$RetryableWriteException$.html" class="extype" name="com.twitter.finagle.service.RetryPolicy.RetryableWriteException">com.twitter.finagle.service.RetryPolicy.RetryableWriteException</a></p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.WriteTimedOutException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="WriteTimedOutExceptionextendsChannelException"></a>
       <a id="WriteTimedOutException:WriteTimedOutException"></a>
       <h4 class="signature">
@@ -2054,9 +2072,7 @@ not have reached the other end.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Indicates that a write to a given <code>remoteAddress</code> timed out.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that a write to a given <code>remoteAddress</code> timed out. See
-<span class="extype" name="com.twitter.finagle.netty3.channel.WriteCompletionTimeoutHandler">com.twitter.finagle.netty3.channel.WriteCompletionTimeoutHandler</span> for details.
-</p></div></div>
+      <p class="shortcomment cmt">Indicates that a write to a given <code>remoteAddress</code> timed out.</p>
     </li><li name="com.twitter.finagle.Group" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Group[T]extendsAnyRef"></a>
       <a id="Group[T]:Group[T]"></a>
@@ -2768,7 +2784,7 @@ example:</p><pre><span class="ano">@volatile</span> <span class="kw">var</span> 
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Redis$.html"><span class="name">Redis</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</span>
+        <a href="Redis$.html"><span class="name">Redis</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>] with <a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@Redis" title="Permalink" target="_top">
@@ -3223,23 +3239,6 @@ stabilized (moved elsewhere) at any time.
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.failters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="failters"></a>
-      <a id="failters:failters"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="failters/package.html"><span class="name">failters</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@failters" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.twitter.finagle.filter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="filter"></a>
       <a id="filter:filter"></a>
@@ -3321,23 +3320,6 @@ stabilized (moved elsewhere) at any time.
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.twitter.finagle.package@kestrel" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.load" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="load"></a>
-      <a id="load:load"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="load/package.html"><span class="name">load</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@load" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

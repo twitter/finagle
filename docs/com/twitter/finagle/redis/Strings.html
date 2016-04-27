@@ -54,7 +54,7 @@
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="Client.html" class="extype" name="com.twitter.finagle.redis.Client">Client</a>, <a href="TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></div>
+            <div class="subClasses hiddenContent"><a href="Client.html" class="extype" name="com.twitter.finagle.redis.Client">Client</a>, <a href="NormalCommands.html" class="extype" name="com.twitter.finagle.redis.NormalCommands">NormalCommands</a>, <a href="TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></div>
           </div></div>
         
 
@@ -148,24 +148,59 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#FutureFalse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FutureFalse:com.twitter.util.Future[Boolean]"></a>
+      <a id="FutureFalse:Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FutureFalse</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@FutureFalse:com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.Strings#FutureTrue" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FutureTrue:com.twitter.util.Future[Boolean]"></a>
+      <a id="FutureTrue:Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FutureTrue</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@FutureTrue:com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.Strings#append" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="append(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
-      <a id="append(ChannelBuffer,ChannelBuffer):Future[Long]"></a>
+      <a id="append(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a>
+      <a id="append(Buf,Buf):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">append</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">append</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@append(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@append(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Appends value at the given key.</p><div class="fullcomment"><div class="comment cmt"><p>Appends value at the given key. If key doesn't exist,
-behavior is similar to SET command</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>length of string after append operation</p></dd></dl></div>
+behavior is similar to SET command
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>length of string after append operation</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -183,45 +218,57 @@ behavior is similar to SET command</p></div><dl class="paramcmts block"><dt>retu
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.Strings#bitCount" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bitCount(key:org.jboss.netty.buffer.ChannelBuffer,start:Option[Int],end:Option[Int]):com.twitter.util.Future[Long]"></a>
-      <a id="bitCount(ChannelBuffer,Option[Int],Option[Int]):Future[Long]"></a>
+    </li><li name="com.twitter.finagle.redis.Strings#bitCount" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="bitCount(key:com.twitter.io.Buf,start:Option[Int],end:Option[Int]):com.twitter.util.Future[Long]"></a>
+      <a id="bitCount(Buf,Option[Int],Option[Int]):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bitCount</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">bitCount</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@bitCount(key:org.jboss.netty.buffer.ChannelBuffer,start:Option[Int],end:Option[Int]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@bitCount(key:com.twitter.io.Buf,start:Option[Int],end:Option[Int]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Count the number of set bits (population counting) in a string.</p><div class="fullcomment"><div class="comment cmt"><p>Count the number of set bits (population counting) in a string.
-</p></div><dl class="paramcmts block"><dt class="param">start</dt><dd class="cmt"><p>optional index bytes starting from.</p></dd><dt class="param">end</dt><dd class="cmt"><p>optional index bytes of the end.</p></dd><dt>returns</dt><dd class="cmt"><p>The number of bits set to 1.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/bitcount</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.Strings#bitOp" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bitOp(op:org.jboss.netty.buffer.ChannelBuffer,dstKey:org.jboss.netty.buffer.ChannelBuffer,srcKeys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]"></a>
-      <a id="bitOp(ChannelBuffer,ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
+      
+    </li><li name="com.twitter.finagle.redis.Strings#bitCount" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="bitCount(key:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a>
+      <a id="bitCount(Buf):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">bitOp</span><span class="params">(<span name="op">op: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="dstKey">dstKey: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="srcKeys">srcKeys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">bitCount</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@bitOp(op:org.jboss.netty.buffer.ChannelBuffer,dstKey:org.jboss.netty.buffer.ChannelBuffer,srcKeys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@bitCount(key:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Perform a bitwise operation between multiple keys (containing string
-values) and store the result in the destination key.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a bitwise operation between multiple keys (containing string
-values) and store the result in the destination key.
-</p></div><dl class="paramcmts block"><dt class="param">op</dt><dd class="cmt"><p>operation type, one of AND/OR/XOR/NOT.</p></dd><dt class="param">dstKey</dt><dd class="cmt"><p>destination key.</p></dd><dt class="param">srcKeys</dt><dd class="cmt"><p>source keys perform the operation between.</p></dd><dt>returns</dt><dd class="cmt"><p>The size of the string stored in the destination key,
-         that is equal to the size of the longest input string.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/bitop</p></span></dd></dl></div>
+      
+    </li><li name="com.twitter.finagle.redis.Strings#bitOp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="bitOp(op:com.twitter.io.Buf,dstKey:com.twitter.io.Buf,srcKeys:Seq[com.twitter.io.Buf]):com.twitter.util.Future[Long]"></a>
+      <a id="bitOp(Buf,Buf,Seq[Buf]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bitOp</span><span class="params">(<span name="op">op: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="dstKey">dstKey: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="srcKeys">srcKeys: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@bitOp(op:com.twitter.io.Buf,dstKey:com.twitter.io.Buf,srcKeys:Seq[com.twitter.io.Buf]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -246,40 +293,42 @@ values) and store the result in the destination key.
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#decr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="decr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
-      <a id="decr(ChannelBuffer):Future[Long]"></a>
+      <a id="decr(key:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a>
+      <a id="decr(Buf):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decr</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">decr</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@decr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@decr(key:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Decrements number stored at key by 1.</p><div class="fullcomment"><div class="comment cmt"><p>Decrements number stored at key by 1.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value after decrement.</p></dd></dl></div>
+      <p class="shortcomment cmt">Decrements number stored at key by 1.</p><div class="fullcomment"><div class="comment cmt"><p>Decrements number stored at key by 1.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value after decrement.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#decrBy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="decrBy(key:org.jboss.netty.buffer.ChannelBuffer,amount:Long):com.twitter.util.Future[Long]"></a>
-      <a id="decrBy(ChannelBuffer,Long):Future[Long]"></a>
+      <a id="decrBy(key:com.twitter.io.Buf,amount:Long):com.twitter.util.Future[Long]"></a>
+      <a id="decrBy(Buf,Long):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">decrBy</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="amount">amount: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">decrBy</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="amount">amount: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@decrBy(key:org.jboss.netty.buffer.ChannelBuffer,amount:Long):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@decrBy(key:com.twitter.io.Buf,amount:Long):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Decrements number stored at key by given amount.</p><div class="fullcomment"><div class="comment cmt"><p>Decrements number stored at key by given amount. If key doesn't
-exist, value is set to 0 before the operation</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value after decrement. Error if key contains value
+exist, value is set to 0 before the operation
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value after decrement. Error if key contains value
 of the wrong type</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
@@ -339,35 +388,37 @@ of the wrong type</p></dd></dl></div>
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="get(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <a id="get(key:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]"></a>
+      <a id="get(Buf):Future[Option[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">get</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@get(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@get(key:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Gets the value associated with the given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the value associated with the given key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value, or none if key doesn't exist</p></dd></dl></div>
+      <p class="shortcomment cmt">Gets the value associated with the given key
+</p><div class="fullcomment"><div class="comment cmt"><p>Gets the value associated with the given key
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>value, or none if key doesn't exist</p></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#getBit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int):com.twitter.util.Future[Long]"></a>
-      <a id="getBit(ChannelBuffer,Int):Future[Long]"></a>
+      <a id="getBit(key:com.twitter.io.Buf,offset:Int):com.twitter.util.Future[Long]"></a>
+      <a id="getBit(Buf,Int):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getBit</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">getBit</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getBit(key:com.twitter.io.Buf,offset:Int):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -391,35 +442,37 @@ of the wrong type</p></dd></dl></div>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#getRange" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getRange(key:org.jboss.netty.buffer.ChannelBuffer,start:Long,end:Long):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="getRange(ChannelBuffer,Long,Long):Future[Option[ChannelBuffer]]"></a>
+      <a id="getRange(key:com.twitter.io.Buf,start:Long,end:Long):com.twitter.util.Future[Option[com.twitter.io.Buf]]"></a>
+      <a id="getRange(Buf,Long,Long):Future[Option[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getRange</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">getRange</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getRange(key:org.jboss.netty.buffer.ChannelBuffer,start:Long,end:Long):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getRange(key:com.twitter.io.Buf,start:Long,end:Long):com.twitter.util.Future[Option[com.twitter.io.Buf]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Gets the substring of the value associated with given key</p><div class="fullcomment"><div class="comment cmt"><p>Gets the substring of the value associated with given key</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>substring, or none if key doesn't exist</p></dd></dl></div>
+      <p class="shortcomment cmt">Gets the substring of the value associated with given key
+</p><div class="fullcomment"><div class="comment cmt"><p>Gets the substring of the value associated with given key
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>substring, or none if key doesn't exist</p></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#getSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getSet(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="getSet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <a id="getSet(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]"></a>
+      <a id="getSet(Buf,Buf):Future[Option[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getSet</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">getSet</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getSet(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getSet(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -445,36 +498,36 @@ Returns an error when key exists but does not hold a string value.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#incr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="incr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
-      <a id="incr(ChannelBuffer):Future[Long]"></a>
+      <a id="incr(key:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a>
+      <a id="incr(Buf):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">incr</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">incr</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@incr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@incr(key:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Increments the number stored at key by one.</p><div class="fullcomment"><div class="comment cmt"><p>Increments the number stored at key by one.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the value of key after the increment.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/incr</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#incrBy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="incrBy(key:org.jboss.netty.buffer.ChannelBuffer,increment:Long):com.twitter.util.Future[Long]"></a>
-      <a id="incrBy(ChannelBuffer,Long):Future[Long]"></a>
+      <a id="incrBy(key:com.twitter.io.Buf,increment:Long):com.twitter.util.Future[Long]"></a>
+      <a id="incrBy(Buf,Long):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">incrBy</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="increment">increment: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">incrBy</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="increment">increment: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@incrBy(key:org.jboss.netty.buffer.ChannelBuffer,increment:Long):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@incrBy(key:com.twitter.io.Buf,increment:Long):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -498,36 +551,36 @@ Returns an error when key exists but does not hold a string value.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#mGet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mGet(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[Option[org.jboss.netty.buffer.ChannelBuffer]]]"></a>
-      <a id="mGet(Seq[ChannelBuffer]):Future[Seq[Option[ChannelBuffer]]]"></a>
+      <a id="mGet(keys:Seq[com.twitter.io.Buf]):com.twitter.util.Future[Seq[Option[com.twitter.io.Buf]]]"></a>
+      <a id="mGet(Seq[Buf]):Future[Seq[Option[Buf]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mGet</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]]</span>
+        <span class="name">mGet</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mGet(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[Option[org.jboss.netty.buffer.ChannelBuffer]]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mGet(keys:Seq[com.twitter.io.Buf]):com.twitter.util.Future[Seq[Option[com.twitter.io.Buf]]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Returns the values of all specified keys.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the values of all specified keys.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>list of values at the specified keys.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/mget</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#mSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mSet(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Unit]"></a>
-      <a id="mSet(Map[ChannelBuffer,ChannelBuffer]):Future[Unit]"></a>
+      <a id="mSet(kv:Map[com.twitter.io.Buf,com.twitter.io.Buf]):com.twitter.util.Future[Unit]"></a>
+      <a id="mSet(Map[Buf,Buf]):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mSet</span><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">mSet</span><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mSet(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mSet(kv:Map[com.twitter.io.Buf,com.twitter.io.Buf]):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -535,18 +588,18 @@ Returns an error when key exists but does not hold a string value.
 values with new values, just as regular SET.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/mset</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#mSetNx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="mSetNx(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Boolean]"></a>
-      <a id="mSetNx(Map[ChannelBuffer,ChannelBuffer]):Future[Boolean]"></a>
+      <a id="mSetNx(kv:Map[com.twitter.io.Buf,com.twitter.io.Buf]):com.twitter.util.Future[Boolean]"></a>
+      <a id="mSetNx(Map[Buf,Buf]):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">mSetNx</span><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">mSetNx</span><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mSetNx(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mSetNx(kv:Map[com.twitter.io.Buf,com.twitter.io.Buf]):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -605,18 +658,18 @@ any operation at all even if just a single key already exists.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#pSetEx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pSetEx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
-      <a id="pSetEx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <a id="pSetEx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]"></a>
+      <a id="pSetEx(Buf,Long,Buf):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">pSetEx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">pSetEx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@pSetEx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@pSetEx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -625,54 +678,55 @@ time is specified in milliseconds instead of seconds.</p><div class="fullcomment
 time is specified in milliseconds instead of seconds.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/psetex</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#set" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="set(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
-      <a id="set(ChannelBuffer,ChannelBuffer):Future[Unit]"></a>
+      <a id="set(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]"></a>
+      <a id="set(Buf,Buf):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">set</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">set</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@set(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@set(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Sets the given value to key.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the given value to key. If a value already exists for the key,
-the value is overwritten with the new value</p></div></div>
+the value is overwritten with the new value
+</p></div></div>
     </li><li name="com.twitter.finagle.redis.Strings#setBit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:Int):com.twitter.util.Future[Long]"></a>
-      <a id="setBit(ChannelBuffer,Int,Int):Future[Long]"></a>
+      <a id="setBit(key:com.twitter.io.Buf,offset:Int,value:Int):com.twitter.util.Future[Long]"></a>
+      <a id="setBit(Buf,Int,Int):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setBit</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">setBit</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:Int):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setBit(key:com.twitter.io.Buf,offset:Int,value:Int):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Sets or clears the bit at offset in the string value stored at key.</p><div class="fullcomment"><div class="comment cmt"><p>Sets or clears the bit at offset in the string value stored at key.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the original bit value stored at offset.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setbit</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setEx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setEx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
-      <a id="setEx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <a id="setEx(key:com.twitter.io.Buf,seconds:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]"></a>
+      <a id="setEx(Buf,Long,Buf):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setEx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">setEx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setEx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setEx(key:com.twitter.io.Buf,seconds:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -681,18 +735,18 @@ number of seconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set k
 number of seconds.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setex</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setExNx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setExNx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="setExNx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <a id="setExNx(key:com.twitter.io.Buf,seconds:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="setExNx(Buf,Long,Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setExNx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">setExNx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setExNx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setExNx(key:com.twitter.io.Buf,seconds:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -701,18 +755,18 @@ only if the key does not already exist.</p><div class="fullcomment"><div class="
 only if the key does not already exist.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setExXx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setExXx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="setExXx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <a id="setExXx(key:com.twitter.io.Buf,seconds:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="setExXx(Buf,Long,Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setExXx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">setExXx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setExXx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setExXx(key:com.twitter.io.Buf,seconds:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -721,18 +775,18 @@ only if the key already exist.</p><div class="fullcomment"><div class="comment c
 only if the key already exist.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setNx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setNx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="setNx(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <a id="setNx(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="setNx(Buf,Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setNx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">setNx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setNx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setNx(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -740,36 +794,36 @@ only if the key already exist.
 equal to SET. When key already holds a value, no operation is performed.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>1 if the key was set, 0 if the key was not set.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setnx</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setPx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setPx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
-      <a id="setPx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <a id="setPx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]"></a>
+      <a id="setPx(Buf,Long,Buf):Future[Unit]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setPx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+        <span class="name">setPx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Set key to hold the string value with the specified expire time in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value with the specified expire time in milliseconds.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setPxNx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setPxNx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="setPxNx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <a id="setPxNx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="setPxNx(Buf,Long,Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setPxNx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">setPxNx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPxNx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPxNx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -778,18 +832,18 @@ only if the key does not already exist.</p><div class="fullcomment"><div class="
 only if the key does not already exist.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setPxXx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setPxXx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="setPxXx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <a id="setPxXx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="setPxXx(Buf,Long,Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setPxXx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">setPxXx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPxXx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPxXx(key:com.twitter.io.Buf,millis:Long,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -798,18 +852,18 @@ only if the key already exist.</p><div class="fullcomment"><div class="comment c
 only if the key already exist.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setRange" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setRange(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
-      <a id="setRange(ChannelBuffer,Int,ChannelBuffer):Future[Long]"></a>
+      <a id="setRange(key:com.twitter.io.Buf,offset:Int,value:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a>
+      <a id="setRange(Buf,Int,Buf):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setRange</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">setRange</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setRange(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setRange(key:com.twitter.io.Buf,offset:Int,value:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -818,36 +872,36 @@ offset, for the entire length of value.</p><div class="fullcomment"><div class="
 offset, for the entire length of value.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>the length of the string after it was modified.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/setrange</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#setXx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setXx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="setXx(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <a id="setXx(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="setXx(Buf,Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">setXx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">setXx</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setXx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setXx(key:com.twitter.io.Buf,value:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Set key to hold the string value only if the key already exist.</p><div class="fullcomment"><div class="comment cmt"><p>Set key to hold the string value only if the key already exist.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the key was set, false if condition was not met.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io.commands/set</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Strings#strlen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="strlen(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
-      <a id="strlen(ChannelBuffer):Future[Long]"></a>
+      <a id="strlen(key:com.twitter.io.Buf):com.twitter.util.Future[Long]"></a>
+      <a id="strlen(Buf):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">strlen</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">strlen</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@strlen(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@strlen(key:com.twitter.io.Buf):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -961,7 +1015,555 @@ offset, for the entire length of value.
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.redis.Strings#append" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="append(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
+      <a id="append(ChannelBuffer,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use append(key: Buf, value: Buf)">append</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@append(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use append(key: Buf, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#bitCount" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bitCount(key:org.jboss.netty.buffer.ChannelBuffer,start:Option[Int],end:Option[Int]):com.twitter.util.Future[Long]"></a>
+      <a id="bitCount(ChannelBuffer,Option[Int],Option[Int]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use bitCount(key: Buf, start: Option[Int], end: Option[Int])">bitCount</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@bitCount(key:org.jboss.netty.buffer.ChannelBuffer,start:Option[Int],end:Option[Int]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Count the number of set bits (population counting) in a string.</p><div class="fullcomment"><div class="comment cmt"><p>Count the number of set bits (population counting) in a string.
+</p></div><dl class="paramcmts block"><dt class="param">start</dt><dd class="cmt"><p>optional index bytes starting from.</p></dd><dt class="param">end</dt><dd class="cmt"><p>optional index bytes of the end.</p></dd><dt>returns</dt><dd class="cmt"><p>The number of bits set to 1.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use bitCount(key: Buf, start: Option[Int], end: Option[Int])</p></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/bitcount</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#bitOp" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bitOp(op:org.jboss.netty.buffer.ChannelBuffer,dstKey:org.jboss.netty.buffer.ChannelBuffer,srcKeys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]"></a>
+      <a id="bitOp(ChannelBuffer,ChannelBuffer,Seq[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use bitOp(op: Buf, dstKey: Buf, srcKeys: Seq[Buf])">bitOp</span><span class="params">(<span name="op">op: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="dstKey">dstKey: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="srcKeys">srcKeys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@bitOp(op:org.jboss.netty.buffer.ChannelBuffer,dstKey:org.jboss.netty.buffer.ChannelBuffer,srcKeys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Perform a bitwise operation between multiple keys (containing string
+values) and store the result in the destination key.</p><div class="fullcomment"><div class="comment cmt"><p>Perform a bitwise operation between multiple keys (containing string
+values) and store the result in the destination key.
+</p></div><dl class="paramcmts block"><dt class="param">op</dt><dd class="cmt"><p>operation type, one of AND/OR/XOR/NOT.</p></dd><dt class="param">dstKey</dt><dd class="cmt"><p>destination key.</p></dd><dt class="param">srcKeys</dt><dd class="cmt"><p>source keys perform the operation between.</p></dd><dt>returns</dt><dd class="cmt"><p>The size of the string stored in the destination key,
+         that is equal to the size of the longest input string.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use bitOp(op: Buf, dstKey: Buf, srcKeys: Seq[Buf])</p></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/bitop</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#decr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="decr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
+      <a id="decr(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use decr(key: Buf)">decr</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@decr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use decr(key: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#decrBy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="decrBy(key:org.jboss.netty.buffer.ChannelBuffer,amount:Long):com.twitter.util.Future[Long]"></a>
+      <a id="decrBy(ChannelBuffer,Long):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use decrBy(key: Buf, amount: Long)">decrBy</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="amount">amount: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@decrBy(key:org.jboss.netty.buffer.ChannelBuffer,amount:Long):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use decrBy(key: Buf, amount: Long)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
+      <a id="get(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use get(key: Buf)">get</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@get(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use get(key: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#getBit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int):com.twitter.util.Future[Long]"></a>
+      <a id="getBit(ChannelBuffer,Int):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use getBit(key: Buf, offset: Int)">getBit</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use getBit(key: Buf, offset: Int)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#getRange" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getRange(key:org.jboss.netty.buffer.ChannelBuffer,start:Long,end:Long):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
+      <a id="getRange(ChannelBuffer,Long,Long):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use getRange(key: Buf, start: Long, end: Long)">getRange</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getRange(key:org.jboss.netty.buffer.ChannelBuffer,start:Long,end:Long):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use getRange(key: Buf, start: Long, end: Long)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#getSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getSet(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
+      <a id="getSet(ChannelBuffer,ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use getSet(key: Buf, value: Buf)">getSet</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@getSet(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use getSet(key: Buf, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#incr" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="incr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
+      <a id="incr(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use incr(key: Buf)">incr</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@incr(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use incr(key: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#incrBy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="incrBy(key:org.jboss.netty.buffer.ChannelBuffer,increment:Long):com.twitter.util.Future[Long]"></a>
+      <a id="incrBy(ChannelBuffer,Long):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use incrBy(key: Buf, increment: Long)">incrBy</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="increment">increment: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@incrBy(key:org.jboss.netty.buffer.ChannelBuffer,increment:Long):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use incrBy(key: Buf, increment: Long)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#mGet2" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mGet2(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[Option[org.jboss.netty.buffer.ChannelBuffer]]]"></a>
+      <a id="mGet2(Seq[ChannelBuffer]):Future[Seq[Option[ChannelBuffer]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use mGet(keys: Seq[Buf])">mGet2</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mGet2(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[Option[org.jboss.netty.buffer.ChannelBuffer]]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use mGet(keys: Seq[Buf])</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#mSet2" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mSet2(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Unit]"></a>
+      <a id="mSet2(Map[ChannelBuffer,ChannelBuffer]):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use mSet(kv: Map[Buf, Buf])">mSet2</span><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mSet2(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use mSet(kv: Map[Buf, Buf])</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#mSetNx2" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="mSetNx2(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Boolean]"></a>
+      <a id="mSetNx2(Map[ChannelBuffer,ChannelBuffer]):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use mSetNx(kv: Map[Buf, Buf])">mSetNx2</span><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@mSetNx2(kv:Map[org.jboss.netty.buffer.ChannelBuffer,org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use mSetNx(kv: Map[Buf, Buf])</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#pSetEx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pSetEx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
+      <a id="pSetEx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use pSetEx(key: Buf, millis: Long, value: Buf)">pSetEx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@pSetEx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use pSetEx(key: Buf, millis: Long, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#set" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="set(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
+      <a id="set(ChannelBuffer,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use set(key: Buf, value: Buf)">set</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@set(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use set(key: Buf, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setBit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:Int):com.twitter.util.Future[Long]"></a>
+      <a id="setBit(ChannelBuffer,Int,Int):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setBit(key: Buf, offset: Int, value: Int)">setBit</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setBit(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:Int):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setBit(key: Buf, offset: Int, value: Int)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setEx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setEx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
+      <a id="setEx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setEx(key: Buf, seconds: Long, value: Buf)">setEx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setEx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setEx(key: Buf, seconds: Long, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setExNx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setExNx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="setExNx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setExNx(key: Buf, seconds: Long, value: Buf)">setExNx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setExNx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setExNx(key: Buf, seconds: Long, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setExXx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setExXx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="setExXx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setExXx(key: Buf, seconds: Long, value: Buf)">setExXx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setExXx(key:org.jboss.netty.buffer.ChannelBuffer,seconds:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setExXx(key: Buf, seconds: Long, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setNx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setNx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="setNx(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setNx(key: Buf, value: Buf)">setNx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setNx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setNx(key: Buf, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setPx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setPx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
+      <a id="setPx(ChannelBuffer,Long,ChannelBuffer):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setPx(key: Buf, millis: Long, value: Buf)">setPx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setPx(key: Buf, millis: Long, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setPxNx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setPxNx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="setPxNx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setPxNx(key: Buf, millis: Long, value: Buf)">setPxNx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPxNx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setPxNx(key: Buf, millis: Long, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setPxXx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setPxXx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="setPxXx(ChannelBuffer,Long,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setPxXx(key: Buf, millis: Long, value: Buf)">setPxXx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setPxXx(key:org.jboss.netty.buffer.ChannelBuffer,millis:Long,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setPxXx(key: Buf, millis: Long, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setRange" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setRange(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
+      <a id="setRange(ChannelBuffer,Int,ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setRange(key: Buf, offset: Int, value: Buf)">setRange</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setRange(key:org.jboss.netty.buffer.ChannelBuffer,offset:Int,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setRange(key: Buf, offset: Int, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#setXx" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setXx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="setXx(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use setXx(key: Buf, value: Buf)">setXx</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@setXx(key:org.jboss.netty.buffer.ChannelBuffer,value:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use setXx(key: Buf, value: Buf)</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Strings#strlen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="strlen(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]"></a>
+      <a id="strlen(ChannelBuffer):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-31) use strlen(key: Buf)">strlen</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Strings@strlen(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-31)</i> use strlen(key: Buf)</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

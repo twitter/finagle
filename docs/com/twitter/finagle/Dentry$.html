@@ -90,7 +90,30 @@
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.Dentry.Prefix" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PrefixextendsProductwithSerializable"></a>
+      <a id="Prefix:Prefix"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Dentry$$Prefix.html"><span class="name">Prefix</span></a><span class="params">(<span name="elems">elems: <a href="Dentry$$Prefix$$Elem.html" class="extype" name="com.twitter.finagle.Dentry.Prefix.Elem">Elem</a>*</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Dentry$@PrefixextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A Prefix comprises a <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>-matching expression.</p><div class="fullcomment"><div class="comment cmt"><p>A Prefix comprises a <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>-matching expression.</p><p>Each element in a prefix may be either a <span class="extype" name="Label">Label</span> or <span class="extype" name="AnyElem">AnyElem</span>.
+When matching a <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>, Label-elements must match exactly,
+while Any-elements are ignored.
+</p></div></div>
+    </li></ol>
+            </div>
 
         
 
@@ -147,6 +170,40 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Dentry.Prefix" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Prefix"></a>
+      <a id="Prefix:Prefix"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Dentry$$Prefix$.html"><span class="name">Prefix</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Dentry$@Prefix" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.Dentry#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="apply(path:com.twitter.finagle.Path,dst:com.twitter.finagle.NameTree[com.twitter.finagle.Path]):com.twitter.finagle.Dentry"></a>
+      <a id="apply(Path,NameTree[Path]):Dentry"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="path">path: <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a></span>, <span name="dst">dst: <a href="NameTree.html" class="extype" name="com.twitter.finagle.NameTree">NameTree</a>[<a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a>]</span>)</span><span class="result">: <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Dentry$@apply(path:com.twitter.finagle.Path,dst:com.twitter.finagle.NameTree[com.twitter.finagle.Path]):com.twitter.finagle.Dentry" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Build a <a href="Dentry.html" class="extype" name="com.twitter.finagle.Dentry">Dentry</a> with a <a href="Path.html" class="extype" name="com.twitter.finagle.Path">Path</a> prefix.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -396,9 +453,28 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Parse a Dentry from the string <code>s</code> with concrete syntax:</p><div class="fullcomment"><div class="comment cmt"><p>Parse a Dentry from the string <code>s</code> with concrete syntax:</p><pre>dentry     ::= path <span class="lit">'=>'</span> tree</pre><p>where the productions <code>path</code> and <code>tree</code> are from the grammar
+      <p class="shortcomment cmt">Parse a Dentry from the string <code>s</code> with concrete syntax:</p><div class="fullcomment"><div class="comment cmt"><p>Parse a Dentry from the string <code>s</code> with concrete syntax:</p><pre>dentry     ::= prefix <span class="lit">'=>'</span> tree</pre><p>where the production <code>prefix</code> is from the grammar documented in
+<a href="Dentry$$Prefix$.html#read(s:String):com.twitter.finagle.Dentry.Prefix" class="extmbr" name="com.twitter.finagle.Dentry.Prefix#read">Prefix.read</a> and the production <code>tree</code> is from the grammar
 documented in <a href="NameTree$.html#read(s:String):com.twitter.finagle.NameTree[com.twitter.finagle.Path]" class="extmbr" name="com.twitter.finagle.NameTree#read">NameTree.read</a>.
 </p></div></div>
+    </li><li name="com.twitter.finagle.Dentry#readPrefix" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="readPrefix(s:String):com.twitter.finagle.Dentry.Prefix"></a>
+      <a id="readPrefix(String):Prefix"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">readPrefix</span><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Dentry$$Prefix.html" class="extype" name="com.twitter.finagle.Dentry.Prefix">Prefix</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Dentry$@readPrefix(s:String):com.twitter.finagle.Dentry.Prefix" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Java compatibility method for <code>Dentry.Prefix.read</code>
+</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

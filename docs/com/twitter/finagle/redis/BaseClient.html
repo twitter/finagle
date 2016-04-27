@@ -41,20 +41,20 @@
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">BaseClient</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">BaseClient</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Connects to a single Redis host</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="Client.html" class="extype" name="com.twitter.finagle.redis.Client">Client</a>, <a href="TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></div>
+            <div class="subClasses hiddenContent"><a href="Client.html" class="extype" name="com.twitter.finagle.redis.Client">Client</a>, <a href="SentinelClient.html" class="extype" name="com.twitter.finagle.redis.SentinelClient">SentinelClient</a>, <a href="TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></div>
           </div></div>
         
 
@@ -72,7 +72,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.redis.BaseClient"><span>BaseClient</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.redis.BaseClient"><span>BaseClient</span></li><li class="in" name="com.twitter.util.Closable"><span>Closable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -92,7 +92,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.redis.BaseClient#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(service:com.twitter.finagle.Service[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]):com.twitter.finagle.redis.BaseClient"></a>
+      <a id="&lt;init&gt;(factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]):com.twitter.finagle.redis.BaseClient"></a>
       <a id="&lt;init&gt;:BaseClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -100,10 +100,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BaseClient</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</span>)</span>
+        <span class="name">BaseClient</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@&lt;init&gt;(service:com.twitter.finagle.Service[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]):com.twitter.finagle.redis.BaseClient" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@&lt;init&gt;(factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]):com.twitter.finagle.redis.BaseClient" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -185,23 +185,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.BaseClient#auth" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="auth(password:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]"></a>
-      <a id="auth(ChannelBuffer):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">auth</span><span class="params">(<span name="password">password: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@auth(password:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Authorizes to db</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -225,6 +208,59 @@
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.BaseClient#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]"></a>
+      <a id="close(Time):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@close(deadline:com.twitter.util.Time):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Releases underlying service factory object
+</p><div class="fullcomment"><div class="comment cmt"><p>Releases underlying service factory object
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.BaseClient">BaseClient</a> → Closable</dd></dl></div>
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]"></a>
+      <a id="close(Duration):Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">(<span name="after">after: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@close(after:com.twitter.util.Duration):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
+    </li><li name="com.twitter.util.Closable#close" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="close():com.twitter.util.Future[Unit]"></a>
+      <a id="close():Future[Unit]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">close</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@close():com.twitter.util.Future[Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Closable</dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -259,6 +295,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.BaseClient#factory" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]"></a>
+      <a id="factory:ServiceFactory[Command,Reply]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">factory</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@factory:com.twitter.finagle.ServiceFactory[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -282,42 +335,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.BaseClient#flushAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="flushAll():com.twitter.util.Future[Unit]"></a>
-      <a id="flushAll():Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">flushAll</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@flushAll():com.twitter.util.Future[Unit]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Deletes all keys in all databases
-</p>
-    </li><li name="com.twitter.finagle.redis.BaseClient#flushDB" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="flushDB():com.twitter.util.Future[Unit]"></a>
-      <a id="flushDB():Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">flushDB</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@flushDB():com.twitter.util.Future[Unit]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Deletes all keys in current DB
-</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -352,23 +369,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.BaseClient#info" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="info(section:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="info(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">info</span><span class="params">(<span name="section">section: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span> = <span class="symbol">ChannelBuffers.EMPTY_BUFFER</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@info(section:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Returns information and statistics about the server</p><div class="fullcomment"><div class="comment cmt"><p>Returns information and statistics about the server</p></div><dl class="paramcmts block"><dt class="param">section</dt><dd class="cmt"><p>Optional parameter can be used to select a specific section of information</p></dd><dt>returns</dt><dd class="cmt"><p>ChannelBuffer with collection of \r\n terminated lines if server has info on section</p></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -437,59 +437,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.BaseClient#quit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="quit():com.twitter.util.Future[Unit]"></a>
-      <a id="quit():Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">quit</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@quit():com.twitter.util.Future[Unit]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Closes connection to Redis instance
-</p>
-    </li><li name="com.twitter.finagle.redis.BaseClient#release" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="release():com.twitter.util.Future[Unit]"></a>
-      <a id="release():Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">release</span><span class="params">()</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@release():com.twitter.util.Future[Unit]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Releases underlying service object
-</p>
-    </li><li name="com.twitter.finagle.redis.BaseClient#select" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="select(index:Int):com.twitter.util.Future[Unit]"></a>
-      <a id="select(Int):Future[Unit]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">select</span><span class="params">(<span name="index">index: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.BaseClient@select(index:Int):com.twitter.util.Future[Unit]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Select DB with specified zero-based index</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -602,7 +549,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.twitter.util.Closable">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>

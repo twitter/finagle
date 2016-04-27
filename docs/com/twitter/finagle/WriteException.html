@@ -51,10 +51,10 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Marker trait to indicate there was an exception while writing the request.
-These exceptions should generally be retryable as the full request should
-not have reached the other end.
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Marker trait to indicate there was an exception before writing any of the
+request.
+These exceptions should generally be retryable.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="service/RetryPolicy$.html#WriteExceptionsOnly:PartialFunction[com.twitter.util.Try[Nothing],Boolean]" class="extmbr" name="com.twitter.finagle.service.RetryPolicy#WriteExceptionsOnly">com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly</a></p></span><span class="cmt"><p><a href="service/RetryPolicy$$RetryableWriteException$.html" class="extype" name="com.twitter.finagle.service.RetryPolicy.RetryableWriteException">com.twitter.finagle.service.RetryPolicy.RetryableWriteException</a></p></span></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a>, <a href="HasRemoteInfo.html" class="extype" name="com.twitter.finagle.HasRemoteInfo">HasRemoteInfo</a>, <span class="extype" name="java.lang.Exception">Exception</span>, <span class="extype" name="java.lang.Throwable">Throwable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">

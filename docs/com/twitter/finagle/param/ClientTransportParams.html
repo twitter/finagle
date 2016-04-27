@@ -316,6 +316,27 @@ to spend establishing a TCP connection.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#httpProxyTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A"></a>
+      <a id="httpProxyTo(String,Option[Credentials]):A"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">httpProxyTo</span><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="credentials">credentials: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../client/Transporter$$Credentials.html" class="extype" name="com.twitter.finagle.client.Transporter.Credentials">Credentials</a>]</span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.ClientTransportParams@httpProxyTo(host:String,credentials:Option[com.twitter.finagle.client.Transporter.Credentials]):A" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Enables TCP tunnelling through HTTP proxy [1] on this client (default: disabled).</p><div class="fullcomment"><div class="comment cmt"><p>Enables TCP tunnelling through HTTP proxy [1] on this client (default: disabled).</p><p>TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to
+establish an HTTPS (TLS/SSL over HTTP) connection to a remote HTTP server through a proxy.</p><p>When enabled, a Finagle client treats the server it connects to as a proxy server and asks it
+to proxy the traffic to a given ultimate destination, specified as <code>host</code>.</p><p>[1]: http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt
+</p></div><dl class="paramcmts block"><dt class="param">host</dt><dd class="cmt"><p>the ultimate host a proxy server connects to</p></dd><dt class="param">credentials</dt><dd class="cmt"><p>optional credentials for a proxy server</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This is only enabled for finagle-netty4 right now. Applying this to a Netty 3 based
+      client has no effect.</p></span></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -481,6 +502,26 @@ a system-level value will be used).
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tls(context:javax.net.ssl.SSLContext,hostname:String):A"></a>
+      <a id="tls(SSLContext,String):A"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="context">context: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>, <span name="hostname">hostname: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.ClientTransportParams@tls(context:javax.net.ssl.SSLContext,hostname:String):A" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) with hostname validation
+on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) with hostname validation
+on this client. The TLS/SSL sessions are configured using the given <code>context</code>.
+</p></div></div>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(context:javax.net.ssl.SSLContext):A"></a>
       <a id="tls(SSLContext):A"></a>
       <h4 class="signature">
@@ -499,7 +540,8 @@ a system-level value will be used).
       <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) with no hostname validation
 on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) with no hostname validation
 on this client. The TLS/SSL sessions are configured using the given <code>context</code>.
-</p></div></div>
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>It's recommended to not use <span class="extype" name="SSLContext">SSLContext</span> directly, but rely on Finagle to pick
+      the most efficient TLS/SSL implementation available on your platform.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(hostname:String):A"></a>
       <a id="tls(String):A"></a>
@@ -519,7 +561,26 @@ on this client. The TLS/SSL sessions are configured using the given <code>contex
       <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) on this client.
 Hostname verification will be provided against the given <code>hostname</code>.
 </p></div></div>
-    </li><li name="com.twitter.finagle.param.ClientTransportParams#tlsWithoutValidation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tls:A"></a>
+      <a id="tls:A"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ClientTransportParams.A">A</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.ClientTransportParams@tls:A" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) on this client.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Given that this uses default <span class="extype" name="SSLContext">SSLContext</span>, all configuration params (trust/key stores)
+      should be passed as Java system properties.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.ClientTransportParams#tlsWithoutValidation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tlsWithoutValidation:A"></a>
       <a id="tlsWithoutValidation:A"></a>
       <h4 class="signature">
@@ -535,8 +596,11 @@ Hostname verification will be provided against the given <code>hostname</code>.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) with no hostname validation
-on this client.</p>
+      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) with no certificate validation
+on this client.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) with no certificate validation
+on this client.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>This makes a client trust any certificate sent by a server, which invalidates the entire
+      idea of TLS/SSL. Use this carefully.</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>

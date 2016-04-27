@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.34.0 documentation</title>
+    <title>Clients &mdash; Finagle 6.35.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.34.0',
+        VERSION:     '6.35.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.35.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -557,7 +557,7 @@ success rate <a class="footnote-reference" href="#example" id="id24">[3]</a>.</p
 <span class="k">import</span> <span class="nn">com.twitter.finagle.service.exp.FailureAccrualPolicy</span>
 
 <span class="k">val</span> <span class="n">twitter</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
-  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">FailureAccrual</span><span class="o">.</span><span class="nc">Param</span><span class="o">(()</span> <span class="k">=&gt;</span> <span class="nc">FailureAccrualPolicy</span><span class="o">.</span><span class="n">successRate</span><span class="o">(</span>
+  <span class="o">.</span><span class="n">configured</span><span class="o">(</span><span class="nc">FailureAccrualFactory</span><span class="o">.</span><span class="nc">Param</span><span class="o">(()</span> <span class="k">=&gt;</span> <span class="nc">FailureAccrualPolicy</span><span class="o">.</span><span class="n">successRate</span><span class="o">(</span>
     <span class="n">requiredSuccessRate</span> <span class="k">=</span> <span class="mf">0.95</span><span class="o">,</span>
     <span class="n">window</span> <span class="k">=</span> <span class="mi">100</span><span class="o">,</span>
     <span class="n">markDeadFor</span> <span class="k">=</span> <span class="nc">Backoff</span><span class="o">.</span><span class="n">const</span><span class="o">(</span><span class="mf">10.</span><span class="n">seconds</span><span class="o">)</span>

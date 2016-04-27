@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FAQ &mdash; Finagle 6.34.0 documentation</title>
+    <title>FAQ &mdash; Finagle 6.35.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.34.0',
+        VERSION:     '6.35.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.35.0 documentation" href="index.html" />
     <link rel="next" title="Changelog" href="changelog.html" />
     <link rel="prev" title="Metrics" href="Metrics.html" />
    
@@ -155,63 +155,65 @@ with <tt class="docutils literal"><span class="pre">Codec</span></tt>s, the new 
 <p>Old <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> APIs:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.builder.ClientBuilder</span>
 <span class="k">import</span> <span class="nn">com.twitter.finagle.http.Http</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.stats.StatsReceiver</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Tracer</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Duration</span>
+
+<span class="k">val</span> <span class="n">statsReceiver</span><span class="k">:</span> <span class="kt">StatsReceiver</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">tracer</span><span class="k">:</span> <span class="kt">Tracer</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">requestTimeout</span><span class="k">:</span> <span class="kt">Duration</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">connectTimeout</span><span class="k">:</span> <span class="kt">Duration</span> <span class="o">=</span> <span class="o">???</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">ClientBuilder</span><span class="o">()</span>
   <span class="o">.</span><span class="n">codec</span><span class="o">(</span><span class="nc">Http</span><span class="o">)</span>
-  <span class="o">.</span><span class="n">hosts</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001,localhost:10003&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">name</span><span class="o">(</span><span class="s">&quot;clientname&quot;</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">reportTo</span><span class="o">(</span><span class="n">statsReceiver</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">tracer</span><span class="o">(</span><span class="n">tracer</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">requestTimeout</span><span class="o">(</span><span class="n">requestTimeout</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">connectTimeout</span><span class="o">(</span><span class="n">connectTimeout</span><span class="o">)</span>
   <span class="o">.</span><span class="n">hostConnectionLimit</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">hosts</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001,localhost:10003&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">build</span><span class="o">()</span>
 </pre></div>
 </div>
 <p>New <tt class="docutils literal"><span class="pre">Stack</span></tt> APIs:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.stats.StatsReceiver</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.tracing.Tracer</span>
+<span class="k">import</span> <span class="nn">com.twitter.util.Duration</span>
+
+<span class="k">val</span> <span class="n">statsReceiver</span><span class="k">:</span> <span class="kt">StatsReceiver</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">tracer</span><span class="k">:</span> <span class="kt">Tracer</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">requestTimeout</span><span class="k">:</span> <span class="kt">Duration</span> <span class="o">=</span> <span class="o">???</span>
+<span class="k">val</span> <span class="n">connectTimeout</span><span class="k">:</span> <span class="kt">Duration</span> <span class="o">=</span> <span class="o">???</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
+  <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;clientname&quot;</span><span class="o">)</span>
+  <span class="c1">// if `withStatsReceiver` is not specified, it will use the</span>
+  <span class="c1">// `c.t.f.stats.DefaultStatsReceiver` scoped to the value of `newClient` or</span>
+  <span class="c1">// `newService`&#39;s label. If that is not provided, it will be scoped to the</span>
+  <span class="c1">// value of `withLabel`.</span>
+  <span class="o">.</span><span class="n">withStatsReceiver</span><span class="o">(</span><span class="n">statsReceiver</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withTracer</span><span class="o">(</span><span class="n">tracer</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withRequestTimeout</span><span class="o">(</span><span class="n">requestTimeout</span><span class="o">)</span>
+  <span class="o">.</span><span class="n">withSession</span><span class="o">.</span><span class="n">acquisitionTimeout</span><span class="o">(</span><span class="n">connectTimeout</span><span class="o">)</span>
   <span class="o">.</span><span class="n">withSessionPool</span><span class="o">.</span><span class="n">maxSize</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
   <span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:10000,localhost:10001&quot;</span><span class="o">)</span>
 </pre></div>
 </div>
-<p>The new APIs make timeouts more explicit, but we think we have a pretty good reason
-for changing the API this way.</p>
-<p>Timeouts are typically used in two cases:</p>
-<ol class="upperalpha simple">
-<li>Liveness detection (TCP connect timeout)</li>
-<li>Application requirements (global timeout)</li>
-</ol>
-<p>For liveness detection, it is actually fine for timeouts to be long.  We have a
-default of 1 second.</p>
-<p>For application requirements, you can use a service normally and then use
-<tt class="docutils literal"><span class="pre">Future#raiseWithin</span></tt>.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.conversions.time._</span>
-<span class="k">import</span> <span class="nn">com.twitter.util.Future</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
-<span class="k">import</span> <span class="nn">com.twitter.finagle.http</span>
-
-<span class="k">val</span> <span class="n">get</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">http.Response</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">fetchUrl</span><span class="o">(</span><span class="s">&quot;http://twitter.com/&quot;</span><span class="o">)</span>
-<span class="n">get</span><span class="o">.</span><span class="n">raiseWithin</span><span class="o">(</span><span class="mf">1.</span><span class="n">ms</span><span class="o">)</span>
-</pre></div>
-</div>
-<p>We found that having all of the extremely granular timeouts was making it harder
-for people to use Finagle, since it was hard to reason about what all of the
-timeouts did without knowledge of Finagle internals.  How is <tt class="docutils literal"><span class="pre">tcpConnectTimeout</span></tt>
-different from <tt class="docutils literal"><span class="pre">connectTimeout</span></tt>?  How is a <tt class="docutils literal"><span class="pre">requestTimeout</span></tt> different from a
-<tt class="docutils literal"><span class="pre">timeout</span></tt>?  What is an <tt class="docutils literal"><span class="pre">idleReaderTimeout</span></tt>?  How is it different from
-<tt class="docutils literal"><span class="pre">idleWriterTimeout</span></tt>?  People would often cargo-cult bad configuration settings,
-and it would be difficult to recover from the bad situation.  We also found that
-they were rarely being used correctly, and usually only by very sophisticated
-users.</p>
-<p>Of course, there are some points where there are rough edges, and we haven&#8217;t
-figured out exactly what the right default should be.  We&#8217;re actively looking
-for input, and would love for the greater Finagle community to help us find good
-defaults. We&#8217;ve also been experimenting with some new abstractions that should
-make configuration a lot more flexible. Stay tuned and of course reach out to
-the mailing list with any questions.</p>
+<p>More configuration options and the details about them are available for
+<a class="reference internal" href="Clients.html#finagle-clients"><em>clients</em></a> and <a class="reference internal" href="Servers.html#finagle-servers"><em>servers</em></a>.
+Additionally, the Scaladocs for most methods on <tt class="docutils literal"><span class="pre">ServerBuilder</span></tt> and
+<tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> include the Stack-based API&#8217;s alternative. A few methods do
+not yet have one-to-one equivalents, such as <tt class="docutils literal"><span class="pre">ClientBuilder.retries</span></tt> and
+for these you should continue to use <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt> along with the
+<tt class="docutils literal"><span class="pre">ClientBuilder.stack</span></tt> method.</p>
 <table class="docutils footnote" frame="void" id="id4" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>Protocol implementors are encouraged to provide sensible
 defaults and leave room for application specific behavior
-to be built on top of the base layer via filters or
+to be built on top of the base layer via <tt class="docutils literal"><span class="pre">Filters</span></tt> or
 synchronization mechanisms.</td></tr>
 </tbody>
 </table>

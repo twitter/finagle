@@ -59,8 +59,7 @@ for information on the preferred <code>with</code>-style client-construction API
   .hostConnectionLimit(<span class="num">1</span>)
   .tcpConnectTimeout(<span class="num">1.</span>second)        <span class="cmt">// max time to spend establishing a TCP connection.</span>
   .retries(<span class="num">2</span>)                         <span class="cmt">// (1) per-request retries</span>
-  .reportTo(<span class="kw">new</span> OstrichStatsReceiver) <span class="cmt">// export host-level load data to ostrich</span>
-  .logger(Logger.getLogger(<span class="lit">"http"</span>))
+  .reportTo(DefaultStatsReceiver)     <span class="cmt">// export host-level load data to the loaded-StatsReceiver</span>
   .build()</pre><p>The <code>ClientBuilder</code> requires the definition of <code>cluster</code>, <code>codec</code>,
 and <code>hostConnectionLimit</code>. In Scala, these are statically type
 checked, and in Java the lack of any of the above causes a runtime
@@ -76,8 +75,7 @@ above is</p><pre>Service&lt;HttpRequest, HttpResponse&gt; service =
      .hostConnectionLimit(<span class="num">1</span>)
      .tcpConnectTimeout(<span class="num">1.</span>second)
      .retries(<span class="num">2</span>)
-     .reportTo(<span class="kw">new</span> OstrichStatsReceiver())
-     .logger(Logger.getLogger(<span class="lit">"http"</span>)))</pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ClientBuilder</code>
+     .reportTo(DefaultStatsReceiver)</pre><p>Alternatively, using the <code>unsafeBuild</code> method on <code>ClientBuilder</code>
 verifies the builder dynamically, resulting in a runtime error
 instead of a compiler error.</p><h3>Defaults</h3><p>The following defaults are applied to clients constructed via ClientBuilder,
 unless overridden with the corresponding method. These defaults were chosen
@@ -256,8 +254,13 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
     </span>
       <p class="shortcomment cmt">A convenience method for specifying a client with one or more
 <a href="../Address.html" class="extype" name="com.twitter.finagle.Address">com.twitter.finagle.Address</a>s.</p><div class="fullcomment"><div class="comment cmt"><p>A convenience method for specifying a client with one or more
-<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">com.twitter.finagle.Address</a>s.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+<a href="../Address.html" class="extype" name="com.twitter.finagle.Address">com.twitter.finagle.Address</a>s.</p><p>To migrate to the Stack-based APIs,
+use <code>com.twitter.finagle.Client.newService(Name, String)</code>.
+For the label String, use the scope you want for your <span class="extype" name="StatsReceiver">StatsReceiver</span>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.{Http, Name}
+
+<span class="kw">val</span> name: Name = Name.bound(addrs: _*)
+Http.client.newService(name, <span class="lit">"the_client_name"</span>)</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@varargs</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -297,9 +300,12 @@ users.</i></p><ul><li><code>keepAlive</code>: Unspecified, in which case the
       <p class="shortcomment cmt">The base <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> used to interpret logical
 destinations for this client.</p><div class="fullcomment"><div class="comment cmt"><p>The base <a href="../Dtab.html" class="extype" name="com.twitter.finagle.Dtab">com.twitter.finagle.Dtab</a> used to interpret logical
 destinations for this client. (This is given as a function to
-permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a>.)
-</p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#build" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dtab" class="extmbr" name="com.twitter.finagle.Dtab#base">com.twitter.finagle.Dtab.base</a>.)</p><p>To migrate to the Stack-based APIs, use <code>configured</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+<span class="kw">import</span> com.twitter.finagle.factory.BindingFactory
+
+Http.client.configured(BindingFactory.BaseDtab(baseDtab))</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#build" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="build()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.Service[Req,Rep]"></a>
       <a id="build()(ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):Service[Req,Rep]"></a>
       <h4 class="signature">
@@ -315,7 +321,10 @@ permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dt
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Construct a Service.</p>
+      <p class="shortcomment cmt">Construct a Service.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a Service.</p><p>To migrate to the Stack-based APIs, use <code>Client.newService</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.newService(destination)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#buildFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="buildFactory()(implicitTHE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:com.twitter.finagle.builder.ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
       <a id="buildFactory()(ClientConfigEvidence[HasCluster,HasCodec,HasHostConnectionLimit]):ServiceFactory[Req,Rep]"></a>
@@ -333,8 +342,10 @@ permit late initialization of <a href="../Dtab$.html#base:com.twitter.finagle.Dt
       </a>
     </span>
       <p class="shortcomment cmt">Construct a ServiceFactory.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a ServiceFactory. This is useful for stateful protocols
-(e.g., those that support transactions or authentication).
-</p></div></div>
+(e.g., those that support transactions or authentication).</p><p>To migrate to the Stack-based APIs, use <code>Client.newClient</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.newClient(destination)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#channelFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="channelFactory(cf:org.jboss.netty.channel.ChannelFactory):ClientBuilder.this.This"></a>
       <a id="channelFactory(ChannelFactory):This"></a>
@@ -400,7 +411,7 @@ responsible for calling <code>releaseExternalResources()</code>.
 mechanism for specifying a set of endpoints to which this client
 remains connected.
 </p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#codec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#codec" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="codec[Req1,Rep1](codecFactory:com.twitter.finagle.ClientCodecConfig=&gt;com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,HasHostConnectionLimit]"></a>
       <a id="codec[Req1,Rep1]((ClientCodecConfig)⇒Codec[Req1,Rep1]):ClientBuilder[Req1,Rep1,HasCluster,Yes,HasHostConnectionLimit]"></a>
       <h4 class="signature">
@@ -416,7 +427,10 @@ remains connected.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A variation of codec for codecs that support only client-codecs.</p>
+      <p class="shortcomment cmt">A variation of codec for codecs that support only client-codecs.</p><div class="fullcomment"><div class="comment cmt"><p>A variation of codec for codecs that support only client-codecs.</p><p>To migrate to the Stack-based APIs, use <code>ClientBuilder.stack(Protocol.client)</code>
+instead. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+ClientBuilder().stack(Http.client)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#codec" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="codec[Req1,Rep1](codecFactory:com.twitter.finagle.CodecFactory[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,HasHostConnectionLimit]"></a>
       <a id="codec[Req1,Rep1](CodecFactory[Req1,Rep1]):ClientBuilder[Req1,Rep1,HasCluster,Yes,HasHostConnectionLimit]"></a>
@@ -435,8 +449,10 @@ remains connected.
     </span>
       <p class="shortcomment cmt">A variation of <code>codec</code> that supports codec factories.</p><div class="fullcomment"><div class="comment cmt"><p>A variation of <code>codec</code> that supports codec factories.  This is
 used by codecs that need dynamic construction, but should be
-transparent to the user.
-</p></div></div>
+transparent to the user.</p><p>To migrate to the Stack-based APIs, use <code>ClientBuilder.stack(Protocol.client)</code>
+instead. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+ClientBuilder().stack(Http.client)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#codec" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="codec[Req1,Rep1](codec:com.twitter.finagle.Codec[Req1,Rep1]):com.twitter.finagle.builder.ClientBuilder[Req1,Rep1,HasCluster,com.twitter.finagle.builder.ClientConfig.Yes,HasHostConnectionLimit]"></a>
       <a id="codec[Req1,Rep1](Codec[Req1,Rep1]):ClientBuilder[Req1,Rep1,HasCluster,Yes,HasHostConnectionLimit]"></a>
@@ -455,8 +471,10 @@ transparent to the user.
     </span>
       <p class="shortcomment cmt">Specify the codec.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the codec. The codec implements the network protocol
 used by the client, and consequently determines the <code>Req</code> and <code>Rep</code>
-type variables. One of the codec variations is required.
-</p></div></div>
+type variables. One of the codec variations is required.</p><p>To migrate to the Stack-based APIs, use <code>ClientBuilder.stack(Protocol.client)</code>
+instead. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+ClientBuilder().stack(Http.client)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#connectTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="connectTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="connectTimeout(Duration):This"></a>
@@ -482,8 +500,10 @@ as well as physical connection time.  Futures returned from
 <code>factory()</code> will always be satisfied within this timeout.</p><p>This timeout is also used for name resolution, separately from
 queueing and physical connection time, so in the worst case the
 time to acquire a service may be double the given duration before
-timing out.
-</p></div></div>
+timing out.</p><p>To migrate to the Stack-based APIs, use <code>SessionParams.acquisitionTimeout</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSession.acquisitionTimeout(duration)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#daemon" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="daemon(daemonize:Boolean):ClientBuilder.this.This"></a>
       <a id="daemon(Boolean):This"></a>
@@ -502,9 +522,10 @@ timing out.
     </span>
       <p class="shortcomment cmt">When true, the client is daemonized.</p><div class="fullcomment"><div class="comment cmt"><p>When true, the client is daemonized. As with java threads, a
 process can exit only when all remaining clients are daemonized.
-False by default.
+False by default.</p><p>The default for the Stack-based APIs is for the client to
+be daemonized.
 </p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#dest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#dest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dest(name:com.twitter.finagle.Name):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
       <a id="dest(Name):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
       <h4 class="signature">
@@ -521,7 +542,11 @@ False by default.
       </a>
     </span>
       <p class="shortcomment cmt">The logical destination of requests dispatched through this
-client.</p>
+client.</p><div class="fullcomment"><div class="comment cmt"><p>The logical destination of requests dispatched through this
+client.</p><p>To migrate to the Stack-based APIs, use this in the call to <code>newClient</code>
+or <code>newService</code>. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.newService(name)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#dest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dest(addr:String):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
       <a id="dest(String):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
@@ -541,8 +566,13 @@ client.</p>
       <p class="shortcomment cmt">The logical destination of requests dispatched through this
 client, as evaluated by a resolver.</p><div class="fullcomment"><div class="comment cmt"><p>The logical destination of requests dispatched through this
 client, as evaluated by a resolver. If the name evaluates a
-label, this replaces the builder's current name.
-</p></div></div>
+label, this replaces the builder's current name.</p><p>To migrating to the Stack-based APIs, you pass the destination
+to <code>newClient</code> or <code>newService</code>. If the <code>addr</code> is labeled,
+additionally, use <code>CommonParams.withLabel</code></p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client
+  .withLabel(<span class="lit">"client_name"</span>)
+  .newService(name)</pre></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -597,8 +627,10 @@ label, this replaces the builder's current name.
 a &quot;failures&quot; stat.</p><div class="fullcomment"><div class="comment cmt"><p>Provide an alternative to putting all request exceptions under
 a &quot;failures&quot; stat.  Typical implementations may report any
 cancellations or validation errors separately so success rate
-considers only valid non cancelled requests.
-</p></div><dl class="paramcmts block"><dt class="param">exceptionStatsHandler</dt><dd class="cmt"><p>function to record failure details.</p></dd></dl></div>
+considers only valid non cancelled requests.</p><p>To migrate to the Stack-based APIs, use <code>CommonParams.withExceptionStatsHandler</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withExceptionStatsHandler(exceptionStatsHandler)</pre></div><dl class="paramcmts block"><dt class="param">exceptionStatsHandler</dt><dd class="cmt"><p>function to record failure details.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#expHostConnectionBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="expHostConnectionBufferSize(size:Int):ClientBuilder.this.This"></a>
       <a id="expHostConnectionBufferSize(Int):This"></a>
@@ -684,8 +716,10 @@ If this is defined concurrently with httpProxy, the order in which they are appl
       <p class="shortcomment cmt">Marks a host dead on connection failure.</p><div class="fullcomment"><div class="comment cmt"><p>Marks a host dead on connection failure. The host remains dead
 until we successfully connect. Intermediate connection attempts
 *are* respected, but host availability is turned off during the
-reconnection period.
-</p></div></div>
+reconnection period.</p><p>To migrate to the Stack-based APIs, use <code>SessionQualificationParams.noFailFast</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSessionQualifier.noFailFast</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#failureAccrualFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="failureAccrualFactory(factory:com.twitter.util.Timer=&gt;com.twitter.finagle.ServiceFactoryWrapper):ClientBuilder.this.This"></a>
       <a id="failureAccrualFactory((Timer)⇒ServiceFactoryWrapper):This"></a>
@@ -801,7 +835,7 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionCoresize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionCoresize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hostConnectionCoresize(value:Int):ClientBuilder.this.This"></a>
       <a id="hostConnectionCoresize(Int):This"></a>
       <h4 class="signature">
@@ -817,7 +851,10 @@ is dead for, once marked.</p><p>To completely disable <span class="extype" name=
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The core size of the connection pool: the pool is not shrinked below this limit.</p>
+      <p class="shortcomment cmt">The core size of the connection pool: the pool is not shrinked below this limit.</p><div class="fullcomment"><div class="comment cmt"><p>The core size of the connection pool: the pool is not shrinked below this limit.</p><p>To migrate to the Stack-based APIs, use <code>SessionPoolingParams.minSize</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSessionPool.minSize(value)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionIdleTime" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="hostConnectionIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="hostConnectionIdleTime(Duration):This"></a>
@@ -855,9 +892,11 @@ closed.</p>
     </span>
       <p class="shortcomment cmt">The maximum number of connections that are allowed per host.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum number of connections that are allowed per host.
 Required.  Finagle guarantees to never have more active
-connections than this limit.
-</p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxIdleTime" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+connections than this limit.</p><p>To migrate to the Stack-based APIs, use <code>SessionPoolingParams.maxSize</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSessionPool.maxSize(value)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxIdleTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hostConnectionMaxIdleTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="hostConnectionMaxIdleTime(Duration):This"></a>
       <h4 class="signature">
@@ -873,8 +912,11 @@ connections than this limit.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The maximum time a connection is allowed to linger unused.</p>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxLifeTime" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">The maximum time a connection is allowed to linger unused.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to linger unused.</p><p>To migrate to the Stack-based APIs, use <code>SessionParams.maxIdleTime</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSession.maxIdleTime(timeout)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxLifeTime" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hostConnectionMaxLifeTime(timeout:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="hostConnectionMaxLifeTime(Duration):This"></a>
       <h4 class="signature">
@@ -890,8 +932,11 @@ connections than this limit.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The maximum time a connection is allowed to exist, regardless of occupancy.</p>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxWaiters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">The maximum time a connection is allowed to exist, regardless of occupancy.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection is allowed to exist, regardless of occupancy.</p><p>To migrate to the Stack-based APIs, use <code>SessionParams.maxLifeTime</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSession.maxLifeTime(timeout)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hostConnectionMaxWaiters" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hostConnectionMaxWaiters(nWaiters:Int):ClientBuilder.this.This"></a>
       <a id="hostConnectionMaxWaiters(Int):This"></a>
       <h4 class="signature">
@@ -907,8 +952,11 @@ connections than this limit.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The maximum queue size for the connection pool.</p>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">The maximum queue size for the connection pool.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum queue size for the connection pool.</p><p>To migrate to the Stack-based APIs, use <code>SessionPoolingParams.maxWaiters</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSessionPool.maxWaiters(nWaiters)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hosts(address:java.net.InetSocketAddress):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
       <a id="hosts(InetSocketAddress):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
       <h4 class="signature">
@@ -925,8 +973,15 @@ connections than this limit.
       </a>
     </span>
       <p class="shortcomment cmt">A convenience method for specifying a one-host
-<span class="extype" name="java.net.SocketAddress">java.net.SocketAddress</span> client.</p>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+<span class="extype" name="java.net.SocketAddress">java.net.SocketAddress</span> client.</p><div class="fullcomment"><div class="comment cmt"><p>A convenience method for specifying a one-host
+<span class="extype" name="java.net.SocketAddress">java.net.SocketAddress</span> client.</p><p>To migrate to the Stack-based APIs,
+use <code>com.twitter.finagle.Client.newService(Name, String)</code>.
+For the label String, use the scope you want for your <span class="extype" name="StatsReceiver">StatsReceiver</span>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.{Address, Http, Name}
+
+<span class="kw">val</span> name: Name = Name.bound(Address(address))
+Http.client.newService(name, <span class="lit">"the_client_name"</span>)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hosts(sockaddrs:Seq[java.net.InetSocketAddress]):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
       <a id="hosts(Seq[InetSocketAddress]):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
       <h4 class="signature">
@@ -943,7 +998,15 @@ connections than this limit.
       </a>
     </span>
       <p class="shortcomment cmt">A variant of <code>hosts</code> that takes a sequence of
-<span class="extype" name="java.net.InetSocketAddress">java.net.InetSocketAddress</span> instead.</p>
+<span class="extype" name="java.net.InetSocketAddress">java.net.InetSocketAddress</span> instead.</p><div class="fullcomment"><div class="comment cmt"><p>A variant of <code>hosts</code> that takes a sequence of
+<span class="extype" name="java.net.InetSocketAddress">java.net.InetSocketAddress</span> instead.</p><p>To migrate to the Stack-based APIs,
+use <code>com.twitter.finagle.Client.newService(Name, String)</code>.
+For the label String, use the scope you want for your <span class="extype" name="StatsReceiver">StatsReceiver</span>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.{Address, Http, Name}
+
+<span class="kw">val</span> addresses: <span class="std">Seq</span>[Address] = sockaddrs.map(Address(_))
+<span class="kw">val</span> name: Name = Name.bound(addresses: _*)
+Http.client.newService(name, <span class="lit">"the_client_name"</span>)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#hosts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hosts(hostnamePortCombinations:String):com.twitter.finagle.builder.ClientBuilder[Req,Rep,com.twitter.finagle.builder.ClientConfig.Yes,HasCodec,HasHostConnectionLimit]"></a>
       <a id="hosts(String):ClientBuilder[Req,Rep,Yes,HasCodec,HasHostConnectionLimit]"></a>
@@ -963,8 +1026,10 @@ connections than this limit.
       <p class="shortcomment cmt">Specify the set of hosts to connect this client to.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the set of hosts to connect this client to.  Requests
 will be load balanced across these.  This is a shorthand form for
 specifying a cluster.</p><p>One of the <code>hosts</code> variations or direct specification of the
-cluster (via <code>cluster</code>) is required.
-</p></div><dl class="paramcmts block"><dt class="param">hostnamePortCombinations</dt><dd class="cmt"><p>comma-separated &quot;host:port&quot;
+cluster (via <code>cluster</code>) is required.</p><p>To migrate to the Stack-based APIs, pass the hostname and port
+pairs into <code>com.twitter.finagle.Client.newService(String)</code>. For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.newService(<span class="lit">"hostnameA:portA,hostnameB:portB"</span>)</pre></div><dl class="paramcmts block"><dt class="param">hostnamePortCombinations</dt><dd class="cmt"><p>comma-separated &quot;host:port&quot;
 string.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#httpProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="httpProxy(httpProxy:java.net.SocketAddress):ClientBuilder.this.This"></a>
@@ -1053,9 +1118,11 @@ If this is defined concurrently with socksProxy, the order in which they are app
       </a>
     </span>
       <p class="shortcomment cmt">Specify a load balancer.</p><div class="fullcomment"><div class="comment cmt"><p>Specify a load balancer.  The load balancer implements
-a strategy for choosing one from a set of hosts to service a request
-</p></div></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#logger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+a strategy for choosing one host from a set to service a request.</p><p>To migrate to the Stack-based APIs, use <code>withLoadBalancer(LoadBalancerFactory)</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withLoadBalancer(loadBalancer)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#logger" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logger(logger:java.util.logging.Logger):ClientBuilder.this.This"></a>
       <a id="logger(Logger):This"></a>
       <h4 class="signature">
@@ -1071,8 +1138,12 @@ a strategy for choosing one from a set of hosts to service a request
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Log very detailed debug information to the given logger.</p>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#monitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Log very detailed debug information to the given logger.</p><div class="fullcomment"><div class="comment cmt"><p>Log very detailed debug information to the given logger.</p><p>To migrate to the Stack-based APIs, use <code>configured</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+<span class="kw">import</span> com.twitter.finagle.param.Logger
+
+Http.client.configured(Logger(logger))</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#monitor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="monitor(mFactory:String=&gt;com.twitter.util.Monitor):ClientBuilder.this.This"></a>
       <a id="monitor((String)⇒Monitor):This"></a>
       <h4 class="signature">
@@ -1088,7 +1159,12 @@ a strategy for choosing one from a set of hosts to service a request
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withMonitor</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withMonitor</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+<span class="kw">import</span> com.twitter.util.Monitor
+
+<span class="kw">val</span> monitor: Monitor = ???
+Http.client.withMonitor(monitor)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#name" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="name(value:String):ClientBuilder.this.This"></a>
       <a id="name(String):This"></a>
@@ -1105,8 +1181,10 @@ a strategy for choosing one from a set of hosts to service a request
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Give a meaningful name to the client.</p><div class="fullcomment"><div class="comment cmt"><p>Give a meaningful name to the client. Required.
-</p></div></div>
+      <p class="shortcomment cmt">Give a meaningful name to the client.</p><div class="fullcomment"><div class="comment cmt"><p>Give a meaningful name to the client. Required.</p><p>To migrate to the Stack-based APIs, use <code>CommonParams.withLabel</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withLabel(<span class="lit">"my_cool_client"</span>)</pre></div></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -1140,8 +1218,10 @@ a strategy for choosing one from a set of hosts to service a request
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><p>To replace the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> use <code>failureAccrualFactory</code>.
-</p></div></div>
+      <p class="shortcomment cmt">Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Disables <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span>.</p><p>To replace the <span class="extype" name="FailureAccrualFactory">FailureAccrualFactory</span> use <code>failureAccrualFactory</code>.</p><p>To migrate to the Stack-based APIs, use <code>SessionQualificationParams.noFailureAccrual</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withSessionQualifier.noFailureAccrual</pre></div></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -1193,7 +1273,7 @@ a strategy for choosing one from a set of hosts to service a request
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#readerIdleTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="readerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="readerIdleTimeout(Duration):This"></a>
       <h4 class="signature">
@@ -1209,8 +1289,11 @@ a strategy for choosing one from a set of hosts to service a request
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The maximum time a connection may have received no data.</p>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#recvBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">The maximum time a connection may have received no data.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may have received no data.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.readTimeout</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.readTimeout(duration)</pre></div></div>
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#recvBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="recvBufferSize(value:Int):ClientBuilder.this.This"></a>
       <a id="recvBufferSize(Int):This"></a>
       <h4 class="signature">
@@ -1226,7 +1309,10 @@ a strategy for choosing one from a set of hosts to service a request
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Sets the TCP recv buffer size.</p>
+      <p class="shortcomment cmt">Sets the TCP recv buffer size.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the TCP recv buffer size.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.receiveBufferSize</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.receiveBufferSize(value)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#reportHostStats" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This"></a>
       <a id="reportHostStats(StatsReceiver):This"></a>
@@ -1245,8 +1331,11 @@ a strategy for choosing one from a set of hosts to service a request
     </span>
       <p class="shortcomment cmt">Report per host stats to the given <code>StatsReceiver</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Report per host stats to the given <code>StatsReceiver</code>.
 The statsReceiver will be scoped per client, like this:
-client/connect_latency_ms_max/0.0.0.0:64754
-</p></div></div>
+client/connect_latency_ms_max/0.0.0.0:64754</p><p>To migrate to the Stack-based APIs, use <code>configured</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+<span class="kw">import</span> com.twitter.finagle.loadbalancer.LoadBalancerFactory
+
+Http.client.configured(LoadBalancerFactory.HostStats(receiver))</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#reportTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="reportTo(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This"></a>
       <a id="reportTo(StatsReceiver):This"></a>
@@ -1265,8 +1354,10 @@ client/connect_latency_ms_max/0.0.0.0:64754
     </span>
       <p class="shortcomment cmt">Report stats to the given <code>StatsReceiver</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Report stats to the given <code>StatsReceiver</code>.  This will report
 verbose global statistics and counters, that in turn may be
-exported to monitoring applications.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Per hosts statistics will <b>NOT</b> be exported to this receiver</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#reportHostStats">ClientBuilder.reportHostStats</a></p></span></dd></dl></div>
+exported to monitoring applications.</p><p>To migrate to the Stack-based APIs, use <code>CommonParams.withStatsReceiver</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withStatsReceiver(receiver)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>Per hosts statistics will <b>NOT</b> be exported to this receiver</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#reportHostStats(receiver:com.twitter.finagle.stats.StatsReceiver):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#reportHostStats">ClientBuilder.reportHostStats</a></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#requestTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="requestTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="requestTimeout(Duration):This"></a>
@@ -1288,8 +1379,10 @@ there are retries, they each get a fresh request timeout).</p><div class="fullco
 there are retries, they each get a fresh request timeout).  The
 timeout is applied only after a connection has been acquired.
 That is: it is applied to the interval between the dispatch of
-the request and the receipt of the response.
-</p></div></div>
+the request and the receipt of the response.</p><p>To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withRequestTimeout(duration)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#responseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="responseClassifier:com.twitter.finagle.service.ResponseClassifier"></a>
       <a id="responseClassifier:ResponseClassifier"></a>
@@ -1338,8 +1431,10 @@ treat all 500 status codes as failures and can do so via a
 <a href="../service/package.html#ResponseClassifier=PartialFunction[com.twitter.finagle.service.ReqRep,com.twitter.finagle.service.ResponseClass]" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier">com.twitter.finagle.service.ResponseClassifier</a>.</p><p>It is a <span class="extype" name="PartialFunction">PartialFunction</span> and as such multiple classifiers can be composed
 together via <span class="extype" name="PartialFunction.orElse">PartialFunction.orElse</span>.</p><p>Response classification is independently configured on the client and server.
 For server-side response classification using <a href="ServerBuilder.html" class="extype" name="com.twitter.finagle.builder.ServerBuilder">com.twitter.finagle.builder.ServerBuilder</a>,
-see <a href="ServerBuilder.html#responseClassifier:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder#responseClassifier">com.twitter.finagle.builder.ServerBuilder.responseClassifier</a>
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
+see <a href="ServerBuilder.html#responseClassifier:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder#responseClassifier">com.twitter.finagle.builder.ServerBuilder.responseClassifier</a></p><p>To migrate to the Stack-based APIs, use <code>CommonParams.withResponseClassifier</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withResponseClassifier(classifier)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
 <a href="../service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
 which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some
 HTTP classification tools.</p></span></dd></dl></div>
@@ -1361,8 +1456,13 @@ HTTP classification tools.</p></span></dd></dl></div>
     </span>
       <p class="shortcomment cmt">Retry (some) failed requests up to <code>value - 1</code> times.</p><div class="fullcomment"><div class="comment cmt"><p>Retry (some) failed requests up to <code>value - 1</code> times.</p><p>Retries are only done if the request failed with something
 known to be safe to retry. This includes <a href="../WriteException.html" class="extype" name="com.twitter.finagle.WriteException">WriteExceptions</a>
-and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>s that are marked <a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">restartable</a>.</p><p>The configured policy has jittered backoffs between retries.
-</p></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>the maximum number of attempts (including retries) that
+and <a href="../Failure.html" class="extype" name="com.twitter.finagle.Failure">Failure</a>s that are marked <a href="../Failure$.html#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">restartable</a>.</p><p>The configured policy has jittered backoffs between retries.</p><p>To migrate to the Stack-based APIs, use this method in conjunction with
+<code>ClientBuilder.stack</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+ClientBuilder()
+  .stack(Http.client)
+  .retries(value)</pre></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>the maximum number of attempts (including retries) that
              can be made.</p><ul><li>A value of <code>1</code> means one attempt and no retries
              on failure.</li><li>A value of <code>2</code> means one attempt and then a
              single retry if the failure is known to be safe to retry.</li></ul></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
@@ -1389,8 +1489,13 @@ eligible for retries.</p></span><span class="cmt"><p><a href="../service/RetryPo
       <p class="shortcomment cmt">The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
 the number of retries that can be made.</p><div class="fullcomment"><div class="comment cmt"><p>The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
 the number of retries that can be made. When used for requeues,
-includes a stream of delays used to delay each retry.</p><p>Helps prevent clients from overwhelming the downstream service.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryPolicy">retryPolicy</a> for per-request rules on which failures are
+includes a stream of delays used to delay each retry.</p><p>Helps prevent clients from overwhelming the downstream service.</p><p>To migrate to the Stack-based APIs, use <code>ClientParams.withRetryBudget</code>
+and <code>ClientParams.withRetryBackoff</code>
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client
+  .withRetryBudget(budget)
+  .withRetryBackoff(backoffSchedule)</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryPolicy">retryPolicy</a> for per-request rules on which failures are
 eligible for retries.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#retryBudget" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="retryBudget(budget:com.twitter.finagle.service.RetryBudget):ClientBuilder.this.This"></a>
@@ -1410,8 +1515,10 @@ eligible for retries.</p></span></dd></dl></div>
     </span>
       <p class="shortcomment cmt">The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
 the number of retries that can be made.</p><div class="fullcomment"><div class="comment cmt"><p>The <span class="extype" name="RetryBudget">budget</span> is shared across requests and governs
-the number of retries that can be made.</p><p>Helps prevent clients from overwhelming the downstream service.
-</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryPolicy">retryPolicy</a> for per-request rules on which failures are
+the number of retries that can be made.</p><p>Helps prevent clients from overwhelming the downstream service.</p><p>To migrate to the Stack-based APIs, use <code>ClientParams.withRetryBudget</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withRetryBudget(budget)</pre></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryPolicy">retryPolicy</a> for per-request rules on which failures are
 eligible for retries.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#retryPolicy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="retryPolicy(value:com.twitter.finagle.service.RetryPolicy[com.twitter.util.Try[Nothing]]):ClientBuilder.this.This"></a>
@@ -1429,13 +1536,18 @@ eligible for retries.</p></span></dd></dl></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.
-</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
+      <p class="shortcomment cmt">Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Retry failed requests according to the given <span class="extype" name="RetryPolicy">RetryPolicy</span>.</p><p>To migrate to the Stack-based APIs, use this method in conjunction with
+<code>ClientBuilder.stack</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+ClientBuilder()
+  .stack(Http.client)
+  .retryPolicy(value)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>The failures seen in the client will <b>not include</b>
       application level failures. This is particularly important for
       codecs that include exceptions, such as <code>Thrift</code>.
       This is only applicable to service-builds (<code>build()</code>).</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="#retryBudget(budget:com.twitter.finagle.service.RetryBudget,backoffSchedule:Stream[com.twitter.util.Duration]):ClientBuilder.this.This" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder#retryBudget">retryBudget</a> for governing how many failed requests are
 eligible for retries.</p></span></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#sendBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sendBufferSize(value:Int):ClientBuilder.this.This"></a>
       <a id="sendBufferSize(Int):This"></a>
       <h4 class="signature">
@@ -1451,7 +1563,10 @@ eligible for retries.</p></span></dd></dl></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Sets the TCP send buffer size.</p>
+      <p class="shortcomment cmt">Sets the TCP send buffer size.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the TCP send buffer size.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.sendBufferSize</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.sendBufferSize(value)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#socksProxy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socksProxy(socksProxy:Option[java.net.SocketAddress]):ClientBuilder.this.This"></a>
       <a id="socksProxy(Option[SocketAddress]):This"></a>
@@ -1469,8 +1584,10 @@ eligible for retries.</p></span></dd></dl></div>
       </a>
     </span>
       <p class="shortcomment cmt">Make connections via the given SOCKS proxy.</p><div class="fullcomment"><div class="comment cmt"><p>Make connections via the given SOCKS proxy.
-If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
-</p></div></div>
+If this is defined concurrently with httpProxy, the order in which they are applied is undefined.</p><p>To migrate to the Stack-based APIs, use <code>ClientTransportParams.socksProxy</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.socksProxy(socketAddress, socksProxy)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#socksUsernameAndPassword" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="socksUsernameAndPassword(credentials:(String,String)):ClientBuilder.this.This"></a>
       <a id="socksUsernameAndPassword((String,String)):This"></a>
@@ -1535,7 +1652,7 @@ such connection pool parameters will not be applied.</p></dd></dl></div>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#tcpConnectTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#tcpConnectTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tcpConnectTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="tcpConnectTimeout(Duration):This"></a>
       <h4 class="signature">
@@ -1551,7 +1668,10 @@ such connection pool parameters will not be applied.</p></dd></dl></div>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Specify the TCP connection timeout.</p>
+      <p class="shortcomment cmt">Specify the TCP connection timeout.</p><div class="fullcomment"><div class="comment cmt"><p>Specify the TCP connection timeout.</p><p>To migrate to the Stack-based APIs, use <code>ClientTransportParams.connectTimeout</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.connectTimeout(duration)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#timeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="timeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="timeout(Duration):This"></a>
@@ -1571,8 +1691,13 @@ such connection pool parameters will not be applied.</p></dd></dl></div>
       <p class="shortcomment cmt">Total request timeout.</p><div class="fullcomment"><div class="comment cmt"><p>Total request timeout.  This timeout is applied from the issuance
 of a request (through <code>service(request)</code>) until the
 satisfaction of that reply future.  No request will take longer
-than this.</p><p>Applicable only to service-builds (<code>build()</code>)
-</p></div></div>
+than this.</p><p>Applicable only to service-builds (<code>build()</code>)</p><p>To migrate to the Stack-based APIs, use this method in conjunction with
+<code>ClientBuilder.stack</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+ClientBuilder()
+  .stack(Http.client)
+  .timeout(duration)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(sslContext:javax.net.ssl.SSLContext,hostname:Option[String]):ClientBuilder.this.This"></a>
       <a id="tls(SSLContext,Option[String]):This"></a>
@@ -1611,8 +1736,10 @@ SSL Hostname Validation is performed, on the passed in hostname
     </span>
       <p class="shortcomment cmt">Encrypt the connection with SSL.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  The Engine to use can be passed into the client.
 This allows the user to use client certificates
-No SSL Hostname Validation is performed
-</p></div></div>
+No SSL Hostname Validation is performed</p><p>To migrate to the Stack-based APIs, use <code>ClientTransportParams.tls</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.tls(sslContext)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(hostname:String):ClientBuilder.this.This"></a>
       <a id="tls(String):This"></a>
@@ -1630,8 +1757,10 @@ No SSL Hostname Validation is performed
       </a>
     </span>
       <p class="shortcomment cmt">Encrypt the connection with SSL.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypt the connection with SSL.  Hostname verification will be
-provided against the given hostname.
-</p></div></div>
+provided against the given hostname.</p><p>To migrate to the Stack-based APIs, use <code>ClientTransportParams.tls</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.tls(hostname)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tlsWithoutValidation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tlsWithoutValidation():ClientBuilder.this.This"></a>
       <a id="tlsWithoutValidation():This"></a>
@@ -1648,8 +1777,10 @@ provided against the given hostname.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Do not perform TLS validation.</p><div class="fullcomment"><div class="comment cmt"><p>Do not perform TLS validation. Probably dangerous.
-</p></div></div>
+      <p class="shortcomment cmt">Do not perform TLS validation.</p><div class="fullcomment"><div class="comment cmt"><p>Do not perform TLS validation. Probably dangerous.</p><p>To migrate to the Stack-based APIs, use <code>ClientTransportParams.tlsWithoutValidation</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.tlsWithoutValidation</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -1684,8 +1815,10 @@ provided against the given hostname.
       </a>
     </span>
       <p class="shortcomment cmt">Specifies a tracer that receives trace events.</p><div class="fullcomment"><div class="comment cmt"><p>Specifies a tracer that receives trace events.
-See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.tracing">com.twitter.finagle.tracing</a> for details.
-</p></div></div>
+See <a href="../tracing/package.html" class="extype" name="com.twitter.finagle.tracing">com.twitter.finagle.tracing</a> for details.</p><p>To migrate to the Stack-based APIs, use <code>CommonParams.withTracer</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTracer(t)</pre></div></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#trafficClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="trafficClass(value:Option[Int]):ClientBuilder.this.This"></a>
       <a id="trafficClass(Option[Int]):This"></a>
@@ -1809,7 +1942,7 @@ completeness.</p>
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#writerIdleTimeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.builder.ClientBuilder#writerIdleTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="writerIdleTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
       <a id="writerIdleTimeout(Duration):This"></a>
       <h4 class="signature">
@@ -1825,7 +1958,10 @@ completeness.</p>
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The maximum time a connection may not have sent any data.</p>
+      <p class="shortcomment cmt">The maximum time a connection may not have sent any data.</p><div class="fullcomment"><div class="comment cmt"><p>The maximum time a connection may not have sent any data.</p><p>To migrate to the Stack-based APIs, use <code>TransportParams.writeTimeout</code>.
+For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
+
+Http.client.withTransport.writeTimeout(duration)</pre></div></div>
     </li></ol>
             </div>
 

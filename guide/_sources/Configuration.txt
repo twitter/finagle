@@ -23,6 +23,8 @@ verbosity.
 .. note:: All the examples in this user guide use the Finagle 6 API as a main configuration
           method and we encourage all the Finagle users to follow this pattern given that
           the ``ClientBuilder``/``ServerBuilder`` API will eventually be deprecated.
+          For help migrating, see :ref:`the FAQ <configuring_finagle6>` as well as
+          :ref:`client <finagle_clients>` and :ref:`server <finagle_servers>` configuration.
 
 In addition to ``with``-prefixed methods that provide easy-to-use and safe-to-configure
 parameters of Finagle clients and servers, there is an expert-level `Stack API`.

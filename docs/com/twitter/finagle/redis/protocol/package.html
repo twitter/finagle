@@ -92,7 +92,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Append.html"><span class="name">Append</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Append.html"><span class="name">Append</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@AppendextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -109,7 +109,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Auth.html"><span class="name">Auth</span></a><span class="params">(<span name="code">code: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Auth.html"><span class="name">Auth</span></a><span class="params">(<span name="code">code: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@AuthextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -126,7 +126,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BitCount.html"><span class="name">BitCount</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="BitCount.html"><span class="name">BitCount</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@BitCountextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -143,7 +143,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BitOp.html"><span class="name">BitOp</span></a><span class="params">(<span name="op">op: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="dstKey">dstKey: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="srcKeys">srcKeys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="BitOp.html"><span class="name">BitOp</span></a><span class="params">(<span name="op">op: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="dstKey">dstKey: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="srcKeys">srcKeys: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@BitOpextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -160,7 +160,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="BulkReply.html"><span class="name">BulkReply</span></a><span class="params">(<span name="message">message: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="MultiLineReply.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiLineReply">MultiLineReply</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="BulkReply.html"><span class="name">BulkReply</span></a><span class="params">(<span name="message">message: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="MultiLineReply.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiLineReply">MultiLineReply</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@BulkReplyextendsMultiLineReplywithProductwithSerializable" title="Permalink" target="_top">
@@ -313,7 +313,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Decr.html"><span class="name">Decr</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="DecrBy.html" class="extype" name="com.twitter.finagle.redis.protocol.DecrBy">DecrBy</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Decr.html"><span class="name">Decr</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="DecrBy.html" class="extype" name="com.twitter.finagle.redis.protocol.DecrBy">DecrBy</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@DecrextendsDecrBywithProductwithSerializable" title="Permalink" target="_top">
@@ -347,7 +347,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Del.html"><span class="name">Del</span></a><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeysCommand">StrictKeysCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Del.html"><span class="name">Del</span></a><span class="params">(<span name="bufs">bufs: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeysCommand">StrictKeysCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@DelextendsCommandwithStrictKeysCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -364,7 +364,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Dump.html"><span class="name">Dump</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Dump.html"><span class="name">Dump</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@DumpextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -432,7 +432,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Exists.html"><span class="name">Exists</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Exists.html"><span class="name">Exists</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@ExistsextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -449,7 +449,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Expire.html"><span class="name">Expire</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Expire.html"><span class="name">Expire</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@ExpireextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -466,7 +466,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ExpireAt.html"><span class="name">ExpireAt</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="ExpireAt.html"><span class="name">ExpireAt</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@ExpireAtextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -483,7 +483,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Get.html"><span class="name">Get</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@GetextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -500,7 +500,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetBit.html"><span class="name">GetBit</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetBit.html"><span class="name">GetBit</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@GetBitextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -517,7 +517,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetRange.html"><span class="name">GetRange</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetRange.html"><span class="name">GetRange</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="start">start: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="end">end: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@GetRangeextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -534,7 +534,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetSet.html"><span class="name">GetSet</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetSet.html"><span class="name">GetSet</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@GetSetextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -789,7 +789,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Incr.html"><span class="name">Incr</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="IncrBy.html" class="extype" name="com.twitter.finagle.redis.protocol.IncrBy">IncrBy</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Incr.html"><span class="name">Incr</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="IncrBy.html" class="extype" name="com.twitter.finagle.redis.protocol.IncrBy">IncrBy</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@IncrextendsIncrBywithProductwithSerializable" title="Permalink" target="_top">
@@ -823,7 +823,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Info.html"><span class="name">Info</span></a><span class="params">(<span name="section">section: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Info.html"><span class="name">Info</span></a><span class="params">(<span name="section">section: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@InfoextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -874,7 +874,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Keys.html"><span class="name">Keys</span></a><span class="params">(<span name="pattern">pattern: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Keys.html"><span class="name">Keys</span></a><span class="params">(<span name="pattern">pattern: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@KeysextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1112,7 +1112,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MGet.html"><span class="name">MGet</span></a><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeysCommand">StrictKeysCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="MGet.html"><span class="name">MGet</span></a><span class="params">(<span name="keysBuf">keysBuf: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeysCommand">StrictKeysCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@MGetextendsCommandwithStrictKeysCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1129,7 +1129,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MSet.html"><span class="name">MSet</span></a><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="MultiSet.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiSet">MultiSet</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="MSet.html"><span class="name">MSet</span></a><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="MultiSet.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiSet">MultiSet</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@MSetextendsCommandwithMultiSetwithProductwithSerializable" title="Permalink" target="_top">
@@ -1146,7 +1146,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="MSetNx.html"><span class="name">MSetNx</span></a><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>, <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="MultiSet.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiSet">MultiSet</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="MSetNx.html"><span class="name">MSetNx</span></a><span class="params">(<span name="kv">kv: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="MultiSet.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiSet">MultiSet</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@MSetNxextendsCommandwithMultiSetwithProductwithSerializable" title="Permalink" target="_top">
@@ -1180,7 +1180,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Move.html"><span class="name">Move</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="db">db: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Move.html"><span class="name">Move</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="db">db: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@MoveextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1265,7 +1265,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PExpire.html"><span class="name">PExpire</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="milliseconds">milliseconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PExpire.html"><span class="name">PExpire</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="milliseconds">milliseconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PExpireextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1282,7 +1282,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PExpireAt.html"><span class="name">PExpireAt</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PExpireAt.html"><span class="name">PExpireAt</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PExpireAtextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1350,10 +1350,27 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PSetEx.html"><span class="name">PSetEx</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PSetEx.html"><span class="name">PSetEx</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="millis">millis: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PSetExextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PSubscribe" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PSubscribeextendsSubscribeCommandwithProductwithSerializable"></a>
+      <a id="PSubscribe:PSubscribe"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PSubscribe.html"><span class="name">PSubscribe</span></a><span class="params">(<span name="patterns">patterns: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="handler">handler: <a href="../exp/SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result"> extends <a href="SubscribeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.SubscribeCommand">SubscribeCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PSubscribeextendsSubscribeCommandwithProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1367,10 +1384,27 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PTtl.html"><span class="name">PTtl</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PTtl.html"><span class="name">PTtl</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PTtlextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PUnsubscribe" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PUnsubscribeextendsSubscribeCommandwithProductwithSerializable"></a>
+      <a id="PUnsubscribe:PUnsubscribe"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PUnsubscribe.html"><span class="name">PUnsubscribe</span></a><span class="params">(<span name="patterns">patterns: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="handler">handler: <a href="../exp/SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result"> extends <a href="SubscribeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.SubscribeCommand">SubscribeCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PUnsubscribeextendsSubscribeCommandwithProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1384,10 +1418,112 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Persist.html"><span class="name">Persist</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Persist.html"><span class="name">Persist</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PersistextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSub" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PubSubextendsCommand"></a>
+      <a id="PubSub:PubSub"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSub.html"><span class="name">PubSub</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubextendsCommand" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSubChannels" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PubSubChannelsextendsPubSubwithProductwithSerializable"></a>
+      <a id="PubSubChannels:PubSubChannels"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubChannels.html"><span class="name">PubSubChannels</span></a><span class="params">(<span name="pattern">pattern: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="PubSub.html" class="extype" name="com.twitter.finagle.redis.protocol.PubSub">PubSub</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubChannelsextendsPubSubwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSubHelper" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PubSubHelperextendsAnyRef"></a>
+      <a id="PubSubHelper:PubSubHelper"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubHelper.html"><span class="name">PubSubHelper</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubHelperextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSubNumPat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PubSubNumPatextendsPubSubwithProductwithSerializable"></a>
+      <a id="PubSubNumPat:PubSubNumPat"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubNumPat.html"><span class="name">PubSubNumPat</span></a><span class="params">()</span><span class="result"> extends <a href="PubSub.html" class="extype" name="com.twitter.finagle.redis.protocol.PubSub">PubSub</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubNumPatextendsPubSubwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSubNumSub" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PubSubNumSubextendsPubSubwithProductwithSerializable"></a>
+      <a id="PubSubNumSub:PubSubNumSub"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubNumSub.html"><span class="name">PubSubNumSub</span></a><span class="params">(<span name="channels">channels: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="PubSub.html" class="extype" name="com.twitter.finagle.redis.protocol.PubSub">PubSub</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubNumSubextendsPubSubwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.Publish" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PublishextendsCommandwithStrictKeyCommandwithProductwithSerializable"></a>
+      <a id="Publish:Publish"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Publish.html"><span class="name">Publish</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="message">message: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PublishextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1469,7 +1605,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Rename.html"><span class="name">Rename</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="newkey">newkey: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Rename.html"><span class="name">Rename</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="newkey">newkey: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@RenameextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1486,7 +1622,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RenameNx.html"><span class="name">RenameNx</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="newkey">newkey: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="RenameNx.html"><span class="name">RenameNx</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="newkey">newkey: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@RenameNxextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1673,7 +1809,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Scan.html"><span class="name">Scan</span></a><span class="params">(<span name="cursor">cursor: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>] = <span class="symbol">None</span></span>, <span name="pattern">pattern: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Scan.html"><span class="name">Scan</span></a><span class="params">(<span name="cursor">cursor: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>] = <span class="symbol">None</span></span>, <span name="pattern">pattern: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@ScanextendsCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1715,6 +1851,244 @@
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.redis.protocol.Sentinel" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SentinelextendsCommand"></a>
+      <a id="Sentinel:Sentinel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Sentinel.html"><span class="name">Sentinel</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelextendsCommand" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelCkQuorum" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelCkQuorumextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelCkQuorum:SentinelCkQuorum"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelCkQuorum.html"><span class="name">SentinelCkQuorum</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelCkQuorumextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelFailover" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelFailoverextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelFailover:SentinelFailover"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelFailover.html"><span class="name">SentinelFailover</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelFailoverextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelFlushConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelFlushConfigextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelFlushConfig:SentinelFlushConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelFlushConfig.html"><span class="name">SentinelFlushConfig</span></a><span class="params">()</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelFlushConfigextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelGetMasterAddrByName" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelGetMasterAddrByNameextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelGetMasterAddrByName:SentinelGetMasterAddrByName"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelGetMasterAddrByName.html"><span class="name">SentinelGetMasterAddrByName</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelGetMasterAddrByNameextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelHelper" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SentinelHelperextendsAnyRef"></a>
+      <a id="SentinelHelper:SentinelHelper"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelHelper.html"><span class="name">SentinelHelper</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelHelperextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelMaster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelMasterextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelMaster:SentinelMaster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelMaster.html"><span class="name">SentinelMaster</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelMasterextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelMasters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelMastersextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelMasters:SentinelMasters"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelMasters.html"><span class="name">SentinelMasters</span></a><span class="params">()</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelMastersextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelMonitorextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelMonitor:SentinelMonitor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelMonitor.html"><span class="name">SentinelMonitor</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="ip">ip: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="quorum">quorum: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelMonitorextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelRemove" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelRemoveextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelRemove:SentinelRemove"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelRemove.html"><span class="name">SentinelRemove</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelRemoveextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelReset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelResetextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelReset:SentinelReset"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelReset.html"><span class="name">SentinelReset</span></a><span class="params">(<span name="pattern">pattern: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelResetextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelSentinels" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelSentinelsextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelSentinels:SentinelSentinels"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelSentinels.html"><span class="name">SentinelSentinels</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelSentinelsextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelSetextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelSet:SentinelSet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelSet.html"><span class="name">SentinelSet</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="option">option: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelSetextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelSlaves" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelSlavesextendsSentinelwithProductwithSerializable"></a>
+      <a id="SentinelSlaves:SentinelSlaves"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelSlaves.html"><span class="name">SentinelSlaves</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="Sentinel.html" class="extype" name="com.twitter.finagle.redis.protocol.Sentinel">Sentinel</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelSlavesextendsSentinelwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.protocol.Set" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SetextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable"></a>
       <a id="Set:Set"></a>
@@ -1724,7 +2098,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="ttl">ttl: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="TimeToLive.html" class="extype" name="com.twitter.finagle.redis.protocol.TimeToLive">TimeToLive</a>] = <span class="symbol">None</span></span>, <span name="nx">nx: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>, <span name="xx">xx: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Set.html"><span class="name">Set</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="ttl">ttl: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="TimeToLive.html" class="extype" name="com.twitter.finagle.redis.protocol.TimeToLive">TimeToLive</a>] = <span class="symbol">None</span></span>, <span name="nx">nx: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>, <span name="xx">xx: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SetextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1741,7 +2115,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SetBit.html"><span class="name">SetBit</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="SetBit.html"><span class="name">SetBit</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SetBitextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1758,7 +2132,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SetEx.html"><span class="name">SetEx</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="SetEx.html"><span class="name">SetEx</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="seconds">seconds: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SetExextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1775,7 +2149,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SetNx.html"><span class="name">SetNx</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="SetNx.html"><span class="name">SetNx</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SetNxextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1792,7 +2166,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="SetRange.html"><span class="name">SetRange</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="value">value: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="SetRange.html"><span class="name">SetRange</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="offset">offset: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SetRangeextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -1962,10 +2336,44 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Strlen.html"><span class="name">Strlen</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Strlen.html"><span class="name">Strlen</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@StrlenextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.Subscribe" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SubscribeextendsSubscribeCommandwithProductwithSerializable"></a>
+      <a id="Subscribe:Subscribe"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Subscribe.html"><span class="name">Subscribe</span></a><span class="params">(<span name="channels">channels: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="handler">handler: <a href="../exp/SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result"> extends <a href="SubscribeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.SubscribeCommand">SubscribeCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SubscribeextendsSubscribeCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SubscribeCommand" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SubscribeCommandextendsCommand"></a>
+      <a id="SubscribeCommand:SubscribeCommand"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SubscribeCommand.html"><span class="name">SubscribeCommand</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SubscribeCommandextendsCommand" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -1987,6 +2395,57 @@
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.redis.protocol.TopologyAdd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TopologyAddextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable"></a>
+      <a id="TopologyAdd:TopologyAdd"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TopologyAdd.html"><span class="name">TopologyAdd</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="valueBuf">valueBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="StrictValueCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictValueCommand">StrictValueCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TopologyAddextendsCommandwithStrictKeyCommandwithStrictValueCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.TopologyDelete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TopologyDeleteextendsCommandwithStrictKeyCommandwithProductwithSerializable"></a>
+      <a id="TopologyDelete:TopologyDelete"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TopologyDelete.html"><span class="name">TopologyDelete</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TopologyDeleteextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.TopologyGet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TopologyGetextendsCommandwithStrictKeyCommandwithProductwithSerializable"></a>
+      <a id="TopologyGet:TopologyGet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TopologyGet.html"><span class="name">TopologyGet</span></a><span class="params">(<span name="keyBuf">keyBuf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TopologyGetextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.protocol.Ttl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TtlextendsCommandwithStrictKeyCommandwithProductwithSerializable"></a>
       <a id="Ttl:Ttl"></a>
@@ -1996,7 +2455,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Ttl.html"><span class="name">Ttl</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Ttl.html"><span class="name">Ttl</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TtlextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -2013,7 +2472,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Type.html"><span class="name">Type</span></a><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Type.html"><span class="name">Type</span></a><span class="params">(<span name="buf">buf: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="StrictKeyCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.StrictKeyCommand">StrictKeyCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TypeextendsCommandwithStrictKeyCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -2034,6 +2493,23 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@UnifiedProtocolCodecextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.Unsubscribe" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UnsubscribeextendsSubscribeCommandwithProductwithSerializable"></a>
+      <a id="Unsubscribe:Unsubscribe"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Unsubscribe.html"><span class="name">Unsubscribe</span></a><span class="params">(<span name="channels">channels: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>, <span name="handler">handler: <a href="../exp/SubscribeHandler.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeHandler">SubscribeHandler</a></span>)</span><span class="result"> extends <a href="SubscribeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.SubscribeCommand">SubscribeCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@UnsubscribeextendsSubscribeCommandwithProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -2064,7 +2540,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Watch.html"><span class="name">Watch</span></a><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Watch.html"><span class="name">Watch</span></a><span class="params">(<span name="bufs">bufs: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="KeysCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.KeysCommand">KeysCommand</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@WatchextendsCommandwithKeysCommandwithProductwithSerializable" title="Permalink" target="_top">
@@ -3562,6 +4038,23 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.redis.protocol.NoReply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NoReply"></a>
+      <a id="NoReply:NoReply"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="NoReply$.html"><span class="name">NoReply</span></a><span class="result"> extends <a href="Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@NoReply" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.protocol.PExpire" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PExpire"></a>
       <a id="PExpire:PExpire"></a>
@@ -3711,6 +4204,108 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@Persist" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.Ping" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Ping"></a>
+      <a id="Ping:Ping"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Ping$.html"><span class="name">Ping</span></a><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@Ping" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSub" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PubSub"></a>
+      <a id="PubSub:PubSub"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSub$.html"><span class="name">PubSub</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSub" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSubChannels" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PubSubChannels"></a>
+      <a id="PubSubChannels:PubSubChannels"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubChannels$.html"><span class="name">PubSubChannels</span></a><span class="result"> extends <a href="PubSubHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.PubSubHelper">PubSubHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubChannels" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSubNumPat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PubSubNumPat"></a>
+      <a id="PubSubNumPat:PubSubNumPat"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubNumPat$.html"><span class="name">PubSubNumPat</span></a><span class="result"> extends <a href="PubSubHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.PubSubHelper">PubSubHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubNumPat" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.PubSubNumSub" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PubSubNumSub"></a>
+      <a id="PubSubNumSub:PubSubNumSub"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubNumSub$.html"><span class="name">PubSubNumSub</span></a><span class="result"> extends <a href="PubSubHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.PubSubHelper">PubSubHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@PubSubNumSub" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.Publish" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Publish"></a>
+      <a id="Publish:Publish"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Publish$.html"><span class="name">Publish</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@Publish" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -4021,6 +4616,227 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.redis.protocol.Sentinel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Sentinel"></a>
+      <a id="Sentinel:Sentinel"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Sentinel$.html"><span class="name">Sentinel</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@Sentinel" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelCkQuorum" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelCkQuorum"></a>
+      <a id="SentinelCkQuorum:SentinelCkQuorum"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelCkQuorum$.html"><span class="name">SentinelCkQuorum</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelCkQuorum" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelFailover" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelFailover"></a>
+      <a id="SentinelFailover:SentinelFailover"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelFailover$.html"><span class="name">SentinelFailover</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelFailover" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelFlushConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelFlushConfig"></a>
+      <a id="SentinelFlushConfig:SentinelFlushConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelFlushConfig$.html"><span class="name">SentinelFlushConfig</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelFlushConfig" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelGetMasterAddrByName" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelGetMasterAddrByName"></a>
+      <a id="SentinelGetMasterAddrByName:SentinelGetMasterAddrByName"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelGetMasterAddrByName$.html"><span class="name">SentinelGetMasterAddrByName</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelGetMasterAddrByName" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelMaster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelMaster"></a>
+      <a id="SentinelMaster:SentinelMaster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelMaster$.html"><span class="name">SentinelMaster</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelMaster" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelMasters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelMasters"></a>
+      <a id="SentinelMasters:SentinelMasters"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelMasters$.html"><span class="name">SentinelMasters</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelMasters" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelMonitor"></a>
+      <a id="SentinelMonitor:SentinelMonitor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelMonitor$.html"><span class="name">SentinelMonitor</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelMonitor" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelRemove" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelRemove"></a>
+      <a id="SentinelRemove:SentinelRemove"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelRemove$.html"><span class="name">SentinelRemove</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelRemove" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelReset" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelReset"></a>
+      <a id="SentinelReset:SentinelReset"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelReset$.html"><span class="name">SentinelReset</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelReset" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelSentinels" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelSentinels"></a>
+      <a id="SentinelSentinels:SentinelSentinels"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelSentinels$.html"><span class="name">SentinelSentinels</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelSentinels" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelSet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelSet"></a>
+      <a id="SentinelSet:SentinelSet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelSet$.html"><span class="name">SentinelSet</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelSet" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.SentinelSlaves" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelSlaves"></a>
+      <a id="SentinelSlaves:SentinelSlaves"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelSlaves$.html"><span class="name">SentinelSlaves</span></a><span class="result"> extends <a href="SentinelHelper.html" class="extype" name="com.twitter.finagle.redis.protocol.SentinelHelper">SentinelHelper</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@SentinelSlaves" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.protocol.Set" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Set"></a>
       <a id="Set:Set"></a>
@@ -4136,6 +4952,57 @@ See http://redis.io/commands/zrangebyscore for more info on different intervals
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@Strlen" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.TopologyAdd" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TopologyAdd"></a>
+      <a id="TopologyAdd:TopologyAdd"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TopologyAdd$.html"><span class="name">TopologyAdd</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TopologyAdd" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.TopologyDelete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TopologyDelete"></a>
+      <a id="TopologyDelete:TopologyDelete"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TopologyDelete$.html"><span class="name">TopologyDelete</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TopologyDelete" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.protocol.TopologyGet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TopologyGet"></a>
+      <a id="TopologyGet:TopologyGet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TopologyGet$.html"><span class="name">TopologyGet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.package@TopologyGet" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

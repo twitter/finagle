@@ -47,14 +47,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">Request</span><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> with <span class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</span></span>
+        <span class="name">Request</span><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Rich HttpRequest.</p><p>Use RequestProxy to create an even richer subclass.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</span>, <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>, <span class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</span>, <span class="extype" name="scala.Proxy">Proxy</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
             <div class="subClasses hiddenContent"><a href="RequestProxy.html" class="extype" name="com.twitter.finagle.http.RequestProxy">RequestProxy</a></div>
@@ -75,7 +75,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.http.Request"><span>Request</span></li><li class="in" name="com.twitter.finagle.http.netty.HttpRequestProxy"><span>HttpRequestProxy</span></li><li class="in" name="com.twitter.finagle.http.Message"><span>Message</span></li><li class="in" name="com.twitter.finagle.http.netty.HttpMessageProxy"><span>HttpMessageProxy</span></li><li class="in" name="scala.Proxy"><span>Proxy</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.http.Request"><span>Request</span></li><li class="in" name="com.twitter.finagle.http.Message"><span>Message</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -118,7 +118,7 @@
 
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.http.netty.HttpRequestProxy#httpRequest" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.http.Request#httpRequest" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="httpRequest:org.jboss.netty.handler.codec.http.HttpRequest"></a>
       <a id="httpRequest:HttpRequest"></a>
       <h4 class="signature">
@@ -134,7 +134,7 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpRequestProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#remoteSocketAddress" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="remoteSocketAddress:java.net.InetSocketAddress"></a>
       <a id="remoteSocketAddress:InetSocketAddress"></a>
@@ -837,8 +837,8 @@ associated context explicit.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.Proxy#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="equals(that:Any):Boolean"></a>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
       <a id="equals(Any):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -846,14 +846,14 @@ associated context explicit.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="that">that: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.Request@equals(that:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.http.Request@equals(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#expires" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="expires:Option[String]"></a>
       <a id="expires:Option[String]"></a>
@@ -999,7 +999,7 @@ associated context explicit.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getContent" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Message#getContent" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getContent():org.jboss.netty.buffer.ChannelBuffer"></a>
       <a id="getContent():ChannelBuffer"></a>
       <h4 class="signature">
@@ -1015,7 +1015,7 @@ associated context explicit.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#getContentString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getContentString():String"></a>
       <a id="getContentString():String"></a>
@@ -1050,24 +1050,7 @@ associated context explicit.
       </a>
     </span>
       <p class="shortcomment cmt">Get iterator over Cookies</p><div class="fullcomment"><div class="comment cmt"><p>Get iterator over Cookies</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getHttpMessage" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getHttpMessage():org.jboss.netty.handler.codec.http.HttpMessage"></a>
-      <a id="getHttpMessage():HttpMessage"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getHttpMessage</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.Request@getHttpMessage():org.jboss.netty.handler.codec.http.HttpMessage" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#getHttpRequest" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request#getHttpRequest" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getHttpRequest():org.jboss.netty.handler.codec.http.HttpRequest"></a>
       <a id="getHttpRequest():HttpRequest"></a>
       <h4 class="signature">
@@ -1083,7 +1066,7 @@ associated context explicit.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpRequestProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#getInputStream" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getInputStream():java.io.InputStream"></a>
       <a id="getInputStream():InputStream"></a>
@@ -1188,7 +1171,7 @@ users should use withInputStream.)
       </a>
     </span>
       <p class="shortcomment cmt">Get Long param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Long param.  Returns value or 0.</p></div></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#getMethod" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request#getMethod" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getMethod():org.jboss.netty.handler.codec.http.HttpMethod"></a>
       <a id="getMethod():HttpMethod"></a>
       <h4 class="signature">
@@ -1204,7 +1187,7 @@ users should use withInputStream.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpRequestProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#getParam" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getParam(name:String,default:String):String"></a>
       <a id="getParam(String,String):String"></a>
@@ -1290,23 +1273,6 @@ users should use withInputStream.)
       </a>
     </span>
       <p class="shortcomment cmt">Get all values of parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Get all values of parameter.  Returns list of values.</p></div></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#getProtocolVersion" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getProtocolVersion():org.jboss.netty.handler.codec.http.HttpVersion"></a>
-      <a id="getProtocolVersion():HttpVersion"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getProtocolVersion</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.Request@getProtocolVersion():org.jboss.netty.handler.codec.http.HttpVersion" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#getReader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getReader():java.io.Reader"></a>
       <a id="getReader():Reader"></a>
@@ -1375,7 +1341,7 @@ users should use withInputStream.)
       </a>
     </span>
       <p class="shortcomment cmt">Get Short param.</p><div class="fullcomment"><div class="comment cmt"><p>Get Short param.  Returns value or 0.</p></div></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#getUri" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request#getUri" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getUri():String"></a>
       <a id="getUri():String"></a>
       <h4 class="signature">
@@ -1391,8 +1357,8 @@ users should use withInputStream.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpRequestProxy</dd></dl></div>
-    </li><li name="scala.Proxy#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
       <h4 class="signature">
@@ -1408,7 +1374,7 @@ users should use withInputStream.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Proxy → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#headerMap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="headerMap:com.twitter.finagle.http.HeaderMap"></a>
       <a id="headerMap:HeaderMap"></a>
@@ -1426,7 +1392,7 @@ users should use withInputStream.)
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#headers" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Message#headers" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="headers():org.jboss.netty.handler.codec.http.HttpHeaders"></a>
       <a id="headers():HttpHeaders"></a>
       <h4 class="signature">
@@ -1442,7 +1408,7 @@ users should use withInputStream.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#host" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="host:Option[String]"></a>
       <a id="host:Option[String]"></a>
@@ -1477,7 +1443,7 @@ users should use withInputStream.)
       </a>
     </span>
       <p class="shortcomment cmt">Set Host header</p><div class="fullcomment"><div class="comment cmt"><p>Set Host header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#httpMessage" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request#httpMessage" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="httpMessage:org.jboss.netty.handler.codec.http.HttpMessage"></a>
       <a id="httpMessage:HttpMessage"></a>
       <h4 class="signature">
@@ -1493,8 +1459,8 @@ users should use withInputStream.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpRequestProxy → HttpMessageProxy</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#isChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.Request">Request</a> → <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#isChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isChunked:Boolean"></a>
       <a id="isChunked:Boolean"></a>
       <h4 class="signature">
@@ -1510,7 +1476,7 @@ users should use withInputStream.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -2068,23 +2034,6 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
       </a>
     </span>
       <p class="shortcomment cmt">Set Retry-After header</p><div class="fullcomment"><div class="comment cmt"><p>Set Retry-After header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#self" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="self:org.jboss.netty.handler.codec.http.HttpMessage"></a>
-      <a id="self:HttpMessage"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">self</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.Request@self:org.jboss.netty.handler.codec.http.HttpMessage" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>HttpMessageProxy → Proxy</dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#server" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="server:Option[String]"></a>
       <a id="server:Option[String]"></a>
@@ -2119,7 +2068,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
       </a>
     </span>
       <p class="shortcomment cmt">Set Server header</p><div class="fullcomment"><div class="comment cmt"><p>Set Server header</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Message#setChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setChunked(chunked:Boolean):Unit"></a>
       <a id="setChunked(Boolean):Unit"></a>
       <h4 class="signature">
@@ -2135,8 +2084,8 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setContent" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Message#setContent" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setContent(content:org.jboss.netty.buffer.ChannelBuffer):Unit"></a>
       <a id="setContent(ChannelBuffer):Unit"></a>
       <h4 class="signature">
@@ -2152,7 +2101,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
     </li><li name="com.twitter.finagle.http.Message#setContentString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setContentString(value:String):Unit"></a>
       <a id="setContentString(String):Unit"></a>
@@ -2204,7 +2153,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
       </a>
     </span>
       <p class="shortcomment cmt">Set Content-Type header to application/json;charset=utf-8</p><div class="fullcomment"><div class="comment cmt"><p>Set Content-Type header to application/json;charset=utf-8</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#setMethod" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.Request#setMethod" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setMethod(method:org.jboss.netty.handler.codec.http.HttpMethod):Unit"></a>
       <a id="setMethod(HttpMethod):Unit"></a>
       <h4 class="signature">
@@ -2220,25 +2169,8 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpRequestProxy</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpMessageProxy#setProtocolVersion" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="setProtocolVersion(version:org.jboss.netty.handler.codec.http.HttpVersion):Unit"></a>
-      <a id="setProtocolVersion(HttpVersion):Unit"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">setProtocolVersion</span><span class="params">(<span name="version">version: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpVersion">HttpVersion</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.Request@setProtocolVersion(version:org.jboss.netty.handler.codec.http.HttpVersion):Unit" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpMessageProxy</dd></dl></div>
-    </li><li name="com.twitter.finagle.http.netty.HttpRequestProxy#setUri" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
+    </li><li name="com.twitter.finagle.http.Request#setUri" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setUri(uri:String):Unit"></a>
       <a id="setUri(String):Unit"></a>
       <h4 class="signature">
@@ -2254,7 +2186,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd><dt>Definition Classes</dt><dd>HttpRequestProxy</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../package.html" class="extype" name="com.twitter.finagle">com.twitter.finagle</a>] </dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -2288,7 +2220,7 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.Request">Request</a> → Proxy → AnyRef → Any</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.http.Request">Request</a> → AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.http.Request#uri" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="uri:String"></a>
       <a id="uri:String"></a>
@@ -2695,14 +2627,8 @@ message body. See <a href="https://twitter.github.io/util/docs/index.html#com.tw
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.http.netty.HttpRequestProxy">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</span></h3>
-            </div><div class="parent" name="com.twitter.finagle.http.Message">
+        <div class="parent" name="com.twitter.finagle.http.Message">
               <h3>Inherited from <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></h3>
-            </div><div class="parent" name="com.twitter.finagle.http.netty.HttpMessageProxy">
-              <h3>Inherited from <span class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</span></h3>
-            </div><div class="parent" name="scala.Proxy">
-              <h3>Inherited from <span class="extype" name="scala.Proxy">Proxy</span></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.34.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.35.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.34.0',
+        VERSION:     '6.35.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.35.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -172,6 +172,14 @@ on simultaneous requests.</dd>
 <dd>A histogram of the number of bytes per response&#8217;s payload.</dd>
 </dl>
 </div>
+<div class="section" id="timeoutfilter">
+<h3>TimeoutFilter<a class="headerlink" href="#timeoutfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>timeout/expired_deadline_ms</strong></dt>
+<dd>A stat of the elapsed time since expiry if a deadline has expired, in
+milliseconds. Temporary stat to aid in debugging.</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="construction">
 <h2>Construction<a class="headerlink" href="#construction" title="Permalink to this headline">¶</a></h2>
@@ -216,6 +224,14 @@ from their expected time.</dd>
 <dt><strong>finagle/clientregistry/size</strong></dt>
 <dd>A gauge of the current number of clients registered in the
 <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/client/ClientRegistry.scala">HashedWheelTimer.Default</a>.</dd>
+</dl>
+</div>
+<div class="section" id="name-resolution">
+<h3>Name Resolution<a class="headerlink" href="#name-resolution" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><strong>inet/dns/queue_size</strong></dt>
+<dd>A gauge of the current number of DNS resolutions waiting for lookup
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/Resolver.scala">InetResolver</a>.</dd>
 </dl>
 </div>
 </div>
@@ -469,6 +485,19 @@ the client.</dd>
 <dt><strong>serverhangup</strong></dt>
 <dd>A counter of the number of times sessions have been abruptly terminated by
 the server.</dd>
+<dt><strong>&lt;label&gt;/mux/framer/write_stream_bytes</strong></dt>
+<dd>A histogram of the number of bytes written to the transport when
+mux framing is enabled.</dd>
+<dt><strong>&lt;label&gt;/mux/framer/read_stream_bytes</strong></dt>
+<dd>A histogram of the number of bytes read from the transport when
+mux framing is enabled.</dd>
+<dt><strong>&lt;label&gt;/mux/framer/pending_write_streams</strong></dt>
+<dd>A guage of the number of outstanding write streams when mux framing is enabled.</dd>
+<dt><strong>&lt;label&gt;/mux/framer/pending_read_streams</strong></dt>
+<dd>A guage of the number of outstanding read streams when mux framing is enabled.</dd>
+<dt><strong>&lt;label&gt;/mux/framer/write_window_bytes</strong></dt>
+<dd>A guage indicating the maximum size of fragments when mux framing is enabled.
+A value of -1 means that writes are not fragmented.</dd>
 </dl>
 </div>
 <div class="section" id="threshold-failure-detector">
@@ -599,8 +628,8 @@ your server.</dd>
 <div class="section" id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
 <p id="id3">These metrics track the state of name resolution and service discovery.</p>
-<div class="section" id="name-resolution">
-<h3>Name Resolution<a class="headerlink" href="#name-resolution" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h3>Name Resolution<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p>Finagle clients resolve <a class="reference internal" href="Names.html"><em>names</em></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
@@ -774,6 +803,7 @@ responses are automatically retried by Finagle Http client.</dd>
 <li><a class="reference internal" href="#serverstatsfilter">ServerStatsFilter</a></li>
 <li><a class="reference internal" href="#requestsemaphorefilter">RequestSemaphoreFilter</a></li>
 <li><a class="reference internal" href="#payloadsizefilter-enabled-for-mux-http-non-chunked-thrift">PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)</a></li>
+<li><a class="reference internal" href="#timeoutfilter">TimeoutFilter</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#construction">Construction</a><ul>
@@ -784,6 +814,7 @@ responses are automatically retried by Finagle Http client.</dd>
 <li><a class="reference internal" href="#finagle">Finagle</a><ul>
 <li><a class="reference internal" href="#timer">Timer</a></li>
 <li><a class="reference internal" href="#clientregistry">ClientRegistry</a></li>
+<li><a class="reference internal" href="#name-resolution">Name Resolution</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#load-balancing">Load Balancing</a><ul>
@@ -835,7 +866,7 @@ responses are automatically retried by Finagle Http client.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
-<li><a class="reference internal" href="#name-resolution">Name Resolution</a></li>
+<li><a class="reference internal" href="#id4">Name Resolution</a></li>
 <li><a class="reference internal" href="#initial-resolution">Initial Resolution</a></li>
 <li><a class="reference internal" href="#address-stabilization">Address Stabilization</a></li>
 <li><a class="reference internal" href="#zookeeper-diagnostics">ZooKeeper Diagnostics</a><ul>

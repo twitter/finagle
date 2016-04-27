@@ -232,7 +232,7 @@ the patterns of the pre-registered handlers. The pattern matching follows these 
            &quot;foo/bar&quot;</li><li>Special case:
      The pattern &quot;&quot; matches only &quot;/&quot; and &quot;&quot;</li></ul><p> NOTE: When multiple pattern matches exist, the longest pattern wins.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.HttpTransport" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.http.HttpTransport" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HttpTransportextendsTransport[Any,Any]"></a>
       <a id="HttpTransport:HttpTransport"></a>
       <h4 class="signature">
@@ -248,7 +248,9 @@ the patterns of the pre-registered handlers. The pattern matching follows these 
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A Transport with close behavior managed by ConnectionManager.</p>
+      <p class="shortcomment cmt">A Transport with close behavior managed by ConnectionManager.</p><div class="fullcomment"><div class="comment cmt"><p>A Transport with close behavior managed by ConnectionManager.
+</p></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>the connection manager will close connections as required by RFC 2616 § 8
+      irrespective of any pending requests in the dispatcher.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.http.MapHeaderMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MapHeaderMapextendsHeaderMap"></a>
       <a id="MapHeaderMap:MapHeaderMap"></a>
@@ -284,7 +286,7 @@ the patterns of the pre-registered handlers. The pattern matching follows these 
     </span>
       <p class="shortcomment cmt">Map-backed ParamMap.</p>
     </li><li name="com.twitter.finagle.http.Message" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="MessageextendsHttpMessageProxy"></a>
+      <a id="MessageextendsAnyRef"></a>
       <a id="Message:Message"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -292,10 +294,10 @@ the patterns of the pre-registered handlers. The pattern matching follows these 
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Message.html"><span class="name">Message</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.http.netty.HttpMessageProxy">HttpMessageProxy</span></span>
+        <a href="Message.html"><span class="name">Message</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.package@MessageextendsHttpMessageProxy" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.http.package@MessageextendsAnyRef" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -373,7 +375,7 @@ methods, though only one set of methods should be used.
     </span>
       
     </li><li name="com.twitter.finagle.http.Request" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="RequestextendsMessagewithHttpRequestProxy"></a>
+      <a id="RequestextendsMessage"></a>
       <a id="Request:Request"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -381,10 +383,10 @@ methods, though only one set of methods should be used.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> with <span class="extype" name="com.twitter.finagle.http.netty.HttpRequestProxy">HttpRequestProxy</span></span>
+        <a href="Request.html"><span class="name">Request</span></a><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.package@RequestextendsMessagewithHttpRequestProxy" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.http.package@RequestextendsMessage" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -446,7 +448,7 @@ body.  Multipart forms are not supported (not needed, could be abusive).</p><p>T
 that wraps Request without exposing the underlying netty http type.
 </p></div></div>
     </li><li name="com.twitter.finagle.http.Response" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ResponseextendsMessagewithHttpResponseProxy"></a>
+      <a id="ResponseextendsMessage"></a>
       <a id="Response:Response"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -454,10 +456,10 @@ that wraps Request without exposing the underlying netty http type.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> with <span class="extype" name="com.twitter.finagle.http.netty.HttpResponseProxy">HttpResponseProxy</span></span>
+        <a href="Response.html"><span class="name">Response</span></a><span class="result"> extends <a href="Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.http.package@ResponseextendsMessagewithHttpResponseProxy" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.http.package@ResponseextendsMessage" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

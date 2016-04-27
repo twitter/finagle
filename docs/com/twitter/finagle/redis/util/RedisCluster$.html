@@ -328,18 +328,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.util.RedisCluster#hostAddresses" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="hostAddresses():String"></a>
-      <a id="hostAddresses():String"></a>
+      <a id="hostAddresses(from:Int,until:Int):String"></a>
+      <a id="hostAddresses(Int,Int):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hostAddresses</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">hostAddresses</span><span class="params">(<span name="from">from: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">0</span></span>, <span name="until">until: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#instanceStack:scala.collection.mutable.Stack[com.twitter.finagle.redis.util.ExternalRedis]">instanceStack.size</a></span></span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.util.RedisCluster$@hostAddresses():String" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.util.RedisCluster$@hostAddresses(from:Int,until:Int):String" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -430,35 +430,52 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.util.RedisCluster#start" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="start(count:Int):Unit"></a>
-      <a id="start(Int):Unit"></a>
+      <a id="start(instance:com.twitter.finagle.redis.util.ExternalRedis):com.twitter.finagle.redis.util.ExternalRedis"></a>
+      <a id="start(ExternalRedis):ExternalRedis"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">start</span><span class="params">(<span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">start</span><span class="params">(<span name="instance">instance: <a href="ExternalRedis.html" class="extype" name="com.twitter.finagle.redis.util.ExternalRedis">ExternalRedis</a></span>)</span><span class="result">: <a href="ExternalRedis.html" class="extype" name="com.twitter.finagle.redis.util.ExternalRedis">ExternalRedis</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.util.RedisCluster$@start(count:Int):Unit" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.util.RedisCluster$@start(instance:com.twitter.finagle.redis.util.ExternalRedis):com.twitter.finagle.redis.util.ExternalRedis" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.util.RedisCluster#start" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="start(count:Int,mode:com.twitter.finagle.redis.util.RedisMode):Seq[com.twitter.finagle.redis.util.ExternalRedis]"></a>
+      <a id="start(Int,RedisMode):Seq[ExternalRedis]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">start</span><span class="params">(<span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol">1</span></span>, <span name="mode">mode: <a href="RedisMode.html" class="extype" name="com.twitter.finagle.redis.util.RedisMode">RedisMode</a> = <span class="symbol"><span class="name"><a href="RedisMode$.html">RedisMode.Standalone</a></span></span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="ExternalRedis.html" class="extype" name="com.twitter.finagle.redis.util.ExternalRedis">ExternalRedis</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.util.RedisCluster$@start(count:Int,mode:com.twitter.finagle.redis.util.RedisMode):Seq[com.twitter.finagle.redis.util.ExternalRedis]" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.twitter.finagle.redis.util.RedisCluster#stop" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="stop():Unit"></a>
-      <a id="stop():Unit"></a>
+      <a id="stop():com.twitter.finagle.redis.util.ExternalRedis"></a>
+      <a id="stop():ExternalRedis"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stop</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">stop</span><span class="params">()</span><span class="result">: <a href="ExternalRedis.html" class="extype" name="com.twitter.finagle.redis.util.ExternalRedis">ExternalRedis</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.util.RedisCluster$@stop():Unit" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.util.RedisCluster$@stop():com.twitter.finagle.redis.util.ExternalRedis" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

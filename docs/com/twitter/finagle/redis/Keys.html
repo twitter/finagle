@@ -54,7 +54,7 @@
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="Client.html" class="extype" name="com.twitter.finagle.redis.Client">Client</a>, <a href="TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></div>
+            <div class="subClasses hiddenContent"><a href="Client.html" class="extype" name="com.twitter.finagle.redis.Client">Client</a>, <a href="NormalCommands.html" class="extype" name="com.twitter.finagle.redis.NormalCommands">NormalCommands</a>, <a href="TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></div>
           </div></div>
         
 
@@ -188,36 +188,36 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.Keys#del" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="del(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]"></a>
-      <a id="del(Seq[ChannelBuffer]):Future[Long]"></a>
+    </li><li name="com.twitter.finagle.redis.Keys#dels" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dels(keys:Seq[com.twitter.io.Buf]):com.twitter.util.Future[Long]"></a>
+      <a id="dels(Seq[Buf]):Future[Long]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">del</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+        <span class="name">dels</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@del(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@dels(keys:Seq[com.twitter.io.Buf]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"><p>list of keys to remove</p></dd><dt>returns</dt><dd class="cmt"><p>Number of keys removed</p></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#dump" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="dump(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="dump(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <a id="dump(key:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]"></a>
+      <a id="dump(Buf):Future[Option[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">dump</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">dump</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@dump(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@dump(key:com.twitter.io.Buf):com.twitter.util.Future[Option[com.twitter.io.Buf]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -259,53 +259,53 @@ returns it to the user</p></div><dl class="paramcmts block"><dt>returns</dt><dd 
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#exists" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="exists(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="exists(ChannelBuffer):Future[Boolean]"></a>
+      <a id="exists(key:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="exists(Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">exists</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">exists</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@exists(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@exists(key:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Checks if given key exists</p><div class="fullcomment"><div class="comment cmt"><p>Checks if given key exists</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if key exists, false otherwise</p></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#expire" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expire(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]"></a>
-      <a id="expire(ChannelBuffer,Long):Future[Boolean]"></a>
+      <a id="expire(key:com.twitter.io.Buf,ttl:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="expire(Buf,Long):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">expire</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="ttl">ttl: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">expire</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="ttl">ttl: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@expire(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@expire(key:com.twitter.io.Buf,ttl:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Sets how long it will take the key to expire</p><div class="fullcomment"><div class="comment cmt"><p>Sets how long it will take the key to expire</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
 false otherwise.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#expireAt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expireAt(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]"></a>
-      <a id="expireAt(ChannelBuffer,Long):Future[Boolean]"></a>
+      <a id="expireAt(key:com.twitter.io.Buf,ttl:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="expireAt(Buf,Long):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">expireAt</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="ttl">ttl: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">expireAt</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="ttl">ttl: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@expireAt(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@expireAt(key:com.twitter.io.Buf,ttl:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -386,35 +386,35 @@ false otherwise.</p></dd></dl></div>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#keys" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="keys(pattern:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="keys(ChannelBuffer):Future[Seq[ChannelBuffer]]"></a>
+      <a id="keys(pattern:com.twitter.io.Buf):com.twitter.util.Future[Seq[com.twitter.io.Buf]]"></a>
+      <a id="keys(Buf):Future[Seq[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">keys</span><span class="params">(<span name="pattern">pattern: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">keys</span><span class="params">(<span name="pattern">pattern: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@keys(pattern:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@keys(pattern:com.twitter.io.Buf):com.twitter.util.Future[Seq[com.twitter.io.Buf]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Returns all keys matching pattern</p><div class="fullcomment"><div class="comment cmt"><p>Returns all keys matching pattern</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>list of keys matching pattern</p></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#move" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="move(key:org.jboss.netty.buffer.ChannelBuffer,db:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
-      <a id="move(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <a id="move(key:com.twitter.io.Buf,db:com.twitter.io.Buf):com.twitter.util.Future[Boolean]"></a>
+      <a id="move(Buf,Buf):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">move</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="db">db: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">move</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="db">db: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@move(key:org.jboss.netty.buffer.ChannelBuffer,db:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@move(key:com.twitter.io.Buf,db:com.twitter.io.Buf):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -476,18 +476,18 @@ not exist in the source database, it does nothing.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#pExpire" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pExpire(key:org.jboss.netty.buffer.ChannelBuffer,milliseconds:Long):com.twitter.util.Future[Boolean]"></a>
-      <a id="pExpire(ChannelBuffer,Long):Future[Boolean]"></a>
+      <a id="pExpire(key:com.twitter.io.Buf,milliseconds:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="pExpire(Buf,Long):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">pExpire</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="milliseconds">milliseconds: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">pExpire</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="milliseconds">milliseconds: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pExpire(key:org.jboss.netty.buffer.ChannelBuffer,milliseconds:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pExpire(key:com.twitter.io.Buf,milliseconds:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -495,18 +495,18 @@ not exist in the source database, it does nothing.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the timeout was set.
         false if key does not exist or the timeout could not be set.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/pexpire</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#pExpireAt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pExpireAt(key:org.jboss.netty.buffer.ChannelBuffer,timestamp:Long):com.twitter.util.Future[Boolean]"></a>
-      <a id="pExpireAt(ChannelBuffer,Long):Future[Boolean]"></a>
+      <a id="pExpireAt(key:com.twitter.io.Buf,timestamp:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="pExpireAt(Buf,Long):Future[Boolean]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">pExpireAt</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timestamp">timestamp: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+        <span class="name">pExpireAt</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="timestamp">timestamp: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pExpireAt(key:org.jboss.netty.buffer.ChannelBuffer,timestamp:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pExpireAt(key:com.twitter.io.Buf,timestamp:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -515,37 +515,37 @@ not exist in the source database, it does nothing.
         false if key does not exist or the timeout could not be set
         (see: EXPIRE).</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/pexpireat</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#pTtl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pTtl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]"></a>
-      <a id="pTtl(ChannelBuffer):Future[Option[Long]]"></a>
+      <a id="pTtl(key:com.twitter.io.Buf):com.twitter.util.Future[Option[Long]]"></a>
+      <a id="pTtl(Buf):Future[Option[Long]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">pTtl</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]]</span>
+        <span class="name">pTtl</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pTtl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pTtl(key:com.twitter.io.Buf):com.twitter.util.Future[Option[Long]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Get the time to live for a key in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Get the time to live for a key in milliseconds.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Time to live in milliseconds or None when key does not exist or
         does not have a timeout.</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.redis.Keys#scan" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scan(cursor:Long,count:Option[Long],pattern:Option[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]"></a>
-      <a id="scan(Long,Option[Long],Option[ChannelBuffer]):Future[Seq[ChannelBuffer]]"></a>
+    </li><li name="com.twitter.finagle.redis.Keys#scans" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="scans(cursor:Long,count:Option[Long],pattern:Option[com.twitter.io.Buf]):com.twitter.util.Future[Seq[com.twitter.io.Buf]]"></a>
+      <a id="scans(Long,Option[Long],Option[Buf]):Future[Seq[Buf]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scan</span><span class="params">(<span name="cursor">cursor: <span class="extype" name="java.lang.Long">Long</span></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>, <span name="pattern">pattern: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+        <span class="name">scans</span><span class="params">(<span name="cursor">cursor: <span class="extype" name="java.lang.Long">Long</span></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>, <span name="pattern">pattern: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@scan(cursor:Long,count:Option[Long],pattern:Option[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@scans(cursor:Long,count:Option[Long],pattern:Option[com.twitter.io.Buf]):com.twitter.util.Future[Seq[com.twitter.io.Buf]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -585,18 +585,18 @@ not exist in the source database, it does nothing.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.Keys#ttl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ttl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]"></a>
-      <a id="ttl(ChannelBuffer):Future[Option[Long]]"></a>
+      <a id="ttl(key:com.twitter.io.Buf):com.twitter.util.Future[Option[Long]]"></a>
+      <a id="ttl(Buf):Future[Option[Long]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ttl</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]]</span>
+        <span class="name">ttl</span><span class="params">(<span name="key">key: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@ttl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@ttl(key:com.twitter.io.Buf):com.twitter.util.Future[Option[Long]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -676,7 +676,267 @@ and has a timeout, or else nothing.</p></dd></dl></div>
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="com.twitter.finagle.redis.Keys#del" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="del(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]"></a>
+      <a id="del(Seq[ChannelBuffer]):Future[Long]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">del</span><span class="params">(<span name="keys">keys: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@del(keys:Seq[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Long]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Removes keys</p><div class="fullcomment"><div class="comment cmt"><p>Removes keys</p></div><dl class="paramcmts block"><dt class="param">keys</dt><dd class="cmt"><p>list of keys to remove</p></dd><dt>returns</dt><dd class="cmt"><p>Number of keys removed</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#dump" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dump(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]"></a>
+      <a id="dump(ChannelBuffer):Future[Option[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">dump</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@dump(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Serialize the value stored at key in a Redis-specific format and
+returns it to the user</p><div class="fullcomment"><div class="comment cmt"><p>Serialize the value stored at key in a Redis-specific format and
+returns it to the user</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>bytes, or none if the key did not exist</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#exists" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exists(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="exists(ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">exists</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@exists(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Checks if given key exists</p><div class="fullcomment"><div class="comment cmt"><p>Checks if given key exists</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if key exists, false otherwise</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#expire" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="expire(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="expire(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">expire</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="ttl">ttl: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@expire(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Sets how long it will take the key to expire</p><div class="fullcomment"><div class="comment cmt"><p>Sets how long it will take the key to expire</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+false otherwise.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#expireAt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="expireAt(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="expireAt(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">expireAt</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="ttl">ttl: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@expireAt(key:org.jboss.netty.buffer.ChannelBuffer,ttl:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p><div class="fullcomment"><div class="comment cmt"><p>Same effect and semantic as &quot;expire&quot;, but takes an absolute Unix timestamp</p></div><dl class="paramcmts block"><dt class="param">ttl</dt><dd class="cmt"><p>time-to-live as unix timestamp</p></dd><dt>returns</dt><dd class="cmt"><p>boolean, true if it successfully set the ttl (time to live) on a valid key,
+false otherwise.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#keys" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="keys(pattern:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]"></a>
+      <a id="keys(ChannelBuffer):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">keys</span><span class="params">(<span name="pattern">pattern: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@keys(pattern:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns all keys matching pattern</p><div class="fullcomment"><div class="comment cmt"><p>Returns all keys matching pattern</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>list of keys matching pattern</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#move" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="move(key:org.jboss.netty.buffer.ChannelBuffer,db:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]"></a>
+      <a id="move(ChannelBuffer,ChannelBuffer):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">move</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="db">db: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@move(key:org.jboss.netty.buffer.ChannelBuffer,db:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Move key from the currently selected database to the specified destination
+database.</p><div class="fullcomment"><div class="comment cmt"><p>Move key from the currently selected database to the specified destination
+database. When key already exists in the destination database, or it does
+not exist in the source database, it does nothing.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if key was moved.
+        false if key was not moved for any reason.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#pExpire" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pExpire(key:org.jboss.netty.buffer.ChannelBuffer,milliseconds:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="pExpire(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">pExpire</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="milliseconds">milliseconds: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pExpire(key:org.jboss.netty.buffer.ChannelBuffer,milliseconds:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Set a key's time to live in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set a key's time to live in milliseconds.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the timeout was set.
+        false if key does not exist or the timeout could not be set.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/pexpire</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#pExpireAt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pExpireAt(key:org.jboss.netty.buffer.ChannelBuffer,timestamp:Long):com.twitter.util.Future[Boolean]"></a>
+      <a id="pExpireAt(ChannelBuffer,Long):Future[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">pExpireAt</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="timestamp">timestamp: <span class="extype" name="java.lang.Long">Long</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pExpireAt(key:org.jboss.netty.buffer.ChannelBuffer,timestamp:Long):com.twitter.util.Future[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Set the expiration for a key as a UNIX timestamp specified in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Set the expiration for a key as a UNIX timestamp specified in milliseconds.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>true if the timeout was set.
+        false if key does not exist or the timeout could not be set
+        (see: EXPIRE).</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd><dt>See also</dt><dd><span class="cmt"><p>http://redis.io/commands/pexpireat</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#pTtl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pTtl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]"></a>
+      <a id="pTtl(ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">pTtl</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@pTtl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Get the time to live for a key in milliseconds.</p><div class="fullcomment"><div class="comment cmt"><p>Get the time to live for a key in milliseconds.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Time to live in milliseconds or None when key does not exist or
+        does not have a timeout.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#scan" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="scan(cursor:Long,count:Option[Long],pattern:Option[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]"></a>
+      <a id="scan(Long,Option[Long],Option[ChannelBuffer]):Future[Seq[ChannelBuffer]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">scan</span><span class="params">(<span name="cursor">cursor: <span class="extype" name="java.lang.Long">Long</span></span>, <span name="count">count: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]</span>, <span name="pattern">pattern: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@scan(cursor:Long,count:Option[Long],pattern:Option[org.jboss.netty.buffer.ChannelBuffer]):com.twitter.util.Future[Seq[org.jboss.netty.buffer.ChannelBuffer]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns keys starting at cursor</p><div class="fullcomment"><div class="comment cmt"><p>Returns keys starting at cursor</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>cursor followed by matching keys</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.Keys#ttl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ttl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]"></a>
+      <a id="ttl(ChannelBuffer):Future[Option[Long]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: (Since version 2016-03-24) remove netty3 types from public API">ttl</span><span class="params">(<span name="key">key: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Long">Long</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.Keys@ttl(key:org.jboss.netty.buffer.ChannelBuffer):com.twitter.util.Future[Option[Long]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Gets the ttl of the given key.</p><div class="fullcomment"><div class="comment cmt"><p>Gets the ttl of the given key.</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Option containing either the ttl in seconds if the key exists
+and has a timeout, or else nothing.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-03-24)</i> remove netty3 types from public API</p></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

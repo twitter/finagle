@@ -66,23 +66,57 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.redis.BaseClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BaseClientextendsAnyRef"></a>
+              <ol><li name="com.twitter.finagle.redis.BaseClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="BaseClientextendsClosable"></a>
       <a id="BaseClient:BaseClient"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Closable" class="extype" target="_top">Closable</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.package@BaseClientextendsAnyRef" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@BaseClientextendsClosable" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Connects to a single Redis host</p>
+    </li><li name="com.twitter.finagle.redis.BasicConnectionCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="BasicConnectionCommandsextendsAnyRef"></a>
+      <a id="BasicConnectionCommands:BasicConnectionCommands"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="BasicConnectionCommands.html"><span class="name">BasicConnectionCommands</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@BasicConnectionCommandsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.BasicServerCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="BasicServerCommandsextendsAnyRef"></a>
+      <a id="BasicServerCommands:BasicServerCommands"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="BasicServerCommands.html"><span class="name">BasicServerCommands</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@BasicServerCommandsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.BtreeSortedSetCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="BtreeSortedSetCommandsextendsAnyRef"></a>
       <a id="BtreeSortedSetCommands:BtreeSortedSetCommands"></a>
@@ -99,9 +133,11 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">These commands are specific to twitter's internal fork of redis
+and will be removed eventually
+</p>
     </li><li name="com.twitter.finagle.redis.Client" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ClientextendsBaseClientwithKeyswithStringswithHasheswithSortedSetswithListswithSetswithBtreeSortedSetCommandswithHyperLogLogs"></a>
+      <a id="ClientextendsBaseClientwithNormalCommandswithSubscribeCommandswithTransactions"></a>
       <a id="Client:Client"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -109,10 +145,10 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.redis.BaseClient">BaseClient</a> with <a href="Keys.html" class="extype" name="com.twitter.finagle.redis.Keys">Keys</a> with <a href="Strings.html" class="extype" name="com.twitter.finagle.redis.Strings">Strings</a> with <a href="Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> with <a href="SortedSets.html" class="extype" name="com.twitter.finagle.redis.SortedSets">SortedSets</a> with <a href="Lists.html" class="extype" name="com.twitter.finagle.redis.Lists">Lists</a> with <a href="Sets.html" class="extype" name="com.twitter.finagle.redis.Sets">Sets</a> with <a href="BtreeSortedSetCommands.html" class="extype" name="com.twitter.finagle.redis.BtreeSortedSetCommands">BtreeSortedSetCommands</a> with <a href="HyperLogLogs.html" class="extype" name="com.twitter.finagle.redis.HyperLogLogs">HyperLogLogs</a></span>
+        <a href="Client.html"><span class="name">Client</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.redis.BaseClient">BaseClient</a> with <a href="NormalCommands.html" class="extype" name="com.twitter.finagle.redis.NormalCommands">NormalCommands</a> with <a href="exp/SubscribeCommands.html" class="extype" name="com.twitter.finagle.redis.exp.SubscribeCommands">SubscribeCommands</a> with <a href="Transactions.html" class="extype" name="com.twitter.finagle.redis.Transactions">Transactions</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.package@ClientextendsBaseClientwithKeyswithStringswithHasheswithSortedSetswithListswithSetswithBtreeSortedSetCommandswithHyperLogLogs" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@ClientextendsBaseClientwithNormalCommandswithSubscribeCommandswithTransactions" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -130,6 +166,23 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.redis.package@ClientErrorextendsExceptionwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.ConnectionCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ConnectionCommandsextendsBasicConnectionCommands"></a>
+      <a id="ConnectionCommands:ConnectionCommands"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ConnectionCommands.html"><span class="name">ConnectionCommands</span></a><span class="result"> extends <a href="BasicConnectionCommands.html" class="extype" name="com.twitter.finagle.redis.BasicConnectionCommands">BasicConnectionCommands</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@ConnectionCommandsextendsBasicConnectionCommands" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -202,6 +255,40 @@
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.redis.NormalCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NormalCommandsextendsKeyswithStringswithHasheswithSortedSetswithListswithSetswithBtreeSortedSetCommandswithTopologyCommandswithHyperLogLogswithPubSubswithServerCommandswithConnectionCommands"></a>
+      <a id="NormalCommands:NormalCommands"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NormalCommands.html"><span class="name">NormalCommands</span></a><span class="result"> extends <a href="Keys.html" class="extype" name="com.twitter.finagle.redis.Keys">Keys</a> with <a href="Strings.html" class="extype" name="com.twitter.finagle.redis.Strings">Strings</a> with <a href="Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> with <a href="SortedSets.html" class="extype" name="com.twitter.finagle.redis.SortedSets">SortedSets</a> with <a href="Lists.html" class="extype" name="com.twitter.finagle.redis.Lists">Lists</a> with <a href="Sets.html" class="extype" name="com.twitter.finagle.redis.Sets">Sets</a> with <a href="BtreeSortedSetCommands.html" class="extype" name="com.twitter.finagle.redis.BtreeSortedSetCommands">BtreeSortedSetCommands</a> with <a href="TopologyCommands.html" class="extype" name="com.twitter.finagle.redis.TopologyCommands">TopologyCommands</a> with <a href="HyperLogLogs.html" class="extype" name="com.twitter.finagle.redis.HyperLogLogs">HyperLogLogs</a> with <a href="PubSubs.html" class="extype" name="com.twitter.finagle.redis.PubSubs">PubSubs</a> with <a href="ServerCommands.html" class="extype" name="com.twitter.finagle.redis.ServerCommands">ServerCommands</a> with <a href="ConnectionCommands.html" class="extype" name="com.twitter.finagle.redis.ConnectionCommands">ConnectionCommands</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@NormalCommandsextendsKeyswithStringswithHasheswithSortedSetswithListswithSetswithBtreeSortedSetCommandswithTopologyCommandswithHyperLogLogswithPubSubswithServerCommandswithConnectionCommands" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.PubSubs" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="PubSubsextendsAnyRef"></a>
+      <a id="PubSubs:PubSubs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="PubSubs.html"><span class="name">PubSubs</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@PubSubsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.Redis" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RedisextendsCodecFactory[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]"></a>
       <a id="Redis:Redis"></a>
@@ -215,6 +302,57 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.redis.package@RedisextendsCodecFactory[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.SentinelClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelClientextendsBaseClientwithSentinelCommandswithServerCommands"></a>
+      <a id="SentinelClient:SentinelClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelClient.html"><span class="name">SentinelClient</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.redis.BaseClient">BaseClient</a> with <a href="SentinelCommands.html" class="extype" name="com.twitter.finagle.redis.SentinelCommands">SentinelCommands</a> with <a href="ServerCommands.html" class="extype" name="com.twitter.finagle.redis.ServerCommands">ServerCommands</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@SentinelClientextendsBaseClientwithSentinelCommandswithServerCommands" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.SentinelCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="SentinelCommandsextendsAnyRef"></a>
+      <a id="SentinelCommands:SentinelCommands"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelCommands.html"><span class="name">SentinelCommands</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@SentinelCommandsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.ServerCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ServerCommandsextendsBasicServerCommands"></a>
+      <a id="ServerCommands:ServerCommands"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerCommands.html"><span class="name">ServerCommands</span></a><span class="result"> extends <a href="BasicServerCommands.html" class="extype" name="com.twitter.finagle.redis.BasicServerCommands">BasicServerCommands</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@ServerCommandsextendsBasicServerCommands" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -287,25 +425,61 @@
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.redis.TransactionalClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="TransactionalClientextendsClient"></a>
-      <a id="TransactionalClient:TransactionalClient"></a>
+    </li><li name="com.twitter.finagle.redis.TopologyCommands" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TopologyCommandsextendsAnyRef"></a>
+      <a id="TopologyCommands:TopologyCommands"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="TransactionalClient.html"><span class="name">TransactionalClient</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.redis.Client">Client</a></span>
+        <a href="TopologyCommands.html"><span class="name">TopologyCommands</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.redis.package@TransactionalClientextendsClient" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@TopologyCommandsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">These commands are specific to twitter's internal fork of redis
+and will be removed eventually
+</p>
+    </li><li name="com.twitter.finagle.redis.TransactionalClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TransactionalClientextendsBaseClientwithNormalCommands"></a>
+      <a id="TransactionalClient:TransactionalClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TransactionalClient.html"><span class="name">TransactionalClient</span></a><span class="result"> extends <a href="BaseClient.html" class="extype" name="com.twitter.finagle.redis.BaseClient">BaseClient</a> with <a href="NormalCommands.html" class="extype" name="com.twitter.finagle.redis.NormalCommands">NormalCommands</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@TransactionalClientextendsBaseClientwithNormalCommands" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Client connected over a single connection to a
 single redis instance, supporting transactions
 </p>
+    </li><li name="com.twitter.finagle.redis.Transactions" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TransactionsextendsAnyRef"></a>
+      <a id="Transactions:Transactions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Transactions.html"><span class="name">Transactions</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@TransactionsextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
@@ -364,6 +538,23 @@ single redis instance, supporting transactions
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.redis.SentinelClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SentinelClient"></a>
+      <a id="SentinelClient:SentinelClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SentinelClient$.html"><span class="name">SentinelClient</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@SentinelClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.redis.TransactionalClient" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TransactionalClient"></a>
       <a id="TransactionalClient:TransactionalClient"></a>
@@ -377,6 +568,23 @@ single redis instance, supporting transactions
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.redis.package@TransactionalClient" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.redis.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exp"></a>
+      <a id="exp:exp"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="exp/package.html"><span class="name">exp</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.redis.package@exp" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

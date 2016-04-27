@@ -53,7 +53,7 @@
 all service-loadable receivers and broadcasts stats to them.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.DelegatingStatsReceiver" class="extype" target="_top">DelegatingStatsReceiver</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -71,7 +71,7 @@ all service-loadable receivers and broadcasts stats to them.
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.stats.LoadedStatsReceiver"><span>LoadedStatsReceiver</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiverProxy"><span>StatsReceiverProxy</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiver"><span>StatsReceiver</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.stats.LoadedStatsReceiver"><span>LoadedStatsReceiver</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiverProxy"><span>StatsReceiverProxy</span></li><li class="in" name="com.twitter.finagle.stats.DelegatingStatsReceiver"><span>DelegatingStatsReceiver</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiver"><span>StatsReceiver</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -522,7 +522,8 @@ all service-loadable receivers and broadcasts stats to them.
 with great care.</p><div class="fullcomment"><div class="comment cmt"><p>Mutating this value at runtime after it has been initialized should be done
 with great care. If metrics have been created using the prior
 <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, updates to those metrics may not be reflected in the
-<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> that replaces it.
+<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> that replaces it. In addition, histograms created with
+the prior <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a> will not be available.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.LoadedStatsReceiver">LoadedStatsReceiver</a> → StatsReceiverProxy</dd></dl></div>
     </li><li name="com.twitter.finagle.stats.StatsReceiverProxy#stat" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stat(names:String*):com.twitter.finagle.stats.Stat"></a>
@@ -592,6 +593,23 @@ with great care. If metrics have been created using the prior
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiverProxy → AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.StatsReceiverProxy#underlying" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="underlying:Seq[com.twitter.finagle.stats.StatsReceiver]"></a>
+      <a id="underlying:Seq[StatsReceiver]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">underlying</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.LoadedStatsReceiver$@underlying:Seq[com.twitter.finagle.stats.StatsReceiver]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StatsReceiverProxy → DelegatingStatsReceiver</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -672,6 +690,8 @@ with great care. If metrics have been created using the prior
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.stats.StatsReceiverProxy">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverProxy" class="extype" target="_top">StatsReceiverProxy</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.stats.DelegatingStatsReceiver">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.DelegatingStatsReceiver" class="extype" target="_top">DelegatingStatsReceiver</a></h3>
             </div><div class="parent" name="com.twitter.finagle.stats.StatsReceiver">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></h3>
             </div><div class="parent" name="scala.AnyRef">

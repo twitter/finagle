@@ -97,7 +97,7 @@ of a single request/response pair.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.thrift.DeserializeCtx#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(request:com.twitter.scrooge.ThriftStruct,replyDeserializer:Array[Byte]=&gt;com.twitter.util.Try[Rep]):com.twitter.finagle.thrift.DeserializeCtx[Rep]"></a>
+      <a id="&lt;init&gt;(request:Any,replyDeserializer:Array[Byte]=&gt;com.twitter.util.Try[Rep]):com.twitter.finagle.thrift.DeserializeCtx[Rep]"></a>
       <a id="&lt;init&gt;:DeserializeCtx[Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -105,15 +105,16 @@ of a single request/response pair.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">DeserializeCtx</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span></span>, <span name="replyDeserializer">replyDeserializer: (<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.thrift.DeserializeCtx.Rep">Rep</span>]</span>)</span>
+        <span class="name">DeserializeCtx</span><span class="params">(<span name="request">request: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>, <span name="replyDeserializer">replyDeserializer: (<span class="extype" name="scala.Array">Array</span>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Byte" class="extype" target="_top">Byte</a>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Try" class="extype" target="_top">Try</a>[<span class="extype" name="com.twitter.finagle.thrift.DeserializeCtx.Rep">Rep</span>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.DeserializeCtx@&lt;init&gt;(request:com.twitter.scrooge.ThriftStruct,replyDeserializer:Array[Byte]=&gt;com.twitter.util.Try[Rep]):com.twitter.finagle.thrift.DeserializeCtx[Rep]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.thrift.DeserializeCtx@&lt;init&gt;(request:Any,replyDeserializer:Array[Byte]=&gt;com.twitter.util.Try[Rep]):com.twitter.finagle.thrift.DeserializeCtx[Rep]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">request</dt><dd class="cmt"><p>the request that was used to generate response
-to be seen by <a href="#deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.DeserializeCtx#deserialize">deserialize</a>.</p></dd></dl></div>
+to be seen by <a href="#deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.DeserializeCtx#deserialize">deserialize</a>. <code>request</code> is of type <code>Any</code> because
+requests in generated Scala and Java services do not share a supertype.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -393,24 +394,26 @@ return the first deserialized result.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.thrift.DeserializeCtx#request" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="request:com.twitter.scrooge.ThriftStruct"></a>
-      <a id="request:ThriftStruct"></a>
+    </li><li name="com.twitter.finagle.thrift.DeserializeCtx#request" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="request:Any"></a>
+      <a id="request:Any"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">request</span><span class="result">: <span class="extype" name="com.twitter.scrooge.ThriftStruct">ThriftStruct</span></span>
+        <span class="name">request</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.thrift.DeserializeCtx@request:com.twitter.scrooge.ThriftStruct" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.thrift.DeserializeCtx@request:Any" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">the request that was used to generate response
-to be seen by <a href="#deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.DeserializeCtx#deserialize">deserialize</a>.</p>
+to be seen by <a href="#deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.DeserializeCtx#deserialize">deserialize</a>.</p><div class="fullcomment"><div class="comment cmt"><p>the request that was used to generate response
+to be seen by <a href="#deserialize(responseBytes:Array[Byte]):com.twitter.util.Try[Rep]" class="extmbr" name="com.twitter.finagle.thrift.DeserializeCtx#deserialize">deserialize</a>. <code>request</code> is of type <code>Any</code> because
+requests in generated Scala and Java services do not share a supertype.</p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

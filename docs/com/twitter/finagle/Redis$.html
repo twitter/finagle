@@ -45,13 +45,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Redis</span><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</span>
+        <span class="name">Redis</span><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>] with <a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a>, <a href="Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -69,7 +69,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.Redis"><span>Redis</span></li><li class="in" name="com.twitter.finagle.Client"><span>Client</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.Redis"><span>Redis</span></li><li class="in" name="com.twitter.finagle.RedisRichClient"><span>RedisRichClient</span></li><li class="in" name="com.twitter.finagle.Client"><span>Client</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -418,6 +418,74 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
     </span>
       <p class="shortcomment cmt">Create a new client connected to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new client connected to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.RedisRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.redis.Client"></a>
+      <a id="newRichClient(Name,String):redis.Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="redis/Client.html" class="extype" name="com.twitter.finagle.redis.Client">redis.Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Redis$@newRichClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.redis.Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.RedisRichClient#newRichClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newRichClient(dest:String):com.twitter.finagle.redis.Client"></a>
+      <a id="newRichClient(String):redis.Client"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newRichClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="redis/Client.html" class="extype" name="com.twitter.finagle.redis.Client">redis.Client</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Redis$@newRichClient(dest:String):com.twitter.finagle.redis.Client" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.RedisRichClient#newSentinelClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newSentinelClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.redis.SentinelClient"></a>
+      <a id="newSentinelClient(Name,String):SentinelClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newSentinelClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="redis/SentinelClient.html" class="extype" name="com.twitter.finagle.redis.SentinelClient">SentinelClient</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Redis$@newSentinelClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.redis.SentinelClient" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.RedisRichClient#newSentinelClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newSentinelClient(dest:String):com.twitter.finagle.redis.SentinelClient"></a>
+      <a id="newSentinelClient(String):SentinelClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newSentinelClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="redis/SentinelClient.html" class="extype" name="com.twitter.finagle.redis.SentinelClient">SentinelClient</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Redis$@newSentinelClient(dest:String):com.twitter.finagle.redis.SentinelClient" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Redis#newService" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="newService(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.Service[com.twitter.finagle.redis.protocol.Command,com.twitter.finagle.redis.protocol.Reply]"></a>
       <a id="newService(Name,String):Service[Command,Reply]"></a>
@@ -472,6 +540,40 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
     </span>
       <p class="shortcomment cmt">Create a new service which dispatches requests to <code>dest</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new service which dispatches requests to <code>dest</code>.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.RedisRichClient#newTransactionalClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newTransactionalClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.redis.TransactionalClient"></a>
+      <a id="newTransactionalClient(Name,String):TransactionalClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newTransactionalClient</span><span class="params">(<span name="dest">dest: <a href="Name.html" class="extype" name="com.twitter.finagle.Name">Name</a></span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="redis/TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Redis$@newTransactionalClient(dest:com.twitter.finagle.Name,label:String):com.twitter.finagle.redis.TransactionalClient" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.RedisRichClient#newTransactionalClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newTransactionalClient(dest:String):com.twitter.finagle.redis.TransactionalClient"></a>
+      <a id="newTransactionalClient(String):TransactionalClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newTransactionalClient</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="redis/TransactionalClient.html" class="extype" name="com.twitter.finagle.redis.TransactionalClient">TransactionalClient</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Redis$@newTransactionalClient(dest:String):com.twitter.finagle.redis.TransactionalClient" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -661,7 +763,9 @@ The label is used to display stats, etc.</p></div><dl class="attributes block"> 
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.Client">
+        <div class="parent" name="com.twitter.finagle.RedisRichClient">
+              <h3>Inherited from <a href="RedisRichClient.html" class="extype" name="com.twitter.finagle.RedisRichClient">RedisRichClient</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.Client">
               <h3>Inherited from <a href="Client.html" class="extype" name="com.twitter.finagle.Client">finagle.Client</a>[<a href="redis/protocol/Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a>, <a href="redis/protocol/Reply.html" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>

@@ -444,6 +444,25 @@ a system-level value will be used).
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.param.ServerTransportParams#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tls(context:javax.net.ssl.SSLContext):A"></a>
+      <a id="tls(SSLContext):A"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tls</span><span class="params">(<span name="context">context: <span class="extype" name="javax.net.ssl.SSLContext">SSLContext</span></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.param.ServerTransportParams.A">A</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.param.ServerTransportParams@tls(context:javax.net.ssl.SSLContext):A" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Enables TLS/SSL support (connection encrypting) on this server.</p><div class="fullcomment"><div class="comment cmt"><p>Enables TLS/SSL support (connection encrypting) on this server.
+</p></div><dl class="paramcmts block"><dt class="param">context</dt><dd class="cmt"><p>the SSL context to use</p></dd></dl><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>It's recommended to not use <span class="extype" name="SSLContext">SSLContext</span> directly, but rely on Finagle to pick
+      the most efficient TLS/SSL implementation available on your platform.</p></span>, <span class="cmt"><p>This configuration method is only used to configure Netty 4 transports.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.param.ServerTransportParams#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(certificatePath:String,keyPath:String,caCertificatePath:Option[String],ciphers:Option[String],nextProtocols:Option[String]):A"></a>
       <a id="tls(String,String,Option[String],Option[String],Option[String]):A"></a>
       <h4 class="signature">
@@ -459,10 +478,11 @@ a system-level value will be used).
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) on this server.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) on this server.
-</p></div><dl class="paramcmts block"><dt class="param">certificatePath</dt><dd class="cmt"><p>the path to the PEM encoded certificate file</p></dd><dt class="param">keyPath</dt><dd class="cmt"><p>the path to the corresponding PEM encoded key file</p></dd><dt class="param">caCertificatePath</dt><dd class="cmt"><p>the path to the optional PEM encoded CA cert file
-                         (JSSE: If caCertPath is set, it should contain the
-                         certificate and will be used in place of <code>certificatePath</code>)</p></dd><dt class="param">ciphers</dt><dd class="cmt"><p>the ciphers spec (OpenSSL)</p></dd><dt class="param">nextProtocols</dt><dd class="cmt"><p>the next protocols specs</p></dd></dl></div>
+      <p class="shortcomment cmt">Enables the TLS/SSL support (connection encrypting) on this server.</p><div class="fullcomment"><div class="comment cmt"><p>Enables the TLS/SSL support (connection encrypting) on this server. Only <code>certificatePath</code> and
+<code>keyPath</code> are required to build up a TLS/SSL transport.
+</p></div><dl class="paramcmts block"><dt class="param">certificatePath</dt><dd class="cmt"><p>the path to the PEM encoded X.509 certificate chain</p></dd><dt class="param">keyPath</dt><dd class="cmt"><p>the path to the corresponding PEM encoded PKCS#8 private key</p></dd><dt class="param">caCertificatePath</dt><dd class="cmt"><p>the path to the optional PEM encoded CA certificates trusted by this
+                         server</p></dd><dt class="param">ciphers</dt><dd class="cmt"><p>the list of supported ciphers, delimited by <code>:</code></p></dd><dt class="param">nextProtocols</dt><dd class="cmt"><p>the comma-delimited list of protocols used to perform APN
+                     (Application Protocol Negotiation)</p></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>

@@ -47,7 +47,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">MetricsStatsReceiver</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></span>
+        <span class="name">MetricsStatsReceiver</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.WithHistogramDetails" class="extype" target="_top">WithHistogramDetails</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></span>
       </span>
       </h4>
       
@@ -58,7 +58,7 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
 20 seconds before this value will be aggregated in the exported metrics.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.WithHistogramDetails" class="extype" target="_top">WithHistogramDetails</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
             <div class="subClasses hiddenContent"><a href="ImmediateMetricsStatsReceiver.html" class="extype" name="com.twitter.finagle.stats.ImmediateMetricsStatsReceiver">ImmediateMetricsStatsReceiver</a></div>
@@ -79,7 +79,7 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.stats.MetricsStatsReceiver"><span>MetricsStatsReceiver</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges"><span>StatsReceiverWithCumulativeGauges</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiver"><span>StatsReceiver</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.stats.MetricsStatsReceiver"><span>MetricsStatsReceiver</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges"><span>StatsReceiverWithCumulativeGauges</span></li><li class="in" name="com.twitter.finagle.stats.StatsReceiver"><span>StatsReceiver</span></li><li class="in" name="com.twitter.finagle.stats.WithHistogramDetails"><span>WithHistogramDetails</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -427,6 +427,23 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.stats.MetricsStatsReceiver#histogramDetails" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="histogramDetails:Map[String,com.twitter.finagle.stats.HistogramDetail]"></a>
+      <a id="histogramDetails:Map[String,HistogramDetail]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">histogramDetails</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.HistogramDetail" class="extype" target="_top">HistogramDetail</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.stats.MetricsStatsReceiver@histogramDetails:Map[String,com.twitter.finagle.stats.HistogramDetail]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.stats.MetricsStatsReceiver">MetricsStatsReceiver</a> → WithHistogramDetails</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -820,6 +837,8 @@ metrics on the first 60 seconds. It means that when you add a value, you need to
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiverWithCumulativeGauges" class="extype" target="_top">StatsReceiverWithCumulativeGauges</a></h3>
             </div><div class="parent" name="com.twitter.finagle.stats.StatsReceiver">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.stats.WithHistogramDetails">
+              <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.WithHistogramDetails" class="extype" target="_top">WithHistogramDetails</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

@@ -179,27 +179,6 @@ with Twitter cache pools.</p>
       <p class="shortcomment cmt">Indicates that an error occurred while resolving a cache address.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that an error occurred while resolving a cache address.
 See <span class="extype" name="com.twitter.finagle.memcached.TwitterCacheResolver">com.twitter.finagle.memcached.TwitterCacheResolver</span> for details.
 </p></div></div>
-    </li><li name="com.twitter.finagle.cacheresolver.ZookeeperCacheNodeGroup" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ZookeeperCacheNodeGroupextendsGroup[com.twitter.finagle.cacheresolver.CacheNode]withZookeeperStateMonitor"></a>
-      <a id="ZookeeperCacheNodeGroup:ZookeeperCacheNodeGroup"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ZookeeperCacheNodeGroup.html"><span class="name">ZookeeperCacheNodeGroup</span></a><span class="result"> extends <a href="../Group.html" class="extype" name="com.twitter.finagle.Group">Group</a>[<a href="CacheNode.html" class="extype" name="com.twitter.finagle.cacheresolver.CacheNode">CacheNode</a>] with <a href="ZookeeperStateMonitor.html" class="extype" name="com.twitter.finagle.cacheresolver.ZookeeperStateMonitor">ZookeeperStateMonitor</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.cacheresolver.package@ZookeeperCacheNodeGroupextendsGroup[com.twitter.finagle.cacheresolver.CacheNode]withZookeeperStateMonitor" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Zookeeper based cache node group with a serverset as the underlying pool.</p><div class="fullcomment"><div class="comment cmt"><p>Zookeeper based cache node group with a serverset as the underlying pool.
-It will monitor the underlying serverset changes and report the detected underlying pool size.
-It will monitor the serverset parent node for cache pool config data, cache node group
-update will be triggered whenever cache config data change event happens.
-</p></div></div>
     </li><li name="com.twitter.finagle.cacheresolver.ZookeeperCachePoolCluster" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ZookeeperCachePoolClusterextendsCachePoolClusterwithZookeeperStateMonitor"></a>
       <a id="ZookeeperCachePoolCluster:ZookeeperCachePoolCluster"></a>

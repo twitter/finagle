@@ -186,9 +186,8 @@ to easily inject a balancer into the Finagle stack via client configuration.
 subset (&quot;aperture&quot;) of services so that:</p><div class="fullcomment"><div class="comment cmt"><p>The aperture load-band balancer balances load to the smallest
 subset (&quot;aperture&quot;) of services so that:</p><ol class="decimal"><li>The concurrent load, measured over a window specified by
     <code>smoothWin</code>, to each service stays within the load band, delimited
-    by <code>lowLoad</code> and <code>highLoad</code>.
- 2. Services receive load proportional to the ratio of their
-    weights.</li></ol><p>Unavailable services are not counted--the aperture expands as
+    by <code>lowLoad</code> and <code>highLoad</code>.</li></ol><p> 2. Services receive load proportional to the ratio of their
+    weights.</p><p>Unavailable services are not counted--the aperture expands as
 needed to cover those that are available.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded" target="_blank">user guide</a>
      for more details.</p></span></dd></dl></div>
@@ -467,6 +466,30 @@ presence of long polling clients.
 expend on a load balancing decision without reweighing.</p></dd><dt class="param">rng</dt><dd class="cmt"><p>The PRNG used for flipping coins. Override for
 deterministic tests.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The <a href="https://twitter.github.io/finagle/guide/Clients.html#power-of-two-choices-p2c-least-loaded" target="_blank">user guide</a>
      for more details.</p></span></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#roundRobin" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="roundRobin(maxEffort:Int):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a>
+      <a id="roundRobin(Int):LoadBalancerFactory"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">roundRobin</span><span class="params">(<span name="maxEffort">maxEffort: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a> = <span class="symbol"><span class="name"><a href="#MaxEffort:Int">MaxEffort</a></span></span></span>)</span><span class="result">: <a href="LoadBalancerFactory.html" class="extype" name="com.twitter.finagle.loadbalancer.LoadBalancerFactory">LoadBalancerFactory</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.Balancers$@roundRobin(maxEffort:Int):com.twitter.finagle.loadbalancer.LoadBalancerFactory" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A simple round robin balancer that chooses the next backend in
+the list for each request.</p><div class="fullcomment"><div class="comment cmt"><p>A simple round robin balancer that chooses the next backend in
+the list for each request.</p><p>WARNING: Unlike other balancers available in finagle, this does
+not take latency into account and will happily direct load to
+slow or oversubscribed services. We recommend using one of the
+other load balancers for typical production use.
+</p></div><dl class="paramcmts block"><dt class="param">maxEffort</dt><dd class="cmt"><p>the maximum amount of &quot;effort&quot; we're willing to
+expend on a load balancing decision without reweighing.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

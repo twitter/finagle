@@ -170,6 +170,26 @@ is capable of parsing trace information out of the codec.</p></span></dd></dl><d
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.Filter#agnosticAndThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="agnosticAndThen(next:com.twitter.finagle.Filter.TypeAgnostic):com.twitter.finagle.Filter[ReqIn,RepOut,ReqOut,RepIn]"></a>
+      <a id="agnosticAndThen(TypeAgnostic):Filter[Req,Rep,Req,Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">agnosticAndThen</span><span class="params">(<span name="next">next: <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.tracing.TraceInitializerFilter.Rep">Rep</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.tracing.TraceInitializerFilter@agnosticAndThen(next:com.twitter.finagle.Filter.TypeAgnostic):com.twitter.finagle.Filter[ReqIn,RepOut,ReqOut,RepIn]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Convert the <span class="extype" name="TypeAgnostic">TypeAgnostic</span> filter to a Filter and chain it with
+<code>andThen</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Convert the <span class="extype" name="TypeAgnostic">TypeAgnostic</span> filter to a Filter and chain it with
+<code>andThen</code>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen(factory:com.twitter.finagle.ServiceFactory[ReqOut,RepIn]):com.twitter.finagle.ServiceFactory[ReqIn,RepOut]"></a>
       <a id="andThen(ServiceFactory[Req,Rep]):ServiceFactory[Req,Rep]"></a>

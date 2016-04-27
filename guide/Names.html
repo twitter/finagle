@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Names and Naming in Finagle &mdash; Finagle 6.34.0 documentation</title>
+    <title>Names and Naming in Finagle &mdash; Finagle 6.35.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.34.0',
+        VERSION:     '6.35.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.34.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.35.0 documentation" href="index.html" />
     <link rel="next" title="Protocols" href="Protocols.html" />
     <link rel="prev" title="Contexts" href="Contexts.html" />
    
@@ -145,6 +145,23 @@ Delegations have the concrete syntax</p>
 </div>
 <p>Note that prefixes match on path <cite>components</cite>, not characters; e.g.
 <cite>/s</cite> is a prefix of <cite>/s/crawler</cite>, but not of <cite>/s#/foo/bar/crawler</cite>.</p>
+<p>Furthermore, prefixes may contain the wildcard character <cite>*</cite> to match
+any component. For example</p>
+<div class="highlight-text"><div class="highlight"><pre>/s#/*/bar       =&gt;      /t/bah
+</pre></div>
+</div>
+<p>rewrites the paths</p>
+<div class="highlight-text"><div class="highlight"><pre>/s#/foo/bar/baz
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-text"><div class="highlight"><pre>/s#/boo/bar/baz
+</pre></div>
+</div>
+<p>to</p>
+<div class="highlight-text"><div class="highlight"><pre>/t/bah/baz
+</pre></div>
+</div>
 <p>Paths beginning with <tt class="docutils literal"><span class="pre">/$/</span></tt> are called &#8220;system paths.&#8221; They are interpreted
 specially by Finagle, similarly to resolver schemes. Paths of the form</p>
 <div class="highlight-text"><div class="highlight"><pre>/$/namer/path..
@@ -162,6 +179,20 @@ example</p>
 </div>
 <p>is the path describing the <a class="reference external" href="http://twitter.github.io/commons/apidocs/com/twitter/common/zookeeper/ServerSet.html">serverset</a> <tt class="docutils literal"><span class="pre">/foo/bar</span></tt> on the ZooKeeper
 ensemble <tt class="docutils literal"><span class="pre">zk.local.twitter.com:2181</span></tt>.</p>
+<p>Dtabs may contain line-oriented comments beginning with <tt class="docutils literal"><span class="pre">#</span></tt>. <tt class="docutils literal"><span class="pre">#</span></tt>
+must be preceded by a whitespace character or delimiter such as <tt class="docutils literal"><span class="pre">;</span></tt>,
+<tt class="docutils literal"><span class="pre">|</span></tt>, or <tt class="docutils literal"><span class="pre">&amp;</span></tt>.  For example, this Dtab with commentary:</p>
+<div class="highlight-text"><div class="highlight"><pre># delegation for /s
+/s =&gt; /a      # prefer /b
+    | ( /b    # or share traffic between /b and /c
+      &amp; /c
+      );
+</pre></div>
+</div>
+<p>is equivalent to this Dtab without commentary:</p>
+<div class="highlight-text"><div class="highlight"><pre>/s =&gt; /a | (/b &amp; /c);
+</pre></div>
+</div>
 <p>We use dtabs to define how logical names (e.g. <tt class="docutils literal"><span class="pre">/s/crawler</span></tt>)
 translate into addresses. Because rewriting is abstracted away, we can
 adapt a Finagle process to its environment by manipulating its dtab.
