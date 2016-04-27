@@ -46,7 +46,7 @@ import org.jboss.netty.buffer.ChannelBuffer
  */
 object ThriftMux
   extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
-  with Server[Array[Byte], Array[Byte]] with ThriftRichServer
+  with Server[Array[Byte], Array[Byte]]
 {
   /**
    * Base [[com.twitter.finagle.Stack]] for ThriftMux clients.
@@ -398,8 +398,8 @@ object ThriftMux
     protected val Thrift.param.ProtocolFactory(protocolFactory) =
       params[Thrift.param.ProtocolFactory]
 
-    override val Thrift.param.MaxReusableBufferSize(maxThriftBufferSize) =
-      params[Thrift.param.MaxReusableBufferSize]
+    override val Thrift.Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
+      params[Thrift.Server.param.MaxReusableBufferSize]
 
     /**
      * Produce a [[com.twitter.finagle.Thrift.Server]] using the provided
@@ -416,7 +416,7 @@ object ThriftMux
      * @param size Max size of the reusable buffer for thrift responses in bytes.
      */
     def withMaxReusableBufferSize(size: Int): Server =
-      configured(Thrift.param.MaxReusableBufferSize(size))
+      configured(Thrift.Server.param.MaxReusableBufferSize(size))
 
     def withParams(ps: Stack.Params): Server =
       copy(muxer = muxer.withParams(ps))

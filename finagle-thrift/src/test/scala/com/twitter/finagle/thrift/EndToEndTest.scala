@@ -331,7 +331,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       override def getStatus(): Future[String] = Future.value("OK")
     }
 
-    val server1 = Thrift.serveIface(
+    val server1 = Thrift.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService1()
     )
@@ -345,7 +345,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       override def echo(msg: String): Future[String] = Future.value(msg)
       override def getStatus(): Future[String] = Future.value("OK")
     }
-    val server2 = Thrift.serveIface(
+    val server2 = Thrift.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService2()
     )

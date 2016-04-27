@@ -55,7 +55,7 @@ class EndToEndTest extends FunSuite
   }
 
   trait ThriftMuxTestServer {
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) =
@@ -272,7 +272,7 @@ class EndToEndTest extends FunSuite
 
   test("thriftmux server + Finagle thrift client: client should receive a " +
     "TApplicationException if the server throws an unhandled exception") {
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) = throw new Exception("sad panda")
@@ -321,7 +321,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("thriftmux server + Finagle thrift client: clientId should be passed from client to server") {
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
@@ -340,7 +340,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("thriftmux server + Finagle thrift client: ClientId should not be overridable externally") {
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
@@ -385,7 +385,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("thriftmux server + thriftmux client: ClientId should not be overridable externally") {
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) = Future.value(ClientId.current map { _.name } getOrElse(""))
@@ -440,7 +440,7 @@ class EndToEndTest extends FunSuite
 
   test("thriftmux server + thrift client: client should receive a " +
     "TApplicationException if the server throws an unhandled exception") {
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) = throw new Exception("sad panda")
@@ -719,7 +719,7 @@ class EndToEndTest extends FunSuite
         servicePromises(nReqReceived-1)
       }
     }
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0), testService)
 
     object OldPlainPipeliningThriftClient extends Thrift.Client(stack=StackClient.newStack) {
@@ -745,7 +745,7 @@ class EndToEndTest extends FunSuite
   }
 
   test("thriftmux client: should emit ClientId") {
-    val server = ThriftMux.serveIface(
+    val server = ThriftMux.server.serveIface(
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new TestService.FutureIface {
         def query(x: String) = {
@@ -764,7 +764,7 @@ class EndToEndTest extends FunSuite
    test("end-to-end finagle-thrift") {
      import com.twitter.finagle.thriftmux.thrift.TestService
 
-     val server = ThriftMux.serveIface(
+     val server = ThriftMux.servver.serveIface(
        new InetSocketAddress(InetAddress.getLoopbackAddress, 0), new TestService.ServiceIface {
          def query(x: String) = Future.value(x+x)
        })

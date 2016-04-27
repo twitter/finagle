@@ -58,9 +58,12 @@ import org.apache.thrift.protocol.TProtocolFactory
  * @define serverExampleObject Thrift
  */
 object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
-    with Server[Array[Byte], Array[Byte]] with ThriftRichServer {
+    with Server[Array[Byte], Array[Byte]] {
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
+
+  // Planned deprecation. Use `Thrift.Server.maxThriftBufferSize` instead.
+  val maxThriftBufferSize: Int = 16 * 1024
 
   protected lazy val Label(defaultClientName) = client.params[Label]
 
@@ -83,6 +86,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
      * A `Param` to control whether a framed transport should be used.
      * If this is set to false, a buffered transport is used.  Framed
      * transports are enabled by default.
+     *
      * @param enabled Whether a framed transport should be used.
      */
     case class Framed(enabled: Boolean)
@@ -91,18 +95,8 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     }
 
     /**
-     * A `Param` to set the max size of a reusable buffer for the thrift response.
-     * If the buffer size exceeds the specified value, the buffer is not reused,
-     * and a new buffer is used for the next thrift response.
-     * @param maxReusableBufferSize Max buffer size in bytes.
-     */
-    case class MaxReusableBufferSize(maxReusableBufferSize: Int)
-    implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
-      val default = MaxReusableBufferSize(maxThriftBufferSize)
-    }
-
-    /**
      * A `Param` to control upgrading the thrift protocol to TTwitter.
+     *
      * @see The [[https://twitter.github.io/finagle/guide/Protocols.html?highlight=Twitter-upgraded#thrift user guide]] for details on Twitter-upgrade Thrift.
      */
     case class AttemptTTwitterUpgrade(upgrade: Boolean)
@@ -274,10 +268,26 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
         override val description = "Prepare TTwitter thrift connection"
         def make(params: Stack.Params, next: ServiceFactory[Array[Byte], Array[Byte]]) = {
           val Label(label) = params[Label]
-          val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
+          val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
           val preparer = new thrift.ThriftServerPreparer(pf, label)
           preparer.prepare(next, params)
         }
+    }
+
+    val maxThriftBufferSize: Int = 16 * 1024
+
+    object param {
+      /**
+       * A `Param` to set the max size of a reusable buffer for the thrift response.
+       * If the buffer size exceeds the specified value, the buffer is not reused,
+       * and a new buffer is used for the next thrift response.
+       *
+       * @param maxReusableBufferSize Max buffer size in bytes.
+       */
+      case class MaxReusableBufferSize(maxReusableBufferSize: Int)
+      implicit object MaxReusableBufferSize extends Stack.Param[MaxReusableBufferSize] {
+        val default = MaxReusableBufferSize(maxThriftBufferSize)
+      }
     }
 
     val stack: Stack[ServiceFactory[Array[Byte], Array[Byte]]] = StackServer.newStack

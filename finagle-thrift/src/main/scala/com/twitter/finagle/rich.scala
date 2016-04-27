@@ -244,7 +244,7 @@ private[twitter] object ThriftUtil {
    * (Legacy version for backward-compatibility).
    */
   def serverFromIface(impl: AnyRef, protocolFactory: TProtocolFactory, serviceName: String): BinaryService = {
-    serverFromIface(impl, protocolFactory, LoadedStatsReceiver, Thrift.maxThriftBufferSize, serviceName)
+    serverFromIface(impl, protocolFactory, LoadedStatsReceiver, Thrift.Server.maxThriftBufferSize, serviceName)
   }
 }
 
@@ -493,7 +493,7 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
 
   protected val protocolFactory: TProtocolFactory
 
-  val maxThriftBufferSize: Int = 16 * 1024
+  protected val maxThriftBufferSize = Thrift.Server.maxThriftBufferSize
 
   protected val serverLabel = "thrift"
 

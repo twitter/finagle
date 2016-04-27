@@ -14,7 +14,7 @@ object ThriftServiceIfaceExample {
   def main(args: Array[String]) {
     // See the docs at https://twitter.github.io/finagle/guide/Protocols.html#using-finagle-thrift
     //#thriftserverapi
-    val server = Thrift.serveIface(
+    val server = Thrift.server.serveIface(
       "localhost:1234",
       new LoggerService[Future] {
         def log(message: String, logLevel: Int): Future[String] = {

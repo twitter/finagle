@@ -39,6 +39,10 @@ Breaking API Changes
 
   * finagle-core: Dentry now takes a Dentry.Prefix instead of a Path. ``RB_ID=813914``
 
+  * finagle-thrift/thriftmux: Thrift servers constructed using `Thrift.serveIface` now use
+    `Thrift.server.serveIface`. ThriftMux servers constructed using `ThriftMux.serveIface` now use
+    `ThriftMux.server.serveIface`. ``RB_ID=824865``
+
   * finagle-cache-resolver: `c.t.f.cacheresolver.ZookeeperCacheNodeGroup` has been removed from the
     API since we no longer check for the zookeeper data for the cache pool size to refresh for the
     changes in the serverset. ``RB_ID=811190``
