@@ -1,15 +1,11 @@
 package com.twitter.finagle.netty3.ssl
 
-import com.twitter.finagle.{ChannelClosedException, InconsistentStateException,
-  SslHandshakeException, SslHostVerificationException}
-import com.twitter.util.Try
+import com.twitter.finagle.{ChannelClosedException, InconsistentStateException, SslHandshakeException}
 import java.net.SocketAddress
-import java.security.cert.X509Certificate
 import java.util.concurrent.atomic.AtomicReference
 import javax.net.ssl.{SSLException, SSLSession}
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.ssl.SslHandler
-import sun.security.util.HostnameChecker
 
 /**
  * Handle server-side SSL Connections:
@@ -144,27 +140,5 @@ class SslConnectHandler(
           fail(ctx.getChannel, new SslHandshakeException(f.getCause, _))
         }
     })
-  }
-}
-
-object SslConnectHandler {
-  /**
-   * Run hostname verification on the session.  This will fail with a
-   * [[com.twitter.finagle.SslHostVerificationException]] if the certificate is
-   * invalid for the given session.
-   *
-   * This uses [[sun.security.util.HostnameChecker]].  Any bugs are theirs.
-   */
-  def sessionHostnameVerifier(hostname: String)(session: SSLSession): Option[Throwable] = {
-    val checker = HostnameChecker.getInstance(HostnameChecker.TYPE_TLS)
-    val isValid = session.getPeerCertificates.headOption.exists {
-      case x509: X509Certificate =>
-        Try { checker.`match`(hostname, x509) }.isReturn
-      case _ => false
-    }
-
-     if (isValid) None else {
-       Some(new SslHostVerificationException(session.getPeerPrincipal.getName))
-     }
   }
 }

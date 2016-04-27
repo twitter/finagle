@@ -7,7 +7,7 @@ import com.twitter.finagle.netty3.socks.SocksConnectHandler
 import com.twitter.finagle.netty3.ssl.SslConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.socks.{SocksProxyFlags, Unauthenticated, UsernamePassAuthenticationSetting}
-import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.{SessionVerifier, Engine}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
@@ -322,9 +322,9 @@ case class Netty3Transporter[In, Out](
       engine.self.setUseClientMode(true)
       engine.self.setEnableSessionCreation(true)
 
-      val verifier = verifyHost.map(SslConnectHandler.sessionHostnameVerifier).getOrElse {
-        Function.const(None) _
-      }
+      val verifier = verifyHost
+        .map(SessionVerifier.hostname)
+        .getOrElse(SessionVerifier.AlwaysValid)
 
       val sslHandler = new SslHandler(engine.self)
       val sslConnectHandler = new SslConnectHandler(sslHandler, verifier)
