@@ -117,6 +117,37 @@ object TraceId {
 
 /**
  * A trace id represents one particular trace for one request.
+ *
+ * A request is composed of one or more spans, which are generally RPCs but
+ * may be other in-process activity. The TraceId for each span is a tuple of
+ * three ids:
+ *
+ *   1. a shared id common to all spans in an overall request (trace id)
+ *   2. an id unique to this part of the request (span id)
+ *   3. an id for the parent request that caused this span (parent id)
+ *
+ * For example, when service M calls service N, they may have respective
+ * TraceIds like these:
+ *
+ * {{{
+ *            TRACE ID         SPAN ID           PARENT ID
+ * SERVICE M  e4bbb7c0f6a2ff07.a5f47e9fced314a2<:694eb2f05b8fd7d1
+ *                   |                |
+ *                   |                +-----------------+
+ *                   |                                  |
+ *                   v                                  v
+ * SERVICE N  e4bbb7c0f6a2ff07.263edc9b65773b08<:a5f47e9fced314a2
+ * }}}
+ *
+ * Parent id and trace id are optional when constructing a TraceId because
+ * they are not present for the very first span in a request. In this case all
+ * three ids in the resulting TraceId are the same:
+ *
+ * {{{
+ *            TRACE ID         SPAN ID           PARENT ID
+ * SERVICE A  34429b04b6bbf478.34429b04b6bbf478<:34429b04b6bbf478
+ * }}}
+ *
  * @param _traceId The id for this request.
  * @param _parentId The id for the request one step up the service stack.
  * @param spanId The id for this particular request
