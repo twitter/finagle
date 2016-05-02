@@ -1,0 +1,14 @@
+junit_tests(name='scala',
+  dependencies=[
+    '3rdparty/jvm/junit',
+    '3rdparty/jvm/org/scalacheck',
+    '3rdparty/jvm/org/scalatest',
+    'finagle/finagle-toggle',
+    'util/util-app/src/main/java',
+    'util/util-app/src/main/scala',
+    'util/util-core',
+  ],
+  sources=rglobs('*.scala'),
+  fatal_warnings=True,
+  strict_deps=True,
+)
