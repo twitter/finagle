@@ -45,7 +45,7 @@ import org.jboss.netty.buffer.ChannelBuffer
  * @define serverExampleObject ThriftMux
  */
 object ThriftMux
-  extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
+  extends Client[ThriftClientRequest, Array[Byte]]
   with Server[Array[Byte], Array[Byte]]
 {
   /**
@@ -214,12 +214,6 @@ object ThriftMux
   val client: ThriftMux.Client = Client()
     .configured(Label("thrift"))
     .configured(Stats(ClientStatsReceiver))
-
-  protected lazy val Label(defaultClientName) = client.params[Label]
-
-  override protected lazy val Stats(stats) = client.params[Stats]
-
-  protected def params: Stack.Params = client.params
 
   protected val Thrift.param.ProtocolFactory(protocolFactory) =
     client.params[Thrift.param.ProtocolFactory]

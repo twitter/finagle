@@ -19,7 +19,8 @@ public class UseThrift {
    */
   @Test
   public void testClientServerCompilation() {
-    Thrift.newIface(":*", B.ServiceIface.class);
+    Thrift.client().newIface(":*", B.ServiceIface.class);
+
     Thrift.server().serveIface(":*", new BServiceImpl());
 
     Thrift.client()

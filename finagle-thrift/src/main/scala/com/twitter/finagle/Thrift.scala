@@ -57,19 +57,13 @@ import org.apache.thrift.protocol.TProtocolFactory
  * @define clientExampleObject Thrift
  * @define serverExampleObject Thrift
  */
-object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichClient
+object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     with Server[Array[Byte], Array[Byte]] {
 
   val protocolFactory: TProtocolFactory = Protocols.binaryFactory()
 
   // Planned deprecation. Use `Thrift.Server.maxThriftBufferSize` instead.
   val maxThriftBufferSize: Int = 16 * 1024
-
-  protected lazy val Label(defaultClientName) = client.params[Label]
-
-  protected def params: Stack.Params = client.params
-
-  override protected lazy val Stats(stats) = client.params[Stats]
 
   object param {
     case class ClientId(clientId: Option[thrift.ClientId])
@@ -117,7 +111,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
         ) = {
           val Label(label) = params[Label]
           val param.ClientId(clientId) = params[param.ClientId]
-          val param.ProtocolFactory(pf) = params[param.ProtocolFactory]
+          val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
           val preparer = new ThriftClientPreparer(pf, label, clientId)
           preparer.prepare(next, params)
         }
@@ -169,7 +163,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
       configured(param.ProtocolFactory(protocolFactory))
 
     def withClientId(clientId: thrift.ClientId): Client =
-      configured(param.ClientId(Some(clientId)))
+      configured(Thrift.param.ClientId(Some(clientId)))
 
     def withAttemptTTwitterUpgrade: Client =
       configured(param.AttemptTTwitterUpgrade(true))
@@ -177,7 +171,7 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]] with ThriftRichCl
     def withNoAttemptTTwitterUpgrade: Client =
       configured(param.AttemptTTwitterUpgrade(false))
 
-    def clientId: Option[thrift.ClientId] = params[param.ClientId].clientId
+    def clientId: Option[thrift.ClientId] = params[Thrift.param.ClientId].clientId
 
     private[this] def deserializingClassifier: Client = {
       // Note: what type of deserializer used is important if none is specified

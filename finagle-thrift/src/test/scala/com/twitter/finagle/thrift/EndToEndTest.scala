@@ -335,7 +335,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService1()
     )
-    val client1 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+    val client1 = Thrift.client.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server1.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(Await.result(client1.echo("asdf")) == "asdf")
     assert(Await.result(client1.getStatus()) == "OK")
@@ -349,7 +349,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       new InetSocketAddress(InetAddress.getLoopbackAddress, 0),
       new ExtendedEchoService2()
     )
-    val client2 = Thrift.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
+    val client2 = Thrift.client.newIface[ExtendedEcho.FutureIface](Name.bound(Address(server2.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(Await.result(client2.echo("asdf")) == "asdf")
     assert(Await.result(client2.getStatus()) == "OK")
