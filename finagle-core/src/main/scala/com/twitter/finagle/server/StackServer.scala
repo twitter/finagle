@@ -20,7 +20,7 @@ import scala.collection.JavaConverters._
 
 object StackServer {
 
-  private[this] val newJvmFilter = new MkJvmFilter(Jvm())
+  private[this] lazy val newJvmFilter = new MkJvmFilter(Jvm())
 
   private[this] class JvmTracing[Req, Rep] extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
     override def role: Role = Role.jvmTracing
