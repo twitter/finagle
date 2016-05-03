@@ -33,6 +33,8 @@ class HttpServerDispatcher(
   protected def dispatch(m: Request): Future[Response] = m match {
     case badReq: BadReq =>
       val resp = badReq match {
+        case _: ContentTooLong =>
+          Response(badReq.version, Status.RequestEntityTooLarge)
         case _: UriTooLong =>
           Response(badReq.version, Status.RequestURITooLong)
         case _: HeaderFieldsTooLarge =>

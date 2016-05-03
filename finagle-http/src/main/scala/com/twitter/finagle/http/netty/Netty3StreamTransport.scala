@@ -61,6 +61,8 @@ private[finagle] class Netty3ServerStreamTransport(transport: Transport[Any, Any
           case ex: TooLongFrameException =>
             if (ex.getMessage().startsWith("An HTTP line is larger than "))
               BadRequest.uriTooLong(badReq)
+            else if (ex.getMessage().startsWith("HTTP content length exceeded "))
+              BadRequest.contentTooLong(badReq)
             else
               BadRequest.headerTooLong(badReq)
           case _ =>

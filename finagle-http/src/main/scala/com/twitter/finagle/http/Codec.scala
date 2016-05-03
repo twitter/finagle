@@ -9,7 +9,7 @@ import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNac
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Closable, StorageUnit, Try}
+import com.twitter.util.{NonFatal, Closable, StorageUnit, Try}
 import java.net.InetSocketAddress
 import org.jboss.netty.channel.{Channel, ChannelEvent, ChannelHandlerContext, ChannelPipelineFactory, Channels, UpstreamMessageEvent}
 import org.jboss.netty.handler.codec.http._
@@ -24,6 +24,7 @@ object BadHttpRequest {
 }
 
 private[finagle] sealed trait BadReq
+private[finagle] trait ContentTooLong extends BadReq
 private[finagle] trait UriTooLong extends BadReq
 private[finagle] trait HeaderFieldsTooLarge extends BadReq
 
@@ -46,6 +47,19 @@ private[finagle] object BadRequest {
     )
 
     apply(msg)
+  }
+
+  def contentTooLong(msg: BadHttpRequest): BadRequest with ContentTooLong =
+    new BadRequest(msg, msg.exception) with ContentTooLong
+
+  def contentTooLong(exn: Throwable): BadRequest with ContentTooLong = {
+    val msg = new BadHttpRequest(
+      HttpVersion.HTTP_1_0,
+      HttpMethod.GET,
+      "/bad-http-request",
+      exn
+    )
+    contentTooLong(msg)
   }
 
   def uriTooLong(msg: BadHttpRequest): BadRequest with UriTooLong =
@@ -72,6 +86,24 @@ private[finagle] object BadRequest {
       exn
     )
     headerTooLong(msg)
+  }
+}
+
+
+/**
+ * a HttpChunkAggregator which recovers decode failures into 4xx http responses
+ */
+private[http] class SafeServerHttpChunkAggregator(maxContentSizeBytes: Int) extends HttpChunkAggregator(maxContentSizeBytes) {
+
+  override def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
+    try {
+      super.handleUpstream(ctx, e)
+    } catch {
+      case NonFatal(ex) =>
+        val channel = ctx.getChannel()
+        ctx.sendUpstream(new UpstreamMessageEvent(
+          channel, BadHttpRequest(ex), channel.getRemoteAddress()))
+    }
   }
 }
 
@@ -270,7 +302,7 @@ case class Http(
           if (!_streaming)
             pipeline.addLast(
               "httpDechunker",
-              new HttpChunkAggregator(maxRequestSizeInBytes))
+              new SafeServerHttpChunkAggregator(maxRequestSizeInBytes))
 
           _annotateCipherHeader foreach { headerName: String =>
             pipeline.addLast("annotateCipher", new AnnotateCipher(headerName))

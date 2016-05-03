@@ -39,6 +39,8 @@ class HttpServerDispatcher(
           // this is very brittle :(
           if (ex.getMessage().startsWith("An HTTP line is larger than "))
             Response(from(badReq.httpVersion), Status.RequestURITooLong)
+          else if (ex.getMessage().startsWith("HTTP content length exceeded "))
+            Response(from(badReq.httpVersion), Status.RequestEntityTooLarge)
           else
             Response(from(badReq.httpVersion), Status.RequestHeaderFieldsTooLarge)
         case _ =>

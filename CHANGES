@@ -7,6 +7,13 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-http: Servers which aggregate content chunks (streaming == false) now return a 413 
+    response for streaming clients who exceed the servers' configured max request size. 
+    ``RB_ID=828741``
+
 New Features
 ~~~~~~~~~~~~
 
@@ -75,7 +82,7 @@ New Features
   * finagle-core: Gauge for dns resolutions awaiting lookups. ``RB_ID=822410``
 
 Bug Fixes
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
 
   * finagle-http: Ensure that service closure is delayed until chunked response bodies
     have been processed. ``RB_ID=813110``

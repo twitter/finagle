@@ -150,7 +150,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       client.close()
     }
 
-    test(name + ": return 413s for requests with too large payloads") {
+    test(name + ": return 413s for fixed-length requests with too large payloads") {
       val service = new HttpService {
         def apply(request: Request) = Future.value(Response())
       }
@@ -164,6 +164,24 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
       assert(Await.result(client(tooBig)).status == Status.RequestEntityTooLarge)
       assert(Await.result(client(justRight)).status == Status.Ok)
+      client.close()
+    }
+
+    test(name + ": return 413s for chunked requests which stream too much data") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+
+      val justRight = Request("/")
+      assert(Await.result(client(justRight), 2.seconds).status == Status.Ok)
+
+      val tooMuch = Request("/")
+      tooMuch.setChunked(true)
+      val w = tooMuch.writer
+      w.write(buf("a"*1000)).before(w.close)
+      val res = Await.result(client(tooMuch), 2.seconds)
+      assert(res.status == Status.RequestEntityTooLarge)
       client.close()
     }
   }
