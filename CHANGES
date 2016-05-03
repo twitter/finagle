@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: Added gauge, "scheduler/blocking_ms" measuring how much time,
+    in milliseconds, the ``com.twitter.concurrent.Scheduler`` is spending doing blocking
+    operations on threads that have opted into tracking. This also moves the
+    "scheduler/dispatches" gauge out of TwitterServer into Finagle. ``RB_ID=828289``
+
 6.35.0
 ------
 

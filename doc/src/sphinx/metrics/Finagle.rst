@@ -1,3 +1,19 @@
+Scheduler
+<<<<<<<<<
+
+**scheduler/dispatches**
+  A gauge of the number of dispatches performed by the
+  ``com.twitter.concurrent.Scheduler``.
+
+**scheduler/blocking_ms**
+  A gauge of how much time, in milliseconds, the ``com.twitter.concurrent.Scheduler``
+  is spending doing blocking operations on threads that have opted into tracking.
+  Of the built-in ``Schedulers``, this is only enabled for the
+  ``com.twitter.concurrent.LocalScheduler`` which is the default ``Scheduler``
+  implementation. Note that this does not include time spent doing blocking code
+  outside of ``com.twitter.util.Await.result``/``Await.ready``. For example,
+  ``Future(someSlowSynchronousIO)`` would not be accounted for in this metric.
+
 Timer
 <<<<<
 

@@ -2,7 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.app.GlobalFlag
 import com.twitter.concurrent.NamedPoolThreadFactory
+import com.twitter.finagle.util.ProxyThreadFactory
 import com.twitter.jvm.numProcs
+import com.twitter.util.Awaitable
 import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.util.internal.PlatformDependent
@@ -18,9 +20,16 @@ package object netty4 {
   object numWorkers extends GlobalFlag((numProcs() * 2).ceil.toInt, "number of netty4 worker threads")
 
   // global worker thread pool for finagle clients and servers.
-  private[netty4] val Executor: ExecutorService = Executors.newCachedThreadPool(
-    new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true)
-  )
+  private[netty4] val Executor: ExecutorService = {
+    val threadFactory = new ProxyThreadFactory(
+      new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true),
+      ProxyThreadFactory.newProxiedRunnable(
+        () => Awaitable.enableBlockingTimeTracking(),
+        () => Awaitable.disableBlockingTimeTracking()
+      )
+    )
+    Executors.newCachedThreadPool(threadFactory)
+  }
 
   private[netty4] object WorkerPool extends NioEventLoopGroup(numWorkers(), Executor)
 

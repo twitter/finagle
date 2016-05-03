@@ -1,8 +1,9 @@
 package com.twitter.finagle
 
-
 import com.twitter.concurrent.NamedPoolThreadFactory
-import java.util.concurrent.Executors
+import com.twitter.finagle.util.ProxyThreadFactory
+import com.twitter.util.Awaitable
+import java.util.concurrent.{ExecutorService, Executors}
 import org.jboss.netty.util.{ThreadNameDeterminer, ThreadRenamingRunnable}
 
 /**
@@ -18,8 +19,16 @@ import org.jboss.netty.util.{ThreadNameDeterminer, ThreadRenamingRunnable}
 package object netty3 {
   // Disable Netty's thread name rewriting, to preserve the "finagle/netty3"
   // suffix specified below.
-  ThreadRenamingRunnable.setThreadNameDeterminer(ThreadNameDeterminer.CURRENT);
+  ThreadRenamingRunnable.setThreadNameDeterminer(ThreadNameDeterminer.CURRENT)
 
-  val Executor = Executors.newCachedThreadPool(
-    new NamedPoolThreadFactory("finagle/netty3", true/*daemon*/))
+  val Executor: ExecutorService = {
+    val threadFactory = new ProxyThreadFactory(
+      new NamedPoolThreadFactory("finagle/netty3", makeDaemons = true),
+      ProxyThreadFactory.newProxiedRunnable(
+        () => Awaitable.enableBlockingTimeTracking(),
+        () => Awaitable.disableBlockingTimeTracking()
+      )
+    )
+    Executors.newCachedThreadPool(threadFactory)
+  }
 }
