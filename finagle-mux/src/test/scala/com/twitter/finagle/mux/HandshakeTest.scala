@@ -6,11 +6,10 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Failure, Status}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Return}
 import java.net.SocketAddress
 import java.security.cert.{Certificate, X509Certificate}
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers.wrappedBuffer
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -24,8 +23,8 @@ class HandshakeTest extends FunSuite
 
   import Message.{encode => enc, decode => dec}
 
-  val clientToServer = new AsyncQueue[ChannelBuffer]
-  val serverToClient = new AsyncQueue[ChannelBuffer]
+  val clientToServer = new AsyncQueue[Buf]
+  val serverToClient = new AsyncQueue[Buf]
 
   val clientTransport = new QueueTransport(
     writeq = clientToServer,
@@ -72,7 +71,7 @@ class HandshakeTest extends FunSuite
     val local = new java.net.SocketAddress { }
     val peerCert = Some(mock[X509Certificate])
 
-    val q = new AsyncQueue[ChannelBuffer]
+    val q = new AsyncQueue[Buf]
     val trans = new QueueTransport(q, q) {
       override val localAddress: SocketAddress = local
       override val remoteAddress: SocketAddress = remote
@@ -168,8 +167,7 @@ class HandshakeTest extends FunSuite
 
   test("client handshake") {
     val version = 10: Short
-    val headers = Seq(
-      wrappedBuffer("key".getBytes) -> wrappedBuffer("value".getBytes))
+    val headers = Seq(Buf.Utf8("key") -> Buf.Utf8("value"))
     var negotiated = false
 
     val client = Handshake.client(
@@ -229,8 +227,7 @@ class HandshakeTest extends FunSuite
 
   test("server handshake") {
     val version = 10: Short
-    val hdrs = Seq(
-      wrappedBuffer("key".getBytes) -> wrappedBuffer("value".getBytes))
+    val hdrs = Seq(Buf.Utf8("key") -> Buf.Utf8("value"))
     var negotiated = false
 
     val server = Handshake.server(

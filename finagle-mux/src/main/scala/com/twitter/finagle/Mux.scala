@@ -15,9 +15,9 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{param => fparam}
+import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future, StorageUnit}
 import java.net.SocketAddress
-import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * A client and server for the mux protocol described in [[com.twitter.finagle.mux]].
@@ -141,8 +141,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = ChannelBuffer
-    protected type Out = ChannelBuffer
+    protected type In = Buf
+    protected type Out = Buf
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
@@ -216,8 +216,8 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
 
-    protected type In = ChannelBuffer
-    protected type Out = ChannelBuffer
+    protected type In = Buf
+    protected type Out = Buf
 
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 

@@ -3,14 +3,13 @@ package com.twitter.finagle.mux.transport
 import com.twitter.concurrent.{AsyncQueue, Broker, Offer}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Failure, Status}
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util.{Future, NonFatal, Promise,Time, Throw, Return}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicInteger
-import org.jboss.netty.buffer.ChannelBuffers.{unmodifiableBuffer, wrappedBuffer}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 /**
  * Defines a [[com.twitter.finagle.transport.Transport]] which allows a
@@ -33,24 +32,23 @@ private[finagle] object MuxFramer {
    * mux session header during initialization.
    */
   object Header {
-    private val key = "mux-framer".getBytes(Charsets.Utf8)
-    def KeyBuf: ChannelBuffer = unmodifiableBuffer(wrappedBuffer(key))
+    val KeyBuf: Buf = Buf.Utf8("mux-framer")
 
     /**
      * Returns a header value with the given frame `size` encoded.
      */
-    def encodeFrameSize(size: Int): ChannelBuffer = {
+    def encodeFrameSize(size: Int): Buf = {
       require(size > 0)
-      val cb = ChannelBuffers.buffer(4)
-      cb.writeInt(size)
-      unmodifiableBuffer(cb)
+      val bw = BufWriter.fixed(4)
+      bw.writeIntBE(size)
+      bw.owned()
     }
 
     /**
-     * Extracts frame size from the `cb`.
+     * Extracts frame size from the `buf`.
      */
-    def decodeFrameSize(cb: ChannelBuffer): Int = {
-      val size = cb.readInt()
+    def decodeFrameSize(buf: Buf): Int = {
+      val size = BufReader(buf).readIntBE()
       require(size > 0)
       size
     }
@@ -63,7 +61,7 @@ private[finagle] object MuxFramer {
    */
   case class FragmentStream(
     tag: Int,
-    fragments: Iterator[ChannelBuffer],
+    fragments: Iterator[Buf],
     writePromise: Promise[Unit])
 
   /**
@@ -80,7 +78,7 @@ private[finagle] object MuxFramer {
    * transport. However, the transport is always prepared to read fragments.
    */
   def apply(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Buf, Buf],
     writeWindowBytes: Option[Int],
     statsReceiver: StatsReceiver
   ): Transport[Message, Message] = new Transport[Message, Message] {
@@ -107,10 +105,10 @@ private[finagle] object MuxFramer {
      * be <= `maxSize`. Note, this should not be iterated over on more than one
      * thread at a time.
      */
-    private[this] def fragment(msg: Message, maxSize: Int): Iterator[ChannelBuffer] =
-      if (msg.buf.readableBytes <= maxSize) {
+    private[this] def fragment(msg: Message, maxSize: Int): Iterator[Buf] =
+      if (msg.buf.length <= maxSize) {
         Iterator.single(Message.encode(msg))
-      } else new Iterator[ChannelBuffer] {
+      } else new Iterator[Buf] {
         // Create a mux header with the tag MSB set to 1. This signifies
         // that the message is part of a set of fragments. Note that the
         // decoder needs to respect this and not attempt to decode fragments
@@ -124,18 +122,17 @@ private[finagle] object MuxFramer {
           )
         }
 
-        private[this] val headerBuf = unmodifiableBuffer(wrappedBuffer(header))
-        headerBuf.markReaderIndex()
+        private[this] val headerBuf = Buf.ByteArray.Owned(header)
+        private[this] val buf = msg.buf
+        private[this] val readable = buf.length
 
-        private[this] val readable = msg.buf.readableBytes
         @volatile private[this] var read = 0
 
         def hasNext: Boolean = read < readable
 
-        def next(): ChannelBuffer = {
+        def next(): Buf = {
           if (!hasNext) throw new NoSuchElementException
 
-          headerBuf.resetReaderIndex()
           if (readable - read <= maxSize) {
             // Toggle the tag MSB in the header region which signifies
             // the end of the sequence. Note, our header is denormalized
@@ -143,11 +140,11 @@ private[finagle] object MuxFramer {
             header(1) = (header(1) ^ (1 << 7)).toByte
           }
           // ensure we don't slice past the end of the msg.buf
-          val len = math.min(readable - read, maxSize)
+          val frameLength = math.min(readable - read, maxSize)
           // note that the size of a frame is implicitly prepended by the transports
-          // pipeline and is derived from `readableBytes.`
-          val b = wrappedBuffer(headerBuf, msg.buf.slice(read, len))
-          read += len
+          // pipeline and is derived from readable bytes.
+          val b = headerBuf.concat(buf.slice(from = read, until = read + frameLength))
+          read += frameLength
           b
         }
       }
@@ -186,7 +183,7 @@ private[finagle] object MuxFramer {
         val round = streams.foldLeft[Seq[Future[FragmentStream]]](Nil) {
           case (writes, s@FragmentStream(_, fragments, writep)) if fragments.hasNext =>
             val buf = fragments.next()
-            writeStreamBytes.add(buf.readableBytes)
+            writeStreamBytes.add(buf.length)
             val write = trans.write(buf).transform {
               case Return(_) => Future.value(s)
               case exc@Throw(_) =>
@@ -282,11 +279,11 @@ private[finagle] object MuxFramer {
      * The `readLoop` is responsible for demuxing and defragmenting tag streams.
      * If we read an `Rdiscarded` remove the corresponding stream from `tags`.
      */
-    private[this] def readLoop(tags: Map[Int, ChannelBuffer]): Future[Unit] =
+    private[this] def readLoop(tags: Map[Int, Buf]): Future[Unit] =
       trans.read().flatMap { buf =>
-        readStreamBytes.add(buf.readableBytes)
-        buf.markReaderIndex()
-        val header = buf.readInt()
+        readStreamBytes.add(buf.length)
+        val br = BufReader(buf)
+        val header = br.readIntBE()
         val typ = Message.Tags.extractType(header)
         val tag = Message.Tags.extractTag(header)
 
@@ -308,19 +305,19 @@ private[finagle] object MuxFramer {
           // Note, we don't reset the reader index because we want
           // to consume the header for fragments.
           tags.updated(t, tags.get(t) match {
-            case Some(buf0) => wrappedBuffer(buf0, buf)
-            case None => buf
+            case Some(buf0) => buf0.concat(br.readAll())
+            case None => br.readAll()
           })
         } else {
           // If the fragment bit isn't flipped, the `buf` is either
           // a fully buffered message or the last fragment for `tag`.
           // We distinguish between the two by checking for the presence
           // of `tag` in `tags`.
-          buf.resetReaderIndex()
           val resBuf = if (!tags.contains(t)) buf else {
-            val headerBuf = buf.readSlice(4)
-            val buf0 = tags(t)
-            wrappedBuffer(headerBuf, buf0, buf)
+            val head = buf.slice(0, 4)
+            val rest = tags(t)
+            val last = buf.slice(4, buf.length)
+            head.concat(rest).concat(last)
           }
           readq.offer(Message.decode(resBuf))
           tags - t

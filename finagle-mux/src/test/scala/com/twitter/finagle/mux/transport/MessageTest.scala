@@ -1,10 +1,9 @@
 package com.twitter.finagle.mux.transport
 
 import com.twitter.finagle.{Path, tracing, Dtab, Dentry}
-import com.twitter.io.Charsets
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.Time
 import com.twitter.util.TimeConversions.intToTimeableNumber
-import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -14,18 +13,16 @@ import scala.collection.mutable
 class MessageTest extends FunSuite with AssertionsForJUnit {
   import Message._
 
-  def buf(n: Int) = ChannelBuffers.wrappedBuffer((0 until n).toArray.map(_.toByte))
+  def buf(n: Int) = Buf.ByteArray.Owned((0 until n).toArray.map(_.toByte))
   val body = buf(4)
 
   val goodTags = Seq(8388607, 1, 123)
   val goodVersions = Seq(100: Short, 200: Short, 300: Short)
   val goodTraceIds = Seq(None, Some(tracing.Trace.nextId))
-  val goodBufs = Seq(ChannelBuffers.EMPTY_BUFFER, buf(1), buf(4), buf(100))
+  val goodBufs = Seq(Buf.Empty, buf(1), buf(4), buf(100))
   val goodStrings = Seq("", "Hello, world!", "☺☹")
-  val goodKeys = goodStrings map { s =>
-    val bytes = s.getBytes(Charsets.Utf8)
-    ChannelBuffers.wrappedBuffer(bytes)
-  }
+  val goodKeys = goodStrings.map(Buf.Utf8(_))
+
   val goodDentries = Seq("/a=>/b", "/foo=>/$/inet/twitter.com/80") map(Dentry.read)
   val goodDtabs = goodDentries.permutations map { ds => Dtab(ds.toIndexedSeq) }
   val goodDests = Seq("/", "/okay", "/foo/bar/baz") map(Path.read)
@@ -127,10 +124,10 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
 
   test("not decode invalid messages") {
     assert(intercept[BadMessageException] {
-      decode(ChannelBuffers.EMPTY_BUFFER)
+      decode(Buf.Empty)
     } == BadMessageException("short message"))
     assert(intercept[BadMessageException] {
-      decode(ChannelBuffers.wrappedBuffer(Array[Byte](0, 0, 0, 1)))
+      decode(Buf.ByteArray.Owned(Array[Byte](0, 0, 0, 1)))
     } == BadMessageException("unknown message type: 0 [tag=1]"))
   }
 
@@ -152,7 +149,7 @@ class MessageTest extends FunSuite with AssertionsForJUnit {
 
   test("extract control messages") {
     val tag = 0
-    val buf = ChannelBuffers.EMPTY_BUFFER
+    val buf = Buf.Empty
 
     assert(ControlMessage.unapply(Treq(tag, None, buf)) == None)
     assert(ControlMessage.unapply(RreqOk(0, buf)) == None)

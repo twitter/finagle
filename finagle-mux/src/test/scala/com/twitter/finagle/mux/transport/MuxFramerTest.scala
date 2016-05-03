@@ -5,9 +5,10 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.mux.Latch
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.util.BufReader
 import com.twitter.finagle.{Dtab, Dentry, Failure, Path}
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, Promise, Return}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.FunSuite
@@ -21,36 +22,37 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("writes") (forAll { (msg: Message, window: Int) =>
     whenever(window > 0) {
-      val writeq = new AsyncQueue[ChannelBuffer]
+      val writeq = new AsyncQueue[Buf]
       // Create a queued transport that seals writes as if we've written
       // the bytes to the wire. Note, this is important since the
       // written channel buffers share buffer regions to avoid allocations.
-      val transport = new QueueTransport(writeq, new AsyncQueue[ChannelBuffer])
-        .map({ buf: ChannelBuffer => buf.copy() }, identity)
+      val transport = new QueueTransport(writeq, new AsyncQueue[Buf])
+        .map({ buf: Buf => deepCopy(buf) }, identity)
 
       val sr = new InMemoryStatsReceiver
       val flow = MuxFramer(transport, Some(window), sr)
       Await.result(flow.write(msg), 5.seconds)
 
-      val payloadSize = msg.buf.readableBytes
+      val payloadSize = msg.buf.length
 
       if (window >= payloadSize) assert(writeq.size == 1) else {
         val Return(q) = writeq.drain()
 
         // ensure that we've written the correct amount of bytes
-        val written = q.foldLeft(0) { _ + _.readableBytes }
-        val expected = Message.encode(msg).readableBytes
+        val written = q.foldLeft(0) { _ + _.length }
+        val expected = Message.encode(msg).length
         val hdrSize = 4 * (q.size-1)
         assert(written == expected + hdrSize)
 
         assert(sr.stats(Seq("write_stream_bytes")).forall { _ == window + 4 })
 
         q.init.foreach { buf =>
-          buf.readByte() // typ
-          assert((buf.readByte() >> 7 & 1) == 1) // tag MSB
+          val br = BufReader(buf)
+          br.readByte() // typ
+          assert((br.readByte() >> 7 & 1) == 1) // tag MSB
         }
 
-        val last = q.last
+        val last = BufReader(q.last)
         last.readByte() // typ
         assert((last.readByte() >> 7 & 1) == 0) // tag MSB
       }
@@ -59,14 +61,14 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("reads") (forAll { (msg: Message, window: Int) =>
     whenever(window > 0) {
-      val transq = new AsyncQueue[ChannelBuffer]
+      val transq = new AsyncQueue[Buf]
       val readLatch = new Latch
 
       val transport = new QueueTransport(transq, transq) {
-        override def write(buf: ChannelBuffer): Future[Unit] =
-          super.write(buf.copy())
+        override def write(buf: Buf): Future[Unit] =
+          super.write(deepCopy(buf))
 
-        override def read(): Future[ChannelBuffer] =
+        override def read(): Future[Buf] =
           readLatch.get.before { super.read() }
       }
 
@@ -77,7 +79,7 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
       val read = flow.read()
       readLatch.flip()
 
-      if (msg.buf.readableBytes > window) {
+      if (msg.buf.length > window) {
         assert(sr.gauges(Seq("pending_read_streams"))() == 1)
       }
 
@@ -85,14 +87,14 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
       val out = Await.result(read, 5.seconds)
       assert(sr.gauges(Seq("pending_read_streams"))() == 0)
 
-      val expected = ChannelBuffers.hexDump(Message.encode(msg))
-      val received = ChannelBuffers.hexDump(Message.encode(out))
+      val expected = Buf.slowHexString(Message.encode(msg))
+      val received = Buf.slowHexString(Message.encode(out))
       assert(received == expected)
     }
   })
 
   test("write fragments disabled") (forAll { msg: Message =>
-    val transq = new AsyncQueue[ChannelBuffer]
+    val transq = new AsyncQueue[Buf]
     val transport = new QueueTransport(transq, transq)
     val flow = MuxFramer(transport, None, NullStatsReceiver)
 
@@ -107,11 +109,11 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
       case (map, msg) => map + (msg.tag -> msg)
     }
     whenever(msgs.nonEmpty) {
-      val transq = new AsyncQueue[ChannelBuffer]
+      val transq = new AsyncQueue[Buf]
       val writeGate = new Promise[Unit]
       val transport = new QueueTransport(transq, transq) {
-        override def write(buf: ChannelBuffer): Future[Unit] = {
-          writeGate.before { super.write(buf.copy()) }
+        override def write(buf: Buf): Future[Unit] = {
+          writeGate.before { super.write(deepCopy(buf)) }
         }
       }
 
@@ -133,16 +135,17 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("diverse stream in the presence of concurrency") {
     val msgs = (1 to 20).map { tag =>
       Message.Tdispatch(tag, Seq.empty, Path.read("/foo/bar/baz"),
-        Dtab.empty, ChannelBuffers.wrappedBuffer(payload.getBytes))
+        Dtab.empty, Buf.ByteArray.Owned(payload.getBytes))
     }
 
-    val transq = new AsyncQueue[ChannelBuffer]
+    val transq = new AsyncQueue[Buf]
     val writtenTags = new ArrayBuffer[Int]
     val writeGate = Promise[Unit]
 
     val transport = new QueueTransport(transq, transq) {
-      override def write(buf: ChannelBuffer): Future[Unit] = {
-        val tag = Message.Tags.extractTag(buf.readInt())
+      override def write(buf: Buf): Future[Unit] = {
+        val br = BufReader(buf)
+        val tag = Message.Tags.extractTag(br.readIntBE())
         // clear fragment bit and store tag
         writtenTags += tag  & ~Message.Tags.TagMSB
         writeGate
@@ -170,13 +173,13 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("Tdiscarded") {
     val msg = Message.Tdispatch(20, Seq.empty, Path.read("/foo/bar/baz"),
-      Dtab.empty, ChannelBuffers.wrappedBuffer(payload.getBytes))
+      Dtab.empty, Buf.ByteArray.Owned(payload.getBytes))
 
-    val writeq = new AsyncQueue[ChannelBuffer]
+    val writeq = new AsyncQueue[Buf]
     val writeLatch = new Latch
 
-    val transport = new QueueTransport(writeq, new AsyncQueue[ChannelBuffer]) {
-      override def write(buf: ChannelBuffer): Future[Unit] = {
+    val transport = new QueueTransport(writeq, new AsyncQueue[Buf]) {
+      override def write(buf: Buf): Future[Unit] = {
         writeLatch.get.before { super.write(buf) }
       }
     }
@@ -196,25 +199,25 @@ class MuxFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     val Return(writes) = writeq.drain()
     assert(writes.exists { buf =>
-      val typ = Message.Tags.extractType(buf.readInt())
+      val br = BufReader(buf)
+      val typ = Message.Tags.extractType(br.readIntBE())
       typ == Message.Types.BAD_Tdiscarded
     })
   }
 
   test("Rdiscarded") {
-    val msg = Message.RdispatchOk(20, Seq.empty,
-      ChannelBuffers.wrappedBuffer(payload.getBytes))
+    val msg = Message.RdispatchOk(20, Seq.empty, Buf.ByteArray.Owned(payload.getBytes))
 
-    val transq = new AsyncQueue[ChannelBuffer]
+    val transq = new AsyncQueue[Buf]
     val writeLatch = new Latch
     val readLatch = new Latch
 
     val transport = new QueueTransport(transq, transq) {
-      override def write(buf: ChannelBuffer): Future[Unit] = {
-        writeLatch.get.before { super.write(buf.copy()) }
+      override def write(buf: Buf): Future[Unit] = {
+        writeLatch.get.before { super.write(deepCopy(buf)) }
       }
 
-      override def read(): Future[ChannelBuffer] =
+      override def read(): Future[Buf] =
         readLatch.get.before { super.read() }
     }
 
@@ -251,6 +254,8 @@ object MuxFramerTest {
   val window = 1 << 6
   val payload = ("a" * window) * 10
 
+  def deepCopy(b: Buf): Buf = Buf.ByteArray.Owned(Buf.ByteArray.Shared.extract(b))
+
   val genMessage: Gen[Message] = for {
     typ <- Gen.oneOf(Seq(Message.Types.Tdispatch, Message.Types.Rdispatch))
     tag <- Gen.choose(Message.Tags.MinTag, Message.Tags.MaxTag)
@@ -259,9 +264,9 @@ object MuxFramerTest {
     dentry <- Gen.oneOf(Seq("/a=>/b", "/foo=>/$/inet/twitter.com/80"))
     body <- Gen.alphaStr
   } yield {
-    val ctxBuf = ChannelBuffers.wrappedBuffer(ctx.getBytes)
+    val ctxBuf = Buf.Utf8(ctx)
     val contexts = Seq(ctxBuf -> ctxBuf)
-    val bodyBuf = ChannelBuffers.wrappedBuffer(body.getBytes)
+    val bodyBuf = Buf.Utf8(body)
     if (typ == Message.Types.Tdispatch)
       Message.Tdispatch(tag, contexts,
         Path.read(path), Dtab(IndexedSeq(Dentry.read(dentry))), bodyBuf)

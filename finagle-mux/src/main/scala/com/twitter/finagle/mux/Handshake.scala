@@ -3,11 +3,11 @@ package com.twitter.finagle.mux
 import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.transport.{Transport, TransportProxy}
 import com.twitter.finagle.{Failure, Status}
+import com.twitter.io.Buf
 import com.twitter.util.{Future, Return, Throw, Time}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.AtomicBoolean
-import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * Implements mux session negotiation. The mux spec allows for (re)negotiation
@@ -18,7 +18,7 @@ import org.jboss.netty.buffer.ChannelBuffer
  * exchanged version and headers.
  */
 private[finagle] object Handshake {
-  type Headers = Seq[(ChannelBuffer, ChannelBuffer)]
+  type Headers = Seq[(Buf, Buf)]
 
   /**
    * A function which transforms or installs features atop a transport based
@@ -26,13 +26,13 @@ private[finagle] object Handshake {
    * than mux `Message` types to more easily allow for features that need to
    * operate on the raw byte frame (e.g. compression, checksums, etc).
    */
-  type Negotiator = (Headers, Transport[ChannelBuffer, ChannelBuffer]) =>
+  type Negotiator = (Headers, Transport[Buf, Buf]) =>
     Transport[Message, Message]
 
   /**
    * Returns Some(value) if `key` exists in `headers`, otherwise None.
    */
-  def valueOf(key: ChannelBuffer, headers: Headers): Option[ChannelBuffer] = {
+  def valueOf(key: Buf, headers: Headers): Option[Buf] = {
     val iter = headers.iterator
     while (iter.hasNext) {
       val (k, v) = iter.next()
@@ -102,7 +102,7 @@ private[finagle] object Handshake {
    * the headers received from the server.
    */
   def client(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Buf, Buf],
     version: Short,
     headers: Headers,
     negotiate: Negotiator
@@ -163,7 +163,7 @@ private[finagle] object Handshake {
    * negotiated headers.
    */
   def server(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Buf, Buf],
     version: Short,
     headers: Headers => Headers,
     negotiate: Negotiator

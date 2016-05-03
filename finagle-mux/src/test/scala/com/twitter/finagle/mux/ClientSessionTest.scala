@@ -6,10 +6,8 @@ import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.finagle.{Failure, Dtab, Path, Status}
-import com.twitter.io.Charsets
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Return, Throw, Time, TimeControl, Duration, Future}
-import java.nio.charset.Charset
-import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -58,7 +56,8 @@ private class ClientSessionTest extends FunSuite {
       val ctx = new Ctx
       import ctx._
 
-      val buf = ChannelBuffers.copiedBuffer("OK", Charsets.Utf8)
+      val buf = Buf.Utf8("OK")
+
       val req = Message.Tdispatch(2, Seq.empty, Path.empty, Dtab.empty, buf)
 
       // 2 outstanding req, it's okay to use the same tag

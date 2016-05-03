@@ -16,7 +16,6 @@ import java.net.SocketAddress
 import org.apache.thrift.protocol.TProtocolFactory
 import org.apache.thrift.TException
 import org.apache.thrift.transport.TMemoryInputTransport
-import org.jboss.netty.buffer.ChannelBuffer
 
 /**
  * The `ThriftMux` object is both a [[com.twitter.finagle.Client]] and a
@@ -267,8 +266,8 @@ object ThriftMux
       params: Stack.Params = Mux.server.params + ProtocolLibrary("thriftmux"))
     extends StdStackServer[mux.Request, mux.Response, ServerMuxer] {
 
-    protected type In = ChannelBuffer
-    protected type Out = ChannelBuffer
+    protected type In = Buf
+    protected type Out = Buf
 
     private[this] val muxStatsReceiver = {
       val Stats(statsReceiver) = params[Stats]

@@ -1,10 +1,10 @@
 package com.twitter.finagle.mux.transport
 
 import com.twitter.finagle.tracing.{SpanId, TraceId, Flags}
+import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Dtab, Dentry, NameTree, Path}
-import com.twitter.io.Charsets
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.{Duration, Time}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers, ReadOnlyChannelBuffer}
 import scala.collection.mutable.ArrayBuffer
 
 /**
@@ -29,7 +29,7 @@ private[twitter] sealed trait Message {
   /**
    * The body of the message omitting size, typ, and tag.
    */
-  def buf: ChannelBuffer
+  def buf: Buf
 }
 
 private[twitter] object Message {
@@ -78,14 +78,12 @@ private[twitter] object Message {
     def setMsb(tag: Int): Int = tag | TagMSB
   }
 
-  private def mkByte(b: Byte) =
-    ChannelBuffers.unmodifiableBuffer(ChannelBuffers.wrappedBuffer(Array(b)))
+  private def mkByte(b: Byte) = Buf.ByteArray.Owned(Array(b))
 
-  private val bufOfChar = Array[ChannelBuffer](
-    mkByte(0), mkByte(1), mkByte(2))
+  private val bufOfChar = Array[Buf](mkByte(0), mkByte(1), mkByte(2))
 
   abstract class EmptyMessage extends Message {
-    def buf = ChannelBuffers.EMPTY_BUFFER
+    def buf: Buf = Buf.Empty
   }
 
   abstract class MarkerMessage extends Message {
@@ -95,58 +93,58 @@ private[twitter] object Message {
   private object Init {
     def encode(
       version: Short,
-      headers: Seq[(ChannelBuffer, ChannelBuffer)]
-    ): ChannelBuffer = {
+      headers: Seq[(Buf, Buf)]
+    ): Buf = {
       var size = 2 // 2 bytes for version
       var iter = headers.iterator
       while (iter.hasNext) {
         val (k, v) = iter.next()
         // 8 bytes for length encoding of k, v
-        size += 8 + k.readableBytes + v.readableBytes
+        size += 8 + k.length + v.length
       }
-      val bytes = ChannelBuffers.buffer(size)
-      bytes.writeShort(version)
+      val bw = BufWriter.fixed(size)
+      bw.writeShortBE(version)
       iter = headers.iterator
       while (iter.hasNext) {
         iter.next() match { case (k, v) =>
-          bytes.writeInt(k.readableBytes)
-          bytes.writeBytes(k.slice())
-          bytes.writeInt(v.readableBytes)
-          bytes.writeBytes(v.slice())
+          bw.writeIntBE(k.length)
+          bw.writeBytes(Buf.ByteArray.Owned.extract(k))
+          bw.writeIntBE(v.length)
+          bw.writeBytes(Buf.ByteArray.Owned.extract(v))
         }
       }
-      bytes
+      bw.owned()
     }
 
-    def decode(buf: ChannelBuffer): (Short, Seq[(ChannelBuffer, ChannelBuffer)]) = {
-      val version = buf.readShort()
-      val headers = new ArrayBuffer[(ChannelBuffer, ChannelBuffer)]
-      while (buf.readableBytes() > 0) {
-        val k = buf.readSlice(buf.readInt())
-        val v = buf.readSlice(buf.readInt())
+    def decode(buf: Buf): (Short, Seq[(Buf, Buf)]) = {
+      val br = BufReader(buf)
+      val version = br.readShortBE()
+      val headers = new ArrayBuffer[(Buf, Buf)]
+      while (br.remaining > 0) {
+        val k = br.readBytes(br.readIntBE())
+        val v = br.readBytes(br.readIntBE())
         headers += (k -> v)
       }
-      (version, headers)
+      (version.toShort, headers)
     }
   }
 
   case class Tinit(
       tag: Int,
       version: Short,
-      headers: Seq[(ChannelBuffer, ChannelBuffer)])
+      headers: Seq[(Buf, Buf)])
     extends Message {
     def typ: Byte = Types.Tinit
-    lazy val buf: ChannelBuffer = Init.encode(version, headers)
+    lazy val buf: Buf = Init.encode(version, headers)
   }
-
 
   case class Rinit(
       tag: Int,
       version: Short,
-      headers: Seq[(ChannelBuffer, ChannelBuffer)])
+      headers: Seq[(Buf, Buf)])
     extends Message {
     def typ: Byte = Types.Rinit
-    lazy val buf: ChannelBuffer = Init.encode(version, headers)
+    lazy val buf: Buf = Init.encode(version, headers)
   }
 
   /**
@@ -155,34 +153,34 @@ private[twitter] object Message {
    * Note, Treq messages are deprecated in favor of [[Tdispatch]] and will likely
    * be removed in a future version of mux.
    */
-  case class Treq(tag: Int, traceId: Option[TraceId], req: ChannelBuffer) extends Message {
+  case class Treq(tag: Int, traceId: Option[TraceId], req: Buf) extends Message {
     import Treq._
     def typ = Types.Treq
-    lazy val buf = {
+    lazy val buf: Buf = {
       val header = traceId match {
         // Currently we require the 3-tuple, but this is not
         // necessarily required.
         case Some(traceId) =>
-          val hd = ChannelBuffers.buffer(1+1+1+24+1+1+1)
+          val hd = BufWriter.fixed(1+1+1+24+1+1+1)
           hd.writeByte(2) // 2 entries
 
           hd.writeByte(Keys.TraceId) // key 0 (traceid)
           hd.writeByte(24) // key 0 size
-          hd.writeLong(traceId.spanId.toLong)
-          hd.writeLong(traceId.parentId.toLong)
-          hd.writeLong(traceId.traceId.toLong)
+          hd.writeLongBE(traceId.spanId.toLong)
+          hd.writeLongBE(traceId.parentId.toLong)
+          hd.writeLongBE(traceId.traceId.toLong)
 
           hd.writeByte(Keys.TraceFlag) // key 1 (traceflag)
           hd.writeByte(1) // key 1 size
           hd.writeByte(traceId.flags.toLong.toByte)
 
-          hd
+          hd.owned()
 
         case None =>
           bufOfChar(0) // 0 keys
       }
 
-      ChannelBuffers.wrappedBuffer(header, req)
+      header.concat(req)
     }
   }
 
@@ -199,26 +197,26 @@ private[twitter] object Message {
    * Note, Rreq messages are deprecated in favor of [[Rdispatch]] and will likely
    * be removed in a future version of mux.
    */
-  abstract class Rreq(rreqType: Byte, body: ChannelBuffer) extends Message {
+  abstract class Rreq(rreqType: Byte, body: Buf) extends Message {
     def typ = Types.Rreq
-    lazy val buf = ChannelBuffers.wrappedBuffer(bufOfChar(rreqType), body)
+    lazy val buf: Buf = bufOfChar(rreqType).concat(body)
   }
 
-  case class RreqOk(tag: Int, reply: ChannelBuffer) extends Rreq(0, reply)
+  case class RreqOk(tag: Int, reply: Buf) extends Rreq(0, reply)
   case class RreqError(tag: Int, error: String) extends Rreq(1, encodeString(error))
-  case class RreqNack(tag: Int) extends Rreq(2, ChannelBuffers.EMPTY_BUFFER)
+  case class RreqNack(tag: Int) extends Rreq(2, Buf.Empty)
 
   private[this] val noBytes = Array.empty[Byte]
 
   case class Tdispatch(
       tag: Int,
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
+      contexts: Seq[(Buf, Buf)],
       dst: Path,
       dtab: Dtab,
-      req: ChannelBuffer)
+      req: Buf)
     extends Message {
     def typ = Types.Tdispatch
-    lazy val buf = {
+    lazy val buf: Buf = {
       // first, compute how large the message header is (in 'n')
       var n = 2
       var iter = contexts.iterator
@@ -226,7 +224,7 @@ private[twitter] object Message {
         // Note: here and below we don't use the scala dereferencing sugar of
         // `val (k, v) = seq.head` as that caused unnecessary Tuple2 allocations.
         iter.next() match { case (k, v) =>
-          n += 2 + k.readableBytes + 2 + v.readableBytes
+          n += 2 + k.length + 2 + v.length
         }
       }
 
@@ -250,96 +248,94 @@ private[twitter] object Message {
       }
 
       // then, allocate and populate the header
-      val hd = ChannelBuffers.dynamicBuffer(n)
-      hd.writeShort(contexts.length)
+      val hd = BufWriter.fixed(n)
+      hd.writeShortBE(contexts.length)
       iter = contexts.iterator
       while (iter.hasNext) {
         // TODO: it may or may not make sense
         // to do zero-copy here.
         iter.next() match { case (k, v) =>
-          hd.writeShort(k.readableBytes)
-          hd.writeBytes(k.slice())
-          hd.writeShort(v.readableBytes)
-          hd.writeBytes(v.slice())
+          hd.writeShortBE(k.length)
+          hd.writeBytes(Buf.ByteArray.Owned.extract(k))
+          hd.writeShortBE(v.length)
+          hd.writeBytes(Buf.ByteArray.Owned.extract(v))
         }
       }
 
-      hd.writeShort(dstbytes.length)
+      hd.writeShortBE(dstbytes.length)
       hd.writeBytes(dstbytes)
 
-      hd.writeShort(dtab.size)
+      hd.writeShortBE(dtab.size)
       dtabidx = 0
       while (dtabidx != dtabbytes.length) {
         dtabbytes(dtabidx) match { case (srcbytes, treebytes) =>
-          hd.writeShort(srcbytes.length)
+          hd.writeShortBE(srcbytes.length)
           hd.writeBytes(srcbytes)
-          hd.writeShort(treebytes.length)
+          hd.writeShortBE(treebytes.length)
           hd.writeBytes(treebytes)
         }
         dtabidx += 1
       }
 
-      ChannelBuffers.wrappedBuffer(hd, req)
+      hd.owned().concat(req)
     }
   }
 
   /** A reply to a `Tdispatch` message */
   abstract class Rdispatch(
       status: Byte,
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
-      body: ChannelBuffer)
+      contexts: Seq[(Buf, Buf)],
+      body: Buf)
     extends Message {
     def typ = Types.Rdispatch
-    lazy val buf = {
+    lazy val buf: Buf = {
       var n = 1+2
-      var seq = contexts
-      while (seq.nonEmpty) {
-        seq.head match { case (k, v) =>
-          n += 2+k.readableBytes+2+v.readableBytes
+      var iter = contexts.iterator
+      while (iter.hasNext) {
+        iter.next() match { case (k, v) =>
+          n += 2+k.length+2+v.length
         }
-        seq = seq.tail
       }
 
-      val hd = ChannelBuffers.buffer(n)
+      val hd = BufWriter.fixed(n)
       hd.writeByte(status)
-      hd.writeShort(contexts.length)
-      seq = contexts
-      while (seq.nonEmpty) {
-        seq.head match { case (k, v) =>
-          hd.writeShort(k.readableBytes)
-          hd.writeBytes(k.slice())
-          hd.writeShort(v.readableBytes)
-          hd.writeBytes(v.slice())
+      hd.writeShortBE(contexts.length)
+      iter = contexts.iterator
+      while (iter.hasNext) {
+        iter.next() match { case (k, v) =>
+          hd.writeShortBE(k.length)
+          hd.writeBytes(Buf.ByteArray.Owned.extract(k))
+          hd.writeShortBE(v.length)
+          hd.writeBytes(Buf.ByteArray.Owned.extract(v))
         }
-        seq = seq.tail
       }
 
-      ChannelBuffers.wrappedBuffer(hd, body)
+      hd.owned().concat(body)
     }
   }
 
   case class RdispatchOk(
       tag: Int,
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
-      reply: ChannelBuffer)
+      contexts: Seq[(Buf, Buf)],
+      reply: Buf)
     extends Rdispatch(0, contexts, reply)
 
   case class RdispatchError(
       tag: Int,
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)],
+      contexts: Seq[(Buf, Buf)],
       error: String)
     extends Rdispatch(1, contexts, encodeString(error))
 
   case class RdispatchNack(
       tag: Int,
-      contexts: Seq[(ChannelBuffer, ChannelBuffer)])
-    extends Rdispatch(2, contexts, ChannelBuffers.EMPTY_BUFFER)
+      contexts: Seq[(Buf, Buf)])
+    extends Rdispatch(2, contexts, Buf.Empty)
 
   /**
    * A fragment, as defined by the mux spec, is a message with its tag MSB
    * set to 1.
    */
-  case class Fragment(typ: Byte, tag: Int, buf: ChannelBuffer) extends Message
+  case class Fragment(typ: Byte, tag: Int, buf: Buf) extends Message
 
   /** Indicates to the client to stop sending new requests. */
   case class Tdrain(tag: Int) extends EmptyMessage { def typ = Types.Tdrain }
@@ -353,23 +349,12 @@ private[twitter] object Message {
   /**
    * We pre-encode a ping message with the reserved ping tag
    * (PingTag) in order to avoid re-encoding this frequently sent
-   * message. Since it uses ChannelBuffers, it maintains a read
-   * cursor, and thus it is important that it is not used
-   * concurrently. This happens to agree with the natural way you'd
-   * use it, since a client can only have one outstanding ping per
-   * tag.
+   * message.
    */
   final class PreEncodedTping extends Message {
     def typ = ???
     def tag = ???
-
-    private[this] val cb = new ReadOnlyChannelBuffer(encode(Tping(Tags.PingTag)))
-    cb.markReaderIndex()
-
-    def buf = {
-      cb.resetReaderIndex()
-      cb
-    }
+    lazy val buf = encode(Tping(Tags.PingTag))
   }
 
   /** Response to a `Tping` message */
@@ -382,7 +367,7 @@ private[twitter] object Message {
     // old servers.
 
     def typ = Types.BAD_Rerr
-    lazy val buf = encodeString(error)
+    lazy val buf: Buf = encodeString(error)
   }
 
   /**
@@ -395,17 +380,18 @@ private[twitter] object Message {
       // old servers.
       extends MarkerMessage {
     def typ = Types.BAD_Tdiscarded
-    lazy val buf = ChannelBuffers.wrappedBuffer(
-      ChannelBuffers.wrappedBuffer(
-        Array[Byte]((which >> 16 & 0xff).toByte,
-          (which >> 8 & 0xff).toByte,
-          (which & 0xff).toByte)),
-      encodeString(why))
+    lazy val buf: Buf = {
+      val arr = Array[Byte](
+        (which >> 16 & 0xff).toByte,
+        (which >> 8 & 0xff).toByte,
+        (which & 0xff).toByte)
+      Buf.ByteArray.Owned(arr).concat(encodeString(why))
+    }
   }
 
   case class Rdiscarded(tag: Int) extends Message {
     def typ = Types.Rdiscarded
-    def buf: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER
+    def buf: Buf = Buf.Empty
   }
 
   object Tlease {
@@ -423,11 +409,11 @@ private[twitter] object Message {
 
   case class Tlease(unit: Byte, howLong: Long) extends MarkerMessage {
     def typ = Types.Tlease
-    lazy val buf = {
-      val b = ChannelBuffers.buffer(9)
-      b.writeByte(unit)
-      b.writeLong(howLong)
-      b
+    lazy val buf: Buf = {
+      val bw = BufWriter.fixed(9)
+      bw.writeByte(unit)
+      bw.writeLongBE(howLong)
+      bw.owned()
     }
   }
 
@@ -452,23 +438,19 @@ private[twitter] object Message {
       else None
   }
 
-  def decodeUtf8(buf: ChannelBuffer): String =
-    decodeUtf8(buf, buf.readableBytes)
-
-  def decodeUtf8(buf: ChannelBuffer, n: Int): String = {
-    val arr = new Array[Byte](n)
-    buf.readBytes(arr)
-    new String(arr, Charsets.Utf8)
+  def decodeUtf8(buf: Buf): String = buf match {
+    case Buf.Utf8(str) => str
+    case _ => throw BadMessageException(s"expected Utf8 string, but got $buf")
   }
 
-  def encodeString(str: String) =
-    ChannelBuffers.wrappedBuffer(str.getBytes(Charsets.Utf8))
+  def encodeString(str: String): Buf = Buf.Utf8(str)
 
-  private def decodeTreq(tag: Int, buf: ChannelBuffer) = {
-    if (buf.readableBytes < 1)
+  private def decodeTreq(tag: Int, buf: Buf) = {
+    if (buf.length < 1)
       throw BadMessageException("short Treq")
 
-    var nkeys = buf.readByte().toInt
+    val br = BufReader(buf)
+    var nkeys = br.readByte().toInt
     if (nkeys < 0)
       throw BadMessageException("Treq: too many keys")
 
@@ -476,16 +458,16 @@ private[twitter] object Message {
     var traceFlags = 0L
 
     while (nkeys > 0) {
-      if (buf.readableBytes < 2)
+      if (br.remaining < 2)
         throw BadMessageException("short Treq (header)")
 
-      val key = buf.readByte()
-      val vsize = buf.readByte().toInt match {
+      val key = br.readByte()
+      val vsize = br.readByte().toInt match {
         case s if s < 0 => s + 256
         case s => s
       }
 
-      if (buf.readableBytes < vsize)
+      if (br.remaining < vsize)
         throw BadMessageException("short Treq (vsize)")
 
       // TODO: technically we should probably check for duplicate
@@ -493,24 +475,24 @@ private[twitter] object Message {
       key match {
         case Treq.Keys.TraceId =>
           if (vsize != 24)
-            throw BadMessageException("bad traceid size %d".format(vsize))
+            throw BadMessageException(s"bad traceid size $vsize")
           trace3 = Some((
-            SpanId(buf.readLong()),  // spanId
-            SpanId(buf.readLong()),  // parentId
-            SpanId(buf.readLong()))  // traceId
+            SpanId(br.readLongBE()),  // spanId
+            SpanId(br.readLongBE()),  // parentId
+            SpanId(br.readLongBE()))  // traceId
           )
 
         case Treq.Keys.TraceFlag =>
           // We only know about bit=0, so discard
           // everything but the last byte
           if (vsize > 1)
-            buf.readBytes(vsize-1)
+            br.readBytes(vsize-1)
           if (vsize > 0)
-            traceFlags = buf.readByte().toLong
+            traceFlags = br.readByte().toLong
 
         case _ =>
           // discard:
-          buf.readBytes(vsize)
+          br.readBytes(vsize)
       }
 
       nkeys -= 1
@@ -522,127 +504,134 @@ private[twitter] object Message {
       case None => None
     }
 
-    Treq(tag, id, buf.slice())
+    Treq(tag, id, br.readAll())
   }
 
-  private def decodeContexts(buf: ChannelBuffer): Seq[(ChannelBuffer, ChannelBuffer)] = {
-    val n = buf.readUnsignedShort()
+  private def decodeContexts(br: BufReader): Seq[(Buf, Buf)] = {
+    val n = br.readShortBE()
     if (n == 0)
       return Nil
 
-    val contexts = new Array[(ChannelBuffer, ChannelBuffer)](n)
+    val contexts = new Array[(Buf, Buf)](n)
     var i = 0
     while (i < n) {
-      val nk = buf.readUnsignedShort()
-      val k = buf.readSlice(nk)
-      val nv = buf.readUnsignedShort()
-      val v = buf.readSlice(nv)
+      val k = br.readBytes(br.readShortBE())
+      val v = br.readBytes(br.readShortBE())
       contexts(i) = (k, v)
       i += 1
     }
     contexts
   }
 
-  private def decodeTdispatch(tag: Int, buf: ChannelBuffer) = {
-    val contexts = decodeContexts(buf)
-
-    val ndst = buf.readUnsignedShort()
+  private def decodeTdispatch(tag: Int, buf: Buf) = {
+    val br = BufReader(buf)
+    val contexts = decodeContexts(br)
+    val ndst = br.readShortBE()
     // Path.read("") fails, so special case empty-dst.
     val dst =
       if (ndst == 0) Path.empty
-      else Path.read(decodeUtf8(buf.readSlice(ndst)))
+      else Path.read(decodeUtf8(br.readBytes(ndst)))
 
-    val nd = buf.readUnsignedShort()
+    val nd = br.readShortBE()
     val dtab = if (nd == 0) Dtab.empty else {
       var i = 0
       val delegations = new Array[Dentry](nd)
       while (i < nd) {
-        val src = decodeUtf8(buf, buf.readUnsignedShort())
-        val dst = decodeUtf8(buf, buf.readUnsignedShort())
+        val src = decodeUtf8(br.readBytes(br.readShortBE()))
+        val dst = decodeUtf8(br.readBytes(br.readShortBE()))
         delegations(i) = Dentry(Path.read(src), NameTree.read(dst))
         i += 1
       }
       Dtab(delegations)
     }
 
-    Tdispatch(tag, contexts, dst, dtab, buf.slice())
+    Tdispatch(tag, contexts, dst, dtab, br.readAll())
   }
 
-  private def decodeRdispatch(tag: Int, buf: ChannelBuffer) = {
-    val status = buf.readByte()
-    val contexts = decodeContexts(buf)
+  private def decodeRdispatch(tag: Int, buf: Buf) = {
+    val br = BufReader(buf)
+    val status = br.readByte()
+    val contexts = decodeContexts(br)
+    val rest = br.readAll()
     status match {
-      case 0 => RdispatchOk(tag, contexts, buf.slice())
-      case 1 => RdispatchError(tag, contexts, decodeUtf8(buf))
+      case 0 => RdispatchOk(tag, contexts, rest)
+      case 1 => RdispatchError(tag, contexts, decodeUtf8(rest))
       case 2 => RdispatchNack(tag, contexts)
       case _ => throw BadMessageException("invalid Rdispatch status")
     }
   }
 
-  private def decodeRreq(tag: Int, buf: ChannelBuffer) = {
-    if (buf.readableBytes < 1)
+  private def decodeRreq(tag: Int, buf: Buf) = {
+    if (buf.length < 1)
       throw BadMessageException("short Rreq")
-    buf.readByte() match {
-      case 0 => RreqOk(tag, buf.slice())
-      case 1 => RreqError(tag, decodeUtf8(buf))
+    val br = BufReader(buf)
+    val status = br.readByte()
+    val rest = br.readAll()
+    status match {
+      case 0 => RreqOk(tag, rest)
+      case 1 => RreqError(tag, decodeUtf8(rest))
       case 2 => RreqNack(tag)
       case _ => throw BadMessageException("invalid Rreq status")
     }
   }
 
-  private def decodeTdiscarded(buf: ChannelBuffer) = {
-    if (buf.readableBytes < 3)
+  private def decodeTdiscarded(buf: Buf) = {
+    if (buf.length < 3)
       throw BadMessageException("short Tdiscarded message")
-    val which = ((buf.readByte() & 0xff) << 16) |
-      ((buf.readByte() & 0xff) << 8) |
-      (buf.readByte() & 0xff)
-    Tdiscarded(which, decodeUtf8(buf))
+    val br = BufReader(buf)
+    val which = ((br.readByte() & 0xff) << 16) |
+      ((br.readByte() & 0xff) << 8) |
+      (br.readByte() & 0xff)
+    Tdiscarded(which, decodeUtf8(br.readAll()))
   }
 
-  private def decodeTlease(buf: ChannelBuffer) = {
-    if (buf.readableBytes < 9)
+  private def decodeTlease(buf: Buf) = {
+    if (buf.length < 9)
       throw BadMessageException("short Tlease message")
-    val unit: Byte = buf.readByte()
-    val howMuch: Long = buf.readLong()
+    val br = BufReader(buf)
+    val unit: Byte = br.readByte().toByte
+    val howMuch: Long = br.readLongBE()
     Tlease(unit, howMuch)
   }
 
-  def decode(buf: ChannelBuffer): Message = {
-    if (buf.readableBytes < 4)
+  def decode(buf: Buf): Message = {
+    if (buf.length < 4)
       throw BadMessageException("short message")
-    val head = buf.readInt()
+    val br = BufReader(buf)
+    val head = br.readIntBE()
+    val rest = br.readAll()
     val typ = Tags.extractType(head)
     val tag = Tags.extractTag(head)
     if (Tags.isFragment(tag))
-      Fragment(typ, tag, buf)
+      Fragment(typ, tag, rest)
     else typ match {
       case Types.Tinit =>
-        val (version, ctx) = Init.decode(buf)
+        val (version, ctx) = Init.decode(rest)
         Tinit(tag, version, ctx)
       case Types.Rinit =>
-        val (version, ctx) = Init.decode(buf)
+        val (version, ctx) = Init.decode(rest)
         Rinit(tag, version, ctx)
-      case Types.Treq => decodeTreq(tag, buf)
-      case Types.Rreq => decodeRreq(tag, buf)
-      case Types.Tdispatch => decodeTdispatch(tag, buf)
-      case Types.Rdispatch => decodeRdispatch(tag, buf)
+      case Types.Treq => decodeTreq(tag, rest)
+      case Types.Rreq => decodeRreq(tag, rest)
+      case Types.Tdispatch => decodeTdispatch(tag, rest)
+      case Types.Rdispatch => decodeRdispatch(tag, rest)
       case Types.Tdrain => Tdrain(tag)
       case Types.Rdrain => Rdrain(tag)
       case Types.Tping => Tping(tag)
       case Types.Rping => Rping(tag)
-      case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(buf))
+      case Types.Rerr | Types.BAD_Rerr => Rerr(tag, decodeUtf8(rest))
       case Types.Rdiscarded => Rdiscarded(tag)
-      case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(buf)
-      case Types.Tlease => decodeTlease(buf)
+      case Types.Tdiscarded | Types.BAD_Tdiscarded => decodeTdiscarded(rest)
+      case Types.Tlease => decodeTlease(rest)
       case unknown => throw new BadMessageException(s"unknown message type: $unknown [tag=$tag]")
     }
   }
 
-  def encode(msg: Message): ChannelBuffer = msg match {
+  def encode(msg: Message): Buf = msg match {
     case m: PreEncodedTping => m.buf
     case m: Message =>
       if (m.tag < Tags.MarkerTag || (m.tag & ~Tags.TagMSB) > Tags.MaxTag)
-        throw new BadMessageException("invalid tag number %d".format(m.tag))
+        throw new BadMessageException(s"invalid tag number ${m.tag}")
 
       val head = Array[Byte](
         m.typ,
@@ -651,7 +640,6 @@ private[twitter] object Message {
         (m.tag & 0xff).toByte
       )
 
-      ChannelBuffers.wrappedBuffer(
-        ChannelBuffers.wrappedBuffer(head), m.buf)
+      Buf.ByteArray.Owned(head).concat(m.buf)
   }
 }

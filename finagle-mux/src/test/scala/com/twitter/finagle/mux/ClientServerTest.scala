@@ -1,19 +1,18 @@
 package com.twitter.finagle.mux
 
-import com.twitter.conversions.time._
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.conversions.time._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.mux.transport.Message
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
+import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.{Failure, Path, Service, SimpleFilter, Status}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Duration, Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicInteger
-import org.jboss.netty.buffer.ChannelBuffers
 import org.junit.runner.RunWith
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.Matchers.any
@@ -238,9 +237,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
     when(service(any[Request])).thenAnswer(
       new Answer[Future[Response]] {
         def answer(invocation: InvocationOnMock) = {
-          val buf = ChannelBuffers.directBuffer(8)
-          buf.writeLong(Trace.id.flags.toLong)
-          Future.value(Response(ChannelBufferBuf.Owned(buf)))
+          val bw = BufWriter.fixed(8)
+          bw.writeLongBE(Trace.id.flags.toLong)
+          Future.value(Response(bw.owned()))
         }
       }
     )
@@ -252,9 +251,9 @@ private[mux] class ClientServerTest(canDispatch: Boolean)
       p
     }
     assert(resp.poll.isDefined)
-    val respCb = BufChannelBuffer(Await.result(resp).body)
-    assert(respCb.readableBytes == 8)
-    val respFlags = Flags(respCb.readLong())
+    val respBr = BufReader(Await.result(resp).body)
+    assert(respBr.remaining == 8)
+    val respFlags = Flags(respBr.readLongBE())
     assert(respFlags == flags)
   }
 

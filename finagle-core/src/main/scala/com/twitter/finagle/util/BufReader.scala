@@ -79,7 +79,7 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
   def readByte(): Int = {
     if (remaining < 1) {
       throw new UnderflowException(
-        s"tried to read a byte when remaining bytes=${remaining}")
+        s"tried to read a byte when remaining bytes was ${remaining}")
     }
 
     readBytes(1).write(nums, 0)
@@ -89,7 +89,7 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
   def readShortBE(): Int = {
     if (remaining < 2) {
       throw new UnderflowException(
-        s"tried to read 2 bytes when remaining bytes=${remaining}")
+        s"tried to read 2 bytes when remaining bytes was ${remaining}")
     }
 
     readBytes(2).write(nums, 0)
@@ -100,7 +100,7 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
   def readIntBE(): Int = {
     if (remaining < 4) {
       throw new UnderflowException(
-        s"tried to read 4 bytes when remaining bytes=${remaining}")
+        s"tried to read 4 bytes when remaining bytes was ${remaining}")
     }
 
     readBytes(4).write(nums, 0)
@@ -113,7 +113,7 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
   def readLongBE(): Long = {
     if (remaining < 8) {
       throw new UnderflowException(
-        s"tried to read 8 bytes when remaining bytes=${remaining}")
+        s"tried to read 8 bytes when remaining bytes was ${remaining}")
     }
 
     readBytes(8).write(nums, 0)
