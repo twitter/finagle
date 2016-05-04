@@ -7,6 +7,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: RequeueFilter now uses the stack's ResponseClassifier to determine whether
+    a response should be considered retryable.
+
 6.35.0
 ------
 

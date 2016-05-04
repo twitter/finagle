@@ -93,7 +93,13 @@ object Retries {
    * (see [[RetryPolicy.RetryableWriteException]]).
    */
   private[finagle] def moduleRequeueable[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module3[Stats, Budget, HighResTimer, ServiceFactory[Req, Rep]] {
+    new Stack.Module4[
+      Stats,
+      Budget,
+      param.ResponseClassifier,
+      HighResTimer,
+      ServiceFactory[Req, Rep]
+    ] {
       def role: Stack.Role = Retries.Role
 
       def description: String =
@@ -102,6 +108,7 @@ object Retries {
       def make(
         statsP: param.Stats,
         budgetP: Budget,
+        classifierP: param.ResponseClassifier,
         timerP: HighResTimer,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
@@ -109,12 +116,19 @@ object Retries {
         val scoped = statsRecv.scope("retries")
         val requeues = scoped.counter("requeues")
         val retryBudget = budgetP.retryBudget
+        val param.ResponseClassifier(classifier) = classifierP
         val timer = timerP.timer
 
-        val filters = newRequeueFilter(
-          retryBudget, budgetP.requeueBackoffs, withdrawsOnly = false, scoped, timer, next
+        val filter = newRequeueFilter(
+          retryBudget,
+          budgetP.requeueBackoffs,
+          withdrawsOnly = false,
+          scoped,
+          timer,
+          classifier,
+          next
         )
-        svcFactory(retryBudget, filters, scoped, requeues, next)
+        svcFactory(retryBudget, filter, scoped, requeues, next)
       }
     }
 
@@ -131,10 +145,11 @@ object Retries {
    *       include exceptions, such as `Thrift`.
    */
   private[finagle] def moduleWithRetryPolicy[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module4[
+    new Stack.Module5[
       Stats,
       Budget,
       Policy,
+      param.ResponseClassifier,
       HighResTimer,
       ServiceFactory[Req, Rep]
     ] {
@@ -148,6 +163,7 @@ object Retries {
         statsP: param.Stats,
         budgetP: Budget,
         policyP: Policy,
+        classifierP: param.ResponseClassifier,
         timerP: HighResTimer,
         next: ServiceFactory[Req, Rep]
       ): ServiceFactory[Req, Rep] = {
@@ -156,16 +172,31 @@ object Retries {
         val requeues = scoped.counter("requeues")
         val retryBudget = budgetP.retryBudget
         val retryPolicy = policyP.retryPolicy
+        val param.ResponseClassifier(classifier) = classifierP
 
         val filters =
           if (retryPolicy eq RetryPolicy.Never) {
-            newRequeueFilter(retryBudget, budgetP.requeueBackoffs, withdrawsOnly = false, scoped, timerP.timer, next)
+            newRequeueFilter(
+              retryBudget,
+              budgetP.requeueBackoffs,
+              withdrawsOnly = false,
+              scoped,
+              timerP.timer,
+              classifier,
+              next
+            )
           } else {
             val retryFilter = new RetryExceptionsFilter[Req, Rep](
               retryPolicy, timerP.timer, statsRecv, retryBudget)
             // note that we wrap the budget, since the retry filter wraps this
             val requeueFilter = newRequeueFilter(
-              retryBudget, budgetP.requeueBackoffs, withdrawsOnly = true, scoped, timerP.timer, next
+              retryBudget,
+              budgetP.requeueBackoffs,
+              withdrawsOnly = true,
+              scoped,
+              timerP.timer,
+              classifier,
+              next
             )
             retryFilter.andThen(requeueFilter)
           }
@@ -180,6 +211,7 @@ object Retries {
     withdrawsOnly: Boolean,
     statsReceiver: StatsReceiver,
     timer: Timer,
+    classifier: ResponseClassifier,
     next: ServiceFactory[Req, Rep]
   ): RequeueFilter[Req, Rep] = {
     val budget =
@@ -193,7 +225,8 @@ object Retries {
       // failures when it isn't Open, we wouldn't need to gate on status.
       () => next.status == Status.Open,
       MaxRequeuesPerReq,
-      timer)
+      timer,
+      classifier)
   }
 
   private[this] def svcFactory[Req, Rep](

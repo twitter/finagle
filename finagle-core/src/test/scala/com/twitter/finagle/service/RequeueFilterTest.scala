@@ -150,4 +150,58 @@ class RequeueFilterTest extends FunSuite {
       }
     }
   }
+
+  test("uses response classifier") {
+    val timer = new MockTimer
+    val stats = new InMemoryStatsReceiver
+    val filter = new RequeueFilter[String, String](
+      RetryBudget(1.second, 1, 0.0, Stopwatch.timeMillis),
+      Backoff.const(Duration.Zero),
+      stats,
+      () => true,
+      1.0,
+      timer,
+      ResponseClassifier.named("TestClassifier") {
+        case ReqRep(_, Return("fail")) => ResponseClass.NonRetryableFailure
+        case ReqRep(_, Return("retry")) => ResponseClass.RetryableFailure
+      }
+    )
+    val svc = filter.andThen(Service.mk[String, String] {
+      case "ok" => Future.value("ok")
+      case "fail" => Future.value("fail")
+      case "retry" => Future.value("retry")
+      case "failfast" => Future.exception(new FailedFastException("failfast"))
+      case in => Future.exception(new IllegalArgumentException(in))
+    })
+
+    val requeues = stats.counter("requeues")
+
+    Time.withCurrentTimeFrozen { clock =>
+      // successes are successes
+      assert(Await.result(svc("ok")) == "ok")
+      assert(0 == requeues())
+
+      // failures are failures
+      assert(Await.result(svc("fail")) == "fail")
+      assert(0 == requeues())
+      clock.advance(1.second)
+      timer.tick()
+
+      // RetryableFailures are retried
+      assert(Await.result(svc("retry")) == "retry")
+      assert(1 == requeues())
+      clock.advance(1.second)
+      timer.tick()
+
+      // RetryableWriteExceptions are retried
+      assert(Await.result(svc("failfast").liftToTry).isThrow)
+      assert(2 == requeues())
+      clock.advance(1.second)
+      timer.tick()
+
+      // other failures are not retried
+      assert(Await.result(svc("illegal").liftToTry).isThrow)
+      assert(2 == requeues())
+    }
+  }
 }

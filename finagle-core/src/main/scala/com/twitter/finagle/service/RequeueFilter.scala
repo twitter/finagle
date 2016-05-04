@@ -36,13 +36,14 @@ import com.twitter.util._
  *      for more details.
  */
 private[finagle] class RequeueFilter[Req, Rep](
-    retryBudget: RetryBudget,
-    retryBackoffs: Stream[Duration],
-    statsReceiver: StatsReceiver,
-    canRetry: () => Boolean,
-    maxRetriesPerReq: Double,
-    timer: Timer)
-  extends SimpleFilter[Req, Rep] {
+  retryBudget: RetryBudget,
+  retryBackoffs: Stream[Duration],
+  statsReceiver: StatsReceiver,
+  canRetry: () => Boolean,
+  maxRetriesPerReq: Double,
+  timer: Timer,
+  classifier: ResponseClassifier = PartialFunction.empty
+) extends SimpleFilter[Req, Rep] {
 
   require(maxRetriesPerReq >= 0,
     s"maxRetriesPerReq must be non-negative: $maxRetriesPerReq")
@@ -68,37 +69,40 @@ private[finagle] class RequeueFilter[Req, Rep](
     retriesRemaining: Int,
     backoffs: Stream[Duration]
   ): Future[Rep] = {
-    service(req).transform {
-      case t@Throw(RetryPolicy.RetryableWriteException(_)) =>
-        if (!canRetry()) {
-          canNotRetryCounter.incr()
-          responseFuture(attempt, t)
-        } else if (retriesRemaining > 0 && retryBudget.tryWithdraw()) {
-          backoffs match {
-            case Duration.Zero #:: rest =>
-              // no delay between retries. Retry immediately.
-              requeueCounter.incr()
-              applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
-            case delay #:: rest =>
-              // Delay and then retry.
-              timer.doLater(delay) {
+    service(req).transform { result =>
+      classifier.applyOrElse(ReqRep(req, result), ResponseClassifier.Default) match {
+        case ResponseClass.RetryableFailure =>
+          if (!canRetry()) {
+            canNotRetryCounter.incr()
+            responseFuture(attempt, result)
+          } else if (retriesRemaining > 0 && retryBudget.tryWithdraw()) {
+            backoffs match {
+              case Duration.Zero #:: rest =>
+                // no delay between retries. Retry immediately.
                 requeueCounter.incr()
                 applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
-              }.flatten
-            case _ =>
-              // Schedule has run out of entries. Budget is empty.
+              case delay #:: rest =>
+                // Delay and then retry.
+                timer.doLater(delay) {
+                  requeueCounter.incr()
+                  applyService(req, service, attempt + 1, retriesRemaining - 1, rest)
+                }.flatten
+              case _ =>
+                // Schedule has run out of entries. Budget is empty.
+                budgetExhaustCounter.incr()
+                responseFuture(attempt, result)
+            }
+          } else {
+            if (retriesRemaining > 0)
               budgetExhaustCounter.incr()
-              responseFuture(attempt, t)
+            else
+              requestLimitCounter.incr()
+            responseFuture(attempt, result)
           }
-        } else {
-          if (retriesRemaining > 0)
-            budgetExhaustCounter.incr()
-          else
-            requestLimitCounter.incr()
-          responseFuture(attempt, t)
-        }
-      case t =>
-        responseFuture(attempt, t)
+
+        case _ =>
+          responseFuture(attempt, result)
+      }
     }
   }
 
