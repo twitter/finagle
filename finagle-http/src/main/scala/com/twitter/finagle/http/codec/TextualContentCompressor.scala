@@ -25,7 +25,10 @@ class TextualContentCompressor extends HttpContentCompressor {
     }
   }
 
-  private[this] def isTextual(contentType: String) = {
+}
+
+private[finagle] object TextualContentCompressor {
+  def isTextual(contentType: String): Boolean = {
     val contentTypeWithoutCharset = contentType.split(";", 2) match {
       case Array(charsetContentType, _) => charsetContentType
       case _ => contentType
@@ -33,9 +36,7 @@ class TextualContentCompressor extends HttpContentCompressor {
     val lowerCased = contentTypeWithoutCharset.toLowerCase.trim()
     lowerCased.startsWith("text/") || TextLike.contains(lowerCased)
   }
-}
 
-private object TextualContentCompressor {
   val TextLike = Set(
     "image/svg+xml",
     "application/atom+xml",

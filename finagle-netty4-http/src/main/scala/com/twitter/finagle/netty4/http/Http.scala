@@ -60,11 +60,13 @@ private[finagle] object Http {
 
         pipeline.addLast("httpCodec", codec)
 
-        if (compressionLevel > 0) {
-          pipeline.addLast("httpCompressor", new NettyHttp.HttpContentCompressor(compressionLevel))
-        } /* else if (compressionLevel == -1) {
-           <insert text content compressor here CSL-2721>
-        } */
+        compressionLevel match {
+          case lvl if lvl > 0 =>
+            pipeline.addLast("httpCompressor", new NettyHttp.HttpContentCompressor(lvl))
+          case lvl if lvl == -1 =>
+            pipeline.addLast("httpCompressor", new TextualContentCompressor)
+          case _ =>
+        }
 
         if (decompressionEnabled)
           pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
