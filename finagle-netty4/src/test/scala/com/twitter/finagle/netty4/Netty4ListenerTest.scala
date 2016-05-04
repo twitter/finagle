@@ -79,8 +79,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
       }
     }
 
-    val p = Params.empty + Label("test") + Stats(sr) + PipelineInit(StringServerInit)
-    val listener = Netty4Listener[String, String](p)
+    val p = Params.empty + Label("test") + Stats(sr)
+    val listener = Netty4Listener[String, String](p, StringServerInit)
 
     @volatile var observedRequest: Option[String] = None
 

@@ -755,4 +755,35 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       com.twitter.finagle.Http.client.withMaxResponseSize(3000.megabytes)
     }
   }
+
+  test("server handles expect continue header") {
+    val expectP = new Promise[Boolean]
+
+    val svc = new HttpService {
+      def apply(request: Request) = {
+        expectP.setValue(request.headerMap.contains("expect"))
+        val response = Response()
+        Future.value(response)
+      }
+    }
+    val server = com.twitter.finagle.Http.server
+      .withStatsReceiver(NullStatsReceiver)
+      .withStreaming(true)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = com.twitter.finagle.Http.client
+      .withStatsReceiver(statsRecv)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/streaming")
+    req.setChunked(false)
+    req.headerMap.set("expect", "100-continue")
+
+    val res = client(req)
+    assert(Await.result(res, 2.seconds).status == Status.Continue)
+    assert(Await.result(expectP, 2.seconds) == false)
+    client.close()
+    server.close()
+  }
 }

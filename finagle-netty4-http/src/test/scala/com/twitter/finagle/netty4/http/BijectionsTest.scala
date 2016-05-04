@@ -159,12 +159,22 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("finagle http response -> netty") {
     forAll(arbResponse) { case (in: Response, body: String) =>
-      val out = Bijections.finagle.responseToNetty(in)
-      assert(HttpUtil.isTransferEncodingChunked(out) == false)
-      assert(out.protocolVersion == Bijections.finagle.versionToNetty(in.version))
-      assert(out.content.toString(UTF_8) == body)
-      in.headerMap.foreach { case (k, v) =>
-        assert(out.headers.getAll(k).asScala.toSet == in.headerMap.getAll(k).toSet)
+      if (!in.isChunked) {
+        val out = Bijections.finagle.fullResponseToNetty(in)
+        assert(HttpUtil.isTransferEncodingChunked(out) == false)
+        assert(out.protocolVersion == Bijections.finagle.versionToNetty(in.version))
+        assert(out.asInstanceOf[FullHttpResponse].content.toString(UTF_8) == body)
+        in.headerMap.foreach { case (k, v) =>
+          assert(out.headers.getAll(k).asScala.toSet == in.headerMap.getAll(k).toSet)
+        }
+      } else {
+        val out = Bijections.finagle.responseHeadersToNetty(in)
+        assert(HttpUtil.isTransferEncodingChunked(out) == false)
+        assert(out.protocolVersion == Bijections.finagle.versionToNetty(in.version))
+        assert(out.asInstanceOf[FullHttpResponse].content.toString(UTF_8) == body)
+        in.headerMap.foreach { case (k, v) =>
+          assert(out.headers.getAll(k).asScala.toSet == in.headerMap.getAll(k).toSet)
+        }
       }
     }
   }

@@ -29,14 +29,6 @@ private[finagle] object Netty4Listener {
   val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
 }
 
-private[finagle] case class PipelineInit(cf: ChannelPipeline => Unit) {
-  def mk(): (PipelineInit, Stack.Param[PipelineInit]) =
-    (this, PipelineInit.param)
-}
-private[finagle] object PipelineInit {
-  implicit val param = Stack.Param(PipelineInit(_ => ()))
-}
-
 /**
  * Constructs a `Listener[In, Out]` given a ``pipelineInit`` function
  * responsible for framing a [[Transport]] stream. The [[Listener]] is configured
@@ -48,10 +40,9 @@ private[finagle] object PipelineInit {
  */
 private[finagle] case class Netty4Listener[In, Out](
     params: Stack.Params,
+    pipelineInit: ChannelPipeline => Unit = _ => (),
     transportFactory: SocketChannel => Transport[In, Out] = new ChannelTransport[In, Out](_)
   ) extends Listener[In, Out] {
-
-  private[this] val PipelineInit(pipelineInit) = params[PipelineInit]
 
   // transport params
   private[this] val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]

@@ -3,9 +3,9 @@ package com.twitter.finagle.netty4.http
 import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
 import com.twitter.finagle.context.Contexts
+import com.twitter.finagle._
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.http.{Fields, Status, Response, Request}
-import com.twitter.finagle._
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, InMemoryStatsReceiver}
@@ -140,7 +140,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       justRight.content = Buf.ByteArray.Owned(Array[Byte](100))
 
       assert(Await.result(client(justRight), 2.seconds).status == Status.Ok)
-      assert(Await.result(client(tooBig)).status == Status.RequestEntityTooLarge)
+      assert(Await.result(client(tooBig), 2.seconds).status == Status.RequestEntityTooLarge)
       client.close()
     }
   }
@@ -279,8 +279,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val writer = Reader.writable()
       val client = connect(service(writer))
       val r = client(Request())
-      val response = Await.result(r, 5.seconds)
-      assert(response.contentString == "helloworld")
+      assert(Await.result(r, 5.seconds).contentString == "helloworld")
       client.close()
     }
 
@@ -536,11 +535,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     service =>
       val server = com.twitter.finagle.Http.server
         .withLabel("server")
+        .configured(Http.Netty4Impl)
         .configured(Stats(statsRecv))
         .withMaxRequestSize(100.bytes)
         .serve("localhost:*", service)
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = com.twitter.finagle.netty4.http.Http.client
+      val client = com.twitter.finagle.Http.client
+        .configured(Http.Netty4Impl)
         .configured(Stats(statsRecv))
         .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
@@ -621,7 +622,8 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
   status("Client/Server") {
     (service, st, name) =>
       val server = com.twitter.finagle.Http.serve(new InetSocketAddress(0), service)
-      val client = com.twitter.finagle.netty4.http.Http.client
+      val client = com.twitter.finagle.Http.client
+        .configured(Http.Netty4Impl)
         .configured(Stats(st))
         .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
         .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), name)
@@ -640,9 +642,11 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
     val server = com.twitter.finagle.Http.server
       .configured(param.Stats(NullStatsReceiver))
+      .configured(Http.Netty4Impl)
       .serve("localhost:*", statusCodeSvc)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = com.twitter.finagle.netty4.http.Http.client
+    val client = com.twitter.finagle.Http.client
+      .configured(Http.Netty4Impl)
       .configured(param.Stats(statsRecv))
       .withResponseClassifier(classifier)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
@@ -668,10 +672,12 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     val server = com.twitter.finagle.Http.server
       .withResponseClassifier(classifier)
       .withStatsReceiver(statsRecv)
+      .configured(Http.Netty4Impl)
       .withLabel("server")
       .serve("localhost:*", statusCodeSvc)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-    val client = com.twitter.finagle.netty4.http.Http.client
+    val client = com.twitter.finagle.Http.client
+      .configured(Http.Netty4Impl)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
     Await.ready(client(requestWith(Status.Ok)), 1.second)
@@ -687,12 +693,36 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     server.close()
   }
 
-  test("codec should require a message size be less than 2Gb") {
-    intercept[IllegalArgumentException] {
-      com.twitter.finagle.netty4.http.Http.client.withMaxRequestSize(3000.megabytes)
+  test("server handles expect continue header") {
+    val expectP = new Promise[Boolean]
+
+    val svc = new HttpService {
+      def apply(request: Request) = {
+        expectP.setValue(request.headerMap.contains("expect"))
+        val response = Response()
+        Future.value(response)
+      }
     }
-    intercept[IllegalArgumentException] {
-      com.twitter.finagle.netty4.http.Http.client.withMaxResponseSize(3000.megabytes)
-    }
+    val server = com.twitter.finagle.Http.server
+      .configured(param.Stats(NullStatsReceiver))
+      .configured(Http.Netty4Impl)
+      .withStreaming(true)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = com.twitter.finagle.Http.client
+      .configured(Http.Netty4Impl)
+      .configured(param.Stats(statsRecv))
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    val req = Request("/streaming")
+    req.setChunked(false)
+    req.headerMap.set("expect", "100-continue")
+
+    val res = client(req)
+    assert(Await.result(res, 2.seconds).status == Status.Continue)
+    assert(Await.result(expectP, 2.seconds) == false)
+    client.close()
+    server.close()
   }
 }

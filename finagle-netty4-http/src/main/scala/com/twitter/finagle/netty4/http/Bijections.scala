@@ -90,7 +90,14 @@ private[finagle] object Bijections {
       case FinagleHttp.Version.Http11 => NettyHttp.HttpVersion.HTTP_1_1
     }
 
-    def responseToNetty(r: FinagleHttp.Response): NettyHttp.FullHttpResponse =
+    def responseHeadersToNetty(r: FinagleHttp.Response): NettyHttp.HttpResponse =
+      new NettyHttp.DefaultHttpResponse(
+        versionToNetty(r.version),
+        statusToNetty(r.status),
+        headersToNetty(r.headerMap)
+      )
+
+    def fullResponseToNetty(r: FinagleHttp.Response): NettyHttp.HttpResponse =
       new NettyHttp.DefaultFullHttpResponse(
         versionToNetty(r.version),
         statusToNetty(r.status),
