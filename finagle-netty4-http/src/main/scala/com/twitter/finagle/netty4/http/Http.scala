@@ -9,8 +9,15 @@ import com.twitter.finagle.server.Listener
 import io.netty.channel._
 import io.netty.handler.codec.{http => NettyHttp}
 
-private[finagle] object Http {
-  val Netty4HttpTransporter: Stack.Params => Transporter[Any, Any] =
+/**
+ * The `exp` package contains params to configure the underlying netty version
+ * for http 1.1 clients and servers. The netty4 implementation is considered
+ * experimental and is untested in production scenarios.
+ */
+object exp {
+
+  private[http] val Netty4HttpTransporter: Stack.Params => Transporter[Any, Any] =
+
     (params: Stack.Params) => {
       val maxChunkSize = params[httpparam.MaxChunkSize].size
       val maxHeaderSize = params[httpparam.MaxHeaderSize].size

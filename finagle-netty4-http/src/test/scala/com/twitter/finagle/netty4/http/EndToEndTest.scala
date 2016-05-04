@@ -535,13 +535,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     service =>
       val server = com.twitter.finagle.Http.server
         .withLabel("server")
-        .configured(Http.Netty4Impl)
+        .configured(exp.Netty4Impl)
         .configured(Stats(statsRecv))
         .withMaxRequestSize(100.bytes)
         .serve("localhost:*", service)
       val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
       val client = com.twitter.finagle.Http.client
-        .configured(Http.Netty4Impl)
+        .configured(exp.Netty4Impl)
         .configured(Stats(statsRecv))
         .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
@@ -623,7 +623,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     (service, st, name) =>
       val server = com.twitter.finagle.Http.serve(new InetSocketAddress(0), service)
       val client = com.twitter.finagle.Http.client
-        .configured(Http.Netty4Impl)
+        .configured(exp.Netty4Impl)
         .configured(Stats(st))
         .configured(FailureAccrualFactory.Param(failureAccrualFailures, () => 1.minute))
         .newService(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), name)
@@ -642,11 +642,11 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
 
     val server = com.twitter.finagle.Http.server
       .configured(param.Stats(NullStatsReceiver))
-      .configured(Http.Netty4Impl)
+      .configured(exp.Netty4Impl)
       .serve("localhost:*", statusCodeSvc)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = com.twitter.finagle.Http.client
-      .configured(Http.Netty4Impl)
+      .configured(exp.Netty4Impl)
       .configured(param.Stats(statsRecv))
       .withResponseClassifier(classifier)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
@@ -672,12 +672,12 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     val server = com.twitter.finagle.Http.server
       .withResponseClassifier(classifier)
       .withStatsReceiver(statsRecv)
-      .configured(Http.Netty4Impl)
+      .configured(exp.Netty4Impl)
       .withLabel("server")
       .serve("localhost:*", statusCodeSvc)
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = com.twitter.finagle.Http.client
-      .configured(Http.Netty4Impl)
+      .configured(exp.Netty4Impl)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
     Await.ready(client(requestWith(Status.Ok)), 1.second)
@@ -705,13 +705,13 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     }
     val server = com.twitter.finagle.Http.server
       .configured(param.Stats(NullStatsReceiver))
-      .configured(Http.Netty4Impl)
+      .configured(exp.Netty4Impl)
       .withStreaming(true)
       .serve("localhost:*", svc)
 
     val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
     val client = com.twitter.finagle.Http.client
-      .configured(Http.Netty4Impl)
+      .configured(exp.Netty4Impl)
       .configured(param.Stats(statsRecv))
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 

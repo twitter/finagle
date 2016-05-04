@@ -65,6 +65,9 @@ Breaking API Changes
 New Features
 ~~~~~~~~~~~~
 
+  * finagle-http: http 1.1 running on netty4 is configurable via `c.t.finagle.netty4.http.exp.Netty4Impl`.
+    It has not been tested in production and should be considered beta software. ``RB_ID=828188``
+
   * finagle-core: Multi-line Dtabs may now contain line-oriented comments beginning with '#'.
     Comments are omitted from parsed Dtabs. ``RB_ID=818752``
 
