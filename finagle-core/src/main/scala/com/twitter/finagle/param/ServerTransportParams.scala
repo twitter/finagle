@@ -25,7 +25,6 @@ class ServerTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
    *
    * @param caCertificatePath the path to the optional PEM encoded CA certificates trusted by this
    *                          server
-
    *
    * @param ciphers the list of supported ciphers, delimited by `:`
    *

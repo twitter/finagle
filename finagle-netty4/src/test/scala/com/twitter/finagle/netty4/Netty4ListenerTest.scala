@@ -9,8 +9,7 @@ import com.twitter.finagle.{Service, Status}
 import com.twitter.io.Charsets
 import com.twitter.util._
 import io.netty.buffer.ByteBuf
-import io.netty.channel.ChannelPipeline
-import io.netty.channel.socket.SocketChannel
+import io.netty.channel.{Channel, ChannelPipeline}
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.handler.codec.{Delimiters, DelimiterBasedFrameDecoder}
 import java.net.{SocketAddress, InetAddress, Socket, InetSocketAddress}
@@ -62,7 +61,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     val p = Params.empty + Label("test") + Stats(sr)
     val listener = Netty4Listener[ByteBuf, ByteBuf](
       p,
-      transportFactory = { _: SocketChannel => new NullTransport }
+      transportFactory = { _: Channel => new NullTransport }
     )
   }
 
@@ -115,7 +114,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     val p = Params.empty + Label("srv") + Stats(sr)
     val listener = Netty4Listener[ByteBuf, ByteBuf](
         p,
-        transportFactory = { _: SocketChannel => new NullTransport }
+        transportFactory = { _: Channel => new NullTransport }
       )
     val server1 = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(nopDispatch)
     val server2 = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(nopDispatch)

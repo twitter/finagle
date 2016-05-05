@@ -3,11 +3,11 @@ package com.twitter.finagle.netty4.transport
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
-import io.netty.channel.{ChannelException => _, _}
 import com.twitter.util._
 import io.netty.channel.{
   Channel, ChannelHandlerContext, ChannelFutureListener, ChannelFuture, SimpleChannelInboundHandler
 }
+import io.netty.handler.ssl.SslHandler
 import java.net.SocketAddress
 import java.security.cert.Certificate
 import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
@@ -121,8 +121,15 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
     closed.unit
   }
 
-  // TODO: We don't support SSL for Netty 4 yet
-  val peerCertificate: Option[Certificate] = None
+  val peerCertificate: Option[Certificate] = ch.pipeline.get(classOf[SslHandler]) match {
+    case null => None
+    case handler =>
+      try {
+        handler.engine.getSession.getPeerCertificates.headOption
+      } catch {
+        case NonFatal(_) => None
+      }
+  }
 
   def localAddress: SocketAddress = ch.localAddress
 

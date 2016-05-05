@@ -5,8 +5,10 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
 import com.twitter.finagle.netty4.codec.{DecodeHandler, EncodeHandler}
 import com.twitter.finagle.netty4.proxy.HttpProxyConnectHandler
+import com.twitter.finagle.netty4.ssl.Netty4SslHandler
 import com.twitter.finagle.param.{Stats, Logger}
 import com.twitter.finagle.transport.Transport
+import com.twitter.util.Duration
 import io.netty.channel._
 import io.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
 
@@ -41,7 +43,12 @@ private[netty4] class Netty4ClientChannelInitializer[In, Out](
   override def initChannel(ch: Channel): Unit = {
     super.initChannel(ch)
 
-    // read timeout => decode handler => encode handler => write timeout => cxn handler
+    // fist => last
+    // - a request flies from last to first
+    // - a response flies from first to last
+    //
+    // decoder => [pipeline from super.initChannel] => encoder
+
     val pipe = ch.pipeline
     decodeHandler.foreach(pipe.addFirst(FrameDecoderHandlerKey, _))
 
@@ -60,39 +67,51 @@ private[netty4] class Netty4ClientChannelInitializer[In, Out](
 private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
     params: Stack.Params)
   extends ChannelInitializer[Channel] {
-    import Netty4ClientChannelInitializer._
 
-    private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
-    private[this] val Logger(logger) = params[Logger]
-    private[this] val Stats(stats) = params[Stats]
-    private[this] val Transporter.HttpProxyTo(hostAndCredentials) = params[Transporter.HttpProxyTo]
+  import Netty4ClientChannelInitializer._
 
-    private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
+  private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
+  private[this] val Logger(logger) = params[Logger]
+  private[this] val Stats(stats) = params[Stats]
+  private[this] val Transporter.HttpProxyTo(hostAndCredentials) = params[Transporter.HttpProxyTo]
 
-    def initChannel(ch: Channel): Unit = {
-      val pipe = ch.pipeline
+  private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
 
-      if (readTimeout.isFinite) {
-        val (timeoutValue, timeoutUnit) = readTimeout.inTimeUnit
-        pipe.addFirst(ReadTimeoutHandlerKey, new ReadTimeoutHandler(timeoutValue, timeoutUnit))
-      }
+  def initChannel(ch: Channel): Unit = {
 
-      if (writeTimeout.isFinite) {
-        val (timeoutValue, timeoutUnit) = writeTimeout.inTimeUnit
-        pipe.addLast(WriteTimeoutHandlerKey, new WriteTimeoutHandler(timeoutValue, timeoutUnit))
-      }
+    // first => last
+    // - a request flies from last to first
+    // - a response flies from first to last
+    //
+    // http proxy => ssl => read timeout => write timeout => exceptions
 
-      pipe.addLast("exception handler", exceptionHandler)
+    val pipe = ch.pipeline
 
-      hostAndCredentials.foreach {
-        case (host, credentials) => pipe.addFirst("http proxy connect",
-          new HttpProxyConnectHandler(host, credentials))
-      }
+    if (readTimeout.isFinite && readTimeout > Duration.Zero) {
+      val (timeoutValue, timeoutUnit) = readTimeout.inTimeUnit
+      pipe.addFirst(ReadTimeoutHandlerKey, new ReadTimeoutHandler(timeoutValue, timeoutUnit))
+    }
+
+    if (writeTimeout.isFinite && writeTimeout > Duration.Zero) {
+      val (timeoutValue, timeoutUnit) = writeTimeout.inTimeUnit
+      pipe.addLast(WriteTimeoutHandlerKey, new WriteTimeoutHandler(timeoutValue, timeoutUnit))
+    }
+
+    pipe.addLast("exception handler", exceptionHandler)
+
+    // Add SslHandler to the pipeline.
+    pipe.addFirst("ssl init", new Netty4SslHandler(params))
+
+    hostAndCredentials.foreach {
+      case (host, credentials) => pipe.addFirst("http proxy connect",
+        new HttpProxyConnectHandler(host, credentials))
     }
   }
+}
 
 /**
  * Channel Initializer which exposes the netty pipeline to the transporter.
+ *
  * @param params configuration parameters.
  * @param pipeCb a callback for initialized pipelines
  * @tparam In the application request type.
@@ -100,7 +119,7 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
  */
 private[netty4] class RawNetty4ClientChannelInitializer[In, Out](
     params: Stack.Params,
-    pipeCb: ChannelPipeline => Unit)
+    pipeCb: ChannelPipeline => Unit = _ => ())
   extends AbstractNetty4ClientChannelInitializer[In, Out](params) {
 
   override def initChannel(ch: Channel): Unit = {

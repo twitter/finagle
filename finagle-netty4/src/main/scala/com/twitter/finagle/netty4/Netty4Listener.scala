@@ -5,25 +5,16 @@ import com.twitter.finagle._
 import com.twitter.finagle.netty4.channel.{ServerBridge, Netty4ServerChannelInitializer}
 import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.server.Listener
-import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.concurrent.GenericFutureListener
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
-
-/**
- * Netty4 TLS configuration.
- *
- * @param newEngine Creates a new SSL engine
- */
-private[finagle] case class Netty4ListenerTLSConfig(newEngine: () => Engine)
 
 private[finagle] object Netty4Listener {
   val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
@@ -41,7 +32,7 @@ private[finagle] object Netty4Listener {
 private[finagle] case class Netty4Listener[In, Out](
     params: Stack.Params,
     pipelineInit: ChannelPipeline => Unit = _ => (),
-    transportFactory: SocketChannel => Transport[In, Out] = new ChannelTransport[In, Out](_)
+    transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_)
   ) extends Listener[In, Out] {
 
   // transport params

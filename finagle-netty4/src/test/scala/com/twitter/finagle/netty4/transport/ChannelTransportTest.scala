@@ -5,14 +5,19 @@ import com.twitter.finagle._
 import com.twitter.util.{Throw, Return, Await, Future}
 import io.netty.channel.{ChannelPromise, ChannelHandlerContext, ChannelOutboundHandlerAdapter}
 import io.netty.channel.embedded.EmbeddedChannel
+import io.netty.handler.ssl.SslHandler
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 import org.scalatest.{OneInstancePerTest, FunSuite}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.mockito.Mockito._
+import java.security.cert.Certificate
+import javax.net.ssl.{SSLSession, SSLEngine}
 
 @RunWith(classOf[JUnitRunner])
 class ChannelTransportTest extends FunSuite
-  with GeneratorDrivenPropertyChecks with OneInstancePerTest {
+  with GeneratorDrivenPropertyChecks with OneInstancePerTest with MockitoSugar {
 
   val timeout = 10.seconds
 
@@ -155,5 +160,18 @@ class ChannelTransportTest extends FunSuite
     assert(Await.result(transport.onClose, timeout).isInstanceOf[ChannelClosedException])
     assert(transport.status == Status.Closed)
     assert(!channel.isOpen)
+  }
+
+  test("peerCertificate") {
+    val engine = mock[SSLEngine]
+    val session = mock[SSLSession]
+    val cert = mock[Certificate]
+    when(engine.getSession).thenReturn(session)
+    when(session.getPeerCertificates).thenReturn(Array(cert))
+    val ch = new EmbeddedChannel(new SslHandler(engine))
+    ch.pipeline().removeLast()
+    val tr = new ChannelTransport[String, String](ch)
+
+    assert(tr.peerCertificate == Some(cert))
   }
 }
