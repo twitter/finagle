@@ -2,15 +2,15 @@ package com.twitter.finagle.kestrel
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Address, Group, Name, ServiceFactory}
+import com.twitter.finagle.{Addr, Address, Group, Kestrel, Name, ServiceFactory}
 import com.twitter.finagle.builder._
-import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
+import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel => KestrelCodec}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ThriftClientFramedCodecFactory, ThriftClientFramedCodec, ClientId, ThriftClientRequest}
+import com.twitter.finagle.Thrift
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util._
 import _root_.java.{util => ju}
-import _root_.java.lang.UnsupportedOperationException
 import _root_.java.net.SocketAddress
 import _root_.java.util.concurrent.atomic.AtomicInteger
 import scala.collection.mutable
@@ -221,7 +221,7 @@ object MultiReaderMemcache {
    * Helper for getting the right codec for the memcache protocol
    * @return the Kestrel codec
    */
-  def codec = Kestrel()
+  def codec = KestrelCodec()
 }
 
 /**
@@ -316,7 +316,7 @@ object MultiReaderThrift {
    * Helper for getting the right codec for the thrift protocol
    * @return the ThriftClientFramedCodec codec
    */
-  def codec(clientId: ClientId) = ThriftClientFramedCodec(Some(clientId))
+  def codec(clientId: ClientId): ThriftClientFramedCodecFactory = ThriftClientFramedCodec(Some(clientId))
 }
 
 /**
@@ -580,10 +580,9 @@ abstract class MultiReaderBuilderMemcacheBase[Builder] private[kestrel](
 
   protected[kestrel] def defaultClientBuilder: MemcacheClientBuilder =
     ClientBuilder()
-      .codec(Kestrel())
+      .stack(Kestrel.client)
       .connectTimeout(1.minute)
       .requestTimeout(1.minute)
-      .hostConnectionLimit(1)
       .daemon(true)
 
   protected[kestrel] def createClient(factory: ServiceFactory[Command, Response]): Client =
