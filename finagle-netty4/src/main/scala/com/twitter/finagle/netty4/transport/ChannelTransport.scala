@@ -130,7 +130,7 @@ private[netty4] class ChannelTransport[In, Out](ch: Channel) extends Transport[I
 
   override def toString = s"Transport<channel=$ch, onClose=$closed>"
 
-  ch.pipeline().addLast("finagleChannelTransport", new SimpleChannelInboundHandler[Out]() {
+  ch.pipeline().addLast("finagleChannelTransport", new SimpleChannelInboundHandler[Out](false) {
 
     override def channelReadComplete(ctx: ChannelHandlerContext): Unit = {
       if (!ch.config.isAutoRead && msgsNeeded.get > 0) ch.read()
