@@ -37,5 +37,38 @@ Name Resolution
 <<<<<<<<<<<<<<<
 
 **inet/dns/queue_size**
-  A gauge of the current number of DNS resolutions waiting for lookup
-  :src:`InetResolver <com/twitter/finagle/Resolver.scala>`.
+  A gauge of the current number of DNS resolutions waiting for
+  lookup in :src:`InetResolver <com/twitter/finagle/Resolver.scala>`.
+
+**inet/dns/dns_lookups**
+  A counter of the number of DNS lookups attempted by :src:`InetResolver
+  <com/twitter/finagle/Resolver.scala>`.
+
+**inet/dns/dns_lookup_failures**
+  A counter of the number of DNS lookups attempted by :src:`InetResolver
+  <com/twitter/finagle/Resolver.scala>` and failed.
+
+**inet/dns/lookup_ms**
+  A histogram of the latency, in milliseconds, of the time to lookup
+  every host (successfully or not) in a ``com.twitter.finagle.Addr``.
+
+**inet/dns/successes**
+  A counter of the number of ``com.twitter.finagle.Addr`` s with
+  at least one resolved host.
+
+**inet/dns/failures**
+  A counter of the number of ``com.twitter.finagle.Addr`` s with
+  no resolved hosts.
+
+**inet/dns/cache/size**
+  A gauge of the approximate number of cached DNS resolutions in
+  :src:`FixedInetResolver <com/twitter/finagle/Resolver.scala>`.
+
+**inet/dns/cache/evicts**
+  A gauge of the number of times a cached DNS resolution has been
+  evicted from :src:`FixedInetResolver
+  <com/twitter/finagle/Resolver.scala>`.
+
+**inet/dns/cache/hit_rate**
+  A gauge of the ratio of DNS lookups which were already cached by
+  :src:`FixedInetResolver <com/twitter/finagle/Resolver.scala>`
