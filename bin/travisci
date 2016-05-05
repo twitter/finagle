@@ -84,4 +84,3 @@ if [ "$FINAGLE_BRANCH" != "master" ]; then
   cd $FINAGLE_DIR
   rm -rf $FINAGLE_TMP_DIR
 fi
-

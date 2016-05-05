@@ -10,8 +10,8 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 Bug Fixes
 ~~~~~~~~~
 
-  * finagle-http: Servers which aggregate content chunks (streaming == false) now return a 413 
-    response for streaming clients who exceed the servers' configured max request size. 
+  * finagle-http: Servers which aggregate content chunks (streaming == false) now return a 413
+    response for streaming clients who exceed the servers' configured max request size.
     ``RB_ID=828741``
 
 New Features
@@ -21,6 +21,13 @@ New Features
     in milliseconds, the ``com.twitter.concurrent.Scheduler`` is spending doing blocking
     operations on threads that have opted into tracking. This also moves the
     "scheduler/dispatches" gauge out of TwitterServer into Finagle. ``RB_ID=828289``
+
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+   * Builds are now only for Java 8 and Scala 2.11. See the
+     `blog post <https://finagle.github.io/blog/2016/04/20/scala-210-and-java7/>`_
+     for details. ``RB_ID=828898``
 
 6.35.0
 ------

@@ -31,7 +31,6 @@ java -ea                          \
   -XX:+CMSParallelRemarkEnabled   \
   -XX:+CMSClassUnloadingEnabled   \
   -XX:ReservedCodeCacheSize=128m  \
-  -XX:MaxPermSize=1024m           \
   -XX:SurvivorRatio=128           \
   -XX:MaxTenuringThreshold=0      \
   -Xss8M                          \

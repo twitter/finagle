@@ -51,28 +51,10 @@ object Finagle extends Build {
       ExclusionRule(organization = "org.scala-tools.testing"),
       ExclusionRule(organization = "org.mockito"))
 
-  def scalacOptionsVersion(sv: String): Seq[String] = {
-    Seq(
-      // Note: Add -deprecation when deprecated methods are removed
-      "-unchecked",
-      "-feature",
-      "-language:_",
-      "-encoding", "utf8"
-    ) ++ (CrossVersion.partialVersion(sv) match {
-      case Some((2, x)) if x >= 11 =>
-        Seq(
-          "-Xlint:-missing-interpolator",
-          "-Ypatmat-exhaust-depth", "40"
-        )
-      case _ => Seq("-Xlint")
-    })
-  }
-
   val sharedSettings = Seq(
     version := libVersion,
     organization := "com.twitter",
-    crossScalaVersions := Seq("2.10.6", "2.11.7"),
-    scalaVersion := "2.11.7",
+    scalaVersion := "2.11.8",
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",
       "org.scalatest" %% "scalatest" % "2.2.4" % "test",
@@ -81,12 +63,7 @@ object Finagle extends Build {
     ),
     resolvers += "twitter-repo" at "https://maven.twttr.com",
 
-    ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := (
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 10)) => false
-        case _ => true
-      }
-    ),
+    ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true,
 
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
@@ -97,9 +74,18 @@ object Finagle extends Build {
         <exclude org="javax.jms" module="jms" />
       </dependencies>,
 
-    scalacOptions := scalacOptionsVersion(scalaVersion.value),
-    javacOptions ++= Seq("-Xlint:unchecked", "-source", "1.7", "-target", "1.7"),
-    javacOptions in doc := Seq("-source", "1.7"),
+    scalacOptions := Seq(
+      // Note: Add -deprecation when deprecated methods are removed
+      "-target:jvm-1.8",
+      "-unchecked",
+      "-feature",
+      "-language:_",
+      "-encoding", "utf8",
+      "-Xlint:-missing-interpolator",
+      "-Ypatmat-exhaust-depth", "40"
+    ),
+    javacOptions ++= Seq("-Xlint:unchecked", "-source", "1.8", "-target", "1.8"),
+    javacOptions in doc := Seq("-source", "1.8"),
 
     // This is bad news for things like com.twitter.util.Time
     parallelExecution in Test := false,

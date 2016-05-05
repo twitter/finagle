@@ -1,1 +1,6 @@
-scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xlint", "-encoding", "utf8")
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-unchecked",
+  "-feature", "-Xlint",
+  "-encoding", "utf8"
+)
