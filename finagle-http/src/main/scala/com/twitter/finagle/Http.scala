@@ -61,14 +61,14 @@ object Http extends Client[Request, Response] with HttpRichClient
      * note: the listener and transporter don't strictly need to be
      *       coupled but we do so for ease of configuration.
      */
-    private[finagle] case class HttpImpl(
+    case class HttpImpl(
       clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
       serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
       transporter: Stack.Params => Transporter[Any, Any],
       listener: Stack.Params => Listener[Any, Any]
     )
 
-    private[finagle] implicit object HttpImpl extends Stack.Param[HttpImpl] {
+    implicit object HttpImpl extends Stack.Param[HttpImpl] {
       val default = Netty3Impl
     }
 
