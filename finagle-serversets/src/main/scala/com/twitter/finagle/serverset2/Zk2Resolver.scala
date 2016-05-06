@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
 
+object dnsCacheSize extends GlobalFlag(16000L, "Maximum size of DNS resolution cache")
+
 private[serverset2] object eprintf {
   def apply(fmt: String, xs: Any*) = System.err.print(fmt.format(xs: _*))
 }
@@ -76,7 +78,7 @@ class Zk2Resolver(
 
   private[this] implicit val injectTimer = timer
 
-  private[this] val inetResolver = FixedInetResolver(statsReceiver)
+  private[this] val inetResolver = FixedInetResolver(statsReceiver, dnsCacheSize())
   private[this] val sessionTimeout = 10.seconds
   private[this] val removalEpoch = Epoch(removalWindow)
   private[this] val batchEpoch = Epoch(batchWindow)
