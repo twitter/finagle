@@ -151,7 +151,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     eventually { counterEquals("connects")(3) }
 
     // listening socket is closed
-    Await.ready(server.close(), Duration.fromSeconds(15))
+    Await.ready(server.close(Time.Top), Duration.fromSeconds(15))
 
     // new connection attempts fail
     intercept[java.net.ConnectException] { new Socket().connect(server.boundAddress) }

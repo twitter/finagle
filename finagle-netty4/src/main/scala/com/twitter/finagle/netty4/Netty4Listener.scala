@@ -11,7 +11,7 @@ import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel._
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.util.concurrent.GenericFutureListener
+import io.netty.util.concurrent.{Future => NettyFuture, FutureListener}
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
 import java.util.concurrent.TimeUnit
@@ -112,8 +112,8 @@ private[finagle] case class Netty4Listener[In, Out](
         // Existing tasks have ``deadline`` time to finish executing.
         bossLoop
           .shutdownGracefully(0 /* quietPeriod */ , deadline.inMillis /* timeout */ , TimeUnit.MILLISECONDS)
-          .addListener(new GenericFutureListener[Nothing] {
-            def operationComplete(future: Nothing): Unit = p.setDone()
+          .addListener(new FutureListener[Any] {
+            def operationComplete(future: NettyFuture[Any]) = p.setDone()
           })
         p
       }
