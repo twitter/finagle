@@ -9,6 +9,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.InetSocketAddressUtil
 import com.twitter.io.Buf
 import com.twitter.util.{Duration, Await}
+import io.netty.buffer.{Unpooled, ByteBuf}
 import io.netty.channel._
 import java.net.{Socket, InetSocketAddress, InetAddress, ServerSocket}
 import org.junit.runner.RunWith
@@ -25,8 +26,8 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
   def defaultDec = new FixedLengthDecoder(frameSize, Buf.Utf8.unapply(_).getOrElse("????"))
   def params = Params.empty
 
-  private[this] class Ctx[A](transporter: Transporter[A, String]) {
-    var clientsideTransport: Transport[A, String] = null
+  private[this] class Ctx[A, B](transporter: Transporter[A, B]) {
+    var clientsideTransport: Transport[A, B] = null
     var server: ServerSocket = null
     var acceptedSocket: Socket = null
 
@@ -108,6 +109,19 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     }
   }
 
+  test("listener pipeline emits byte bufs with refCnt == 1") {
+    val ctx = new Ctx(Netty4Transporter[ByteBuf, ByteBuf]({pipe: ChannelPipeline => ()}, params)) { }
+    ctx.connect()
+    val requestBytes = "hello world request".getBytes("UTF-8")
+    val in = Unpooled.wrappedBuffer(requestBytes)
+    ctx.clientsideTransport.write(in)
+
+    val responseBytes = "some response".getBytes("UTF-8")
+    ctx.acceptedSocket.getOutputStream.write(responseBytes)
+
+    val responseBB = Await.result(ctx.clientsideTransport.read())
+    assert(responseBB.refCnt == 1)
+  }
 
   test("Netty4ClientChannelInitializer pipelines enforce read timeouts") {
     @volatile var observedExn: Throwable = null

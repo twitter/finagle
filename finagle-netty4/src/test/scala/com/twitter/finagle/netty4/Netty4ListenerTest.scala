@@ -1,5 +1,6 @@
 package com.twitter.finagle.netty4
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.dispatch.SerialServerDispatcher
 import com.twitter.finagle.param.{Stats, Label}
@@ -8,7 +9,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{Service, Status}
 import com.twitter.io.Charsets
 import com.twitter.util._
-import io.netty.buffer.ByteBuf
+import io.netty.buffer.{Unpooled, ByteBuf}
 import io.netty.channel.{Channel, ChannelPipeline}
 import io.netty.handler.codec.string.{StringDecoder, StringEncoder}
 import io.netty.handler.codec.{Delimiters, DelimiterBasedFrameDecoder}
@@ -104,6 +105,34 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     val expected = "hi2u"
     val actual = new String(Array.fill("hi2u".length)(response.read().toByte))
     assert(actual == expected)
+    server.close()
+  }
+
+  test("bytebufs in default pipeline have refCnt == 1") {
+    val ctx = new StatsCtx { }
+    import ctx._
+
+    val p = Params.empty + Label("test") + Stats(sr)
+    val listener = Netty4Listener[ByteBuf, ByteBuf](p)
+
+    val requestBB = new Promise[ByteBuf]
+    val service = new Service[ByteBuf, ByteBuf] {
+      def apply(request: ByteBuf) = {
+        requestBB.setValue(request)
+        Future.value(Unpooled.wrappedBuffer("hi".getBytes("UTF-8")))
+      }
+    }
+
+    val serveTransport = (t: Transport[ByteBuf, ByteBuf]) => new SerialServerDispatcher(t, service)
+    val server = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
+
+    val client = new Socket()
+    eventually { client.connect(server.boundAddress) }
+    client.getOutputStream.write("hello netty4!\n".getBytes("UTF-8"))
+    client.getOutputStream.flush()
+
+    val bb = Await.result(requestBB, 2.seconds)
+    assert(bb.refCnt == 1)
     server.close()
   }
 

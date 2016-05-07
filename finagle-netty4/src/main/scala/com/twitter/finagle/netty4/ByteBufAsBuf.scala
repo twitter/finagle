@@ -19,7 +19,7 @@ private[finagle] object ByteBufAsBuf {
       if (buf.readableBytes == 0)
         Buf.Empty
       else
-        new ByteBufAsBuf(buf.retain())
+        new ByteBufAsBuf(buf)
 
     /**
      * Extract a [[ByteBufAsBuf]]'s underlying ByteBuf without copying.
