@@ -18,6 +18,20 @@ import java.util.concurrent.TimeUnit
 
 private[finagle] object Netty4Listener {
   val TrafficClass: ChannelOption[JInt] = ChannelOption.newInstance("trafficClass")
+
+  /**
+   * A [[com.twitter.finagle.Stack.Param]] used to configure the ability to
+   * exert back pressure by only reading from the Channel when the [[Transport]] is
+   * read.
+   */
+  private[finagle] case class BackPressure(enabled: Boolean) {
+    def mk(): (BackPressure, Stack.Param[BackPressure]) = (this, BackPressure.param)
+  }
+
+  private[finagle] object BackPressure {
+    implicit val param: Stack.Param[BackPressure] =
+      Stack.Param(BackPressure(enabled = true))
+  }
 }
 
 /**
@@ -35,6 +49,9 @@ private[finagle] case class Netty4Listener[In, Out](
     transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_)
   ) extends Listener[In, Out] {
 
+  import Netty4Listener.BackPressure
+
+
   // transport params
   private[this] val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
   private[this] val Transport.BufferSizes(sendBufSize, recvBufSize) = params[Transport.BufferSizes]
@@ -42,6 +59,7 @@ private[finagle] case class Netty4Listener[In, Out](
 
   // listener params
   private[this] val Listener.Backlog(backlog) = params[Listener.Backlog]
+  private[this] val BackPressure(backPressureEnabled) = params[BackPressure]
 
   // netty4 params
   private[this] val param.Allocator(allocator) = params[param.Allocator]
@@ -82,6 +100,7 @@ private[finagle] case class Netty4Listener[In, Out](
       sendBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_SNDBUF, _))
       recvBufSize.foreach(bootstrap.childOption[JInt](ChannelOption.SO_RCVBUF, _))
       keepAlive.foreach(bootstrap.childOption[JBool](ChannelOption.SO_KEEPALIVE, _))
+      bootstrap.childOption[JBool](ChannelOption.AUTO_READ, !backPressureEnabled)
       params[Listener.TrafficClass].value.foreach { tc =>
         bootstrap.option[JInt](Netty4Listener.TrafficClass, tc)
         bootstrap.childOption[JInt](Netty4Listener.TrafficClass, tc)

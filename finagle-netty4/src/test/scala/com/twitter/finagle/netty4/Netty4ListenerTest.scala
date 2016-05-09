@@ -3,6 +3,7 @@ package com.twitter.finagle.netty4
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.dispatch.SerialServerDispatcher
+import com.twitter.finagle.netty4.Netty4Listener.BackPressure
 import com.twitter.finagle.param.{Stats, Label}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.transport.Transport
@@ -59,7 +60,9 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
   private[this] trait Ctx extends StatsCtx {
-    val p = Params.empty + Label("test") + Stats(sr)
+    def backpressure: Boolean = true
+
+    val p = Params.empty + Label("test") + Stats(sr) + BackPressure(backpressure)
     val listener = Netty4Listener[ByteBuf, ByteBuf](
       p,
       transportFactory = { _: Channel => new NullTransport }
@@ -140,7 +143,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     val ctx = new StatsCtx { }
     import ctx._
 
-    val p = Params.empty + Label("srv") + Stats(sr)
+    // need to turn off backpressure since we don't read off the transport
+    val p = Params.empty + Label("srv") + Stats(sr) + BackPressure(false)
     val listener = Netty4Listener[ByteBuf, ByteBuf](
         p,
         transportFactory = { _: Channel => new NullTransport }
@@ -166,7 +170,10 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   }
 
   test("Netty4Listener shuts down gracefully") {
-    val c = new Ctx {}
+
+    // turn off backpressure so that the three bytes
+    // are recorded below.
+    val c = new Ctx { override def backpressure = false }
     import c._
 
     val serverAddr = new InetSocketAddress(InetAddress.getLoopbackAddress, 0)
