@@ -5,7 +5,7 @@ import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{DeadlineFilter, StatsFilter, TimeoutFilter}
+import com.twitter.finagle.service.{DeadlineStatsFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter.Module
@@ -50,7 +50,7 @@ object StackServer {
    *
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
-   * @see [[com.twitter.finagle.service.DeadlineFilter]]
+   * @see [[com.twitter.finagle.service.DeadlineStatsFilter]]
    * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
    * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
@@ -68,12 +68,7 @@ object StackServer {
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.serverModule)
-    // The DeadlineFilter is pushed after the stats filters so stats are
-    // recorded for the request. If a server processing deadline is set in
-    // TimeoutFilter, the deadline will start from the current time, and
-    // therefore not be expired if the request were to then pass through
-    // DeadlineFilter. Thus, DeadlineFilter is pushed before TimeoutFilter.
-    stk.push(DeadlineFilter.module)
+    stk.push(DeadlineStatsFilter.module)
     stk.push(DtabStatsFilter.module)
     // Admission Control filters are inserted after `StatsFilter` so that rejected
     // requests are counted. We may need to adjust how latency are recorded

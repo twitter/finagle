@@ -7,6 +7,14 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+  * Renamed DeadlineFilter to DeadlineStatsFilter, which now only records stats
+    for the number of requests with exceeded deadlines, the remaining deadline
+    budget, and the transit latency of requests. It no longer rejects requests
+    and has no configuration. We have decided not to pursue Deadline Admission
+    Control at this time. ``RB_ID=829372``
+
 Bug Fixes
 ~~~~~~~~~
 

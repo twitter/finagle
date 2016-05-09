@@ -100,40 +100,6 @@ All the incoming requests on top of ``(maxConcurrentRequests + maxWaiters)`` wil
 
 See :ref:`Requests Concurrency metrics <requests_concurrency_limit>` for more details.
 
-Request Deadline
-^^^^^^^^^^^^^^^^
-
-The `Request Deadline` module acts as deadline driven server-side `static admission controller` and
-`rejects` [#nack]_ all the incoming requests that expire their deadline. Generally, the deadline for
-each request is set up by a frontend service and propagated over the wire to the downstream services.
-
-The `Request Deadline` module is implemented by
-:src:`DeadlineFilter <com/twitter/finagle/filter/DeadlineFilter.scala>` and configured with
-following params [#example]_.
-
-.. code-block:: scala
-
-  import com.twitter.conversions.time._
-  import com.twitter.finagle.Http
-
-  val server = Http.server
-    .withAdmissionControl.deadlineTolerance(200.milliseconds)
-    .withAdmissionControl.deadlineMaxRejectedPercentage(0.3)
-    .serve(":8080", service)
-
-There are two arguments passed to the `Request Deadline` module, which might be configured
-separately:
-
-1. `deadlineTolerance` (default: 170 ms) - the maximum elapsed time since a request's deadline
-   when it will be considered for rejection
-2. `deadlineMaxRejectedPercentage` (default: 20%) - the maximum percentage of requests that can be
-   rejected
-
-See :ref:`Deadline Admission Control metrics <deadline_admission_control_stats>` for more details.
-
-.. note:: The `Request Deadline` module is currently in an experimental mode where it doesn't actually
-          reject any of the `expired` requests, but only maintains metrics.
-
 Request Timeout
 ^^^^^^^^^^^^^^^
 
