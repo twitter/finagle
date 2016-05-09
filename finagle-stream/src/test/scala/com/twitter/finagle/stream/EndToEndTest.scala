@@ -347,7 +347,6 @@ class EndToEndTest extends FunSuite {
     Closable.all(client, server).close()
   }
 
-  if (!sys.props.contains("SKIP_FLAKY"))
   test("Streams: delay release until complete response") {
     @volatile var count: Int = 0
     val c = new WorkItContext()
@@ -368,7 +367,7 @@ class EndToEndTest extends FunSuite {
       .retries(2)
       .build()
 
-    val res = Await.result(client(streamRequest), 2.seconds)
+    val res = Await.result(client(streamRequest), 1.second)
     assert(count == 1)
     val f2 = client(streamRequest)
     assert(f2.poll.isEmpty)  // because of the host connection limit
@@ -378,7 +377,7 @@ class EndToEndTest extends FunSuite {
     assert(count == 1)
     res.release()
     error !! EOF
-    val res2 = Await.result(f2, 2.seconds)
+    val res2 = Await.result(f2, 1.second)
     assert(count == 2)
     res2.release()
 
