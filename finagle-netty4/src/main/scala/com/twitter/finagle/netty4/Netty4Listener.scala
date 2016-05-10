@@ -4,6 +4,7 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle._
 import com.twitter.finagle.netty4.channel.{ServerBridge, Netty4ServerChannelInitializer}
 import com.twitter.finagle.netty4.transport.ChannelTransport
+import com.twitter.finagle.param.Timer
 import com.twitter.finagle.server.Listener
 import com.twitter.finagle.transport.Transport
 import com.twitter.util._
@@ -48,9 +49,9 @@ private[finagle] case class Netty4Listener[In, Out](
     pipelineInit: ChannelPipeline => Unit = _ => (),
     transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_)
   ) extends Listener[In, Out] {
-
   import Netty4Listener.BackPressure
 
+  private[this] val Timer(timer) = params[Timer]
 
   // transport params
   private[this] val Transport.Liveness(_, _, keepAlive) = params[Transport.Liveness]
@@ -66,6 +67,7 @@ private[finagle] case class Netty4Listener[In, Out](
 
   /**
    * Listen for connections and apply the `serveTransport` callback on connected [[Transport transports]].
+   *
    * @param addr socket address for listening.
    * @param serveTransport a call-back for newly created transports which in turn are
    *                       created for new connections.
@@ -127,14 +129,21 @@ private[finagle] case class Netty4Listener[In, Out](
 
         val p = new Promise[Unit]
 
+        val timeout = deadline - Time.now
+        val timeoutMs = timeout.inMillis
+
         // The boss loop immediately starts refusing new work.
-        // Existing tasks have ``deadline`` time to finish executing.
+        // Existing tasks have ``timeoutMs`` time to finish executing.
         bossLoop
-          .shutdownGracefully(0 /* quietPeriod */ , deadline.inMillis /* timeout */ , TimeUnit.MILLISECONDS)
+          .shutdownGracefully(0 /* quietPeriod */ , timeoutMs.max(0), TimeUnit.MILLISECONDS)
           .addListener(new FutureListener[Any] {
             def operationComplete(future: NettyFuture[Any]) = p.setDone()
           })
-        p
+
+        // Don't rely on netty to satisfy the promise and transform all results to
+        // success because we don't want the non-deterministic lifecycle of external
+        // resources to affect application success.
+        p.raiseWithin(timeout)(timer).transform { _ => Future.Done }
       }
 
       def boundAddress: SocketAddress = ch.localAddress()

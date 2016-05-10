@@ -108,7 +108,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     val expected = "hi2u"
     val actual = new String(Array.fill("hi2u".length)(response.read().toByte))
     assert(actual == expected)
-    server.close()
+    Await.ready(server.close(), 2.seconds)
   }
 
   test("bytebufs in default pipeline have refCnt == 1") {
@@ -136,7 +136,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
 
     val bb = Await.result(requestBB, 2.seconds)
     assert(bb.refCnt == 1)
-    server.close()
+    Await.ready(server.close(), 2.seconds)
   }
 
   test("Netty4Listener records basic channel stats") {
@@ -165,8 +165,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     client2.getOutputStream.write(1)
     eventually { counterEquals("received_bytes")(4) }
 
-    server1.close()
-    server2.close()
+    Await.ready(server1.close(), 2.seconds)
+    Await.ready(server2.close(), 2.seconds)
   }
 
   test("Netty4Listener shuts down gracefully") {
@@ -198,5 +198,6 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     client3.getOutputStream.write(1)
 
     eventually { counterEquals("received_bytes")(3) }
+    Await.ready(server.close(), 2.seconds)
   }
 }
