@@ -3,7 +3,6 @@ package com.twitter.finagle.http.codec
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
-// note: netty4's http 1.1 impl obviates the need for this handler CSL-2707
 private[http] class PayloadSizeHandler(maxRequestPayloadSize: Int)
   extends SimpleChannelUpstreamHandler {
 
@@ -20,7 +19,6 @@ private[http] class PayloadSizeHandler(maxRequestPayloadSize: Int)
       Channels.write(ctx, writeF, tooLargeResponse, m.getRemoteAddress)
       writeF.addListener(ChannelFutureListener.CLOSE)
 
-    // todo: should we enforce the payload limit on responses?
     case _ => super.messageReceived(ctx, m)
   }
 }

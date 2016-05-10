@@ -2,9 +2,11 @@ package com.twitter.finagle.netty4.http
 
 import com.twitter.finagle.Http.param.HttpImpl
 import com.twitter.finagle.Http.{param => httpparam}
+import com.twitter.finagle.param.Logger
 import com.twitter.finagle.{Status => _, _}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
+import com.twitter.finagle.netty4.http.handler.{PayloadSizeHandler, RespondToExpectContinue}
 import com.twitter.finagle.server.Listener
 import io.netty.channel._
 import io.netty.handler.codec.{http => NettyHttp}
@@ -56,9 +58,9 @@ object exp {
       val decompressionEnabled = params[httpparam.Decompression].enabled
       val compressionLevel = params[httpparam.CompressionLevel].level
       val streaming = params[httpparam.Streaming].enabled
+      val log = params[Logger].log
 
       val init: ChannelPipeline => Unit = { pipeline: ChannelPipeline =>
-        // todo: channel buffer manager handler CSL-2722
         val codec = new NettyHttp.HttpServerCodec(
           maxInitialLineSize.inBytes.toInt,
           maxHeaderSize.inBytes.toInt,
@@ -78,12 +80,13 @@ object exp {
         if (decompressionEnabled)
           pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
 
-
         // nb: Netty's http object aggregator handles 'expect: continue' headers
-        // but its request chunk decoder doesn't. Consequently we need to install
-        // this handler when we're not aggregating content chunks.
-        if (streaming)
+        // and oversize payloads but the base codec does not. Consequently we need to
+        // install handlers to replicate this behavior when streaming.
+        if (streaming) {
+          pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSize, Some(log)))
           pipeline.addLast("expectContinue", RespondToExpectContinue)
+        }
         else
           pipeline.addLast(
             "httpDechunker",

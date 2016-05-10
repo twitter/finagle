@@ -469,6 +469,24 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
       client.close()
     }
+
+
+    test(name + ": return 413s for fixed-length requests with too large payloads to streaming servers") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+
+      val tooBig = Request("/")
+      tooBig.content = Buf.ByteArray.Owned(new Array[Byte](200))
+
+      val justRight = Request("/")
+      justRight.content = Buf.ByteArray.Owned(Array[Byte](100))
+
+      assert(Await.result(client(tooBig), 2.seconds).status == Status.RequestEntityTooLarge)
+      assert(Await.result(client(justRight), 2.seconds).status == Status.Ok)
+      client.close()
+    }
   }
 
   def tracing(name: String)(connect: HttpService => HttpService) {

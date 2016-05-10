@@ -1,8 +1,8 @@
-package com.twitter.finagle.netty4.http
+package com.twitter.finagle.netty4.http.handler
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.{ChannelInboundHandlerAdapter, ChannelHandlerContext}
+import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.http._
 
 
