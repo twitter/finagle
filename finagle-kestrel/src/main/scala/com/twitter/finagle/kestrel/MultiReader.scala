@@ -2,19 +2,18 @@ package com.twitter.finagle.kestrel
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Address, Group, Kestrel, Name, ServiceFactory}
+import com.twitter.finagle._
 import com.twitter.finagle.builder._
 import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel => KestrelCodec}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodecFactory, ThriftClientFramedCodec, ClientId, ThriftClientRequest}
-import com.twitter.finagle.Thrift
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util._
-import _root_.java.{util => ju}
-import _root_.java.net.SocketAddress
-import _root_.java.util.concurrent.atomic.AtomicInteger
-import scala.collection.mutable
+import java.net.SocketAddress
+import java.util.concurrent.atomic.AtomicInteger
+import java.{util => ju}
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
  * Indicates that all [[com.twitter.finagle.kestrel.ReadHandle ReadHandles]]
@@ -186,12 +185,10 @@ private[finagle] object MultiReaderHelper {
  * there are multiple available messages, round-robin across them.  Otherwise,
  * wait for the first message to arrive.
  *
- * Var[Addr] example:
+ * Example with a custom client builder:
  * {{{
- *   val name: com.twitter.finagle.Name = Resolver.eval(...)
- *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReaderMemcache(va, "the-queue")
+ *     MultiReaderMemcache("/the/path", "the-queue")
  *       .clientBuilder(
  *         ClientBuilder()
  *           .codec(MultiReaderMemcache.codec)
@@ -203,12 +200,25 @@ private[finagle] object MultiReaderHelper {
  * }}}
  */
 object MultiReaderMemcache {
+  /**
+   * Create a new MultiReader which dispatches requests to `dest` using the memcache protocol.
+   * 
+   * @param dest the name of the destination which requests are dispatched to.
+   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   * @param queueName the name of the queue to read from
+   *
+   * TODO: `dest` is eagerly resolved at client creation time, so name resolution does not
+   * behave dynamically with respect to local dtabs (unlike
+   * [[com.twitter.finagle.factory.BindingFactory]]. In practice this is not a problem since
+   * ReadHandle is not on the request path. Weights are discarded.
+   */
+  def apply(dest: String, queueName: String): MultiReaderBuilderMemcache =
+    apply(Resolver.eval(dest), queueName)
+
   def apply(dest: Name, queueName: String): MultiReaderBuilderMemcache = {
     dest match {
       case Name.Bound(va) => apply(va, queueName)
-      case Name.Path(_) => throw new UnsupportedOperationException(
-        "Failed to bind Name.Path in `MultiReaderMemcache.apply`"
-      )
+      case Name.Path(path) => apply(Namer.resolve(path), queueName)
     }
   }
 
@@ -233,10 +243,8 @@ object MultiReaderMemcache {
  *
  * Example with a custom client builder:
  * {{{
- *   val name: com.twitter.finagle.Name = Resolver.eval(...)
- *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReaderThrift(va, "the-queue")
+ *     MultiReaderThrift("/the/path", "the-queue")
  *       .clientBuilder(
  *         ClientBuilder()
  *           .codec(MultiReaderThrift.codec(ClientId("myClientName"))
@@ -259,6 +267,22 @@ object MultiReaderMemcache {
  */
 object MultiReaderThrift {
   /**
+   * Create a new MultiReader which dispatches requests to `dest` using the thrift protocol.
+   * 
+   * @param dest the name of the destination which requests are dispatched to.
+   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   * @param queueName the name of the queue to read from
+   * @param clientId the clientid to be used
+   *
+   * TODO: `dest` is eagerly resolved at client creation time, so name resolution does not
+   * behave dynamically with respect to local dtabs (unlike
+   * [[com.twitter.finagle.factory.BindingFactory]]. In practice this is not a problem since
+   * ReadHandle is not on the request path. Weights are discarded.
+   */
+  def apply(dest: String, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThrift =
+    apply(Resolver.eval(dest), queueName, clientId)
+
+  /**
    * Used to create a thrift based MultiReader with a ClientId when a custom
    * client builder will not be used.  If a custom client builder will be
    * used then it is more reasonable to use the version of apply that does
@@ -273,9 +297,7 @@ object MultiReaderThrift {
   def apply(dest: Name, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThrift = {
     dest match {
       case Name.Bound(va) => apply(va, queueName, clientId)
-      case Name.Path(_) => throw new UnsupportedOperationException(
-        "Failed to bind Name.Path in `MultiReaderThrift.apply`"
-      )
+      case Name.Path(path) => apply(Namer.resolve(path), queueName, clientId)
     }
   }
 

@@ -10,7 +10,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
 import com.twitter.finagle.kestrel._
 import com.twitter.finagle.kestrel.protocol.{Command, Response, Set}
-import com.twitter.finagle.{Addr, Address, ClientConnection, Service, ServiceFactory}
+import com.twitter.finagle._
 import com.twitter.io.Buf
 import com.twitter.util._
 import org.junit.runner.RunWith
@@ -24,6 +24,15 @@ import scala.language.postfixOps
 
 import scala.collection.immutable.{Set => ISet}
 import scala.collection.mutable.{ArrayBuffer, Set => MSet}
+
+object TestNamer {
+  val va = Var[Addr](Addr.Pending)
+}
+
+class TestNamer extends Namer {
+  override def lookup(path: Path) =
+    Activity.value(NameTree.Leaf(Name.Bound.singleton(TestNamer.va)))
+}
 
 @RunWith(classOf[JUnitRunner])
 class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with IntegrationPatience {
@@ -122,6 +131,14 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
         msg.ack.sync()
       }
       messages
+    }
+
+    val sentMessages = Seq.tabulate(N * 10) { i => s"message $i" }
+
+    def sendMessages(): Unit = {
+      sentMessages.zipWithIndex.foreach { case (m, i) =>
+        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
+      }
     }
   }
 
@@ -291,12 +308,25 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val va = Var(Addr.Bound(hosts: _*))
       val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
-      val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
       assert(messages.size == 0)
 
-      sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
+      sendMessages()
+
+      eventually {
+        assert(messages == sentMessages.toSet)
       }
+    }
+  }
+
+  test("Name.Path-based cluster should read messages from a ready cluster") {
+    new AddrClusterHelper {
+      val handle = MultiReaderMemcache("/$/com.twitter.finagle.kestrel.unit.TestNamer", queueName)
+        .clientBuilder(mockClientBuilder).build()
+      TestNamer.va() = Addr.Bound(hosts.toSet)
+      val messages = configureMessageReader(handle)
+      assert(messages.size == 0)
+
+      sendMessages()
 
       eventually {
         assert(messages == sentMessages.toSet)
@@ -309,12 +339,9 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val va = Var(Addr.Bound(hosts.head))
       val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
-      val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
       assert(messages.size == 0)
 
-      sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
-      }
+      sendMessages()
 
       // 0, 3, 6 ...
       eventually {
@@ -339,12 +366,9 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()
 
       val messages = configureMessageReader(handle)
-      val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
       assert(messages.size == 0)
 
-      sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
-      }
+      sendMessages()
 
       eventually {
         assert(messages == sentMessages.toSet)
@@ -374,12 +398,9 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
       val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()
       val messages = configureMessageReader(handle)
       val error = handle.error.sync()
-      val sentMessages = 0 until N * 10 map { i => "message %d".format(i) }
       assert(messages.size == 0)
 
-      sentMessages.zipWithIndex foreach { case (m, i) =>
-        Await.result(services(i % services.size).apply(Set(queueNameBuf, Time.now, Buf.Utf8(m))))
-      }
+      sendMessages()
 
       assert(messages.size == 0) // cluster not ready
       assert(error.isDefined == false)
