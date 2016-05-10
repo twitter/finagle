@@ -9,9 +9,9 @@ import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.{ThriftClientFramedCodecFactory, ThriftClientFramedCodec, ClientId, ThriftClientRequest}
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util._
-import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicInteger
-import java.{util => ju}
+import _root_.java.net.SocketAddress
+import _root_.java.util.concurrent.atomic.AtomicInteger
+import _root_.java.{util => ju}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
