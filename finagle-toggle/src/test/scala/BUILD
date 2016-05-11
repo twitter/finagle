@@ -8,6 +8,9 @@ junit_tests(name='scala',
     'util/util-app/src/main/scala',
     'util/util-core',
   ],
+  resources=[
+    'finagle/finagle-toggle/src/test/resources'
+  ],
   sources=rglobs('*.scala'),
   fatal_warnings=True,
   strict_deps=True,
