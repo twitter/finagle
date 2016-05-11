@@ -47,7 +47,8 @@ private[finagle] object Netty4Listener {
 private[finagle] case class Netty4Listener[In, Out](
     params: Stack.Params,
     pipelineInit: ChannelPipeline => Unit = _ => (),
-    transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_)
+    transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
+    handlerDecorator: ChannelHandler => ChannelHandler = identity
   ) extends Listener[In, Out] {
   import Netty4Listener.BackPressure
 
@@ -109,7 +110,7 @@ private[finagle] case class Netty4Listener[In, Out](
       }
 
       val initializer = new Netty4ServerChannelInitializer(pipelineInit, params, newBridge)
-      bootstrap.childHandler(initializer)
+      bootstrap.childHandler(handlerDecorator(initializer))
 
       // Block until listening socket is bound. `ListeningServer`
       // represents a bound server and if we don't block here there's
