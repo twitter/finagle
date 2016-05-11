@@ -1,6 +1,7 @@
 package com.twitter.finagle.util
 
 import com.twitter.io.Buf
+import java.lang.{Double => JDouble, Float => JFloat}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -9,6 +10,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 @RunWith(classOf[JUnitRunner])
 class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import BufWriter.OverflowException
+
   test("writeByte") (forAll { byte: Byte =>
     val bw = BufWriter.fixed(1)
     val buf = bw.writeByte(byte).owned()
@@ -16,45 +18,121 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(buf == Buf.ByteArray.Owned(Array(byte)))
   })
 
-  test("writeShortBE") (forAll { short: Short =>
-    val bw = BufWriter.fixed(2)
-    val buf = bw.writeShortBE(short).owned()
-    intercept[OverflowException] { bw.writeByte(0xff) }
+  test("writeShort{BE,LE}") (forAll { s: Short =>
+    val be = BufWriter.fixed(2).writeShortBE(s)
+    val le = BufWriter.fixed(2).writeShortLE(s)
+
+    intercept[OverflowException] { be.writeByte(0xff) }
+    intercept[OverflowException] { be.writeByte(0xff) }
+
     val arr = Array[Byte](
-      ((short >> 8) & 0xff).toByte,
-      (short & 0xff).toByte
+      ((s >>  8) & 0xff).toByte,
+      ((s      ) & 0xff).toByte
     )
-    assert(buf == Buf.ByteArray.Owned(arr))
+
+    assert(be.owned() == Buf.ByteArray.Owned(arr))
+    assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
   })
 
-  test("writeIntBE") (forAll { int: Int =>
-    val bw = BufWriter.fixed(4)
-    val buf = bw.writeIntBE(int).owned()
-    intercept[OverflowException] { bw.writeByte(0xff) }
+  test("writeMedium{BE,LE}") (forAll { m: Int =>
+    val be = BufWriter.fixed(3).writeMediumBE(m)
+    val le = BufWriter.fixed(3).writeMediumLE(m)
+
+    intercept[OverflowException] { be.writeByte(0xff) }
+    intercept[OverflowException] { be.writeByte(0xff) }
+
     val arr = Array[Byte](
-      ((int >> 24) & 0xff).toByte,
-      ((int >> 16) & 0xff).toByte,
-      ((int >> 8) & 0xff).toByte,
-      (int & 0xff).toByte
+      ((m >> 16) & 0xff).toByte,
+      ((m >>  8) & 0xff).toByte,
+      ((m      ) & 0xff).toByte
     )
-    assert(buf == Buf.ByteArray.Owned(arr))
+
+    assert(be.owned() == Buf.ByteArray.Owned(arr))
+    assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
   })
 
-  test("writeLongBE") (forAll { long: Long =>
-    val bw = BufWriter.fixed(8)
-    val buf = bw.writeLongBE(long).owned()
-    intercept[OverflowException] { bw.writeByte(0xff) }
+  test("writeInt{BE,LE}") (forAll { i: Int =>
+    val be = BufWriter.fixed(4).writeIntBE(i)
+    val le = BufWriter.fixed(4).writeIntLE(i)
+
+    intercept[OverflowException] { be.writeByte(0xff) }
+    intercept[OverflowException] { be.writeByte(0xff) }
+
     val arr = Array[Byte](
-      ((long >> 56) & 0xff).toByte,
-      ((long >> 48) & 0xff).toByte,
-      ((long >> 40) & 0xff).toByte,
-      ((long >> 32) & 0xff).toByte,
-      ((long >> 24) & 0xff).toByte,
-      ((long >> 16) & 0xff).toByte,
-      ((long >> 8) & 0xff).toByte,
-      (long & 0xff).toByte
+      ((i >> 24) & 0xff).toByte,
+      ((i >> 16) & 0xff).toByte,
+      ((i >>  8) & 0xff).toByte,
+      ((i      ) & 0xff).toByte
     )
-    assert(buf == Buf.ByteArray.Owned(arr))
+
+    assert(be.owned() == Buf.ByteArray.Owned(arr))
+    assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+  })
+
+  test("writeLong{BE,LE}") (forAll { l: Long =>
+    val be = BufWriter.fixed(8).writeLongBE(l)
+    val le = BufWriter.fixed(8).writeLongLE(l)
+
+    intercept[OverflowException] { be.writeByte(0xff) }
+    intercept[OverflowException] { be.writeByte(0xff) }
+
+    val arr = Array[Byte](
+      ((l >> 56) & 0xff).toByte,
+      ((l >> 48) & 0xff).toByte,
+      ((l >> 40) & 0xff).toByte,
+      ((l >> 32) & 0xff).toByte,
+      ((l >> 24) & 0xff).toByte,
+      ((l >> 16) & 0xff).toByte,
+      ((l >>  8) & 0xff).toByte,
+      ((l      ) & 0xff).toByte
+    )
+
+    assert(be.owned() == Buf.ByteArray.Owned(arr))
+    assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+  })
+
+  test("writeFloat{BE,LE}") (forAll { f: Float =>
+    val be = BufWriter.fixed(4).writeFloatBE(f)
+    val le = BufWriter.fixed(4).writeFloatLE(f)
+
+    intercept[OverflowException] { be.writeByte(0xff) }
+    intercept[OverflowException] { be.writeByte(0xff) }
+
+    val i = JFloat.floatToIntBits(f)
+
+    val arr = Array[Byte](
+      ((i >> 24) & 0xff).toByte,
+      ((i >> 16) & 0xff).toByte,
+      ((i >>  8) & 0xff).toByte,
+      ((i      ) & 0xff).toByte
+    )
+
+    assert(be.owned() == Buf.ByteArray.Owned(arr))
+    assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+  })
+
+  test("writeDouble{BE,LE}") (forAll { d: Double =>
+    val be = BufWriter.fixed(8).writeDoubleBE(d)
+    val le = BufWriter.fixed(8).writeDoubleLE(d)
+
+    intercept[OverflowException] { be.writeByte(0xff) }
+    intercept[OverflowException] { be.writeByte(0xff) }
+
+    val l = JDouble.doubleToLongBits(d)
+
+    val arr = Array[Byte](
+      ((l >> 56) & 0xff).toByte,
+      ((l >> 48) & 0xff).toByte,
+      ((l >> 40) & 0xff).toByte,
+      ((l >> 32) & 0xff).toByte,
+      ((l >> 24) & 0xff).toByte,
+      ((l >> 16) & 0xff).toByte,
+      ((l >>  8) & 0xff).toByte,
+      ((l      ) & 0xff).toByte
+    )
+
+    assert(be.owned() == Buf.ByteArray.Owned(arr))
+    assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
   })
 
   test("writeBytes") (forAll { bytes: Array[Byte] =>
