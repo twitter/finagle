@@ -13,9 +13,9 @@ private[http2] object Http2Listener {
     pipeline.addLast(new Http2ServerDowngrader())
   }
 
-  def apply[In, Out](params: Stack.Params): Listener[In, Out] = {
-    Netty4Listener(params, init, handlerDecorator = { handler: ChannelHandler =>
-      new Http2ServerInitializer(handler)
-    })
-  }
+  def apply[In, Out](params: Stack.Params): Listener[In, Out] = Netty4Listener(
+    // we turn off backpressure because Http2 only works with autoread on for now
+    params + Netty4Listener.BackPressure(false),
+    init,
+    handlerDecorator = { handler: ChannelHandler => new Http2ServerInitializer(handler) })
 }

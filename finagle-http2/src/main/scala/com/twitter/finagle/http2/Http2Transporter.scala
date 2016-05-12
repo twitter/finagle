@@ -2,10 +2,7 @@ package com.twitter.finagle.http2
 
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.netty4.http.Bijections
 import com.twitter.finagle.transport.{TransportProxy, Transport}
 import com.twitter.util.Future
 import io.netty.channel.{ChannelPipeline, ChannelInboundHandlerAdapter, ChannelHandlerContext}
@@ -13,8 +10,6 @@ import io.netty.handler.codec.http.{HttpResponse => Netty4Response, _}
 import io.netty.handler.codec.http2._
 import io.netty.handler.logging.LogLevel
 import java.net.SocketAddress
-import org.jboss.netty.handler.codec.http.{
-  HttpRequest => Netty3Request, HttpResponse => Netty3Response}
 
 private[http2] object Http2Transporter {
 
@@ -54,20 +49,12 @@ private[http2] object Http2Transporter {
       // TODO: this bijection impl breaks streaming
       underlying(addr).map { transport =>
         new TransportProxy[Any, Any](transport) {
-          def write(any: Any): Future[Unit] = any match {
-            case request: Netty3Request =>
-              val finReq = from[Netty3Request, Request](request)
-              val netty4Req = Bijections.finagle.requestToNetty(finReq)
-              transport.write(netty4Req)
-            case _ => Future.exception(
-              new IllegalArgumentException(s"expected a Netty3Request, got a ${any.getClass.getName}"))
-          }
+          def write(msg: Any): Future[Unit] = transport.write(msg)
 
           def read(): Future[Any] = {
             transport.read().flatMap {
               case req: Netty4Response =>
-                val finReq = Bijections.netty.responseToFinagle(req)
-                Future.value(from[Response, Netty3Response](finReq))
+                Future.value(req)
               case settings: Http2Settings =>
                 // drop for now
                 // TODO: we should handle settings properly
