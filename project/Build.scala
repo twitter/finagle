@@ -167,21 +167,35 @@ object Finagle extends Build {
       )
   ) aggregate(
     // Core, support.
-    finagleCore, finagleStats, finagleNetty4,
-    finagleZipkin, finagleServersets, finagleCacheResolver,
-    finagleException, finagleIntegration, finagleCommonsStats,
-    finagleExp, finagleMdns, finagleOstrich4,
+    finagleToggle,
+    finagleCore,
+    finagleStats,
+    finagleNetty4,
+    finagleZipkin,
+    finagleServersets,
+    finagleCacheResolver,
+    finagleException,
+    finagleIntegration,
+    finagleCommonsStats,
+    finagleExp,
+    finagleMdns,
+    finagleOstrich4,
 
     // Protocols
-    finagleHttp, finagleHttp2, finagleHttpCompat, finagleStream, finagleNative,
-    finagleThrift, finagleMemcached, finagleKestrel,
-    finagleMux, finagleThriftMux, finagleMySQL,
-    finagleSpdy, finagleRedis, finagleNetty4Http
-
-    // finagleBenchmark
-
-    // Removing projects with specs tests and their dependencies
-    // finagleExample
+    finagleHttp,
+    finagleHttp2,
+    finagleHttpCompat,
+    finagleStream,
+    finagleNative,
+    finagleThrift,
+    finagleMemcached,
+    finagleKestrel,
+    finagleMux,
+    finagleThriftMux,
+    finagleMySQL,
+    finagleSpdy,
+    finagleRedis,
+    finagleNetty4Http
   )
 
   lazy val finagleIntegration = Project(
@@ -198,6 +212,18 @@ object Finagle extends Build {
     finagleMySQL,
     finagleMemcached,
     finagleMux
+  )
+
+  lazy val finagleToggle = Project(
+    id = "finagle-toggle",
+    base = file("finagle-toggle"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-toggle",
+    libraryDependencies ++= Seq(
+      util("app"),
+      util("core"))
   )
 
   lazy val finagleCore = Project(
