@@ -51,6 +51,9 @@ Runtime Behavior Changes
     is not shared across clients. This prevents a single client from exceeding the rejection
     budget. ``RB_ID=813731``.
 
+  * finagle-core: The use of keytool in PEMEncodedKeyManager has been removed and instead the
+    keystore is being loaded from the pkcs12 file. ``RB_ID=832070``
+
   * finagle-http: Local Dtabs are now encoded into the `Dtab-Local` header.  `X-Dtab` headers
     may still be read but should be considered deprecated. ``RB_ID=815092``
 
