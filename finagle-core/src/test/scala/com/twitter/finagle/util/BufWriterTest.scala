@@ -11,6 +11,10 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
   import BufWriter.OverflowException
 
+  test("index initialized to zero") {
+    assert(BufWriter.fixed(1).index == 0)
+  }
+
   test("writeByte") (forAll { byte: Byte =>
     val bw = BufWriter.fixed(1)
     val buf = bw.writeByte(byte).owned()
@@ -32,6 +36,8 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     assert(be.owned() == Buf.ByteArray.Owned(arr))
     assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+    assert(be.index == 2)
+    assert(le.index == 2)
   })
 
   test("writeMedium{BE,LE}") (forAll { m: Int =>
@@ -49,6 +55,8 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     assert(be.owned() == Buf.ByteArray.Owned(arr))
     assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+    assert(be.index == 3)
+    assert(le.index == 3)
   })
 
   test("writeInt{BE,LE}") (forAll { i: Int =>
@@ -67,6 +75,8 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     assert(be.owned() == Buf.ByteArray.Owned(arr))
     assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+    assert(be.index == 4)
+    assert(le.index == 4)
   })
 
   test("writeLong{BE,LE}") (forAll { l: Long =>
@@ -89,6 +99,8 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     assert(be.owned() == Buf.ByteArray.Owned(arr))
     assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+    assert(be.index == 8)
+    assert(le.index == 8)
   })
 
   test("writeFloat{BE,LE}") (forAll { f: Float =>
@@ -109,6 +121,8 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     assert(be.owned() == Buf.ByteArray.Owned(arr))
     assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+    assert(be.index == 4)
+    assert(le.index == 4)
   })
 
   test("writeDouble{BE,LE}") (forAll { d: Double =>
@@ -133,6 +147,8 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
     assert(be.owned() == Buf.ByteArray.Owned(arr))
     assert(le.owned() == Buf.ByteArray.Owned(arr.reverse))
+    assert(be.index == 8)
+    assert(le.index == 8)
   })
 
   test("writeBytes") (forAll { bytes: Array[Byte] =>
@@ -140,5 +156,6 @@ class BufWriterTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val buf = bw.writeBytes(bytes).owned()
     intercept[OverflowException] { bw.writeByte(0xff) }
     assert(buf == Buf.ByteArray.Owned(bytes))
+    assert(bw.index == bytes.length)
   })
 }

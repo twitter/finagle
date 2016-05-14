@@ -96,6 +96,11 @@ private[finagle] trait BufWriter {
    * the natural way to coerce a builder to a [[Buf]].
    */
   def owned(): Buf
+
+  /**
+   * Offset in bytes of next write. Visible for testing only.
+   */
+  private[util] def index: Int
 }
 
 private[finagle] object BufWriter {
@@ -120,9 +125,9 @@ private[finagle] object BufWriter {
 private class FixedBufWriter(arr: Array[Byte]) extends BufWriter {
   import BufWriter.OverflowException
 
-  private[this] var index: Int = 0
+  private[util] var index: Int = 0
 
-  private[this] def remaining = arr.length - index
+  private[this] def remaining: Int = arr.length - index
 
   def writeByte(b: Int): BufWriter = {
     if (remaining < 1) {
@@ -160,7 +165,7 @@ private class FixedBufWriter(arr: Array[Byte]) extends BufWriter {
     arr(index)   = ((m >> 16) & 0xff).toByte
     arr(index+1) = ((m >>  8) & 0xff).toByte
     arr(index+2) = ((m      ) & 0xff).toByte
-    index += 4
+    index += 3
     this
   }
 
@@ -171,7 +176,7 @@ private class FixedBufWriter(arr: Array[Byte]) extends BufWriter {
     arr(index)   = ((m      ) & 0xff).toByte
     arr(index+1) = ((m >>  8) & 0xff).toByte
     arr(index+2) = ((m >> 16) & 0xff).toByte
-    index += 4
+    index += 3
     this
   }
 
