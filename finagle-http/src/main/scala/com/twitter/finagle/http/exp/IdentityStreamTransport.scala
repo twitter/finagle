@@ -3,7 +3,7 @@ package com.twitter.finagle.http.exp
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Future
 
-private[http] class IdentityStreamTransport[A, B](self: Transport[A, B])
+private[finagle] class IdentityStreamTransport[A, B](self: Transport[A, B])
   extends StreamTransportProxy[A, B](self) {
   def write(any: A): Future[Unit] = self.write(any)
   def read(): Future[Multi[B]] = self.read().map(IdentityStreamTransport.readFn)

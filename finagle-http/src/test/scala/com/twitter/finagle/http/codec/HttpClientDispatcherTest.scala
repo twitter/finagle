@@ -4,6 +4,8 @@ import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle.{Dtab, Status}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.netty.Bijections._
+import com.twitter.finagle.http.netty.Netty3ClientStreamTransport
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{Transport, QueueTransport}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Await, Duration, Time, Promise, Future, Return, Throw}
@@ -42,6 +44,7 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
   }
   
   def write(in: In) = ops match {
+
     case Write(accept, res) :: rest =>
       if (!accept(in))
         fail(s"Did not accept write $in")
@@ -75,10 +78,11 @@ class OpTransport[In, Out](_ops: List[OpTransport.Op[In, Out]]) extends Transpor
 
 @RunWith(classOf[JUnitRunner])
 class HttpClientDispatcherTest extends FunSuite {
-  def mkPair[A,B] = {
-    val inQ = new AsyncQueue[A]
-    val outQ = new AsyncQueue[B]
-    (new QueueTransport[A,B](inQ, outQ), new QueueTransport[B,A](outQ, inQ))
+  def mkPair() = {
+    val inQ = new AsyncQueue[Any]
+    val outQ = new AsyncQueue[Any]
+    (new Netty3ClientStreamTransport(new QueueTransport[Any, Any](inQ, outQ)),
+      new QueueTransport[Any, Any](outQ, inQ))
   }
 
   def chunk(content: String) =
@@ -88,8 +92,8 @@ class HttpClientDispatcherTest extends FunSuite {
   private val timeout = Duration.fromSeconds(2)
 
   test("streaming request body") {
-    val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher(in)
+    val (in, out) = mkPair()
+    val disp = new HttpClientDispatcher(in, NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
     val f = disp(req)
@@ -123,15 +127,15 @@ class HttpClientDispatcherTest extends FunSuite {
   }
 
   test("invalid message") {
-    val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher(in)
+    val (in, out) = mkPair()
+    val disp = new HttpClientDispatcher(in, NullStatsReceiver)
     out.write("invalid message")
-    intercept[IllegalArgumentException] { Await.result(disp(Request())) }
+    intercept[ClassCastException] { Await.result(disp(Request())) }
   }
 
   test("not chunked") {
-    val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher(in)
+    val (in, out) = mkPair()
+    val disp = new HttpClientDispatcher(in, NullStatsReceiver)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     val req = Request()
     val f = disp(req)
@@ -142,8 +146,8 @@ class HttpClientDispatcherTest extends FunSuite {
   }
 
   test("chunked") {
-    val (in, out) = mkPair[Any,Any]
-    val disp = new HttpClientDispatcher(in)
+    val (in, out) = mkPair()
+    val disp = new HttpClientDispatcher(in, NullStatsReceiver)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     httpRes.setChunked(true)
 
@@ -164,9 +168,9 @@ class HttpClientDispatcherTest extends FunSuite {
   }
 
   test("error mid-chunk") {
-    val (in, out) = mkPair[Any,Any]
+    val (in, out) = mkPair()
     val inSpy = spy(in)
-    val disp = new HttpClientDispatcher(inSpy)
+    val disp = new HttpClientDispatcher(inSpy, NullStatsReceiver)
     val httpRes = new DefaultHttpResponse(HTTP_1_1, OK)
     httpRes.setChunked(true)
 
@@ -188,11 +192,13 @@ class HttpClientDispatcherTest extends FunSuite {
     import OpTransport._
 
     val writep = new Promise[Unit]
+    val readp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
+      Read(readp),
       Write(Function.const(true), writep),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher(transport)
+    val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -211,19 +217,19 @@ class HttpClientDispatcherTest extends FunSuite {
     assert(g.isDefined)
     intercept[Reader.ReaderDiscarded] { Await.result(g, timeout) }
   }
-  
+
   test("upstream interrupt: during req stream (read)") {
     import OpTransport._
     
     val readp = new Promise[Nothing]
     val transport = OpTransport[Any, Any](
-      // First write the initial request.
-      Write(_.isInstanceOf[HttpRequest], Future.Done),
       // Read the response
       Read(readp),
+      // Write the initial request.
+      Write(_.isInstanceOf[HttpRequest], Future.Done),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher(transport)
+    val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -248,15 +254,15 @@ class HttpClientDispatcherTest extends FunSuite {
     
     val chunkp = new Promise[Unit]
     val transport = OpTransport[Any, Any](
-      // First write the initial request.
-      Write(_.isInstanceOf[HttpRequest], Future.Done),
       // Read the response
       Read(Future.never),
+      // Write the initial request.
+      Write(_.isInstanceOf[HttpRequest], Future.Done),
       // Then we try to write the chunk
       Write(_.isInstanceOf[HttpChunk], chunkp),
       Close(Future.Done))
 
-    val disp = new HttpClientDispatcher(transport)
+    val disp = new HttpClientDispatcher(new Netty3ClientStreamTransport(transport), NullStatsReceiver)
     val req = Request()
     req.setChunked(true)
 
@@ -281,8 +287,8 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("ensure denial of new-style dtab headers") {
     // create a test dispatcher and its transport mechanism
-    val (in, out) = mkPair[Any,Any]
-    val dispatcher = new HttpClientDispatcher(in)
+    val (in, out) = mkPair()
+    val dispatcher = new HttpClientDispatcher(in, NullStatsReceiver)
 
     // prepare a request and add a correct looking new-style dtab header
     val sentRequest = Request()
@@ -316,8 +322,8 @@ class HttpClientDispatcherTest extends FunSuite {
 
   test("ensure denial of old-style dtab headers") {
     // create a test dispatcher and its transport mechanism
-    val (in, out) = mkPair[Any,Any]
-    val dispatcher = new HttpClientDispatcher(in)
+    val (in, out) = mkPair()
+    val dispatcher = new HttpClientDispatcher(in, NullStatsReceiver)
 
     // prepare a request and add a correct looking new-style dtab header
     val sentRequest = Request()
@@ -353,8 +359,8 @@ class HttpClientDispatcherTest extends FunSuite {
   test("ensure transmission of dtab local") {
     Dtab.unwind {
       // create a test dispatcher and its transport mechanism
-      val (in, out) = mkPair[Any,Any]
-      val dispatcher = new HttpClientDispatcher(in)
+      val (in, out) = mkPair()
+      val dispatcher = new HttpClientDispatcher(in, NullStatsReceiver)
 
       // prepare a request and a simple dtab with one dentry
       val sentRequest = Request()

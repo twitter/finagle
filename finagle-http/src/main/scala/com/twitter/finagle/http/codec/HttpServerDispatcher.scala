@@ -1,83 +1,66 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.Service
-import com.twitter.finagle.dispatch.GenSerialServerDispatcher
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.netty.Bijections._
-import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.stats.{StatsReceiver, DefaultStatsReceiver, RollupStatsReceiver}
-import com.twitter.finagle.transport.Transport
-import com.twitter.io.{Reader, BufReader}
+import com.twitter.finagle.http.exp.{GenSerialServerDispatcher, StreamTransport}
+import com.twitter.finagle.stats.{StatsReceiver, RollupStatsReceiver}
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Throwables}
-import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.frame.TooLongFrameException
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-class HttpServerDispatcher(
-  trans: Transport[Any, Any],
-  service: Service[Request, Response],
-  stats: StatsReceiver) extends GenSerialServerDispatcher[Request, Response, Any, Any](trans) {
+private[http] object HttpServerDispatcher {
+  val handleHttp10: PartialFunction[Throwable, Response] = {
+    case _ => Response(Version.Http10, Status.InternalServerError)
+  }
 
-  def this(
-    trans: Transport[Any, Any],
-    service: Service[Request, Response]) = this(trans, service, DefaultStatsReceiver)
+  val handleHttp11: PartialFunction[Throwable, Response] = {
+    case _ => Response(Version.Http11, Status.InternalServerError)
+  }
+}
 
-  private[this] val failureReceiver = new RollupStatsReceiver(stats.scope("stream")).scope("failures")
+private[finagle] class HttpServerDispatcher(
+    trans: StreamTransport[Response, Request],
+    service: Service[Request, Response],
+    stats: StatsReceiver)
+  extends GenSerialServerDispatcher[Request, Response, Response, Request](trans) {
+  import HttpServerDispatcher._
 
-  import ReaderUtils.{readChunk, streamChunks}
+  private[this] val failureReceiver =
+    new RollupStatsReceiver(stats.scope("stream")).scope("failures")
 
-  trans.onClose ensure {
+  trans.onClose.ensure {
     service.close()
   }
 
-  protected def dispatch(m: Any, eos: Promise[Unit]): Future[Response] = m match {
-    case badReq: BadHttpRequest =>
-      eos.setDone()
-      val response = badReq.exception match {
-        case ex: TooLongFrameException =>
-          // this is very brittle :(
-          if (ex.getMessage().startsWith("An HTTP line is larger than "))
-            Response(from(badReq.httpVersion), Status.RequestURITooLong)
-          else if (ex.getMessage().startsWith("HTTP content length exceeded "))
-            Response(from(badReq.httpVersion), Status.RequestEntityTooLarge)
-          else
-            Response(from(badReq.httpVersion), Status.RequestHeaderFieldsTooLarge)
+  protected def dispatch(m: Request): Future[Response] = m match {
+    case badReq: BadReq =>
+      val resp = badReq match {
+        case _: ContentTooLong =>
+          Response(badReq.version, Status.RequestEntityTooLarge)
+        case _: UriTooLong =>
+          Response(badReq.version, Status.RequestURITooLong)
+        case _: HeaderFieldsTooLarge =>
+          Response(badReq.version, Status.RequestHeaderFieldsTooLarge)
         case _ =>
-          Response(from(badReq.httpVersion), Status.BadRequest)
+          Response(badReq.version, Status.BadRequest)
       }
-      // The connection in unusable so we close it here.
+      // The connection is unusable so we close it here.
       // Note that state != Idle while inside dispatch
       // so state will be set to Closed but trans.close
-      // will not be called. Instead isClosing will be
+      // will not be called. Instead, isClosing will be
       // set to true, keep-alive headers set correctly
       // in handle, and trans.close will be called in
       // the respond statement of loop().
       close()
-      Future.value(response)
+      Future.value(resp)
 
-    case reqIn: HttpRequest =>
-      val reader = if (reqIn.isChunked) {
-        val coll = Transport.collate(trans, readChunk)
-        coll.proxyTo(eos)
-        coll: Reader
-      } else {
-        eos.setDone()
-        BufReader(ChannelBufferBuf.Owned(reqIn.getContent))
+    case req: Request =>
+      val handleFn = req.version match {
+        case Version.Http10 => handleHttp10
+        case _ => handleHttp11
       }
-
-      val addr = trans.remoteAddress match {
-        case ia: InetSocketAddress => ia
-        case _ => new InetSocketAddress(0)
-      }
-
-      val req = Request(reqIn, reader, addr)
-      service(req).handle {
-        case _ => Response(req.version, Status.InternalServerError)
-      }
+      service(req).handle(handleFn)
 
     case invalid =>
-      eos.setDone()
       Future.exception(new IllegalArgumentException("Invalid message "+invalid))
   }
 
@@ -85,15 +68,15 @@ class HttpServerDispatcher(
     setKeepAlive(rep, !isClosing)
     if (rep.isChunked) {
       // We remove content length here in case the content is later
-      // compressed. This is a pretty bad violation of modularity:
+      // compressed. This is a pretty bad violation of modularity;
       // this is likely an issue with the Netty content
       // compressors, which (should?) adjust headers regardless of
       // transfer encoding.
-      rep.headers.remove(Fields.ContentLength)
+      rep.headerMap.remove(Fields.ContentLength)
+      rep.headerMap.set(Fields.TransferEncoding, "chunked")
 
       val p = new Promise[Unit]
-      val f = trans.write(from[Response, HttpResponse](rep)) before
-        streamChunks(trans, rep.reader)
+      val f = trans.write(rep)
       f.proxyTo(p)
       // This awkwardness is unfortunate but necessary for now as you may be
       // interrupted in the middle of a write, or when there otherwise isn’t
@@ -110,10 +93,10 @@ class HttpServerDispatcher(
       p
     } else {
       // Ensure Content-Length is set if not chunked
-      if (!rep.headers.contains(Fields.ContentLength))
+      if (!rep.contentLength.isDefined)
         rep.contentLength = rep.content.length
 
-      trans.write(from[Response, HttpResponse](rep))
+      trans.write(rep)
     }
   }
 

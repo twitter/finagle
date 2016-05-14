@@ -6,11 +6,12 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http._
-import com.twitter.finagle.http.exp.{StreamTransport, HttpTransport => ExpHttpTransport,
-  HttpClientDispatcher => ExpHttpClientDispatcher, HttpServerDispatcher => ExpHttpServerDispatcher}
+import com.twitter.finagle.http.codec.{HttpClientDispatcher, HttpServerDispatcher}
+import com.twitter.finagle.http.exp.StreamTransport
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter,
   ServerContextFilter}
-import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport, Netty3HttpTransporter, Netty3HttpListener}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport,
+  Netty3HttpTransporter, Netty3HttpListener}
 import com.twitter.finagle.netty3._
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _,
   Tracer => _, _}
@@ -178,7 +179,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newStreamTransport(
       transport: Transport[Any, Any]
     ): StreamTransport[Request, Response] =
-      new ExpHttpTransport(params[HttpImpl].clientTransport(transport))
+      new HttpTransport(params[HttpImpl].clientTransport(transport))
 
     protected def newTransporter(): Transporter[Any, Any] =
       params[param.HttpImpl].transporter(params)
@@ -189,7 +190,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): Client = copy(stack, params)
 
     protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] = {
-      val dispatcher = new ExpHttpClientDispatcher(
+      val dispatcher = new HttpClientDispatcher(
         newStreamTransport(transport),
         params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
@@ -317,7 +318,7 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected def newStreamTransport(
       transport: Transport[Any, Any]
     ): StreamTransport[Response, Request] =
-      new ExpHttpTransport(params[HttpImpl].serverTransport(transport))
+      new HttpTransport(params[HttpImpl].serverTransport(transport))
 
     protected def newDispatcher(transport: Transport[In, Out],
         service: Service[Request, Response]) = {
@@ -327,7 +328,7 @@ object Http extends Client[Request, Response] with HttpRichClient
 
       val endpoint = dtab.andThen(context).andThen(service)
 
-      new ExpHttpServerDispatcher(
+      new HttpServerDispatcher(
         newStreamTransport(transport),
         endpoint,
         stats.scope("dispatch"))

@@ -3,12 +3,10 @@ package com.twitter.finagle.http.codec
 import com.twitter.finagle.{Dtab, Failure}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.http.{Fields, ReaderUtils, Request, Response}
+import com.twitter.finagle.http.exp.{StreamTransport, Multi}
 import com.twitter.finagle.http.filter.HttpNackFilter
-import com.twitter.finagle.http.netty.Bijections._
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
-import com.twitter.io.BufReader
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Return, Throw}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -27,19 +25,14 @@ private[http] object HttpClientDispatcher {
  *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
-class HttpClientDispatcher(
-    trans: Transport[Any, Any],
+private[finagle] class HttpClientDispatcher(
+    trans: StreamTransport[Request, Response],
     statsReceiver: StatsReceiver)
-  extends GenSerialClientDispatcher[Request, Response, Any, Any](
+  extends GenSerialClientDispatcher[Request, Response, Request, Multi[Response]](
     trans,
     statsReceiver) {
 
-  import GenSerialClientDispatcher.wrapWriteException
   import HttpClientDispatcher._
-  import ReaderUtils.{readChunk, streamChunks}
-
-  def this(trans: Transport[Any, Any]) =
-    this(trans, NullStatsReceiver)
 
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
     val dtabHeaders = HttpDtab.strip(req)
@@ -63,34 +56,20 @@ class HttpClientDispatcher(
       if (len > 0) req.headerMap.set(Fields.ContentLength, len.toString)
     }
 
-    trans.write(from[Request, HttpRequest](req)).rescue(wrapWriteException).before {
-      // Do these concurrently:
-      Future.join(
-        // 1. Drain the Request body into the Transport.
-        if (req.isChunked) streamChunks(trans, req.reader)
-        else Future.Done,
-        // 2. Drain the Transport into Response body.
-        trans.read() flatMap {
-          case res: HttpResponse if HttpNackFilter.isNack(res) =>
-            p.updateIfEmpty(Throw(NackFailure))
-            Future.Done
+    // wait on these concurrently:
+    Future.join(Seq(
+      trans.write(req),
+      // Drain the Transport into Response body.
+      trans.read().flatMap {
+        case Multi(res, _) if HttpNackFilter.isNack(res)=>
+          p.updateIfEmpty(Throw(NackFailure))
+          Future.Done
 
-          case res: HttpResponse if !res.isChunked =>
-            val response = Response(res, BufReader(ChannelBufferBuf.Owned(res.getContent)))
-            p.updateIfEmpty(Return(response))
-            Future.Done
-
-          case res: HttpResponse =>
-            val coll = Transport.collate(trans, readChunk)
-            p.updateIfEmpty(Return(Response(res, coll)))
-            coll
-
-          case invalid =>
-            // We rely on the base class to satisfy p.
-            Future.exception(new IllegalArgumentException(s"invalid message '$invalid'"))
-        }
-      ).unit
-    } onFailure { _ =>
+        case Multi(res, readFinished) =>
+          p.updateIfEmpty(Return(res))
+          readFinished
+      } // we don't need to satisfy p when we fail because GenSerialClientDispatcher does already
+    )).onFailure { _ =>
       // This Future represents the totality of the exchange;
       // thus failure represents *any* failure that can happen
       // during the exchange.

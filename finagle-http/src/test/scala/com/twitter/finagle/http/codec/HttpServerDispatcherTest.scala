@@ -1,10 +1,13 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
+import com.twitter.conversions.time._
 import com.twitter.finagle.{Service, Status}
 import com.twitter.finagle.http
 import com.twitter.finagle.http.{BadHttpRequest, Request, Response, Version}
+import com.twitter.finagle.http.netty.Netty3ServerStreamTransport
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.io.Reader
 import com.twitter.util.{Await, Future, Promise}
@@ -21,40 +24,40 @@ class HttpServerDispatcherTest extends FunSuite {
   def testChunk(trans: Transport[Any, Any], chunk: HttpChunk) = {
     val f = trans.read()
     assert(!f.isDefined)
-    Await.ready(trans.write(chunk))
-    val c = Await.result(f).asInstanceOf[HttpChunk]
+    Await.ready(trans.write(chunk), 5.seconds)
+    val c = Await.result(f, 5.seconds).asInstanceOf[HttpChunk]
     assert(c.getContent == chunk.getContent)
   }
 
   test("invalid message") {
     val (in, out) = mkPair[Any, Any]
     val service = Service.mk { req: Request => Future.value(Response()) }
-    val disp = new HttpServerDispatcher(out, service)
+    val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
     in.write("invalid")
-    Await.ready(out.onClose)
+    Await.ready(out.onClose, 5.seconds)
     assert(out.status == Status.Closed)
   }
 
   test("bad request") {
     val (in, out) = mkPair[Any, Any]
     val service = Service.mk { req: Request => Future.value(Response()) }
-    val disp = new HttpServerDispatcher(out, service)
+    val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
     in.write(BadHttpRequest(new Exception()))
-    Await.result(in.read)
+    Await.result(in.read, 5.seconds)
     assert(out.status == Status.Closed)
   }
 
   test("streaming request body") {
     val service = Service.mk { req: Request => ok(req.reader) }
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher(out, service)
+    val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
     val req = Request()
     req.setChunked(true)
     in.write(req.httpRequest)
-    Await.result(in.read)
+    Await.result(in.read, 5.seconds)
 
     testChunk(in, chunk("a"))
     testChunk(in, chunk("foo"))
@@ -66,7 +69,7 @@ class HttpServerDispatcherTest extends FunSuite {
     val service = Service.mk { _: Request => promise }
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher(out, service)
+    val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
     in.write(Request().httpRequest)
 
@@ -81,24 +84,27 @@ class HttpServerDispatcherTest extends FunSuite {
     val service = Service.mk { _: Request => Future.value(res) }
 
     val (in, out) = mkPair[Any, Any]
-    val disp = new HttpServerDispatcher(out, service)
+    val disp = new HttpServerDispatcher(out, service, NullStatsReceiver)
 
     req.response.setChunked(true)
     in.write(req.httpRequest)
 
-    Await.result(in.read())
+    Await.result(in.read(), 5.seconds)
 
     // Simulate channel closure
     out.close()
-    intercept[Reader.ReaderDiscarded] { Await.result(res.writer.write(buf("."))) }
+    intercept[Reader.ReaderDiscarded] { Await.result(res.writer.write(buf(".")), 5.seconds) }
   }
 }
 
 object HttpServerDispatcherTest {
   def mkPair[A,B] = {
-    val inQ = new AsyncQueue[A]
-    val outQ = new AsyncQueue[B]
-    (new QueueTransport[A,B](inQ, outQ), new QueueTransport[B,A](outQ, inQ))
+    val inQ = new AsyncQueue[Any]
+    val outQ = new AsyncQueue[Any]
+    (
+      Transport.cast[A,B](new QueueTransport(outQ, inQ)),
+      new Netty3ServerStreamTransport(new QueueTransport(inQ, outQ))
+    )
   }
 
   def wrap(msg: String) = ChannelBuffers.wrappedBuffer(msg.getBytes("UTF-8"))

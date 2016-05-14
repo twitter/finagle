@@ -1,9 +1,10 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Status => CoreStatus}
+import com.twitter.finagle.http.Message
 import com.twitter.finagle.http.codec.ConnectionManager
-import com.twitter.util.{Future, Time}
+import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy, StreamTransport}
+import com.twitter.util.{Future, Promise, Return, Throw}
 import scala.util.control.NonFatal
 
 /**
@@ -12,39 +13,33 @@ import scala.util.control.NonFatal
  * @note the connection manager will close connections as required by RFC 2616 § 8
  *       irrespective of any pending requests in the dispatcher.
  */
-class HttpTransport(self: Transport[Any, Any], manager: ConnectionManager)
-  extends Transport[Any, Any] {
+private[finagle] class HttpTransport[A <: Message, B <: Message](
+    self: StreamTransport[A, B],
+    manager: ConnectionManager)
+  extends StreamTransportProxy[A, B](self) {
 
-  def this(self: Transport[Any, Any]) = this(self, new ConnectionManager)
+  private[this] val readFn: Multi[B] => Unit = { case Multi(m, onFinish) =>
+    manager.observeMessage(m, onFinish)
+    if (manager.shouldClose)
+      self.close()
+  }
 
-  def close(deadline: Time) = self.close(deadline)
+  def this(self: StreamTransport[A, B]) = this(self, new ConnectionManager)
 
-  def read(): Future[Any] =
-    self.read() onSuccess { m =>
-      manager.observeMessage(m)
-      if (manager.shouldClose)
-        self.close()
-    }
+  def read(): Future[Multi[B]] =
+    self.read().onSuccess(readFn)
 
-  def write(m: Any): Future[Unit] =
+  def write(m: A): Future[Unit] =
     try {
-      manager.observeMessage(m)
+      val p = Promise[Unit]
+      manager.observeMessage(m, p)
       val f = self.write(m)
-      if (manager.shouldClose) f before self.close()
+      p.become(f)
+      if (manager.shouldClose) f.before(self.close())
       else f
     } catch {
       case NonFatal(e) => Future.exception(e)
     }
 
-  def status =
-    if (manager.shouldClose) finagle.Status.Closed
-    else self.status
-
-  def localAddress = self.localAddress
-
-  def remoteAddress = self.remoteAddress
-
-  def peerCertificate = self.peerCertificate
-
-  val onClose = self.onClose
+  override def status: CoreStatus = if (manager.shouldClose) CoreStatus.Closed else self.status
 }

@@ -6,7 +6,8 @@ import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
 import com.twitter.finagle.http.filter.{ClientContextFilter, DtabFilter, HttpNackFilter, ServerContextFilter}
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.http.netty.{Netty3ClientStreamTransport, Netty3ServerStreamTransport}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, ServerStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{NonFatal, Closable, StorageUnit, Try}
@@ -255,11 +256,11 @@ case class Http(
         }
 
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any,Any] =
-        new HttpTransport(super.newClientTransport(ch, statsReceiver))
+        super.newClientTransport(ch, statsReceiver)
 
       override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
         new HttpClientDispatcher(
-          transport,
+          new HttpTransport(new Netty3ClientStreamTransport(transport)),
           params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
         )
 
@@ -315,8 +316,10 @@ case class Http(
       override def newServerDispatcher(
         transport: Transport[Any, Any],
         service: Service[Request, Response]
-      ): Closable =
-        new HttpServerDispatcher(new HttpTransport(transport), service)
+      ): Closable = new HttpServerDispatcher(
+        new HttpTransport(new Netty3ServerStreamTransport(transport)),
+        service,
+        ServerStatsReceiver)
 
       override def prepareConnFactory(
         underlying: ServiceFactory[Request, Response],

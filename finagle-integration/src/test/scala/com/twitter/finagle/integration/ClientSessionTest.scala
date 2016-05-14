@@ -3,8 +3,9 @@ package com.twitter.finagle.integration
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
 import com.twitter.finagle.exp._
+import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.codec.HttpClientDispatcher
-import com.twitter.finagle.exp.mysql
+import com.twitter.finagle.http.exp.IdentityStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{QueueTransport, Transport}
 import com.twitter.util._
@@ -63,7 +64,8 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
     { tr: Transport[Any, Any] =>
       val manager = mock[http.codec.ConnectionManager]
       when(manager.shouldClose).thenReturn(false)
-      val wrappedT = new http.HttpTransport(tr, manager)
+      val wrappedT = new http.HttpTransport(
+        new IdentityStreamTransport(Transport.cast[Request, Response](tr)), manager)
       () => wrappedT.status
     }
   )
@@ -71,7 +73,10 @@ class ClientSessionTest extends FunSuite with MockitoSugar {
   testSessionStatus(
     "http-dispatcher",
     { tr: Transport[Any, Any] =>
-      val dispatcher = new HttpClientDispatcher(tr)
+      val dispatcher = new HttpClientDispatcher(
+        new IdentityStreamTransport(Transport.cast[Request, Response](tr)),
+        NullStatsReceiver
+      )
       () => dispatcher.status
     }
   )

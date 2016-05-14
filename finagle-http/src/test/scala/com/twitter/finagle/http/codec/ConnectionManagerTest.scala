@@ -1,18 +1,16 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.http.{
-  HttpTransport, Request, Version, Method, Response, Fields, Status
-}
+import com.twitter.finagle.http._
+import com.twitter.finagle.http.exp.IdentityStreamTransport
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Promise, Return, Future}
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import com.twitter.util.{Promise, Return, Future, Time}
 import org.junit.runner.RunWith
-import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers._
+import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ConnectionManagerTest extends FunSuite with MockitoSugar {
@@ -21,14 +19,9 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   //   - methods other than GET
   //   - 100/continue
 
-  val me = mock[MessageEvent]
-  val c = mock[Channel]
-  val cFuture = new DefaultChannelFuture(c, false)
-  when(me.getChannel).thenReturn(c)
-
   def makeRequest(version: Version, headers: (String, String)*) = {
     val request = Request(version, Method.Get, "/")
-    headers foreach { case (k, v) =>
+    headers.foreach { case (k, v) =>
       request.headers.set(k, v)
     }
     request
@@ -36,38 +29,93 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
 
   def makeResponse(version: Version, headers: (String, String)*) = {
     val response = Response(version, Status.Ok)
-    headers foreach { case (k, v) =>
+    headers.foreach { case (k, v) =>
       response.headers.set(k, v)
     }
     response
   }
 
+  test("not terminate when response is standard") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose())
+    manager.observeResponse(makeResponse(Version.Http11, Fields.ContentLength -> "1"), Future.Done)
+    assert(!manager.shouldClose())
+  }
+
+  test("terminate when response doesn't have content length") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose())
+    manager.observeResponse(makeResponse(Version.Http11), Future.Done)
+    assert(manager.shouldClose())
+  }
+
+  test("terminate when request has Connection: close") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11, "Connection" -> "close"), Future.Done)
+    assert(!manager.shouldClose())
+    manager.observeResponse(makeResponse(Version.Http11, Fields.ContentLength -> "1"), Future.Done)
+    assert(manager.shouldClose())
+  }
+
+  test("terminate after response, even if request hasn't finished streaming") {
+    val manager = new ConnectionManager()
+    val p = Promise[Unit]
+    val req = makeRequest(Version.Http11)
+    req.setChunked(true)
+    manager.observeRequest(req, p)
+    assert(!manager.shouldClose())
+    manager.observeResponse(
+      makeResponse(Version.Http11, Fields.ContentLength -> "1", "Connection" -> "close"),
+      Future.Done)
+    assert(manager.shouldClose())
+  }
+
+  test("terminate after response has finished streaming") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose())
+    val p = Promise[Unit]
+    val rep = makeResponse(Version.Http11, "Connection" -> "close")
+    rep.setChunked(true)
+    manager.observeResponse(rep, p)
+    assert(!manager.shouldClose())
+    p.setDone()
+    assert(manager.shouldClose())
+  }
+
+  // these tests are sophisticated, and use things that ConnectionManager
+  // isn't aware of.  we should be careful in the way we use it.
   def perform(request: Request, response: Response, shouldMarkDead: Boolean) {
     val closeP = new Promise[Throwable]
-    val trans = mock[Transport[Any, Any]]
+    val trans = mock[Transport[Request, Response]]
     when(trans.close).thenReturn(Future.Done)
     when(trans.onClose).thenReturn(closeP)
 
-    val disp = new HttpClientDispatcher(new HttpTransport(trans))
+    val disp = new HttpClientDispatcher(
+      new HttpTransport(new IdentityStreamTransport(trans)),
+      NullStatsReceiver)
 
     val wp = new Promise[Unit]
-    when(trans.write(any[HttpRequest])).thenReturn(wp)
+    when(trans.write(any[Request])).thenReturn(wp)
+
+    val rp = new Promise[Response]
+    when(trans.read()).thenReturn(rp)
 
     val f = disp(request)
     assert(f.isDefined == false)
 
-    verify(trans, times(1)).write(any[HttpRequest])
-    verify(trans, never()).read()
+    verify(trans, times(1)).write(any[Request])
+    verify(trans, times(1)).read()
 
-    val rp = new Promise[HttpResponse]
-    when(trans.read()).thenReturn(rp)
 
     wp.setDone()
 
     verify(trans, times(1)).read()
 
     assert(f.isDefined == false)
-    rp.setValue(response.httpResponse)
+    rp.setValue(response)
 
     f.poll match {
       case Some(Return(r)) =>
@@ -79,7 +127,7 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
     }
 
     if (shouldMarkDead)
-      verify(trans, times(1)).close
+      verify(trans, times(1)).close(Time.Bottom)
   }
 
   test("not terminate regular http/1.1 connections") {
