@@ -23,8 +23,9 @@ Wireshark is available at [wireshark.org](https://www.wireshark.org/).
 
 Copy `mux_dissector.lua` to your wireshark
 [personal plugins directory](https://www.wireshark.org/docs/wsug_html_chunked/ChAppFilesConfigurationSection.html).
-On Mac OS X, this is currently `$HOME/.wireshark/plugins` and you should
-create this directory if it does not yet exist.
+On Mac OS X, you can find this directory by going to
+Wireshark -> About Wireshark -> Folders, and locate the entry for Personal Plugins.
+You should create this directory if it does not yet exist.
 
 The dissector will be available after the next launch of the application.
 
