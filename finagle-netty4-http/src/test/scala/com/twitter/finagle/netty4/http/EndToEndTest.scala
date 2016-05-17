@@ -4,8 +4,9 @@ import com.twitter.conversions.time._
 import com.twitter.conversions.storage._
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle._
+import com.twitter.finagle.http.Status
 import com.twitter.finagle.http.service.HttpResponseClassifier
-import com.twitter.finagle.http.{Fields, Status, Response, Request}
+import com.twitter.finagle.http._
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory}
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver, InMemoryStatsReceiver}
@@ -143,9 +144,56 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       assert(Await.result(client(tooBig), 2.seconds).status == Status.RequestEntityTooLarge)
       client.close()
     }
+
+    test(name + ": return 413s for chunked requests which stream too much data") {
+      val service = new HttpService {
+        def apply(request: Request) = Future.value(Response())
+      }
+      val client = connect(service)
+
+      val justRight = Request("/")
+      assert(Await.result(client(justRight), 2.seconds).status == Status.Ok)
+
+      val tooMuch = Request("/")
+      tooMuch.setChunked(true)
+      val r: Future[Response] = client(tooMuch)
+      val w = tooMuch.writer
+      w.write(buf("a"*1000)).before(w.close)
+
+
+      // this works around a bug either in finagle or netty where the client will
+      // see disconnects before the 413 in violation of the 1.1 spec.
+      // CSL-2753
+      val res = r.respond {
+        case Return(res) =>
+          assert(res.status == Status.RequestEntityTooLarge)
+          client.close()
+
+        case Throw(t: ChannelClosedException) =>
+          ()
+
+        case Throw(_) =>
+          fail("expected ChannelClosedException")
+      }
+
+      Await.ready(res, 2.seconds)
+    }
   }
 
   def standardBehaviour(name: String)(connect: HttpService => HttpService) {
+    test(name + ": client sees response headers"){
+      val service = new HttpService {
+        def apply(req: Request) = {
+          val res = Response()
+          res.headerMap.put("Cool", "Story")
+          Future.value(res)
+        }
+      }
+      val client = connect(service)
+      val res = Await.result(client(Request("/")), 2.seconds)
+      assert(res.headerMap("Cool") == "Story")
+    }
+
     test(name + ": client stack observes max header size") {
       val service = new HttpService {
         def apply(req: Request) = {
@@ -264,6 +312,26 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       }
     }
 
+    test(name + ": symmetric reader and getContent") {
+      val s = Service.mk[Request, Response] { req =>
+        val buf = Await.result(Reader.readAll(req.reader), 2.seconds)
+        assert(buf == Buf.Utf8("hello"))
+        assert(req.contentString == "hello")
+
+        req.response.content = req.content
+        Future.value(req.response)
+      }
+      val req = Request()
+      req.contentString = "hello"
+      req.headerMap.put("Content-Length", "5")
+      val client = connect(s)
+      val res = Await.result(client(req), 2.seconds)
+
+      val buf = Await.result(Reader.readAll(res.reader), 2.seconds)
+      assert(buf == Buf.Utf8("hello"))
+      assert(res.contentString == "hello")
+    }
+
     test(name + ": streaming response to non-streaming client") {
       def service(r: Reader) = new HttpService {
         def apply(request: Request) = {
@@ -293,7 +361,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service)
       client(Request())
       Await.ready(timer.doLater(20.milliseconds) {
-        Await.ready(client.close(), 2.seconds)
+        Await.ready(client.close(), 10.seconds)
         intercept[CancelledRequestException] {
           promise.isInterrupted match {
             case Some(intr) => throw intr
@@ -329,50 +397,27 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
   def streaming(name: String)(connect: HttpService => HttpService) {
     def service(r: Reader) = new HttpService {
       def apply(request: Request) = {
-        val response = new Response {
-          final val httpResponse = request.response.httpResponse
-          override def reader = r
-        }
-        response.setChunked(true)
-        Future.value(response)
+        val resp = Response(request.version, Status.Ok, r)
+        resp.setChunked(true)
+        Future.value(resp)
       }
-    }
-
-    test(name + ": symmetric reader and getContent") {
-      val s = Service.mk[Request, Response] { req =>
-        val buf = Await.result(Reader.readAll(req.reader), 2.seconds)
-        assert(buf == Buf.Utf8("hello"))
-        assert(req.contentString == "hello")
-
-        req.response.content = req.content
-        Future.value(req.response)
-      }
-      val req = Request()
-      req.contentString = "hello"
-      req.headerMap.put("Content-Length", "5")
-      val client = connect(s)
-      val res = Await.result(client(req), 2.seconds)
-
-      val buf = Await.result(Reader.readAll(res.reader), 2.seconds)
-      assert(buf == Buf.Utf8("hello"))
-      assert(res.contentString == "hello")
     }
 
     test(name + ": stream") {
-      val writer = Reader.writable()
-      val client = connect(service(writer))
+      val responseStream = Reader.writable()
+      val client = connect(service(responseStream))
       val reader = Await.result(client(Request()), 2.seconds).reader
-      Await.result(writer.write(buf("hello")), 2.seconds)
+      Await.result(responseStream.write(buf("hello")), 2.seconds)
       assert(Await.result(readNBytes(5, reader), 2.seconds) == Buf.Utf8("hello"))
-      Await.result(writer.write(buf("world")), 2.seconds)
+      Await.result(responseStream.write(buf("world")), 2.seconds)
       assert(Await.result(readNBytes(5, reader), 2.seconds) == Buf.Utf8("world"))
       client.close()
     }
 
     test(name + ": transport closure propagates to request stream reader") {
-      val p = new Promise[Buf]
+      var p: Future[Buf] = null
       val s = Service.mk[Request, Response] { req =>
-        p.become(Reader.readAll(req.reader))
+        p = Reader.readAll(req.reader)
         Future.value(Response())
       }
       val client = connect(s)
@@ -390,7 +435,7 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       req.setChunked(true)
       client(req)
       client.close()
-      intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer), 5.seconds) }
+      intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer), 15.seconds) }
     }
 
     test(name + ": request discard terminates remote stream producer") {
@@ -470,6 +515,56 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       client.close()
     }
 
+    test(name +": server strips and acks 'expect: continue' header") {
+      val expectP = new Promise[Boolean]
+
+      val svc = new HttpService {
+        def apply(request: Request) = {
+          expectP.setValue(request.headerMap.contains("expect"))
+          val response = Response()
+          Future.value(response)
+        }
+      }
+
+      val client = connect(svc)
+      val req = Request("/streaming")
+      req.setChunked(false)
+      req.headerMap.set("expect", "100-continue")
+
+      val res = client(req)
+      assert(Await.result(res, 2.seconds).status == Status.Continue)
+      assert(Await.result(expectP, 2.seconds) == false)
+      client.close()
+    }
+
+    test(name + ": fixed length request to streaming server") {
+      val svc = new HttpService {
+        def apply(request: Request) = {
+          val response = Response()
+          response.setChunked(true)
+          val w = response.writer
+          w.write(buf("saw "))
+            .before(w.write(buf(request.contentString.length.toString)))
+            .before(w.write(buf(" bytes")))
+            .before(w.close())
+
+          Future.value(response)
+        }
+      }
+
+      val client = connect(svc)
+      val req = Request("/streaming")
+      req.setChunked(false)
+      req.contentString = "some content"
+
+      val res = client(req)
+
+      val r = Await.result(res, 2.seconds)
+      assert(r.statusCode == 200)
+      assert(r.isChunked)
+      assert(Await.result(Reader.readAll(r.reader), 2.seconds) == buf(s"saw ${req.contentString.length} bytes"))
+      client.close()
+    }
 
     test(name + ": return 413s for fixed-length requests with too large payloads to streaming servers") {
       val service = new HttpService {
@@ -561,6 +656,29 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
       val client = com.twitter.finagle.Http.client
         .configured(exp.Netty4Impl)
         .configured(Stats(statsRecv))
+        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+      new ServiceProxy(client) {
+        override def close(deadline: Time) =
+          Closable.all(client, server).close(deadline)
+      }
+  }
+
+  run("Client/Server (streaming)")(streaming) {
+    service =>
+      val server = com.twitter.finagle.Http.server
+        .withLabel("server")
+        .configured(Stats(statsRecv))
+        .configured(exp.Netty4Impl)
+        .withMaxRequestSize(100.bytes)
+        .withStreaming(true)
+        .serve("localhost:*", service)
+      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+
+      val client = com.twitter.finagle.Http.client
+        .configured(exp.Netty4Impl)
+        .configured(Stats(statsRecv))
+        .withStreaming(true)
         .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
       new ServiceProxy(client) {
@@ -711,14 +829,57 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     server.close()
   }
 
-  test("server handles expect continue header") {
-    val expectP = new Promise[Boolean]
 
+  test("streaming response to a streaming enabled client") {
     val svc = new HttpService {
       def apply(request: Request) = {
-        expectP.setValue(request.headerMap.contains("expect"))
         val response = Response()
+        response.setChunked(true)
+        val w = response.writer
+        w.write(buf("streaming"))
+          .before(w.write(buf("response")))
+          .before(w.close())
         Future.value(response)
+      }
+    }
+    val server = com.twitter.finagle.Http.server
+      .configured(param.Stats(NullStatsReceiver))
+      .configured(exp.Netty4Impl)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = com.twitter.finagle.Http.client
+      .configured(exp.Netty4Impl)
+      .configured(param.Stats(statsRecv))
+      .withStreaming(true)
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+
+    val req = Request("/streaming")
+    val res = client(req)
+
+    val r = Await.result(res)
+    assert(r.statusCode == 200)
+
+    val streamedResponse = Await.result(Reader.readAll(r.reader))
+
+    val s = Buf.Utf8.unapply(streamedResponse).get
+    assert(s == "streamingresponse")
+
+    client.close()
+    server.close()
+  }
+
+  test("streaming request and streaming response") {
+    val svc = new HttpService {
+      def apply(request: Request) = {
+        val response = Response()
+        response.setChunked(true)
+        Reader.readAll(request.reader).map { b =>
+          val w = response.writer
+          val reqString = Buf.Utf8.unapply(b).get
+          w.write(buf(s"server saw: $reqString")).before(w.close())
+          response
+        }
       }
     }
     val server = com.twitter.finagle.Http.server
@@ -731,16 +892,27 @@ class EndToEndTest extends FunSuite with BeforeAndAfter {
     val client = com.twitter.finagle.Http.client
       .configured(exp.Netty4Impl)
       .configured(param.Stats(statsRecv))
+      .withStreaming(true)
       .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
     val req = Request("/streaming")
-    req.setChunked(false)
-    req.headerMap.set("expect", "100-continue")
+    req.setChunked(true)
+    val w = req.writer
 
     val res = client(req)
-    assert(Await.result(res, 2.seconds).status == Status.Continue)
-    assert(Await.result(expectP, 2.seconds) == false)
+
+    val streamF = w.write(buf("hello")).before(w.write(buf("world"))).before(w.close())
+
+    val r = Await.result(res)
+    assert(r.statusCode == 200)
+
+    val streamedResponse = Await.result(Reader.readAll(r.reader))
+
+    val s = Buf.Utf8.unapply(streamedResponse).get
+    assert(s == "server saw: helloworld")
+
     client.close()
     server.close()
   }
+
 }

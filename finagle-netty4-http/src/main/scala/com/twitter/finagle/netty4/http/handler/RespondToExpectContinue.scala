@@ -9,7 +9,7 @@ import io.netty.handler.codec.http._
 /**
  * Categorically respond 100 CONTINUE to message bearing the 'expect: continue 100' header
  *
- * see longer note in [[Http.Netty4HttpListener]]
+ * see longer note in [[exp.Netty4HttpListener]]
  * why we need this.
  */
 @Sharable
@@ -25,6 +25,7 @@ private[http] object RespondToExpectContinue extends ChannelInboundHandlerAdapte
     msg match {
       case http: HttpMessage if HttpUtil.is100ContinueExpected(http) =>
         ctx.writeAndFlush(newContinue())
+        http.headers.remove(HttpHeaderNames.EXPECT)
       case _ =>
     }
     super.channelRead(ctx, msg)

@@ -6,7 +6,7 @@ import com.twitter.finagle.param.Logger
 import com.twitter.finagle.{Status => _, _}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
-import com.twitter.finagle.netty4.http.handler.{PayloadSizeHandler, RespondToExpectContinue}
+import com.twitter.finagle.netty4.http.handler.{FixedLengthMessageAggregator, PayloadSizeHandler, RespondToExpectContinue}
 import com.twitter.finagle.server.Listener
 import io.netty.channel._
 import io.netty.handler.codec.{http => NettyHttp}
@@ -37,11 +37,14 @@ object exp {
 
         pipeline.addLast("httpCodec", codec)
 
-        if (!streaming)
+        if (streaming)
+          pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxChunkSize))
+        else {
           pipeline.addLast(
             "httpDechunker",
             new NettyHttp.HttpObjectAggregator(maxResponseSize.inBytes.toInt)
           )
+        }
 
         if (decompressionEnabled)
           pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
@@ -64,7 +67,7 @@ object exp {
         val codec = new NettyHttp.HttpServerCodec(
           maxInitialLineSize.inBytes.toInt,
           maxHeaderSize.inBytes.toInt,
-          maxChunkSize.inBytes.toInt
+          maxRequestSize.inBytes.toInt
         )
 
         pipeline.addLast("httpCodec", codec)
@@ -86,6 +89,7 @@ object exp {
         if (streaming) {
           pipeline.addLast("payloadSizeHandler", new PayloadSizeHandler(maxRequestSize, Some(log)))
           pipeline.addLast("expectContinue", RespondToExpectContinue)
+          pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxRequestSize))
         }
         else
           pipeline.addLast(

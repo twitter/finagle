@@ -133,7 +133,7 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("netty http request -> finagle") {
     forAll(arbNettyRequest) { case (in: FullHttpRequest, body: String) =>
-      val out = Bijections.netty.requestToFinagle(in)
+      val out = Bijections.netty.fullRequestToFinagle(in)
       assert(out.getUri == in.uri)
       assert(out.isChunked == false)
       assert(out.contentString == body)
@@ -146,7 +146,7 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("netty http response -> finagle") {
     forAll(arbNettyResponse) { case (in: FullHttpResponse, body: String) =>
-      val out = Bijections.netty.responseToFinagle(in)
+      val out = Bijections.netty.fullResponseToFinagle(in)
       assert(out.statusCode == in.status.code)
       assert(out.isChunked == false)
       assert(out.contentString == body)
@@ -186,7 +186,12 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
       assert(out.protocolVersion == Bijections.finagle.versionToNetty(in.version))
       assert(out.method == Bijections.finagle.methodToNetty(in.method))
       assert(out.uri == in.getUri)
-      assert(out.content.toString(UTF_8) == body)
+      if (!in.isChunked) {
+        assert(out.isInstanceOf[FullHttpRequest])
+        val full = out.asInstanceOf[FullHttpRequest]
+        assert(full.content.toString(UTF_8) == body)
+      }
+
       in.headerMap.foreach { case (k, v) =>
         assert(out.headers.getAll(k).asScala.toSet == in.headerMap.getAll(k).toSet)
       }
