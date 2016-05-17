@@ -2,14 +2,12 @@ package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.{Dtab, Failure}
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.http.{Fields, ReaderUtils, Request, Response}
+import com.twitter.finagle.http.{Fields, Request, Response}
 import com.twitter.finagle.http.exp.{StreamTransport, Multi}
 import com.twitter.finagle.http.filter.HttpNackFilter
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Promise, Return, Throw}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 private[http] object HttpClientDispatcher {
   val NackFailure = Failure.rejected("The request was nacked by the server")

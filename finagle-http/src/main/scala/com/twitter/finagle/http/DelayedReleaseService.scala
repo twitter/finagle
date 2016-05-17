@@ -3,7 +3,7 @@ package com.twitter.finagle.http
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.util.AsyncLatch
 import com.twitter.finagle._
-import com.twitter.io.{Buf, Reader, Writer}
+import com.twitter.io.Reader
 import com.twitter.util.{Future, Promise, Return, Throw, Time}
 import java.util.concurrent.atomic.AtomicBoolean
 

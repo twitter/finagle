@@ -1,13 +1,13 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.http.netty.Bijections
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.util.Base64StringEncoder
 import com.twitter.io.Buf
 import java.net.URL
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpPostRequestEncoder, HttpDataFactory}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders, HttpVersion, HttpMethod, DefaultHttpRequest}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders}
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -71,13 +71,13 @@ case class FileElement(name: String, content: Buf, contentType: Option[String] =
  */
 object RequestBuilder {
   @implicitNotFound("Http RequestBuilder is not correctly configured: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Nothing) ${HasForm}.")
-  private trait RequestEvidence[HasUrl, HasForm]
+  trait RequestEvidence[HasUrl, HasForm]
   private object RequestEvidence {
     implicit object FullyConfigured extends RequestEvidence[RequestConfig.Yes, Nothing]
   }
 
   @implicitNotFound("Http RequestBuilder is not correctly configured for form post: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Yes): ${HasForm}.")
-  private trait PostRequestEvidence[HasUrl, HasForm]
+  trait PostRequestEvidence[HasUrl, HasForm]
   private object PostRequestEvidence {
     implicit object FullyConfigured extends PostRequestEvidence[RequestConfig.Yes, RequestConfig.Yes]
   }

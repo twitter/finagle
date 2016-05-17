@@ -1,16 +1,14 @@
 package com.twitter.finagle.http.filter
 
-import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.finagle.filter.{
   LogFormatter => CoreLogFormatter,
   LoggingFilter => CoreLoggingFilter
 }
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{Duration, Future, Return, Throw, Time, Stopwatch}
+import com.twitter.util.{Duration, Time}
 import java.util.TimeZone
 import org.apache.commons.lang.time.FastDateFormat
-
 
 trait LogFormatter extends CoreLogFormatter[Request, Response] {
   def escape(s: String): String = LogFormatter.escape(s)

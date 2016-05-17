@@ -6,7 +6,6 @@ import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
 import com.twitter.util.Future
-import org.jboss.netty.handler.codec.http.HttpResponse
 
 /**
  * When a server fails with retryable failures, it sends back a

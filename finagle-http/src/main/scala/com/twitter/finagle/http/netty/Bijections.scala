@@ -40,16 +40,10 @@ object Bijections {
   // Method
 
   implicit val methodToNetty = new Injection[Method, HttpMethod] {
-    import HttpMethod._
-    import Method._
-
     def apply(m: Method): HttpMethod = HttpMethod.valueOf(m.toString)
   }
 
   implicit val methodFromNetty = new Injection[HttpMethod, Method] {
-    import HttpMethod._
-    import Method._
-
     def apply(m: HttpMethod): Method = Method(m.getName)
   }
 

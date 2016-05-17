@@ -3,7 +3,7 @@ package com.twitter.finagle.http.exp
 import com.twitter.finagle.Failure
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, CancelledRequestException}
+import com.twitter.finagle.CancelledRequestException
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
 

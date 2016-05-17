@@ -14,7 +14,7 @@ import org.jboss.netty.buffer.{
   ChannelBufferInputStream, DynamicChannelBuffer, ChannelBuffer,
   ChannelBufferOutputStream, ChannelBuffers
 }
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage, HttpVersion}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMessage}
 import scala.collection.JavaConverters._
 
 import Bijections._

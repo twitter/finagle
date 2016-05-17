@@ -1,10 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.{Status => CoreStatus}
-import com.twitter.finagle.http.Message
 import com.twitter.finagle.http.codec.ConnectionManager
 import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy, StreamTransport}
-import com.twitter.util.{Future, Promise, Return, Throw}
+import com.twitter.util.{Future, Promise}
 import scala.util.control.NonFatal
 
 /**

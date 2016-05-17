@@ -7,7 +7,6 @@ import java.security.PrivilegedAction
 import javax.security.auth.Subject
 import javax.security.auth.login.LoginContext
 import org.ietf.jgss._
-import scala.collection.JavaConverters._
 
 /**
  * A SPNEGO HTTP authenticator as defined in https://tools.ietf.org/html/rfc4559, which gets

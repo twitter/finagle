@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.{Filter, Service}
-import com.twitter.finagle.http.{Request, Response, Status, Method}
+import com.twitter.finagle.http.{Request, Response, Method}
 import com.twitter.util.{Duration, Future}
 
 /** Implements http://www.w3.org/TR/cors/ */
