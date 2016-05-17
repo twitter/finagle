@@ -9,6 +9,7 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
+
   * finagle-core: Renamed DeadlineFilter to DeadlineStatsFilter, which now only
     records stats for the number of requests with exceeded deadlines, the
     remaining deadline budget, and the transit latency of requests. It no longer
@@ -17,6 +18,10 @@ Breaking API Changes
 
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
+
+   * Builds are now only for Java 8 and Scala 2.11. See the
+     `blog post <https://finagle.github.io/blog/2016/04/20/scala-210-and-java7/>`_
+     for details. ``RB_ID=828898``
 
 Bug Fixes
 ~~~~~~~~~
@@ -33,12 +38,14 @@ New Features
     operations on threads that have opted into tracking. This also moves the
     "scheduler/dispatches" gauge out of TwitterServer into Finagle. ``RB_ID=828289``
 
-Breaking API Changes
-~~~~~~~~~~~~~~~~~~~~
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-   * Builds are now only for Java 8 and Scala 2.11. See the
-     `blog post <https://finagle.github.io/blog/2016/04/20/scala-210-and-java7/>`_
-     for details. ``RB_ID=828898``
+  * finagle-core: MonitorFilter now installs the parameterized monitor, and will
+    no longer fail the request automatically if any exception is thrown
+    synchronously (like if an exception is thrown in an onSuccess or onFailure
+    block).  This removes a race, and makes Finagle more deterministic.
+    ``RB_ID=832979``
 
 6.35.0
 ------

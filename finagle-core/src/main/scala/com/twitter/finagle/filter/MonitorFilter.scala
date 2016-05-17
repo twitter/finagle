@@ -1,7 +1,8 @@
 package com.twitter.finagle.filter
 
 import com.twitter.finagle._
-import com.twitter.util.{Monitor, Future}
+import com.twitter.util.{Monitor, Future, Try, Throw}
+import scala.util.control.NonFatal
 
 private[finagle] object MonitorFilter {
   val role = Stack.Role("Monitoring")
@@ -26,12 +27,22 @@ private[finagle] object MonitorFilter {
  * according to the argument [[com.twitter.util.Monitor]].
  */
 class MonitorFilter[Req, Rep](monitor: Monitor) extends SimpleFilter[Req, Rep] {
+  private[this] val RespondFn: Try[Rep] => Unit = {
+    case Throw(exc) => monitor.handle(exc)
+    case _ =>
+  }
 
-  private[this] val OnFailureFn: Throwable => Unit =
-    exc => monitor.handle(exc)
-
-  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
-    Future.monitored {
-      service(request)
-    }.onFailure(OnFailureFn)
+  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] = {
+    val saved = Monitor.get
+    Monitor.set(monitor)
+    try {
+      service(request).respond(RespondFn)
+    } catch {
+      case NonFatal(e) =>
+        monitor.handle(e)
+        Future.exception(e)
+    } finally {
+      Monitor.set(saved)
+    }
+  }
 }
