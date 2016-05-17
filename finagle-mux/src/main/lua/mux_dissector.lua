@@ -81,8 +81,12 @@ local MSG_TYPE_TPING = 65
 local MSG_TYPE_RPING = 191 -- -65 & 0xff
 
 local MSG_TYPE_TDISCARDED = 66
+local MSG_TYPE_RDISCARDED = 190 -- -66 & 0xff
 
 local MSG_TYPE_TLEASE = 67
+
+local MSG_TYPE_TINIT = 68
+local MSG_TYPE_RINIT = 188 -- -68 & 0xff
 
 local MSG_TYPE_RERR = 128 -- -128 & 0xff
 
@@ -96,7 +100,10 @@ local MESSAGE_TYPES = {
   [MSG_TYPE_TPING] = "Tping",
   [MSG_TYPE_RPING] = "Rping",
   [MSG_TYPE_TDISCARDED] = "Tdiscarded",
+  [MSG_TYPE_RDISCARDED] = "Rdiscarded",
   [MSG_TYPE_TLEASE] = "Tlease",
+  [MSG_TYPE_TINIT] = "Tinit",
+  [MSG_TYPE_RINIT] = "Rinit",
   [MSG_TYPE_RERR] = "Rerr"
 }
 
@@ -128,6 +135,14 @@ mux.fields = {
   pf_why,
   pf_trace_flags
 }
+
+-- Tag bit manipulation
+--
+function isFragment(tag)
+  -- Corresponds to `Tags.isFragment`
+  -- ((tag >> 23) & 1) == 1
+  return bit.band(bit.rshift(tag, 23), 1) == 1
+end
 
 -- Tries to decode the context value for the given key.
 -- Understands some of the primary contexts used in Finagle.
@@ -331,6 +346,9 @@ local function heur_dissect_mux(tvbuf,pktinfo,root)
         return false
       end
     else
+      if isFragment(tag) == true then
+        tag = bit.band(tag, bit.bnot(MSB_TAG))
+      end
       if tag < MIN_TAG or tag > MAX_TAG then
         dprint("heur_dissect_mux: invalid tag: ".. tag)
         return false
