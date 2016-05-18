@@ -14,80 +14,177 @@ import java.lang.{Double => JDouble, Float => JFloat}
  * builders are stateful and keep track of a writer index. Assume that the
  * builder implementations are *not* threadsafe unless otherwise noted.
  */
-private[finagle] trait BufWriter {
+private[finagle] abstract class BufWriter {
+
+  /**
+   * Returns the array to write `numBytes` bytes into. Subclasses should
+   * assume that `BufWriter` writes after calling `arrayToWrite`
+   * and `startWriteIndex`, and update their state accordingly.
+   * We obtain the array and index to write into for performance; successive
+   * writing of bytes in each of the write methods don't require additional
+   * function calls and size checks.
+   */
+  protected def arrayToWrite(numBytes: Int): Array[Byte]
+
+  /**
+   * Returns the index at which to start writing. Subclasses
+   * are expected to update the index according to numBytes.
+   */
+  protected def getAndIncrementIndex(numBytes: Int): Int
+
+  /**
+   * Write all the bytes from `bs` into the running [[Buf]].
+   */
+  def writeBytes(bs: Array[Byte]): BufWriter = {
+    val arr = arrayToWrite(numBytes = bs.length)
+    val index = getAndIncrementIndex(numBytes = bs.length)
+    System.arraycopy(bs, 0, arr, index, bs.length)
+    this
+  }
+
   /**
    * Write 8 bits of `b`. The remaining 24 bits are ignored.
    */
-  def writeByte(b: Int): BufWriter
+  def writeByte(b: Int): BufWriter = {
+    val arr = arrayToWrite(numBytes = 1)
+    val index = getAndIncrementIndex(numBytes = 1)
+    arr(index) = ((b & 0xff).toByte)
+    this
+  }
 
   /**
    * Write 16 bits from `s` in big-endian order. The remaining
    * 16 bits are ignored.
    */
-  def writeShortBE(s: Int): BufWriter
+  def writeShortBE(s: Int): BufWriter = {
+    val arr = arrayToWrite(numBytes = 2)
+    val index = getAndIncrementIndex(numBytes = 2)
+    arr(index)     = ((s >>  8) & 0xff).toByte
+    arr(index + 1) = ((s      ) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 16 bits from `s` in little-endian order. The remaining
    * 16 bits are ignored.
    */
-  def writeShortLE(s: Int): BufWriter
+  def writeShortLE(s: Int): BufWriter = {
+    val arr = arrayToWrite(numBytes = 2)
+    val index = getAndIncrementIndex(numBytes = 2)
+    arr(index)     = ((s      ) & 0xff).toByte
+    arr(index + 1) = ((s >>  8) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 24 bits from `m` in big-endian order. The remaining
    * 8 bits are ignored.
    */
-  def writeMediumBE(m: Int): BufWriter
+  def writeMediumBE(m: Int): BufWriter = {
+    val arr = arrayToWrite(numBytes = 3)
+    val index = getAndIncrementIndex(numBytes = 3)
+    arr(index)     = ((m >> 16) & 0xff).toByte
+    arr(index + 1) = ((m >>  8) & 0xff).toByte
+    arr(index + 2) = ((m      ) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 24 bits from `m` in little-endian order. The remaining
    * 8 bits are ignored.
    */
-  def writeMediumLE(m: Int): BufWriter
+  def writeMediumLE(m: Int): BufWriter = {
+    val arr = arrayToWrite(numBytes = 3)
+    val index = getAndIncrementIndex(numBytes = 3)
+    arr(index)     =  ((m      ) & 0xff).toByte
+    arr(index + 1) =  ((m >>  8) & 0xff).toByte
+    arr(index + 2) =  ((m >> 16) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 32 bits from `i` in big-endian order.
    */
-  def writeIntBE(i: Long): BufWriter
+  def writeIntBE(i: Long): BufWriter = {
+    val arr = arrayToWrite(numBytes = 4)
+    val index = getAndIncrementIndex(numBytes = 4)
+    arr(index)     = ((i >> 24) & 0xff).toByte
+    arr(index + 1) = ((i >> 16) & 0xff).toByte
+    arr(index + 2) = ((i >>  8) & 0xff).toByte
+    arr(index + 3) = ((i      ) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 32 bits from `i` in little-endian order.
    */
-  def writeIntLE(i: Long): BufWriter
+  def writeIntLE(i: Long): BufWriter = {
+    val arr = arrayToWrite(numBytes = 4)
+    val index = getAndIncrementIndex(numBytes = 4)
+    arr(index)     = ((i      ) & 0xff).toByte
+    arr(index + 1) = ((i >>  8) & 0xff).toByte
+    arr(index + 2) = ((i >> 16) & 0xff).toByte
+    arr(index + 3) = ((i >> 24) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 64 bits from `l` in big-endian order.
    */
-  def writeLongBE(l: Long): BufWriter
+  def writeLongBE(l: Long): BufWriter = {
+    val arr = arrayToWrite(numBytes = 8)
+    val index = getAndIncrementIndex(numBytes = 8)
+    arr(index)     = ((l >> 56) & 0xff).toByte
+    arr(index + 1) = ((l >> 48) & 0xff).toByte
+    arr(index + 2) = ((l >> 40) & 0xff).toByte
+    arr(index + 3) = ((l >> 32) & 0xff).toByte
+    arr(index + 4) = ((l >> 24) & 0xff).toByte
+    arr(index + 5) = ((l >> 16) & 0xff).toByte
+    arr(index + 6) = ((l >>  8) & 0xff).toByte
+    arr(index + 7) = ((l      ) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 64 bits from `l` in little-endian order.
    */
-  def writeLongLE(l: Long): BufWriter
+  def writeLongLE(l: Long): BufWriter = {
+    val arr = arrayToWrite(numBytes = 8)
+    val index = getAndIncrementIndex(numBytes = 8)
+    arr(index)     = ((l      ) & 0xff).toByte
+    arr(index + 1) = ((l >>  8) & 0xff).toByte
+    arr(index + 2) = ((l >> 16) & 0xff).toByte
+    arr(index + 3) = ((l >> 24) & 0xff).toByte
+    arr(index + 4) = ((l >> 32) & 0xff).toByte
+    arr(index + 5) = ((l >> 40) & 0xff).toByte
+    arr(index + 6) = ((l >> 48) & 0xff).toByte
+    arr(index + 7) = ((l >> 56) & 0xff).toByte
+    this
+  }
 
   /**
    * Write 32 bits from `f` in big-endian order.
    */
-  def writeFloatBE(f: Float): BufWriter
+  def writeFloatBE(f: Float): BufWriter =
+    writeIntBE(JFloat.floatToIntBits(f).toLong)
 
   /**
    * Write 32 bits from `f` in little-endian order.
    */
-  def writeFloatLE(f: Float): BufWriter
+  def writeFloatLE(f: Float): BufWriter =
+    writeIntLE(JFloat.floatToIntBits(f).toLong)
 
   /**
    * Write 64 bits from `d` in big-endian order.
    */
-  def writeDoubleBE(d: Double): BufWriter
+  def writeDoubleBE(d: Double): BufWriter =
+    writeLongBE(JDouble.doubleToLongBits(d))
 
   /**
    * Write 64 bits from `d` in little-endian order.
    */
-  def writeDoubleLE(d: Double): BufWriter
-
-  /**
-   * Write all the bytes from `bs` into the running [[Buf]].
-   */
-  def writeBytes(bs: Array[Byte]): BufWriter
+  def writeDoubleLE(d: Double): BufWriter =
+    writeLongLE(JDouble.doubleToLongBits(d))
 
   /**
    * In keeping with [[Buf]] terminology, creates a potential zero-copy [[Buf]]
@@ -149,129 +246,17 @@ private class FixedBufWriter(arr: Array[Byte], private[util] var index: Int = 0)
   def size: Int = arr.length
   def remaining: Int = arr.length - index
 
-  def writeByte(b: Int): BufWriter = {
-    if (remaining < 1) {
-      throw new OverflowException("insufficient space to write a byte")
+  def arrayToWrite(bytes: Int): Array[Byte] = {
+    if (remaining < bytes) {
+      throw new OverflowException(s"insufficient space to write $bytes bytes")
     }
-    arr(index) = (b & 0xff).toByte
-    index += 1
-    this
+    array
   }
 
-  def writeShortBE(s: Int): BufWriter = {
-    if (remaining < 2) {
-      throw new OverflowException("insufficient space to write 2 bytes")
-    }
-    arr(index)   = ((s >>  8) & 0xff).toByte
-    arr(index+1) = ((s      ) & 0xff).toByte
-    index += 2
-    this
-  }
-
-  def writeShortLE(s: Int): BufWriter = {
-    if (remaining < 2) {
-      throw new OverflowException("insufficient space to write 2 bytes")
-    }
-    arr(index)   = ((s      ) & 0xff).toByte
-    arr(index+1) = ((s >>  8) & 0xff).toByte
-    index += 2
-    this
-  }
-
-  def writeMediumBE(m: Int): BufWriter = {
-    if (remaining < 3) {
-      throw new OverflowException("insufficient space to write 4 bytes")
-    }
-    arr(index)   = ((m >> 16) & 0xff).toByte
-    arr(index+1) = ((m >>  8) & 0xff).toByte
-    arr(index+2) = ((m      ) & 0xff).toByte
-    index += 3
-    this
-  }
-
-  def writeMediumLE(m: Int): BufWriter = {
-    if (remaining < 3) {
-      throw new OverflowException("insufficient space to write 4 bytes")
-    }
-    arr(index)   = ((m      ) & 0xff).toByte
-    arr(index+1) = ((m >>  8) & 0xff).toByte
-    arr(index+2) = ((m >> 16) & 0xff).toByte
-    index += 3
-    this
-  }
-
-  def writeIntBE(i: Long): BufWriter = {
-    if (remaining < 4) {
-      throw new OverflowException("insufficient space to write 4 bytes")
-    }
-    arr(index)   = ((i >> 24) & 0xff).toByte
-    arr(index+1) = ((i >> 16) & 0xff).toByte
-    arr(index+2) = ((i >>  8) & 0xff).toByte
-    arr(index+3) = ((i      ) & 0xff).toByte
-    index += 4
-    this
-  }
-
-  def writeIntLE(i: Long): BufWriter = {
-    if (remaining < 4) {
-      throw new OverflowException("insufficient space to write 4 bytes")
-    }
-    arr(index)   = ((i      ) & 0xff).toByte
-    arr(index+1) = ((i >>  8) & 0xff).toByte
-    arr(index+2) = ((i >> 16) & 0xff).toByte
-    arr(index+3) = ((i >> 24) & 0xff).toByte
-    index += 4
-    this
-  }
-
-
-  def writeLongBE(l: Long): BufWriter = {
-    if (remaining < 8) {
-      throw new OverflowException("insufficient space to write 8 bytes")
-    }
-    arr(index)   = ((l >> 56) & 0xff).toByte
-    arr(index+1) = ((l >> 48) & 0xff).toByte
-    arr(index+2) = ((l >> 40) & 0xff).toByte
-    arr(index+3) = ((l >> 32) & 0xff).toByte
-    arr(index+4) = ((l >> 24) & 0xff).toByte
-    arr(index+5) = ((l >> 16) & 0xff).toByte
-    arr(index+6) = ((l >>  8) & 0xff).toByte
-    arr(index+7) = ((l      ) & 0xff).toByte
-    index += 8
-    this
-  }
-
-  def writeLongLE(l: Long): BufWriter = {
-    if (remaining < 8) {
-      throw new OverflowException("insufficient space to write 8 bytes")
-    }
-    arr(index)   = ((l      ) & 0xff).toByte
-    arr(index+1) = ((l >>  8) & 0xff).toByte
-    arr(index+2) = ((l >> 16) & 0xff).toByte
-    arr(index+3) = ((l >> 24) & 0xff).toByte
-    arr(index+4) = ((l >> 32) & 0xff).toByte
-    arr(index+5) = ((l >> 40) & 0xff).toByte
-    arr(index+6) = ((l >> 48) & 0xff).toByte
-    arr(index+7) = ((l >> 56) & 0xff).toByte
-    index += 8
-    this
-  }
-
-  def writeFloatBE(f: Float): BufWriter = writeIntBE(JFloat.floatToIntBits(f).toLong)
-
-  def writeFloatLE(f: Float): BufWriter = writeIntLE(JFloat.floatToIntBits(f).toLong)
-
-  def writeDoubleBE(d: Double): BufWriter = writeLongBE(JDouble.doubleToLongBits(d))
-
-  def writeDoubleLE(d: Double): BufWriter = writeLongLE(JDouble.doubleToLongBits(d))
-
-  def writeBytes(bs: Array[Byte]): BufWriter = {
-    if (remaining < bs.length) {
-      throw new OverflowException(s"insufficient space to write ${bs.length} bytes")
-    }
-    System.arraycopy(bs, 0, arr, index, bs.length)
-    index += bs.length
-    this
+  def getAndIncrementIndex(numBytes: Int): Int = {
+    val curIndex = index
+    index += numBytes
+    curIndex
   }
 
   val owned: Buf = Buf.ByteArray.Owned(arr)
@@ -335,15 +320,13 @@ private class DynamicBufWriter(arr: Array[Byte]) extends BufWriter {
     }
   }
 
-  /**
-   * Write 8 bits from `b` in `endianness` order, the remaining
-   * 24 bits are ignored.
-   */
-  def writeByte(b: Int): BufWriter = {
-    resizeIfNeeded(1)
-    underlying.writeByte(b)
-    this
+  protected def arrayToWrite(bytes: Int): Array[Byte] = {
+    resizeIfNeeded(bytes)
+    underlying.arrayToWrite(bytes)
   }
+
+  protected def getAndIncrementIndex(numBytes: Int): Int =
+    underlying.getAndIncrementIndex(numBytes)
 
   /**
    * Copies the contents of this writer into a `Buf` of the exact size needed.
@@ -351,89 +334,5 @@ private class DynamicBufWriter(arr: Array[Byte]) extends BufWriter {
   def owned(): Buf = {
     // trim the buffer to the size of the contents
     Buf.ByteArray.Owned(underlying.array, 0, underlying.size - underlying.remaining)
-  }
-
-  def writeShortBE(s: Int): BufWriter = {
-    resizeIfNeeded(2)
-    underlying.writeShortBE(s)
-    this
-  }
-
-  def writeIntBE(i: Int): BufWriter = {
-    resizeIfNeeded(4)
-    underlying.writeIntBE(i)
-    this
-  }
-
-  def writeLongBE(l: Long): BufWriter = {
-    resizeIfNeeded(8)
-    underlying.writeLongBE(l)
-    this
-  }
-
-  def writeBytes(bs: Array[Byte]): BufWriter = {
-    resizeIfNeeded(bs.length)
-    underlying.writeBytes(bs)
-    this
-  }
-
-  def writeShortLE(s: Int): BufWriter = {
-    resizeIfNeeded(2)
-    underlying.writeShortLE(s)
-    this
-  }
-
-  def writeMediumLE(m: Int): BufWriter = {
-    resizeIfNeeded(3)
-    underlying.writeMediumLE(m)
-    this
-  }
-
-  def writeIntBE(i: Long): BufWriter = {
-    resizeIfNeeded(4)
-    underlying.writeIntBE(i)
-    this
-  }
-
-  def writeFloatBE(f: Float): BufWriter = {
-    resizeIfNeeded(4)
-    underlying.writeFloatBE(f)
-    this
-  }
-
-  def writeIntLE(i: Long): BufWriter = {
-    resizeIfNeeded(4)
-    underlying.writeIntLE(i)
-    this
-  }
-
-  def writeDoubleBE(d: Double): BufWriter = {
-    resizeIfNeeded(8)
-    underlying.writeDoubleBE(d)
-    this
-  }
-
-  def writeFloatLE(f: Float): BufWriter = {
-    resizeIfNeeded(4)
-    underlying.writeFloatLE(f)
-    this
-  }
-
-  def writeMediumBE(m: Int): BufWriter = {
-    resizeIfNeeded(4)
-    underlying.writeMediumBE(m)
-    this
-  }
-
-  def writeLongLE(l: Long): BufWriter = {
-    resizeIfNeeded(8)
-    underlying.writeLongLE(l)
-    this
-  }
-
-  def writeDoubleLE(d: Double): BufWriter = {
-    resizeIfNeeded(8)
-    underlying.writeDoubleLE(d)
-    this
   }
 }
