@@ -5,12 +5,12 @@ import com.twitter.common.metrics.{HistogramInterface, AbstractGauge, Metrics}
 import com.twitter.finagle.http.HttpMuxHandler
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.Buf
-import com.twitter.jsr166e.LongAdder
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util.events.{Event, Sink}
 import com.twitter.util.lint.{Issue, Category, Rule, GlobalRules}
 import com.twitter.util.{Time, Throw, Try}
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.LongAdder
 import scala.collection.JavaConverters._
 
 private object Json {

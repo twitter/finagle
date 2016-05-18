@@ -22,7 +22,6 @@ object Finagle extends Build {
 
   val commonsCodecLib = "commons-codec" % "commons-codec" % "1.9"
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
-  val jsr166eLib = "com.twitter" % "jsr166e" % "1.0.0"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
     "io.netty" % "netty-handler" % netty4Version,
@@ -247,7 +246,6 @@ object Finagle extends Build {
       util("stats"),
       commonsCodecLib,
       guavaLib,
-      jsr166eLib,
       nettyLib)
   )
 
@@ -539,10 +537,7 @@ object Finagle extends Build {
     settings = Defaults.coreDefaultSettings ++
       sharedSettings
     ).settings(
-      name := "finagle-exp",
-      libraryDependencies ++= Seq(
-        jsr166eLib
-      )
+      name := "finagle-exp"
     ).dependsOn(finagleCore, finagleThrift)
 
   // Uses

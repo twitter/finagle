@@ -6,7 +6,6 @@ scala_library(name='scala',
   ),
   dependencies=[
     '3rdparty/jvm/com/google/guava',
-    '3rdparty/jvm/com/twitter:jsr166e',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/commons-codec:commons-codec',
     'util/util-app',
