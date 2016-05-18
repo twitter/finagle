@@ -200,6 +200,7 @@ case class Http(
   def maxRequestSize(bufferSize: StorageUnit) = copy(_maxRequestSize = bufferSize)
   def maxResponseSize(bufferSize: StorageUnit) = copy(_maxResponseSize = bufferSize)
   def decompressionEnabled(yesno: Boolean) = copy(_decompressionEnabled = yesno)
+  @deprecated("Use maxRequestSize to enforce buffer footprint limits", "2016-05-10")
   def channelBufferUsageTracker(usageTracker: ChannelBufferUsageTracker) =
     copy(_channelBufferUsageTracker = Some(usageTracker))
   def annotateCipherHeader(headerName: String) = copy(_annotateCipherHeader = Option(headerName))
