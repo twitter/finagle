@@ -116,14 +116,84 @@ class FailureAccrualPolicyTest extends FunSuite with MockitoSugar {
   }
 
   test("Sucess rate policy: markDeadFor resets on revived()") {
-    val policy = FailureAccrualPolicy.successRate(1, 1, expBackoff)
+    val policy = FailureAccrualPolicy.successRate(1, 2, expBackoff)
 
+    // At least 2 requests need to fail before markDeadOnFailure() returns Some(_)
+    assert(policy.markDeadOnFailure() == None)
     for(i <- 0 until expBackoffList.length)
       assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
 
     policy.revived()
 
+    // The failures should've been reset. markDeadOnFailure() should return None
+    // on the first failed request.
+    assert(policy.markDeadOnFailure() == None)
     for(i <- 0 until expBackoffList.length)
       assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+  }
+
+  test("Success rate within duration policy: markDeadOnFailure() returns Some(Duration) when success rate not met") {
+    val successRateDuration = 30.seconds
+    Time.withCurrentTimeFrozen { timeControl =>
+      val policy = FailureAccrualPolicy.successRateWithinDuration(
+        1, successRateDuration, expBackoffList)
+
+      assert(policy.markDeadOnFailure() == None)
+
+      // Advance the time with 'successRateDuration'.
+      // All markDeadOnFailure() calls should now return Some(Duration),
+      // and should iterate over expBackoffList.
+      timeControl.advance(successRateDuration)
+      for (i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+
+      // Stream 'expBackoffList' ran out of values.
+      // All markDeadOnFailure() calls should return Some(300.seconds).
+      for (i <- 0 until 5) assert(policy.markDeadOnFailure() == Some(300.seconds))
+    }
+  }
+
+  test("Success rate within duration policy: revived() resets failures") {
+    val successRateDuration = 30.seconds
+    Time.withCurrentTimeFrozen { timeControl =>
+      val policy = FailureAccrualPolicy.successRateWithinDuration(
+        1, successRateDuration, expBackoffList)
+
+      timeControl.advance(successRateDuration)
+      for (i <- 0 until expBackoffList.length) assert(policy.markDeadOnFailure() == Some(expBackoffList(i)))
+
+      policy.revived()
+
+      // Make sure the failure status has been reset.
+      // This will also be registered as the timestamp of the first request.
+      assert(policy.markDeadOnFailure() == None)
+
+      // One failure after 'successRateDuration' should mark the node dead again.
+      timeControl.advance(successRateDuration)
+      assert(!policy.markDeadOnFailure().isEmpty)
+    }
+  }
+
+  test("Success rate within duration policy: fractional success rate") {
+    val successRateDuration = 100.seconds
+    Time.withCurrentTimeFrozen { timeControl =>
+      val policy = FailureAccrualPolicy.successRateWithinDuration(
+        0.5, successRateDuration, constantBackoff)
+
+      for (i <- 0 until 100) {
+        timeControl.advance(1.second)
+        policy.recordSuccess()
+      }
+
+      // With a window of 100 seconds, it will take 100 * ln(2) + 1 = 70 seconds of failures
+      // for the success rate to drop below 0.5 (half-life).
+      for (i <- 0 until 69) {
+        timeControl.advance(1.second)
+        assert(policy.markDeadOnFailure() == None)
+      }
+
+      // 70th failure should make markDeadOnFailure() return Some(_)
+      timeControl.advance(1.second)
+      assert(policy.markDeadOnFailure() == Some(5.seconds))
+    }
   }
 }

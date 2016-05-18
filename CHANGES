@@ -27,9 +27,9 @@ Breaking API Changes
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
 
-   * Builds are now only for Java 8 and Scala 2.11. See the
-     `blog post <https://finagle.github.io/blog/2016/04/20/scala-210-and-java7/>`_
-     for details. ``RB_ID=828898``
+  * Builds are now only for Java 8 and Scala 2.11. See the
+    `blog post <https://finagle.github.io/blog/2016/04/20/scala-210-and-java7/>`_
+    for details. ``RB_ID=828898``
 
 Bug Fixes
 ~~~~~~~~~
@@ -45,6 +45,10 @@ New Features
     in milliseconds, the ``com.twitter.concurrent.Scheduler`` is spending doing blocking
     operations on threads that have opted into tracking. This also moves the
     "scheduler/dispatches" gauge out of TwitterServer into Finagle. ``RB_ID=828289``
+
+  * finagle-core: Added a FailureAccrualPolicy that marks an endpoint
+    dead when the success rate in a specified time window is under the
+    required threshold. ``RB_ID=829984``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
