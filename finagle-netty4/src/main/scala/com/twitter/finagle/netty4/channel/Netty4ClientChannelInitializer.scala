@@ -18,6 +18,7 @@ private[netty4] object Netty4ClientChannelInitializer {
   val WriteTimeoutHandlerKey = "write timeout"
   val ReadTimeoutHandlerKey = "read timeout"
   val ConnectionHandlerKey = "connection handler"
+  val ChannelStatsHandlerKey = "channel stats"
 }
 
 /**
@@ -75,6 +76,10 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
   private[this] val Stats(stats) = params[Stats]
   private[this] val Transporter.HttpProxyTo(hostAndCredentials) = params[Transporter.HttpProxyTo]
 
+  private[this] val channelStatsHandler =
+    if (!stats.isNull) Some(new ChannelStatsHandler(stats))
+    else None
+
   private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
 
   def initChannel(ch: Channel): Unit = {
@@ -83,9 +88,11 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
     // - a request flies from last to first
     // - a response flies from first to last
     //
-    // http proxy => ssl => read timeout => write timeout => exceptions
+    // http proxy => ssl => read timeout => write timeout => channel stats => exceptions
 
     val pipe = ch.pipeline
+
+    channelStatsHandler.foreach(pipe.addFirst(ChannelStatsHandlerKey, _))
 
     if (readTimeout.isFinite && readTimeout > Duration.Zero) {
       val (timeoutValue, timeoutUnit) = readTimeout.inTimeUnit
