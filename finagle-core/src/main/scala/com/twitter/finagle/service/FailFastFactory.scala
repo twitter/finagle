@@ -26,7 +26,12 @@ object FailFastFactory {
     val Success, Fail, Timeout, TimeoutFail, Close = Value
   }
 
-  private val defaultBackoffs: Stream[Duration] = Backoff.exponentialJittered(1.second, 32.seconds)
+  // put a reasonably sized cap on the number of jittered backoffs so that a
+  // "permanently" dead host doesn't create a space leak. since each new backoff
+  // that is taken will be held onto by this global Stream (having the trailing
+  // `constant` avoids this issue).
+  private val defaultBackoffs: Stream[Duration] =
+    Backoff.exponentialJittered(1.second, 32.seconds).take(16) ++ Backoff.constant(32.seconds)
 
   val role = Stack.Role("FailFast")
 
