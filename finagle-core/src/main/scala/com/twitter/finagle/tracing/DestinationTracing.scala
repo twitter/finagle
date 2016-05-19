@@ -44,12 +44,16 @@ private[finagle] object ClientDestTracingFilter {
    * $module [[com.twitter.finagle.tracing.ClientDestTracingFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[Transporter.EndpointAddr, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[Transporter.EndpointAddr, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ClientDestTracingFilter.role
       val description = "Record remote address of server"
-      def make(_addr: Transporter.EndpointAddr, next: ServiceFactory[Req, Rep]) = {
-        val Transporter.EndpointAddr(addr) = _addr
-        new ClientDestTracingFilter(addr) andThen next
+      def make(_addr: Transporter.EndpointAddr, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val Transporter.EndpointAddr(addr) = _addr
+          new ClientDestTracingFilter(addr) andThen next
+        }
       }
     }
 }

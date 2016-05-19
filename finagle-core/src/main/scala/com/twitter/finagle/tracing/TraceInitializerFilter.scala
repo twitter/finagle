@@ -176,12 +176,16 @@ object ClientTracingFilter {
     finagleVersion)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ClientTracingFilter.role
       val description = "Report finagle information and client send/recv events"
-      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
-        val param.Label(label) = _label
-        TracingFilter[Req, Rep](label) andThen next
+      def make(_label: param.Label, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val param.Label(label) = _label
+          TracingFilter[Req, Rep](label) andThen next
+        }
       }
     }
 }
@@ -205,12 +209,16 @@ private[finagle] object WireTracingFilter {
     false)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ClientTracingFilter.role
       val description = "Report finagle information and wire send/recv events"
-      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
-        val param.Label(label) = _label
-        TracingFilter[Req, Rep](label) andThen next
+      def make(_label: param.Label, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val param.Label(label) = _label
+          TracingFilter[Req, Rep](label) andThen next
+        }
       }
     }
 }
