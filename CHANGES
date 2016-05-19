@@ -24,6 +24,10 @@ Breaking API Changes
     rejects requests and has no configuration. We have decided not to pursue
     Deadline Admission Control at this time. ``RB_ID=829372``
 
+  * finagle-core: `ClientBuilder.socksProxy(SocketAddress)` is removed.
+    Use command line flags (see `c.t.f.socks.SocksProxyFlags.scala`) instead.
+    ``RB_ID=834634``
+
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
 

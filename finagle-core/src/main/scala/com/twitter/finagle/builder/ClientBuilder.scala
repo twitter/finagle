@@ -1089,10 +1089,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def httpProxyUsernameAndPassword(credentials: Credentials): This =
     configured(params[Transporter.HttpProxy].copy(credentials = Some(credentials)))
 
-  @deprecated("Use socksProxy(socksProxy: Option[SocketAddress])", "2014-12-02")
-  def socksProxy(socksProxy: SocketAddress): This =
-    configured(params[Transporter.SocksProxy].copy(sa = Some(socksProxy)))
-
   /**
    * Make connections via the given SOCKS proxy.
    * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
@@ -1115,7 +1111,9 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     * If this is defined concurrently with httpProxy, the order in which they are applied is undefined.
     */
   def expSocksProxy(hostName: String, port: Int): This =
-    configured(params[Transporter.HttpProxy].copy(sa = Some(InetSocketAddress.createUnresolved(hostName, port))))
+    configured(
+      params[Transporter.SocksProxy].copy(sa = Some(InetSocketAddress.createUnresolved(hostName, port)))
+    )
 
   /**
    * For the socks proxy use this username for authentication.
