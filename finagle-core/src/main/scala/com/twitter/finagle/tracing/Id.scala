@@ -4,6 +4,7 @@ import com.twitter.finagle.util.ByteArrays
 import com.twitter.util.RichU64String
 import com.twitter.util.{Try, Return, Throw}
 import com.twitter.util.NonFatal
+import java.lang.{Boolean => JBool}
 
 /**
  * Defines trace identifiers.  Span IDs name a particular (unique)
@@ -173,8 +174,21 @@ final case class TraceId(
     case Some(id) => id
   }
 
-  // debug flag overrides sampled to be true
-  lazy val sampled = if (flags.isDebug) Some(true) else _sampled
+  /**
+   * Override [[_sampled]] to Some(true) if the debug flag is set.
+   * @see [[getSampled]] for a Java-friendly API.
+   */
+  lazy val sampled: Option[Boolean] = if (flags.isDebug) Some(true) else _sampled
+
+  /**
+   * Java-friendly API to convert [[sampled]] to a [[Option]] of [[java.lang.Boolean]].
+   * @since Java generics require objects, using [[sampled]] from
+   *        Java would give an Option<Object> instead of Option<Boolean>
+   */
+  def getSampled(): Option[JBool] = sampled match {
+    case Some(b) => Some(Boolean.box(b))
+    case None => None
+  }
 
   private[TraceId] def ids = (traceId, parentId, spanId)
 
