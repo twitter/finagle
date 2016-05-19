@@ -92,7 +92,7 @@ final class Failure private[finagle](
     copy(logLevel = level)
 
   /**
-   * A [[Throwable]] appropriate for user presentation (e.g., for stats,
+   * A `Throwable` appropriate for user presentation (e.g., for stats,
    * or to return from a user's [[Service]].)
    *
    * Show may return `this`.
@@ -100,17 +100,17 @@ final class Failure private[finagle](
   def show: Throwable = Failure.show(this)
 
   override def toString: String =
-    "Failure(%s, flags=0x%02x)\n\twith %s".format(why, flags,
-      if (sources.isEmpty) "NoSources" else sources.mkString("\n\twith "))
+    "Failure(%s, flags=0x%02x) with %s".format(why, flags,
+      if (sources.isEmpty) "NoSources" else sources.mkString(" with "))
 
   override def getStackTrace(): Array[StackTraceElement] = stacktrace
-  override def printStackTrace(p: java.io.PrintWriter) {
+  override def printStackTrace(p: java.io.PrintWriter): Unit = {
     p.println(this)
     for (te <- stacktrace)
       p.println("\tat %s".format(te))
   }
 
-  override def equals(a: Any) = {
+  override def equals(a: Any): Boolean = {
     a match {
       case that: Failure =>
         this.why.equals(that.why) &&
