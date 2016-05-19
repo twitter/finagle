@@ -49,13 +49,6 @@ object Http extends Client[Request, Response] with HttpRichClient
     with Server[Request, Response] {
 
   object param {
-
-    /**
-     * the transporter, useful for changing underlying http implementations
-     */
-    private[finagle] case class ParameterizableTransporter(
-      transporterFn: Stack.Params => Transporter[Any, Any])
-
     /**
      * configure alternative http 1.1 implementations
      *
