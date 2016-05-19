@@ -1,9 +1,6 @@
 package com.twitter.finagle.mux.transport
 
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
-import com.twitter.finagle.Failure
-import com.twitter.io.Buf
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.finagle.netty3.codec.BufCodec
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.frame
 
@@ -37,25 +34,6 @@ private[finagle] object Netty3Framer extends ChannelPipelineFactory {
     override def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent): Unit = {
       enc.handleDownstream(ctx, e)
     }
-  }
-
-  /**
-   * ChannelBuffer <-> Buf codec.
-   */
-  private class BufCodec extends SimpleChannelHandler {
-    override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
-      e.getMessage match {
-        case b: Buf => Channels.write(ctx, e.getFuture, BufChannelBuffer(b))
-        case typ => e.getFuture.setFailure(Failure(
-          s"unexpected type ${typ.getClass.getSimpleName} when encoding to ChannelBuffer"))
-      }
-
-    override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
-      e.getMessage match {
-        case cb: ChannelBuffer => Channels.fireMessageReceived(ctx, ChannelBufferBuf.Owned(cb))
-        case typ => Channels.fireExceptionCaught(ctx, Failure(
-          s"unexpected type ${typ.getClass.getSimpleName} when encoding to Buf"))
-      }
   }
 
   def getPipeline(): ChannelPipeline = {
