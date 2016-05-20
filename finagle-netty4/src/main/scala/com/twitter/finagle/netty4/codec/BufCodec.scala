@@ -16,7 +16,7 @@ import io.netty.channel.{ChannelPromise, ChannelHandlerContext, ChannelDuplexHan
 private[finagle] class BufCodec extends ChannelDuplexHandler {
   override def write(ctx: ChannelHandlerContext, msg: Any, p: ChannelPromise): Unit =
     msg match {
-      case buf: Buf => ctx.write(BufAsByteBuf.Owned(buf))
+      case buf: Buf => ctx.write(BufAsByteBuf.Owned(buf), p)
       case typ => p.setFailure(Failure(
         s"unexpected type ${typ.getClass.getSimpleName} when encoding to ByteBuf"))
     }
