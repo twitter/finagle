@@ -21,7 +21,7 @@ import io.netty.channel._
  * `writePendingWritesAndFlushIfNeeded`. It usually makes sense to remove this handler from the
  * pipeline if it's no longer needed.
  */
-private[netty4] trait BufferingChannelOutboundHandler extends ChannelOutboundHandler {
+private[finagle] trait BufferingChannelOutboundHandler extends ChannelOutboundHandler {
 
   private[this] var pendingWrites: PendingWriteQueue = _
   private[this] var needFlush: Boolean = false

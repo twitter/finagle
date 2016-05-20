@@ -10,7 +10,7 @@ import io.netty.channel.{ChannelHandler, ChannelPipeline}
  */
 private[http2] object Http2Listener {
   private[this] val init: ChannelPipeline => Unit = { pipeline: ChannelPipeline =>
-    pipeline.addLast(new Http2ServerDowngrader())
+    pipeline.addLast(new Http2ServerDowngrader(false /*validateHeaders*/))
   }
 
   def apply[In, Out](params: Stack.Params): Listener[In, Out] = Netty4Listener(
