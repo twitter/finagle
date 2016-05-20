@@ -2,6 +2,7 @@ package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 import _root_.java.net.{InetSocketAddress, SocketAddress}
+import com.twitter.bijection.Bijection
 import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle
@@ -383,7 +384,7 @@ trait Client extends BaseClient[Buf] {
   def withStrings: BaseClient[String] = adapt(
     new Bijection[Buf, String] {
       def apply(a: Buf): String  = a match { case Buf.Utf8(s) => s }
-      def invert(b: String): Buf = Buf.Utf8(b)
+      override def invert(b: String): Buf = Buf.Utf8(b)
     }
   )
 
@@ -391,7 +392,7 @@ trait Client extends BaseClient[Buf] {
   def withBytes: BaseClient[Array[Byte]] = adapt(
     new Bijection[Buf, Array[Byte]] {
       def apply(a: Buf): Array[Byte]  = a.toArray
-      def invert(b: Array[Byte]): Buf = Buf.ByteArray.Owned(b)
+      override def invert(b: Array[Byte]): Buf = Buf.ByteArray.Owned(b)
     }
   )
 }

@@ -485,6 +485,7 @@ object Finagle extends Build {
       util("hashing"),
       util("zk-test") % "test",
       guavaLib,
+      "com.twitter.bijection" % "bijection-core" % "0.9.2",
       "com.twitter.common" % "zookeeper-testing" % "0.0.53" % "test"
     ),
     libraryDependencies ++= jacksonLibs

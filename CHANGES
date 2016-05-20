@@ -31,6 +31,9 @@ Breaking API Changes
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
 
+  * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
+    instead of `c.t.u.Bijection`. ``RB_ID=834383``
+
   * Builds are now only for Java 8 and Scala 2.11. See the
     `blog post <https://finagle.github.io/blog/2016/04/20/scala-210-and-java7/>`_
     for details. ``RB_ID=828898``

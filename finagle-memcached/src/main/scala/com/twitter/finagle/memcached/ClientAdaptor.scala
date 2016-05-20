@@ -2,8 +2,9 @@ package com.twitter.finagle.memcached
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
+import com.twitter.bijection.Bijection
 import com.twitter.io.Buf
-import com.twitter.util.{Time, Future, Bijection}
+import com.twitter.util.{Time, Future}
 
 class ClientAdaptor[T](
   val self: Client,
