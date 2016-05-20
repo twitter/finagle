@@ -2,22 +2,22 @@ package com.twitter.finagle.thrift
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
+import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{ResponseClass, ReqRep, ResponseClassifier}
+import com.twitter.finagle.service.{ReqRep, ResponseClass, ResponseClassifier}
 import com.twitter.finagle.ssl.Ssl
-import com.twitter.finagle.stats.{LoadedStatsReceiver, InMemoryStatsReceiver, NullStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, LoadedStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.thrift.service.ThriftResponseClassifier
-import com.twitter.finagle.thrift.thriftjava
 import com.twitter.finagle.thrift.thriftscala._
 import com.twitter.finagle.tracing.{Annotation, Record, Trace}
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.test._
 import com.twitter.util._
 import java.io.{File, PrintWriter, StringWriter}
-import java.net.{InetAddress, SocketAddress, InetSocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.apache.thrift.TApplicationException
-import org.apache.thrift.protocol.{TProtocolFactory, TCompactProtocol}
+import org.apache.thrift.protocol.{TCompactProtocol, TProtocolFactory}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{BeforeAndAfter, FunSuite}
@@ -240,7 +240,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     Trace.letId(id) {
       assert(Await.result(client.multiply(10, 30)) == 300)
 
-      assert(!tracer.isEmpty)
+      assert(tracer.nonEmpty)
       val idSet = tracer.map(_.traceId).toSet
 
       val ids = idSet.filter(_.traceId == id.traceId)
@@ -361,6 +361,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     case ReqRep(Echo.Echo.Args(x), Throw(_: InvalidQueryException)) if x == "ok" =>
       ResponseClass.Success
     case ReqRep(_, Throw(_: InvalidQueryException)) => ResponseClass.NonRetryableFailure
+    case ReqRep(_, Throw(_: RequestTimeoutException)) => ResponseClass.Success
     case ReqRep(_, Return(s: String)) => ResponseClass.NonRetryableFailure
   }
 
@@ -374,8 +375,12 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
   private def serverForClassifier(): ListeningServer  = {
     val iface = new Echo.FutureIface {
       def echo(x: String) =
-        if (x == "safe") Future.value("safe")
-        else Future.exception(new InvalidQueryException(x.length))
+        if (x == "safe")
+          Future.value("safe")
+        else if (x == "slow")
+          Future.sleep(1.second)(HashedWheelTimer.Default).before(Future.value("slow"))
+        else
+          Future.exception(new InvalidQueryException(x.length))
     }
     val svc = new Echo.FinagledService(iface, Protocols.binaryFactory())
     Thrift.server
@@ -405,6 +410,14 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     assert("safe" == Await.result(client.echo("safe")))
     assert(sr.counters(Seq("client", "requests")) == 3)
     assert(sr.counters(Seq("client", "success")) == 1)
+
+    // this query produces a `Throw` response produced on the client side and
+    // we want to ensure that we can translate it to a `Success`.
+    intercept[RequestTimeoutException] {
+      Await.result(client.echo("slow"))
+    }
+    assert(sr.counters(Seq("client", "requests")) == 4)
+    assert(sr.counters(Seq("client", "success")) == 2)
   }
 
   private def testJavaFailureClassification(
@@ -435,8 +448,9 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
     val server = serverForClassifier()
     val sr = new InMemoryStatsReceiver()
     val client = Thrift.client
-      .configured(Stats(sr))
+      .withStatsReceiver(sr)
       .withResponseClassifier(scalaClassifier)
+      .withRequestTimeout(100.milliseconds) // used in conjuection with a "slow" query
       .newIface[Echo.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     testScalaFailureClassification(sr, client)
@@ -463,6 +477,7 @@ class EndToEndTest extends FunSuite with ThriftTest with BeforeAndAfter {
       .name("client")
       .reportTo(sr)
       .responseClassifier(scalaClassifier)
+      .requestTimeout(100.milliseconds) // used in conjuection with a "slow" query
       .dest(Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])))
       .build()
     val client = new Echo.FinagledClient(clientBuilder)

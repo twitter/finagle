@@ -102,18 +102,26 @@ object ThriftResponseClassifier {
         return false
 
       reqRep.response match {
+        // we use the deserializer only if its a thrift response
         case Return(bytes: Array[Byte]) =>
           try
             classifier.isDefinedAt(deserialized(deserCtx, bytes))
           catch {
             case _: Throwable => false
           }
-        case _ => false
+        // otherwise, we see if the classifier can handle this as is
+        case _ =>
+          try
+            classifier.isDefinedAt(reqRep)
+          catch {
+            case _: Throwable => false
+          }
       }
     }
 
     def apply(reqRep: ReqRep): ResponseClass =
       reqRep.response match {
+        // we use the deserializer only if its a thrift response
         case Return(bytes: Array[Byte]) =>
           val deserCtx = Contexts.local.getOrElse(DeserializeCtx.Key, NoDeserializerFn)
           if (deserCtx eq NoDeserializeCtx)
@@ -123,7 +131,13 @@ object ThriftResponseClassifier {
           } catch {
             case NonFatal(e) => throw new MatchError(e)
           }
-        case e => throw new MatchError(e)
+        // otherwise, we see if the classifier can handle this as is
+        case _ =>
+          try
+            classifier(reqRep)
+          catch {
+            case NonFatal(e) => throw new MatchError(e)
+          }
       }
   }
 
