@@ -438,6 +438,23 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
     }
   }
 
+  test("Var[Addr]-based cluster should use last known good state if addr becomes Pending") {
+    new AddrClusterHelper {
+      val va: Var[Addr] with Updatable[Addr] = Var(Addr.Bound(hosts: _*))
+      val handle = MultiReader(va, queueName).clientBuilder(mockClientBuilder).build()
+      va.update(Addr.Pending)
+
+      val messages = configureMessageReader(handle)
+      assert(messages.size == 0)
+
+      sendMessages()
+
+      eventually {
+        assert(messages == sentMessages.toSet)
+      }
+    }
+  }
+
   test("dynamic SocketAddress cluster should read messages from a ready cluster") {
     new DynamicClusterHelper {
       val cluster = new DynamicCluster[SocketAddress](hosts)

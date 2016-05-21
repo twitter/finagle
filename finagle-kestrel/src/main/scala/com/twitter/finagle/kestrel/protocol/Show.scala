@@ -5,7 +5,7 @@ import org.jboss.netty.handler.codec.oneone.OneToOneEncoder
 
 import com.twitter.finagle.memcached.protocol.text.{Decoding, Tokens, TokensWithData, ValueLines}
 import com.twitter.io.Buf
-import com.twitter.util.{Time, Duration}
+import com.twitter.util.Duration
 
 object ResponseToEncoding {
   private val ZERO          = "0"

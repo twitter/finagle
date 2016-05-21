@@ -14,5 +14,6 @@ scala_library(name='scala',
     'finagle/finagle-kestrel/src/main/thrift:thrift-scala',
     'util/util-core',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
 )

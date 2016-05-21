@@ -1,7 +1,5 @@
 package com.twitter.finagle.kestrel
 
-import scala.collection.JavaConversions._
-
 import com.twitter.concurrent.{Offer, Broker}
 import com.twitter.conversions.time._
 import com.twitter.finagle.kestrel.protocol._
@@ -12,6 +10,8 @@ import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Item
 import com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.Kestrel.FinagledClient
 import com.twitter.io.Buf
 import com.twitter.util.{Command=>_, _}
+import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 
 /**
  * Indicates that a [[com.twitter.finagle.kestrel.ReadHandle]] has been closed.
@@ -159,7 +159,7 @@ object ReadHandle {
    * A java-friendly interface to {{merged}}
    */
   def merged(handles: _root_.java.util.Iterator[ReadHandle]): ReadHandle =
-    merged(handles.toSeq)
+    merged(handles.asScala.toSeq)
 }
 
 object Client {
@@ -333,7 +333,7 @@ abstract protected[kestrel] class CommandExecutorFactory[U]
  * @tparam ItemId the type used by {{CommandExecutor}} to identify returned
  *                items
  */
-abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply, ItemId](
+abstract protected[kestrel] class ClientBase[CommandExecutor <: Closable, Reply: ClassTag, ItemId](
     underlying: CommandExecutorFactory[CommandExecutor])
   extends Client
 {

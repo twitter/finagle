@@ -475,8 +475,6 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
 
   private[this] val logger = DefaultLogger
 
-  private[this] val ReturnEmptySet = Return(Set.empty[ReadHandle])
-
   protected[kestrel] def copy(config: MultiReaderConfig[Req, Rep]): Builder
 
   protected[kestrel] def withConfig(
@@ -577,9 +575,19 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
         Return(currentHandles.values.toSet)
       }
 
-      case Addr.Failed(t) => Throw(t)
+      case Addr.Neg =>
+        logger.info(s"Address could not be bound while trying to read from ${config.queueName}")
+        currentHandles.clear()
+        Return(currentHandles.values.toSet)
 
-      case _ => ReturnEmptySet
+      case Addr.Pending =>
+        // If resolution goes back to pending, it can mean there is a
+        // transient problem with service discovery. Keep the existing
+        // set.
+        logger.info(s"Pending name resolution for reading from ${config.queueName}")
+        Return(currentHandles.values.toSet)
+
+      case Addr.Failed(t) => Throw(t)
     }
 
     Var(Return(Set.empty), event)
