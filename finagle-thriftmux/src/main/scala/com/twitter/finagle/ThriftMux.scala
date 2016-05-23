@@ -269,44 +269,30 @@ object ThriftMux
     protected type In = Buf
     protected type Out = Buf
 
-    private[this] val muxStatsReceiver = {
-      val Stats(statsReceiver) = params[Stats]
-      statsReceiver.scope("mux")
-    }
+    private[this] val statsReceiver = params[Stats].statsReceiver
 
     protected def copy1(
       stack: Stack[ServiceFactory[mux.Request, mux.Response]] = this.stack,
       params: Stack.Params = this.params
     ) = copy(stack, params)
 
-    protected def newListener(): Listener[In, Out] = {
-      val Stats(sr) = params[Stats]
-      val scoped = sr.scope("thriftmux")
-      val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
-
-      // Create a Listener with a pipeline that can downgrade the connection
-      // to vanilla thrift.
-      new Listener[In, Out] {
-        private[this] val underlying = Netty3Listener[In, Out](
-          new thriftmux.PipelineFactory(scoped, pf),
-          params
-        )
-
-        def listen(addr: SocketAddress)(
-          serveTransport: Transport[In, Out] => Unit
-        ): ListeningServer = underlying.listen(addr)(serveTransport)
-      }
-    }
+    protected def newListener(): Listener[In, Out] =
+      Netty3Listener(mux.transport.Netty3Framer, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[mux.Request, mux.Response]
     ): Closable = {
-      val param.Tracer(tracer) = params[param.Tracer]
       val Mux.param.MaxFrameSize(frameSize) = params[Mux.param.MaxFrameSize]
+      val muxStatsReceiver = statsReceiver.scope("mux")
+      val param.Tracer(tracer) = params[param.Tracer]
+      val Thrift.param.ProtocolFactory(pf) = params[Thrift.param.ProtocolFactory]
+
+      val thriftEmulator = thriftmux.ThriftEmulator(
+        transport, pf, statsReceiver.scope("thriftmux"))
 
       val negotiatedTrans = mux.Handshake.server(
-        trans = transport,
+        trans = thriftEmulator,
         version = Mux.LatestVersion,
         headers = Mux.Server.headers(_, frameSize),
         negotiate = Mux.negotiate(frameSize, muxStatsReceiver))
