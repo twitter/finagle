@@ -408,7 +408,7 @@ object Finagle extends Build {
       "commons-lang" % "commons-lang" % "2.6",
       netty4Http
     )
-  ).dependsOn(finagleCore, finagleNetty4, finagleHttp)
+  ).dependsOn(finagleCore, finagleNetty4, finagleHttp % "test->test;compile->compile")
 
   lazy val finagleHttp2 = Project(
     id = "finagle-http2",
@@ -420,9 +420,10 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       netty4Http2,
       util("core"),
+      util("logging"),
       nettyLib
     ) ++ netty4Libs
-  ).dependsOn(finagleCore, finagleHttp, finagleNetty4, finagleNetty4Http)
+  ).dependsOn(finagleCore, finagleHttp % "test->test;compile->compile", finagleNetty4, finagleNetty4Http)
 
   lazy val finagleHttpCompat = Project(
     id = "finagle-http-compat",
