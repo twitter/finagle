@@ -17,6 +17,14 @@ import java.util.concurrent.{ExecutorService, Executors}
  */
 package object netty4 {
 
+  // NB Setting this system property works around a bug in n4's content [de|en]coder 
+  //    where they allocate buffers using the global default allocator rather than 
+  //    the allocator configured in the client/server boostrap. By setting this value
+  //    we're changing the global default to unpooled.
+  //
+  //    https://github.com/netty/netty/issues/5294
+  System.setProperty("io.netty.allocator.type", "unpooled")
+
   object numWorkers extends GlobalFlag((numProcs() * 2).ceil.toInt, "number of netty4 worker threads")
 
   // global worker thread pool for finagle clients and servers.
