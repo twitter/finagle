@@ -4,7 +4,6 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.ResponseClassifier
 import com.twitter.finagle.stats._
 import com.twitter.finagle.thrift._
-import com.twitter.finagle.thrift.service.ThriftResponseClassifier
 import com.twitter.finagle.util.Showable
 import com.twitter.util.NonFatal
 import java.lang.reflect.{Constructor, Method}

@@ -1,11 +1,10 @@
 package com.twitter.finagle.addr
 
 import com.twitter.concurrent.{Offer, Broker}
-import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.{Addr, Address}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Time, Timer, Duration, Var}
+import com.twitter.util.{Duration, Future, Time, Timer}
 import scala.collection.immutable.Queue
 
 private[finagle] object StabilizingAddr {

@@ -8,7 +8,6 @@ import com.twitter.finagle.param._
 import com.twitter.finagle.service.{DeadlineStatsFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
-import com.twitter.finagle.tracing.TraceInitializerFilter.Module
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm

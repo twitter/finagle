@@ -1,7 +1,6 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle.context.Contexts
-import com.twitter.scrooge.ThriftStruct
 import com.twitter.util.Try
 
 /**

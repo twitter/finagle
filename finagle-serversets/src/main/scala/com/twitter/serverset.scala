@@ -1,7 +1,6 @@
 package com.twitter
 
-import com.twitter.app.GlobalFlag
-import com.twitter.finagle.{Addr, Dtab, NameTree, Namer, Resolver, Path, Name}
+import com.twitter.finagle.{Addr, NameTree, Namer, Resolver, Path, Name}
 import com.twitter.util.{Var, Activity}
 
 /**

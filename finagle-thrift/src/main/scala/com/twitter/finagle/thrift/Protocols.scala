@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.google.common.base.Charsets
-import com.twitter.finagle.stats.{NullStatsReceiver, Counter, DefaultStatsReceiver, StatsReceiver}
+import com.twitter.finagle.stats.{Counter, DefaultStatsReceiver, StatsReceiver}
 import com.twitter.logging.Logger
 import com.twitter.util.NonFatal
 import java.nio.{ByteBuffer, CharBuffer}

@@ -2,7 +2,7 @@ package com.twitter.finagle
 
 import com.twitter.finagle.util.LoadService
 import com.twitter.util.{Closable, Future, Time}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 import java.util.logging.Logger
 import scala.collection.mutable
 

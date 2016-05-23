@@ -1,7 +1,6 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util._
 

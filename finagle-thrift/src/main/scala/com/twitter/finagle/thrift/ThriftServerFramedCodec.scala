@@ -2,7 +2,6 @@ package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
 import com.twitter.finagle.filter.PayloadSizeFilter
-import com.twitter.finagle.service.RetryPolicy
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.io.Buf

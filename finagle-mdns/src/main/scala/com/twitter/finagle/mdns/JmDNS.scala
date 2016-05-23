@@ -1,7 +1,7 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Announcement, Group, Resolver, Addr, Address}
-import com.twitter.util.{Future, FuturePool, Return, Throw, Try, Var}
+import com.twitter.finagle.{Announcement, Group, Addr, Address}
+import com.twitter.util.{Future, FuturePool, Var}
 import java.net.InetSocketAddress
 import javax.jmdns._
 import scala.collection.mutable

@@ -3,14 +3,12 @@ package com.twitter.finagle.zookeeper
 import com.twitter.common.quantity.{Amount, Time => CommonTime}
 import com.twitter.common.zookeeper.{ZooKeeperClient, ZooKeeperUtils}
 import com.twitter.concurrent.{Offer, Broker, AsyncMutex}
-import com.twitter.conversions.common._
 import com.twitter.conversions.common.quantity._
 import com.twitter.finagle.addr.StabilizingAddr.State._
 import com.twitter.finagle.util.InetSocketAddressUtil
-import com.twitter.finagle.InetResolver
 import com.twitter.util.Duration
 import java.net.InetSocketAddress
-import org.apache.zookeeper.Watcher.Event.{EventType, KeeperState}
+import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{Watcher, WatchedEvent}
 import scala.collection.JavaConverters._
 import scala.collection._

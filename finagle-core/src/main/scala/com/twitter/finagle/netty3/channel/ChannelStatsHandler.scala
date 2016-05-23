@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Duration, Future, Monitor, Stopwatch, Time}
+import com.twitter.util.{Duration, Monitor, Stopwatch, Time}
 import java.io.IOException
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.{Level, Logger}

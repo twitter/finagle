@@ -6,7 +6,6 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.factory.TrafficDistributor
 import com.twitter.finagle.stats._
 import com.twitter.util.{Activity, Future, Time, Var}
-import java.net.SocketAddress
 import java.util.logging.{Level, Logger}
 
 object perHostStats extends GlobalFlag(false, "enable/default per-host stats.\n" +

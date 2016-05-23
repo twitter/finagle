@@ -1,10 +1,9 @@
 package com.twitter.finagle.mdns
 
 import com.twitter.finagle.{Announcer, Announcement, Resolver, Addr, Address}
-import com.twitter.util.{Future, Return, Throw, Try, Var}
+import com.twitter.util.{Future, Var}
 import java.lang.management.ManagementFactory
-import java.net.{InetSocketAddress, SocketAddress}
-import scala.collection.mutable
+import java.net.InetSocketAddress
 
 class MDNSAddressException(addr: String)
   extends Exception("Invalid MDNS address \"%s\"".format(addr))

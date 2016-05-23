@@ -1,7 +1,6 @@
 package com.twitter.finagle.param
 
 import com.twitter.finagle.Stack
-import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.service.{FailureAccrualFactory, FailFastFactory}
 
 /**
