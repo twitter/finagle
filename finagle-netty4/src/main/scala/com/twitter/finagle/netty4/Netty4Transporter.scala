@@ -93,10 +93,10 @@ private[finagle] object Netty4Transporter {
    * (ie; finagle-http)
    */
   def apply[In, Out](
-    pipeCb: ChannelPipeline => Unit,
+    pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params
   ): Transporter[In, Out] = {
-    val init = new RawNetty4ClientChannelInitializer[In, Out](params, pipeCb)
+    val init = new RawNetty4ClientChannelInitializer[In, Out](pipelineInit, params)
 
     build(init, params)
   }

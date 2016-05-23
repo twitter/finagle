@@ -113,17 +113,17 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
  * Channel Initializer which exposes the netty pipeline to the transporter.
  *
  * @param params configuration parameters.
- * @param pipeCb a callback for initialized pipelines
+ * @param pipelineInit a callback for initialized pipelines
  * @tparam In the application request type.
  * @tparam Out the application response type.
  */
 private[netty4] class RawNetty4ClientChannelInitializer[In, Out](
-    params: Stack.Params,
-    pipeCb: ChannelPipeline => Unit = _ => ())
+    pipelineInit: ChannelPipeline => Unit,
+    params: Stack.Params)
   extends AbstractNetty4ClientChannelInitializer[In, Out](params) {
 
   override def initChannel(ch: Channel): Unit = {
     super.initChannel(ch)
-    pipeCb(ch.pipeline)
+    pipelineInit(ch.pipeline)
   }
 }

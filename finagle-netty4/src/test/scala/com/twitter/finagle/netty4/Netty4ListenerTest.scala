@@ -64,7 +64,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
 
     val p = Params.empty + Label("test") + Stats(sr) + BackPressure(backpressure)
     val listener = Netty4Listener[ByteBuf, ByteBuf](
-      p,
+      pipelineInit = _ => (),
+      params = p,
       transportFactory = { _: Channel => new NullTransport }
     )
   }
@@ -83,7 +84,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     }
 
     val p = Params.empty + Label("test") + Stats(sr)
-    val listener = Netty4Listener[String, String](p, StringServerInit)
+    val listener = Netty4Listener[String, String](StringServerInit, p)
 
     @volatile var observedRequest: Option[String] = None
 
@@ -116,7 +117,7 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     import ctx._
 
     val p = Params.empty + Label("test") + Stats(sr)
-    val listener = Netty4Listener[ByteBuf, ByteBuf](p)
+    val listener = Netty4Listener[ByteBuf, ByteBuf](pipelineInit = _ => (), params = p)
 
     val requestBB = new Promise[ByteBuf]
     val service = new Service[ByteBuf, ByteBuf] {
@@ -146,7 +147,8 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     // need to turn off backpressure since we don't read off the transport
     val p = Params.empty + Label("srv") + Stats(sr) + BackPressure(false)
     val listener = Netty4Listener[ByteBuf, ByteBuf](
-        p,
+        pipelineInit = _ => (),
+        params = p,
         transportFactory = { _: Channel => new NullTransport }
       )
     val server1 = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(nopDispatch)

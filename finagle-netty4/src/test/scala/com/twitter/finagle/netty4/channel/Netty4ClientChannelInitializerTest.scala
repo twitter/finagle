@@ -28,7 +28,9 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
     }
 
     val init =
-      new RawNetty4ClientChannelInitializer[ByteBuf, ByteBuf](Params.empty, _.addLast(reverser))
+      new RawNetty4ClientChannelInitializer[ByteBuf, ByteBuf](
+        pipelineInit = _.addLast(reverser),
+        params = Params.empty)
 
     val channel: SocketChannel = new NioSocketChannel()
     val loop = new NioEventLoopGroup()

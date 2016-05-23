@@ -45,8 +45,8 @@ private[finagle] object Netty4Listener {
  * @see [[com.twitter.finagle.param]]
  */
 private[finagle] case class Netty4Listener[In, Out](
+    pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
-    pipelineInit: ChannelPipeline => Unit = _ => (),
     transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
     handlerDecorator: ChannelHandler => ChannelHandler = identity
   ) extends Listener[In, Out] {
