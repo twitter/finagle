@@ -7,7 +7,6 @@ import scala.util.Random
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
-import com.twitter.finagle.cacheresolver.CacheNode
 import com.twitter.finagle.Group
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value

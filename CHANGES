@@ -18,6 +18,9 @@ Breaking API Changes
   * finagle: Finagle is no longer depending on Twitter's clone of JSR166e, JDK 8
     API is used instead. ``RB_ID=833652``
 
+  * finagle-cacheresolver: package contents merged into finagle-memcached.
+    ``RB_ID=833602``
+
   * finagle-core: Renamed DeadlineFilter to DeadlineStatsFilter, which now only
     records stats for the number of requests with exceeded deadlines, the
     remaining deadline budget, and the transit latency of requests. It no longer

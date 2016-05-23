@@ -5,7 +5,7 @@ import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
 import com.twitter.finagle.memcached
-import com.twitter.finagle.cacheresolver.{CacheNode, CachePoolCluster}
+import com.twitter.finagle.memcached.{CacheNode, CachePoolCluster}
 import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.memcached.replication._
 import com.twitter.finagle.memcached.PartitionedClient

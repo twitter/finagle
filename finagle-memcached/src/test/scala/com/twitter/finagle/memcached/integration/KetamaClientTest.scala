@@ -1,7 +1,6 @@
 package com.twitter.finagle.memcached.integration
 
-import com.twitter.finagle.cacheresolver.CacheNodeGroup
-import com.twitter.finagle.memcached.{KetamaClientBuilder, KetamaPartitionedClient, KetamaClientKey}
+import com.twitter.finagle.memcached.{CacheNodeGroup, KetamaClientBuilder, KetamaPartitionedClient, KetamaClientKey}
 import com.twitter.finagle.{Address, Group, Name}
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Future}

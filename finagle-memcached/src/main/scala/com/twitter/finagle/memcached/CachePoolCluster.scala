@@ -1,4 +1,4 @@
-package com.twitter.finagle.cacheresolver
+package com.twitter.finagle.memcached
 
 import _root_.java.io.ByteArrayInputStream
 import _root_.java.net.{SocketAddress, InetSocketAddress}
@@ -270,7 +270,7 @@ object ZookeeperCachePoolCluster {
  *                   the same as no backup pool.
  * @param statsReceiver Optional, the destination to report the stats to
  */
-class ZookeeperCachePoolCluster private[cacheresolver](
+class ZookeeperCachePoolCluster private[memcached](
   protected val zkPath: String,
   protected val zkClient: ZooKeeperClient,
   backupPool: Option[Set[CacheNode]] = None,
