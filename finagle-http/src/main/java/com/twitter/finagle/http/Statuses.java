@@ -96,6 +96,8 @@ public final class Statuses {
     Status$.MODULE$.TooManyRequests();
   public static final Status REQUEST_HEADER_FIELDS_TOO_LARGE =
     Status$.MODULE$.RequestHeaderFieldsTooLarge();
+  public static final Status UNAVAILABLE_FOR_LEGAL_REASONS =
+    Status$.MODULE$.UnavailableForLegalReasons();
   public static final Status CLIENT_CLOSED_REQUEST =
     Status$.MODULE$.ClientClosedRequest();
   public static final Status INTERNAL_SERVER_ERROR =

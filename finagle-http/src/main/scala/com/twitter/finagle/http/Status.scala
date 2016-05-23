@@ -119,6 +119,7 @@ object Status {
   val PreconditionRequired = Status(428)
   val TooManyRequests = Status(429)
   val RequestHeaderFieldsTooLarge = Status(431)
+  val UnavailableForLegalReasons = Status(451)
   val ClientClosedRequest = Status(499)
   val InternalServerError = Status(500)
   val NotImplemented = Status(501)
@@ -180,6 +181,7 @@ object Status {
     428 -> PreconditionRequired,
     429 -> TooManyRequests,
     431 -> RequestHeaderFieldsTooLarge,
+    451 -> UnavailableForLegalReasons,
     499 -> ClientClosedRequest,
     500 -> InternalServerError,
     501 -> NotImplemented,
@@ -240,6 +242,7 @@ object Status {
     PreconditionRequired -> "Precondition Required",
     TooManyRequests -> "Too Many Requests",
     RequestHeaderFieldsTooLarge -> "Request Header Fields Too Large",
+    UnavailableForLegalReasons -> "Unavailable For Legal Reasons",
     ClientClosedRequest -> "Client Closed Request",
     InternalServerError -> "Internal Server Error",
     NotImplemented -> "Not Implemented",
