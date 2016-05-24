@@ -309,18 +309,16 @@ abstract class LoadBalancerFactory {
 }
 
 /**
- * We expose the ability to configure balancers per-process via flags. However,
- * this is generally not a good idea as Finagle processes usually contain many clients.
- * This will likely go away in the future or be no-op and, therfore, should not be
- * depended on. Instead, configure your balancers via the `configured` method on
- * clients:
+ * We expose the ability to configure balancers per-process via flags. 'heap',
+ * 'choice', and 'aperture' are valid choices for defaultBalancer. However, using
+ * this is generally not a good idea, as Finagle processes usually contain many clients.
+ * To configure the load balancer method on a client, use the `configured` method like so:
  *
  * {{
  *    val balancer = Balancers.aperture(...)
  *    Protocol.configured(LoadBalancerFactory.Param(balancer))
  * }}
  */
-@deprecated("Use com.twitter.finagle.loadbalancer.Balancers per-client.", "2015-06-15")
 object defaultBalancer extends GlobalFlag("choice", "Default load balancer")
 
 package exp {
@@ -341,6 +339,7 @@ object DefaultBalancerFactory extends LoadBalancerFactory {
     defaultBalancer() match {
       case "heap" => Balancers.heap()
       case "choice" => p2c()
+      case "aperture" => Balancers.aperture()
       case x =>
         log.warning(s"""Invalid load balancer $x, using "choice" balancer.""")
         p2c()
