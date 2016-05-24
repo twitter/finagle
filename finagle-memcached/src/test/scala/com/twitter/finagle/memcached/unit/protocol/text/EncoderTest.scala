@@ -23,8 +23,8 @@ class EncoderTest extends FunSuite with MockitoSugar {
     val encoder = new Encoder
 
     def encode(x: AnyRef) = {
-      val encoded = encoder.encode(context, channel, x).asInstanceOf[ChannelBuffer]
-      channelBufferToString(encoded)
+      val encoded = encoder.encode(context, channel, x)
+      Buf.Utf8.unapply(encoded).get
     }
 
     def encodeIsPure(x: AnyRef) = {

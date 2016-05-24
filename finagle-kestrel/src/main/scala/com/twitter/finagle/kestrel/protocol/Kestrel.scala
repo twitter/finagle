@@ -2,7 +2,7 @@ package com.twitter.finagle.kestrel.protocol
 
 import com.twitter.finagle.memcached.protocol.text.client.{Decoder => ClientDecoder}
 import com.twitter.finagle.memcached.protocol.text.server.{Decoder => ServerDecoder}
-import com.twitter.finagle.memcached.protocol.text.Encoder
+import com.twitter.finagle.memcached.protocol.text.{BufToChannelBuf, Encoder}
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.{Codec, CodecFactory, KestrelTracingFilter, ServiceFactory, Stack}
 import org.jboss.netty.buffer.ChannelBuffer
@@ -15,6 +15,7 @@ private[finagle] object KestrelClientPipelineFactory extends ChannelPipelineFact
     pipeline.addLast("decoder", new ClientDecoder)
     pipeline.addLast("decoding2response", new DecodingToResponse)
 
+    pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
     pipeline.addLast("encoder", new Encoder)
     pipeline.addLast("command2encoding", new CommandToEncoding)
     pipeline
@@ -35,6 +36,7 @@ class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
           pipeline.addLast("decoder", new ServerDecoder(storageCommands))
           pipeline.addLast("decoding2command", new DecodingToCommand)
 
+          pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
           pipeline.addLast("encoder", new Encoder)
           pipeline.addLast("response2encoding", new ResponseToEncoding)
           pipeline

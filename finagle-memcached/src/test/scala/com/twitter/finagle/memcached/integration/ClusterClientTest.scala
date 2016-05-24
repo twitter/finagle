@@ -175,7 +175,7 @@ class ClusterClientTest
           updateCachePoolConfigData(10)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       /***** remove 2 servers from the zk serverset ******/
       // cache pool should remain the same size at this moment
@@ -193,7 +193,7 @@ class ClusterClientTest
           updateCachePoolConfigData(8)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       /***** remove 2 more then add 3 ******/
       // cache pool should remain the same size at this moment
@@ -212,7 +212,7 @@ class ClusterClientTest
           updateCachePoolConfigData(9)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
     }
 
 
@@ -248,7 +248,7 @@ class ClusterClientTest
           updateCachePoolConfigData(10)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
     }
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined)
@@ -269,7 +269,7 @@ class ClusterClientTest
           zookeeperServer.startNetwork
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       /***** start 5 more memcached servers and join the cluster ******/
       // update config data node, which triggers the pool update
@@ -280,7 +280,7 @@ class ClusterClientTest
           updateCachePoolConfigData(10)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
     }
 
   if (!Option(System.getProperty("SKIP_FLAKY")).isDefined) {
@@ -368,7 +368,7 @@ class ClusterClientTest
           updateCachePoolConfigData(9)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 9) }
 
@@ -380,7 +380,7 @@ class ClusterClientTest
           updateCachePoolConfigData(7)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 7) }
 
@@ -392,7 +392,7 @@ class ClusterClientTest
           updateCachePoolConfigData(5)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 5) }
 
@@ -403,7 +403,7 @@ class ClusterClientTest
           updateCachePoolConfigData(7)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 7) }
 
@@ -414,7 +414,7 @@ class ClusterClientTest
           updateCachePoolConfigData(9)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 9) }
 
@@ -427,7 +427,7 @@ class ClusterClientTest
           updateCachePoolConfigData(9)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 9) }
     }
@@ -454,7 +454,7 @@ class ClusterClientTest
           additionalServers = addMoreServers(4)
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 9) }
 
@@ -465,7 +465,7 @@ class ClusterClientTest
           additionalServers(1).leave()
         }.get(10.seconds)()
       }
-      catch { case _: Exception => fail("it shouldn't trown an exception") }
+      catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       eventually { assert(trackCacheShards(client).size == 7) }
     }

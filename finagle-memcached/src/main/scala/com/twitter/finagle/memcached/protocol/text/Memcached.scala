@@ -29,6 +29,7 @@ object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
     pipeline.addLast("decoder", new ClientDecoder)
     pipeline.addLast("decoding2response", new DecodingToResponse)
 
+    pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
     pipeline.addLast("encoder", new Encoder)
     pipeline.addLast("command2encoding", new CommandToEncoding)
     pipeline
@@ -47,6 +48,7 @@ object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
     pipeline.addLast("decoder", new ServerDecoder(storageCommands))
     pipeline.addLast("decoding2command", new DecodingToCommand)
 
+    pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
     pipeline.addLast("encoder", new Encoder)
     pipeline.addLast("response2encoding", new ResponseToEncoding)
     pipeline
