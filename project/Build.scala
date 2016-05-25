@@ -56,7 +56,7 @@ object Finagle extends Build {
     scalaVersion := "2.11.8",
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",
-      "org.scalatest" %% "scalatest" % "2.2.4" % "test",
+      "org.scalatest" %% "scalatest" % "2.2.6" % "test",
       "junit" % "junit" % "4.10" % "test",
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
