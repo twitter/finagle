@@ -30,6 +30,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
   object MeasurePayload extends Feature
   object MaxHeaderSize extends Feature
   object SetContentLength extends Feature
+  object CompressedContent extends Feature
 
   var saveBase: Dtab = Dtab.empty
   private val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -193,6 +194,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
   }
 
   def standardBehaviour(name: String)(connect: HttpService => HttpService) {
+
     testIfImplemented(MaxHeaderSize)(name + ": client stack observes max header size") {
       val service = new HttpService {
         def apply(req: Request) = {
@@ -384,6 +386,23 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       }
     }
 
+    testIfImplemented(CompressedContent)(name + ": streaming clients can decompress content") {
+      val svc = new Service[Request, Response] {
+        def apply(request: Request) = {
+          val response = Response()
+          response.contentString = "raw content"
+          Future.value(response)
+        }
+      }
+      val client = connect(svc)
+      val req = Request("/")
+      req.headerMap.set("accept-encoding", "gzip")
+
+      val content = Await.result(client(req).flatMap { rep => Reader.readAll(rep.reader) }, 5.seconds)
+      assert(Buf.Utf8.unapply(content).get == "raw content")
+      client.close()
+    }
+
     test(name + ": symmetric reader and getContent") {
       val s = Service.mk[Request, Response] { req =>
         val buf = Await.result(Reader.readAll(req.reader), 5.seconds)
@@ -409,7 +428,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service(writer))
       val reader = Await.result(client(Request()), 5.seconds).reader
       Await.result(writer.write(buf("hello")), 5.seconds)
-      assert(Await.result(readNBytes(5, reader)) == Buf.Utf8("hello"))
+      assert(Await.result(readNBytes(5, reader), 5.seconds) == Buf.Utf8("hello"))
       Await.result(writer.write(buf("world")), 5.seconds)
       assert(Await.result(readNBytes(5, reader), 5.seconds) == Buf.Utf8("world"))
       client.close()
@@ -790,6 +809,31 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     val res = client(req)
     assert(Await.result(res, 2.seconds).status == Status.Continue)
     assert(Await.result(expectP, 2.seconds) == false)
+    client.close()
+    server.close()
+  }
+
+  testIfImplemented(CompressedContent)("non-streaming clients can decompress content") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = "raw content"
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .withCompressionLevel(5)
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .withStatsReceiver(NullStatsReceiver)
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    val req = Request("/")
+    req.headerMap.set("accept-encoding", "gzip")
+    assert(Await.result(client(req), 5.seconds).contentString == "raw content")
     client.close()
     server.close()
   }

@@ -37,6 +37,9 @@ object exp {
 
         pipeline.addLast("httpCodec", codec)
 
+        if (decompressionEnabled)
+          pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
+
         if (streaming)
           pipeline.addLast("fixedLenAggregator", new FixedLengthMessageAggregator(maxChunkSize))
         else {
@@ -46,8 +49,6 @@ object exp {
           )
         }
 
-        if (decompressionEnabled)
-          pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
       }
 
       Netty4Transporter(pipelineCb, params)
@@ -80,6 +81,9 @@ object exp {
           case _ =>
         }
 
+        // we decompress before object aggregation so that fixed-length
+        // encoded messages aren't re-chunked by the decompressor after
+        // aggregation.
         if (decompressionEnabled)
           pipeline.addLast("httpDecompressor", new NettyHttp.HttpContentDecompressor)
 

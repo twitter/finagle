@@ -4,3 +4,9 @@ target(name='finagle-http2',
     'finagle/finagle-http2/src/main/java',
   ]
 )
+
+target(name='tests',
+  dependencies=[
+    'finagle/finagle-http2/src/test/scala'
+  ]
+)
