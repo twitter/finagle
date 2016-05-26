@@ -163,54 +163,54 @@ class ClusterClientTest
       /***** start 5 more memcached servers and join the cluster ******/
       // cache pool should remain the same size at this moment
       intercept[com.twitter.util.TimeoutException] {
-        expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+        Await.result(expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
           additionalServers = addMoreServers(5)
-        }.get(2.seconds)()
+        }.liftToTry, 2.seconds)()
       }
 
       // update config data node, which triggers the pool update
       // cache pool cluster should be updated
       try {
-        expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
+        Await.result(expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           updateCachePoolConfigData(10)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       /***** remove 2 servers from the zk serverset ******/
       // cache pool should remain the same size at this moment
       intercept[com.twitter.util.TimeoutException] {
-        expectPoolStatus(myPool, currentSize = 10, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+        Await.result(expectPoolStatus(myPool, currentSize = 10, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
           additionalServers(0).leave()
           additionalServers(1).leave()
-        }.get(2.seconds)()
+        }.liftToTry, 2.seconds)()
       }
 
       // update config data node, which triggers the pool update
       // cache pool should be updated
       try {
-        expectPoolStatus(myPool, currentSize = 10, expectedPoolSize = 8, expectedAdd = 0, expectedRem = 2) {
+        Await.result(expectPoolStatus(myPool, currentSize = 10, expectedPoolSize = 8, expectedAdd = 0, expectedRem = 2) {
           updateCachePoolConfigData(8)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
       /***** remove 2 more then add 3 ******/
       // cache pool should remain the same size at this moment
       intercept[com.twitter.util.TimeoutException] {
-        expectPoolStatus(myPool, currentSize = 8, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+        Await.result(expectPoolStatus(myPool, currentSize = 8, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
           additionalServers(2).leave()
           additionalServers(3).leave()
           addMoreServers(3)
-        }.get(2.seconds)()
+        }.liftToTry, 2.seconds)()
       }
 
       // update config data node, which triggers the pool update
       // cache pool should be updated
       try {
-        expectPoolStatus(myPool, currentSize = 8, expectedPoolSize = 9, expectedAdd = 3, expectedRem = 2) {
+        Await.result(expectPoolStatus(myPool, currentSize = 8, expectedPoolSize = 9, expectedAdd = 3, expectedRem = 2) {
           updateCachePoolConfigData(9)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
     }
@@ -224,29 +224,29 @@ class ClusterClientTest
       /***** fail the server here to verify the pool manager will re-establish ******/
       // cache pool cluster should remain the same
       intercept[com.twitter.util.TimeoutException] {
-        expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+        Await.result(expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
           zookeeperServer.expireClientSession(zookeeperClient)
           zookeeperServer.shutdownNetwork()
-        }.get(2.seconds)()
+        }.liftToTry, 2.seconds)()
       }
 
       /***** start the server now ******/
       // cache pool cluster should remain the same
       intercept[com.twitter.util.TimeoutException] {
-        expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
+        Await.result(expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = -1, expectedAdd = -1, expectedRem = -1) {
           zookeeperServer.startNetwork
           Thread.sleep(2000)
-        }.get(2.seconds)()
+        }.liftToTry, 2.seconds)()
       }
 
       /***** start 5 more memcached servers and join the cluster ******/
       // update config data node, which triggers the pool update
       // cache pool cluster should still be able to see underlying pool changes
       try {
-        expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
+        Await.result(expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           addMoreServers(5)
           updateCachePoolConfigData(10)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
     }
@@ -265,9 +265,9 @@ class ClusterClientTest
       // bring the server back online
       // give it some time we should see the cache pool cluster pick up underlying pool
       try {
-        expectPoolStatus(myPool, currentSize = 2, expectedPoolSize = 5, expectedAdd = 5, expectedRem = 2) {
+        Await.result(expectPoolStatus(myPool, currentSize = 2, expectedPoolSize = 5, expectedAdd = 5, expectedRem = 2) {
           zookeeperServer.startNetwork
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -275,10 +275,10 @@ class ClusterClientTest
       // update config data node, which triggers the pool update
       // cache pool cluster should still be able to see underlying pool changes
       try {
-        expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
+        Await.result(expectPoolStatus(myPool, currentSize = 5, expectedPoolSize = 10, expectedAdd = 5, expectedRem = 0) {
           addMoreServers(5)
           updateCachePoolConfigData(10)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
     }
@@ -363,10 +363,10 @@ class ClusterClientTest
       // add 4 more cache servers and update cache pool config data, now there should be 7 shards
       var additionalServers = List[EndpointStatus]()
       try {
-        expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 0) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 0) {
           additionalServers = addMoreServers(4)
           updateCachePoolConfigData(9)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -374,11 +374,11 @@ class ClusterClientTest
 
       // remove 2 cache servers and update cache pool config data, now there should be 7 shards
       try {
-        expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
           additionalServers(0).leave()
           additionalServers(1).leave()
           updateCachePoolConfigData(7)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -386,11 +386,11 @@ class ClusterClientTest
 
       // remove another 2 cache servers and update cache pool config data, now there should be 5 shards
       try {
-        expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 5, expectedAdd = 0, expectedRem = 2) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 5, expectedAdd = 0, expectedRem = 2) {
           additionalServers(2).leave()
           additionalServers(3).leave()
           updateCachePoolConfigData(5)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -398,10 +398,10 @@ class ClusterClientTest
 
       // add 2 more cache servers and update cache pool config data, now there should be 7 shards
       try {
-        expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 7, expectedAdd = 2, expectedRem = 0) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 7, expectedAdd = 2, expectedRem = 0) {
           additionalServers = addMoreServers(2)
           updateCachePoolConfigData(7)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -409,10 +409,10 @@ class ClusterClientTest
 
       // add another 2 more cache servers and update cache pool config data, now there should be 9 shards
       try {
-        expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 0) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 7, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 0) {
           additionalServers = addMoreServers(2)
           updateCachePoolConfigData(9)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -420,12 +420,12 @@ class ClusterClientTest
 
       // remove 2 and add 2, now there should be still 9 shards
       try {
-        expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 2) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 9, expectedAdd = 2, expectedRem = 2) {
           additionalServers(0).leave()
           additionalServers(1).leave()
           addMoreServers(2)
           updateCachePoolConfigData(9)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -450,9 +450,9 @@ class ClusterClientTest
       // add 4 more cache servers and update cache pool config data, now there should be 7 shards
       var additionalServers = List[EndpointStatus]()
       try {
-        expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 0) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 5, expectedPoolSize = 9, expectedAdd = 4, expectedRem = 0) {
           additionalServers = addMoreServers(4)
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
@@ -460,10 +460,10 @@ class ClusterClientTest
 
       // remove 2 cache servers and update cache pool config data, now there should be 7 shards
       try {
-        expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
+        Await.result(expectPoolStatus(mycluster, currentSize = 9, expectedPoolSize = 7, expectedAdd = 0, expectedRem = 2) {
           additionalServers(0).leave()
           additionalServers(1).leave()
-        }.get(10.seconds)()
+        }.liftToTry, 10.seconds)()
       }
       catch { case _: Exception => fail("it shouldn't thrown an exception") }
 
