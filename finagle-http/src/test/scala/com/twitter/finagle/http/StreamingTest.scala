@@ -6,7 +6,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.{Buf, Reader, Writer}
-import com.twitter.util.{Await, Closable, Future, Promise}
+import com.twitter.util.{Await, Closable, Future, Promise, Return, Throw}
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import org.jboss.netty.channel.Channel
@@ -43,11 +43,11 @@ class StreamingTest extends FunSuite with Eventually {
     writer.write(buf) before writeLots(writer, buf)
 
   class ClientCtx {
-    val fail = new Promise[Unit]
+    val failure = new Promise[Unit]
 
     val server = startServer(echo, identity)
     val client = connect(server.boundAddress, transport => {
-      if (!fail.isDefined) fail ensure transport.close()
+      if (!failure.isDefined) failure.ensure { transport.close() }
       transport
     })
 
@@ -67,16 +67,21 @@ class StreamingTest extends FunSuite with Eventually {
     // Assert previously queued request is now processed, and not interrupted
     // midstream.
     def assertSecondRequestOk() = {
-      val reader = await(res2).reader
-      req2.writer.close()
-      await(Reader.readAll(reader))
-      Closable.all(server, client).close()
+      await(res2.liftToTry) match {
+        case Return(rsp) =>
+          val reader = rsp.reader
+          await(req2.writer.close())
+          await(Reader.readAll(reader))
+          await(Closable.all(server, client).close())
+        case Throw(e) =>
+          fail(s"second request failed: $e")
+      }
     }
   }
 
   test("client: request stream fails on write") (new ClientCtx {
     // Simulate network failure by closing the transport.
-    fail.setDone()
+    failure.setDone()
 
     intercept[Reader.ReaderDiscarded] { await(writeLots(req.writer, buf)) }
     // We call read for the collating function to notice transport failure.
@@ -91,7 +96,7 @@ class StreamingTest extends FunSuite with Eventually {
     assert(!f.isDefined)
 
     // Simulate network failure by closing the transport.
-    fail.setDone()
+    failure.setDone()
 
     // Assert reading state suspension is interrupted by transport closure.
     intercept[ChannelClosedException] { await(f) }
@@ -103,16 +108,16 @@ class StreamingTest extends FunSuite with Eventually {
   test("client: server disconnect on pending response should fail request") {
     // flaky -- does not fail reliably
     (0 to 99).foreach { _ =>
-      val fail = new Promise[Unit]
+      val failure = new Promise[Unit]
       val server = startServer(neverRespond, transport => {
-        if (!fail.isDefined) fail.ensure { transport.close() }
+        if (!failure.isDefined) failure.ensure { transport.close() }
         transport
       })
       val client = connect(server.boundAddress, identity)
 
       val resF = client(get("/"))
       assert(!resF.isDefined)
-      fail.setDone()
+      failure.setDone()
       intercept[ChannelClosedException] { await(resF) }
 
       await(client.close())
@@ -158,7 +163,7 @@ class StreamingTest extends FunSuite with Eventually {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
     val setFail = new AtomicBoolean(false)
-    val fail = new Promise[Unit]
+    val failure = new Promise[Unit]
     val readp = new Promise[Unit]
     val writer = Reader.writable()
 
@@ -169,13 +174,13 @@ class StreamingTest extends FunSuite with Eventually {
           Future.value(ok(writer))
         case _ =>
           val writer = Reader.writable()
-          fail ensure (writer.write(buf) ensure writer.close())
+          failure.ensure { writer.write(buf) ensure writer.close() }
           Future.value(ok(writer))
       }
     }
 
     val server = startServer(service, transport => {
-      if (!setFail.getAndSet(true)) fail ensure transport.close()
+      if (!setFail.getAndSet(true)) failure.ensure { transport.close() }
       transport
     })
     val client1 = connect(server.boundAddress, identity, "client1")
@@ -191,7 +196,7 @@ class StreamingTest extends FunSuite with Eventually {
 
     val res = await(f1)
 
-    fail.setDone()
+    failure.setDone()
     intercept[ChannelClosedException] { await(readp) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(writer, buf)) }
 
@@ -207,11 +212,11 @@ class StreamingTest extends FunSuite with Eventually {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
     val setFail = new AtomicBoolean(false)
-    val fail = new Promise[Unit]
+    val failure = new Promise[Unit]
     val readp = new Promise[Unit]
     val writer = Reader.writable()
     val writep = new Promise[Unit]
-    (fail before writeLots(writer, buf)) proxyTo writep
+    failure.before(writeLots(writer, buf)).proxyTo(writep)
 
     val service = new Service[Request, Response] {
       def apply(req: Request) = n.getAndIncrement() match {
@@ -220,13 +225,13 @@ class StreamingTest extends FunSuite with Eventually {
           Future.value(ok(writer))
         case _ =>
           val writer = Reader.writable()
-          fail ensure (writer.write(buf) ensure writer.close())
+          failure.ensure { writer.write(buf) ensure writer.close() }
           Future.value(ok(writer))
       }
     }
 
     val server = startServer(service, transport => {
-      if (!setFail.getAndSet(true)) fail ensure transport.close()
+      if (!setFail.getAndSet(true)) failure.ensure { transport.close() }
       transport
     })
     val client1 = connect(server.boundAddress, identity, "client1")
@@ -242,7 +247,7 @@ class StreamingTest extends FunSuite with Eventually {
 
     val res = await(f1)
 
-    fail.setDone()
+    failure.setDone()
     intercept[Reader.ReaderDiscarded] { await(writep) }
     // This really should be ChannelClosedException, perhaps we're too
     // indiscriminatory by calling discard on any error in the dispatcher.
@@ -258,17 +263,17 @@ class StreamingTest extends FunSuite with Eventually {
   test("server: fail response writer") {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
-    val fail = new Promise[Unit]
+    val failure = new Promise[Unit]
 
     val service = new Service[Request, Response] {
       def apply(req: Request) = n.getAndIncrement() match {
         case 0 =>
           val writer = Reader.writable()
-          fail ensure writer.fail(new Exception)
+          failure.ensure { writer.fail(new Exception) }
           Future.value(ok(writer))
         case _ =>
           val writer = Reader.writable()
-          fail ensure (writer.write(buf) ensure writer.close())
+          failure.ensure { writer.write(buf) ensure writer.close() }
           Future.value(ok(writer))
         }
     }
@@ -284,7 +289,7 @@ class StreamingTest extends FunSuite with Eventually {
 
     val res = await(f1)
 
-    fail.setDone()
+    failure.setDone()
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
@@ -296,18 +301,18 @@ class StreamingTest extends FunSuite with Eventually {
   test("server: fail request reader") {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
-    val fail = new Promise[Unit]
+    val failure = new Promise[Unit]
 
     val service = new Service[Request, Response] {
       def apply(req: Request) = n.getAndIncrement() match {
         case 0 =>
-          fail ensure req.reader.discard()
+          failure.ensure { req.reader.discard() }
           val writer = Reader.writable()
-          fail ensure (writer.write(buf) ensure writer.close())
+          failure.ensure { writer.write(buf) ensure writer.close() }
           Future.value(ok(writer))
         case _ =>
           val writer = Reader.writable()
-          fail ensure (writer.write(buf) ensure writer.close())
+          failure.ensure { writer.write(buf) ensure writer.close() }
           Future.value(ok(writer))
         }
     }
@@ -323,7 +328,7 @@ class StreamingTest extends FunSuite with Eventually {
 
     val res = await(f1)
 
-    fail.setDone()
+    failure.setDone()
     intercept[ChannelClosedException] { await(res.reader.read(1)) }
     intercept[Reader.ReaderDiscarded] { await(writeLots(req1.writer, buf)) }
 
