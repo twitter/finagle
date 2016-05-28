@@ -43,11 +43,12 @@ class StreamingTest extends FunSuite with Eventually {
     writer.write(buf) before writeLots(writer, buf)
 
   class ClientCtx {
+    @volatile var shouldFail = true
     val failure = new Promise[Unit]
 
     val server = startServer(echo, identity)
     val client = connect(server.boundAddress, transport => {
-      if (!failure.isDefined) failure.ensure { transport.close() }
+      if (shouldFail) failure.ensure { transport.close() }
       transport
     })
 
@@ -60,6 +61,7 @@ class StreamingTest extends FunSuite with Eventually {
     assert(await(res.reader.read(1)) == Some(buf))
 
     // This request should queue in the service pool.
+    shouldFail = false
     val req2 = get("abc")
     val res2 = client(req2)
     assert(!res2.isDefined)
@@ -106,23 +108,16 @@ class StreamingTest extends FunSuite with Eventually {
   })
 
   test("client: server disconnect on pending response should fail request") {
-    // flaky -- does not fail reliably
-    (0 to 99).foreach { _ =>
-      val failure = new Promise[Unit]
-      val server = startServer(neverRespond, transport => {
-        if (!failure.isDefined) failure.ensure { transport.close() }
-        transport
-      })
-      val client = connect(server.boundAddress, identity)
+    val failure = new Promise[Unit]
+    val server = startServer(neverRespond, closingTransport(failure))
+    val client = connect(server.boundAddress, identity)
 
-      val resF = client(get("/"))
-      assert(!resF.isDefined)
-      failure.setDone()
-      intercept[ChannelClosedException] { await(resF) }
+    val resF = client(get("/"))
+    failure.setDone()
+    intercept[ChannelClosedException] { await(resF) }
 
-      await(client.close())
-      await(server.close())
-    }
+    await(client.close())
+    await(server.close())
   }
 
   test("client: client closes transport after server disconnects") {
@@ -130,10 +125,7 @@ class StreamingTest extends FunSuite with Eventually {
     val service = Service.mk[Request, Response] { req =>
       Future.value(Response())
     }
-    val server = startServer(service, transport => {
-      if (!serverClose.isDefined) serverClose.ensure { transport.close() }
-      transport
-    })
+    val server = startServer(service, closingTransport(serverClose))
     val client = connect(server.boundAddress, transport => {
       clientClosed.become(transport.onClose.unit)
       transport
@@ -162,7 +154,6 @@ class StreamingTest extends FunSuite with Eventually {
   test("server: request stream fails read") {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
-    val setFail = new AtomicBoolean(false)
     val failure = new Promise[Unit]
     val readp = new Promise[Unit]
     val writer = Reader.writable()
@@ -179,10 +170,7 @@ class StreamingTest extends FunSuite with Eventually {
       }
     }
 
-    val server = startServer(service, transport => {
-      if (!setFail.getAndSet(true)) failure.ensure { transport.close() }
-      transport
-    })
+    val server = startServer(service, closingOnceTransport(failure))
     val client1 = connect(server.boundAddress, identity, "client1")
     val client2 = connect(server.boundAddress, identity, "client2")
 
@@ -211,7 +199,6 @@ class StreamingTest extends FunSuite with Eventually {
   test("server: response stream fails write") {
     val buf = Buf.Utf8(".")
     val n = new AtomicInteger(0)
-    val setFail = new AtomicBoolean(false)
     val failure = new Promise[Unit]
     val readp = new Promise[Unit]
     val writer = Reader.writable()
@@ -230,10 +217,7 @@ class StreamingTest extends FunSuite with Eventually {
       }
     }
 
-    val server = startServer(service, transport => {
-      if (!setFail.getAndSet(true)) failure.ensure { transport.close() }
-      transport
-    })
+    val server = startServer(service, closingOnceTransport(failure))
     val client1 = connect(server.boundAddress, identity, "client1")
     val client2 = connect(server.boundAddress, identity, "client2")
 
@@ -395,14 +379,27 @@ object StreamingTest {
       .name("server")
       .build(service)
 
-  def connect(addr: SocketAddress, mod: Modifier, name: String = "client") = {
-    val fac = ClientBuilder()
+  def connect(addr: SocketAddress, mod: Modifier, name: String = "client") =
+    ClientBuilder()
       .codec(new Custom(mod, identity))
       .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .name(name)
-      .buildFactory()
-    await(fac())
+      .build()
+
+  def closingTransport(closed: Future[Unit]): Modifier =
+    (transport: Transport[Any, Any]) => {
+      closed.ensure { transport.close() }
+      transport
+    }
+
+  def closingOnceTransport(closed: Future[Unit]): Modifier = {
+    val setFail = new AtomicBoolean(false)
+
+    (transport: Transport[Any, Any]) => {
+      if (!setFail.getAndSet(true)) closed.ensure { transport.close() }
+      transport
+    }
   }
 
   class Custom(cmod: Modifier, smod: Modifier)
