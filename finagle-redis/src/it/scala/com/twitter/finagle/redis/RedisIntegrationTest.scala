@@ -1,17 +1,16 @@
 package com.twitter.finagle.redis.integration
 
+import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.redis.naggati.test.TestCodec
 import com.twitter.finagle.redis.naggati.RedisTest
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util._
-import com.twitter.finagle.redis.{Redis, TransactionalClient}
+import com.twitter.finagle.redis.{Client, Redis, TransactionalClient}
 import com.twitter.util.{Await, Future, Time}
+import java.net.InetSocketAddress
 import org.jboss.netty.buffer.ChannelBuffer
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import java.net.InetSocketAddress
-import com.twitter.finagle.Service
-import com.twitter.finagle.redis.Client
 
 trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll {
 
@@ -40,7 +39,7 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
 
   protected val OKStatusReply = StatusReply("OK")
 
-  protected def withRedisClient(testCode: Service[Command, Reply] => Any) {
+  protected def withRedisClient(testCode: Service[Command, Reply] => Any): Unit = {
     val client = ClientBuilder()
           .name("redis-client")
           .codec(Redis())
@@ -57,20 +56,22 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
     }
   }
 
-  protected def assertMBulkReply(reply: Future[Reply], expects: List[String],
+  protected def assertMBulkReply(
+    reply: Future[Reply],
+    expects: List[String],
     contains: Boolean = false) = Await.result(reply) match {
       case MBulkReply(msgs) => contains match {
         case true =>
           assert(expects.isEmpty === false, "Test did no supply a list of expected replies.")
           val newMsgs = ReplyFormat.toString(msgs)
-          expects.foreach({ msg =>
+          expects.foreach { msg =>
             val doesMBulkReplyContainMessage = newMsgs.contains(msg)
             assert(doesMBulkReplyContainMessage === true)
-          })
+          }
         case false =>
-          val actualMessages = ReplyFormat.toChannelBuffers(msgs).map({ msg =>
+          val actualMessages = ReplyFormat.toChannelBuffers(msgs).map { msg =>
             chanBuf2String(msg)
-          })
+          }
           assert(actualMessages === expects)
       }
       case EmptyMBulkReply() => {
