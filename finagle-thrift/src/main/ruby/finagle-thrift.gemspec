@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = ">= 1.3.5"
 
-  # s.add_runtime_dependency 'thrift', '~> 0.6.0'
+  s.add_runtime_dependency 'thrift', '~> 0.9.3'
 
   s.files        = Dir.glob("{bin,lib}/**/*")
   s.require_path = 'lib'
