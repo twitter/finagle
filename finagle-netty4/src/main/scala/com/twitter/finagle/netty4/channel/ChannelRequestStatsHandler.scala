@@ -26,9 +26,9 @@ private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
 
   private[this] val requestCount = statsReceiver.stat("connection_requests")
 
-  override def channelActive(ctx: ChannelHandlerContext): Unit = {
+  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
     ctx.attr(ConnectionRequestsKey).set(new AtomicInteger(0))
-    super.channelActive(ctx)
+    super.handlerAdded(ctx)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {

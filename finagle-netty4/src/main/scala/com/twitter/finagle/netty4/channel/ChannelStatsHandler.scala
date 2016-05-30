@@ -50,12 +50,14 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     connectionCount.get()
   }
 
-
+  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
+    ctx.attr(ConnectionStatsKey).set(ChannelStats(new AtomicLong(0), new AtomicLong(0)))
+    super.handlerAdded(ctx)
+  }
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     ctx.attr(ChannelWasWritableKey).set(true) //netty channels start in writable state
     ctx.attr(ChannelWritableDurationKey).set(Stopwatch.start())
-    ctx.attr(ConnectionStatsKey).set(ChannelStats(new AtomicLong(0), new AtomicLong(0)))
     connects.incr()
     connectionCount.incrementAndGet()
 
@@ -99,13 +101,16 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
   override def channelInactive(ctx: ChannelHandlerContext) {
     closeChans.incr()
-    val channelStats = ctx.attr(ConnectionStatsKey).get
 
+    val channelStats = ctx.attr(ConnectionStatsKey).get
     connectionReceivedBytes.add(channelStats.bytesRead.get)
     connectionSentBytes.add(channelStats.bytesWritten.get)
 
-    val elapsed = ctx.attr(ConnectionDurationKey).get()
-    connectionDuration.add(elapsed().inMilliseconds)
+    ctx.attr(ConnectionDurationKey).get match {
+      case null => // the connection didn't initialize
+      case elapsed => connectionDuration.add(elapsed().inMilliseconds)
+    }
+
     connectionCount.decrementAndGet()
     super.channelInactive(ctx)
   }
