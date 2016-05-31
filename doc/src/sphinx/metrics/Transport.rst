@@ -38,7 +38,10 @@ ChannelStatsHandler
   A counter of the total number of successful connections made.
 
 **closes**
-  A counter of the total number of channel close operations.
+  A counter of the total number of channel close operations initiated. To see the
+  total number of closes completed, use the total count from one of the
+  "connection_duration", "connection_received_bytes", or "connection_sent_bytes"
+  histograms.
 
 **connection_duration**
   A histogram of the duration of the lifetime of a connection.
@@ -54,9 +57,6 @@ ChannelStatsHandler
 
 **sent_bytes**
   A counter of the total number of sent bytes.
-
-**closechans**
-  A counter of the total number of connections closed.
 
 **writableDuration**
   A gauge of the length of time the socket has been writable in the channel.

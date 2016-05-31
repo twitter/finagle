@@ -41,7 +41,6 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val closeChans              = statsReceiver.counter("closechans")
   private[this] val writable                = statsReceiver.counter("socket_writable_ms")
   private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
   private[this] val exceptions              = statsReceiver.scope("exn")
@@ -49,8 +48,6 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connections             = statsReceiver.addGauge("connections") {
     connectionCount.get()
   }
-
-
 
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     ctx.attr(ChannelWasWritableKey).set(true) //netty channels start in writable state
@@ -98,7 +95,6 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext) {
-    closeChans.incr()
     val channelStats = ctx.attr(ConnectionStatsKey).get
 
     connectionReceivedBytes.add(channelStats.bytesRead.get)

@@ -28,10 +28,10 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val closeChans              = statsReceiver.counter("closechans")
   private[this] val writable                = statsReceiver.counter("socket_writable_ms")
   private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
   private[this] val exceptions              = statsReceiver.scope("exn")
+  private[this] val closesCount             = statsReceiver.counter("closes")
   private[this] val connections             = statsReceiver.addGauge("connections") {
     connectionCount.get()
   }
@@ -68,19 +68,12 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     super.messageReceived(ctx, e)
   }
 
-  private[this] val pendingClose = new AtomicInteger(0)
-  private[this] val closesCount = statsReceiver.counter("closes")
-  private[this] val closedCount = statsReceiver.counter("closed")
-
   override def closeRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     closesCount.incr()
     super.closeRequested(ctx, e)
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    closedCount.incr()
-    closeChans.incr()
-
     // guarded in case Netty calls channelClosed without calling channelOpen.
     if (elapsed != null) {
       val (channelReadCount, channelWriteCount) =

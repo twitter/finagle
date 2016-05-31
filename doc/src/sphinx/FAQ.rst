@@ -210,7 +210,7 @@ consequence, traditional forms of connection-pooling are no longer required. Thu
 Mux employs `com.twitter.finagle.pool.SingletonPool <http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.SingletonPool>`_,
 which exposes new stats:
 
-- ``connects``, ``connections``, and ``closechans`` stats should drop, since
+- ``connects``, ``connections``, and ``closes`` stats should drop, since
   there will be less channel opening and closing.
 - ``connection_duration``, ``connection_received_bytes``, and
   ``connection_sent_bytes`` stats should increase, since connections become more
@@ -234,7 +234,7 @@ settings related to connection pooling become obsolete:
 The server-side connection model changes as well. Expect the following stats to
 be impacted:
 
-- ``connects``, ``connections``, and ``closechans`` stats should drop.
+- ``connects``, ``connections``, and ``closes`` stats should drop.
 - ``connection_duration``, ``connection_received_bytes``, and
   ``connection_sent_bytes`` should increase.
 - Obsolete stats: ``idle/idle``, ``idle/refused``, and ``idle/closed``

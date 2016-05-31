@@ -1074,7 +1074,7 @@ class EndToEndTest extends FunSuite
 
       assert(sr.counters(Seq("client", "requests")) == 1)
       assert(sr.counters(Seq("client", "failures")) == 1)
-      assert(sr.counters(Seq("client", "closed")) == 1)
+      assert(sr.stats(Seq("client", "connection_duration")).size == 1)
       assert(sr.counters.get(Seq("client", "retries", "requeues")) == None)
 
       intercept[ChannelClosedException](await(client.query("ok")))

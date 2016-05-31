@@ -128,11 +128,6 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
   )
 
   channelLifeCycleTest(
-    "closechans",
-    (handler, ctx) => handler.channelInactive(ctx)
-  )
-
-  channelLifeCycleTest(
     "connects",
     (handler, ctx) => handler.channelActive(ctx)
   )
