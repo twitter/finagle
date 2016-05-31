@@ -28,6 +28,7 @@ object DecodingToCommand {
   private val DECR    = Buf.Utf8("decr")
   private val QUIT    = Buf.Utf8("quit")
   private val STATS   = Buf.Utf8("stats")
+  private val CAS     = Buf.Utf8("cas")
 }
 
 abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
@@ -38,19 +39,20 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
 
   def decode(ctx: ChannelHandlerContext, ch: Channel, m: AnyRef) = m match {
     case Tokens(tokens) => parseNonStorageCommand(tokens)
-    case TokensWithData(tokens, data, _/*ignore CAS*/) => parseStorageCommand(tokens, data)
+    case TokensWithData(tokens, data, casUnique) => parseStorageCommand(tokens, data, casUnique)
   }
 
   protected def parseNonStorageCommand(tokens: Seq[Buf]): C
-  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf): C
+  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf] = None): C
 
-  protected def validateStorageCommand(tokens: Seq[Buf], data: Buf) = {
-    val expiry = tokens(2).toInt match {
-      case 0 => 0.seconds.afterEpoch
-      case unixtime if unixtime > RealtimeMaxdelta => Time.fromSeconds(unixtime)
-      case delta => delta.seconds.fromNow
-    }
+  protected def validateStorageCommand(tokens: Seq[Buf], data: Buf): (Buf, Int, Time, Buf) = {
+    val expiry = getExpiry(tokens)
     (tokens(0), tokens(1).toInt, expiry, data)
+  }
+
+  protected def validateCasCommand(tokens: Seq[Buf], data: Buf, casUnique: Buf): (Buf, Int, Time, Buf, Buf) = {
+    val expiry = getExpiry(tokens)
+    (tokens(0), tokens(1).toInt, expiry, data, casUnique)
   }
 
   protected def validateDeleteCommand(tokens: Seq[Buf]): Buf = {
@@ -59,6 +61,14 @@ abstract class AbstractDecodingToCommand[C <: AnyRef] extends OneToOneDecoder {
     if (tokens.size > 2) throw new ClientError("Too many arguments")
 
     tokens.head
+  }
+
+  private def getExpiry(tokens: Seq[Buf]): Time = {
+    tokens(2).toInt match {
+      case 0 => Time.epoch
+      case unixtime if unixtime > RealtimeMaxdelta => Time.fromSeconds(unixtime)
+      case delta => delta.seconds.fromNow
+    }
   }
 }
 
@@ -78,7 +88,7 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
     if (tokens.isEmpty) throw new ClientError("No arguments specified")
   }
 
-  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf) = {
+  protected def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf]) = {
     validateAnyStorageCommand(tokens)
     val commandName = tokens.head
     val args = tokens.tail
@@ -88,6 +98,10 @@ class DecodingToCommand extends AbstractDecodingToCommand[Command] {
       case REPLACE   => tupled(Replace)(validateStorageCommand(args, data))
       case APPEND    => tupled(Append)(validateStorageCommand(args, data))
       case PREPEND   => tupled(Prepend)(validateStorageCommand(args, data))
+      case CAS       => {
+        val casUniqueValue = casUnique.getOrElse(throw new ServerError("checksum is missing for a CAS command"))
+        tupled(Cas)(validateCasCommand(args, data, casUniqueValue))
+      }
       case _         => throw new NonexistentCommand(Buf.slowHexString(commandName))
     }
   }

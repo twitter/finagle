@@ -26,7 +26,7 @@ private[kestrel] class DecodingToCommand extends AbstractDecodingToCommand[Comma
 
   protected val storageCommands = collection.Set(SET)
 
-  def parseStorageCommand(tokens: Seq[Buf], data: Buf) = {
+  def parseStorageCommand(tokens: Seq[Buf], data: Buf, casUnique: Option[Buf] = None) = {
     val commandName = tokens.head
     val args = tokens.tail
     commandName match {

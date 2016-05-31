@@ -38,7 +38,7 @@ object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
 
 object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
   private val storageCommands = collection.Set[ChannelBuffer](
-    "set", "add", "replace", "append", "prepend")
+    "set", "add", "replace", "append", "prepend", "cas")
 
   def getPipeline() = {
     val pipeline = Channels.pipeline()

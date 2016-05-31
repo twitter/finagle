@@ -5,6 +5,7 @@ import com.twitter.finagle.memcached.protocol.text._
 import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.io.Buf
 import com.twitter.util.StateMachine
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
@@ -30,7 +31,19 @@ class Decoder(storageCommands: collection.Set[ChannelBuffer]) extends AbstractDe
         }
       case AwaitingData(tokens, bytesNeeded) =>
         decodeData(bytesNeeded, buffer) { data =>
-          TokensWithData(tokens.map { ChannelBufferBuf.Owned(_) }, ChannelBufferBuf.Owned(data))
+          val commandName = ChannelBufferBuf.Owned(tokens.head)
+          if (commandName.equals(Buf.Utf8("cas"))) {// cas command
+            TokensWithData(
+              tokens.slice(0, 5).map { ChannelBufferBuf.Owned(_) },
+              ChannelBufferBuf.Owned(data),
+              Some(ChannelBufferBuf.Owned(tokens(5)))
+            )
+          } else { // other commands
+            TokensWithData(
+              tokens.map { ChannelBufferBuf.Owned(_) },
+              ChannelBufferBuf.Owned(data)
+            )
+          }
         }
     }
   }
