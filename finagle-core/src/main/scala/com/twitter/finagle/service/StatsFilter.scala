@@ -2,9 +2,8 @@ package com.twitter.finagle.service
 
 import com.twitter.finagle.Filter.TypeAgnostic
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{
-  MultiCategorizingExceptionStatsHandler, ExceptionStatsHandler, StatsReceiver}
-import com.twitter.util.{Try, Future, Stopwatch, Throw}
+import com.twitter.finagle.stats.{ExceptionStatsHandler, MultiCategorizingExceptionStatsHandler, StatsReceiver}
+import com.twitter.util.{Future, Stopwatch, Throw, Try}
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.LongAdder
 
@@ -125,7 +124,6 @@ class StatsFilter[Req, Rep](
   private[this] val dispatchCount = statsReceiver.counter("requests")
   private[this] val successCount = statsReceiver.counter("success")
   private[this] val latencyStat = statsReceiver.stat(s"request_latency_$latencyStatSuffix")
-  private[this] val loadGauge = statsReceiver.addGauge("load") { outstandingRequestCount.sum() }
   private[this] val outstandingRequestCountGauge =
     statsReceiver.addGauge("pending") { outstandingRequestCount.sum() }
 

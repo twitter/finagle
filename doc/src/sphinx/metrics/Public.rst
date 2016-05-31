@@ -12,11 +12,8 @@ StatsFilter
 **request_latency_ms**
   A histogram of the latency of requests in milliseconds.
 
-**load**
-  A gauge of the current total number of outstanding requests.
-
 **pending**
-  A gauge of the current total number of outstanding requests (same as "load").
+  A gauge of the current total number of outstanding requests.
 
 **failures/<exception_name>+**
   A counter of the number of times a specific exception has been thrown.

@@ -38,6 +38,9 @@ Breaking API Changes
   * finagle-core: Removed "closechans" and "closed" counters from `ChannelStatsHandler`.
     ``RB_ID=835194``
 
+  * finagle-core: Removed the "load" gauge from `StatsFilter` as it was duplicated
+    by the "pending" gauge. ``RB_ID=835199``
+
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
 
