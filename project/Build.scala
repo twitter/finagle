@@ -188,7 +188,7 @@ object Finagle extends Build {
   )
 
   // finagle-thrift and finagle-thriftmux tests do not currently compile under sbt
-  // due to scrooge-sbt-plugin limitations. 
+  // due to scrooge-sbt-plugin limitations.
   lazy val testableProjects = projectList diff Seq[sbt.ProjectReference](finagleThrift, finagleThriftMux)
 
   lazy val finagle = Project(
@@ -511,7 +511,7 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-mux",
     libraryDependencies ++= Seq("com.twitter.common" % "stats-util" % "0.0.58")
-  ).dependsOn(finagleCore)
+  ).dependsOn(finagleCore, finagleNetty4)
 
   lazy val finagleThriftMux = Project(
     id = "finagle-thriftmux",
