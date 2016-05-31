@@ -113,6 +113,7 @@ object ToggleMap {
    *          `java.lang.IllegalArgumentException` will be thrown.
    */
   private[toggle] def fractional(id: String, fraction: Double): Toggle[Int] = {
+    Toggle.validateId(id)
     Toggle.validateFraction(fraction)
 
     // we want a continuous range within the space of Int.MinValue
@@ -167,6 +168,8 @@ object ToggleMap {
   private[this] val NoFractionAndToggle = (Double.NaN, Toggle.Undefined)
 
   private class MutableToggle(id: String) extends Toggle[Int] {
+    Toggle.validateId(id)
+
     private[this] val fractionAndToggle =
       new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
 
@@ -258,6 +261,8 @@ object ToggleMap {
       flag.overrides()
 
     private[this] class FlagToggle(id: String) extends Toggle[Int] {
+      Toggle.validateId(id)
+
       private[this] val fractionAndToggle =
         new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
 

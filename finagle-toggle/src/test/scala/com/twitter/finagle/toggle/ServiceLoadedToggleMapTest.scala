@@ -10,7 +10,7 @@ import org.scalatest.junit.JUnitRunner
 //
 class ServiceLoadedToggleTestA extends ServiceLoadedToggleMap with ToggleMap.Proxy {
   private val tm = ToggleMap.newMutable()
-  tm.put("a", 1.0)
+  tm.put("com.toggle.a", 1.0)
 
   protected def underlying: ToggleMap = tm
   def libraryName: String = "A"
@@ -33,10 +33,10 @@ class ServiceLoadedToggleMapTest extends FunSuite {
     val tm = ServiceLoadedToggleMap("A")
 
     // make sure we got ToggleMap we expected
-    assert(tm("a")(500))
+    assert(tm("com.toggle.a")(500))
     val toggles = tm.iterator.toSeq
     assert(toggles.size == 1)
-    assert(toggles.head.id == "a")
+    assert(toggles.head.id == "com.toggle.a")
   }
 
   test("no libraryName matches") {

@@ -6,6 +6,17 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
+object ToggleGenerator {
+
+  val Id: Gen[String] = for {
+    prefix <- Gen.identifier
+    suffix <- Gen.identifier
+  } yield {
+    prefix + "." + suffix
+  }
+
+}
+
 @RunWith(classOf[JUnitRunner])
 class ToggleTest extends FunSuite
   with GeneratorDrivenPropertyChecks {
@@ -78,13 +89,52 @@ class ToggleTest extends FunSuite
     }
   }
 
-  test("Toggle.Metadata constructor") {
+  test("Toggle.Metadata constructor checks id") {
+    def assertNotAllowed(id: String): Unit = {
+      intercept[IllegalArgumentException] {
+        Toggle.Metadata(id, 0.0, None)
+      }
+    }
+
+    // invalid chars
+    assertNotAllowed("!")
+    assertNotAllowed(" ")
+    assertNotAllowed(" com.toggle.a")
+
+    // check ids are package like
+    assertNotAllowed("")
+    assertNotAllowed("t")
+    assertNotAllowed("2c")
+    assertNotAllowed("comtoggleA")
+    assertNotAllowed(".com.toggle.A")
+
+    // test boundaries are ok
+    Toggle.Metadata("com.toggle.A", 0.0, None)
+    Toggle.Metadata("com.toggle.Z", 0.0, None)
+    Toggle.Metadata("com.toggle.a", 0.0, None)
+    Toggle.Metadata("com.toggle.z", 0.0, None)
+    Toggle.Metadata("com.toggle.0", 0.0, None)
+    Toggle.Metadata("com.toggle.9", 0.0, None)
+    Toggle.Metadata("com.toggle._", 0.0, None)
+    Toggle.Metadata("com.toggle..", 0.0, None)
+    Toggle.Metadata("com.toggle.-", 0.0, None)
+
+    forAll(ToggleGenerator.Id) { id =>
+      Toggle.validateId(id)
+    }
+  }
+
+  test("Toggle.Metadata constructor checks fraction") {
     intercept[IllegalArgumentException] {
-      Toggle.Metadata("t", -0.1, None)
+      Toggle.Metadata("com.toggle.Test", -0.1, None)
     }
     intercept[IllegalArgumentException] {
-      Toggle.Metadata("t", 1.1, None)
+      Toggle.Metadata("com.toggle.Test", 1.1, None)
     }
+
+    // test boundaries are ok
+    Toggle.Metadata("com.toggle.Test", 0.0, None)
+    Toggle.Metadata("com.toggle.Test", 1.0, None)
   }
 
 }
