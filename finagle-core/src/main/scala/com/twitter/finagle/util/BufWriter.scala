@@ -24,13 +24,13 @@ private[finagle] abstract class BufWriter {
    * writing of bytes in each of the write methods don't require additional
    * function calls and size checks.
    */
-  protected def arrayToWrite(numBytes: Int): Array[Byte]
+  private[util] def arrayToWrite(numBytes: Int): Array[Byte]
 
   /**
    * Returns the index at which to start writing. Subclasses
    * are expected to update the index according to numBytes.
    */
-  protected def getAndIncrementIndex(numBytes: Int): Int
+  private[util] def getAndIncrementIndex(numBytes: Int): Int
 
   /**
    * Write all the bytes from `bs` into the running [[Buf]].
@@ -201,6 +201,18 @@ private[finagle] abstract class BufWriter {
   private[util] def index: Int
 }
 
+private[finagle] trait ProxyBufWriter extends BufWriter {
+  protected def writer: BufWriter
+
+  private[util] def arrayToWrite(numBytes: Int): Array[Byte] = writer.arrayToWrite(numBytes)
+
+  private[util] def getAndIncrementIndex(numBytes: Int): Int = writer.getAndIncrementIndex(numBytes)
+
+  private[util] def index: Int = writer.index
+
+  def owned(): Buf = writer.owned()
+}
+
 private[finagle] object BufWriter {
   /**
    * Creates a fixed size [[BufWriter]].
@@ -320,12 +332,12 @@ private class DynamicBufWriter(arr: Array[Byte]) extends BufWriter {
     }
   }
 
-  protected def arrayToWrite(bytes: Int): Array[Byte] = {
+  private[util] def arrayToWrite(bytes: Int): Array[Byte] = {
     resizeIfNeeded(bytes)
     underlying.arrayToWrite(bytes)
   }
 
-  protected def getAndIncrementIndex(numBytes: Int): Int =
+  private[util] def getAndIncrementIndex(numBytes: Int): Int =
     underlying.getAndIncrementIndex(numBytes)
 
   /**

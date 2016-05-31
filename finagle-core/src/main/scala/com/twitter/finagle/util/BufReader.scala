@@ -47,17 +47,17 @@ private[finagle] trait BufReader {
   def readUnsignedShortLE(): Int
 
   /**
-   * Extract 24 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 3.
+   * Extract 24 bits and interpret as a big endian integer, advancing the byte cursor by 3.
    */
   def readMediumBE(): Int
 
   /**
-   * Extract 24 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 3.
+   * Extract 24 bits and interpret as a little endian integer, advancing the byte cursor by 3.
    */
   def readMediumLE(): Int
 
   /**
-   * Extract 24 bits and interpret as a little endian unsigned integer, advancing the byte cursor by 3.
+   * Extract 24 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 3.
    */
   def readUnsignedMediumBE(): Int
 
@@ -67,7 +67,7 @@ private[finagle] trait BufReader {
   def readUnsignedMediumLE(): Int
 
   /**
-   * Extract 32 bits and interpret as a big endian int, advancing the byte cursor by 4.
+   * Extract 32 bits and interpret as a big endian integer, advancing the byte cursor by 4.
    */
   def readIntBE(): Int
 
@@ -132,6 +132,56 @@ private[finagle] trait BufReader {
   def readAll(): Buf
 }
 
+private[finagle] trait ProxyBufReader extends BufReader {
+  protected def reader: BufReader
+
+  def remaining: Int = reader.remaining
+
+  def readByte(): Int = reader.readByte()
+
+  def readUnsignedByte(): Int = reader.readUnsignedByte()
+
+  def readShortBE(): Int = reader.readShortBE()
+
+  def readShortLE(): Int = reader.readShortLE()
+
+  def readUnsignedShortBE(): Int = reader.readUnsignedShortBE()
+
+  def readUnsignedShortLE(): Int = reader.readUnsignedShortLE()
+
+  def readMediumBE(): Int = reader.readMediumBE()
+
+  def readMediumLE(): Int = reader.readMediumLE()
+
+  def readUnsignedMediumBE(): Int = reader.readUnsignedMediumBE()
+
+  def readUnsignedMediumLE(): Int = reader.readUnsignedMediumLE()
+
+  def readIntBE(): Int = reader.readIntBE()
+
+  def readIntLE(): Int = reader.readIntLE()
+
+  def readUnsignedIntBE(): Long = reader.readUnsignedIntBE()
+
+  def readUnsignedIntLE(): Long = reader.readUnsignedIntLE()
+
+  def readLongBE(): Long = reader.readLongBE()
+
+  def readLongLE(): Long = reader.readLongLE()
+
+  def readFloatBE(): Float = reader.readFloatBE()
+
+  def readFloatLE(): Float = reader.readFloatLE()
+
+  def readDoubleBE(): Double = reader.readDoubleBE()
+
+  def readDoubleLE(): Double = reader.readDoubleLE()
+
+  def readBytes(n: Int): Buf = reader.readBytes(n)
+
+  def readAll(): Buf = reader.readAll()
+}
+
 private[finagle] object BufReader {
   /**
    * Creates a [[BufReader]] that is capable of extracting
@@ -160,7 +210,7 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
   // from `buf` via the `read*` methods.
   private[this] val nums = new Array[Byte](8)
 
-  def remaining = buf.length
+  def remaining: Int = buf.length
 
   def readByte(): Int = {
     if (remaining < 1) {
