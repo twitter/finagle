@@ -161,6 +161,7 @@ object Finagle extends Build {
     finagleCore,
     finagleStats,
     finagleNetty4,
+    finagleZipkinCore,
     finagleZipkin,
     finagleServersets,
     finagleException,
@@ -304,6 +305,17 @@ object Finagle extends Build {
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleHttp)
 
+  lazy val finagleZipkinCore = Project(
+    id = "finagle-zipkin-core",
+    base = file("finagle-zipkin-core"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-zipkin-core",
+    libraryDependencies ++= Seq(util("codec"), util("events"), util("core")) ++ scroogeLibs,
+    libraryDependencies ++= jacksonLibs
+  ).dependsOn(finagleCore, finagleThrift)
+
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
@@ -311,9 +323,8 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    libraryDependencies ++= Seq(util("codec"), util("events")) ++ scroogeLibs,
-    libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleThrift)
+    libraryDependencies ++= scroogeLibs
+  ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
 
   lazy val finagleException = Project(
     id = "finagle-exception",

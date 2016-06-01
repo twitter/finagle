@@ -1,4 +1,4 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.zipkin.core
 
 import org.scalatest.FunSuite
 import com.twitter.util.Time

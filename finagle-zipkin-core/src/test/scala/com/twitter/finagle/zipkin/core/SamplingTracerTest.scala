@@ -1,4 +1,53 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.zipkin.core
+
+import com.twitter.finagle.tracing._
+import com.twitter.util.Time
+import com.twitter.util.events.Sink
+import org.junit.runner.RunWith
+import org.mockito.Mockito._
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
+
+@RunWith(classOf[JUnitRunner])
+class SamplingTracerTest extends FunSuite
+  with MockitoSugar
+{
+
+  private val traceId = TraceId(
+    None,
+    None,
+    new SpanId(1L),
+    None,
+    Flags()
+  )
+
+  private val record = Record(
+    traceId,
+    Time.now,
+    Annotation.Message("sup"),
+    None
+  )
+
+  test("sends sampled events to Sink") {
+    val sink = mock[Sink]
+    when(sink.recording).thenReturn(true)
+    val tracer = mock[Tracer]
+    val samplingTracer = new SamplingTracer(tracer, 1f, sink)
+    samplingTracer.record(record)
+
+    verify(sink, times(1)).event(SamplingTracer.Trace, objectVal = record.annotation)
+  }
+
+  test("does not send events to sink when not sampled") {
+    val sink = mock[Sink]
+    val tracer = mock[Tracer]
+    val samplingTracer = new SamplingTracer(tracer, 0f, sink)
+    samplingTracer.record(record)
+
+    verifyNoMoreInteractions(sink)
+  }
+}
 
 import com.twitter.finagle.tracing._
 import com.twitter.util._
@@ -20,7 +69,7 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
     val underlying = mock[RawZipkinTracer]
-    val tracer = new ZipkinTracer(underlying, 0f)
+    val tracer = new SamplingTracer(underlying, 0f)
     assert(tracer.sampleTrace(traceId) == Some(false))
     tracer.setSampleRate(1f)
     assert(tracer.sampleTrace(traceId) == Some(true))
@@ -30,7 +79,7 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
     val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
 
     val underlying = mock[RawZipkinTracer]
-    val tracer = new ZipkinTracer(underlying, 0f)
+    val tracer = new SamplingTracer(underlying, 0f)
     val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
     val record = Record(id, Time.now, Annotation.ClientSend())
     tracer.record(record)
@@ -38,7 +87,7 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
   }
 
   test("serialize andThen deserialize = identity") {
-    import ZipkinTracer.Trace
+    import SamplingTracer.Trace
 
     def id(e: events.Event) = Trace.serialize(e).flatMap(Trace.deserialize).get
     forAll(genEvent(Trace)) { event =>
