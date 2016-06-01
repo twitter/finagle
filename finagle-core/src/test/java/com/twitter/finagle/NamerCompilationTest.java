@@ -23,4 +23,9 @@ public class NamerCompilationTest {
         new NameTree.Leaf<Name>(Name$.MODULE$.apply("/asdf")),
         idNamer.lookup(Path.read("/asdf")).sample());
   }
+
+  @Test
+  public void testNamerResolve() {
+    Namer.resolve("/$/inet/localhost/9990");
+  }
 }

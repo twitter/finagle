@@ -13,7 +13,7 @@ import java.net.InetSocketAddress
  * external processes, for example lookups through DNS or to ZooKeeper,
  * and thus lookup results are represented by a [[com.twitter.util.Activity Activity]].
  */
-trait Namer { self =>
+abstract class Namer { self =>
 
   /**
    * Translate a [[com.twitter.finagle.Path Path]] into a
@@ -269,7 +269,6 @@ trait ServiceNamer[Req, Rep] extends Namer {
       Activity.value(NameTree.Leaf(name))
   }
 }
-
 
 
 package namer {
