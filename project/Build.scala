@@ -45,6 +45,7 @@ object Finagle extends Build {
   )
   val scroogeLibs = thriftLibs ++ Seq(
     "com.twitter" %% "scrooge-core" % scroogeVersion)
+  val kafkaLib =  "org.apache.kafka" % "kafka-clients" % "0.10.0.0"
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -165,6 +166,7 @@ object Finagle extends Build {
     finagleNetty4,
     finagleZipkinCore,
     finagleZipkin,
+    finagleZipkinKafka,
     finagleServersets,
     finagleException,
     finagleIntegration,
@@ -328,6 +330,16 @@ object Finagle extends Build {
   ).settings(
     name := "finagle-zipkin",
     libraryDependencies ++= scroogeLibs
+  ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
+
+  lazy val finagleZipkinKafka = Project(
+    id = "finagle-zipkin-kafka",
+    base = file("finagle-zipkin-kafka"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-zipkin-kafka",
+    libraryDependencies ++= Seq(kafkaLib)
   ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
 
   lazy val finagleException = Project(
@@ -590,7 +602,8 @@ object Finagle extends Build {
     finagleOstrich4,
     finagleRedis,
     finagleStats,
-    finagleThrift)
+    finagleThrift,
+    finagleZipkinKafka)
 
   lazy val finagleBenchmarkThrift = Project(
     id = "finagle-benchmark-thrift",
