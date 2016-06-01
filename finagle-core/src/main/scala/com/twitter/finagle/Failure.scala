@@ -3,6 +3,7 @@ package com.twitter.finagle
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.Future
 import scala.annotation.tailrec
+import scala.util.control.NoStackTrace
 
 /**
  * Base exception for all Finagle originated failures. These are
@@ -15,10 +16,9 @@ final class Failure private[finagle](
     val cause: Option[Throwable] = None,
     val flags: Long = 0L,
     protected val sources: Map[Failure.Source.Value, Object] = Map.empty,
-    val stacktrace: Array[StackTraceElement] = Failure.NoStacktrace,
     val logLevel: Level = Level.WARNING)
   extends Exception(why, cause.orNull)
-  with NoStacktrace
+  with NoStackTrace
   with HasLogLevel
 {
   import Failure._
@@ -35,12 +35,6 @@ final class Failure private[finagle](
    */
   def withSource(key: Failure.Source.Value, value: Object): Failure =
     copy(sources = sources + (key -> value))
-
-  /**
-   * Creates a new Failure with the current threads stacktrace.
-   */
-  def withStackTrace(): Failure =
-    copy(stacktrace = Thread.currentThread.getStackTrace())
 
   /**
    * This failure with the given flags added.
@@ -103,13 +97,6 @@ final class Failure private[finagle](
     "Failure(%s, flags=0x%02x) with %s".format(why, flags,
       if (sources.isEmpty) "NoSources" else sources.mkString(" with "))
 
-  override def getStackTrace(): Array[StackTraceElement] = stacktrace
-  override def printStackTrace(p: java.io.PrintWriter): Unit = {
-    p.println(this)
-    for (te <- stacktrace)
-      p.println("\tat %s".format(te))
-  }
-
   override def equals(a: Any): Boolean = {
     a match {
       case that: Failure =>
@@ -132,15 +119,11 @@ final class Failure private[finagle](
     cause: Option[Throwable] = cause,
     flags: Long = flags,
     sources: Map[Failure.Source.Value, Object] = sources,
-    stacktrace: Array[StackTraceElement] = stacktrace,
     logLevel: Level = logLevel
-  ): Failure = new Failure(why, cause, flags, sources, stacktrace, logLevel)
+  ): Failure = new Failure(why, cause, flags, sources, logLevel)
 }
 
 object Failure {
-  private val NoStacktrace =
-    Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1))
-
   object Source extends Enumeration {
     val Service, Role, RemoteInfo = Value
   }

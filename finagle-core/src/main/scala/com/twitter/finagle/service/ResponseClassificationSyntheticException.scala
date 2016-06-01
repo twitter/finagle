@@ -1,6 +1,6 @@
 package com.twitter.finagle.service
 
-import com.twitter.util.NoStacktrace
+import scala.util.control.NoStackTrace
 
 /**
  * Used by [[com.twitter.finagle.param.ResponseClassifier response classification]]
@@ -10,7 +10,7 @@ import com.twitter.util.NoStacktrace
  */
 class ResponseClassificationSyntheticException private[finagle]()
   extends Exception
-  with NoStacktrace {
+  with NoStackTrace {
   override def getMessage: String =
     "A synthetic ResponseClassification failure"
 }

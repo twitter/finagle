@@ -2,12 +2,13 @@ package com.twitter.finagle.dispatch
 
 import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
+import com.twitter.finagle.{Service, CancelledRequestException}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
+import scala.util.control.NoStackTrace
 
 object GenSerialServerDispatcher {
-  private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
+  private val Eof = Future.exception(new Exception("EOF") with NoStackTrace)
   // We don't use Future.never here, because object equality is important here
   private val Idle = new NoFuture
   private val Closed = new NoFuture

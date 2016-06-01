@@ -5,6 +5,7 @@ import com.twitter.util.{Closable, Future, Time}
 import java.net.InetSocketAddress
 import java.util.logging.Logger
 import scala.collection.mutable
+import scala.util.control.NoStackTrace
 
 /**
  * Indicates that an [[com.twitter.finagle.Announcer]] was not found for the
@@ -26,7 +27,7 @@ class AnnouncerNotFoundException(scheme: String)
  * libraries on the classpath with conflicting scheme definitions.
  */
 class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer]])
-  extends NoStacktrace
+  extends Exception with NoStackTrace
 {
   override def getMessage = {
     val msgs = announcers map { case (scheme, rs) =>

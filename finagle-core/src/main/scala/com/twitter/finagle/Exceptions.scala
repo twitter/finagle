@@ -4,7 +4,7 @@ import com.twitter.finagle.context.RemoteInfo
 import com.twitter.logging.{HasLogLevel, Level}
 import com.twitter.util.Duration
 import java.net.SocketAddress
-
+import scala.util.control.NoStackTrace
 
 /**
  * A trait for exceptions that contain remote information:
@@ -51,33 +51,12 @@ object SourcedException {
 }
 
 /**
- * A trait for common exceptions that either
- *
- * a) don't benefit from full stacktrace information (e.g. stacktraces don't add
- *    useful information, as in the case of connection closure), or
- * b) are thrown frequently enough that stacktrace-creation becomes unacceptably
- *    expensive.
- *
- * This trait represents a tradeoff between debugging ease and efficiency.
- * Implementers beware.
- */
-trait NoStacktrace extends Exception {
-  override def fillInStackTrace = this
-  // specs expects non-empty stacktrace array
-  this.setStackTrace(NoStacktrace.NoStacktraceArray)
-}
-
-object NoStacktrace {
-  val NoStacktraceArray = Array(new StackTraceElement("com.twitter.finagle", "NoStacktrace", null, -1))
-}
-
-/**
  * A base class for request failures. Indicates that some failure occurred
  * before a request could be successfully serviced.
  */
 class RequestException(message: String, cause: Throwable)
   extends Exception(message, cause)
-  with NoStacktrace
+  with NoStackTrace
   with SourcedException
 {
   def this() = this(null, null)
@@ -290,7 +269,7 @@ class ChannelException(underlying: Throwable, val remoteAddress: SocketAddress)
  * particular category of connection failure.
  */
 class ConnectionFailedException(underlying: Throwable, remoteAddress: SocketAddress)
-  extends ChannelException(underlying, remoteAddress) with NoStacktrace {
+  extends ChannelException(underlying, remoteAddress) with NoStackTrace {
   def this() = this(null, null)
 }
 
@@ -299,7 +278,7 @@ class ConnectionFailedException(underlying: Throwable, remoteAddress: SocketAddr
  * was reset by a peer or a proxy.
  */
 class ChannelClosedException(underlying: Throwable, remoteAddress: SocketAddress)
-  extends ChannelException(underlying, remoteAddress) with NoStacktrace {
+  extends ChannelException(underlying, remoteAddress) with NoStackTrace {
   def this(remoteAddress: SocketAddress) = this(null, remoteAddress)
   def this() = this(null, null)
 }
@@ -364,9 +343,9 @@ trait WriteException extends Exception with SourcedException
 case class ChannelWriteException(underlying: Throwable)
   extends ChannelException(underlying)
   with WriteException
-  with NoStacktrace
+  with NoStackTrace
 {
-  override def fillInStackTrace: NoStacktrace = this
+  override def fillInStackTrace: NoStackTrace = this
   override def getStackTrace: Array[StackTraceElement] = underlying.getStackTrace
 }
 
@@ -475,6 +454,6 @@ class ChannelBufferUsageException(description: String) extends Exception(descrip
  * their corresponding backup requests succeeded first. See
  * [[com.twitter.finagle.exp.BackupRequestFilter]] for details.
  */
-object BackupRequestLost extends Exception with NoStacktrace with HasLogLevel {
+object BackupRequestLost extends Exception with NoStackTrace with HasLogLevel {
   def logLevel: Level = Level.TRACE
 }

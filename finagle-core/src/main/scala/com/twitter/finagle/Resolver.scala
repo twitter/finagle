@@ -9,6 +9,7 @@ import com.twitter.finagle.util._
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
 import java.util.logging.Logger
+import scala.util.control.NoStackTrace
 
 /**
  * Indicates that a [[com.twitter.finagle.Resolver]] was not found for the
@@ -31,7 +32,7 @@ class ResolverNotFoundException(scheme: String)
  * libraries on the classpath with conflicting scheme definitions.
  */
 class MultipleResolversPerSchemeException(resolvers: Map[String, Seq[Resolver]])
-  extends NoStacktrace
+  extends Exception with NoStackTrace
 {
   override def getMessage = {
     val msgs = resolvers map { case (scheme, rs) =>
@@ -235,7 +236,6 @@ object FixedInetResolver {
  * Allows unit tests to specify a CI-friendly resolve fn. Otherwise
  * defaults to InetResolver.resolveHost
  *
- * @param statsReceiver Unscoped receiver for InetResolver
  * @param maxCacheSize Specifies the maximum number of `Futures` that can be cached.
  *                     No maximum size limit if Long.MaxValue.
  * @param resolveOverride Optional fn. If None, defaults back to superclass implementation
