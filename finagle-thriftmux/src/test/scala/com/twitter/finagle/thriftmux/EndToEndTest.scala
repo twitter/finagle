@@ -15,16 +15,18 @@ import com.twitter.finagle.thriftmux.thriftscala._
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.io.Buf
 import com.twitter.util.{Await, Awaitable, Closable, Duration, Future, Promise, Return, Throw, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
+
+import com.twitter.finagle.util.HashedWheelTimer
 import org.apache.thrift.protocol._
 import org.apache.thrift.TApplicationException
 import org.junit.runner.RunWith
+import org.scalatest.{FunSuite, Tag}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.{FunSuite, Tag}
+
 import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
@@ -184,11 +186,6 @@ class EndToEndTest extends FunSuite
       val protoOld = ThriftMuxServer
         .withProtocolFactory(pf)
         .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
-      val netty4 = ThriftMux.server
-        .configured(Mux.param.MuxImpl.Netty4)
-        .withProtocolFactory(pf)
-        .serveIface(new InetSocketAddress(InetAddress.getLoopbackAddress, 0), iface)
-
 
       def port(socketAddr: SocketAddress): Int =
         socketAddr.asInstanceOf[InetSocketAddress].getPort
@@ -197,8 +194,7 @@ class EndToEndTest extends FunSuite
         ("ServerBuilder deprecated", builderOld, port(builderOld.boundAddress)),
         ("ServerBuilder", builder, port(builder.boundAddress)),
         ("ThriftMux proto deprecated", protoOld, port(protoOld.boundAddress)),
-        ("ThriftMux proto", protoOld, port(protoNew.boundAddress)),
-        ("ThriftMux with Netty4", netty4, port(netty4.boundAddress))
+        ("ThriftMux proto", protoOld, port(protoNew.boundAddress))
       )
     }
 
@@ -232,11 +228,6 @@ class EndToEndTest extends FunSuite
         .withClientId(clientId)
         .withProtocolFactory(pf)
         .newService(dest)
-      val netty4 = ThriftMux.client
-        .withClientId(clientId)
-        .withProtocolFactory(pf)
-        .configured(Mux.param.MuxImpl.Netty4)
-        .newService(dest)
 
       def toIface(svc: Service[ThriftClientRequest, Array[Byte]]): TestService$FinagleClient =
         new TestService.FinagledClient(svc, pf)
@@ -247,8 +238,7 @@ class EndToEndTest extends FunSuite
         ("Thrift via ClientBuilder", toIface(thriftBuilder), thriftBuilder),
         ("Thrift via proto", toIface(thriftProto), thriftProto),
         ("ThriftMux proto deprecated", toIface(oldProto), oldProto),
-        ("ThriftMux proto", toIface(newProto), newProto),
-        ("ThriftMux with Netty4", toIface(netty4), netty4)
+        ("ThriftMux proto", toIface(newProto), newProto)
       )
     }
 

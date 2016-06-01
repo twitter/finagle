@@ -5,9 +5,8 @@ import com.twitter.finagle.client._
 import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.mux.transport.{Message, MuxFramer, Netty3Framer, Netty4Framer}
+import com.twitter.finagle.mux.transport.{Message, MuxFramer, Netty3Framer}
 import com.twitter.finagle.mux.{Handshake, FailureDetector}
-import com.twitter.finagle.netty4.{Netty4Listener, Netty4Transporter}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.param.{WithDefaultLoadBalancer, ProtocolLibrary}
 import com.twitter.finagle.pool.SingletonPool
@@ -49,42 +48,6 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     }
     object MaxFrameSize {
       implicit val param = Stack.Param(MaxFrameSize(Int.MaxValue.bytes))
-    }
-
-    /**
-     * A param that controls the [[Transporter]] and [[Listener]] implementation
-     * used by Mux. This allows us to easily swap the underlying I/O multiplexer
-     * implementation.
-     *
-     * @note the listener and transporter don't strictly need to be
-     * coupled but we do so for ease of configuration (e.g. both
-     * servers and clients can use the same parameter).
-     */
-    case class MuxImpl(
-        transporter: Stack.Params => Transporter[Buf, Buf],
-        listener: Stack.Params => Listener[Buf, Buf]) {
-      def mk(): (MuxImpl, Stack.Param[MuxImpl]) =
-        (this, MuxImpl.param)
-    }
-
-    object MuxImpl {
-      /**
-       * A [[MuxImpl]] that uses netty3 as the underlying I/O multiplexer.
-       */
-      val Netty3 = MuxImpl(
-        params => Netty3Transporter(Netty3Framer, params),
-        params => Netty3Listener(Netty3Framer, params))
-
-      /**
-       * A [[MuxImpl]] that uses netty4 as the underlying I/O multiplexer.
-       *
-       * @note this is experimental and not yet tested in production.
-       */
-      val Netty4 = MuxImpl(
-        params => Netty4Transporter(Netty4Framer, params),
-        params => Netty4Listener(Netty4Framer, params))
-
-      implicit val param = Stack.Param(Netty3)
     }
   }
 
@@ -184,7 +147,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
     protected def newTransporter(): Transporter[In, Out] =
-      params[param.MuxImpl].transporter(params)
+      Netty3Transporter(Netty3Framer, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]
@@ -259,7 +222,7 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     private[this] val statsReceiver = params[fparam.Stats].statsReceiver.scope("mux")
 
     protected def newListener(): Listener[In, Out] =
-      params[param.MuxImpl].listener(params)
+      Netty3Listener(Netty3Framer, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out],

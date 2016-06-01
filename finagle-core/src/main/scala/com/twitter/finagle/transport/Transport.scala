@@ -41,7 +41,7 @@ trait Transport[In, Out] extends Closable { self =>
    * write on the Transport, but this allows clients to listen to
    * close events.
    */
-  def onClose: Future[Throwable]
+  val onClose: Future[Throwable]
 
   /**
    * The locally bound address of this transport.
@@ -70,7 +70,7 @@ trait Transport[In, Out] extends Closable { self =>
       def write(req: In1): Future[Unit] = Future(f(req)).flatMap(self.write)
       def read(): Future[Out1] = self.read().map(g)
       def status: Status = self.status
-      def onClose: Future[Throwable] = self.onClose
+      val onClose: Future[Throwable] = self.onClose
       def localAddress: SocketAddress = self.localAddress
       def remoteAddress: SocketAddress = self.remoteAddress
       def peerCertificate: Option[Certificate] = self.peerCertificate
@@ -282,10 +282,9 @@ trait TransportFactory {
  * A [[Transport]] that defers all methods except `read` and `write`
  * to `self`.
  */
-abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transport[In, Out] {
-  def self: Transport[In, Out] = _self
+abstract class TransportProxy[In, Out](self: Transport[In, Out]) extends Transport[In, Out] {
   def status: Status = self.status
-  def onClose: Future[Throwable] = self.onClose
+  val onClose: Future[Throwable] = self.onClose
   def localAddress: SocketAddress = self.localAddress
   def remoteAddress: SocketAddress = self.remoteAddress
   def peerCertificate: Option[Certificate] = self.peerCertificate
