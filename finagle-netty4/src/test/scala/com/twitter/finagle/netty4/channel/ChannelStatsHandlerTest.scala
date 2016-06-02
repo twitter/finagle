@@ -9,7 +9,8 @@ import io.netty.util.{AttributeKey, Attribute}
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicLong
 import org.junit.runner.RunWith
-import org.mockito.Mockito.when
+import org.mockito.Matchers.any
+import org.mockito.Mockito.{when, verify}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
@@ -163,8 +164,10 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     val tc = new TestContext { }
     import tc._
 
-    handler.channelActive(ctx)
+    handler.handlerAdded(ctx)
+    verify(statsAttr).set(any[ChannelStats])
     handler.write(ctx, wrappedBuffer(Array.fill(42)(0.toByte)), mock[ChannelPromise])
+    handler.channelActive(ctx)
     handler.channelInactive(ctx)
 
     assert(sr.counter("sent_bytes")() == 42)

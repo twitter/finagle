@@ -44,17 +44,17 @@ class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
     val msg = new Object
 
     // first connection sends two messages
-    handler.channelActive(ctx)
+    handler.handlerAdded(ctx)
     handler.channelRead(ctx, msg)
     handler.channelRead(ctx, msg)
     handler.channelInactive(ctx)
 
     // second connection sends zero
-    handler.channelActive(ctx)
+    handler.handlerAdded(ctx)
     handler.channelInactive(ctx)
 
     // third connection sends one
-    handler.channelActive(ctx)
+    handler.handlerAdded(ctx)
     handler.channelRead(ctx, msg)
     handler.channelInactive(ctx)
 
