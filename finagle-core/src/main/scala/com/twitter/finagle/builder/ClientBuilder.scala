@@ -484,7 +484,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     codec: Codec[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     this.codec(Function.const(codec)(_))
-      .configured(ProtocolLibrary(codec.protocolLibraryName))
 
   /**
    * A variation of `codec` that supports codec factories.  This is
@@ -503,7 +502,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     codecFactory: CodecFactory[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     this.codec(codecFactory.client)
-      .configured(ProtocolLibrary(codecFactory.protocolLibraryName))
 
   /**
    * A variation of codec for codecs that support only client-codecs.
@@ -518,8 +516,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Client
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] = {
+    // in order to know the protocol library name, we need to produce
+    // a throw-away codec. given that the codec API is on its way out
+    // in favor of Stack, this is a reasonable compromise.
+    val codec = codecFactory(ClientCodecConfig("ClientBuilder protocolLibraryName"))
     copy(CodecClient[Req1, Rep1](codecFactory).withParams(params))
+      .configured(ProtocolLibrary(codec.protocolLibraryName))
+  }
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Client]] that will be used

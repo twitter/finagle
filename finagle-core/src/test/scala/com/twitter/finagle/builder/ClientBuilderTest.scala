@@ -1,22 +1,22 @@
 package com.twitter.finagle.builder
 
 import com.twitter.finagle._
+import com.twitter.finagle.client.StringClient
 import com.twitter.finagle.integration.IntegrationBase
 import com.twitter.finagle.param.ProtocolLibrary
-import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.service.{RetryPolicy, FailureAccrualFactory}
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.service.RetryPolicy
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.util._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry}
-import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import org.junit.runner.RunWith
-import org.mockito.Mockito.{verify, when}
 import org.mockito.Matchers
 import org.mockito.Matchers._
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.FunSuite
-import org.scalatest.mock.MockitoSugar
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ClientBuilderTest extends FunSuite
@@ -112,6 +112,26 @@ class ClientBuilderTest extends FunSuite
     ClientBuilder()
       .name("test")
       .hostConnectionLimit(1)
+      .codec(cfClient)
+      .hosts("")
+      .build()
+  }
+
+  verifyProtocolRegistry("#codec(CodecFactory#Client) along with #stack", expected = "fancy") {
+    val ctx = new ClientBuilderHelper {}
+    when(ctx.m.codec.protocolLibraryName).thenReturn("fancy")
+
+    val cfClient: CodecFactory[String, String]#Client =
+      { (_: ClientCodecConfig) => ctx.m.codec }
+
+    val stringClient = new StringClient {}
+
+    ClientBuilder()
+      .name("test")
+      .hostConnectionLimit(1)
+      // make sure that we replace the string client's Stack's
+      // protocol library with the codec's because we call codec afterwards.
+      .stack(stringClient.stringClient)
       .codec(cfClient)
       .hosts("")
       .build()
