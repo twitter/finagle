@@ -11,16 +11,16 @@ import com.twitter.util.{Var, Activity}
 private[twitter] trait BaseServersetNamer extends Namer {
 
   /** Resolve a resolver string to a Var[Addr]. */
-  protected[this] def resolve(spec: String): Var[Addr] = Resolver.eval(spec) match {
+  protected[this] def resolve0(spec: String): Var[Addr] = Resolver.eval(spec) match {
     case Name.Bound(addr) => addr
     case _ => Var.value(Addr.Neg)
   }
 
   protected[this] def resolveServerset(hosts: String, path: String) = 
-    resolve(s"zk2!$hosts!$path")
+    resolve0(s"zk2!$hosts!$path")
 
   protected[this] def resolveServerset(hosts: String, path: String, endpoint: String) = 
-    resolve(s"zk2!$hosts!$path!$endpoint")
+    resolve0(s"zk2!$hosts!$path!$endpoint")
 
   /** Bind a name. */
   protected[this] def bind(path: Path): Option[Name.Bound]
