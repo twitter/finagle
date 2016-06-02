@@ -170,7 +170,7 @@ class FinagleClientThriftServerTest extends FunSuite {
       {
         val futures = 0 until NumParties map { _ => client.multiply(1, 2) }
         val resolved = futures map (Await.result(_, 5.seconds))
-        resolved foreach { r => assert(r == (3)) }
+        resolved foreach { r => assert(r == 3) }
       }
 
       addrs.foreach(_.shutdown())
@@ -178,6 +178,4 @@ class FinagleClientThriftServerTest extends FunSuite {
   }
 
   doit(new TFramedTransport.Factory(), ThriftClientFramedCodec(), "framed transport")
-
-  doit(new TTransportFactory, ThriftClientBufferedCodec(), "buffered transport")
 }

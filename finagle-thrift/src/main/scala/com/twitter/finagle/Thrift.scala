@@ -165,6 +165,13 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     def withClientId(clientId: thrift.ClientId): Client =
       configured(Thrift.param.ClientId(Some(clientId)))
 
+    /**
+     * Use a buffered transport instead of the default framed transport.
+     * In almost all cases, the default framed transport should be used.
+     */
+    def withBufferedTransport: Client =
+      configured(Thrift.param.Framed(false))
+
     def withAttemptTTwitterUpgrade: Client =
       configured(param.AttemptTTwitterUpgrade(true))
 

@@ -35,20 +35,24 @@ Breaking API Changes
     Use command line flags (see `c.t.f.socks.SocksProxyFlags.scala`) instead.
     ``RB_ID=834634``
 
-<<<<<<< e440b7d5ae2f3a6b9474c6dd90e4987078532bcf
   * finagle-core: Removed "closechans" and "closed" counters from `ChannelStatsHandler`.
     ``RB_ID=835194``
-=======
+
+  * finagle-core: Removed the "load" gauge from `StatsFilter` as it was duplicated
+    by the "pending" gauge. ``RB_ID=835199``
+
   * finagle-core: `c.t.finagle.NoStacktrace` is removed. Use `scala.util.control.NoStackTrace`
     instead. ``RB_ID=833188``
 
   * finagle-core: `c.t.finagle.Failure.withStackTrace` is removed. Use system property
     `scala.control.noTraceSuppression` instead to fill stacktraces in Finagle's failures.
     ``RB_ID=833188``
->>>>>>> source: NoStacktrace is dead. Long live NoStackTrace
 
-  * finagle-core: Removed the "load" gauge from `StatsFilter` as it was duplicated
-    by the "pending" gauge. ``RB_ID=835199``
+  * finagle-thrift: As part of the migration off of `Codec`, remove
+    `c.t.f.thrift.ThriftClientBufferedCodec` and `c.t.f.thrift.ThriftClientBufferedCodecFactory`
+    which were used by `ClientBuilder.codec` and `ServerBuilder.codec`. Replace usage
+    with `ClientBuilder.stack(Thrift.client.withBufferedTransport)`
+    or `ServerBuilder.stack(Thrift.server.withBufferedTransport)`. ``RB_ID=838146``
 
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
