@@ -723,6 +723,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client.withSessionPool.maxSize(value)
    * }}}
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
     configured(params[DefaultPool.Param].copy(high = value))
@@ -737,6 +741,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client.withSessionPool.minSize(value)
    * }}}
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionCoresize(value: Int): This =
     configured(params[DefaultPool.Param].copy(low = value))
@@ -745,6 +753,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The amount of time a connection is allowed to linger (when it
    * otherwise would have been closed by the pool) before being
    * closed.
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionIdleTime(timeout: Duration): This =
     configured(params[DefaultPool.Param].copy(idleTime = timeout))
@@ -759,6 +771,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client.withSessionPool.maxWaiters(nWaiters)
    * }}}
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionMaxWaiters(nWaiters: Int): This =
     configured(params[DefaultPool.Param].copy(maxWaiters = nWaiters))
@@ -801,6 +817,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * @note This will be integrated into the mainline pool, at
    * which time the experimental option will go away.
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def expHostConnectionBufferSize(size: Int): This =
     configured(params[DefaultPool.Param].copy(bufferSize = size))

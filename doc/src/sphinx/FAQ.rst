@@ -226,8 +226,7 @@ which exposes new stats:
 Certain `ClientBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder>`_
 settings related to connection pooling become obsolete:
 ``hostConnectionCoresize``, ``hostConnectionLimit``, ``hostConnectionIdleTime``,
-``hostConnectionMaxWaiters``, ``hostConnectionMaxIdleTime``,
-``hostConnectionMaxLifeTime``, and ``hostConnectionBufferSize``
+``hostConnectionMaxWaiters``, and ``expHostConnectionBufferSize``
 
 *Server Connection Stats*
 

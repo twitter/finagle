@@ -591,6 +591,10 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
   def hostConnectionMaxLifeTime(howlong: Duration): This =
     configured(params[ExpiringService.Param].copy(lifeTime = howlong))
 
+  /**
+   * @note not all protocol implementations support this, such as
+   *       `com.twitter.finagle.ThriftMux`.
+   */
   def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
     configured(IdleConnectionFilter.Param(Some(thresholds)))
 
