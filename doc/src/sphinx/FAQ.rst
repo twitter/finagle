@@ -246,5 +246,7 @@ connection management settings become obsolete: ``openConnectionsThresholds``,
 What is ThriftMux?
 ~~~~~~~~~~~~~~~~~~
 
+.. _whats_thriftmux:
+
 `ThriftMux <http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$>`_
 is an implementation of the Thrift protocol built on top of Mux.

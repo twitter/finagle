@@ -16,7 +16,7 @@ extensions = ['sphinx.ext.extlinks', 'includecode']
 templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
-exclude_patterns = ['metrics/*']
+exclude_patterns = ['metrics/*', 'shared-modules/*']
 
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']

@@ -116,10 +116,10 @@ Breaking API Changes
   * finagle-redis: Deprecated ChannelBuffer exposing apis for string commands. ``RB_ID=817766``.
 
   * finagle-core: DefaultClient has been removed. Implementors should prefer `c.t.f.StackClient`
-  ``RB_ID=812681``.
+    ``RB_ID=812681``.
 
   * finagle-core: When a client is created, its server set resolution is started eagerly.
-  ``RB_ID=806940``
+    ``RB_ID=806940``
 
   * finagle-core: Dentry now takes a Dentry.Prefix instead of a Path. ``RB_ID=813914``
 
@@ -260,7 +260,7 @@ Breaking API Changes
     use `c.t.f.service.exp.FailureAccrualPolicy` instead.
 
   * finagle-core: DefaultServer is removed. Protocol implementors should use StackServer instead.
-  ``RB_ID=811918``
+    ``RB_ID=811918``
 
   * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
     pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``
