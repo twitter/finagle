@@ -63,6 +63,9 @@ Breaking API Changes
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-core: PipeliningDispatcher now serializes "write and enqueue Promise" so it's no longer
+    possible for the wrong response to be given to a request. ``RB_ID=834927``
+
   * finagle-http: Servers which aggregate content chunks (streaming == false) now return a 413
     response for streaming clients who exceed the servers' configured max request size.
     ``RB_ID=828741``
