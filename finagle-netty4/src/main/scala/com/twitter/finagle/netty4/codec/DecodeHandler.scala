@@ -23,9 +23,9 @@ private[netty4] class DecodeHandler[In](
 
   private[this] val DecoderKey = AttributeKey.valueOf[FrameDecoder[In]]("frame_decoder")
 
-  override def channelActive(ctx: ChannelHandlerContext): Unit = {
+  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
     ctx.attr(DecoderKey).set(decoderFactory())
-    super.channelActive(ctx)
+    super.handlerAdded(ctx)
   }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
