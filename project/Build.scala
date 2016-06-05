@@ -20,7 +20,6 @@ object Finagle extends Build {
   val libthriftVersion = "0.5.0-1"
   val netty4Version = "4.1.0.CR7"
 
-  val commonsCodecLib = "commons-codec" % "commons-codec" % "1.9"
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
@@ -258,7 +257,6 @@ object Finagle extends Build {
       util("logging"),
       util("registry"),
       util("stats"),
-      commonsCodecLib,
       guavaLib,
       nettyLib)
   )
@@ -351,7 +349,6 @@ object Finagle extends Build {
     name := "finagle-serversets",
     fork in Test := true,
     libraryDependencies ++= Seq(
-      commonsCodecLib,
       util("cache"),
       util("zk-common"),
       util("zk-test") % "test",
