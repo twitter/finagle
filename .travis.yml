@@ -1,60 +1,75 @@
-# This is necessary until https://github.com/travis-ci/travis-ci/issues/3120 is
-# fixed
-sudo: required
+# container-based build
+sudo: false
 
 language: scala
+
+env:
+  - JAVA_OPTS="-Xmx4G -DSKIP_FLAKY=1"
 
 # These directories are cached to S3 at the end of the build
 cache:
   directories:
-   - $HOME/.ivy2/cache
+   - $HOME/.m2
+   - $HOME/.ivy2
    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+   - $HOME/.gitshas
 
 scala:
-  - 2.10.5
-  - 2.11.6
+  - 2.11.8
 
 jdk:
-  - oraclejdk7
-  # Note: not currently testing on JDK 8 internally
   - oraclejdk8
-  - openjdk7
+
+notifications:
+  hipchat:
+    rooms:
+      secure: UlvjA1u/K7a/ykVt9hfRksqI5coq9k5fFqpeGCcEmqPOyrkOnCLj21xHHB16SzUfwy3pqjVK+B8kWORB9zaNyalHZm6I11Ba1hfmPXWemH/qA972IN/hdAQxnMVhhnWqJPzuoVlW7WAFxwltPTbAwDMzIczmsyMv+rCc2Xffiks=
 
 before_script:
   # default $SBT_OPTS is irrelevant to sbt lancher
   - unset SBT_OPTS
-  - ./bin/travisci
-  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION update
+  - mkdir -p $HOME/.gitshas
+  - env GIT_SHA_DIR=$HOME/.gitshas ./bin/travisci
+  - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
+  - >
+    if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
+      ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/update
+    fi
 
 script:
   # don't test these projects because they don't pass on travis-ci
-  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcachedx/test:compile
+  - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
   # run conditionally because they don't pass with openjdks
-  - if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-native/test; fi
+  - >
+    if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
+      ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-native/test;
+    fi
 
   # run for all environments
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-commons-stats/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-cacheresolver/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-core/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exception/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exp/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-httpx/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http-compat/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-netty4-http/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http2/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-integration/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-kestrel/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mdns/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mux/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mysql/test
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-netty4/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-ostrich4/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-redis/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-serversets/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-spdy/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stats/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stream/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stress/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-testers/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thrift/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thriftmux/test
   - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-zipkin/test
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
 
-after_success: ./sbt ++$TRAVIS_SCALA_VERSION coveralls
+after_success: ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate coveralls

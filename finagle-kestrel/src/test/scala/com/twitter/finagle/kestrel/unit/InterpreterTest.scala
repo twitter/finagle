@@ -28,7 +28,7 @@ class InterpreterTest extends FunSuite {
   test("Interpreter should set & get") {
     new InterpreterHelper {
       interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
-      assert(interpreter(Get(Buf.Utf8("name"))) ===
+      assert(interpreter(Get(Buf.Utf8("name"))) ==
         Values(Seq(Value(Buf.Utf8("name"), Buf.Utf8("rawr")))))
     }
   }
@@ -55,29 +55,29 @@ class InterpreterTest extends FunSuite {
   test("Interpreter: transactions should set & get/open & get/close") {
     new InterpreterHelper {
       interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
-      assert(interpreter(Open(Buf.Utf8("name"))) ===
+      assert(interpreter(Open(Buf.Utf8("name"))) ==
         Values(Seq(Value(Buf.Utf8("name"), Buf.Utf8("rawr")))))
-      assert(interpreter(Close(Buf.Utf8("name"))) === Values(Seq()))
-      assert(interpreter(Open(Buf.Utf8("name"))) === Values(Seq()))
+      assert(interpreter(Close(Buf.Utf8("name"))) == Values(Seq()))
+      assert(interpreter(Open(Buf.Utf8("name"))) == Values(Seq()))
     }
   }
 
   test("Interpreter: transactions should set & get/open & get/abort") {
     new InterpreterHelper {
       interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
-      assert(interpreter(Open(Buf.Utf8("name"))) ===
+      assert(interpreter(Open(Buf.Utf8("name"))) ==
         Values(Seq(Value(Buf.Utf8("name"), Buf.Utf8("rawr")))))
-      assert(interpreter(Abort(Buf.Utf8("name"))) === Values(Seq()))
-      assert(interpreter(Open(Buf.Utf8("name"))) ===
+      assert(interpreter(Abort(Buf.Utf8("name"))) == Values(Seq()))
+      assert(interpreter(Open(Buf.Utf8("name"))) ==
         Values(Seq(Value(Buf.Utf8("name"), Buf.Utf8("rawr")))))
     }
   }
 
   test("Interpreter: timeouts: set & get/t=1") {
     new InterpreterHelper {
-      assert(interpreter(Get(Buf.Utf8("name"), Some(1.millisecond))) === Values(Seq()))
+      assert(interpreter(Get(Buf.Utf8("name"), Some(1.millisecond))) == Values(Seq()))
       interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
-      assert(interpreter(Get(Buf.Utf8("name"), Some(1.second))) === Values(Seq(Value(Buf.Utf8("name"), Buf.Utf8("rawr")))))
+      assert(interpreter(Get(Buf.Utf8("name"), Some(1.second))) == Values(Seq(Value(Buf.Utf8("name"), Buf.Utf8("rawr")))))
     }
   }
 
@@ -85,7 +85,7 @@ class InterpreterTest extends FunSuite {
     new InterpreterHelper {
       interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
       interpreter(Delete(Buf.Utf8("name")))
-      assert(interpreter(Get(Buf.Utf8("name"))) === Values(Seq.empty))
+      assert(interpreter(Get(Buf.Utf8("name"))) == Values(Seq.empty))
     }
   }
 
@@ -93,7 +93,7 @@ class InterpreterTest extends FunSuite {
     new InterpreterHelper {
       interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
       interpreter(Flush(Buf.Utf8("name")))
-      assert(interpreter(Get(Buf.Utf8("name"))) === Values(Seq.empty))
+      assert(interpreter(Get(Buf.Utf8("name"))) == Values(Seq.empty))
     }
   }
 
@@ -101,7 +101,7 @@ class InterpreterTest extends FunSuite {
     new InterpreterHelper {
       interpreter(Set(Buf.Utf8("name"), Time.now, Buf.Utf8("rawr")))
       interpreter(FlushAll())
-      assert(interpreter(Get(Buf.Utf8("name"))) === Values(Seq.empty))
+      assert(interpreter(Get(Buf.Utf8("name"))) == Values(Seq.empty))
     }
   }
 }

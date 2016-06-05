@@ -44,9 +44,9 @@ object ExitGuard {
     synchronized {
       guards match {
         case Some((thread, gs)) =>
-          guards = Some(thread, guard :: gs)
+          guards = Some((thread, guard :: gs))
         case None =>
-          guards = Some(startGuardThread(), List(guard))
+          guards = Some((startGuardThread(), List(guard)))
       }
       updateName()
     }

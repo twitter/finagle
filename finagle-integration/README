@@ -1,0 +1,2 @@
+The finagle-integration package is a collection of tests which apply across
+multiple finagle protocol implementations.

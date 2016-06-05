@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-ostrich4',
   dependencies=[
     'finagle/finagle-ostrich4/src/main/scala'

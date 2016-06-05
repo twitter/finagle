@@ -1,11 +1,9 @@
 package com.twitter.finagle.http
 
 import com.twitter.finagle.util.LoadService
-import com.twitter.finagle.{Filter, Service}
+import com.twitter.finagle.Service
 import com.twitter.util.Future
 import java.util.logging.Logger
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
-  HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 
 /**
  * A service that dispatches incoming requests to registered handlers.
@@ -24,35 +22,31 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders,
  *
  *  NOTE: When multiple pattern matches exist, the longest pattern wins.
  */
-class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, HttpResponse])])
-  extends Service[HttpRequest, HttpResponse] {
+class HttpMuxer(protected[this] val handlers: Seq[(String, Service[Request, Response])])
+  extends Service[Request, Response] {
 
-  def this() = this(Seq[(String, Service[HttpRequest, HttpResponse])]())
+  def this() = this(Seq[(String, Service[Request, Response])]())
 
-  private[this] val sorted: Seq[(String, Service[HttpRequest, HttpResponse])] =
-    (handlers.sortBy { case (pattern, _) => pattern.length }).reverse
+  private[this] val sorted: Seq[(String, Service[Request, Response])] =
+    handlers.sortBy { case (pattern, _) => pattern.length }.reverse
 
-  def patterns = sorted map { case(p, _) => p }
+  def patterns: Seq[String] = sorted map { case(p, _) => p }
 
   /**
    * Create a new Mux service with the specified pattern added. If the pattern already exists, overwrite existing value.
    * Pattern ending with "/" indicates prefix matching; otherwise exact matching.
    */
-  def withHandler(pattern: String, service: Service[HttpRequest, HttpResponse]): HttpMuxer = {
+  def withHandler(pattern: String, service: Service[Request, Response]): HttpMuxer = {
     val norm = normalize(pattern)
-    new HttpMuxer(handlers.filterNot { case (pat, _) => pat == norm } :+ (norm, service))
+    new HttpMuxer(handlers.filterNot { case (pat, _) => pat == norm } :+ ((norm, service)))
   }
 
   /**
-   * Extract path from HttpRequest; look for a matching pattern; if found, dispatch the
-   * HttpRequest to the registered service; otherwise create a NOT_FOUND response
+   * Extract path from Request; look for a matching pattern; if found, dispatch the
+   * Request to the registered service; otherwise create a NOT_FOUND response
    */
-  def apply(request: HttpRequest): Future[HttpResponse] = {
-    val uri = request.getUri
-    val path = normalize(uri.indexOf('?') match {
-      case -1 => uri
-      case n => uri.substring(0, n)
-    })
+  def apply(request: Request): Future[Response] = {
+    val path = normalize(request.path)
 
     // find the longest pattern that matches (the patterns are already sorted)
     val matching = sorted.find { case (pattern, _) =>
@@ -66,10 +60,7 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
 
     matching match {
       case Some((_, service)) => service(request)
-      case None =>
-        val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND)
-        response.headers.set(HttpHeaders.Names.CONTENT_LENGTH, 0.toString)
-        Future.value(response)
+      case None => Future.value(Response(request.version, Status.NotFound))
     }
   }
 
@@ -87,29 +78,27 @@ class HttpMuxer(protected[this] val handlers: Seq[(String, Service[HttpRequest, 
 }
 
 /**
- * Singleton default multiplex service
+ * Singleton default multiplex service.
+ *
+ * @see [[HttpMuxers]] for Java compatibility APIs.
  */
-object HttpMuxer extends Service[HttpRequest, HttpResponse] {
+object HttpMuxer extends Service[Request, Response] {
   @volatile private[this] var underlying = new HttpMuxer()
-  override def apply(request: HttpRequest): Future[HttpResponse] =
+
+  override def apply(request: Request): Future[Response] =
     underlying(request)
 
   /**
    * add handlers to mutate dispatching strategies.
    */
-  def addHandler(pattern: String, service: Service[HttpRequest, HttpResponse]) = synchronized {
+  def addHandler(pattern: String, service: Service[Request, Response]): Unit = synchronized {
     underlying = underlying.withHandler(pattern, service)
   }
 
-  private[this] val nettyToFinagle =
-    Filter.mk[HttpRequest, HttpResponse, Request, Response] { (req, service) =>
-      service(Request(req)) map { _.httpResponse }
-    }
+  def addRichHandler(pattern: String, service: Service[Request, Response]): Unit =
+    addHandler(pattern, service)
 
-  def addRichHandler(pattern: String, service: Service[Request, Response]) =
-    addHandler(pattern, nettyToFinagle andThen service)
-
-  def patterns = underlying.patterns
+  def patterns: Seq[String] = underlying.patterns
 
   private[this] val log = Logger.getLogger(getClass.getName)
 
@@ -120,9 +109,22 @@ object HttpMuxer extends Service[HttpRequest, HttpResponse] {
 }
 
 /**
+ * Java compatibility APIs for [[HttpMuxer]].
+ */
+object HttpMuxers {
+
+  /** See [[HttpMuxer.apply]] */
+  def apply(request: Request): Future[Response] = HttpMuxer(request)
+
+  /** See [[HttpMuxer.patterns]] */
+  def patterns: Seq[String] = HttpMuxer.patterns
+
+}
+
+/**
  * Trait HttpMuxHandler is used for service-loading HTTP handlers.
  */
-trait HttpMuxHandler extends Service[HttpRequest, HttpResponse] {
-  /** The pattern on to bind this handler to */
+trait HttpMuxHandler extends Service[Request, Response] {
+  /** The pattern that this handler gets bound to */
   val pattern: String
 }

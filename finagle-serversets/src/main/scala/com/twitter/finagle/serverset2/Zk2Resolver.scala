@@ -2,13 +2,19 @@ package com.twitter.finagle.serverset2
 
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, InetResolver, Resolver}
+import com.twitter.finagle.addr.WeightedAddress
+import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
+import com.twitter.finagle.serverset2.addr.ZkMetadata
+import com.twitter.finagle.{FixedInetResolver, Addr, Resolver}
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Activity, Closable, Future, Memoize, Var, Witness}
+import com.twitter.logging.Logger
+import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 
 object chatty extends GlobalFlag(false, "Log resolved ServerSet2 addresses")
+
+object dnsCacheSize extends GlobalFlag(16000L, "Maximum size of DNS resolution cache")
 
 private[serverset2] object eprintf {
   def apply(fmt: String, xs: Any*) = System.err.print(fmt.format(xs: _*))
@@ -30,6 +36,15 @@ private[serverset2] object Zk2Resolver {
     case Addr.Bound(set, _) => set.size
     case _ => 0
   }
+
+  /**
+   * The prefix to use for scoping stats of a ZK ensemble. The input
+   * string can be a long vip or coma separated set. The function keeps
+   * the first two components of the first hostname. Take at most 30
+   * characters out of that.
+   */
+  def statsOf(hostname: String): String =
+    hostname.takeWhile(_ != ',').split('.').take(2).mkString(".").take(30)
 }
 
 /**
@@ -37,28 +52,48 @@ private[serverset2] object Zk2Resolver {
  *
  * Resolution is achieved by looking up registered ServerSet paths within a
  * service discovery ZooKeeper cluster. See `Zk2Resolver.bind` for details.
+ *
+ * @param statsReceiver: maintains stats and gauges used in resolution
+ * @param removalWindow: how long a member stays in limbo before it is removed from a ServerSet
+ * @param batchWindow: how long do we batch up change notifications before finalizing a ServerSet
+ * @param unhealthyWindow: how long must the zk client be unhealthy for us to report before
+ *                       reporting trouble
+ * @param timer: timer to use for stabilization and zk sessions
  */
-class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
+class Zk2Resolver(
+    statsReceiver: StatsReceiver,
+    removalWindow: Duration,
+    batchWindow: Duration,
+    unhealthyWindow: Duration,
+    timer: Timer = DefaultTimer.twitter)
+  extends Resolver {
   import Zk2Resolver._
 
-  def this() = this(DefaultStatsReceiver.scope("zk2"))
+  def this() = this(DefaultStatsReceiver.scope("zk2"), 40.seconds, 5.seconds, 5.minutes, DefaultTimer.twitter)
+
+  def this(statsReceiver: StatsReceiver) =
+    this(statsReceiver, 40.seconds, 5.seconds, 5.minutes, DefaultTimer.twitter)
 
   val scheme = "zk2"
 
-  private[this] implicit val injectTimer = DefaultTimer.twitter
+  private[this] implicit val injectTimer = timer
 
-  private[this] val inetResolver = InetResolver(statsReceiver)
+  private[this] val inetResolver = FixedInetResolver(statsReceiver, dnsCacheSize())
   private[this] val sessionTimeout = 10.seconds
-  private[this] val epoch = Stabilizer.epochs(sessionTimeout*4)
+  private[this] val removalEpoch = Epoch(removalWindow)
+  private[this] val batchEpoch = Epoch(batchWindow)
+  private[this] val unhealthyEpoch = Epoch(unhealthyWindow)
   private[this] val nsets = new AtomicInteger(0)
+  private[this] val logger = Logger(getClass)
 
   // Cache of ServiceDiscoverer instances.
   private[this] val discoverers = Memoize.snappable[String, ServiceDiscoverer] { hosts =>
+    val retryStream = RetryStream()
     val varZkSession = ZkSession.retrying(
-      ServiceDiscoverer.DefaultRetrying,
-      () => ZkSession(hosts, sessionTimeout = sessionTimeout)
+      retryStream,
+      () => ZkSession(retryStream, hosts, sessionTimeout = sessionTimeout, statsReceiver)
     )
-    new ServiceDiscoverer(varZkSession, statsReceiver)
+    new ServiceDiscoverer(varZkSession, statsReceiver.scope(statsOf(hosts)), unhealthyEpoch, timer)
   }
 
   private[this] val gauges = Seq(
@@ -86,7 +121,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
     case (discoverer, path, endpointOption) =>
       val scoped = {
         val sr =
-          path.split("/").filter(_.nonEmpty).foldLeft(statsReceiver) {
+          path.split("/").filter(_.nonEmpty).foldLeft(discoverer.statsReceiver) {
             case (sr, ns) => sr.scope(ns)
           }
         sr.scope(s"endpoint=${endpointOption.getOrElse("default")}")
@@ -103,15 +138,17 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
       // First, convert the Op-based serverset address to a
       // Var[Addr], filtering out only the endpoints we are
       // interested in.
-      val va: Var[Addr] = serverSetOf(discoverer, path).flatMap {
+      val va: Var[Addr] = serverSetOf((discoverer, path)).flatMap {
         case Activity.Pending => Var.value(Addr.Pending)
         case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
         case Activity.Ok(eps) =>
           val endpoint = endpointOption.getOrElse(null)
           val subseq = eps collect {
-            case (Endpoint(names, host, port, _, Endpoint.Status.Alive, _), weight)
+            case (Endpoint(names, host, port, shardId, Endpoint.Status.Alive, _), weight)
                 if names.contains(endpoint) && host != null =>
-              (host, port, weight)
+              val shardIdOpt = if (shardId == Int.MinValue) None else Some(shardId)
+              val metadata = ZkMetadata.toAddrMetadata(ZkMetadata(shardIdOpt))
+              (host, port, metadata + (WeightedAddress.weightKey -> weight))
           }
 
           if (chatty()) {
@@ -119,17 +156,18 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
           }
 
           if (subseq.isEmpty) Var.value(Addr.Neg)
-          else inetResolver.bindWeightedHostPortsToAddr(subseq)
+          else inetResolver.bindHostPortsToAddr(subseq)
       }
 
-      // The stabilizer ensures that we qualify removals by putting
-      // them in a limbo state for at least one epoch.
-      val stabilized = Stabilizer(va, epoch)
+      // The stabilizer ensures that we qualify changes by putting
+      // removes in a limbo state for at least one removalEpoch, and emitting
+      // at most one update per batchEpoch.
+      val stabilized = Stabilizer(va, removalEpoch, batchEpoch)
 
       // Finally we output `State`s, which are always nonpending
       // address coupled with statistics from the stabilization
       // process.
-      val states = (stabilized.changes joinLast va.changes) collect {
+      val states = stabilized.changes.joinLast(va.changes) collect {
         case (stable, unstable) if stable != Addr.Pending =>
           val nstable = sizeOf(stable)
           val nunstable = sizeOf(unstable)
@@ -143,7 +181,9 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
         // stable Addr doesn't vary.
         var lastu: Addr = Addr.Pending
 
-        val reg = states.register(Witness { state: State =>
+        val reg = (discoverer.health.changes joinLast states).register(Witness { tuple =>
+          val (clientHealth, state) = tuple
+
           if (chatty()) {
             eprintf("New state for %s!%s: %s\n",
               path, endpointOption getOrElse "default", state)
@@ -153,9 +193,17 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
             val State(addr, _nlimbo, _size) = state
             nlimbo = _nlimbo
             size = _size
-            if (lastu != addr) {
-              lastu = addr
-              u() = addr
+
+            val newAddr =
+              if (clientHealth == ClientHealth.Unhealthy) {
+                logger.info("ZkResolver reports unhealthy. resolution moving to Addr.Pending")
+                Addr.Pending
+              }
+              else addr
+
+            if (lastu != newAddr) {
+              lastu = newAddr
+              u() = newAddr
             }
           }
         })
@@ -188,7 +236,7 @@ class Zk2Resolver(statsReceiver: StatsReceiver) extends Resolver {
    * Construct a Var[Addr] from the components of a ServerSet path.
    */
   private[twitter] def addrOf(hosts: String, path: String, endpoint: Option[String]): Var[Addr] =
-    addrOf_(mkDiscoverer(hosts), path, endpoint)
+    addrOf_((mkDiscoverer(hosts), path, endpoint))
 
   /**
    * Bind a string into a variable address using the zk2 scheme.

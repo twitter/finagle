@@ -38,7 +38,7 @@ html_show_sphinx = False
 html_style = 'finagle.css'
 
 project = u'Finagle'
-copyright = u'2014 Twitter, Inc'
+copyright = u'2016 Twitter, Inc'
 htmlhelp_basename = "finagle"
 release = sbt_versions.find_release(os.path.abspath('../../../project/Build.scala'))
 version = sbt_versions.release_to_version(release)
@@ -49,6 +49,11 @@ extlinks = {
   'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example '),
   'api': ('http://twitter.github.io/finagle/docs/#%s', ''),
   'util': ('http://twitter.github.io/util/docs/#%s', ''),
+  'util-stats-src':("https://github.com/twitter/util/blob/master/util-stats/src/main/scala/%s", 'util-stats github repo'),
+  'util-core-src':("https://github.com/twitter/util/blob/master/util-core/src/main/scala/%s", 'util-core github repo'),
+  'finagle-mux-src':("https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/%s", 'finagle-mux github repo'),
+  'finagle-http-src':("https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/%s", 'finagle-http github repo'),
+  'finagle-thriftmux-src':("https://github.com/twitter/finagle/blob/master/finagle-thriftmux/src/main/scala/%s", 'finagle-thriftmux github repo'),
   'src':("https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/%s", 'finagle-core github repo')
 }
 

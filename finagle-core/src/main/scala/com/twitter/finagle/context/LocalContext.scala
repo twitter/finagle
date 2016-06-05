@@ -7,4 +7,9 @@ package com.twitter.finagle.context
  */
 class LocalContext extends Context {
   class Key[A]
+
+  /**
+   * A java-friendly key constructor.
+   */
+  def newKey[A]() = new Key[A]
 }

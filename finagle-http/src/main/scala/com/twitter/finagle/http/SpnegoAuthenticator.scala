@@ -1,6 +1,5 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.netty.HttpRequestProxy
 import com.twitter.finagle.{Service, Filter}
 import com.twitter.util.{Base64StringEncoder, Future, FuturePool, Return}
 import com.twitter.logging.Logger
@@ -8,15 +7,6 @@ import java.security.PrivilegedAction
 import javax.security.auth.Subject
 import javax.security.auth.login.LoginContext
 import org.ietf.jgss._
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.{
-  HttpRequest,
-  HttpResponse,
-  HttpHeaders,
-  HttpVersion,
-  DefaultHttpResponse
-}
-import scala.collection.JavaConverters._
 
 /**
  * A SPNEGO HTTP authenticator as defined in https://tools.ietf.org/html/rfc4559, which gets
@@ -57,15 +47,7 @@ object SpnegoAuthenticator {
   }
 
   object Authenticated {
-    case class Http(httpRequest: HttpRequest, context: GSSContext)
-         extends HttpRequestProxy
-         with Authenticated[HttpRequest] {
-      val request = httpRequest
-    }
-
-    case class RichHttp(request: Request, context: GSSContext)
-         extends RequestProxy
-         with Authenticated[Request]
+    case class Http(request: Request, context: GSSContext) extends Authenticated[Request]
   }
 
   case class Negotiated(
@@ -202,64 +184,55 @@ object SpnegoAuthenticator {
     }
   }
 
-  /** A typeclass to get/set fields of http responses of type Rsp. */
+  /**
+   * A typeclass to get/set fields of http responses of type Rsp.
+   * TODO: Remove after http and http are merged
+   */
   sealed trait RspSupport[Rsp] {
     /** Get the status for the Rsp. */
-    def status(rsp: Rsp): Status.Type
+    def status(rsp: Rsp): Status
     /** Get the WWW-Authenticate: Negotiate <token> header. */
     def wwwAuthenticateHeader(rsp: Rsp): Option[String]
     /** Sets the WWW-Authenticate: Negotiate <token> header. */
     def wwwAuthenticateHeader(rsp: Rsp, auth: String): Unit
     /** Create an Unauthorized response with the given protocolVersion. */
-    def unauthorized(version: HttpVersion): Rsp
+    def unauthorized(version: Version): Rsp
   }
 
-  /** A typeclass to get/set fields of http requests of type Req. */
+  /**
+   * A typeclass to get/set fields of http requests of type Req.
+   * TODO: Remove after http and http are merged
+   */
   sealed trait ReqSupport[Req] {
     /** Returns the AUTHORIZATION header for the given Req. */
     def authorizationHeader(req: Req): Option[String]
     /** Sets the AUTHORIZATION header for the given Req. */
     def authorizationHeader(req: Req, token: Token): Unit
     /** Get the protocol version for a request. */
-    def protocolVersion(req: Req): HttpVersion
+    def protocolVersion(req: Req): Version
     /** Wrap a Req with authentication information. */
     def authenticated(req: Req, context: GSSContext): Authenticated[Req]
   }
 
-  implicit val httpResponseSupport = new RspSupport[HttpResponse] {
-    def status(rsp: HttpResponse) = rsp.getStatus
-    def wwwAuthenticateHeader(rsp: HttpResponse) =
-      Option(rsp.headers.get(HttpHeaders.Names.WWW_AUTHENTICATE))
-    def wwwAuthenticateHeader(rsp: HttpResponse, auth: String) =
-      rsp.headers.set(HttpHeaders.Names.WWW_AUTHENTICATE, auth)
-    def unauthorized(version: HttpVersion) = new DefaultHttpResponse(version, Status.Unauthorized)
-  }
-
-  implicit val httpRequestSupport = new ReqSupport[HttpRequest] {
-    def authorizationHeader(req: HttpRequest) =
-      Option(req.headers.get(HttpHeaders.Names.AUTHORIZATION))
-    def authorizationHeader(req: HttpRequest, token: Token) =
-      AuthHeader(Some(token)).foreach { header =>
-        req.headers.set(HttpHeaders.Names.AUTHORIZATION, header)
-      }
-    def protocolVersion(req: HttpRequest) = req.getProtocolVersion
-    def authenticated(req: HttpRequest, context: GSSContext) =
-      Authenticated.Http(req, context)
-  }
-
-  implicit val httpRichResponseSupport = new RspSupport[Response] {
+  implicit val httpResponseSupport = new RspSupport[Response] {
     def status(rsp: Response) = rsp.status
-    def wwwAuthenticateHeader(rsp: Response) = rsp.authorization
-    def wwwAuthenticateHeader(rsp: Response, auth: String) = { rsp.wwwAuthenticate = auth }
-    def unauthorized(version: HttpVersion) = Response(version, Status.Unauthorized)
+    def wwwAuthenticateHeader(rsp: Response) =
+      Option(rsp.headers.get(Fields.WwwAuthenticate))
+    def wwwAuthenticateHeader(rsp: Response, auth: String) =
+      rsp.headers.set(Fields.WwwAuthenticate, auth)
+    def unauthorized(version: Version) =  Response(version, Status.Unauthorized)
   }
 
-  implicit val httpRichRequestSupport = new ReqSupport[Request] {
-    def authorizationHeader(req: Request) = req.authorization
+  implicit val httpRequestSupport = new ReqSupport[Request] {
+    def authorizationHeader(req: Request) =
+      Option(req.headers.get(Fields.Authorization))
     def authorizationHeader(req: Request, token: Token) =
-      AuthHeader(Some(token)).foreach { header => req.authorization = header }
+      AuthHeader(Some(token)).foreach { header =>
+        req.headers.set(Fields.Authorization, header)
+      }
     def protocolVersion(req: Request) = req.version
-    def authenticated(req: Request, context: GSSContext) = Authenticated.RichHttp(req, context)
+    def authenticated(req: Request, context: GSSContext) =
+      Authenticated.Http(req, context)
   }
 
   sealed abstract class Client[Req: ReqSupport, Rsp: RspSupport]
@@ -344,14 +317,9 @@ object SpnegoAuthenticator {
   }
 
   case class ClientFilter(credSrc: Credentials.ClientSource)
-      extends Client[HttpRequest,HttpResponse]
-
-  case class RichClientFilter(credSrc: Credentials.ClientSource)
-      extends Client[Request,Response]
+      extends Client[Request, Response]
 
   case class ServerFilter(credSrc: Credentials.ServerSource)
-      extends Server[HttpRequest,HttpResponse]
+      extends Server[Request,  Response]
 
-  case class RichServerFilter(credSrc: Credentials.ServerSource)
-      extends Server[Request,Response]
 }

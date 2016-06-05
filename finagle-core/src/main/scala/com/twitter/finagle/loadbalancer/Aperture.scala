@@ -1,25 +1,19 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{Rng, Ring, Ema, DefaultTimer}
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.{Rng, Ring, Ema}
 import com.twitter.finagle.{
   ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy,
   ServiceProxy, Status}
-import com.twitter.util.{Activity, Return, Future, Throw, Time, Var, Duration, Timer}
+import com.twitter.util.{Activity, Return, Future, Throw, Time, Duration, Timer}
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.logging.Logger
 
 /**
  * The aperture load-band balancer balances load to the smallest
- * subset ("aperture") of services so that:
- *
- *  1. The concurrent load, measured over a window specified by
- *     `smoothWin`, to each service stays within the load band, delimited
- *     by `lowLoad` and `highLoad`.
- *  2. Services receive load proportional to the ratio of their
- *     weights.
+ * subset ("aperture") of services so that the concurrent load to each service,
+ * measured over a window specified by `smoothWin`, stays within the
+ * load band delimited by `lowLoad` and `highLoad`.
  *
  * Unavailable services are not counted--the aperture expands as
  * needed to cover those that are available.
@@ -45,8 +39,8 @@ import java.util.logging.Logger
  *     arranges load in a manner that ensures a higher level of per-service
  *     concurrency.
  */
-private class ApertureLoadBandBalancer[Req, Rep](
-    protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
+private[loadbalancer] class ApertureLoadBandBalancer[Req, Rep](
+    protected val activity: Activity[Traversable[ServiceFactory[Req, Rep]]],
     protected val smoothWin: Duration,
     protected val lowLoad: Double,
     protected val highLoad: Double,
@@ -59,13 +53,21 @@ private class ApertureLoadBandBalancer[Req, Rep](
   extends Balancer[Req, Rep]
   with Aperture[Req, Rep]
   with LoadBand[Req, Rep]
-  with Updating[Req, Rep]
+  with Updating[Req, Rep] {
+
+  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+
+}
 
 object Aperture {
+  // Note, we need to have a non-zero range for each node
+  // in order for Ring.pick2 to pick distinctly. That is,
+  // `RingWidth` should be wider than the number of slices
+  // in the ring.
   private val RingWidth = Int.MaxValue
 
   // Ring that maps to 0 for every value.
-  private val ZeroRing = Ring.fromWeights(Seq(1), RingWidth)
+  private val ZeroRing = Ring(1, RingWidth)
 }
 
 /**
@@ -74,14 +76,8 @@ object Aperture {
  * control mechanism so that a controller can adjust the aperture
  * according to load conditions.
  *
- * The window contains a number of discrete serving units, each of
- * which corresponds to the serving capacity represented by a unit
- * weight. Thus a single serving unit may be half of a node with
- * weight=2, or two nodes with weight=0.5. This arrangement allows
- * the aperture distributor to maintain the weight contract: in
- * aggregate, endpoints are assigned loads according to their weight
- * and the current load metric. No load metric is prescribed: this
- * can be mixed in separately.
+ * The window contains a number of discrete serving units, one for each
+ * node. No load metric is prescribed: this can be mixed in separately.
  *
  * The underlying nodes are arranged in a consistent fashion: an
  * aperture of a given size always refers to the same set of nodes; a
@@ -89,7 +85,7 @@ object Aperture {
  * harmless to adjust apertures frequently, since underlying nodes
  * are typically backed by pools, and will be warm on average.
  */
-private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
+private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   import Aperture._
 
   protected def rng: Rng
@@ -99,15 +95,17 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
    */
   protected def minAperture: Int
 
-  private[this] val nodeUp: Node => Boolean =
-    { node => node.status == Status.Open && node.weight > 0 }
+  private[this] val nodeUp: Node => Boolean = { node =>
+    node.status == Status.Open
+  }
 
   private[this] val gauge = statsReceiver.addGauge("aperture") { aperture }
 
   protected class Distributor(val vector: Vector[Node], initAperture: Int)
-    extends DistributorT {
+    extends DistributorT[Node] {
     type This = Distributor
 
+    // Indicates if we've seen any down nodes during pick which we expected to be available
     @volatile private[this] var sawDown = false
 
     private[this] val (up, down) = vector.partition(nodeUp) match {
@@ -119,13 +117,9 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       if (up.isEmpty) {
         (ZeroRing, RingWidth, RingWidth)
       } else {
-        val N = up.size
-        val weights = up.map(_.weight)
-        // We know `sum` can never be zero because
-        // up nodes have a non-zero weight.
-        val sum = weights.sum
-        val ring = Ring.fromWeights(weights, RingWidth)
-        val unit = (RingWidth/sum).toInt
+        val numNodes = up.size
+        val ring = Ring(numNodes, RingWidth)
+        val unit = RingWidth/numNodes
         val max = RingWidth/unit
         (ring, unit, max)
       }
@@ -161,9 +155,6 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       if (up.size == 1)
         return up(0)
 
-      // TODO(marius): return fractional contribution,
-      // so that we can multiply this with the node's
-      // weight.
       val (i, j) = ring.pick2(rng, 0, aperture*unitWidth)
       val a = up(i)
       val b = up(j)
@@ -171,7 +162,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       if (a.status != Status.Open || b.status != Status.Open)
         sawDown = true
 
-      if (a.load/a.weight < b.load/b.weight) a else b
+      if (a.load < b.load) a else b
     }
 
     def needsRebuild: Boolean =
@@ -220,7 +211,7 @@ private trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
  * The upshot is that `lowLoad` and `highLoad` define an acceptable
  * band of load for each serving unit.
  */
-private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, Rep] =>
+private[loadbalancer] trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, Rep] =>
   /**
    * The time-smoothing factor used to compute the capacity-adjusted
    * load. Exponential smoothing is used to absorb large spikes or
@@ -282,23 +273,22 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
 
   protected case class Node(
       factory: ServiceFactory[Req, Rep],
-      weight: Double,
-      counter: AtomicInteger, token: Int)
+      counter: AtomicInteger,
+      token: Int)
     extends ServiceFactoryProxy[Req, Rep](factory)
-    with NodeT {
+    with NodeT[Req, Rep] {
     type This = Node
 
-    def newWeight(weight: Double) = copy(weight=weight)
-    def load = counter.get
-    def pending = counter.get
+    def load: Double = counter.get
+    def pending: Int = counter.get
 
     override def apply(conn: ClientConnection) = {
       adjustNode(this, 1)
-      super.apply(conn) transform {
+      super.apply(conn).transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
             override def close(deadline: Time) =
-              super.close(deadline) ensure {
+              super.close(deadline).ensure {
                 adjustNode(Node.this, -1)
               }
           })
@@ -310,9 +300,10 @@ private trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with Aperture[Req, R
     }
   }
 
-  protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver) =
-    Node(factory, weight, new AtomicInteger(0), rng.nextInt())
+  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) =
+    Node(factory, new AtomicInteger(0), rng.nextInt())
 
   private[this] val failingLoad = new AtomicInteger(0)
-  protected def failingNode(cause: Throwable) = Node(new FailingFactory(cause), 0D, failingLoad, 0)
+  protected def failingNode(cause: Throwable) = Node(
+    new FailingFactory(cause), failingLoad, 0)
 }

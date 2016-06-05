@@ -2,9 +2,10 @@ package com.twitter.finagle
 
 import com.twitter.finagle.util.LoadService
 import com.twitter.util.{Closable, Future, Time}
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
 import java.util.logging.Logger
 import scala.collection.mutable
+import scala.util.control.NoStackTrace
 
 /**
  * Indicates that an [[com.twitter.finagle.Announcer]] was not found for the
@@ -26,7 +27,7 @@ class AnnouncerNotFoundException(scheme: String)
  * libraries on the classpath with conflicting scheme definitions.
  */
 class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer]])
-  extends NoStacktrace
+  extends Exception with NoStackTrace
 {
   override def getMessage = {
     val msgs = announcers map { case (scheme, rs) =>
@@ -40,7 +41,7 @@ class MultipleAnnouncersPerSchemeException(announcers: Map[String, Seq[Announcer
  * Indicates that a forum string passed to an [[com.twitter.finagle.Announcer]]
  * was invalid according to the forum grammar [1].
  *
- * [1] http://twitter.github.io/finagle/guide/Names.html
+ * [1] https://twitter.github.io/finagle/guide/Names.html
  */
 class AnnouncerForumInvalid(forum: String)
   extends Exception("Announcer forum \"%s\" is not valid".format(forum))

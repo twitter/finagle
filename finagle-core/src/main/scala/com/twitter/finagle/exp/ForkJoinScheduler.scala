@@ -1,10 +1,10 @@
 package com.twitter.finagle.exp
 
 import com.twitter.concurrent.{LocalScheduler, Scheduler}
-import com.twitter.finagle.jsr166y.{ForkJoinPool, ForkJoinTask, ForkJoinWorkerThread}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.util.Awaitable.CanAwait
 import com.twitter.util.Monitor
+import java.util.concurrent.{ForkJoinPool, ForkJoinTask, ForkJoinWorkerThread}
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicLong
 
@@ -137,10 +137,6 @@ private class ForkJoinScheduler(
   }
 
   // We can't provide useful/cheap implementations of these.
-  def usrTime = -1L
-  def cpuTime = -1L
-  def wallTime = -1L
   def numDispatches = -1L
   def flush() = ()
 }
-

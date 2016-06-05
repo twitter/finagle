@@ -1,8 +1,8 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Announcement, Group, Resolver, Addr}
-import com.twitter.util.{Future, FuturePool, Return, Throw, Try, Var}
-import java.net.{InetSocketAddress, SocketAddress}
+import com.twitter.finagle.{Announcement, Group, Addr, Address}
+import com.twitter.util.{Future, FuturePool, Var}
+import java.net.InetSocketAddress
 import javax.jmdns._
 import scala.collection.mutable
 
@@ -44,7 +44,7 @@ private class JmDNSAnnouncer extends MDNSAnnouncerIface {
 
 private object JmDNSResolver {
   def resolve(regType: String): Var[Addr] = {
-    val services = new mutable.HashMap[String, MdnsRecord]()
+    val services = new mutable.HashMap[String, Address]()
     val v = Var[Addr](Addr.Pending)
 
     DNS.addServiceListener(regType, new ServiceListener {
@@ -53,15 +53,17 @@ private object JmDNSResolver {
       def serviceAdded(event: ServiceEvent) {
         DNS.getServiceInfo(event.getType, event.getName) foreach { info =>
           val addresses = info.getInetAddresses
-          val mdnsRecord = MdnsRecord(
+          val metadata = MdnsAddrMetadata(
             info.getName,
             info.getApplication + "." + info.getProtocol,
-            info.getDomain,
-            new InetSocketAddress(addresses(0), info.getPort))
+            info.getDomain)
+          val addr = Address.Inet(
+            new InetSocketAddress(addresses(0), info.getPort),
+            MdnsAddrMetadata.toAddrMetadata(metadata))
 
           synchronized {
-            services.put(info.getName, mdnsRecord)
-            v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
+            services.put(info.getName, addr)
+            v() = Addr.Bound(services.values.toSet: Set[Address])
           }
         }
       }
@@ -69,7 +71,7 @@ private object JmDNSResolver {
       def serviceRemoved(event: ServiceEvent) {
         synchronized {
           if (services.remove(event.getName).isDefined)
-            v() = Addr.Bound(services.values.toSet: Set[SocketAddress])
+            v() = Addr.Bound(services.values.toSet: Set[Address])
         }
       }
     })
@@ -84,9 +86,9 @@ private class JmDNSResolver extends MDNSResolverIface {
     JmDNSResolver.resolve(regType + "." + domain + ".")
 }
 
-private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
-  private[this] val services = new mutable.HashMap[String, MdnsRecord]()
-  protected[finagle] val set = Var(Set[MdnsRecord]())
+private class JmDNSGroup(regType: String) extends Group[Address] {
+  private[this] val services = new mutable.HashMap[String, Address]()
+  protected[finagle] val set = Var(Set[Address]())
 
   DNS.addServiceListener(regType, new ServiceListener {
     def serviceResolved(event: ServiceEvent) {}
@@ -94,14 +96,16 @@ private class JmDNSGroup(regType: String) extends Group[MdnsRecord] {
     def serviceAdded(event: ServiceEvent) {
       DNS.getServiceInfo(event.getType, event.getName) foreach { info =>
         val addresses = info.getInetAddresses
-        val mdnsRecord = MdnsRecord(
+        val metadata = MdnsAddrMetadata(
           info.getName,
           info.getApplication + "." + info.getProtocol,
-          info.getDomain,
-          new InetSocketAddress(addresses(0), info.getPort))
+          info.getDomain)
+        val addr = Address.Inet(
+          new InetSocketAddress(addresses(0), info.getPort),
+          MdnsAddrMetadata.toAddrMetadata(metadata))
 
         synchronized {
-          services.put(info.getName, mdnsRecord)
+          services.put(info.getName, addr)
           set() = services.values.toSet
         }
       }

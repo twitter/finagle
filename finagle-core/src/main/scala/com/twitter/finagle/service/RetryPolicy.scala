@@ -3,13 +3,20 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle.{ChannelClosedException, Failure, TimeoutException, WriteException}
 import com.twitter.util.{
-  TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Throw, Try}
+  TimeoutException => UtilTimeoutException, Duration, JavaSingleton, Return, Throw, Try}
 import java.util.{concurrent => juc}
 import java.{util => ju}
 import scala.collection.JavaConverters._
 
 /**
  * A function defining retry behavior for a given value type `A`.
+ *
+ * The [[Function1]] returns [[None]] if no more retries should be made
+ * and [[Some]] if another retry should happen. The returned `Some` has
+ * a [[Duration]] field for how long to wait for the next retry as well
+ * as the next `RetryPolicy` to use.
+ *
+ * @see [[SimpleRetryPolicy]] for a Java friendly API.
  */
 abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])]) {
   /**
@@ -52,7 +59,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
       if (!pred(e))
         None
       else {
-        this(e) map {
+        this(e).map {
           case (backoff, p2) => (backoff, p2.filterEach(pred))
         }
       }
@@ -65,7 +72,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
    * of retries that the underlying policy would allow, it is capped to be no greater than the
    * number returned by `maxRetries` on the first failure in the chain.
    *
-   * Using a dynamically choosen retry limit allows for the retry count to be tuned at runtime
+   * Using a dynamically chosen retry limit allows for the retry count to be tuned at runtime
    * based upon backpressure signals such as failure rate or request latency.
    */
   def limit(maxRetries: => Int): RetryPolicy[A] =
@@ -74,7 +81,7 @@ abstract class RetryPolicy[-A] extends (A => Option[(Duration, RetryPolicy[A])])
       if (triesRemaining <= 0)
         None
       else {
-        this(e) map {
+        this(e).map {
           case (backoff, p2) => (backoff, p2.limit(triesRemaining - 1))
         }
       }
@@ -106,9 +113,11 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
     }
   }
 
-  override def andThen[B](that: Function1[Option[(Duration, RetryPolicy[A])], B]): A => B = that.compose(this)
+  override def andThen[B](that: Option[(Duration, RetryPolicy[A])] => B): A => B =
+    that.compose(this)
 
-  override def compose[B](that: Function1[B, A]): B => Option[(Duration, RetryPolicy[A])] = that.andThen(this)
+  override def compose[B](that: B => A): B => Option[(Duration, RetryPolicy[A])] =
+    that.andThen(this)
 
   /**
    * Given a value, decide whether it is retryable. Typically the value is an exception.
@@ -123,7 +132,7 @@ abstract class SimpleRetryPolicy[A](i: Int) extends RetryPolicy[A]
   def backoffAt(retry: Int): Duration
 
   /**
-   * A convenience method to access Duration.forever from Java. This is a sentinel value that
+   * A convenience method to access Duration.Top from Java. This is a sentinel value that
    * signals no-further-retries.
    */
   final val never = Duration.Top
@@ -150,33 +159,54 @@ object RetryPolicy extends JavaSingleton {
     case Throw(RetryableWriteException(_)) => true
   }
 
-  val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = WriteExceptionsOnly orElse {
-    case Throw(Failure(Some(_: TimeoutException))) => true
-    case Throw(Failure(Some(_: UtilTimeoutException))) => true
-    case Throw(_: TimeoutException) => true
-    case Throw(_: UtilTimeoutException) => true
-  }
+  val TimeoutAndWriteExceptionsOnly: PartialFunction[Try[Nothing], Boolean] =
+    WriteExceptionsOnly.orElse {
+      case Throw(Failure(Some(_: TimeoutException))) => true
+      case Throw(Failure(Some(_: UtilTimeoutException))) => true
+      case Throw(_: TimeoutException) => true
+      case Throw(_: UtilTimeoutException) => true
+    }
 
   val ChannelClosedExceptionsOnly: PartialFunction[Try[Nothing], Boolean] = {
     case Throw(_: ChannelClosedException) => true
   }
 
   val Never: RetryPolicy[Try[Nothing]] = new RetryPolicy[Try[Nothing]] {
-    def apply(t: Try[Nothing]) = None
+    def apply(t: Try[Nothing]): Option[(Duration, Nothing)] = None
   }
+
+  /**
+   * Converts a `RetryPolicy[Try[Nothing]]` to a `RetryPolicy[(Req, Try[Rep])]`
+   * that acts only on exceptions.
+   */
+  private[finagle] def convertExceptionPolicy[Req, Rep](
+    policy: RetryPolicy[Try[Nothing]]
+  ): RetryPolicy[(Req, Try[Rep])] =
+    new RetryPolicy[(Req, Try[Rep])] {
+      def apply(input: (Req, Try[Rep])): Option[(Duration, RetryPolicy[(Req, Try[Rep])])] = input match {
+        case (_, t@Throw(_)) =>
+          policy(t.asInstanceOf[Throw[Nothing]]) match {
+            case Some((howlong, nextPolicy)) => Some((howlong, convertExceptionPolicy(nextPolicy)))
+            case None => None
+          }
+        case (_, Return(_)) => None
+      }
+    }
 
   /**
    * Lifts a function of type `A => Option[(Duration, RetryPolicy[A])]` in the  `RetryPolicy` type.
    */
   def apply[A](f: A => Option[(Duration, RetryPolicy[A])]): RetryPolicy[A] =
     new RetryPolicy[A] {
-      def apply(e: A) = f(e)
+      def apply(e: A): Option[(Duration, RetryPolicy[A])] = f(e)
     }
 
   /**
    * Try up to a specific number of times, based on the supplied `PartialFunction[A, Boolean]`.
    * A value of type `A` is considered retryable if and only if the PartialFunction
    * is defined at and returns true for that value.
+   *
+   * The returned policy has jittered backoffs between retries.
    *
    * @param numTries the maximum number of attempts (including retries) that can be made.
    *   A value of `1` means one attempt and no retries on failure.
@@ -188,12 +218,15 @@ object RetryPolicy extends JavaSingleton {
     numTries: Int,
     shouldRetry: PartialFunction[A, Boolean]
   ): RetryPolicy[A] = {
-    backoff[A](Backoff.const(0.second) take (numTries - 1))(shouldRetry)
+    val backoffs = Backoff.decorrelatedJittered(5.millis, 200.millis)
+    backoff[A](backoffs.take(numTries - 1))(shouldRetry)
   }
 
   /**
    * Try up to a specific number of times of times on failures that are
    * [[com.twitter.finagle.service.RetryPolicy.WriteExceptionsOnly]].
+   *
+   * The returned policy has jittered backoffs between retries.
    *
    * @param numTries the maximum number of attempts (including retries) that can be made.
    *   A value of `1` means one attempt and no retries on failure.
@@ -209,6 +242,8 @@ object RetryPolicy extends JavaSingleton {
    * stream is consulted to determine the duration after which a request is to
    * be retried. A `PartialFunction` argument determines which request types
    * are retryable.
+   *
+   * @see [[backoffJava]] for a Java friendly API.
    */
   def backoff[A](
     backoffs: Stream[Duration]
@@ -228,7 +263,9 @@ object RetryPolicy extends JavaSingleton {
   }
 
   /**
-   * A constructor usable from Java (`backoffs` from `Backoff.toJava`).
+   * A version of [[backoff]] usable from Java.
+   *
+   * @param backoffs can be created via [[Backoff.toJava]].
    */
   def backoffJava[A](
     backoffs: juc.Callable[ju.Iterator[Duration]],
@@ -267,7 +304,7 @@ object RetryPolicy extends JavaSingleton {
       var backoffOpt: Option[Duration] = None
 
       val policies2 =
-        policies map { p =>
+        policies.map { p =>
           if (backoffOpt.nonEmpty)
             p
           else {
@@ -285,38 +322,4 @@ object RetryPolicy extends JavaSingleton {
         case Some(backoff) => Some((backoff, combine(policies2: _*)))
       }
     }
-}
-
-/**
- * Implements various backoff strategies. Strategies are defined by a
- * `Stream[Duration]` and intended for use with
- * [[com.twitter.finagle.service.RetryingFilter#backoff]] to determine the duration
- * after which a request is to be retried
- */
-object Backoff {
-  private[this] def durations(next: Duration, f: Duration => Duration): Stream[Duration] =
-    next #:: durations(f(next), f)
-
-  def apply(next: Duration)(f: Duration => Duration) = durations(next, f)
-
-  def exponential(start: Duration, multiplier: Int) =
-    Backoff(start) { prev => prev * multiplier }
-
-  def linear(start: Duration, offset: Duration) =
-    Backoff(start) { prev => prev + offset }
-
-  /* Alias because `const' is a reserved word in Java */
-  def constant(start: Duration) = const(start)
-
-  def const(start: Duration) =
-    Backoff(start)(Function.const(start))
-
-  /**
-   * Convert a {{Stream[Duration]}} into a Java-friendly representation.
-   */
-  def toJava(backoffs: Stream[Duration]): ju.concurrent.Callable[ju.Iterator[Duration]] = {
-    new ju.concurrent.Callable[ju.Iterator[Duration]] {
-      def call() = backoffs.toIterator.asJava
-    }
-  }
 }

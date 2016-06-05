@@ -2,16 +2,18 @@ package com.twitter.finagle.http
 
 import com.google.common.base.Charsets
 import com.twitter.collection.RecordSchema
-import com.twitter.finagle.http.netty.HttpResponseProxy
+import com.twitter.finagle.http.netty.Bijections
+import com.twitter.io.Reader
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.embedder.{DecoderEmbedder, EncoderEmbedder}
 import org.jboss.netty.handler.codec.http._
+
+import Bijections._
 
 /**
  * Rich HttpResponse
  */
-abstract class Response extends Message with HttpResponseProxy {
+abstract class Response extends Message {
 
   /**
    * Arbitrary user-defined context associated with this response object.
@@ -24,33 +26,43 @@ abstract class Response extends Message with HttpResponseProxy {
 
   def isRequest = false
 
-  def status: HttpResponseStatus          = getStatus
-  def status_=(value: HttpResponseStatus) { setStatus(value) }
-  def statusCode: Int                     = getStatus.getCode
-  def statusCode_=(value: Int)            { setStatus(HttpResponseStatus.valueOf(value)) }
+  def status: Status = from(getStatus)
+  def status_=(value: Status): Unit = { setStatus(from(value)) }
+  def statusCode: Int = getStatus.getCode
+  def statusCode_=(value: Int): Unit = { setStatus(HttpResponseStatus.valueOf(value)) }
 
-  def getStatusCode(): Int      = statusCode
-  def setStatusCode(value: Int) { statusCode = value }
+  def getStatusCode(): Int = statusCode
+  def setStatusCode(value: Int): Unit = { statusCode = value }
 
   /** Encode as an HTTP message */
   def encodeString(): String = {
     val encoder = new EncoderEmbedder[ChannelBuffer](new HttpResponseEncoder)
-    encoder.offer(this)
+    encoder.offer(httpResponse)
     val buffer = encoder.poll()
     buffer.toString(Charsets.UTF_8)
   }
 
   override def toString =
     "Response(\"" + version + " " + status + "\")"
+
+  protected[finagle] def httpResponse: HttpResponse
+
+  protected[finagle] def getHttpResponse(): HttpResponse = httpResponse
+  protected[finagle] def httpMessage: HttpMessage = httpResponse
+
+  protected[finagle] def getStatus(): HttpResponseStatus = httpResponse.getStatus()
+  protected[finagle] def setStatus(status: HttpResponseStatus): Unit = {
+    httpResponse.setStatus(status)
+  }
 }
-
-
-class MockResponse extends Response {
-  val httpResponse = new DefaultHttpResponse(Version.Http11, Status.Ok)
-}
-
 
 object Response {
+  /**
+   * Utility class to make it possible to mock/spy a Response.
+   */
+  class Ok extends Response {
+    val httpResponse = apply.httpResponse
+  }
 
   /**
    * [[com.twitter.collection.RecordSchema RecordSchema]] declaration, used
@@ -59,41 +71,57 @@ object Response {
    */
   val Schema: RecordSchema = new RecordSchema
 
-  /** Decode a Response from a String */
+  /** Decode a [[Response]] from a String */
   def decodeString(s: String): Response = {
-    val decoder = new DecoderEmbedder(
-      new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
-    decoder.offer(ChannelBuffers.wrappedBuffer(s.getBytes(Charsets.UTF_8)))
-    val httpResponse = decoder.poll().asInstanceOf[HttpResponse]
-    assert(httpResponse ne null)
-    Response(httpResponse)
+    decodeBytes(s.getBytes(Charsets.UTF_8))
   }
 
+  /** Decode a [[Response]] from a byte array */
+  def decodeBytes(b: Array[Byte]): Response = {
+    val decoder = new DecoderEmbedder(
+      new HttpResponseDecoder(Int.MaxValue, Int.MaxValue, Int.MaxValue))
+    decoder.offer(ChannelBuffers.wrappedBuffer(b))
+    val res = decoder.poll().asInstanceOf[HttpResponse]
+    assert(res ne null)
+    Response(res)
+  }
+  
   /** Create Response. */
   def apply(): Response =
     apply(Version.Http11, Status.Ok)
 
   /** Create Response from version and status. */
-  def apply(version: HttpVersion, status: HttpResponseStatus): Response =
-    apply(new DefaultHttpResponse(version, status))
+  def apply(version: Version, status: Status): Response =
+    apply(new DefaultHttpResponse(from(version), from(status)))
 
-  /** Create Response from status. */
-  def apply(status: HttpResponseStatus): Response =
-    apply(new DefaultHttpResponse(Version.Http11, status))
+  /**
+   * Create a Response from version, status, and Reader.
+   */
+  def apply(version: Version, status: Status, reader: Reader): Response = {
+    val res = new DefaultHttpResponse(from(version), from(status))
+    res.setChunked(true)
+    apply(res, reader)
+  }
 
-  /** Create Response from HttpResponse. */
-  def apply(httpResponseArg: HttpResponse): Response =
-    httpResponseArg match {
-      case res: Response => res
-      case _ => new Response {
-        final val httpResponse = httpResponseArg
-      }
+  private[http] def apply(response: HttpResponse): Response =
+    new Response {
+      val httpResponse = response
     }
 
-  /** Create Response from HttpRequest. */
-  def apply(httpRequest: HttpRequest): Response =
+  private[http] def apply(response: HttpResponse, readerIn: Reader): Response =
+    new Response {
+      val httpResponse = response
+      override val reader = readerIn
+    }
+
+  /** Create Response from status. */
+  def apply(status: Status): Response =
+    apply(Version.Http11, status)
+
+  /** Create Response from Request. */
+  private[http] def apply(httpRequest: Request): Response =
     new Response {
       final val httpResponse =
-        new DefaultHttpResponse(httpRequest.getProtocolVersion, Status.Ok)
-  }
+        new DefaultHttpResponse(from(httpRequest.version), HttpResponseStatus.OK)
+    }
 }

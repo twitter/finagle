@@ -30,17 +30,17 @@ class MaskCancelFilterTest extends FunSuite with MockitoSugar {
 
   test("MaskCancelFilter should mask interrupts") {
     new MaskHelper {
-      assert(p.interrupted === None)
+      assert(p.interrupted == None)
       f.raise(new Exception)
-      assert(p.interrupted === None)
+      assert(p.interrupted == None)
     }
   }
 
   test("MaskCancelFilter should propagate results") {
     new MaskHelper {
-      assert(f.poll === None)
+      assert(f.poll == None)
       p.setValue(123)
-      assert(p.poll === Some(Return(123)))
+      assert(p.poll == Some(Return(123)))
     }
   }
 }

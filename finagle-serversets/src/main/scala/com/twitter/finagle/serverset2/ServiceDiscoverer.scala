@@ -1,15 +1,12 @@
 package com.twitter.finagle.serverset2
 
-import com.twitter.conversions.time._
+import com.twitter.finagle.serverset2.client.{SessionState, WatchState}
 import com.twitter.finagle.stats.{Stat, StatsReceiver}
-import com.twitter.io.Buf
-import com.twitter.util.{Activity, Memoize, Stopwatch, Var}
-import java.nio.charset.Charset
+import com.twitter.finagle.util.Rng
+import com.twitter.logging.Logger
+import com.twitter.util._
 
 private[serverset2] object ServiceDiscoverer {
-
-  val DefaultRetrying = 5.seconds
-  val Utf8 = Charset.forName("UTF-8")
   val EndpointGlob = "/member_"
   val VectorGlob = "/vector_"
 
@@ -20,11 +17,33 @@ private[serverset2] object ServiceDiscoverer {
    * Each entry in `ents` is paired with the product of all weights for that
    * entry in `vecs`.
    */
-  def zipWithWeights(ents: Seq[Entry], vecs: Set[Vector]): Seq[(Entry, Double)] =
+  def zipWithWeights(ents: Seq[Entry], vecs: Set[Vector]): Seq[(Entry, Double)] = {
     ents map { ent =>
       val w = vecs.foldLeft(1.0) { case (w, vec) => w*vec.weightOf(ent) }
       ent -> w
     }
+  }
+
+  /**
+   * ZooKeeper client health as observed by the ServiceDiscoverer.
+   */
+  private[serverset2] sealed trait ClientHealth
+  private[serverset2] object ClientHealth {
+    case object Healthy extends ClientHealth
+    case object Unhealthy extends ClientHealth
+
+    def apply(sessionState: SessionState): ClientHealth = {
+      sessionState match {
+        case SessionState.Expired | SessionState.NoSyncConnected
+             | SessionState.Unknown | SessionState.AuthFailed
+             | SessionState.Disconnected => Unhealthy
+        case SessionState.ConnectedReadOnly | SessionState.SaslAuthenticated
+            | SessionState.SyncConnected => Healthy
+      }
+    }
+  }
+
+  object EntryLookupFailureException extends Exception("All serverset member lookups failed")
 }
 
 /**
@@ -33,89 +52,149 @@ private[serverset2] object ServiceDiscoverer {
  *
  * Given a ServerSet path, [[apply]] looks up the set and returns a
  * dynamic set of (entry, weight) tuples.
+ * @param varZkSession: The active, connected zkSession. This session
+ *    may change in response to normal zookeeper changes
+ *    (such as servers restarting).
+ * @param statsReceiver: Scoped statsReceiver
+ * @param healthStabilizationEpoch: Used in stabilizing the reporting
+ *  health changes of the underlying ZkSession
  */
 private[serverset2] class ServiceDiscoverer(
   varZkSession: Var[ZkSession],
-  statsReceiver: StatsReceiver
+  val statsReceiver: StatsReceiver,
+  healthStabilizationEpoch: Epoch,
+  timer: Timer
 ) {
   import ServiceDiscoverer._
 
   private[this] val zkEntriesReadStat = statsReceiver.scope("entries").stat("read_ms")
-  private[this] val zkEntriesParseStat = statsReceiver.scope("entries").stat("parse_ms")
   private[this] val zkVectorsReadStat = statsReceiver.scope("vectors").stat("read_ms")
-  private[this] val zkVectorsParseStat = statsReceiver.scope("vectors").stat("parse_ms")
 
-  def entriesOfNode(zkSession: ZkSession) =
-    Memoize { path: String =>
-      Activity.future(
-        zkSession.immutableDataOf(path) map {
-          case Some(Buf.Utf8(data)) => Entry.parseJson(path, data)
-          case None => Seq()
-        })
+  private[this] val actZkSession = Activity(varZkSession.map(Activity.Ok(_)))
+  private[this] val log = Logger(getClass)
+  private[this] val retryJitter = Duration.fromSeconds(20 + Rng.threadLocal.nextInt(120))
+
+  /**
+   * Monitor the session status of the ZkSession and expose to listeners whether
+   * the connection is healthy or unhealthy. Exposed for testing
+   */
+  private[serverset2] val rawHealth: Var[ClientHealth] = Var.async[ClientHealth](ClientHealth.Healthy) { u =>
+    @volatile var stateListener = Closable.nop
+
+    val sessionChanges = varZkSession.changes.dedup.respond { zk =>
+      // When the zk session changes, we need to stop observing changes
+      // to the previous session.
+      synchronized {
+        stateListener.close()
+        stateListener = zk.state.changes.dedup.respond {
+          case WatchState.SessionState(state) =>
+            log.info(s"SessionState. Session ${zk.sessionIdAsHex}. State $state")
+            u() = ClientHealth(state)
+          case _ => // don't need to update on non-sessionstate events
+        }
+      }
     }
 
-  def vectorOfNode(zkSession: ZkSession) =
-    Memoize { path: String =>
-      Activity.future(
-        zkSession.immutableDataOf(path) map {
-          case Some(Buf.Utf8(data)) => Vector.parseJson(data)
-          case None => None
-        })
-    }
+    Closable.all(sessionChanges,
+      Closable.make(t => stateListener.close(t))
+    )
+  }
 
-  private[this] val actZkSession =
-    Activity(varZkSession.map { zkSession =>
-      Activity.Ok(zkSession, entriesOfNode(zkSession), vectorOfNode(zkSession))
-    })
+  /**
+   * Monitor the session state of the ZkSession within a HealthStabilizer
+   * which only reports unhealthy when the rawHealth has been unhealthy for
+   * a long enough time (as defined by the stabilization epoch).
+   */
+  private[serverset2] val health: Var[ClientHealth] =
+    HealthStabilizer(rawHealth, healthStabilizationEpoch, statsReceiver)
 
-  private[this] def timedOf[T](stat: Stat)(f: => Activity[T]): Activity[T] = {
-    val elapsed = Stopwatch.start()
-    f map { rv =>
-      stat.add(elapsed().inMilliseconds)
-      rv
+  /**
+   * Activity to keep a hydrated list of Entrys or Vectors for a given ZK path.
+   * protected for testing
+   */
+  protected[this] def entitiesOf[Entity](
+    path: String,
+    cache: ZkNodeDataCache[Entity],
+    readStat: Stat,
+    glob: String
+  ): Activity[Seq[Entity]] = {
+    actZkSession.flatMap { case zkSession =>
+      cache.setSession(zkSession)
+      zkSession.globOf(path + glob).flatMap { paths =>
+        // Remove any cached entries not surfaced by globOf from our cache
+        (cache.keys &~ paths).foreach(cache.remove)
+        bulkResolveMemberData(path, paths.toSeq, cache, readStat)
+      }
     }
   }
 
-  private[this] def entriesOf(path: String): Activity[Seq[Entry]] =
-    actZkSession flatMap { case (zkSession, entriesOfNode, _) =>
-      zkSession.globOf(path + EndpointGlob) flatMap { paths =>
-        timedOf(zkEntriesReadStat) {
-          Activity.collect(paths.map(entriesOfNode)).map(_.flatten)
-        }
-      }
-    }
+  /**
+    * Resolve all child paths of a watch. If all resolutions fail,
+    * schedule a retry for later.
+    */
+  private[this] def bulkResolveMemberData[Entity](
+    parentPath: String,
+    paths: Seq[String],
+    cache: ZkNodeDataCache[Entity],
+    readStat: Stat
+  ): Activity[Seq[Entity]] =
+    Activity(Var.async[Activity.State[Seq[Entity]]](Activity.Pending) { u =>
+      @volatile var closed = false
 
-  private[this] def vectorsOf(path: String): Activity[Set[Vector]] =
-    actZkSession flatMap { case (zkSession, _, vectorOfNode) =>
-      zkSession.globOf(path + VectorGlob) flatMap { paths =>
-        timedOf(zkVectorsReadStat) {
-          Activity.collect(paths.map(vectorOfNode)).map(_.flatten.toSet)
+      def loop(): Future[Unit] = {
+        if (!closed) {
+          @volatile var seenFailures = false
+          Stat.timeFuture(readStat) {
+            Future.collectToTry(paths.map { path =>
+              // note if any failed
+              cache.get(path).onFailure { _ => seenFailures = true }
+            })
+              // We end up with a Seq[Seq[Entity]] here, b/c cache.get() returns a Seq[Entity]
+              // flatten() to fix this (see the comment on ZkNodeDataCache for why we get a Seq[])
+              .map(tries => tries.collect { case Return(e) => e }.flatten)
+              .map { seq =>
+                // if we have *any* results or no-failure, we consider it a success
+                if (seenFailures && seq.isEmpty) u() = Activity.Failed(EntryLookupFailureException)
+                else u() = Activity.Ok(seq)
+              }.ensure {
+                if (seenFailures) {
+                  log.warning(s"Failed to read all data for $parentPath. Retrying in $retryJitter")
+                  timer.doLater(retryJitter) { loop() }
+                }
+              }
+          }
         }
+
+        Future.Done
       }
-    }
+
+      loop()
+
+      Closable.make { _ =>
+        closed = true
+        Future.Done
+      }
+    })
+
+  // protected for testing
+  protected[this] val entriesOf: String => Activity[Seq[Entry]] = Memoize { path: String =>
+    entitiesOf(path, new ZkEntryCache(path, statsReceiver), zkEntriesReadStat, EndpointGlob)
+  }
+
+  private[this] val vectorsOf: String => Activity[Seq[Vector]] = Memoize { path: String =>
+    entitiesOf(path, new ZkVectorCache(path, statsReceiver), zkVectorsReadStat, VectorGlob)
+  }
 
   /**
    * Look up the weighted ServerSet entries for a given path.
    */
   def apply(path: String): Activity[Seq[(Entry, Double)]] = {
-    val es = entriesOf(path).run
-    val vs = vectorsOf(path).run
+    val es = entriesOf(path)
+    val vs = vectorsOf(path)
 
-    val raw = (es join vs) map {
-      case (Activity.Pending, _) => Activity.Pending
-      case (f@Activity.Failed(_), _) => f
-      case (Activity.Ok(ents), Activity.Ok(vecs)) =>
-        Activity.Ok(ServiceDiscoverer.zipWithWeights(ents, vecs))
-      case (Activity.Ok(ents), _) =>
-        Activity.Ok(ents map (_ -> 1D))
-    }
+    val raw = es.join(vs).map { case (ents, vecs) => zipWithWeights(ents, vecs.toSet) }
 
     // Squash duplicate updates
-    val dedupe = raw.changes.sliding(2) collect {
-      case Seq(current) => current
-      case Seq(last, next) if last != next => next
-    }
-
-    Activity(Var(Activity.Pending, dedupe))
+    Activity(Var(Activity.Pending, raw.states.dedup))
   }
 }

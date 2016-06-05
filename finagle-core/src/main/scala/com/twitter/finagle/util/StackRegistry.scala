@@ -22,7 +22,7 @@ object StackRegistry {
           // this is not very useful, and it might make sense to filter them out in the future.
           val fields = p.getClass.getDeclaredFields.map(_.getName).toSeq
           val values = p.productIterator.map(_.toString).toSeq
-          seq ++ (fields.zipAll(values, "<unknown>", "<unknown>"))
+          seq ++ fields.zipAll(values, "<unknown>", "<unknown>")
 
         case (seq, _) => seq
       }
@@ -51,20 +51,55 @@ trait StackRegistry {
   /** The name of the [[StackRegistry]], to be used for identification in the registry. */
   def registryName: String
 
+  // thread-safe updates via synchronization on `this`
   private[this] var registry = Map.empty[String, Entry]
+
   private[this] val numEntries = new AtomicInteger(0)
+
+  // thread-safe updates via synchronization on `this`
+  private[this] var duplicates: Map[String, Seq[Entry]] =
+    Map.empty[String, Seq[Entry]]
+
+  /**
+   * Returns any registered [[Entry Entries]] that had the same [[Label]].
+   */
+  def registeredDuplicates: Seq[Entry] = synchronized {
+    duplicates.values.flatten.toSeq
+  }
 
   /** Registers an `addr` and `stk`. */
   def register(addr: String, stk: Stack[_], params: Stack.Params): Unit = {
     val entry = Entry(addr, stk, params)
     addEntries(entry)
-    synchronized { registry += entry.name -> entry }
+    synchronized {
+      if (registry.contains(entry.name)) {
+        val updated = duplicates.get(entry.name) match {
+          case Some(values) => values :+ entry
+          case None => Seq(entry)
+        }
+        duplicates += entry.name -> updated
+      }
+      registry += entry.name -> entry
+    }
   }
 
   /** Unregisters an `addr` and `stk`. */
   def unregister(addr: String, stk: Stack[_], params: Stack.Params): Unit = {
     val entry = Entry(addr, stk, params)
-    synchronized { registry -= entry.name }
+    synchronized {
+      duplicates.get(entry.name) match {
+        case Some(dups) =>
+          if (dups.size == 1)
+            duplicates -= entry.name
+          else
+            // We may not remove the exact same entry, but since they are duplicates,
+            // it does not matter.
+            duplicates += entry.name -> dups.drop(1)
+        case None =>
+          // only remove when there is no more duplications
+          registry -= entry.name
+      }
+    }
     removeEntries(entry)
   }
 
@@ -98,5 +133,8 @@ trait StackRegistry {
   def registrants: Iterable[Entry] = synchronized { registry.values }
 
   // added for tests
-  private[finagle] def clear(): Unit = synchronized { registry = Map.empty[String, Entry] }
+  private[finagle] def clear(): Unit = synchronized {
+    registry = Map.empty[String, Entry]
+    duplicates = Map.empty[String, Seq[Entry]]
+  }
 }

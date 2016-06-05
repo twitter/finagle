@@ -1,16 +1,19 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Rng, DefaultTimer}
 import com.twitter.finagle.{ServiceFactory, NoBrokersAvailableException}
-import com.twitter.util.{Activity, Duration, Timer}
+import com.twitter.util.{Activity, Duration, Future, Timer, Time}
 import scala.util.Random
 
 /**
  * Constructor methods for various load balancers. The methods take balancer
  * specific parameters and return a [[LoadBalancerFactory]] that allows you
  * to easily inject a balancer into the Finagle stack via client configuration.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#load-balancing user guide]]
+ *      for more details.
  */
 object Balancers {
   /** Default MaxEffort used in constructors below. */
@@ -36,8 +39,9 @@ object Balancers {
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "P2cLoadBalancerFactory"
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
@@ -66,19 +70,26 @@ object Balancers {
    * @param rng The PRNG used for flipping coins. Override for
    * deterministic tests.
    *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#power-of-two-choices-p2c-least-loaded user guide]]
+   *      for more details.
    */
   def p2cPeakEwma(
     decayTime: Duration = 10.seconds,
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "P2cPeakEwmaLoadBalancerFactory"
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] =
       new P2CBalancerPeakEwma(endpoints, decayTime, maxEffort, rng, sr, exc) {
         private[this] val gauge = sr.addGauge("p2cPeakEwma")(1)
+        override def close(when: Time): Future[Unit] = {
+          gauge.remove()
+          super.close(when)
+        }
       }
   }
 
@@ -86,17 +97,24 @@ object Balancers {
    * An efficient strictly least-loaded balancer that maintains
    * an internal heap. Note, because weights are not supported by
    * the HeapBalancer they are ignored when the balancer is constructed.
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#heap-least-loaded user guide]]
+   *      for more details.
    */
   def heap(rng: Random = new Random): LoadBalancerFactory =
     new LoadBalancerFactory {
+      override def toString: String = "HeapLoadBalancerFactory"
       def newBalancer[Req, Rep](
-        endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+        endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
         sr: StatsReceiver,
         exc: NoBrokersAvailableException
       ): ServiceFactory[Req, Rep] = {
-        val unweighted = endpoints.map { set => set.map { case (f, _) => f } }
-        new HeapBalancer(unweighted, sr, exc, rng) {
+        new HeapBalancer(endpoints, sr, exc, rng) {
           private[this] val gauge = sr.addGauge("heap")(1)
+          override def close(when: Time): Future[Unit] = {
+            gauge.remove()
+            super.close(when)
+          }
         }
       }
     }
@@ -108,29 +126,65 @@ object Balancers {
    *  1. The concurrent load, measured over a window specified by
    *     `smoothWin`, to each service stays within the load band, delimited
    *     by `lowLoad` and `highLoad`.
+   *
    *  2. Services receive load proportional to the ratio of their
    *     weights.
    *
    * Unavailable services are not counted--the aperture expands as
    * needed to cover those that are available.
+   *
+   * @see The [[https://twitter.github.io/finagle/guide/Clients.html#aperture-least-loaded user guide]]
+   *      for more details.
    */
   def aperture(
     smoothWin: Duration = 5.seconds,
     lowLoad: Double = 0.5,
-    highLoad: Double = 2,
+    highLoad: Double = 2.0,
     minAperture: Int = 1,
     timer: Timer = DefaultTimer.twitter,
     maxEffort: Int = MaxEffort,
     rng: Rng = Rng.threadLocal
   ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "ApertureLoadBalancerFactory"
     def newBalancer[Req, Rep](
-      endpoints: Activity[Set[(ServiceFactory[Req, Rep], Double)]],
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
       sr: StatsReceiver,
       exc: NoBrokersAvailableException
     ): ServiceFactory[Req, Rep] = {
       new ApertureLoadBandBalancer(endpoints, smoothWin, lowLoad,
         highLoad, minAperture, maxEffort, rng, timer, sr, exc) {
         private[this] val gauge = sr.addGauge("aperture")(1)
+        override def close(when: Time): Future[Unit] = {
+          gauge.remove()
+          super.close(when)
+        }
+      }
+    }
+  }
+
+  /**
+   * A simple round robin balancer that chooses the next backend in
+   * the list for each request.
+   *
+   * WARNING: Unlike other balancers available in finagle, this does
+   * not take latency into account and will happily direct load to
+   * slow or oversubscribed services. We recommend using one of the
+   * other load balancers for typical production use.
+   *
+   * @param maxEffort the maximum amount of "effort" we're willing to
+   * expend on a load balancing decision without reweighing.
+   */
+  def roundRobin(
+    maxEffort: Int = MaxEffort
+  ): LoadBalancerFactory = new LoadBalancerFactory {
+    override def toString: String = "RoundRobinLoadBalancerFactory"
+    def newBalancer[Req, Rep](
+      endpoints: Activity[Set[ServiceFactory[Req, Rep]]],
+      sr: StatsReceiver,
+      exc: NoBrokersAvailableException
+    ): ServiceFactory[Req, Rep] = {
+      new RoundRobinBalancer(endpoints, sr, exc) {
+        private[this] val gauge = sr.addGauge("round_robin")(1)
       }
     }
   }

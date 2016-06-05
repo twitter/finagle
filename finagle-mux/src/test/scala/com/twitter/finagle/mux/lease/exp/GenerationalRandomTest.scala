@@ -19,7 +19,7 @@ class GenerationalRandomTest extends FunSuite with MockitoSugar {
     val x = gen()
     verify(nfo, times(2)).generation()
 
-    assert(gen() === x)
+    assert(gen() == x)
     verify(nfo, times(3)).generation()
   }
 
@@ -33,7 +33,7 @@ class GenerationalRandomTest extends FunSuite with MockitoSugar {
     val x = gen()
     verify(nfo, times(2)).generation()
 
-    assert(gen() === x)
+    assert(gen() == x)
     verify(nfo, times(3)).generation()
 
     when(nfo.generation()).thenReturn(1)

@@ -56,9 +56,9 @@ class ChannelTransportTest
     assert(!f.isDefined)
     val captor = ArgumentCaptor.forClass(classOf[ChannelEvent])
     verify(sink, times(1)).eventSunk(Matchers.eq(pipeline), captor.capture)
-    assert(captor.getValue.getClass === classOf[DownstreamMessageEvent])
+    assert(captor.getValue.getClass == classOf[DownstreamMessageEvent])
     val dsme = captor.getValue.asInstanceOf[DownstreamMessageEvent]
-    assert(dsme.getMessage === "one")
+    assert(dsme.getMessage == "one")
   }
 
   test("write to the underlying channel, proxying the underlying ChannelFuture (ok)") {
@@ -66,7 +66,7 @@ class ChannelTransportTest
     import ctx._
 
     dsme.getFuture.setSuccess()
-    assert(Await.result(f) === ())
+    assert(Await.result(f.liftToTry) == Return.Unit)
   }
 
   test("write to the underlying channel, proxying the underlying ChannelFuture (err)") {
@@ -76,19 +76,19 @@ class ChannelTransportTest
     val exc = new Exception("wtf")
     dsme.getFuture.setFailure(exc)
     val exc1 = intercept[ChannelException] { Await.result(f) }
-    assert(exc1 === ChannelException(exc, remoteAddress))
+    assert(exc1 == ChannelException(exc, remoteAddress))
   }
 
   test("service reads before read())") {
     sendUpstreamMessage("a reply!")
-    assert(Await.result(trans.read()) === "a reply!")
+    assert(Await.result(trans.read()) == "a reply!")
   }
 
   test("service reads after read()") {
     val f = trans.read()
     assert(!f.isDefined)
     sendUpstreamMessage("a reply!")
-    assert(Await.result(f) === "a reply!")
+    assert(Await.result(f) == "a reply!")
   }
 
   test("closes on interrupted read") {
@@ -130,7 +130,7 @@ class ChannelTransportTest
     verify(ch, never).setReadable(Matchers.any[Boolean])
 
     // Consumed "1", "2"
-    assert(Await.result(f) === Seq("1", "2"))
+    assert(Await.result(f) == Seq("1", "2"))
 
     // Satisfy the buffering requirement
     sendUpstreamMessage("3")
@@ -142,22 +142,22 @@ class ChannelTransportTest
     sendUpstreamMessage("4")
     sendUpstreamMessage("5")
 
-    assert(Await.result(trans.read()) === "3")
+    assert(Await.result(trans.read()) == "3")
     verify(ch, times(1)).setReadable(false)
     verify(ch, never).setReadable(true)
-    assert(Await.result(trans.read()) === "4")
+    assert(Await.result(trans.read()) == "4")
     verify(ch, times(1)).setReadable(false)
     verify(ch, never).setReadable(true)
 
     // At this point, we have buffered 1 message,
     // and we're not readable. If we attempt to read
     // another one, we become readable again.
-    assert(Await.result(trans.read()) === "5")
+    assert(Await.result(trans.read()) == "5")
     verify(ch, times(1)).setReadable(false)
     verify(ch, times(1)).setReadable(true)
     when(ch.isReadable).thenReturn(true)
 
-    // And finally, we don't attemp to change
+    // And finally, we don't attempt to change
     // readability again when we enqueue further
     // reads.
     assert(!trans.read().isDefined)
@@ -170,7 +170,7 @@ class ChannelTransportTest
       sendUpstreamMessage("message:%d".format(i))
 
     for (i <- 0 until 10)
-      assert(Await.result(trans.read()) === "message:%d".format(i))
+      assert(Await.result(trans.read()) == "message:%d".format(i))
 
     assert(!trans.read().isDefined)
   }
@@ -185,7 +185,7 @@ class ChannelTransportTest
     })
 
     val exc1 = intercept[ChannelException] { Await.result(trans.read()) }
-    assert(exc1 === ChannelException(exc, remoteAddress))
+    assert(exc1 == ChannelException(exc, remoteAddress))
   }
 
   test("handle exceptions on pending reads") {  // writes are taken care of by netty
@@ -198,7 +198,7 @@ class ChannelTransportTest
     })
 
     val exc1 = intercept[ChannelException] { Await.result(f) }
-    assert(exc1 === ChannelException(exc, remoteAddress))
+    assert(exc1 == ChannelException(exc, remoteAddress))
   }
 
   test("satisfy onClose") {
@@ -210,7 +210,7 @@ class ChannelTransportTest
       e
     })
 
-    assert(Await.result(trans.onClose) ===
+    assert(Await.result(trans.onClose) ==
       ChannelException(exc, remoteAddress))
   }
 
@@ -227,8 +227,8 @@ class ChannelTransportTest
       e
     })
 
-    assert(f.poll === Some(Return("a")))
-    assert(trans.read().poll === Some(Return("b")))
-    assert(trans.read().poll === Some(Throw(ChannelException(exc, remoteAddress))))
+    assert(f.poll == Some(Return("a")))
+    assert(trans.read().poll == Some(Return("b")))
+    assert(trans.read().poll == Some(Throw(ChannelException(exc, remoteAddress))))
   }
 }

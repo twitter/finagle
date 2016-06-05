@@ -30,9 +30,9 @@ class DrvTest extends FunSuite {
 
   test("Drv.newVose(zero probs)") {
     val Drv.Aliased(aliased, prob) = Drv.newVose(Seq(1, 0))
-    assert(aliased(1) === 0)
-    assert(prob(0) === 1.0)
-    assert(prob(1) === 0.0)
+    assert(aliased(1) == 0)
+    assert(prob(0) == 1.0)
+    assert(prob(1) == 0.0)
   }
 
   test("Drv.newVose(all zeros)") {

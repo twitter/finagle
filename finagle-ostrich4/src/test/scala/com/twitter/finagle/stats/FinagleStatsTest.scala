@@ -62,7 +62,7 @@ class FinagleStatsTest extends FunSuite with MockitoSugar {
   val service = ClientBuilder()
     .name("client")
     .reportTo(statsReceiver)
-    .hosts(server.boundAddress)
+    .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
     .codec(codec)
     .hostConnectionLimit(10)
     .build()
@@ -74,13 +74,13 @@ class FinagleStatsTest extends FunSuite with MockitoSugar {
     Stats.getGauge("client/connections") must beSome(0.0)*/
 
     Await.result(service("Hello\n"))
-    assert(Stats.getGauge("server/connections") === Some(1.0))
-    assert(Stats.getGauge("client/connections") === Some(1.0))
+    assert(Stats.getGauge("server/connections") == Some(1.0))
+    assert(Stats.getGauge("client/connections") == Some(1.0))
   }
 
   test("system should show symmetric stats on client and server") {
     def equalsGauge(name: String) =
-      assert(Stats.getCounter("server/" + name)() === Stats.getCounter("client/" + name)())
+      assert(Stats.getCounter("server/" + name)() == Stats.getCounter("client/" + name)())
 
     equalsGauge("requests")
     equalsGauge("connects")

@@ -9,6 +9,7 @@ import com.twitter.finagle.ssl.Engine
 import com.twitter.finagle.stats.{ServerStatsReceiver, StatsReceiver}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.{DefaultLogger, DefaultTimer}
+import com.twitter.logging.HasLogLevel
 import com.twitter.util.{CloseAwaitably, Duration, Future, NullMonitor, Promise, Time}
 import java.net.SocketAddress
 import java.util.IdentityHashMap
@@ -177,11 +178,12 @@ object Netty3Listener {
       case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
       case _ => None
     }
+    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
 
     val opts = new mutable.HashMap[String, Object]()
     opts += "soLinger" -> (0: java.lang.Integer)
-    opts += "reuseAddress" -> java.lang.Boolean.TRUE
-    opts += "child.tcpNoDelay" -> java.lang.Boolean.TRUE
+    opts += "reuseAddress" -> (reuseAddr: java.lang.Boolean)
+    opts += "child.tcpNoDelay" -> (noDelay: java.lang.Boolean)
     for (v <- backlog) opts += "backlog" -> (v: java.lang.Integer)
     for (v <- sendBufSize) opts += "child.sendBufferSize" -> (v: java.lang.Integer)
     for (v <- recvBufSize) opts += "child.receiveBufferSize" -> (v: java.lang.Integer)
@@ -254,7 +256,7 @@ case class Netty3Listener[In, Out](
   channelWriteCompletionTimeout: Duration = Duration.Top,
   tlsConfig: Option[Netty3ListenerTLSConfig] = None,
   timer: com.twitter.util.Timer = DefaultTimer.twitter,
-  nettyTimer: org.jboss.netty.util.Timer = DefaultTimer,
+  nettyTimer: org.jboss.netty.util.Timer = DefaultTimer.netty,
   statsReceiver: StatsReceiver = ServerStatsReceiver,
   monitor: com.twitter.util.Monitor = NullMonitor,
   logger: java.util.logging.Logger = DefaultLogger
@@ -367,7 +369,7 @@ private[netty3] class ServerBridge[In, Out](
   private[this] val writeTimeoutCounter = statsReceiver.counter("write_timeout")
 
   private[this] def severity(exc: Throwable): Level = exc match {
-    case e: Failure => e.logLevel
+    case e: HasLogLevel => e.logLevel
     case
         _: java.nio.channels.ClosedChannelException
       | _: javax.net.ssl.SSLException
@@ -383,7 +385,7 @@ private[netty3] class ServerBridge[In, Out](
     val channel = e.getChannel
     channels.add(channel)
 
-    val transport = new ChannelTransport(channel).cast[In, Out]
+    val transport = Transport.cast[In, Out](new ChannelTransport[Any, Any](channel))
     serveTransport(transport)
     super.channelOpen(ctx, e)
   }

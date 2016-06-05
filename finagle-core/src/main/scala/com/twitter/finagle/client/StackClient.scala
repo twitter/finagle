@@ -1,6 +1,7 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.{
   BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
 import com.twitter.finagle.filter.{DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
@@ -13,12 +14,13 @@ import com.twitter.finagle.stats.{LoadedHostStatsReceiver, ClientStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
+import com.twitter.util.Future
 
 object StackClient {
   /**
    * Canonical Roles for each Client-related Stack modules.
    */
-  object Role extends Stack.Role("StackClient"){
+  object Role extends Stack.Role("StackClient") {
     val pool = Stack.Role("Pool")
     val requestDraining = Stack.Role("RequestDraining")
     val prepFactory = Stack.Role("PrepFactory")
@@ -35,6 +37,7 @@ object StackClient {
    * @see [[com.twitter.finagle.tracing.WireTracingFilter]]
    * @see [[com.twitter.finagle.service.ExpiringService]]
    * @see [[com.twitter.finagle.service.FailFastFactory]]
+   * @see [[com.twitter.finagle.service.PendingRequestFilter]]
    * @see [[com.twitter.finagle.client.DefaultPool]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
    * @see [[com.twitter.finagle.service.FailureAccrualFactory]]
@@ -50,21 +53,139 @@ object StackClient {
     // Ensure that we have performed global initialization.
     com.twitter.finagle.Init()
 
+    /**
+     * N.B. see the note in `newStack` regarding up / down orientation in the stack.
+     */
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](nilStack[Req, Rep])
+
+    /**
+     * `prepConn` is the bottom of the stack by definition. This position represents
+     * the first module to handle newly connected [[Transport]]s and dispatchers.
+     *
+     * finagle-thrift uses this role to install session upgrading logic from
+     * vanilla Thrift to Twitter Thrift.
+     */
     stk.push(Role.prepConn, identity[ServiceFactory[Req, Rep]](_))
+
+    /**
+     * `WriteTracingFilter` annotates traced requests. Annotations are timestamped
+     * so this should be low in the stack to accurately delineate between wire time
+     * and handling time.
+     */
     stk.push(WireTracingFilter.module)
+
+    /**
+     * `ExpiringService` enforces an idle timeout and total ttl for connections.
+     * This module must be beneath the DefaultPool in order to apply per connection.
+     *
+     * N.B. the difference between this connection ttl and the `DefaultPool` ttl
+     * (via CachingPool) is that this applies to *all* connections and `DefaultPool`
+     * only expires connections above the low watermark.
+     */
     stk.push(ExpiringService.module)
+
+    /**
+     * `FailFastFactory` accumulates failures per connection, marking the endpoint
+     * as unavailable so that modules higher in the stack can dispatch requests
+     * around the failing endpoint.
+     */
     stk.push(FailFastFactory.module)
+
+    /**
+     * `PendingRequestFilter` enforces a limit on the number of pending requests
+     * for a single connection. It must be beneath the `DefaultPool` module so that
+     * its limits are applied per connection rather than per endpoint.
+     */
+    stk.push(PendingRequestFilter.module)
+
+    /**
+     * `DefaultPool` configures connection pooling. Like the `LoadBalancerFactory`
+     * module it is a potentially aggregate [[ServiceFactory]] composed of multiple
+     * [[Service Services]] which represent a distinct session to the same endpoint.
+     */
     stk.push(DefaultPool.module)
+
+    /**
+     * `TimeoutFilter` enforces static request timeouts and broadcast request deadlines,
+     * sending a best-effort interrupt for expired requests.
+     * It must be beneath the `StatsFilter` so that timeouts are properly recorded.
+     */
     stk.push(TimeoutFilter.clientModule)
+
+    /**
+     * `ExceptionRemoteInfoFactory` fills in remote info (upstream addr/client id,
+     * downstream addr/client id, and trace id) in exceptions. This needs to be near the top
+     * of the stack so that failures anywhere lower in the stack have remote
+     * info added to them, but below the stats, tracing, and monitor filters so these filters
+     * see exceptions with remote info added.
+     */
+    stk.push(ExceptionRemoteInfoFactory.module)
+    
+    /**
+     * `FailureAccrualFactory` accrues request failures per endpoint updating its
+     * status so that modules higher in the stack may route around an unhealthy
+     * endpoint.
+     *
+     * It must be above `DefaultPool` to accumulate failures across all sessions
+     * to an endpoint.
+     * It must be above `TimeoutFilter` so that it can observe request timeouts.
+     * It must be above `PendingRequestFilter` so that it can observe client
+     * admission rejections.
+     */
     stk.push(FailureAccrualFactory.module)
+
+    /**
+     * `StatsServiceFactory` exports a gauge which reports the status of the stack
+     * beneath it. It must be above `FailureAccrualFactory` in order to record
+     * failure accrual's aggregate view of health over multiple requests.
+     */
     stk.push(StatsServiceFactory.module)
+
+    /**
+     * `StatsFilter` installs a (wait for it...) stats filter on active sessions.
+     * It must be above the `TimeoutFilter` so that it can record timeouts as failures.
+     * It has no other position constraint.
+     */
     stk.push(StatsFilter.module)
+
+    /**
+     * `DtabStatsFilter` exports dtab stats. It has no relative position constraints
+     * within the endpoint stack.
+     */
     stk.push(DtabStatsFilter.module)
+
+    /**
+     * `ClientDestTracingFilter` annotates the trace with the destination endpoint's
+     * socket address. It has no position constraints within the endpoint stack.
+     */
     stk.push(ClientDestTracingFilter.module)
+
+    /**
+     * `MonitorFilter` installs a configurable exception handler ([[Monitor]]) for
+     * client sessions. There is no specific position constraint but higher in the
+     * stack is preferable so it can wrap more application logic.
+     */
     stk.push(MonitorFilter.module)
+
+    /**
+     * `ExceptionSourceFilter` is the exception handler of last resort. It recovers
+     * application errors into failed [[Future Futures]] and attributes the failures to
+     * clients by client label. This needs to be at the top of the endpoint stack so that
+     * failures anywhere lower in the stack have endpoints attributed to them.
+     */
     stk.push(ExceptionSourceFilter.module)
+
+    /**
+     * `LatencyCompensation` configures latency compensation based on destination.
+     *
+     * It must appear above consumers of the the c.t.f.client.Compensation param, so
+     * above `TimeoutFilter`.
+     *
+     * It is only evaluated at stack creation time.
+     */
     stk.push(LatencyCompensation.module)
+
+
     stk.result
   }
 
@@ -83,7 +204,7 @@ object StackClient {
    * @see [[com.twitter.finagle.factory.RefcountedFactory]]
    * @see [[com.twitter.finagle.factory.TimeoutFactory]]
    * @see [[com.twitter.finagle.FactoryToService]]
-   * @see [[com.twitter.finagle.service.Requeues]]
+   * @see [[com.twitter.finagle.service.Retries]]
    * @see [[com.twitter.finagle.tracing.ClientTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    */
@@ -139,7 +260,7 @@ object StackClient {
      *    load balancer on each request (and closes it after the
      *    response completes).
      *
-     *  * `Requeues` retries `RetryPolicy.RetryableWriteException`s
+     *  * `Retries` retries `RetryPolicy.RetryableWriteException`s
      *    automatically. It must appear above `FactoryToService` so
      *    that service acquisition failures are retried.
      */
@@ -150,7 +271,7 @@ object StackClient {
     stk.push(TimeoutFactory.module)
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
-    stk.push(Requeues.module)
+    stk.push(Retries.moduleRequeueable)
 
     /*
      * These modules deal with name resolution and request
@@ -170,6 +291,11 @@ object StackClient {
      *    in `BindingFactory`.) It must appear below `BindingFactory`
      *    to satisfy the `LoadBalanceFactory.Dest param`, and above
      *    `StatsScoping` to provide the `AddrMetadata` param.
+     *
+     *  * `EndpointRecorder` passes endpoint information to the
+     *    `EndpointRegistry`. It must appear below `BindingFactory` so
+     *    `BindingFactory` can set the `Name.Bound` `BindingFactory.Dest`
+     *    param.
      *
      *  * `BindingFactory` resolves the destination `Name` into a
      *    `NameTree`, and distributes requests to destination clusters
@@ -200,6 +326,7 @@ object StackClient {
      */
     stk.push(StatsScoping.module)
     stk.push(AddrMetadataExtraction.module)
+    stk.push(EndpointRecorder.module)
     stk.push(BindingFactory.module)
     stk.push(TimeoutFactory.module)
     stk.push(FactoryToService.module)
@@ -275,11 +402,29 @@ trait StackClient[Req, Rep] extends StackBasedClient[Req, Rep]
  * The standard template implementation for
  * [[com.twitter.finagle.client.StackClient]].
  *
+ * @see The [[http://twitter.github.io/finagle/guide/Clients.html user guide]]
+ *      for further details on Finagle clients and their configuration.
+  * @see [[StackClient.newStack]] for the default modules used by Finagle
+ *      clients.
  */
 trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
-    extends StackClient[Req, Rep] { self =>
+  extends StackClient[Req, Rep]
+  with Stack.Parameterized[This]
+  with CommonParams[This]
+  with ClientParams[This]
+  with WithClientAdmissionControl[This]
+  with WithClientTransport[This]
+  with WithSession[This]
+  with WithSessionQualifier[This] { self =>
 
+  /**
+   * The type we write into the transport.
+   */
   protected type In
+
+  /**
+   * The type we read out of the transport.
+   */
   protected type Out
 
   /**
@@ -313,13 +458,34 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
    * Creates a new StackClient with parameter `p`.
    */
   override def configured[P: Stack.Param](p: P): This =
-    withParams(params+p)
+    withParams(params + p)
+
+  /**
+   * Creates a new StackClient with parameter `psp._1` and Stack Param type `psp._2`.
+   */
+  override def configured[P](psp: (P, Stack.Param[P])): This = {
+    val (p, sp) = psp
+    configured(p)(sp)
+  }
 
   /**
    * Creates a new StackClient with `params` used to configure this StackClient's `stack`.
    */
   def withParams(params: Stack.Params): This =
     copy1(params = params)
+
+  /**
+   * Prepends `filter` to the top of the client. That is, after materializing
+   * the client (newClient/newService) `filter` will be the first element which
+   * requests flow through. This is a familiar chaining combinator for filters and
+   * is particularly useful for `StdStackClient` implementations that don't expose
+   * services but instead wrap the resulting service with a rich API.
+   */
+  def filtered(filter: Filter[Req, Rep, Req, Rep]): This = {
+    val role = Stack.Role(filter.getClass.getSimpleName)
+    val stackable = Filter.canStackFromFac.toStackable(role, filter)
+    withStack(stackable +: stack)
+  }
 
   /**
    * A copy constructor in lieu of defining StackClient as a
@@ -340,9 +506,23 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
       val parameters = Seq(implicitly[Stack.Param[Transporter.EndpointAddr]])
       def make(prms: Stack.Params, next: Stack[ServiceFactory[Req, Rep]]) = {
         val Transporter.EndpointAddr(addr) = prms[Transporter.EndpointAddr]
-        val endpointClient = copy1(params=prms)
-        val transporter = endpointClient.newTransporter()
-        Stack.Leaf(this, ServiceFactory(() => transporter(addr).map(endpointClient.newDispatcher)))
+        val factory = addr match {
+          case com.twitter.finagle.exp.Address.ServiceFactory(sf: ServiceFactory[Req, Rep], _) => sf
+          case Address.Failed(e) => new FailingFactory[Req, Rep](e)
+          case Address.Inet(ia, _) =>
+            val endpointClient = copy1(params=prms)
+            val transporter = endpointClient.newTransporter()
+            val mkFutureSvc: () => Future[Service[Req, Rep]] =
+              () => transporter(ia).map { trans =>
+                // we do not want to capture and request specific Locals
+                // that would live for the life of the session.
+                Contexts.letClear {
+                  endpointClient.newDispatcher(trans)
+                }
+              }
+            ServiceFactory(mkFutureSvc)
+        }
+        Stack.Leaf(this, factory)
       }
     }
 
@@ -359,10 +539,10 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
     }
 
     val clientStack = stack ++ (endpointer +: nilStack)
-    val clientParams = (params +
+    val clientParams = params +
       Label(clientLabel) +
       Stats(stats.scope(clientLabel)) +
-      BindingFactory.Dest(dest))
+      BindingFactory.Dest(dest)
 
     clientStack.make(clientParams)
   }

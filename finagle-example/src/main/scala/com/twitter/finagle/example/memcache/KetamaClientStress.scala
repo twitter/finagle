@@ -4,11 +4,11 @@ import com.twitter.app.Flag
 import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Cluster, ClientBuilder}
-import com.twitter.finagle.memcachedx
-import com.twitter.finagle.cacheresolver.{CacheNode, CachePoolCluster}
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
-import com.twitter.finagle.memcachedx.replication._
-import com.twitter.finagle.memcachedx.PartitionedClient
+import com.twitter.finagle.memcached
+import com.twitter.finagle.memcached.{CacheNode, CachePoolCluster}
+import com.twitter.finagle.memcached.protocol.text.Memcached
+import com.twitter.finagle.memcached.replication._
+import com.twitter.finagle.memcached.PartitionedClient
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
@@ -16,6 +16,7 @@ import com.twitter.ostrich.admin.{AdminHttpService, RuntimeEnvironment}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.mutable
+import scala.language.reflectiveCalls
 
 object KetamaClientStress extends App {
 
@@ -104,7 +105,7 @@ object KetamaClientStress extends App {
     }
 
     if (replicaPool == null) {
-      val ketamaClient = memcachedx.KetamaClientBuilder()
+      val ketamaClient = memcached.KetamaClientBuilder()
           .clientBuilder(builder)
           .cachePoolCluster(primaryPool)
           .failureAccrualParams(Int.MaxValue, Duration.Top)
@@ -117,31 +118,31 @@ object KetamaClientStress extends App {
             ketamaClient.set(key, value)
           }
         case "getHit" =>
-          keyValueSet foreach { case (k, v) => ketamaClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(ketamaClient.set(k, v)) }
           () => {
             val (key, _) = nextKeyValue
             ketamaClient.get(key)
           }
         case "getMiss" =>
-          keyValueSet foreach { case (k, _) => ketamaClient.delete(k)() }
+          keyValueSet foreach { case (k, _) => Await.result(ketamaClient.delete(k)) }
           () => {
             val (key, _) = nextKeyValue
             ketamaClient.get(key)
           }
         case "gets" =>
-          keyValueSet foreach { case (k, v) => ketamaClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(ketamaClient.set(k, v)) }
           () => {
             val (key, _) = nextKeyValue
             ketamaClient.gets(key)
           }
         case "getsMiss" =>
-          keyValueSet foreach { case (k, _) => ketamaClient.delete(k)() }
+          keyValueSet foreach { case (k, _) => Await.result(ketamaClient.delete(k)) }
           () => {
             val (key, _) = nextKeyValue
             ketamaClient.gets(key)
           }
         case "getsThenCas" =>
-          keyValueSet.map { case (k, v) => ketamaClient.set(k, v)() }
+          keyValueSet.map { case (k, v) => Await.result(ketamaClient.set(k, v)) }
           val casMap = mutable.Map.empty[String, (Buf, Buf)]
 
           () => {
@@ -158,7 +159,7 @@ object KetamaClientStress extends App {
           val (key, value) = (randomString(config.keysize()), Buf.Utf8(randomString(config.valuesize())))
           () => ketamaClient.add(key+load_count.getAndIncrement().toString, value)
         case "replace" =>
-          keyValueSet foreach { case (k, v) => ketamaClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(ketamaClient.set(k, v)) }
           () => {
             val (key, value) = nextKeyValue
             ketamaClient.replace(key, value)
@@ -178,32 +179,32 @@ object KetamaClientStress extends App {
           replicationClient.set(key, value)
         }
         case "getAllHit" =>
-          keyValueSet foreach { case (k, v) => replicationClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(replicationClient.set(k, v)) }
           () => {
             val (key, _) = nextKeyValue
             replicationClient.getAll(key)
           }
         case "getAllMiss" =>
-          keyValueSet foreach { case (k, _) => replicationClient.delete(k)() }
+          keyValueSet foreach { case (k, _) => Await.result(replicationClient.delete(k)) }
           () => {
             val (key, _) = nextKeyValue
             replicationClient.getAll(key)
           }
         case "getOneHit" =>
-          keyValueSet foreach { case (k, v) => replicationClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(replicationClient.set(k, v)) }
           () => {
             val (key, _) = nextKeyValue
             replicationClient.getOne(key, false)
           }
         case "getOneMiss" =>
-          keyValueSet foreach { case (k, _) => replicationClient.delete(k)() }
+          keyValueSet foreach { case (k, _) => Await.result(replicationClient.delete(k)) }
           () => {
             val (key, _) = nextKeyValue
             replicationClient.getOne(key, false)
           }
         case "getSetMix" =>
           assert(config.rwRatio() >=0 && config.rwRatio() < 100)
-          keyValueSet foreach { case (k, v) => replicationClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(replicationClient.set(k, v)) }
           () => {
             val c = load_count.getAndIncrement()
             val (key, value) = keyValueSet((c%config.numkeys()).toInt)
@@ -213,26 +214,26 @@ object KetamaClientStress extends App {
               replicationClient.getOne(key, false)
           }
         case "getsAll" =>
-          keyValueSet foreach { case (k, v) => replicationClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(replicationClient.set(k, v)) }
           () => {
             val (key, _) = nextKeyValue
             replicationClient.getsAll(key)
           }
         case "getsAllMiss" =>
-          keyValueSet foreach { case (k, _) => replicationClient.delete(k)() }
+          keyValueSet foreach { case (k, _) => Await.result(replicationClient.delete(k)) }
           () => {
             val (key, _) = nextKeyValue
             replicationClient.getsAll(key)
           }
         case "getsAllThenCas" =>
-          keyValueSet.map { case (k, v) => replicationClient.set(k, v)() }
+          keyValueSet.map { case (k, v) => Await.result(replicationClient.set(k, v)) }
           val casMap: scala.collection.mutable.Map[String, ReplicationStatus[Option[(Buf, ReplicaCasUnique)]]] = scala.collection.mutable.Map()
 
           () => {
             val (key, value) = nextKeyValue
             casMap.remove(key) match {
               case Some(ConsistentReplication(Some((_, RCasUnique(uniques))))) =>
-                replicationClient.cas(key, value, uniques)
+                replicationClient.checkAndSet(key, value, uniques)
               case Some(ConsistentReplication(None)) =>
                 // not expecting this to ever happen
                 replicationClient.set(key, value)
@@ -251,7 +252,7 @@ object KetamaClientStress extends App {
             replicationClient.add(key+load_count.getAndIncrement().toString, value)
           }
         case "replace" =>
-          keyValueSet foreach { case (k, v) => replicationClient.set(k, v)() }
+          keyValueSet foreach { case (k, v) => Await.result(replicationClient.set(k, v)) }
           () => {
             val (key, value) = nextKeyValue
             replicationClient.replace(key, value)

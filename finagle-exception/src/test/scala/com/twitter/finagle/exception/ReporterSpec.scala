@@ -122,6 +122,6 @@ class ExceptionReporterTest extends FunSuite with MockitoSugar {
     val factoryWithout = reporter("qux", None)
 
     assert(factoryWithClient != factoryWithout)
-    assert(factoryWithClient === factoryWithout.withClient(addr.getAddress))
+    assert(factoryWithClient == factoryWithout.withClient(addr.getAddress))
   }
 }

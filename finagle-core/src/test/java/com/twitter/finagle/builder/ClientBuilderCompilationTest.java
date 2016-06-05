@@ -1,6 +1,7 @@
 package com.twitter.finagle.builder;
 
 import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.junit.Test;
 
 import com.twitter.finagle.AbstractCodec;
 import com.twitter.finagle.ClientCodecConfig;
@@ -8,8 +9,9 @@ import com.twitter.finagle.Codec;
 import com.twitter.finagle.ServiceFactory;
 import com.twitter.util.Function;
 
-class ClientBuilderCompilationTest {
+public class ClientBuilderCompilationTest {
 
+  @Test
   public void testStackClientOfCodec() {
     final Codec<String, String> codec = new AbstractCodec<String, String>() {
       public ChannelPipelineFactory pipelineFactory() {

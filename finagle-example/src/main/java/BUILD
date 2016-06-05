@@ -8,10 +8,12 @@ java_library(name='java',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'finagle/finagle-example/src/main/thrift:thrift-scala',
+    'finagle/finagle-http',
     'finagle/finagle-kestrel',
     'finagle/finagle-thrift',
     'util/util-core',
   ],
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )
 

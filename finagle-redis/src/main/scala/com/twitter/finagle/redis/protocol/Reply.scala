@@ -1,8 +1,10 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.naggati.ProtocolError
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.ServerError
+import com.twitter.finagle.redis.naggati.ProtocolError
 import com.twitter.finagle.redis.util._
+import com.twitter.io.Buf
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 object RequireServerProtocol extends ErrorConversion {
@@ -13,13 +15,16 @@ sealed abstract class Reply extends RedisMessage
 sealed abstract class SingleLineReply extends Reply { // starts with +,-, or :
   import RedisCodec.EOL_DELIMITER
 
-  def getMessageTuple(): (Char,String)
+  def getMessageTuple(): (Char, String)
   override def toChannelBuffer = {
     val (c,s) = getMessageTuple
     StringToChannelBuffer("%c%s%s".format(c,s,EOL_DELIMITER))
   }
 }
 sealed abstract class MultiLineReply extends Reply
+object NoReply extends Reply {
+  def toChannelBuffer: ChannelBuffer = ???
+}
 
 case class StatusReply(message: String) extends SingleLineReply {
   RequireServerProtocol(message != null && message.length > 0, "StatusReply had empty message")
@@ -33,10 +38,11 @@ case class IntegerReply(id: Long) extends SingleLineReply {
   override def getMessageTuple() = (RedisCodec.INTEGER_REPLY, id.toString)
 }
 
-case class BulkReply(message: ChannelBuffer) extends MultiLineReply {
+case class BulkReply(message: Buf) extends MultiLineReply {
   override def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(List(message), false)
+    RedisCodec.toUnifiedFormat(List(ChannelBufferBuf.Owned.extract(message)), false)
 }
+
 case class EmptyBulkReply() extends MultiLineReply {
   val message = "$-1"
   override def toChannelBuffer =
@@ -65,8 +71,8 @@ case class NilMBulkReply() extends MultiLineReply {
 }
 
 class ReplyCodec extends UnifiedProtocolCodec {
-  import com.twitter.finagle.redis.naggati.{Encoder, NextStep}
   import com.twitter.finagle.redis.naggati.Stages._
+  import com.twitter.finagle.redis.naggati.{Encoder, NextStep}
   import RedisCodec._
 
   val encode = new Encoder[Reply] {
@@ -106,7 +112,7 @@ class ReplyCodec extends UnifiedProtocolCodec {
           if (eol(0) != '\r' || eol(1) != '\n') {
             throw new ServerError("Expected EOL after line data and didn't find it")
           }
-          emit(BulkReply(ChannelBuffers.wrappedBuffer(bytes)))
+          emit(BulkReply(Buf.ByteArray.Owned(bytes)))
         }
       }
     }
@@ -141,7 +147,7 @@ class ReplyCodec extends UnifiedProtocolCodec {
                     throw new ProtocolError("Expected EOL after line data and didn't find it")
                   }
                   decodeMBulkLines(i - 1, stack,
-                    BulkReply(ChannelBuffers.wrappedBuffer(byteArray)) :: lines)
+                    BulkReply(Buf.ByteArray.Owned(byteArray)) :: lines)
                 }
               }
             }

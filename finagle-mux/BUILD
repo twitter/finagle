@@ -1,8 +1,7 @@
-maven_layout()
-
 target(name='finagle-mux',
   dependencies=[
-    'finagle/finagle-mux/src/main/scala'
+    'finagle/finagle-mux/src/main/scala',
+    'finagle/finagle-mux/src/main/java'
   ]
 )
 

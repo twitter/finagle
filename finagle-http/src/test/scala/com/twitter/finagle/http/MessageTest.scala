@@ -1,7 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.conversions.time._
-import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.io.Buf
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -10,38 +10,23 @@ import org.scalatest.junit.JUnitRunner
 class MessageTest extends FunSuite {
   test("empty message") {
     val response = Response()
-    assert(response.length === 0)
-    assert(response.contentString === "")
+    assert(response.length == 0)
+    assert(response.contentString == "")
   }
 
   test("headers") {
     val response = Request()
-    response.allow.toList === Nil
+    response.allow.toList == Nil
     response.allow = Method.Get :: Method.Head :: Nil
-    assert(response.allow === Some("GET,HEAD"))
+    assert(response.allow == Some("GET,HEAD"))
 
-    assert(response.accept.toList === Nil)
+    assert(response.accept.toList == Nil)
     response.accept = "text/plain; q=0.5" :: "text/html" :: Nil
-    assert(response.accept.toList === "text/plain; q=0.5" :: "text/html" :: Nil)
+    assert(response.accept.toList == "text/plain; q=0.5" :: "text/html" :: Nil)
 
     response.accept = "A,,c;param,;d,;"
-    assert(response.accept.toList === "A" :: "c;param" :: ";d" :: ";" :: Nil)
-    assert(response.acceptMediaTypes.toList === "a" :: "c" :: Nil)
-  }
-
-  test("ascii encoding protects against header injection") {
-    // A request with a "Foo" key, containing the injected header "Bar".
-    val req = Request("/?Foo=%E5%98%8D%E5%98%8ABar:%20injection")
-    val (fooKey, fooVal) = req.params.toList.head
-    // We encode the response to a string containing raw HTTP. HTTP is
-    // delimited by CRLF, which we exploit to crudely (but effectively) extract
-    // HTTP header lines. Because we set only one header for "Foo" we should
-    // not also see a header "Bar".
-    val res = Response()
-    res.headers.set(fooKey, fooVal)
-    val lines = res.encodeString.split("\r\n")
-    assert(lines.exists(_.startsWith("Foo:")))
-    assert(!lines.exists(_.startsWith("Bar:")))
+    assert(response.accept.toList == "A" :: "c;param" :: ";d" :: ";" :: Nil)
+    assert(response.acceptMediaTypes.toList == "a" :: "c" :: Nil)
   }
 
   test("charset") {
@@ -59,7 +44,7 @@ class MessageTest extends FunSuite {
     tests.foreach { case (header, expected) =>
       val request = Request()
       request.headers.set("Content-Type", header)
-      assert(request.charset === Option(expected))
+      assert(request.charset == Option(expected))
     }
   }
 
@@ -78,7 +63,7 @@ class MessageTest extends FunSuite {
       val request = Request()
       request.headers.set("Content-Type", header)
       request.charset = charset
-      assert(request.headers.get("Content-Type") === expected)
+      assert(request.headers.get("Content-Type") == expected)
     }
   }
 
@@ -97,13 +82,13 @@ class MessageTest extends FunSuite {
       val request = Request()
       request.headers.set("Content-Type", header)
       // shorthand for empty mediaTypes really being returned as None after being parsed.
-      assert(request.mediaType === (if (expected.isEmpty) None else Some(expected)))
+      assert(request.mediaType == (if (expected.isEmpty) None else Some(expected)))
     }
   }
 
   test("empty mediaType") {
     val request = Request()
-    request.mediaType === None
+    request.mediaType == None
   }
 
   test("mediaType=") {
@@ -119,7 +104,7 @@ class MessageTest extends FunSuite {
       val request = Request()
       request.headers.set("Content-Type", header)
       request.mediaType = mediaType
-      assert(request.headers.get("Content-Type") === expected)
+      assert(request.headers.get("Content-Type") == expected)
     }
   }
 
@@ -129,49 +114,49 @@ class MessageTest extends FunSuite {
     response.write("hello")
     response.clearContent()
 
-    assert(response.contentString === "")
-    assert(response.length        === 0)
+    assert(response.contentString == "")
+    assert(response.length        == 0)
   }
 
   test("contentString") {
     val response = Response()
-    response.setContent(ChannelBuffers.wrappedBuffer("hello".getBytes))
-    assert(response.contentString === "hello")
-    assert(response.contentString === "hello")
+    response.content = Buf.Utf8("hello")
+    assert(response.contentString == "hello")
+    assert(response.contentString == "hello")
   }
 
   test("cacheControl") {
     val response = Response()
 
     response.cacheControl = 15123.milliseconds
-    assert(response.cacheControl === Some("max-age=15, must-revalidate"))
+    assert(response.cacheControl == Some("max-age=15, must-revalidate"))
   }
 
   test("withInputStream") {
     val response = Response()
-    response.setContent(ChannelBuffers.wrappedBuffer("hello".getBytes))
+    response.content = Buf.Utf8("hello")
     response.withInputStream { inputStream =>
       val bytes = new Array[Byte](5)
       inputStream.read(bytes)
-      assert(new String(bytes) === "hello")
+      assert(new String(bytes) == "hello")
     }
   }
 
   test("withReader") {
     val response = Response()
-    response.setContent(ChannelBuffers.wrappedBuffer("hello".getBytes))
+    response.content = Buf.Utf8("hello")
     response.withReader { reader =>
       val bytes = new Array[Char](5)
       reader.read(bytes)
-      assert(new String(bytes) === "hello")
+      assert(new String(bytes) == "hello")
     }
   }
 
   test("write(String)") {
     val response = Response()
     response.write("hello")
-    assert(response.length        === 5)
-    assert(response.contentString === "hello")
+    assert(response.length        == 5)
+    assert(response.contentString == "hello")
   }
 
   test("write(String), multiple writes") {
@@ -181,8 +166,8 @@ class MessageTest extends FunSuite {
     response.write("l")
     response.write("l")
     response.write("o")
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withOutputStream") {
@@ -191,8 +176,8 @@ class MessageTest extends FunSuite {
       outputStream.write("hello".getBytes)
     }
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withOutputStream, multiple writes") {
@@ -204,8 +189,8 @@ class MessageTest extends FunSuite {
     }
     response.write("o")
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withWriter") {
@@ -214,8 +199,8 @@ class MessageTest extends FunSuite {
       writer.write("hello")
     }
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 
   test("withWriter, multiple writes") {
@@ -227,7 +212,7 @@ class MessageTest extends FunSuite {
     }
     response.write("o")
 
-    assert(response.contentString === "hello")
-    assert(response.length        === 5)
+    assert(response.contentString == "hello")
+    assert(response.length        == 5)
   }
 }

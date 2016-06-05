@@ -25,7 +25,7 @@ public final class ThriftServer {
   public static void main(String[] args) throws TimeoutException, InterruptedException {
     //#thriftserverapi
     Hello.FutureIface impl = new HelloImpl();
-    ListeningServer server = Thrift.serveIface("localhost:8080", impl);
+    ListeningServer server = Thrift.server().serveIface("localhost:8080", impl);
     Await.ready(server);
     //#thriftserverapi
   }

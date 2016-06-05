@@ -1,15 +1,14 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.finagle.http.codec.HttpDtab
-import com.twitter.finagle.http.{Response, Status}
+import com.twitter.finagle.http.{Response, Status, Message}
 import com.twitter.finagle.{Dtab, SimpleFilter, Service}
 import com.twitter.util.{Throw, Return, Future}
-import org.jboss.netty.handler.codec.http.{HttpMessage, HttpRequest, HttpResponse}
 
 /**
  * Delegate to the dtab contained inside of the request.
  */
-abstract class DtabFilter[Req <: HttpMessage, Rep <: HttpMessage]
+abstract class DtabFilter[Req <: Message, Rep <: Message]
   extends SimpleFilter[Req, Rep] {
 
   def respondToInvalid(req: Req, msg: String): Future[Rep]
@@ -41,12 +40,7 @@ object DtabFilter {
     Future.value(rsp)
   }
 
-  val Netty = new DtabFilter[HttpRequest, HttpResponse] {
-    def respondToInvalid(req: HttpRequest, msg: String) =
-      invalidResponse(msg) map(_.httpResponse)
-  }
-
-  class Finagle[Req <: HttpMessage] extends DtabFilter[Req, Response] {
+  class Finagle[Req <: Message] extends DtabFilter[Req, Response] {
     def respondToInvalid(req: Req, msg: String) = invalidResponse(msg)
   }
 }

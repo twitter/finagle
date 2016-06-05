@@ -5,7 +5,6 @@ import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.util.{Duration, Future, Return, Stopwatch, Throw}
 
-
 /**
  * Statistic filter.
  *

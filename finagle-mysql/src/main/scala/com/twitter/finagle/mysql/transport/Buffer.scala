@@ -172,7 +172,7 @@ trait BufferReader extends Buffer {
 
   /**
    * Reads a length encoded set of bytes according to the MySQL
-   * Client/Server protocol. This is indentical to a length coded
+   * Client/Server protocol. This is identical to a length coded
    * string except the bytes are returned raw.
    * @return an Array[Byte] containing the length coded set of
    * bytes starting at offset.
@@ -323,7 +323,7 @@ trait BufferWriter extends Buffer {
      charset: JCharset = Charset.defaultCharset
    ): BufferWriter = {
     writeBytes(s.getBytes(charset))
-    writeByte('\0')
+    writeByte('\u0000')
     this
    }
 

@@ -2,7 +2,7 @@ package com.twitter.finagle.zookeeper
 
 import com.twitter.common.zookeeper.ServerSetImpl
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Resolver}
+import com.twitter.finagle.{Addr, Address, Resolver}
 import com.twitter.thrift.Status._
 import com.twitter.util.{Await, Duration, RandomSocket, Var}
 import java.net.InetSocketAddress
@@ -52,7 +52,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
       assert(ep.getHost == "0.0.0.0")
       assert(ep.getPort == ephAddr1.getPort)
 
-      assert(clust() === clust())
+      assert(clust() == clust())
       val snap = clust()
 
       serverSet.join(ephAddr2, Map[String, InetSocketAddress]().asJava, ALIVE)
@@ -104,36 +104,36 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
       val res = new ZkResolver(factory)
       val va = res.bind("localhost:%d!/foo/bar/baz".format(
         inst.zookeeperAddress.getPort))
-      eventually { Var.sample(va) === Addr.Bound() }
+      eventually { Var.sample(va) == Addr.Bound() }
 
       /*
        val inetClust = clust collect { case ia: InetSocketAddress => ia }
-       assert(inetClust() === inetClust())
+       assert(inetClust() == inetClust())
        */
 
       val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
       val port1 = RandomSocket.nextPort()
       val port2 = RandomSocket.nextPort()
-      val sockAddr = new InetSocketAddress("127.0.0.1", port1)
-      val blahAddr = new InetSocketAddress("10.0.0.1", port2)
+      val sockAddr = Address.Inet(new InetSocketAddress("127.0.0.1", port1), Addr.Metadata.empty)
+      val blahAddr = Address.Inet(new InetSocketAddress("10.0.0.1", port2), Addr.Metadata.empty)
 
       val status = serverSet.join(
-        sockAddr,
-        Map[String, InetSocketAddress]("blah" -> blahAddr).asJava,
+        sockAddr.addr,
+        Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava,
         ALIVE
       )
 
-      eventually { assert(Var.sample(va) === Addr.Bound(sockAddr)) }
+      eventually { assert(Var.sample(va) == Addr.Bound(sockAddr)) }
       status.leave()
-      eventually { assert(Var.sample(va) === Addr.Neg) }
+      eventually { assert(Var.sample(va) == Addr.Neg) }
       serverSet.join(
-        sockAddr,
-        Map[String, InetSocketAddress]("blah" -> blahAddr).asJava, ALIVE)
-      eventually { assert(Var.sample(va) === Addr.Bound(sockAddr)) }
+        sockAddr.addr,
+        Map[String, InetSocketAddress]("blah" -> blahAddr.addr).asJava, ALIVE)
+      eventually { assert(Var.sample(va) == Addr.Bound(sockAddr)) }
 
       val blahVa = res.bind("localhost:%d!/foo/bar/baz!blah".format(
         inst.zookeeperAddress.getPort))
-      eventually { assert(Var.sample(blahVa) === Addr.Bound(blahAddr)) }
+      eventually { assert(Var.sample(blahVa) == Addr.Bound(blahAddr)) }
     }
 
     test("filter by endpoint") {

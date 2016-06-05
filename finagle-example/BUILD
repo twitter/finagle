@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-example',
   dependencies=[
     'finagle/finagle-example/src/main/java',

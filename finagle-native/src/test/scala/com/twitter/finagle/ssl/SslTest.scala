@@ -3,14 +3,12 @@ package com.twitter.finagle.ssl
 import com.google.common.io.{Files => GuavaFiles, Resources}
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.http.Http
-import com.twitter.io.TempFile
+import com.twitter.finagle.http._
+import com.twitter.io.Buf
 import com.twitter.util.{Await, Future, NonFatal}
 import java.io.File
 import java.net.{InetAddress, InetSocketAddress}
 import java.nio.file.{Path, Files}
-import org.jboss.netty.buffer._
-import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -43,7 +41,7 @@ class SslTest extends FunSuite {
       certChainInput.setupCADirPath.toFile // working dir
     )
     process.waitFor()
-    assert(process.exitValue === 0)
+    assert(process.exitValue == 0)
   } catch {
     case e: java.io.IOException =>
       println("IOException: I/O error in running setupCA script: " +
@@ -65,28 +63,21 @@ class SslTest extends FunSuite {
 
   // now let's run some tests
   test("be able to send and receive various sized content") {
-    def makeContent(length: Int) = {
-      val buf = ChannelBuffers.directBuffer(length)
-      while (buf.writableBytes() > 0)
-        buf.writeByte('Z')
-      buf
-    }
+    def makeContent(length: Int): Buf =
+      Buf.ByteArray.Owned(Array.fill(length)('Z'.toByte))
 
-    val service = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = Future {
-        val requestedBytes = request.headers.get("Requested-Bytes")
-          match {
-          case s: String => s.toInt
-          case _ => 17280
+    val service = new Service[Request, Response] {
+      def apply(request: Request) = Future {
+        val requestedBytes = request.headerMap.get("Requested-Bytes") match {
+          case Some(s) => s.toInt
+          case None => 17280
         }
-        val response = new DefaultHttpResponse(
-          HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Option(request.headers.get("X-Transport-Cipher")) foreach
-        { cipher: String => response.headers.set("X-Transport-Cipher",
-          cipher) }
-        response.setContent(makeContent(requestedBytes))
-        HttpHeaders.setContentLength(response, requestedBytes)
-
+        val response = Response(Version.Http11, Status.Ok)
+        request.headerMap.get("X-Transport-Cipher").foreach { cipher =>
+          response.headerMap.set("X-Transport-Cipher", cipher)
+        }
+        response.content = makeContent(requestedBytes)
+        response.contentLength = requestedBytes
         response
       }
     }
@@ -105,19 +96,18 @@ class SslTest extends FunSuite {
     def client =
       ClientBuilder()
         .name("http-client")
-        .hosts(server.boundAddress)
+        .hosts(server.boundAddress.asInstanceOf[InetSocketAddress])
         .codec(codec)
         .hostConnectionLimit(1)
         .tlsWithoutValidation()
         .build()
 
     def check(requestSize: Int, responseSize: Int) {
-      val request = new DefaultHttpRequest(HttpVersion.HTTP_1_1,
-        HttpMethod.GET, "/")
+      val request = Request(Version.Http11, Method.Get, "/")
 
       if (requestSize > 0) {
-        request.setContent(makeContent(requestSize))
-        HttpHeaders.setContentLength(request, requestSize)
+        request.content = makeContent(requestSize)
+        request.contentLength = requestSize
       }
 
       if (responseSize > 0)
@@ -126,15 +116,13 @@ class SslTest extends FunSuite {
         request.headers.set("Requested-Bytes", 0)
 
       val response = Await.result(client(request))
-      assert(response.getStatus === HttpResponseStatus.OK)
-      assert(HttpHeaders.getContentLength(response) === responseSize)
-      val content = response.getContent()
+      assert(response.status == Status.Ok)
+      assert(response.contentLength == Some(responseSize))
+      val content = response.content
 
-      assert(content.readableBytes() === responseSize)
+      assert(content.length == responseSize)
 
-      while (content.readableBytes() > 0) {
-        assert(content.readByte() === 'Z')
-      }
+      assert(content == makeContent(responseSize))
 
       val cipher = response.headers.get("X-Transport-Cipher")
       assert(cipher != "null")
@@ -148,27 +136,21 @@ class SslTest extends FunSuite {
 
   test("be able to validate a properly constructed authentication chain") {
     // ... spin up an SSL server ...
-    val service = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest) = Future {
-        def makeContent(length: Int) = {
-          val buf = ChannelBuffers.directBuffer(length)
-          while (buf.writableBytes() > 0)
-            buf.writeByte('Z')
-          buf
+    val service = new Service[Request, Response] {
+      def apply(request: Request) = Future {
+        def makeContent(length: Int): Buf =
+          Buf.ByteArray.Owned(Array.fill(length)('Z'.toByte))
+
+        val requestedBytes = request.headerMap.get("Requested-Bytes") match {
+          case Some(s) => s.toInt
+          case None => 17280
         }
-        val requestedBytes = request.headers.get("Requested-Bytes")
-          match {
-          case s: String => s.toInt
-          case _ => 17280
+        val response = Response(Version.Http11, Status.Ok)
+        request.headerMap.get("X-Transport-Cipher").foreach { cipher =>
+          response.headerMap.set("X-Transport-Cipher", cipher)
         }
-        val response = new DefaultHttpResponse(
-          HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-        Option(request.headers.get("X-Transport-Cipher")) foreach {
-          cipher: String =>
-          response.headers.set("X-Transport-Cipher", cipher)
-        }
-        response.setContent(makeContent(requestedBytes))
-        HttpHeaders.setContentLength(response, requestedBytes)
+        response.content = makeContent(requestedBytes)
+        response.contentLength = requestedBytes
 
         response
       }
@@ -206,14 +188,14 @@ class SslTest extends FunSuite {
       process.getOutputStream.close()
 
       process.waitFor()
-      assert(process.exitValue === 0)
+      assert(process.exitValue == 0)
 
       // look for text "Verify return code: 0 (ok)" on stdout
       val out = process.getInputStream
       val outBuf = new Array[Byte](out.available)
       out.read(outBuf)
       val outBufStr = new String(outBuf)
-      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) === Some("""Verify return code: 0 (ok)"""))
+      assert("Verify return code: 0 \\(ok\\)".r.findFirstIn(outBufStr) == Some("""Verify return code: 0 (ok)"""))
     } catch {
       case ex: java.io.IOException =>
         println("Test skipped: running openssl failed" +

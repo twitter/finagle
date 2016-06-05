@@ -19,7 +19,7 @@ public final class ThriftClient {
    */
   public static void main(String[] args) throws Exception {
     //#thriftclientapi
-    Hello.FutureIface client = Thrift.newIface("localhost:8080", Hello.FutureIface.class);
+    Hello.FutureIface client = Thrift.client().newIface("localhost:8080", Hello.FutureIface.class);
     Future<String> response = client.hi().onSuccess(new Function<String, BoxedUnit>() {
       @Override
       public BoxedUnit apply(String response) {

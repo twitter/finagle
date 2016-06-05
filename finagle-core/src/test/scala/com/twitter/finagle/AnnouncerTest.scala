@@ -30,18 +30,18 @@ class AnnouncerTest extends FunSuite {
 
   test("resolve ServiceLoaded announcers") {
     Await.result(Announcer.announce(addr, "test!xyz")) match {
-      case p: Proxy => assert(p.self === TestAnnouncement(addr, "xyz"))
+      case p: Proxy => assert(p.self == TestAnnouncement(addr, "xyz"))
       case _ => assert(false)
     }
   }
 
   test("provide a set of announcements") {
     Announcer.announce(addr, "test!xyz")
-    assert(Announcer.announcements === Set((addr, List("test!xyz"))))
+    assert(Announcer.announcements == Set((addr, List("test!xyz"))))
   }
 
   test("get an announcer instance") {
     val anmt = Await.result(Announcer.get(classOf[TestAnnouncer]).get.announce(addr, "foo"))
-    assert(anmt === TestAnnouncement(addr, "foo"))
+    assert(anmt == TestAnnouncement(addr, "foo"))
   }
 }

@@ -3,8 +3,7 @@ package com.twitter.finagle.http.filter
 import com.twitter.finagle.{CancelledRequestException, Service, SimpleFilter}
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.logging.Logger
-import com.twitter.util.{NonFatal, Future}
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
+import com.twitter.util.{Future, NonFatal}
 
 /**
  * General purpose exception filter.
@@ -17,7 +16,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response] {
   import ExceptionFilter.ClientClosedRequestStatus
 
-  private val log = Logger("finagle-http")
+  private val log = Logger("finagle.http")
 
   def apply(request: REQUEST, service: Service[REQUEST, Response]): Future[Response] =
     {
@@ -30,11 +29,11 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
     } rescue {
       case e: CancelledRequestException =>
         // This only happens when ChannelService cancels a reply.
-        log.warning("cancelled request: uri:%s", request.getUri)
+        log.warning("cancelled request: uri:%s", request.uri)
         respond(request, ClientClosedRequestStatus)
       case e: Throwable =>
         try {
-          log.warning(e, "exception: uri:%s exception:%s", request.getUri, e)
+          log.warning(e, "exception: uri:%s exception:%s", request.uri, e)
           respond(request, Status.InternalServerError)
         } catch {
           // logging or internals are broken.  Write static string to console -
@@ -45,7 +44,7 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
         }
     }
 
-  private def respond(request: REQUEST, responseStatus: HttpResponseStatus): Future[Response] = {
+  private def respond(request: REQUEST, responseStatus: Status): Future[Response] = {
     val response = request.response
     response.status = responseStatus
     response.clearContent()
@@ -57,5 +56,5 @@ class ExceptionFilter[REQUEST <: Request] extends SimpleFilter[REQUEST, Response
 
 object ExceptionFilter extends ExceptionFilter[Request] {
   private[ExceptionFilter] val ClientClosedRequestStatus =
-    new HttpResponseStatus(499, "Client Closed Request")
+    Status.ClientClosedRequest
 }

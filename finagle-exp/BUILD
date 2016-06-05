@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='benchmark',
   dependencies=[
     'finagle/finagle-exp/src/main/scala:benchmark'

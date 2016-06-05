@@ -1,11 +1,10 @@
 package com.twitter.finagle.group
 
 import com.twitter.concurrent.{Offer, Broker}
-import com.twitter.finagle.builder.Cluster
 import com.twitter.finagle.Group
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Future, Time, Timer, Duration, Var}
+import com.twitter.util._
 import scala.collection.immutable.Queue
 
 @deprecated("Use StabilizingAddr instead", "6.7.5")
@@ -99,7 +98,7 @@ object StabilizingGroup {
         def inQ(elem: T) = q exists { case (e, _) => e == elem }
         for (el <- snap &~ newSet if !inQ(el)) {
           val until = Time.now + grace
-          q = q enqueue (el, until)
+          q = q enqueue ((el, until))
         }
 
         loop(q, h)
@@ -116,10 +115,10 @@ object StabilizingGroup {
 
     loop(Queue.empty, Healthy)
 
-    underlying.set observe { set =>
+    underlying.set.changes.register(Witness({ set =>
       // We can synchronize here because we know loop
       // is eager, and doesn't itself synchronize.
       newSet !! set
-    }
+    }))
   }
 }

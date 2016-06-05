@@ -21,7 +21,7 @@ class ExceptionSourceFilterTest extends FunSuite with MockitoSugar {
     val actual = intercept[SourcedException] {
       Await.result(composed(0))
     }
-    assert(actual.serviceName === "name")
+    assert(actual.serviceName == "name")
   }
 
   test("ExceptionSourceFilter should add a name to failures") {
@@ -32,6 +32,6 @@ class ExceptionSourceFilterTest extends FunSuite with MockitoSugar {
     val actual = intercept[Failure] {
       Await.result(composed(0))
     }
-    assert(actual.getSource(Failure.Source.Service) === Some("name"))
+    assert(actual.getSource(Failure.Source.Service) == Some("name"))
   }
 }

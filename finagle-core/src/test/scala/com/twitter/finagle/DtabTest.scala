@@ -19,7 +19,7 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     val d1 = Dtab.read("/foo => /bar")
     val d2 = Dtab.read("/foo=>/biz;/biz=>/$/inet/0/8080;/bar=>/$/inet/0/9090")
 
-    assert(d1++d2 === Dtab.read("""
+    assert(d1++d2 == Dtab.read("""
       /foo=>/bar;
       /foo=>/biz;
       /biz=>/$/inet/0/8080;
@@ -27,10 +27,30 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
     """))
   }
 
+  test("Dtab.read ignores comment lines with #") {
+    val withComments = Dtab.read("""
+# a comment
+      /#foo => /biz  # another comment
+             | ( /bliz & # yet another comment
+                 /bluth ) # duh bluths
+             ; #finalmente
+      #/ignore=>/me;
+    """)
+    assert(withComments == Dtab(IndexedSeq(
+      Dentry(Path.Utf8("#foo"), NameTree.Alt(
+        NameTree.Leaf(Path.Utf8("biz")),
+        NameTree.Union(
+          NameTree.Weighted(NameTree.Weighted.defaultWeight, NameTree.Leaf(Path.Utf8("bliz"))),
+          NameTree.Weighted(NameTree.Weighted.defaultWeight, NameTree.Leaf(Path.Utf8("bluth")))
+        )
+      ))
+    )))
+  }
+
   test("d1 ++ Dtab.empty") {
     val d1 = Dtab.read("/foo=>/bar;/biz=>/baz")
 
-    assert(d1 ++ Dtab.empty === d1)
+    assert(d1 ++ Dtab.empty == d1)
   }
 
   test("Dtab.stripPrefix") {
@@ -58,11 +78,11 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
       Dentry.read("%s=>%s".format(a.show.toUpperCase, b.show.toUpperCase))
     }
 
-    assert(dtab1.size === 2)
+    assert(dtab1.size == 2)
     dtab1(0) match {
       case Dentry(a, b) =>
-        assert(a === Path.Utf8("A"))
-        assert(b === NameTree.Leaf(Path.Utf8("B")))
+        assert(a == Dentry.Prefix(Dentry.Prefix.Label("A")))
+        assert(b == NameTree.Leaf(Path.Utf8("B")))
     }
   }
 
@@ -73,6 +93,11 @@ class DtabTest extends FunSuite with AssertionsForJUnit {
           /a => /b;
           """)
       } catch { case _: IllegalArgumentException => Dtab.empty }
-    assert(dtab.length === 2)
+    assert(dtab.length == 2)
+  }
+
+  test("dtab rewrites with wildcards") {
+    val dtab = Dtab.read("/a/*/c => /d")
+    assert(dtab.lookup(Path.read("/a/b/c/e/f")) == NameTree.Leaf(Name.Path(Path.read("/d/e/f"))))
   }
 }

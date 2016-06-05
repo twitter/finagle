@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle.{Status, ClientConnection, Service, ServiceFactory, Failure}
-import com.twitter.util.{Await, Future, Promise, Time}
+import com.twitter.util._
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -64,7 +64,7 @@ class DelayedFactoryTest extends FunSuite {
 
   def numWaitersCheckFactory(factory: ServiceFactory[Int, Int], num: Int) {
     factory.getClass.getDeclaredMethods.find(_.getName == "numWaiters").foreach { meth =>
-      assert(meth.invoke(factory) === num)
+      assert(meth.invoke(factory) == num)
     }
   }
 
@@ -84,7 +84,7 @@ class DelayedFactoryTest extends FunSuite {
         numWaitersCheckFactory(factory, 1)
         completeFuture()
         assert(bufferF.isDefined)
-        assert(Await.result(bufferF) === service)
+        assert(Await.result(bufferF) == service)
       }
 
       test(
@@ -104,7 +104,7 @@ class DelayedFactoryTest extends FunSuite {
         val actual = intercept[Failure] {
           Await.result(bufferF)
         }
-        assert(actual.getCause === exc)
+        assert(actual.getCause == exc)
       }
 
       test(
@@ -159,7 +159,7 @@ class DelayedFactoryTest extends FunSuite {
         val actual = intercept[Exception] {
           Await.result(bufferF)
         }
-        assert(actual === failed)
+        assert(actual == failed)
       }
 
       test(
@@ -176,7 +176,7 @@ class DelayedFactoryTest extends FunSuite {
         val actual = intercept[Exception] {
           Await.result(bufferF)
         }
-        assert(actual === failed)
+        assert(actual == failed)
       }
     }
   }
@@ -220,7 +220,7 @@ class DelayedFactoryTest extends FunSuite {
         assert(!factory.isAvailable)
         val f = factory.close()
         assert(f.isDefined)
-        assert(Await.result(f) === ())
+        assert(Await.result(f.liftToTry) == Return.Unit)
         assert(underlying.isAvailable)
         completeFuture()
         assert(!underlying.isAvailable)
@@ -233,7 +233,7 @@ class DelayedFactoryTest extends FunSuite {
         assert(!factory.isAvailable)
         val f = factory.close()
         assert(f.isDefined)
-        assert(Await.result(f) === ())
+        assert(Await.result(f.liftToTry) == Return.Unit)
         completeFuture()
       }
     }

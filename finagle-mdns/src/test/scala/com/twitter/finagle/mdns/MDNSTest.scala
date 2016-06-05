@@ -1,11 +1,10 @@
 package com.twitter.finagle.mdns
 
-import com.twitter.finagle.{Announcer, Resolver, Addr}
+import com.twitter.finagle.{Announcer, Resolver, Addr, Address}
 import com.twitter.util.{Await, Var}
 import java.net.{InetSocketAddress, InetAddress, Socket}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.concurrent.Timeouts._
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.time.SpanSugar._
 import org.scalatest.FunSuite
@@ -45,9 +44,11 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
 
       eventually(timeout(5 seconds)) {
         Var.sample(addr) match {
-          case Addr.Bound(sockaddrs, _) =>
-            assert(sockaddrs exists {
-              case ia1: InetSocketAddress => ia1.getPort == ia.getPort
+          case Addr.Bound(addrs, _) =>
+            assert(addrs.exists {
+              case Address.Inet(ia1: InetSocketAddress, _) =>
+                ia1.getPort == ia.getPort
+              case _ => false
             })
           case _ => fail()
         }
@@ -69,7 +70,7 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
     Await.result(Announcer.announce(sock, "mdns!foo._bar._tcp.local."))
   }
 
-  test("throws an exception on an imporperly formatted name") {
+  test("throws an exception on an improperly formatted name") {
     val res = new MDNSResolver
     val ann = new MDNSAnnouncer
     val ia = new InetSocketAddress(loopback, 0)
@@ -79,8 +80,8 @@ class MdnsTest extends FunSuite with Eventually with IntegrationPatience {
 
   test("name parser") {
     val (name, regType, domain) = MDNS.parse("dots.in.the.name._finagle._tcp.local.")
-    assert(name === "dots.in.the.name")
-    assert(regType === "_finagle._tcp")
-    assert(domain === "local")
+    assert(name == "dots.in.the.name")
+    assert(regType == "_finagle._tcp")
+    assert(domain == "local")
   }
 }

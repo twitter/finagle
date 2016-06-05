@@ -1,7 +1,6 @@
 package com.twitter.finagle.http.javaapi;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.twitter.finagle.http.Request;
@@ -15,7 +14,7 @@ public class DtabFilterTest {
 
   @Test
   public void tesDtab() {
-    DtabFilter<HttpRequest, HttpResponse> nettyDtabFilter = DtabFilter.Netty();
     DtabFilter<Request, Response> finagleDtabFilter = new DtabFilter.Finagle<Request>();
+    Assert.assertNotNull(finagleDtabFilter);
   }
 }

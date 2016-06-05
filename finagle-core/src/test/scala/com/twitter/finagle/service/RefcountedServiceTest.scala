@@ -44,6 +44,6 @@ class RefcountedServiceTest extends FunSuite with MockitoSugar {
     promise() = Return(123)
     verify(service).close(any)
     assert(f.isDefined)
-    assert(Await.result(f) === 123)
+    assert(Await.result(f) == 123)
   }
 }

@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import com.twitter.finagle.{Status, Service, ServiceFactory, ClientConnection, ServiceProxy, ServiceFactoryProxy}
 import com.twitter.util.{Closable, Future, Stopwatch, Throw, Return, Time, Duration}
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.tracing.Trace
 import scala.collection.immutable
 
 /**
@@ -58,7 +57,7 @@ private class IdlingFactory[Req, Rep](self: ServiceFactory[Req, Rep])
  * performance: one-shots could be created constantly for a hot cache
  * key, but should work well when there are a few hot keys.
  */
-private class ServiceFactoryCache[Key, Req, Rep](
+private[finagle] class ServiceFactoryCache[Key, Req, Rep](
     newFactory: Key => ServiceFactory[Req, Rep],
     statsReceiver: StatsReceiver = NullStatsReceiver,
     maxCacheSize: Int = 8)
@@ -79,7 +78,6 @@ private class ServiceFactoryCache[Key, Req, Rep](
   private[this] val nidle = statsReceiver.addGauge("idle") {
     cache count { case (_, f) => f.idleFor > Duration.Zero }
   }
-  private[this] val misstime = statsReceiver.stat("misstime_ms")
 
   /*
    * This returns a Service rather than a ServiceFactory to avoid
@@ -114,8 +112,6 @@ private class ServiceFactoryCache[Key, Req, Rep](
       }
     }
 
-    val watch = Stopwatch.start()
-
     val svc = try {
       nmiss.incr()
 
@@ -140,17 +136,7 @@ private class ServiceFactoryCache[Key, Req, Rep](
       writeLock.unlock()
     }
 
-    Trace.record(s"Interpreter cache miss with key $key")
-
-    svc.respond {
-      case Return(_) =>
-        val d = watch()
-        // generalize message
-        Trace.record(s"Interpreter resolved: $d", d)
-        misstime.add(d.inMilliseconds)
-      case Throw(error) =>
-        Trace.record(s"Interpreter failed to resolve (${error.getClass().getName()}: ${error.getMessage()}). Aborting request.")
-    }
+    svc
   }
 
   private[this] def oneshot(factory: ServiceFactory[Req, Rep], conn: ClientConnection)

@@ -1,18 +1,16 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle.http.HttpTransport
+import com.twitter.finagle.http._
+import com.twitter.finagle.http.exp.IdentityStreamTransport
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Promise, Return, Future, Time}
-import java.nio.charset.Charset
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
-import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
 import org.mockito.Matchers._
+import org.mockito.Mockito._
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class ConnectionManagerTest extends FunSuite with MockitoSugar {
@@ -21,88 +19,137 @@ class ConnectionManagerTest extends FunSuite with MockitoSugar {
   //   - methods other than GET
   //   - 100/continue
 
-  val me = mock[MessageEvent]
-  val c = mock[Channel]
-  val cFuture = new DefaultChannelFuture(c, false)
-  when(me.getChannel).thenReturn(c)
-
-  def makeRequest(version: HttpVersion, headers: (String, String)*) = {
-    val request = new DefaultHttpRequest(version, HttpMethod.GET, "/")
-    headers foreach { case (k, v) =>
+  def makeRequest(version: Version, headers: (String, String)*) = {
+    val request = Request(version, Method.Get, "/")
+    headers.foreach { case (k, v) =>
       request.headers.set(k, v)
     }
-
     request
   }
 
-  def makeResponse(version: HttpVersion, headers: (String, String)*) = {
-    val response = new DefaultHttpResponse(version, HttpResponseStatus.OK)
-    headers foreach { case (k, v) =>
+  def makeResponse(version: Version, headers: (String, String)*) = {
+    val response = Response(version, Status.Ok)
+    headers.foreach { case (k, v) =>
       response.headers.set(k, v)
     }
-
     response
   }
 
-  def perform(request: HttpRequest, response: HttpResponse, shouldMarkDead: Boolean) {
-    val trans = mock[Transport[Any, Any]]
-    when(trans.close(any[Time])).thenReturn(Future.Done)
-    when(trans.close).thenReturn(Future.Done)
+  test("not terminate when response is standard") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose())
+    manager.observeResponse(makeResponse(Version.Http11, Fields.ContentLength -> "1"), Future.Done)
+    assert(!manager.shouldClose())
+  }
 
-    val disp = new HttpClientDispatcher[HttpRequest](new HttpTransport(trans))
+  test("terminate when response doesn't have content length") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose())
+    manager.observeResponse(makeResponse(Version.Http11), Future.Done)
+    assert(manager.shouldClose())
+  }
+
+  test("terminate when request has Connection: close") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11, "Connection" -> "close"), Future.Done)
+    assert(!manager.shouldClose())
+    manager.observeResponse(makeResponse(Version.Http11, Fields.ContentLength -> "1"), Future.Done)
+    assert(manager.shouldClose())
+  }
+
+  test("terminate after response, even if request hasn't finished streaming") {
+    val manager = new ConnectionManager()
+    val p = Promise[Unit]
+    val req = makeRequest(Version.Http11)
+    req.setChunked(true)
+    manager.observeRequest(req, p)
+    assert(!manager.shouldClose())
+    manager.observeResponse(
+      makeResponse(Version.Http11, Fields.ContentLength -> "1", "Connection" -> "close"),
+      Future.Done)
+    assert(manager.shouldClose())
+  }
+
+  test("terminate after response has finished streaming") {
+    val manager = new ConnectionManager()
+    manager.observeRequest(makeRequest(Version.Http11), Future.Done)
+    assert(!manager.shouldClose())
+    val p = Promise[Unit]
+    val rep = makeResponse(Version.Http11, "Connection" -> "close")
+    rep.setChunked(true)
+    manager.observeResponse(rep, p)
+    assert(!manager.shouldClose())
+    p.setDone()
+    assert(manager.shouldClose())
+  }
+
+  // these tests are sophisticated, and use things that ConnectionManager
+  // isn't aware of.  we should be careful in the way we use it.
+  def perform(request: Request, response: Response, shouldMarkDead: Boolean) {
+    val closeP = new Promise[Throwable]
+    val trans = mock[Transport[Request, Response]]
+    when(trans.close).thenReturn(Future.Done)
+    when(trans.onClose).thenReturn(closeP)
+
+    val disp = new HttpClientDispatcher(
+      new HttpTransport(new IdentityStreamTransport(trans)),
+      NullStatsReceiver)
 
     val wp = new Promise[Unit]
-    when(trans.write(any[HttpRequest])).thenReturn(wp)
+    when(trans.write(any[Request])).thenReturn(wp)
+
+    val rp = new Promise[Response]
+    when(trans.read()).thenReturn(rp)
 
     val f = disp(request)
-    assert(f.isDefined === false)
+    assert(f.isDefined == false)
 
-    verify(trans, times(1)).write(request)
-    verify(trans, never()).read()
+    verify(trans, times(1)).write(any[Request])
+    verify(trans, times(1)).read()
 
-    val rp = new Promise[HttpResponse]
-    when(trans.read()).thenReturn(rp)
 
     wp.setDone()
 
     verify(trans, times(1)).read()
 
-    assert(f.isDefined === false)
+    assert(f.isDefined == false)
     rp.setValue(response)
 
     f.poll match {
-      case Some(Return(r: HttpResponse)) =>
-        assert(r.version === response.getProtocolVersion)
-        assert(r.status === response.getStatus)
+      case Some(Return(r)) =>
+        assert(r.version == response.version)
+        assert(r.status == response.status)
 
       case _ =>
         fail()
     }
 
     if (shouldMarkDead)
-      verify(trans, times(1)).close
+      verify(trans, times(1)).close(Time.Bottom)
   }
 
   test("not terminate regular http/1.1 connections") {
     perform(
-      makeRequest(HttpVersion.HTTP_1_1),
-      makeResponse(HttpVersion.HTTP_1_1, HttpHeaders.Names.CONTENT_LENGTH -> "1"),
+      makeRequest(Version.Http11),
+      makeResponse(Version.Http11, Fields.ContentLength -> "1"),
       false)
   }
 
   // Note: by way of the codec, this reply is already taken care of.
   test("terminate http/1.1 connections without content length") {
     perform(
-      makeRequest(HttpVersion.HTTP_1_1),
-      makeResponse(HttpVersion.HTTP_1_1),
+      makeRequest(Version.Http11),
+      makeResponse(Version.Http11),
       true
     )
   }
 
   test("terminate http/1.1 connections with Connection: close") {
     perform(
-      makeRequest(HttpVersion.HTTP_1_1, "Connection" -> "close"),
-      makeResponse(HttpVersion.HTTP_1_1),
+      makeRequest(Version.Http11, "Connection" -> "close"),
+      makeResponse(Version.Http11),
       true
     )
   }

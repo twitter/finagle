@@ -10,59 +10,59 @@ class BufferTest extends FunSuite {
 
   test("read Byte") {
     val br = BufferReader(bytes)
-    assert(br.readByte() === 0x11)
-    assert(br.readByte() === 0x22)
-    assert(br.readByte() === 0x33)
-    assert(br.readByte() === 0x44)
-    assert(br.readByte() === 0x55)
-    assert(br.readByte() === 0x66)
-    assert(br.readByte() === 0x77)
-    assert(br.readByte() === 0x78)
+    assert(br.readByte() == 0x11)
+    assert(br.readByte() == 0x22)
+    assert(br.readByte() == 0x33)
+    assert(br.readByte() == 0x44)
+    assert(br.readByte() == 0x55)
+    assert(br.readByte() == 0x66)
+    assert(br.readByte() == 0x77)
+    assert(br.readByte() == 0x78)
   }
 
   test("read Short") {
     val br = BufferReader(bytes)
-    assert(br.readShort() === 0x2211)
-    assert(br.readShort() === 0x4433)
-    assert(br.readShort() === 0x6655)
-    assert(br.readShort() === 0x7877)
+    assert(br.readShort() == 0x2211)
+    assert(br.readShort() == 0x4433)
+    assert(br.readShort() == 0x6655)
+    assert(br.readShort() == 0x7877)
   }
 
   test("read Int24") {
     val br = BufferReader(bytes)
-    assert(br.readInt24() === 0x332211)
-    assert(br.readInt24() === 0x665544)
-    assert(br.readShort() === 0x7877)
+    assert(br.readInt24() == 0x332211)
+    assert(br.readInt24() == 0x665544)
+    assert(br.readShort() == 0x7877)
   }
 
   test("read Int") {
     val br = BufferReader(bytes)
-    br.readInt() === 0x44332211
-    br.readInt() === 0x78776655
+    br.readInt() == 0x44332211
+    br.readInt() == 0x78776655
   }
 
   test("read Signed Int") {
     val n = 0xfffff6ff
     val br = BufferReader(Array[Byte](0xff.toByte, 0xf6.toByte, 0xff.toByte, 0xff.toByte))
-    assert(n === br.readInt())
+    assert(n == br.readInt())
   }
 
   test("read Long") {
     val br = BufferReader(bytes)
-    assert(br.readLong() === 0x7877665544332211L)
+    assert(br.readLong() == 0x7877665544332211L)
   }
 
   test("read null terminated string") {
-    val str = "Null Terminated String\0"
+    val str = "Null Terminated String\u0000"
     val br = BufferReader(str.getBytes)
-    assert(str.take(str.size-1) === br.readNullTerminatedString())
+    assert(str.take(str.size-1) == br.readNullTerminatedString())
   }
 
   test("read tiny length coded string") {
     val str = "test"
     val bytes = Array.concat(Array(str.size.toByte), str.getBytes)
     val br = BufferReader(bytes)
-    assert(str === br.readLengthCodedString())
+    assert(str == br.readLengthCodedString())
   }
 
   def writerCtx() = new {
@@ -75,71 +75,71 @@ class BufferTest extends FunSuite {
     val ctx = writerCtx()
     import ctx._
     bw.writeByte(0x01.toByte)
-    assert(0x01 === br.readByte())
+    assert(0x01 == br.readByte())
   }
 
   test("write Short") {
     val ctx = writerCtx()
     import ctx._
     bw.writeShort(0xFE.toShort)
-    assert(0xFE === br.readShort())
+    assert(0xFE == br.readShort())
   }
 
   test("write Int24") {
     val ctx = writerCtx()
     import ctx._
     bw.writeInt24(0x872312)
-    assert(0x872312 === br.readUnsignedInt24())
+    assert(0x872312 == br.readUnsignedInt24())
   }
 
   test("write Int") {
     val ctx = writerCtx()
     import ctx._
     bw.writeInt(0x98765432)
-    assert(0x98765432 === br.readInt())
+    assert(0x98765432 == br.readInt())
   }
 
   test("write Long") {
     val ctx = writerCtx()
     import ctx._
     bw.writeLong(0x7877665544332211L)
-    assert(0x7877665544332211L === br.readLong)
+    assert(0x7877665544332211L == br.readLong)
   }
 
   test("tiny length coded binary") {
     val ctx = writerCtx()
     import ctx._
     bw.writeLengthCodedBinary(250)
-    assert(br.readLengthCodedBinary() === 250)
+    assert(br.readLengthCodedBinary() == 250)
   }
 
   test("short length coded binary") {
     val ctx = writerCtx()
     import ctx._
     bw.writeLengthCodedBinary(65535)
-    assert(br.readLengthCodedBinary() === 65535)
+    assert(br.readLengthCodedBinary() == 65535)
   }
 
   test("medium length coded binary") {
     val ctx = writerCtx()
     import ctx._
     bw.writeLengthCodedBinary(16777215)
-    assert(br.readLengthCodedBinary() === 16777215)
+    assert(br.readLengthCodedBinary() == 16777215)
   }
 
   test("large length coded binary") {
     val ctx = writerCtx()
     import ctx._
     bw.writeLengthCodedBinary(16777217L)
-    assert(br.readLengthCodedBinary() === 16777217L)
+    assert(br.readLengthCodedBinary() == 16777217L)
   }
 
   test("null terminated string") {
     val ctx = writerCtx()
     import ctx._
-    val str = "test\0"
+    val str = "test\u0000"
     bw.writeNullTerminatedString(str)
-    assert(str.take(str.length-1) === br.readNullTerminatedString())
+    assert(str.take(str.length-1) == br.readNullTerminatedString())
   }
 
   test("tiny length coded string") {
@@ -147,7 +147,7 @@ class BufferTest extends FunSuite {
     import ctx._
     val str = "test"
     bw.writeLengthCodedString(str)
-    assert(str === br.readLengthCodedString())
+    assert(str == br.readLengthCodedString())
   }
 
   test("short length coded string") {
@@ -158,7 +158,7 @@ class BufferTest extends FunSuite {
     bw.writeLengthCodedString(str)
 
     val br = BufferReader(strAsBytes)
-    assert(str === br.readLengthCodedString())
+    assert(str == br.readLengthCodedString())
   }
 
   test("coded string with non-ascii characters") {
@@ -168,6 +168,6 @@ class BufferTest extends FunSuite {
     bw.writeLengthCodedString(str)
 
     val br = BufferReader(strAsBytes)
-    assert(str === br.readLengthCodedString())
+    assert(str == br.readLengthCodedString())
   }
 }

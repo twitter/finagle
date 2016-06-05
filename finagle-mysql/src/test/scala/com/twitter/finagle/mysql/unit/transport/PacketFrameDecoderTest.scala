@@ -23,8 +23,8 @@ class PacketFrameDecoderTest extends FunSuite with MockitoSugar {
     val complete = Array[Byte](0x02, 0x00, 0x00, 0x01, 0x01, 0x02)
     val result = frameDecoder.decode(ctx, c, ChannelBuffers.wrappedBuffer(complete))
     assert(result != null)
-    assert(result.size === 2)
-    assert(result.seq === 1)
+    assert(result.size == 2)
+    assert(result.seq == 1)
     assert(result.body.underlying.array === Array[Byte](0x01, 0x02))
   }
 
@@ -33,7 +33,7 @@ class PacketFrameDecoderTest extends FunSuite with MockitoSugar {
     val frame: Array[Byte] = Array[Byte](ff, ff, ff, 0x01) ++ Array.fill[Byte](0xffffff)(0x00)
     val result = frameDecoder.decode(ctx, c, ChannelBuffers.wrappedBuffer(frame))
     assert(result != null)
-    assert(result.size === 16777215)
-    assert(result.seq === 1)
+    assert(result.size == 16777215)
+    assert(result.seq == 1)
   }
 }

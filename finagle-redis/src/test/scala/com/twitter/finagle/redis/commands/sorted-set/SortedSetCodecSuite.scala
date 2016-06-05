@@ -32,7 +32,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
       case ZAdd(nums, members) =>
         unwrap(members) {
           case ZMember(3.14159, value) =>
-            assert(BytesToString(value.array) === "pi")
+            assert(BytesToString(value.array) == "pi")
         }
     }
   }
@@ -46,11 +46,11 @@ final class SortedSetCodecSuite extends RedisRequestTest {
           case pi :: e :: Nil =>
             unwrap(List(pi)) {
               case ZMember(3.14159, value) =>
-                assert(BytesToString(value.array) === "pi")
+                assert(BytesToString(value.array) == "pi")
             }
             unwrap(List(e)) {
               case ZMember(2.71828, value) =>
-                assert(BytesToString(value.array) === "e")
+                assert(BytesToString(value.array) == "e")
             }
           case _ => fail("Expected two elements in list")
         }
@@ -66,7 +66,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
   test("Correctly encode ZCARD") {
     unwrap(codec(wrap("ZCARD foo\r\n"))) {
       case ZCard(key) =>
-        assert(BytesToString(key.array) === "foo")
+        assert(BytesToString(key.array) == "foo")
     }
   }
 
@@ -96,7 +96,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
       case(s, v) =>
         unwrap(codec(wrap("ZCOUNT %s\r\n".format(s)))) {
           case c: Command =>
-            assert(c === v)
+            assert(c == v)
         }
     }
   }
@@ -119,7 +119,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
     unwrap(codec(wrap("ZINCRBY key 2 one\r\n"))) {
       case ZIncrBy(key, 2, member) =>
-        assert(BytesToString(member.array) === "one")
+        assert(BytesToString(member.array) == "one")
     }
   }
 
@@ -128,8 +128,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
 
     unwrap(codec(wrap("ZINCRBY key 2.1 one\r\n"))) {
       case ZIncrBy(key, value, member) =>
-        assert(value === 2.1)
-        assert(BytesToString(member.array) === "one")
+        assert(value == 2.1)
+        assert(BytesToString(member.array) == "one")
     }
   }
 
@@ -171,9 +171,9 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZINTERSTORE", "ZUNIONSTORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s out 2 zset1 zset2\r\n")) {
         verifyIU(cmd, "out", 2) { (keys, weights, aggregate) =>
-          assert(keys.map(s => BytesToString(s.array)) === List("zset1", "zset2"))
-          assert(weights === None)
-          assert(aggregate === None)
+          assert(keys.map(s => BytesToString(s.array)) == List("zset1", "zset2"))
+          assert(weights == None)
+          assert(aggregate == None)
         }
       }
     }
@@ -183,9 +183,9 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZINTERSTORE", "ZUNIONSTORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s out 2 zset1 zset2 WEIGHTS 2 3\r\n")) {
         verifyIU(cmd, "out", 2) { (keys, weights, aggregate) =>
-          assert(keys.map(s => BytesToString(s.array)) === List("zset1", "zset2"))
-          assert(weights === Some(Weights(2, 3)))
-          assert(aggregate === None)
+          assert(keys.map(s => BytesToString(s.array)) == List("zset1", "zset2"))
+          assert(weights == Some(Weights(2, 3)))
+          assert(aggregate == None)
         }
       }
     }
@@ -195,9 +195,9 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZINTERSTORE", "ZUNIONSTORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s out 2 zset1 zset2 aggregate sum\r\n")) {
         verifyIU(cmd, "out", 2) { (keys, weights, aggregate) =>
-          assert(keys.map(s => BytesToString(s.array)) === List("zset1", "zset2"))
-          assert(weights === None)
-          assert(aggregate === Some(Aggregate.Sum))
+          assert(keys.map(s => BytesToString(s.array)) == List("zset1", "zset2"))
+          assert(weights == None)
+          assert(aggregate == Some(Aggregate.Sum))
         }
       }
     }
@@ -207,9 +207,9 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZINTERSTORE", "ZUNIONSTORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s out 2 zset1 zset2 weights 2 3 aggregate min\r\n")) {
         verifyIU(cmd, "out", 2) { (keys, weights, aggregate) =>
-          assert(keys.map(s => BytesToString(s.array)) === List("zset1", "zset2"))
-          assert(weights === Some(Weights(2, 3)))
-          assert(aggregate === Some(Aggregate.Min))
+          assert(keys.map(s => BytesToString(s.array)) == List("zset1", "zset2"))
+          assert(weights == Some(Weights(2, 3)))
+          assert(aggregate == Some(Aggregate.Min))
         }
       }
     }
@@ -219,9 +219,9 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZINTERSTORE", "ZUNIONSTORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s out 2 zset1 zset2 aggregate max weights 2 3\r\n")) {
         verifyIU(cmd, "out", 2) { (keys, weights, aggregate) =>
-          assert(keys.map(s => BytesToString(s.array)) === List("zset1", "zset2"))
-          assert(weights === Some(Weights(2, 3)))
-          assert(aggregate === Some(Aggregate.Max))
+          assert(keys.map(s => BytesToString(s.array)) == List("zset1", "zset2"))
+          assert(weights == Some(Weights(2, 3)))
+          assert(aggregate == Some(Aggregate.Max))
         }
       }
     }
@@ -281,7 +281,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
       case ZRange(key, start, stop, withScores) => key
     }
     val bytesBack = keyBack.toByteBuffer.array
-    assert(key.toSeq === bytesBack.toSeq)
+    assert(key.toSeq == bytesBack.toSeq)
   }
 
   test("Ensure that, after encoding ZRANGE, the bytes we threw in are the bytes we get back") {
@@ -327,8 +327,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZRANGEBYSCORE", "ZREVRANGEBYSCORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s myzset -inf +inf\r\n")) {
         verifyRangeByScore(cmd, "myzset", ZInterval.MIN, ZInterval.MAX) { (s, l) =>
-          assert(s === None)
-          assert(l === None)
+          assert(s == None)
+          assert(l == None)
         }
       }
     }
@@ -338,8 +338,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZRANGEBYSCORE", "ZREVRANGEBYSCORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s myzset 1 2\r\n")) {
         verifyRangeByScore(cmd, "myzset", ZInterval(1), ZInterval(2)) { (s, l) =>
-          assert(s === None)
-          assert(l === None)
+          assert(s == None)
+          assert(l == None)
         }
       }
     }
@@ -349,8 +349,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZRANGEBYSCORE", "ZREVRANGEBYSCORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s myzset (1 2\r\n")) {
         verifyRangeByScore(cmd, "myzset", ZInterval.exclusive(1), ZInterval(2)) { (s, l) =>
-          assert(s === None)
-          assert(l === None)
+          assert(s == None)
+          assert(l == None)
         }
       }
     }
@@ -361,8 +361,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
       unwrap(doCmd(cmd, "%s myzset (1 (2\r\n")) {
         verifyRangeByScore(cmd, "myzset", ZInterval.exclusive(1), ZInterval.exclusive(2)) {
           (s, l) =>
-            assert(s === None)
-            assert(l === None)
+            assert(s == None)
+            assert(l == None)
         }
       }
     }
@@ -372,8 +372,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZRANGEBYSCORE", "ZREVRANGEBYSCORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s myzset -inf +inf LIMIT 1 5\r\n")) {
         verifyRangeByScore(cmd, "myzset", ZInterval.MIN, ZInterval.MAX) { (s, l) =>
-          assert(s === None)
-          assert(l === Some(Limit(1, 5)))
+          assert(s == None)
+          assert(l == Some(Limit(1, 5)))
         }
       }
     }
@@ -383,8 +383,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZRANGEBYSCORE", "ZREVRANGEBYSCORE").foreach { cmd =>
       unwrap(doCmd(cmd, "%s myzset -inf +inf LIMIT 3 9 WITHSCORES\r\n")) {
         verifyRangeByScore(cmd, "myzset", ZInterval.MIN, ZInterval.MAX) { (s, l) =>
-          assert(s === Some(WithScores))
-          assert(l === Some(Limit(3, 9)))
+          assert(s == Some(WithScores))
+          assert(l == Some(Limit(3, 9)))
         }
       }
     }
@@ -416,13 +416,13 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     List("ZRANK", "ZREVRANK").foreach { cmd =>
       unwrap(doCmd(cmd, "%s myzset three\r\n")) {
         verifyRank(cmd, "myzset") { m =>
-          assert(BytesToString(m.array) === "three")
+          assert(BytesToString(m.array) == "three")
         }
       }
 
       unwrap(doCmd(cmd, "%s myzset four\r\n")) {
         verifyRank(cmd, "myzset") { m =>
-          assert(BytesToString(m.array) === "four")
+          assert(BytesToString(m.array) == "four")
         }
       }
     }
@@ -440,7 +440,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     val key = StringToChannelBuffer("key")
     unwrap(codec(wrap("ZREM key member1\r\n"))) {
       case ZRem(key, members) =>
-        assert(CBToString.fromList(members) === List("member1"))
+        assert(CBToString.fromList(members) == List("member1"))
     }
   }
 
@@ -448,7 +448,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     val key = StringToChannelBuffer("key")
     unwrap(codec(wrap("ZREM key member1 member2\r\n"))) {
       case ZRem(key, members) =>
-        assert(CBToString.fromList(members) === List("member1", "member2"))
+        assert(CBToString.fromList(members) == List("member1", "member2"))
     }
   }
 
@@ -465,8 +465,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     val key = StringToChannelBuffer("key")
     unwrap(codec(wrap("ZREMRANGEBYRANK key 0 1\r\n"))) {
       case ZRemRangeByRank(key, start, stop) =>
-        assert(start === 0)
-        assert(stop === 1)
+        assert(start == 0)
+        assert(stop == 1)
     }
   }
 
@@ -483,8 +483,8 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     val key = StringToChannelBuffer("key")
     unwrap(codec(wrap("ZREMRANGEBYSCORE key -inf (2.0\r\n"))) {
       case ZRemRangeByScore(key, min, max) =>
-        assert(min === ZInterval.MIN)
-        assert(max === ZInterval.exclusive(2))
+        assert(min == ZInterval.MIN)
+        assert(max == ZInterval.exclusive(2))
     }
   }
 
@@ -500,7 +500,7 @@ final class SortedSetCodecSuite extends RedisRequestTest {
     val myset = StringToChannelBuffer("myset")
     unwrap(codec(wrap("ZSCORE myset one\r\n"))) {
       case ZScore(myset, one) =>
-        assert(BytesToString(one.array) === "one")
+        assert(BytesToString(one.array) == "one")
     }
   }
 }

@@ -7,6 +7,7 @@ junit_tests(name='scala',
     'finagle/finagle-http',
     'util/util-core',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-native/src/test/resources'

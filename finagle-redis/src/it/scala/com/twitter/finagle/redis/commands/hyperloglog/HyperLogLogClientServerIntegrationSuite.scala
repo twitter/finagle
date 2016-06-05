@@ -5,7 +5,7 @@ import com.twitter.finagle.redis.tags.{ClientServerTest, RedisTest}
 import com.twitter.finagle.redis.util.StringToChannelBuffer
 import com.twitter.util.{Await, Future}
 import org.jboss.netty.buffer.ChannelBuffer
-
+import scala.language.implicitConversions
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -17,7 +17,7 @@ final class HyperLogLogClientServerIntegrationSuite extends RedisClientServerInt
 
   test("PFADD should work correctly", ClientServerTest, RedisTest) {
     withRedisClient { client =>
-      assert(Await.result(client(PFAdd(foo, List(bar)))) === IntegerReply(1))
+      assert(Await.result(client(PFAdd(foo, List(bar)))) == IntegerReply(1))
     }
   }
 
@@ -25,7 +25,7 @@ final class HyperLogLogClientServerIntegrationSuite extends RedisClientServerInt
     withRedisClient { client =>
       val pfCountResult = client(PFAdd("foo", List("bar", "baz")))
         .flatMap(_ => client(PFCount(List(StringToChannelBuffer("foo")))))
-      assert(Await.result(pfCountResult) === IntegerReply(2))
+      assert(Await.result(pfCountResult) == IntegerReply(2))
     }
   }
 
@@ -33,7 +33,7 @@ final class HyperLogLogClientServerIntegrationSuite extends RedisClientServerInt
     withRedisClient { client =>
       val setup = List(PFAdd("foo", List("bar")), PFAdd("bar", List("baz"))) map client
       val pfMergeResult = Future.collect(setup).flatMap(_ => client(PFMerge("baz", List("foo", "bar"))))
-      assert(Await.result(pfMergeResult) === OKStatusReply)
+      assert(Await.result(pfMergeResult) == OKStatusReply)
     }
   }
 }

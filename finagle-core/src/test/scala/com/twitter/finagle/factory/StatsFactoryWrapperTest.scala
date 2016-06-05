@@ -28,7 +28,7 @@ class StatsFactoryWrapperTest extends FunSuite with MockitoSugar {
 
     val expected = Map(
       List("failures", t.getClass.getName, rex.getClass.getName) -> 1)
-    assert(receiver.counters === expected)
+    assert(receiver.counters == expected)
     verify(underlying)(ClientConnection.nil)
   }
 }

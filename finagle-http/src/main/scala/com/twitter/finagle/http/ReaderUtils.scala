@@ -1,12 +1,10 @@
 package com.twitter.finagle.http
 
-import com.twitter.concurrent.AsyncMutex
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Buf, Reader}
-import com.twitter.util.{Future, Promise, Return}
+import com.twitter.util.{Future, Return}
 import org.jboss.netty.handler.codec.http.{HttpChunk, DefaultHttpChunk}
-import org.jboss.netty.buffer.ChannelBuffers
 
 private[http] object ReaderUtils {
   /**
@@ -17,7 +15,7 @@ private[http] object ReaderUtils {
       Future.None
 
     case chunk: HttpChunk =>
-      Future.value(Some(ChannelBufferBuf(chunk.getContent)))
+      Future.value(Some(ChannelBufferBuf.Owned(chunk.getContent.duplicate)))
 
     case invalid =>
       val exc = new IllegalArgumentException(
@@ -29,12 +27,8 @@ private[http] object ReaderUtils {
    * Translates a Buf into HttpChunk. Beware: an empty buffer indicates end
    * of stream.
    */
-  def chunkOfBuf(buf: Buf): HttpChunk = buf match {
-    case ChannelBufferBuf.Owned(buf) =>
-      new DefaultHttpChunk(buf)
-    case buf =>
-      new DefaultHttpChunk(BufChannelBuffer(buf))
-  }
+  def chunkOfBuf(buf: Buf): HttpChunk =
+    new DefaultHttpChunk(ChannelBufferBuf.Owned.extract(buf))
 
   /**
    * Continuously read from a Reader, writing everything to a Transport.
@@ -44,12 +38,15 @@ private[http] object ReaderUtils {
     r: Reader,
     // TODO Find a better number for bufSize, e.g. 32KiB - Buf overhead
     bufSize: Int = Int.MaxValue
-  ): Future[Unit] =
+  ): Future[Unit] = {
     r.read(bufSize) flatMap {
       case None =>
         trans.write(HttpChunk.LAST_CHUNK)
       case Some(buf) =>
-        trans.write(chunkOfBuf(buf)) before 
-          streamChunks(trans, r, bufSize)
+        trans.write(chunkOfBuf(buf)) transform {
+          case Return(_) => streamChunks(trans, r, bufSize)
+          case _ => Future(r.discard())
+        }
     }
+  }
 }

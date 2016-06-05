@@ -145,28 +145,15 @@ class Ring(positions: Array[Int]) {
   }
 }
 
-private[finagle] object Ring {
+object Ring {
   /**
-   * Construct a ring from a sequence of weights.
-   * The positions in the ring are chosen so that each
-   * element has space in the ring proportional to its weight.
-   *
-   * @param weights The sequence of weights from which
-   * the ring is constructed.
-   * @param wid The ring width to use.
+   * Returns a ring with `numSlices` slices and width `width`.
    */
-  def fromWeights(weights: Seq[Double], wid: Int): Ring = {
-    require(weights.nonEmpty)
-    val sum = weights.sum
-    val factor = wid/sum
-    require(factor >= 1, "Weights are too granular")
-    val nodes = new Array[Int](weights.size)
-    for (i <- nodes.indices) {
-      nodes(i) = (factor*weights(i)).toInt
-      if (i > 0)
-        nodes(i) += nodes(i-1)
-    }
-    nodes(weights.size-1) = wid
-    new Ring(nodes)
+  def apply(numSlices: Int, width: Int): Ring = {
+    require(numSlices > 0)
+    require(width >= numSlices, "ring not wide enough")
+    val unit = width/numSlices.toDouble
+    val positions = Array.tabulate(numSlices) { i => ((i+1)*unit).toInt }
+    new Ring(positions)
   }
 }

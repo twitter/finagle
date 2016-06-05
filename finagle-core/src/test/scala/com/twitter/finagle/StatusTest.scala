@@ -24,7 +24,7 @@ class StatusTest
       List(() => Status.Busy, () => Status.Open, () => fail("element should not be evaluated")),
       _.apply
     )
-    assert(res === Status.Open)
+    assert(res == Status.Open)
   }
 
   test("Status.worstOf can terminate early") {
@@ -32,7 +32,7 @@ class StatusTest
       List(() => Status.Busy, () => Status.Closed, () => fail("element should not be evaluated")),
       _.apply
     )
-    assert(res === Status.Closed)
+    assert(res == Status.Closed)
   }
 
   // This test is borderline silly.

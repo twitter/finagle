@@ -7,6 +7,7 @@ import java.net.{SocketAddress, InetSocketAddress, InetAddress}
 import org.apache.thrift.protocol._
 import org.scalatest.FunSuite
 import scala.collection.mutable
+import scala.language.reflectiveCalls
 import scala.reflect.ClassTag
 
 /**
@@ -71,7 +72,7 @@ trait ThriftTest { self: FunSuite =>
     clientIdOpt: Option[ClientId]
   ) => new {
     val serviceFactory = ClientBuilder()
-      .hosts(Seq(addr))
+      .hosts(Seq(addr.asInstanceOf[InetSocketAddress]))
       .codec(ThriftClientFramedCodec(clientIdOpt).protocolFactory(protocolFactory))
       .name("thriftclient")
       .hostConnectionLimit(2)
@@ -87,8 +88,9 @@ trait ThriftTest { self: FunSuite =>
 
   private val newAPIServer = (protocolFactory: TProtocolFactory) => new {
     val server = Thrift.server
+      .withLabel("thriftserver")
       .withProtocolFactory(protocolFactory)
-      .serveIface("thriftserver=:*", processor)
+      .serveIface("localhost:*", processor)
     val boundAddr = server.boundAddress
 
     def close() {

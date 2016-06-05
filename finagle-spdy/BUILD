@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-spdy',
   dependencies=[
     'finagle/finagle-spdy/src/main/scala'

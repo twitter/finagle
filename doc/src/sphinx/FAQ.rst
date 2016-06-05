@@ -27,17 +27,28 @@ A simplified code snippet that exemplifies the intra-process structure:
 
 .. code-block:: scala
 
-  val client = Mysql.newService(...)
-  val service: Service[Req, Rep] = new Service[Req, Rep] {
-    def apply(req: Req): Future[Rep] = {
-      client(...)
+  import com.twitter.finagle.Mysql
+  import com.twitter.finagle.mysql
+  import com.twitter.finagle.Service
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.http
+  import com.twitter.util.Future
+
+  val client: Service[mysql.Request, mysql.Result] =
+    Mysql.client.newService(...)
+
+  val service: Service[http.Request, http.Response] =
+    new Service[http.Request, http.Response] {
+      def apply(req: http.Request): Future[http.Response] = {
+        client(...).map(req: mysql.Result => http.Response())
+      }
     }
-  }
-  val server = Http.serve(..., service)
+
+  val server = Http.server.serve(..., service)
 
 .. [#] "Chained" in this context means that calling `Future#raise`
        will reach the interrupt handler on the Future that represents
-       the rpc call to the client. This is clearly the case in the above
+       the RPC call to the client. This is clearly the case in the above
        example where the call to the client is indeed the returned Future.
        However, this will still hold if the client call was in the context
        of a Future combinator (ex. `Future#select`, `Future#join`, etc.)
@@ -51,25 +62,29 @@ You can disable this behavior by using the :API:`MaskCancelFilter <com.twitter.f
 
 .. code-block:: scala
 
-	val service: Service[Req, Rep] = ...
-	val masked = new MaskCancelFilter[Req, Rep]
+  import com.twitter.finagle.filter.MaskCancelFilter
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.http.
 
-	val maskedService = masked andThen service
+  val service: Service[http.Request, http.Response] =
+    Http.client.newService("http://twitter.com")
+  val masked = new MaskCancelFilter[http.Request, http.Response]
 
-Note that most protocols do not natively support request cancellations
-(though modern RPC protocols like :doc:`Mux <Protocols>`
-do). In practice, this means that for these protocols, we need to disconnect
-the client to signal cancellation, which in turn can cause undue connection
-churn.
+  val maskedService = masked.andThen(service)
+
+.. note:: Most protocols do not natively support request cancellations (though modern RPC
+          protocols like :doc:`Mux <Protocols>` do). In practice, this means that for these
+          protocols, we need to disconnect the client to signal cancellation, which in turn
+          can cause undue connection churn.
 
 Why is com.twitter.common.zookeeper#server-set not found?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Some of our libraries still aren't published to maven central.  If you add
+Some of our libraries still aren't published to maven central. If you add
 
 .. code-block:: scala
 
-	resolvers += "twitter" at "http://maven.twttr.com"
+	resolvers += "twitter" at "https://maven.twttr.com"
 
 to your sbt configuration, it will be able to pick up the libraries which are
 published externally, but not yet to maven central.
@@ -79,73 +94,74 @@ published externally, but not yet to maven central.
 How do I configure clients and servers with Finagle 6 APIs?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As of :doc:`6.x <changelog>`, We introduced a new, preferred API for constructing Finagle ``Client``\s and ``Server``\s.
-Where the old API used ``ServerBuilder``\/``ClientBuilder`` with Codecs, the new APIs use
-``Proto.newClient`` [#]_.
+As of :doc:`6.x <changelog>`, We introduced a new, preferred API for constructing Finagle
+``Client``\s and ``Server``\s. Where the old API used ``ServerBuilder``\/``ClientBuilder``
+with ``Codec``\s, the new APIs use ``Protocol.client.newClient`` and ``Protocol.server.serve`` [#]_.
 
-Old APIs:
-
-.. code-block:: scala
-
-	val client = ClientBuilder()
-	  .codec(Http)
-	  .hosts("localhost:10000,localhost:10001,localhost:10003")
-	  .hostConnectionLimit(1)
-	  .build()
-
-New APIs:
+Old ``ClientBuilder`` APIs:
 
 .. code-block:: scala
 
-	val client = Http.newService("localhost:10000,localhost:10001")
+  import com.twitter.finagle.builder.ClientBuilder
+  import com.twitter.finagle.http.Http
+  import com.twitter.finagle.stats.StatsReceiver
+  import com.twitter.finagle.tracing.Tracer
+  import com.twitter.util.Duration
 
-The new APIs make timeouts more explicit, but we think we have a pretty good reason
-for changing the API this way.
+  val statsReceiver: StatsReceiver = ???
+  val tracer: Tracer = ???
+  val requestTimeout: Duration = ???
+  val connectTimeout: Duration = ???
 
-Timeouts are typically used in two cases:
+  val client = ClientBuilder()
+    .codec(Http)
+    .name("clientname")
+    .reportTo(statsReceiver)
+    .tracer(tracer)
+    .requestTimeout(requestTimeout)
+    .connectTimeout(connectTimeout)
+    .hostConnectionLimit(1)
+    .hosts("localhost:10000,localhost:10001,localhost:10003")
+    .build()
 
-A.  Liveness detection (TCP connect timeout)
-B.  Application requirements (global timeout)
-
-For liveness detection, it is actually fine for timeouts to be long.  We have a
-default of 1 second.
-
-For application requirements, you can use a service normally and then use
-`Future#raiseWithin`.
+New ``Stack`` APIs:
 
 .. code-block:: scala
 
-	val get: Future[HttpResponse] = Http.fetchUrl("http://twitter.com/")
-	get.raiseWithin(1.ms)
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.stats.StatsReceiver
+  import com.twitter.finagle.tracing.Tracer
+  import com.twitter.util.Duration
 
-We found that having all of the extremely granular timeouts was making it harder
-for people to use Finagle, since it was hard to reason about what all of the
-timeouts did without knowledge of Finagle internals.  How is `tcpConnectTimeout`
-different from `connectTimeout`?  How is a `requestTimeout` different from a
-`timeout`?  What is an `idleReaderTimeout`?  How is it different from
-`idleWriterTimeout`?  People would often cargo-cult bad configuration settings,
-and it would be difficult to recover from the bad situation.  We also found that
-they were rarely being used correctly, and usually only by very sophisticated
-users.
+  val statsReceiver: StatsReceiver = ???
+  val tracer: Tracer = ???
+  val requestTimeout: Duration = ???
+  val connectTimeout: Duration = ???
 
-We're encouraging users to avoid encoding application requirements in Finagle,
-which was previously too easy to do via methods like `ClientBuilder#retries`, or
-`ClientBuilder#timeout`.  These are fundamentally application-level concerns–
-you're trying to meet an SLA, etc.  In general, in order to do what Finagle is
-for, which is to deliver an rpc message to a cluster, we don't think you should
-need a lot of configuration at all.  You should need to specify your protocol,
-and a few details about the transport (ssl?  no ssl?), but that's about it.
+  val client = Http.client
+    .withLabel("clientname")
+    // if `withStatsReceiver` is not specified, it will use the
+    // `c.t.f.stats.DefaultStatsReceiver` scoped to the value of `newClient` or
+    // `newService`'s label. If that is not provided, it will be scoped to the
+    // value of `withLabel`.
+    .withStatsReceiver(statsReceiver)
+    .withTracer(tracer)
+    .withRequestTimeout(requestTimeout)
+    .withSession.acquisitionTimeout(connectTimeout)
+    .withSessionPool.maxSize(1)
+    .newService("localhost:10000,localhost:10001")
 
-Of course, there are some points where there are rough edges, and we haven't
-figured out exactly what the right default should be.  We're actively looking
-for input, and would love for the greater Finagle community to help us find good
-defaults. We've also been experimenting with some new abstractions that should
-make configuration a lot more flexible. Stay tuned and of course reach out to
-the mailing list with any questions.
+More configuration options and the details about them are available for
+:ref:`clients <finagle_clients>` and :ref:`servers <finagle_servers>`.
+Additionally, the Scaladocs for most methods on ``ServerBuilder`` and
+``ClientBuilder`` include the Stack-based API's alternative. A few methods do
+not yet have one-to-one equivalents, such as ``ClientBuilder.retries`` and
+for these you should continue to use ``ClientBuilder`` along with the
+``ClientBuilder.stack`` method.
 
 .. [#] Protocol implementors are encouraged to provide sensible
        defaults and leave room for application specific behavior
-       to be built on top of the base layer via filters or
+       to be built on top of the base layer via ``Filters`` or
        synchronization mechanisms.
 
 .. _faq_failedfastexception:
@@ -161,14 +177,11 @@ marked down as fail fast, then the load balancer will pass requests through, res
 ``com.twitter.finagle.FailedFastException``.
 
 A related issue is when the load balancer's pool is a single endpoint that is itself a
-load balancer (for example an nginx server or a hardware load balancer).
+load balancer (for example an Nginx server or a hardware load balancer).
 It is important to disable fail fast as the remote load balancer has
 the visibility into which endpoints are up.
-Disabling fail fast can be done with ``ClientBuilder``:
 
-.. code-block:: scala
-
-  clientBuilder.failFast(false)
+See :ref:`this example <disabling_fail_fast>` on how to disable `Fail Fast` for a given client.
 
 Refer to the :ref:`fail fast <client_fail_fast>` section for further context.
 
@@ -197,7 +210,7 @@ consequence, traditional forms of connection-pooling are no longer required. Thu
 Mux employs `com.twitter.finagle.pool.SingletonPool <http://twitter.github.io/finagle/docs/#com.twitter.finagle.pool.SingletonPool>`_,
 which exposes new stats:
 
-- ``connects``, ``connections``, and ``closechans`` stats should drop, since
+- ``connects``, ``connections``, and ``closes`` stats should drop, since
   there will be less channel opening and closing.
 - ``connection_duration``, ``connection_received_bytes``, and
   ``connection_sent_bytes`` stats should increase, since connections become more
@@ -221,7 +234,7 @@ settings related to connection pooling become obsolete:
 The server-side connection model changes as well. Expect the following stats to
 be impacted:
 
-- ``connects``, ``connections``, and ``closechans`` stats should drop.
+- ``connects``, ``connections``, and ``closes`` stats should drop.
 - ``connection_duration``, ``connection_received_bytes``, and
   ``connection_sent_bytes`` should increase.
 - Obsolete stats: ``idle/idle``, ``idle/refused``, and ``idle/closed``

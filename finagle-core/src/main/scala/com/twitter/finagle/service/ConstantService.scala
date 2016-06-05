@@ -2,6 +2,7 @@ package com.twitter.finagle.service
 
 import com.twitter.util.Future
 import com.twitter.finagle.{Service, Status}
+import scala.util.control.NoStackTrace
 
 /**
  * A [[com.twitter.finagle.Service]] that returns a constant result.
@@ -20,6 +21,8 @@ class FailedService(failure: Throwable)
 }
 
 /**
- * A static [[com.twitter.finagle.FailedService]] object.
+ * A static [[FailedService]] object.
  */
-object NilService extends FailedService(new Exception("dispatch to invalid service"))
+object NilService
+  extends FailedService(
+    new Exception("dispatch to invalid service") with NoStackTrace)

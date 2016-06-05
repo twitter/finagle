@@ -27,6 +27,13 @@ case class Deadline(timestamp: Time, deadline: Time) extends Ordered[Deadline] {
  * A broadcast context for deadlines.
  */
 object Deadline extends Contexts.broadcast.Key[Deadline]("com.twitter.finagle.Deadline") {
+
+  /**
+   * Returns the current request's deadline, if set.
+   */
+  def current: Option[Deadline] =
+    Contexts.broadcast.get(Deadline)
+
   /**
    * Construct a deadline from a timeout.
    */
@@ -52,13 +59,14 @@ object Deadline extends Contexts.broadcast.Key[Deadline]("com.twitter.finagle.De
   }
 
   def tryUnmarshal(body: Buf): Try[Deadline] = {
-    if (body.length != 16) 
-      return Throw(new IllegalArgumentException("Invalid body"))
-    
+    if (body.length != 16)
+      return Throw(new IllegalArgumentException(
+        s"Invalid body. Length ${body.length} but required 16"))
+
     val bytes = Buf.ByteArray.Owned.extract(body)
     val timestamp = ByteArrays.get64be(bytes, 0)
     val deadline = ByteArrays.get64be(bytes, 8)
-    
+
     Return(Deadline(Time.fromNanoseconds(timestamp), Time.fromNanoseconds(deadline)))
   }
 }

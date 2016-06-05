@@ -1,9 +1,10 @@
 package com.twitter.finagle.stats
 
-import com.twitter.common.metrics.Metrics
+import com.twitter.common.metrics.{AbstractGauge, Metrics}
 import com.twitter.conversions.time._
-import com.twitter.finagle.httpx.{RequestParamMap, MediaType, Request}
+import com.twitter.finagle.http.{RequestParamMap, MediaType, Request}
 import com.twitter.util.{Time, MockTimer, Await}
+import java.io.{BufferedWriter, File, FileOutputStream, OutputStreamWriter}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
@@ -63,6 +64,70 @@ class JsonExporterTest
     val registry = Metrics.createDetached()
     val exporter = new JsonExporter(registry)
     assert(exporter.mkRegex("").isEmpty, "Empty regex filter should result in no filter regex generated")
+  }
+
+  test("statsFilterFile defaults without exception") {
+    val registry = Metrics.createDetached()
+    val exporter1 = new JsonExporter(registry)
+    assert(exporter1.statsFilterRegex.isEmpty)
+  }
+
+  test("statsFilterFile reads empty files") {
+    val registry = Metrics.createDetached()
+
+    statsFilterFile.let(Set(new File("/dev/null"))) {
+      val exporter = new JsonExporter(registry)
+      assert(exporter.statsFilterRegex.isEmpty)
+    }
+  }
+
+  test("statsFilterFile reads multiple files") {
+    val registry = Metrics.createDetached()
+
+    val tFile1 = File.createTempFile("regex", ".txt")
+    tFile1.deleteOnExit()
+
+    val writer1 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile1), "UTF-8"))
+    writer1.write("abc123\r\n")
+    writer1.close()
+
+    val tFile2 = File.createTempFile("regex", ".txt")
+    tFile2.deleteOnExit()
+
+    val writer2 = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile2), "UTF-8"))
+    writer2.write("def456\r\n")
+    writer2.write("ghi789\r\n")
+    writer2.close()
+
+    statsFilterFile.let(Set(tFile1, tFile2)) {
+      val exporter = new JsonExporter(registry)
+      val regex = exporter.statsFilterRegex
+      assert(regex.isDefined)
+      assert(regex.get.pattern.matcher("abc123").matches)
+      assert(regex.get.pattern.matcher("def456").matches)
+      assert(regex.get.pattern.matcher("ghi789").matches)
+    }
+  }
+
+  test("statsFilterFile and statsFilter combine") {
+    val registry = Metrics.createDetached()
+
+    val tFile = File.createTempFile("regex", ".txt")
+    tFile.deleteOnExit()
+
+    val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tFile), "UTF-8"))
+    writer.write("abc123\r\n")
+    writer.close()
+
+    statsFilterFile.let(Set(tFile)) {
+      statsFilter.let("def456") {
+        val exporter = new JsonExporter(registry)
+        val regex = exporter.statsFilterRegex
+        assert(regex.isDefined)
+        assert(regex.get.pattern.matcher("abc123").matches)
+        assert(regex.get.pattern.matcher("def456").matches)
+      }
+    }
   }
 
   test("end-to-end fetching stats works") {
@@ -209,6 +274,18 @@ class JsonExporterTest
       val res = Await.result(exporter(req)).contentString
       assert(res.contains(""""anHisto.max":555"""))
     }
+  }
+
+  test("deadly gauge") {
+    val registry = Metrics.createDetached()
+    val g = new AbstractGauge[java.lang.Double]("boom") {
+      def read: java.lang.Double = throw new RuntimeException("loolool")
+    }
+    val sr = registry.registerGauge(g)
+
+    val exporter = new JsonExporter(registry)
+    val json = exporter.json(pretty = true, filtered = false)
+    assert(!json.contains("boom"), json)
   }
 
 }

@@ -73,7 +73,7 @@ class ClientTest extends FunSuite with IntegrationClient {
       val insertResult = Await.result(c.query(sql))
       val OK(_, insertid, _, _, _) = insertResult.asInstanceOf[OK]
       assert(insertResult.isInstanceOf[OK])
-      assert(insertid === 1)
+      assert(insertid == 1)
     }
 
     test("query: select values") {
@@ -88,7 +88,7 @@ class ClientTest extends FunSuite with IntegrationClient {
 
       var i = 0
       for (res <- selectResult) {
-        assert(allRecords(i) === res)
+        assert(allRecords(i) == res)
         i += 1
       }
     }
@@ -103,7 +103,7 @@ class ClientTest extends FunSuite with IntegrationClient {
         val expectedRes = LongValue(allRecords.filter(_.name == recordName).size)
         val res = ps.select(recordName)(identity)
         val row = Await.result(res)(0)
-        assert(row("numRecords").get === expectedRes)
+        assert(row("numRecords").get == expectedRes)
       }
     }
   }

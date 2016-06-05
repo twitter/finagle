@@ -23,7 +23,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     when(service.apply(any[String])) thenAnswer {
       new Answer[Future[String]] {
         override def answer(invocation: InvocationOnMock) = {
-          if (proxied.status === Status.Open) service("ok")
+          if (proxied.status == Status.Open) service("ok")
           else Future("service is not available")
         }
       }
@@ -35,10 +35,10 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
     proxied.close(Time.now)
     verify(service).close(any)
-    assert(proxied.status === Status.Closed)
+    assert(proxied.status == Status.Closed)
     verify(service).status
 
-    assert(Await.result(proxied("ok")) === "service is not available")
+    assert(Await.result(proxied("ok")) == "service is not available")
     verify(service)("ok")
   }
 
@@ -48,7 +48,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     val rescuedService = Service.rescue(service)
 
     val result = Await.result(rescuedService("ok").liftToTry)
-    assert(result.throwable === exc)
+    assert(result.throwable == exc)
 
     val fatalExc = new InterruptedException
     val service2 = Service.mk[String, String] { _ => throw fatalExc }
@@ -70,7 +70,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
     assert(f.isDefined)
     val proxied = Await.result(f)
 
-    assert(proxied("ok").poll === Some(Return("ko")))
+    assert(proxied("ok").poll == Some(Return("ko")))
     verify(service)("ok")
   }
 
@@ -93,7 +93,7 @@ class ServiceTest extends FunSuite with MockitoSugar {
 
     assert(!didRun)
     verify(service, times(0)).close(any)
-    assert(f2().poll === Some(Throw(exc)))
+    assert(f2().poll == Some(Throw(exc)))
     assert(didRun)
     verify(service).close(any)
   }

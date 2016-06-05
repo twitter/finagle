@@ -1,11 +1,11 @@
 package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack.Param
+import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{StatsFilter, TimeoutFilter}
+import com.twitter.finagle.service.{DeadlineStatsFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
@@ -18,7 +18,18 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 
 object StackServer {
-  private[this] val newJvmFilter = new MkJvmFilter(Jvm())
+
+  private[this] lazy val newJvmFilter = new MkJvmFilter(Jvm())
+
+  private[this] class JvmTracing[Req, Rep] extends Stack.Module1[param.Tracer, ServiceFactory[Req, Rep]] {
+    override def role: Role = Role.jvmTracing
+    override def description: String = "Server-side JVM tracing"
+    override def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] = {
+      val param.Tracer(tracer) = _tracer
+      if (tracer.isNull) next
+      else newJvmFilter[Req, Rep].andThen(next)
+    }
+  }
 
   /**
    * Canonical Roles for each Server-related Stack modules.
@@ -38,6 +49,7 @@ object StackServer {
    *
    * @see [[com.twitter.finagle.tracing.ServerDestTracingProxy]]
    * @see [[com.twitter.finagle.service.TimeoutFilter]]
+   * @see [[com.twitter.finagle.service.DeadlineStatsFilter]]
    * @see [[com.twitter.finagle.filter.DtabStatsFilter]]
    * @see [[com.twitter.finagle.service.StatsFilter]]
    * @see [[com.twitter.finagle.filter.RequestSemaphoreFilter]]
@@ -46,7 +58,7 @@ object StackServer {
    * @see [[com.twitter.finagle.tracing.ServerTracingFilter]]
    * @see [[com.twitter.finagle.tracing.TraceInitializerFilter]]
    * @see [[com.twitter.finagle.filter.MonitorFilter]]
-   * @see [[com.twitter.finagle.filter.HandletimeFilter]]
+   * @see [[com.twitter.finagle.filter.ServerStatsFilter]]
    */
   def newStack[Req, Rep]: Stack[ServiceFactory[Req, Rep]] = {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
@@ -55,14 +67,18 @@ object StackServer {
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.serverModule)
+    stk.push(DeadlineStatsFilter.module)
     stk.push(DtabStatsFilter.module)
+    // Admission Control filters are inserted after `StatsFilter` so that rejected
+    // requests are counted. We may need to adjust how latency are recorded
+    // to exclude Nack response from latency stats, CSL-2306.
+    stk.push(ServerAdmissionControl.module)
     stk.push(StatsFilter.module)
     stk.push(RequestSemaphoreFilter.module)
     stk.push(MaskCancelFilter.module)
     stk.push(ExceptionSourceFilter.module)
-    stk.push(Role.jvmTracing, ((next: ServiceFactory[Req, Rep]) =>
-      newJvmFilter[Req, Rep]() andThen next))
-    stk.push(HandletimeFilter.module)
+    stk.push(new JvmTracing)
+    stk.push(ServerStatsFilter.module)
     stk.push(Role.protoTracing, identity[ServiceFactory[Req, Rep]](_))
     stk.push(ServerTracingFilter.module)
     stk.push(Role.preparer, identity[ServiceFactory[Req, Rep]](_))
@@ -114,11 +130,28 @@ trait StackServer[Req, Rep]
 /**
  * A standard template implementation for
  * [[com.twitter.finagle.server.StackServer]].
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Servers.html user guide]]
+ *      for further details on Finagle servers and their configuration.
+ *
+ * @see [[StackServer.newStack]] for the default modules used by Finagle
+ *      servers.
  */
 trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
-  extends StackServer[Req, Rep] { self =>
+  extends StackServer[Req, Rep]
+  with Stack.Parameterized[This]
+  with CommonParams[This]
+  with WithServerTransport[This]
+  with WithServerAdmissionControl[This] { self =>
 
+  /**
+   * The type we write into the transport.
+   */
   protected type In
+
+  /**
+   * The type we read out of the transport.
+   */
   protected type Out
 
   /**
@@ -137,8 +170,19 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
    */
   protected def newDispatcher(transport: Transport[In, Out], service: Service[Req, Rep]): Closable
 
+  /**
+   * Creates a new StackServer with parameter `p`.
+   */
   override def configured[P: Stack.Param](p: P): This =
-    withParams(params+p)
+    withParams(params + p)
+
+  /**
+   * Creates a new StackServer with parameter `psp._1` and Stack Param type `psp._2`.
+   */
+  override def configured[P](psp: (P, Stack.Param[P])): This = {
+    val (p, sp) = psp
+    configured(p)(sp)
+  }
 
   /**
    * Creates a new StackServer with `params` used to configure this StackServer's `stack`.
@@ -219,7 +263,10 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
             // away. This allows protocols that support graceful shutdown to
             // also gracefully deny new sessions.
             val d = server.newDispatcher(
-              transport, Service.const(Future.exception(Failure.rejected(exc))))
+              transport,
+              Service.const(Future.exception(
+                Failure.rejected("Terminating session and ignoring request", exc)))
+            )
             connections.add(d)
             transport.onClose ensure connections.remove(d)
             // We give it a generous amount of time to shut down the session to
@@ -228,7 +275,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
         }
       }
 
-      ServerRegistry.register(addr.toString, server.stack, server.params)
+      ServerRegistry.register(underlying.boundAddress.toString, server.stack, server.params)
 
       protected def closeServer(deadline: Time) = closeAwaitably {
         // Here be dragons

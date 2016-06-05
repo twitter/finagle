@@ -13,8 +13,7 @@ import java.net.InetSocketAddress
  * external processes, for example lookups through DNS or to ZooKeeper,
  * and thus lookup results are represented by a [[com.twitter.util.Activity Activity]].
  */
-trait Namer { self =>
-  import Namer._
+abstract class Namer { self =>
 
   /**
    * Translate a [[com.twitter.finagle.Path Path]] into a
@@ -45,13 +44,8 @@ object Namer  {
     }
   }
 
-  private def boundNameTreeToAddr(tree: Activity[NameTree[Name.Bound]]): Var[Addr] =
-    tree.map(_.eval).run.flatMap {
-      case Activity.Ok(None) => Var.value(Addr.Neg)
-      case Activity.Ok(Some(names)) => Name.all(names).addr
-      case Activity.Pending => Var.value(Addr.Pending)
-      case Activity.Failed(exc) => Var.value(Addr.Failed(exc))
-    }
+  // Key to encode name tree weights in Addr metadata
+  private[twitter] val AddrWeightKey = "namer_nametree_weight"
 
   /**
    * The global [[com.twitter.finagle.Namer Namer]]. It binds paths of the form
@@ -76,11 +70,11 @@ object Namer  {
   val global: Namer = new Namer {
 
     private[this] object InetPath {
-      def unapply(path: Path): Option[(InetSocketAddress, Path)] = path match {
+      def unapply(path: Path): Option[(Address, Path)] = path match {
         case Path.Utf8("$", "inet", host, IntegerString(port), residual@_*) =>
-          Some((new InetSocketAddress(host, port), Path.Utf8(residual:_*)))
+          Some((Address(new InetSocketAddress(host, port)), Path.Utf8(residual:_*)))
         case Path.Utf8("$", "inet", IntegerString(port), residual@_*) =>
-          Some((new InetSocketAddress(port), Path.Utf8(residual:_*)))
+          Some((Address(new InetSocketAddress(port)), Path.Utf8(residual:_*)))
         case _ => None
       }
     }
@@ -168,7 +162,7 @@ object Namer  {
     lookup: Path => Activity[NameTree[Name]],
     tree: NameTree[Path]
   ): Activity[NameTree[Name.Bound]] =
-    bind(lookup, 0)(tree map { path => Name.Path(path) })
+    bind(lookup, 0, None)(tree map { path => Name.Path(path) })
 
   private[this] def bindUnion(
     lookup: Path => Activity[NameTree[Name]],
@@ -178,7 +172,7 @@ object Namer  {
 
     val weightedTreeVars: Seq[Var[Activity.State[NameTree.Weighted[Name.Bound]]]] = trees.map {
       case Weighted(w, t) =>
-        val treesAct: Activity[NameTree[Name.Bound]] = bind(lookup, depth)(t)
+        val treesAct: Activity[NameTree[Name.Bound]] = bind(lookup, depth, Some(w))(t)
         treesAct.map(Weighted(w, _)).run
     }
 
@@ -204,30 +198,40 @@ object Namer  {
   }
 
   // values of the returned activity are simplified and contain no Alt nodes
-  private def bind(lookup: Path => Activity[NameTree[Name]], depth: Int)(tree: NameTree[Name])
+  private def bind(lookup: Path => Activity[NameTree[Name]], depth: Int, weight: Option[Double])(tree: NameTree[Name])
   : Activity[NameTree[Name.Bound]] =
     if (depth > MaxDepth)
       Activity.exception(new IllegalArgumentException("Max recursion level reached."))
     else tree match {
-      case Leaf(Name.Path(path)) => lookup(path) flatMap bind(lookup, depth+1)
-      case Leaf(bound@Name.Bound(_)) => Activity.value(Leaf(bound))
+      case Leaf(Name.Path(path)) => lookup(path).flatMap(bind(lookup, depth+1, weight))
+      case Leaf(bound@Name.Bound(addr)) =>
+        // Add the weight of the parent to the addr's metadata
+        // Note: this assumes a single level of tree weights
+        val addrWithWeight = addr.map {
+          addr => (addr, weight) match {
+            case (Addr.Bound(addrs, metadata), Some(weight)) =>
+              Addr.Bound(addrs, metadata + ((AddrWeightKey, weight)))
+            case _ => addr
+          }
+        }
+        Activity.value(Leaf(Name.Bound(addrWithWeight, bound.id, bound.path)))
 
       case Fail => Activity.value(Fail)
       case Neg => Activity.value(Neg)
       case Empty => Activity.value(Empty)
 
       case Union() => Activity.value(Neg)
-      case Union(Weighted(_, tree)) => bind(lookup, depth)(tree)
+      case Union(Weighted(weight, tree)) => bind(lookup, depth, Some(weight))(tree)
       case Union(trees@_*) => bindUnion(lookup, depth, trees)
 
       case Alt() => Activity.value(Neg)
-      case Alt(tree) => bind(lookup, depth)(tree)
+      case Alt(tree) => bind(lookup, depth, weight)(tree)
       case Alt(trees@_*) =>
         def loop(trees: Seq[NameTree[Name]]): Activity[NameTree[Name.Bound]] =
           trees match {
             case Nil => Activity.value(Neg)
             case Seq(head, tail@_*) =>
-              bind(lookup, depth)(head) flatMap {
+              bind(lookup, depth, weight)(head).flatMap {
                 case Fail => Activity.value(Fail)
                 case Neg => loop(tail)
                 case head => Activity.value(head)
@@ -241,6 +245,31 @@ object Namer  {
  * Abstract [[Namer]] class for Java compatibility.
  */
 abstract class AbstractNamer extends Namer
+
+/**
+ * Base-trait for Namers that bind to a local Service.
+ *
+ * Implementers with a 0-argument constructor may be named and
+ * auto-loaded with `/$/pkg.cls` syntax.
+ *
+ * Note that this can't actually be accomplished in a type-safe manner
+ * since the naming step obscures the service's type to observers.
+ */
+trait ServiceNamer[Req, Rep] extends Namer {
+
+  protected def lookupService(path: Path): Option[Service[Req, Rep]]
+
+  def lookup(path: Path): Activity[NameTree[Name]] = lookupService(path) match {
+    case None =>
+      Activity.value(NameTree.Neg)
+    case Some(svc) =>
+      val factory = ServiceFactory(() => Future.value(svc))
+      val addr = Addr.Bound(exp.Address(factory))
+      val name = Name.Bound(Var.value(addr), factory, path)
+      Activity.value(NameTree.Leaf(name))
+  }
+}
+
 
 package namer {
   final class global extends Namer {

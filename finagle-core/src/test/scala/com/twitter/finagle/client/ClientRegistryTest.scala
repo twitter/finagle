@@ -2,11 +2,10 @@ package com.twitter.finagle.client
 
 import com.twitter.finagle._
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.finagle.util.{TestParam, TestParam2}
-import com.twitter.util.{Var, Return, Activity, Future, Await}
+import com.twitter.finagle.util.{StackRegistry, TestParam, TestParam2}
+import com.twitter.util._
 import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 import com.twitter.conversions.time.intToTimeableNumber
-
 import org.junit.runner.RunWith
 import org.mockito.Matchers.anyObject
 import org.mockito.Mockito
@@ -16,16 +15,22 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
-import java.net.SocketAddress
-
 object crtnamer {
-  val va = Var[Addr](Addr.Pending)
+  @volatile var observationsOpened = 0
+  @volatile var observationsClosed = 0
+  val e = Event[Addr]
+  val va = Var.async[Addr](Addr.Pending) { u =>
+    observationsOpened += 1
+    val obs = e.register(Witness(u))
+    Closable.make { deadline =>
+      observationsClosed += 1
+      obs.close(deadline)
+    }
+  }
 }
 
 class crtnamer extends Namer {
   import crtnamer._
-
-  def enum(prefix: Path): Activity[Dtab] = Activity.pending
 
   def lookup(path: Path): Activity[NameTree[Name]] = {
     Activity(Var.value(Activity.Ok(NameTree.Leaf(Name.Bound(va, new Object())))))
@@ -53,7 +58,7 @@ class ClientRegistryTest extends FunSuite
 
   test("ClientRegistry.expAllRegisteredClientsResolved zero clients")(new Ctx {
     val allResolved0 = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved0.poll === Some(Return(Set())))
+    assert(allResolved0.poll == Some(Return(Set())))
   })
 
   test("ClientRegistry.expAllRegisteredClientsResolved handles Addr.Bound")(new Ctx {
@@ -61,11 +66,11 @@ class ClientRegistryTest extends FunSuite
 
     val c = stackClient.newClient(Name.Bound(va, new Object()), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll === None)
+    assert(allResolved.poll == None)
 
-    va() = Addr.Bound(Set.empty[SocketAddress])
+    va() = Addr.Bound(Set.empty[Address])
     eventually {
-      assert(allResolved.poll === Some(Return(Set("foo"))))
+      assert(allResolved.poll == Some(Return(Set("foo"))))
     }
   })
 
@@ -74,11 +79,11 @@ class ClientRegistryTest extends FunSuite
 
     val c = stackClient.newClient(Name.Bound(va, new Object()), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll === None)
+    assert(allResolved.poll == None)
 
     va() = Addr.Failed(new Exception("foo"))
     eventually {
-      assert(allResolved.poll === Some(Return(Set("foo"))))
+      assert(allResolved.poll == Some(Return(Set("foo"))))
     }
   })
 
@@ -87,11 +92,11 @@ class ClientRegistryTest extends FunSuite
 
     val c = stackClient.newClient(Name.Bound(va, new Object()), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll === None)
+    assert(allResolved.poll == None)
 
     va() = Addr.Neg
     eventually {
-      assert(allResolved.poll === Some(Return(Set("foo"))))
+      assert(allResolved.poll == Some(Return(Set("foo"))))
     }
   })
 
@@ -101,19 +106,19 @@ class ClientRegistryTest extends FunSuite
 
     val c0 = stackClient.newClient(Name.Bound(va0, new Object()), "foo")
     val allResolved0 = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved0.poll === None)
-    va0() = Addr.Bound(Set.empty[SocketAddress])
+    assert(allResolved0.poll == None)
+    va0() = Addr.Bound(Set.empty[Address])
     eventually {
-      assert(allResolved0.poll === Some(Return(Set("foo"))))
+      assert(allResolved0.poll == Some(Return(Set("foo"))))
     }
 
     val c1 = stackClient.newClient(Name.Bound(va1, new Object()), "bar")
     val allResolved1 = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved1.poll === None)
-    va1() = Addr.Bound(Set.empty[SocketAddress])
+    assert(allResolved1.poll == None)
+    va1() = Addr.Bound(Set.empty[Address])
 
     eventually {
-      assert(allResolved1.poll === Some(Return(Set("foo", "bar"))))
+      assert(allResolved1.poll == Some(Return(Set("foo", "bar"))))
     }
   })
 
@@ -121,11 +126,26 @@ class ClientRegistryTest extends FunSuite
     val path = Path.read("/$/com.twitter.finagle.client.crtnamer/foo")
     val c = stackClient.newClient(Name.Path(path), "foo")
     val allResolved = ClientRegistry.expAllRegisteredClientsResolved()
-    assert(allResolved.poll === None)
-    crtnamer.va() = Addr.Bound(Set.empty[SocketAddress])
+    assert(allResolved.poll == None)
+    crtnamer.e.notify(Addr.Bound(Set.empty[Address]))
     eventually {
-      assert(allResolved.poll === Some(Return(Set("foo"))))
+      assert(allResolved.poll == Some(Return(Set("foo"))))
     }
+    c.close()
+  })
+
+  test("ClientRegistry does not release Var observations")(new Ctx {
+    // reset observation counters in crtnamer, since other tests may alter them
+    crtnamer.observationsOpened = 0
+    crtnamer.observationsClosed = 0
+    val path = Path.read("/$/com.twitter.finagle.client.crtnamer/foo")
+    assert(crtnamer.observationsOpened == 0)
+    val c = stackClient.newClient(Name.Path(path), "foo")
+    assert(crtnamer.observationsOpened == 1) // check that we kicked off resolution
+    assert(crtnamer.observationsClosed == 0)
+    c.close()
+    assert(crtnamer.observationsOpened == 1)
+    assert(crtnamer.observationsClosed == 1)
   })
 
   test("ClientRegistry registers clients in registry")(new Ctx {
@@ -196,5 +216,27 @@ class ClientRegistryTest extends FunSuite
 
       assert(GlobalRegistry.get.isEmpty)
     }
+  }
+
+  test("RegistryEntryLifecycle module cleans up duplicates after service closes") {
+    val stk = newStack()
+    val params = Stack.Params.empty + param.Label("foo")
+
+    ClientRegistry.register("first", stk, params)
+    ClientRegistry.register("second", stk, params)
+    val factory = (RegistryEntryLifecycle.module[Int, Int] +: stk).make(params)
+
+    assert(ClientRegistry.registeredDuplicates.size == 2)
+    assert(ClientRegistry.registeredDuplicates(0).name == "foo")
+    assert(ClientRegistry.registeredDuplicates(0).addr == "second")
+    assert(ClientRegistry.registeredDuplicates(1).name == "foo")
+    assert(ClientRegistry.registeredDuplicates(1).addr == "/$/fail")
+
+
+    factory.close()
+
+    assert(ClientRegistry.registeredDuplicates.size == 1)
+    assert(ClientRegistry.registeredDuplicates(0).name == "foo")
+    assert(ClientRegistry.registeredDuplicates(0).addr == "/$/fail")
   }
 }

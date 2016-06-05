@@ -1,7 +1,7 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
-import com.twitter.finagle.service.RetryPolicy
+import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.TraceInitializerFilter
 import com.twitter.io.Buf
@@ -54,8 +54,10 @@ class ThriftServerFramedCodec(
   private[this] val preparer = ThriftServerPreparer(
     protocolFactory, config.serviceName)
 
-  override def prepareConnFactory(factory: ServiceFactory[Array[Byte], Array[Byte]]) =
-    preparer.prepare(factory)
+  override def prepareConnFactory(
+    factory: ServiceFactory[Array[Byte],
+    Array[Byte]], params: Stack.Params
+  ) = preparer.prepare(factory, params)
 
   override def newTraceInitializer = TraceInitializerFilter.serverModule[Array[Byte], Array[Byte]]
 
@@ -69,10 +71,15 @@ private[finagle] case class ThriftServerPreparer(
     new UncaughtAppExceptionFilter(protocolFactory)
 
   def prepare(
-    factory: ServiceFactory[Array[Byte], Array[Byte]]
-  ): ServiceFactory[Array[Byte], Array[Byte]] = factory map { service =>
+    factory: ServiceFactory[Array[Byte], Array[Byte]],
+    params: Stack.Params
+  ): ServiceFactory[Array[Byte], Array[Byte]] = factory.map { service =>
+    val payloadSize = new PayloadSizeFilter[Array[Byte], Array[Byte]](
+      params[param.Stats].statsReceiver, _.length, _.length)
+
     val ttwitter = new TTwitterServerFilter(serviceName, protocolFactory)
-    ttwitter andThen uncaughtExceptionsFilter andThen service
+
+    payloadSize.andThen(ttwitter).andThen(uncaughtExceptionsFilter).andThen(service)
   }
 }
 

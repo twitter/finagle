@@ -2,8 +2,9 @@ ExpiringService
 <<<<<<<<<<<<<<<
 
 **idle**
-  a counter of the number of times the service has expired from staying idle for too long
-  in between requests
+  A counter of the number of times the service has expired from staying idle
+  for too long in between requests.
 
 **lifetime**
-  a counter of the number of times the service has exceeded its lifetime expiration duration
+  A counter of the number of times the service has exceeded its lifetime
+  expiration duration.

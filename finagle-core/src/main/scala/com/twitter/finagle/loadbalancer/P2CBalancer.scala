@@ -1,17 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.app.GlobalFlag
-import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.service.FailingFactory
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
-import com.twitter.finagle.util.{OnReady, Drv, Rng, Updater}
+import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.TimeUnit
-import java.util.logging.{Logger, Level}
-import scala.annotation.tailrec
-import scala.collection.immutable
 
 /**
  * An O(1), concurrent, weighted least-loaded fair load balancer.
@@ -19,7 +12,7 @@ import scala.collection.immutable
  * O(1) biased coin flipping through the aliasing method, described
  * in [[com.twitter.finagle.util.Drv Drv]].
  *
- * @param underlying An activity that updates with the set of
+ * @param activity An activity that updates with the set of
  * (node, weight) pairs over which we distribute load.
  *
  * @param maxEffort the maximum amount of "effort" we're willing to
@@ -36,7 +29,7 @@ import scala.collection.immutable
  * 10 (October 2001), 1094-1104.
  */
 private class P2CBalancer[Req, Rep](
-    protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
+    protected val activity: Activity[Traversable[ServiceFactory[Req, Rep]]],
     protected val maxEffort: Int,
     protected val rng: Rng,
     protected val statsReceiver: StatsReceiver,
@@ -44,7 +37,11 @@ private class P2CBalancer[Req, Rep](
   extends Balancer[Req, Rep]
   with LeastLoaded[Req, Rep]
   with P2C[Req, Rep]
-  with Updating[Req, Rep]
+  with Updating[Req, Rep] {
+
+  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+
+}
 
 /**
  * Like [[com.twitter.finagle.loadbalancer.P2CBalancer]] but
@@ -55,7 +52,7 @@ private class P2CBalancer[Req, Rep](
  * only cautiously. Peak EWMA takes history into account, so that
  * slow behavior is penalized relative to the supplied decay time.
  *
- * @param underlying An activity that updates with the set of
+ * @param activity An activity that updates with the set of
  * (node, weight) pairs over which we distribute load.
  *
  * @param decayTime The window of latency observations.
@@ -74,7 +71,7 @@ private class P2CBalancer[Req, Rep](
  * 10 (October 2001), 1094-1104.
  */
 private class P2CBalancerPeakEwma[Req, Rep](
-    protected val activity: Activity[Traversable[(ServiceFactory[Req, Rep], Double)]],
+    protected val activity: Activity[Traversable[ServiceFactory[Req, Rep]]],
     protected val decayTime: Duration,
     protected val maxEffort: Int,
     protected val rng: Rng,
@@ -83,14 +80,13 @@ private class P2CBalancerPeakEwma[Req, Rep](
   extends Balancer[Req, Rep]
   with PeakEwma[Req, Rep]
   with P2C[Req, Rep]
-  with Updating[Req, Rep]
+  with Updating[Req, Rep] {
 
-private object PeakEwma {
-  private val log = Logger.getLogger("com.twitter.finagle.loadbalancer.loadMetric")
+  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
+
 }
 
 private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
-  import PeakEwma.log
 
   protected def rng: Rng
 
@@ -100,7 +96,7 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
 
   protected class Metric(sr: StatsReceiver, name: String) {
     private[this] val epoch = nanoTime()
-    private[this] val Penalty: Double = Double.MaxValue/2
+    private[this] val Penalty: Double = Long.MaxValue >> 16
     // The mean lifetime of `cost`, it reaches its half-life after Tau*ln(2).
     private[this] val Tau: Double = decayTime.inNanoseconds.toDouble
     require(Tau > 0)
@@ -148,28 +144,27 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
       val rtt = math.max(nanoTime()-ts, 0)
       pending -= 1
       observe(rtt)
-      if (log.isLoggable(Level.FINEST)) {
-        log.finest(f"[$name] clock=${stamp-epoch}%d, rtt=$rtt%d, cost=$cost%f, pending=$pending%d")
-      }
     }
   }
 
-  protected case class Node(factory: ServiceFactory[Req, Rep], weight: Double, metric: Metric, token: Int)
-      extends ServiceFactoryProxy[Req, Rep](factory)
-      with NodeT {
+  protected case class Node(
+      factory: ServiceFactory[Req, Rep],
+      metric: Metric,
+      token: Int)
+    extends ServiceFactoryProxy[Req, Rep](factory)
+    with NodeT[Req, Rep] {
     type This = Node
 
-    def newWeight(weight: Double) = copy(weight=weight)
-    def load = metric.get()
-    def pending = metric.rate()
+    def load: Double = metric.get()
+    def pending: Int = metric.rate()
 
     override def apply(conn: ClientConnection) = {
       val ts = metric.start()
-      super.apply(conn) transform {
+      super.apply(conn).transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
             override def close(deadline: Time) =
-              super.close(deadline) ensure {
+              super.close(deadline).ensure {
                 metric.end(ts)
               }
           })
@@ -181,11 +176,12 @@ private trait PeakEwma[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
 
-  protected def newNode(factory: ServiceFactory[Req, Rep], weight: Double, statsReceiver: StatsReceiver): Node =
-    Node(factory, weight, new Metric(statsReceiver, factory.toString), rng.nextInt())
+  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver): Node =
+    Node(factory, new Metric(statsReceiver, factory.toString), rng.nextInt())
 
   protected def failingNode(cause: Throwable) = Node(
-    new FailingFactory(cause), 0.0,
+    new FailingFactory(cause),
     new Metric(NullStatsReceiver, "failing"),
-    0)
+    0
+  )
 }

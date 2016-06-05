@@ -1,16 +1,12 @@
 package com.twitter.finagle.thrift
 
 import com.twitter.finagle._
-import com.twitter.finagle.netty3.Conversions._
-import com.twitter.finagle.netty3.{Ok, Error, Cancelled}
-import com.twitter.util.Future
-import java.util.logging.{Logger, Level}
+import com.twitter.finagle.filter.PayloadSizeFilter
+import com.twitter.util.{Future, Stopwatch}
 import org.apache.thrift.protocol.{TBinaryProtocol, TMessage, TMessageType, TProtocolFactory}
 import org.apache.thrift.transport.TMemoryInputTransport
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{
-  ChannelHandlerContext, ChannelPipelineFactory, Channels, MessageEvent,
-  SimpleChannelDownstreamHandler}
+import org.jboss.netty.channel._
 
 /**
  * ThriftClientFramedCodec implements a framed thrift transport that
@@ -72,8 +68,9 @@ class ThriftClientFramedCodec(
     ThriftClientFramedPipelineFactory
 
   override def prepareConnFactory(
-    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]
-  ) = preparer.prepare(underlying)
+    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]],
+    params: Stack.Params
+  ) = preparer.prepare(underlying, params)
 
   override val protocolLibraryName: String = "thrift"
 }
@@ -93,14 +90,16 @@ private[thrift] class ThriftClientChannelBufferEncoder
         Channels.write(ctx, e.getFuture, ChannelBuffers.wrappedBuffer(request.message))
         if (request.oneway) {
           // oneway RPCs are satisfied when the write is complete.
-          e.getFuture() {
-            case Ok(_) =>
-              Channels.fireMessageReceived(ctx, ChannelBuffers.EMPTY_BUFFER)
-            case Error(e) =>
-              Channels.fireExceptionCaught(ctx, e)
-            case Cancelled =>
-              Channels.fireExceptionCaught(ctx, new CancelledRequestException)
-          }
+          e.getFuture.addListener(new ChannelFutureListener {
+            override def operationComplete(f: ChannelFuture): Unit =
+              if (f.isSuccess) {
+                Channels.fireMessageReceived(ctx, ChannelBuffers.EMPTY_BUFFER)
+              } else if (f.isCancelled) {
+                Channels.fireExceptionCaught(ctx, new CancelledRequestException)
+              } else {
+                Channels.fireExceptionCaught(ctx, f.getCause)
+              }
+          })
         }
 
       case _ =>
@@ -109,9 +108,11 @@ private[thrift] class ThriftClientChannelBufferEncoder
 }
 
 /**
- * A class to prepare a client for upgrade: it attempts to send a
- * probe message to upgrade the protocol to TTwitter. If this
- * succeds, the TTwitter filter is added.
+ * A class to prepare a client. It adds a payload size filter and a
+ * connection validation filter. If requested, it will also prepare
+ * clients for upgrade: it attempts to send a probe message to upgrade
+ * the protocol to TTwitter. If this succeeds, the TTwitter filter is
+ * added.
  */
 private[finagle] case class ThriftClientPreparer(
     protocolFactory: TProtocolFactory,
@@ -119,7 +120,52 @@ private[finagle] case class ThriftClientPreparer(
     clientId: Option[ClientId] = None,
     useCallerSeqIds: Boolean = false) {
 
-  def prepareService(
+  def prepareService(params: Stack.Params)(
+    service: Service[ThriftClientRequest, Array[Byte]]
+  ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
+    val payloadSize = new PayloadSizeFilter[ThriftClientRequest, Array[Byte]](
+      params[param.Stats].statsReceiver, _.message.length, _.length
+    )
+    val Thrift.param.AttemptTTwitterUpgrade(attemptUpgrade) =
+      params[Thrift.param.AttemptTTwitterUpgrade]
+    val payloadSizeService = payloadSize.andThen(service)
+    val upgradedService =
+      if (attemptUpgrade) {
+        upgrade(payloadSizeService)
+      } else {
+        Future.value(payloadSizeService)
+      }
+
+    upgradedService.map { upgraded =>
+      new ValidateThriftService(upgraded, protocolFactory)
+    }
+  }
+
+  def prepare(
+    underlying: ServiceFactory[ThriftClientRequest, Array[Byte]],
+    params: Stack.Params
+  ): ServiceFactory[ThriftClientRequest, Array[Byte]] = {
+    val param.Stats(stats) = params[param.Stats]
+    val Thrift.param.AttemptTTwitterUpgrade(attemptUpgrade) =
+      params[Thrift.param.AttemptTTwitterUpgrade]
+    val preparingFactory = underlying.flatMap(prepareService(params))
+
+    if (attemptUpgrade) {
+      new ServiceFactoryProxy(preparingFactory) {
+        val stat = stats.stat("codec_connection_preparation_latency_ms")
+        override def apply(conn: ClientConnection) = {
+          val elapsed = Stopwatch.start()
+          super.apply(conn).ensure {
+            stat.add(elapsed().inMilliseconds)
+          }
+        }
+      }
+    } else {
+      preparingFactory
+    }
+  }
+
+  private def upgrade(
     service: Service[ThriftClientRequest, Array[Byte]]
   ): Future[Service[ThriftClientRequest, Array[Byte]]] = {
     // Attempt to upgrade the protocol the first time around by
@@ -137,24 +183,22 @@ private[finagle] case class ThriftClientPreparer(
       val memoryTransport = new TMemoryInputTransport(bytes)
       val iprot = protocolFactory.getProtocol(memoryTransport)
       val reply = iprot.readMessageBegin()
+
       val ttwitter = new TTwitterClientFilter(
         serviceName,
         reply.`type` != TMessageType.EXCEPTION,
         clientId, protocolFactory)
       // TODO: also apply this for Protocols.binaryFactory
+
       val seqIdFilter =
         if (protocolFactory.isInstanceOf[TBinaryProtocol.Factory] && !useCallerSeqIds)
           new SeqIdFilter
         else
           Filter.identity[ThriftClientRequest, Array[Byte]]
 
-      val filtered = seqIdFilter andThen ttwitter andThen service
-      new ValidateThriftService(filtered, protocolFactory)
+      seqIdFilter.andThen(ttwitter).andThen(service)
     }
   }
-
-  def prepare(underlying: ServiceFactory[ThriftClientRequest, Array[Byte]]) =
-    underlying flatMap prepareService
 }
 
 /**

@@ -4,8 +4,8 @@ import com.twitter.app.Flag
 import com.twitter.app.App
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.memcachedx
-import com.twitter.finagle.memcachedx.protocol.text.Memcached
+import com.twitter.finagle.memcached
+import com.twitter.finagle.memcached.protocol.text.Memcached
 import com.twitter.finagle.stats.OstrichStatsReceiver
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.io.Buf
@@ -14,6 +14,7 @@ import com.twitter.util.{Future, Stopwatch}
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicLong
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory
+import scala.language.reflectiveCalls
 
 class PersistentService[Req, Rep](factory: ServiceFactory[Req, Rep]) extends Service[Req, Rep] {
   @volatile private[this] var currentService: Future[Service[Req, Rep]] = factory()
@@ -38,7 +39,7 @@ object MemcacheStress extends App {
   }
   val count = new AtomicLong
 
-  def proc(client: memcachedx.Client, key: String, value: Buf) {
+  def proc(client: memcached.Client, key: String, value: Buf) {
     client.set(key, value) ensure {
       count.incrementAndGet()
       proc(client, key, value)
@@ -78,7 +79,7 @@ object MemcacheStress extends App {
 
     for (_ <- 0 until config.concurrency()) {
       val svc = new PersistentService(factory)
-      val client = memcachedx.Client(svc)
+      val client = memcached.Client(svc)
       proc(client, key, value)
     }
 

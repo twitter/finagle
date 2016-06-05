@@ -56,24 +56,27 @@ trait Transport[In, Out] extends Closable { self =>
   /**
    * The peer certificate if a TLS session is established.
    */
-  private[finagle] def peerCertificate: Option[Certificate]
+  def peerCertificate: Option[Certificate]
 
   /**
-   * Cast this transport to `Transport[In1, Out1]`. Note that this is
-   * generally unsafe: only do this when you know the cast is
-   * guaranteed safe.
+   * Maps this transport to `Transport[In1, Out2]`. Note, exceptions
+   * in `f` and `g` are lifted to a [[com.twitter.util.Future]].
+   *
+   * @param f The function applied to `write`s input.
+   * @param g The function applied to the result of a `read`
    */
-  def cast[In1, Out1]: Transport[In1, Out1] = new Transport[In1, Out1] {
-    def write(req: In1) = self.write(req.asInstanceOf[In])
-    def read(): Future[Out1] = self.read().asInstanceOf[Future[Out1]]
-    def status = self.status
-    val onClose = self.onClose
-    def localAddress = self.localAddress
-    def remoteAddress = self.remoteAddress
-    private[finagle] def peerCertificate = self.peerCertificate
-    def close(deadline: Time) = self.close(deadline)
-    override def toString: String = self.toString
-  }
+  def map[In1, Out1](f: In1 => In, g: Out => Out1): Transport[In1, Out1] =
+    new Transport[In1, Out1] {
+      def write(req: In1): Future[Unit] = Future(f(req)).flatMap(self.write)
+      def read(): Future[Out1] = self.read().map(g)
+      def status: Status = self.status
+      val onClose: Future[Throwable] = self.onClose
+      def localAddress: SocketAddress = self.localAddress
+      def remoteAddress: SocketAddress = self.remoteAddress
+      def peerCertificate: Option[Certificate] = self.peerCertificate
+      def close(deadline: Time): Future[Unit] = self.close(deadline)
+      override def toString: String = self.toString
+    }
 }
 
 /**
@@ -138,12 +141,12 @@ object Transport {
    * $param the verbosity of a `Transport`. Transport activity is
    * written to [[com.twitter.finagle.param.Logger]].
    */
-  case class Verbose(b: Boolean) {
+  case class Verbose(enabled: Boolean) {
     def mk(): (Verbose, Stack.Param[Verbose]) =
       (this, Verbose.param)
   }
   object Verbose {
-    implicit val param = Stack.Param(Verbose(false))
+    implicit val param = Stack.Param(Verbose(enabled = false))
   }
 
   /**
@@ -169,11 +172,38 @@ object Transport {
   }
 
   /**
+   * $param the TLS config for a `Transport` (default: disabled).
+   */
+  case class Tls(config: TlsConfig)
+  object Tls {
+    implicit val param: Stack.Param[Tls] = Stack.Param(Tls(TlsConfig.Disabled))
+  }
+
+  /**
+   * $param the options (i.e., socket options) of a `Transport`.
+   *
+   * @param noDelay enables or disables `TCP_NODELAY` (Nagle's algorithm)
+   *                option on a transport socket (`noDelay = true` means
+   *                disabled). Default is `true` (disabled).
+   *
+   * @param reuseAddr enables or disables `SO_REUSEADDR` option on a
+   *                  transport socket. Default is `true`.
+   */
+  case class Options(noDelay: Boolean, reuseAddr: Boolean) {
+    def mk(): (Options, Stack.Param[Options]) = (this, Options.param)
+  }
+
+  object Options {
+    implicit val param: Stack.Param[Options] =
+      Stack.Param(Options(noDelay = true, reuseAddr = true))
+  }
+
+  /**
    * Serializes the object stream from a `Transport` into a
    * [[com.twitter.io.Writer]].
    *
    * The serialization function `f` can return `Future.None` to interrupt the
-   * stream to faciliate using the transport with multiple writers and vice
+   * stream to facilitate using the transport with multiple writers and vice
    * versa.
    *
    * Both transport and writer are unmanaged, the caller must close when
@@ -210,7 +240,7 @@ object Transport {
    * is complete, or else has failed.
    *
    * @note This deserves its own implementation, independently of
-   * using copyToWriter. In particular, in today's implemenation,
+   * using copyToWriter. In particular, in today's implementation,
    * the path of interrupts are a little convoluted; they would be
    * clarified by an independent implementation.
    */
@@ -229,6 +259,15 @@ object Transport {
       raise(new Reader.ReaderDiscarded)
     }
   }
+
+  /**
+   * Casts an object transport to `Transport[In1, Out1]`. Note that this is
+   * generally unsafe: only do this when you know the cast is guaranteed safe.
+   * This is useful when coercing a netty object pipeline into a typed transport,
+   * for example.
+   */
+  def cast[In1, Out1](trans: Transport[Any, Any]): Transport[In1, Out1] =
+    trans.map(_.asInstanceOf[Any], _.asInstanceOf[Out1])
 }
 
 /**
@@ -237,6 +276,20 @@ object Transport {
  */
 trait TransportFactory {
   def apply[In, Out](): Transport[In, Out]
+}
+
+/**
+ * A [[Transport]] that defers all methods except `read` and `write`
+ * to `self`.
+ */
+abstract class TransportProxy[In, Out](self: Transport[In, Out]) extends Transport[In, Out] {
+  def status: Status = self.status
+  val onClose: Future[Throwable] = self.onClose
+  def localAddress: SocketAddress = self.localAddress
+  def remoteAddress: SocketAddress = self.remoteAddress
+  def peerCertificate: Option[Certificate] = self.peerCertificate
+  def close(deadline: Time): Future[Unit] = self.close(deadline)
+  override def toString: String = self.toString
 }
 
 /**
@@ -268,5 +321,5 @@ class QueueTransport[In, Out](writeq: AsyncQueue[In], readq: AsyncQueue[Out])
   val onClose = closep
   val localAddress = new SocketAddress{}
   val remoteAddress = new SocketAddress{}
-  private[finagle] def peerCertificate: Option[Certificate] = None
+  def peerCertificate: Option[Certificate] = None
 }

@@ -58,5 +58,4 @@ object Listener {
   object TrafficClass {
     implicit val param = Stack.Param(TrafficClass(None))
   }
-
 }

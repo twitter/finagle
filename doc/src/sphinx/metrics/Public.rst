@@ -1,74 +1,108 @@
+.. _metrics_stats_filter:
+
 StatsFilter
 <<<<<<<<<<<
 
 **requests**
-  a counter of the total number of successes + failures
+  A counter of the total number of successes + failures.
 
 **success**
-  a counter of the total number of successes
+  A counter of the total number of successes.
 
 **request_latency_ms**
-  a histogram of the latency of requests in milliseconds
-
-**load**
-  a gauge of the current total number of outstanding requests
+  A histogram of the latency of requests in milliseconds.
 
 **pending**
-  a gauge of the current total number of outstanding requests
+  A gauge of the current total number of outstanding requests.
 
 **failures/<exception_name>+**
-  a counter of the number of times a specific exception has been thrown
+  A counter of the number of times a specific exception has been thrown.
+  If you are using a ``ResponseClassifier`` that classifies non-Exceptions
+  as failures, it will use a synthetic Exception,
+  ``com.twitter.finagle.service.ResponseClassificationSyntheticException``,
+  to account for these.
 
 **failures**
-  a counter of the number of times any exception has been thrown
+  A counter of the number of times any failure has been observed.
 
 **sourcedfailures/<source_service_name>{/<exception_name>}+**
-  a counter of the number of times a specific SourcedException or sourced
-  Failure has been thrown
+  A counter of the number of times a specific
+  :src:`SourcedException <com/twitter/finagle/Exceptions.scala>` or sourced
+  :src:`Failure <com/twitter/finagle/Failure.scala>` has been thrown. Sourced
+  failures include additional information on what service caused the failure.
 
 **sourcedfailures/<source_service_name>**
-  a counter of the number of times any SourcedException or sourced Failure has
-  been thrown from this service
+  A counter of the number of times any
+  :src:`SourcedException <com/twitter/finagle/Exceptions.scala>` or sourced
+  :src:`Failure <com/twitter/finagle/Failure.scala>` has been thrown from this
+  service. Sourced failures include additional information on what service
+  caused the failure.
 
 **sourcedfailures**
-  a counter of the number of times any SourcedException or sourced Failure has
-  been thrown
-
-**transit_latency_ms**
-  a stat that attempts to measure (walltime) transit times between hops, e.g.,
-  from client to server. Not supported by all protocols.
-  
-**deadline_budget_ms**
-  a stat accounting for the (implied) amount of time remaining for this request, 
-  for example from a deadline or timeout. Not supported by all protocols.
+  A counter of the number of times any
+  :src:`SourcedException <com/twitter/finagle/Exceptions.scala>` or sourced
+  :src:`Failure <com/twitter/finagle/Failure.scala>` has been thrown. Sourced
+  failures include additional information on what service caused the failure.
 
 StatsFactoryWrapper
 <<<<<<<<<<<<<<<<<<<
 
+.. _service_factory_failures:
+
 **failures/<exception_class_name>**
-  a counter of the number of times a service factory has failed with this
-  specific exception
+  A counter of the number of times :doc:`Service <ServicesAndFilters>`
+  creation has failed with this specific exception.
 
 **failures**
-  a counter of the number of times a service factory has failed
+  A counter of the number of times :doc:`Service <ServicesAndFilters>`
+  creation has failed.
 
 **service_acquisition_latency_ms**
-  a stat of the latency to acquire a service in milliseconds
-  this entails establishing a connection or waiting for a connection from a pool
+  A stat of the latency, in milliseconds, to acquire a service.
+  This entails establishing a connection or waiting for a connection from a pool.
 
-HandletimeFilter
-<<<<<<<<<<<<<<<<
+ServerStatsFilter
+<<<<<<<<<<<<<<<<<
 
 **handletime_us**
-  a histogram of the time it takes to handle the request in microseconds
-  NB: does not include the time to respond
+  A  stat of the time it takes to handle the request in microseconds.
+  This is how long it takes to set up the chain of ``Future``\s to be used in the
+  response without waiting for the response. Large values suggest blocking code
+  on a Finagle thread.
 
-DefaultServer
-<<<<<<<<<<<<<
+**transit_latency_ms**
+  A stat that attempts to measure (wall time) transit times between hops, e.g.,
+  from client to server. Be aware that clock drift between hosts and other factors
+  can contribute here. Not supported by all protocols.
+
+**deadline_budget_ms**
+  A stat accounting for the (implied) amount of time remaining for this request,
+  for example from a deadline or timeout. Not supported by all protocols.
+
+RequestSemaphoreFilter
+<<<<<<<<<<<<<<<<<<<<<<
+
+.. _requests_concurrency_limit:
 
 **request_concurrency**
-  a gauge of the total number of current concurrent requests
+  A gauge of the total number of current concurrent requests.
 
 **request_queue_size**
-  a gauge of the total number of requests which are waiting because of the limit
-  on simultaneous requests
+  A gauge of the total number of requests which are waiting because of the limit
+  on simultaneous requests.
+
+PayloadSizeFilter (enabled for Mux, HTTP (non-chunked), Thrift)
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+**request_payload_bytes**
+  A histogram of the number of bytes per request's payload.
+
+**response_payload_bytes**
+  A histogram of the number of bytes per response's payload.
+
+TimeoutFilter
+<<<<<<<<<<<<<
+
+**timeout/expired_deadline_ms**
+  A stat of the elapsed time since expiry if a deadline has expired, in
+  milliseconds. Temporary stat to aid in debugging.

@@ -3,7 +3,7 @@ package com.twitter.finagle.service
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{CategorizingExceptionStatsHandler, ExceptionStatsHandler, InMemoryStatsReceiver}
 import com.twitter.finagle._
-import com.twitter.util.{Time, Await, Promise}
+import com.twitter.util._
 import java.util.concurrent.TimeUnit
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -72,13 +72,13 @@ class StatsFilterTest extends FunSuite {
     assert(Await.ready(res).poll.get.isThrow)
 
     val sourced = receiver.counters.filterKeys { _.exists(_ == "sourcedfailures") }
-    assert(sourced.size === 0)
+    assert(sourced.size == 0)
 
     val unsourced = receiver.counters.filterKeys { _.exists(_ == "failures") }
-    assert(unsourced.size === 2)
-    assert(unsourced(Seq("failures")) === 1)
+    assert(unsourced.size == 2)
+    assert(unsourced(Seq("failures")) == 1)
     assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(),
-      classOf[RequestException].getName(), classOf[Exception].getName())) === 1)
+      classOf[RequestException].getName(), classOf[Exception].getName())) == 1)
   }
 
   test("source failures") {
@@ -93,14 +93,14 @@ class StatsFilterTest extends FunSuite {
     assert(Await.ready(res).poll.get.isThrow)
 
     val sourced = receiver.counters.filterKeys { _.exists(_ == "sourcedfailures") }
-    assert(sourced.size === 2)
-    assert(sourced(Seq("sourcedfailures", "bogus")) === 1)
-    assert(sourced(Seq("sourcedfailures", "bogus", classOf[Failure].getName())) === 1)
+    assert(sourced.size == 2)
+    assert(sourced(Seq("sourcedfailures", "bogus")) == 1)
+    assert(sourced(Seq("sourcedfailures", "bogus", classOf[Failure].getName())) == 1)
 
     val unsourced = receiver.counters.filterKeys { _.exists(_ == "failures") }
-    assert(unsourced.size === 2)
-    assert(unsourced(Seq("failures")) === 1)
-    assert(unsourced(Seq("failures", classOf[Failure].getName())) === 1)
+    assert(unsourced.size == 2)
+    assert(unsourced(Seq("failures")) == 1)
+    assert(unsourced(Seq("failures", classOf[Failure].getName())) == 1)
   }
 
   test("don't report BackupRequestLost exceptions") {
@@ -114,65 +114,65 @@ class StatsFilterTest extends FunSuite {
       assert(!receiver.counters.contains(Seq("requests")))
       assert(!receiver.counters.keys.exists(_ contains "failure"))
       statsService("foo")
-      assert(receiver.gauges(Seq("pending"))() === 1.0)
+      assert(receiver.gauges(Seq("pending"))() == 1.0)
       promise.setException(BackupRequestLost)
       assert(!receiver.counters.keys.exists(_ contains "failure"))
       assert(!receiver.counters.contains(Seq("requests")))
       assert(!receiver.counters.contains(Seq("success")))
-      assert(receiver.gauges(Seq("pending"))() === 0.0)
+      assert(receiver.gauges(Seq("pending"))() == 0.0)
     }
   }
 
   test("report pending requests on success") {
     val (promise, receiver, statsService) = getService()
-    assert(receiver.gauges(Seq("pending"))() === 0.0)
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
     statsService("foo")
-    assert(receiver.gauges(Seq("pending"))() === 1.0)
+    assert(receiver.gauges(Seq("pending"))() == 1.0)
     promise.setValue("")
-    assert(receiver.gauges(Seq("pending"))() === 0.0)
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
   }
 
   test("report pending requests on failure") {
     val (promise, receiver, statsService) = getService()
-    assert(receiver.gauges(Seq("pending"))() === 0.0)
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
     statsService("foo")
-    assert(receiver.gauges(Seq("pending"))() === 1.0)
+    assert(receiver.gauges(Seq("pending"))() == 1.0)
     promise.setException(new Exception)
-    assert(receiver.gauges(Seq("pending"))() === 0.0)
+    assert(receiver.gauges(Seq("pending"))() == 0.0)
   }
 
   test("should count failure requests only after they are finished") {
     val (promise, receiver, statsService) = getService()
 
-    assert(receiver.counters.contains(Seq("requests")) === false)
-    assert(receiver.counters.contains(Seq("failures")) === false)
+    assert(receiver.counters.contains(Seq("requests")) == false)
+    assert(receiver.counters.contains(Seq("failures")) == false)
 
     val f = statsService("foo")
 
-    assert(receiver.counters.contains(Seq("requests")) === false)
-    assert(receiver.counters.contains(Seq("failures")) === false)
+    assert(receiver.counters.contains(Seq("requests")) == false)
+    assert(receiver.counters.contains(Seq("failures")) == false)
 
     promise.setException(new Exception)
 
-    assert(receiver.counters(Seq("requests")) === 1)
-    assert(receiver.counters(Seq("failures")) === 1)
+    assert(receiver.counters(Seq("requests")) == 1)
+    assert(receiver.counters(Seq("failures")) == 1)
   }
 
   test("should count successful requests only after they are finished") {
     val (promise, receiver, statsService) = getService()
 
-    assert(receiver.counters.contains(Seq("requests")) === false)
-    assert(receiver.counters.contains(Seq("failures")) === false)
+    assert(receiver.counters.contains(Seq("requests")) == false)
+    assert(receiver.counters.contains(Seq("failures")) == false)
 
     val f = statsService("foo")
 
-    assert(receiver.counters.contains(Seq("requests")) === false)
-    assert(receiver.counters.contains(Seq("failures")) === false)
+    assert(receiver.counters.contains(Seq("requests")) == false)
+    assert(receiver.counters.contains(Seq("failures")) == false)
 
     promise.setValue("whatever")
 
-    assert(receiver.counters(Seq("requests")) === 1)
-    assert(receiver.counters(Seq("success")) === 1)
+    assert(receiver.counters(Seq("requests")) == 1)
+    assert(receiver.counters(Seq("success")) == 1)
   }
 
   test("support rollup exceptions") {
@@ -186,9 +186,49 @@ class StatsFilterTest extends FunSuite {
 
     val unsourced = receiver.counters.filterKeys { _.exists(_ == "failures") }
 
-    assert(unsourced.size === 3)
-    assert(unsourced(Seq("failures")) === 1)
-    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName())) === 1)
-    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(), classOf[Exception].getName())) === 1)
+    assert(unsourced.size == 3)
+    assert(unsourced(Seq("failures")) == 1)
+    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName())) == 1)
+    assert(unsourced(Seq("failures", classOf[ChannelWriteException].getName(), classOf[Exception].getName())) == 1)
   }
+
+  test("respects ResponseClassifier") {
+    val sr = new InMemoryStatsReceiver()
+    val svc = Service.mk { i: Int =>
+      if (i < 0) Future.exception(new RuntimeException(i.toString))
+      else Future(i)
+    }
+    val aClassifier: ResponseClassifier = {
+      case ReqRep(_, Return(i: Int)) if i == 5 => ResponseClass.RetryableFailure
+      case ReqRep(_, Throw(x)) if x.getMessage == "-5" => ResponseClass.Success
+    }
+    val statsFilter = new StatsFilter[Int, Int](
+      sr, aClassifier, StatsFilter.DefaultExceptions, TimeUnit.MILLISECONDS)
+
+    val service = statsFilter.andThen(svc)
+
+    // able to categorize Returns as failures
+    assert(5 == Await.result(service(5), 1.second))
+    assert(1 == sr.counter("requests")())
+    assert(0 == sr.counter("success")())
+    assert(1 == sr.counter("failures")())
+    val failure = sr.counter(
+      "failures",
+      "com.twitter.finagle.service.ResponseClassificationSyntheticException")
+    assert(1 == failure())
+
+    // able to categorize Throws as success
+    intercept[RuntimeException] { Await.result(service(-5), 1.second) }
+    assert(2 == sr.counter("requests")())
+    assert(1 == sr.counter("success")())
+    assert(1 == sr.counter("failures")())
+
+    // handles responses that are not defined in our classifier
+    assert(!aClassifier.isDefinedAt(ReqRep(3, Return(1))))
+    assert(3 == Await.result(service(3), 1.second))
+    assert(3 == sr.counter("requests")())
+    assert(2 == sr.counter("success")())
+    assert(1 == sr.counter("failures")())
+  }
+
 }

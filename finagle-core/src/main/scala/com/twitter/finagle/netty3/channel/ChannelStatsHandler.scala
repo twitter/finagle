@@ -1,10 +1,8 @@
 package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.util.{Duration, Future, Monitor, Stopwatch, Time}
-import java.net.{PortUnreachableException, ConnectException}
+import com.twitter.util.{Duration, Monitor, Stopwatch, Time}
 import java.io.IOException
-import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
 import java.util.logging.{Level, Logger}
 import org.jboss.netty.buffer.ChannelBuffer
@@ -19,10 +17,10 @@ import org.jboss.netty.channel.{ChannelHandlerContext, ChannelStateEvent,
  */
 class ChannelStatsHandler(statsReceiver: StatsReceiver)
   extends SimpleChannelHandler
-  with ConnectionLifecycleHandler
 {
   private[this] val log = Logger.getLogger(getClass.getName)
   private[this] val connectionCount: AtomicLong = new AtomicLong()
+  private[this] var elapsed: () => Duration = null
 
   private[this] val connects                = statsReceiver.counter("connects")
   private[this] val connectionDuration      = statsReceiver.stat("connection_duration")
@@ -30,31 +28,21 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
   private[this] val connectionSentBytes     = statsReceiver.stat("connection_sent_bytes")
   private[this] val receivedBytes           = statsReceiver.counter("received_bytes")
   private[this] val sentBytes               = statsReceiver.counter("sent_bytes")
-  private[this] val closeChans              = statsReceiver.counter("closechans")
   private[this] val writable                = statsReceiver.counter("socket_writable_ms")
   private[this] val unwritable              = statsReceiver.counter("socket_unwritable_ms")
   private[this] val exceptions              = statsReceiver.scope("exn")
+  private[this] val closesCount             = statsReceiver.counter("closes")
   private[this] val connections             = statsReceiver.addGauge("connections") {
     connectionCount.get()
   }
 
-  protected[channel] def channelConnected(ctx: ChannelHandlerContext, onClose: Future[Unit]) {
-    ctx.setAttachment((new AtomicLong(0), new AtomicLong(0)))
+  override def channelOpen(ctx: ChannelHandlerContext, e: ChannelStateEvent): Unit = {
+    elapsed = Stopwatch.start()
+    ctx.setAttachment(new AtomicLong(0), new AtomicLong(0))
     connects.incr()
     connectionCount.incrementAndGet()
 
-    val elapsed = Stopwatch.start()
-    onClose ensure {
-      closeChans.incr()
-      val (channelReadCount, channelWriteCount) =
-        ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
-
-      connectionReceivedBytes.add(channelReadCount.get)
-      connectionSentBytes.add(channelWriteCount.get)
-
-      connectionDuration.add(elapsed().inMilliseconds)
-      connectionCount.decrementAndGet()
-    }
+    super.channelOpen(ctx, e)
   }
 
   override def writeComplete(ctx: ChannelHandlerContext, e: WriteCompletionEvent) {
@@ -80,17 +68,24 @@ class ChannelStatsHandler(statsReceiver: StatsReceiver)
     super.messageReceived(ctx, e)
   }
 
-  private[this] val pendingClose = new AtomicInteger(0)
-  private[this] val closesCount = statsReceiver.counter("closes")
-  private[this] val closedCount = statsReceiver.counter("closed")
-
   override def closeRequested(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
     closesCount.incr()
     super.closeRequested(ctx, e)
   }
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    closedCount.incr()
+    // guarded in case Netty calls channelClosed without calling channelOpen.
+    if (elapsed != null) {
+      val (channelReadCount, channelWriteCount) =
+        ctx.getAttachment().asInstanceOf[(AtomicLong, AtomicLong)]
+
+      connectionReceivedBytes.add(channelReadCount.get)
+      connectionSentBytes.add(channelWriteCount.get)
+
+      connectionDuration.add(elapsed().inMilliseconds)
+      connectionCount.decrementAndGet()
+    }
+
     super.channelClosed(ctx, e)
   }
 

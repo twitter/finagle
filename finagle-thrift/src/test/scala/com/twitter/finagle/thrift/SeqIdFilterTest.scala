@@ -40,14 +40,14 @@ class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
     test("SeqIdFilter(%s) maintain seqids passed in by the client".format(how)) {
       val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
-      assert(f.poll === None)
+      assert(f.poll == None)
 
       val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
       verify(service).apply(req.capture)
       p.setValue(mkmsg(new TMessage("proc", TMessageType.REPLY, getmsg(req.getValue.message).seqid)))
 
       f.poll match {
-        case Some(Return(buf)) => assert(getmsg(buf).seqid === seqId)
+        case Some(Return(buf)) => assert(getmsg(buf).seqid == seqId)
         case _ => fail()
       }
     }
@@ -58,7 +58,7 @@ class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest
       val f = filtered(new ThriftClientRequest(mkmsg(new TMessage("proc", TMessageType.CALL, seqId)), false))
       val req = ArgumentCaptor.forClass(classOf[ThriftClientRequest])
       verify(service).apply(req.capture)
-      assert(getmsg(req.getValue.message).seqid === expected)
+      assert(getmsg(req.getValue.message).seqid == expected)
     }}
 
     test("SeqIdFilter(%s) fail when sequence ids are out of order".format(how)) { Time.withCurrentTimeFrozen { _ =>
@@ -74,7 +74,7 @@ class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest
 
     def mustExcept(bytes: Array[Byte], exceptionMsg: String) {
       filtered(new ThriftClientRequest(bytes, false)).poll match {
-        case Some(Throw(exc: IllegalArgumentException)) => assert(exc.getMessage === exceptionMsg)
+        case Some(Throw(exc: IllegalArgumentException)) => assert(exc.getMessage == exceptionMsg)
         case _ => fail()
       }
     }
@@ -85,7 +85,7 @@ class SeqIdFilterTest extends FunSuite with MockitoSugar with OneInstancePerTest
       filtered(new ThriftClientRequest(reqBuf, false))
 
       verify(service).apply(Matchers.any[ThriftClientRequest])
-      assert(reqBuf.toSeq === origBuf.toSeq)
+      assert(reqBuf.toSeq == origBuf.toSeq)
     }
 
     test("SeqIdFilter(%s) handle empty TMessage".format(how)) {

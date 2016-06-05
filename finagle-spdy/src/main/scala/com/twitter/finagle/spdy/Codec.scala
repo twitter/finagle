@@ -76,16 +76,16 @@ case class Spdy(
       }
 
       override def prepareConnFactory(
-        underlying: ServiceFactory[HttpRequest, HttpResponse]
+        underlying: ServiceFactory[HttpRequest, HttpResponse], params: Stack.Params
       ): ServiceFactory[HttpRequest, HttpResponse] = {
-        new GenerateSpdyStreamId andThen super.prepareConnFactory(underlying)
+        new GenerateSpdyStreamId andThen super.prepareConnFactory(underlying, params)
       }
 
       override def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
         new ChannelTransport(ch)
 
-      override def newClientDispatcher(transport: Transport[Any, Any]) =
-        new SpdyClientDispatcher(transport.cast[HttpRequest, HttpResponse])
+      override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
+        new SpdyClientDispatcher(Transport.cast[HttpRequest, HttpResponse](transport))
     }
   }
 
@@ -104,16 +104,16 @@ case class Spdy(
       }
 
       override def prepareConnFactory(
-        underlying: ServiceFactory[HttpRequest, HttpResponse]
+        underlying: ServiceFactory[HttpRequest, HttpResponse], params: Stack.Params
       ): ServiceFactory[HttpRequest, HttpResponse] = {
-        new AnnotateSpdyStreamId andThen super.prepareConnFactory(underlying)
+        new AnnotateSpdyStreamId andThen super.prepareConnFactory(underlying, params)
       }
 
       override def newServerDispatcher(
           transport: Transport[Any, Any],
           service: Service[HttpRequest, HttpResponse]
       ): Closable = new SpdyServerDispatcher(
-        transport.cast[HttpResponse, HttpRequest], service)
+        Transport.cast[HttpResponse, HttpRequest](transport), service)
     }
   }
 

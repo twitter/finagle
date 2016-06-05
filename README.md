@@ -3,6 +3,8 @@
 [![Build status](https://travis-ci.org/twitter/finagle.svg?branch=develop)](https://travis-ci.org/twitter/finagle)
 [![Coverage status](https://img.shields.io/coveralls/twitter/finagle/develop.svg)](https://coveralls.io/r/twitter/finagle?branch=develop)
 [![Project status](https://img.shields.io/badge/status-active-brightgreen.svg)](#status)
+[![Gitter](https://img.shields.io/badge/gitter-join%20chat-green.svg)](https://gitter.im/twitter/finagle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Maven Central](https://img.shields.io/maven-central/v/com.twitter/finagle_2.11.svg)](https://maven-badges.herokuapp.com/maven-central/com.twitter/finagle_2.11)
 
 ## Status
 
@@ -35,6 +37,7 @@ our way.
 The following are a few of the companies that are using Finagle:
 
 * [Foursquare](https://foursquare.com/)
+* [ING Bank](https://ing.nl)
 * [Pinterest](https://www.pinterest.com/)
 * [SoundCloud](https://soundcloud.com/)
 * [Tumblr](https://www.tumblr.com/)
@@ -46,6 +49,10 @@ If your organization is using Finagle, consider adding a link there and sending
 us a pull request!
 
 ## Contributing
+
+We feel that a welcoming community is important and we ask that you follow Twitter's
+[Open Source Code of Conduct](https://engineering.twitter.com/opensource/code-of-conduct)
+in all interactions with the community.
 
 The `master` branch of this repository contains the latest stable release of
 Finagle, and weekly snapshots are published to the `develop` branch. In general

@@ -102,4 +102,20 @@ class StackRegistryTest extends FunSuite {
       assert(GlobalRegistry.get.size == reg.size)
     }
   }
+
+  test("Duplicates are tracked") {
+    val reg = new StackRegistry { def registryName: String = "test" }
+    val stk = newStack()
+
+    val name = "aname"
+    reg.register("addr1", stk, Stack.Params.empty + param.Label(name))
+    assert(reg.registeredDuplicates.isEmpty)
+
+    reg.register("addr2", stk, Stack.Params.empty + param.Label(name))
+    assert(reg.registeredDuplicates.size == 1)
+
+    reg.register("addr3", stk, Stack.Params.empty + param.Label("somethingelse"))
+    assert(reg.registeredDuplicates.size == 1)
+  }
+
 }

@@ -1,8 +1,7 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.ClientError
-import com.twitter.finagle.redis.protocol._
-import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 case class PFAdd(key: ChannelBuffer, elements: Seq[ChannelBuffer]) extends StrictKeyCommand {
   val command = Commands.PFADD

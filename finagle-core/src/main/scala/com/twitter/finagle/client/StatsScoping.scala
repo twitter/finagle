@@ -4,7 +4,6 @@ import com.twitter.finagle.client.AddrMetadataExtraction.AddrMetadata
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{Addr, Stack, Stackable, ServiceFactory}
-import com.twitter.util.Duration
 
 /**
  * Stats scoping enabled the modification of the StatsReceiver scoping on a

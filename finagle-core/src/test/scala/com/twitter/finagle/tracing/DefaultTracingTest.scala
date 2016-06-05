@@ -34,7 +34,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
   }
 
   def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
-    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
+    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
   /**
@@ -54,8 +54,8 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
     Await.result(f(serverTracer, clientTracer)("foo"), 1.second)
 
-    assert(serverTracer.map(_.traceId).toSet.size === 1)
-    assert(clientTracer.map(_.traceId).toSet.size === 1)
+    assert(serverTracer.map(_.traceId).toSet.size == 1)
+    assert(clientTracer.map(_.traceId).toSet.size == 1)
 
     assertAnnotationsInOrder(combinedTracer.toSeq, Seq(
       Annotation.ServiceName("theClient"),
@@ -80,25 +80,6 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
     }
   }
 
-  test("core events are traced in the DefaultClient/DefaultServer") {
-    testCoreTraces { (serverTracer, clientTracer) =>
-      val server = DefaultServer[String, String, String, String](
-        name = "theServer",
-        listener = Netty3Listener("theServer", StringServerPipeline),
-        serviceTransport = new SerialServerDispatcher(_, _),
-        tracer = serverTracer)
-
-      val client = DefaultClient[String, String](
-        name = "theClient",
-        endpointer = Bridge[String, String, String, String](
-          Netty3Transporter("theClient", StringClientPipeline), new SerialClientDispatcher(_)),
-        tracer = clientTracer)
-
-      val svc = server.serve("localhost:*", Svc)
-      client.newService(svc)
-    }
-  }
-
   test("core events are traced in the ClientBuilder/ServerBuilder") {
     testCoreTraces { (serverTracer, clientTracer) =>
       val svc = ServerBuilder()
@@ -110,7 +91,7 @@ class DefaultTracingTest extends FunSuite with StringClient with StringServer {
 
       ClientBuilder()
         .name("theClient")
-        .hosts(svc.boundAddress)
+        .hosts(svc.boundAddress.asInstanceOf[InetSocketAddress])
         .codec(StringClientCodec)
         .hostConnectionLimit(1)
         .tracer(clientTracer)

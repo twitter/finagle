@@ -28,7 +28,7 @@ class OptionallyServableFilterTest extends FunSuite with MockitoSugar {
 
     when(fn.apply(request)) thenReturn Future.value(true)
     when(underlying(request)) thenReturn response
-    assert(Await.result(service(request)) === Await.result(response))
+    assert(Await.result(service(request)) == Await.result(response))
 
     verify(fn).apply(request)
   }

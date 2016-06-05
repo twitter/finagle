@@ -1,9 +1,11 @@
 junit_tests(name='java',
   dependencies=[
     '3rdparty/jvm/io/netty',
+    '3rdparty/jvm/junit',
     'finagle/finagle-core',
     'finagle/finagle-redis',
     'util/util-core'
   ],
+  fatal_warnings=False,
   sources=rglobs('*.java')
 )

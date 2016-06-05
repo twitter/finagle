@@ -20,17 +20,17 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("construct by list") {
     forAll(pathParts) { (parts: List[String]) =>
       val p = Path(parts)
-      assert(p.toList.length === parts.length)
-      assert(p.lastOption === util.Try(parts.last).toOption)
+      assert(p.toList.length == parts.length)
+      assert(p.lastOption == util.Try(parts.last).toOption)
       assert(p.startsWith(util.Try(Path(parts.init)).getOrElse(Root)))
-      if (p != Root) assert(p.toString === parts.mkString("/", "/", ""))
+      if (p != Root) assert(p.toString == parts.mkString("/", "/", ""))
     }
   }
 
   test("path separator extrator") {
     forAll(pathParts) { (parts: List[String]) =>
       val p = Path(parts)
-      assert(/:.unapply(p) === util.Try(parts.head -> Path(parts.tail)).toOption)
+      assert(/:.unapply(p) == util.Try(parts.head -> Path(parts.tail)).toOption)
     }
   }
 
@@ -39,21 +39,21 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
       whenever (parts.length > 0) {
         if (ext.length == 0) {
           val p = Path(parts)
-          assert($tilde.unapply(p) === Some(p, ""))
+          assert($tilde.unapply(p) == Some((p, "")))
         } else {
           val p = Path(parts.init ++ List(parts.last + "." + ext))
-          assert($tilde.unapply(p) === Some(Path(parts), ext))
+          assert($tilde.unapply(p) == Some((Path(parts), ext)))
         }
       }
     }
   }
 
   test("/foo/bar") {
-    assert(Path("/foo/bar").toList === List("foo", "bar"))
+    assert(Path("/foo/bar").toList == List("foo", "bar"))
   }
 
   test("foo/bar") {
-    assert(Path("foo/bar").toList === List("foo", "bar"))
+    assert(Path("foo/bar").toList == List("foo", "bar"))
   }
 
   test(":? extractor") {
@@ -158,7 +158,7 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (Path("/test.json") match {
         case Root => true
         case _    => false
-      }) === false
+      }) == false
     }
   }
 
@@ -203,7 +203,7 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (Path("/user/invalid") match {
         case Root / "user" / Integer(userId) => true
         case _                               => false
-      }) === false
+      }) == false
     }
   }
 
@@ -212,7 +212,7 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (Path("/user/2147483648") match {
         case Root / "user" / Integer(userId) => true
         case _                               => false
-      }) === false
+      }) == false
     }
   }
 
@@ -230,7 +230,7 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (Path("/user/invalid") match {
         case Root / "user" / Long(userId) => true
         case _                            => false
-      }) === false
+      }) == false
     }
   }
 
@@ -239,7 +239,7 @@ class PathTest extends FunSuite with GeneratorDrivenPropertyChecks {
       (Path("/user/9223372036854775808") match {
         case Root / "user" / Long(userId) => true
         case _                            => false
-      }) === false
+      }) == false
     }
   }
 }

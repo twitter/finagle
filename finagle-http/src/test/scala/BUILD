@@ -1,15 +1,22 @@
 junit_tests(name='scala',
   dependencies=[
+    '3rdparty/jvm/com/google/code/findbugs:jsr305',
+    '3rdparty/jvm/com/google/guava',
+    '3rdparty/jvm/commons-lang',
+    '3rdparty/jvm/io/netty',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
-    '3rdparty/jvm/io/netty',
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',
-    '3rdparty/jvm/org/scala-tools/testing:specs',
     'finagle/finagle-core',
     'finagle/finagle-http',
+    'util/util-app',
     'util/util-core',
-    'util/util-logging'
+    'util/util-collection',
+    'util/util-logging',
+    'util/util-stats',
   ],
+  fatal_warnings=True,
+  strict_deps=True,
   sources=rglobs('*.scala')
 )

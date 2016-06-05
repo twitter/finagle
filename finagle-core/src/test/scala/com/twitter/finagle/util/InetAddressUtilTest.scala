@@ -23,12 +23,12 @@ class InetAddressUtilTest extends FunSuite {
 
   test("InetAddressUtil should getByName") {
     import InetAddressUtil.getByName
-    assert(getByName("69.55.236.117").getHostAddress === "69.55.236.117")
-    assert(getByName("0.0.0.0").getHostAddress === "0.0.0.0")
-    assert(getByName("255.0.0.0").getHostAddress === "255.0.0.0")
-    assert(getByName("0.255.0.0").getHostAddress === "0.255.0.0")
-    assert(getByName("0.0.255.0").getHostAddress === "0.0.255.0")
-    assert(getByName("0.0.0.255").getHostAddress === "0.0.0.255")
-    assert(getByName("255.255.255.255").getHostAddress === "255.255.255.255")
+    assert(getByName("69.55.236.117").getHostAddress == "69.55.236.117")
+    assert(getByName("0.0.0.0").getHostAddress == "0.0.0.0")
+    assert(getByName("255.0.0.0").getHostAddress == "255.0.0.0")
+    assert(getByName("0.255.0.0").getHostAddress == "0.255.0.0")
+    assert(getByName("0.0.255.0").getHostAddress == "0.0.255.0")
+    assert(getByName("0.0.0.255").getHostAddress == "0.0.0.255")
+    assert(getByName("255.255.255.255").getHostAddress == "255.255.255.255")
   }
 }

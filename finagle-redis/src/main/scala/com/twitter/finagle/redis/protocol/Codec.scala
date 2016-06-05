@@ -1,6 +1,8 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.util.StringToChannelBuffer
+import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.redis.util.{StringToBuf, StringToChannelBuffer}
+import com.twitter.io.{ConcatBuf, Buf}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import scala.collection.immutable.WrappedString
 
@@ -45,25 +47,43 @@ private[redis] object RedisCodec {
   val POS_INFINITY_BA     = StringToChannelBuffer("+inf")
   val NEG_INFINITY_BA     = StringToChannelBuffer("-inf")
 
+  val BULK_REPLY_BUF: Buf       = StringToBuf("$")
+  val MBULK_REPLY_BUF: Buf      = StringToBuf("*")
 
-  def toUnifiedFormat(args: Seq[ChannelBuffer], includeHeader: Boolean = true) = {
-    val header = includeHeader match {
-      case true =>
-        Seq(ARG_COUNT_MARKER_BA, StringToChannelBuffer(args.length.toString), EOL_DELIMITER_BA)
-      case false => Nil
-    }
-    val buffers = args.map({ arg =>
-      Seq(
-        ARG_SIZE_MARKER_BA,
-        StringToChannelBuffer(arg.readableBytes.toString),
-        EOL_DELIMITER_BA,
-        arg,
-        EOL_DELIMITER_BA
-      )
-    }).flatten
-    ChannelBuffers.wrappedBuffer((header ++ buffers).toArray:_*)
+  val ARG_COUNT_MARKER_BUF: Buf = MBULK_REPLY_BUF
+  val ARG_SIZE_MARKER_BUF: Buf  = BULK_REPLY_BUF
+
+  val EOL_DELIMITER_BUF: Buf    = StringToBuf(EOL_DELIMITER)
+
+  val NIL_VALUE_BUF: Buf        = Buf.Empty
+
+
+  def toUnifiedFormat(args: Seq[ChannelBuffer], includeHeader: Boolean = true): ChannelBuffer = {
+    val bufArgs = args.map(ChannelBufferBuf.Owned(_))
+    ChannelBufferBuf.Owned.extract(toUnifiedBuf(bufArgs, includeHeader))
   }
 
+  def bufToUnifiedChannelBuffer(args: Seq[Buf], includeHeader: Boolean = true): ChannelBuffer =
+    ChannelBufferBuf.Owned.extract(toUnifiedBuf(args, includeHeader))
+
+  def toUnifiedBuf(args: Seq[Buf], includeHeader: Boolean = true): Buf = {
+    val header: Vector[Buf] =
+      if (!includeHeader) Vector.empty else {
+        Vector(
+          ARG_COUNT_MARKER_BUF,
+          StringToBuf(args.length.toString),
+          EOL_DELIMITER_BUF)
+      }
+    val bufs = args.flatMap { arg =>
+      Vector(
+        ARG_SIZE_MARKER_BUF,
+        StringToBuf(arg.length.toString),
+        EOL_DELIMITER_BUF,
+        arg,
+        EOL_DELIMITER_BUF)
+    }
+    ConcatBuf(header ++ bufs)
+  }
 }
 
 abstract class RedisMessage {

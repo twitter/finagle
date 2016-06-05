@@ -1,6 +1,5 @@
 package com.twitter.finagle.server
 
-import com.twitter.finagle.Stack.Params
 import com.twitter.finagle._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.dispatch.SerialServerDispatcher

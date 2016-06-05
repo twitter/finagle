@@ -1,8 +1,10 @@
 package com.twitter.finagle.redis.protocol
 
-import com.twitter.finagle.redis.ClientError
+import com.twitter.finagle.netty3.ChannelBufferBuf
+import com.twitter.finagle.redis._
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
+import com.twitter.io.Buf
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 case object FlushAll extends Command {
@@ -27,29 +29,37 @@ object Select {
   }
 }
 
-case class Auth(code: ChannelBuffer) extends Command {
+case class Auth(code: Buf) extends Command {
   def command = Commands.AUTH
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.AUTH, code))
+  def toChannelBuffer =
+    RedisCodec.toUnifiedFormat(Seq(CommandBytes.AUTH, ChannelBufferBuf.Owned.extract(code)))
 }
 
 object Auth {
-  def apply(code: Seq[Array[Byte]]) = {
-    new Auth(ChannelBuffers.wrappedBuffer(code.head))
+  def apply(code: Seq[Array[Byte]]): Auth = {
+    new Auth(Buf.ByteArray.Owned(code.head))
   }
 }
 
-case class Info(section: ChannelBuffer) extends Command {
+case class Info(section: Buf) extends Command {
   def command = Commands.INFO
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(section match {
-    case ChannelBuffers.EMPTY_BUFFER => Seq(CommandBytes.INFO)
-    case _ => Seq(CommandBytes.INFO, section)
-  })
+  def toChannelBuffer = RedisCodec.toUnifiedFormat(
+    section match {
+      case Buf.Empty => Seq(CommandBytes.INFO)
+      case _ => Seq(CommandBytes.INFO, ChannelBufferBuf.Owned.extract(section))
+    }
+  )
 }
 
 object Info {
-  def apply(section: Seq[Array[Byte]]) = {
-      new Info(section.headOption.map{ChannelBuffers.wrappedBuffer}.getOrElse(ChannelBuffers.EMPTY_BUFFER))
+  def apply(section: Seq[Array[Byte]]): Info = {
+      new Info(section.headOption.map(Buf.ByteArray.Owned(_)).getOrElse(Buf.Empty))
   }
+}
+
+case object Ping extends Command {
+  def command = Commands.PING
+  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.PING))
 }
 
 case object Quit extends Command {

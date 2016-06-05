@@ -18,7 +18,8 @@ private[finagle] object StatsFactoryWrapper {
         "and service acquisition latency"
       def make(_stats: param.Stats, next: ServiceFactory[Req, Rep]) = {
         val param.Stats(statsReceiver) = _stats
-        new StatsFactoryWrapper(
+        if (statsReceiver.isNull) next
+        else new StatsFactoryWrapper(
           next,
           new RollupStatsReceiver(statsReceiver.scope("service_creation"))
         )

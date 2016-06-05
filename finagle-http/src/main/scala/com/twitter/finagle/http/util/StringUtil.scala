@@ -55,4 +55,12 @@ object StringUtil {
         0L
     }
   }
+
+  /**
+   * Convert s to a Boolean: True is "1", "t" or "true", false is all other values
+   */
+  def toBoolean(s: String): Boolean = {
+    val v = s.toLowerCase
+    v == "1" || v == "t" || v == "true"
+  }
 }

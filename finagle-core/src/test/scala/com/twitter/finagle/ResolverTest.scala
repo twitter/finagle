@@ -1,12 +1,22 @@
 package com.twitter.finagle
 
-import com.twitter.util.{Return, Throw, Var}
-import java.net.SocketAddress
+import com.twitter.util.{Future, Time, Return, Throw, Var}
+import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
-case class TestAddr(arg: String) extends SocketAddress
+object TestAddr {
+  case class StringFactory(s: String) extends ServiceFactory[Any, String] {
+    val svc = Service.const(Future.value(s))
+    override def apply(conn: ClientConnection) = Future.value(svc)
+    override def close(deadline: Time) = Future.Done
+  }
+
+  def apply(arg: String): Address = {
+    exp.Address(StringFactory(arg))
+  }
+}
 
 class TestResolver extends Resolver {
   val scheme = "test"
@@ -35,7 +45,7 @@ class ResolverTest extends FunSuite {
     val Name.Bound(addr) = Resolver.eval("test!xyz")
     Var.sample(addr) match {
       case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
-        assert(addrs.head === TestAddr("xyz"))
+        assert(addrs.head == TestAddr("xyz"))
       case _ => fail()
     }
   }
@@ -45,7 +55,7 @@ class ResolverTest extends FunSuite {
     val binding = resolver.bind("xyz")
     Var.sample(binding) match {
       case Addr.Bound(addrs, attrs) if addrs.size == 1 && attrs.isEmpty =>
-        assert(addrs.head === TestAddr("xyz"))
+        assert(addrs.head == TestAddr("xyz"))
       case _ => fail()
     }
   }
@@ -57,9 +67,9 @@ class ResolverTest extends FunSuite {
       case _ => fail()
     }
 
-    val sockaddr = new SocketAddress {}
-    ConstResolver(Addr.Bound(sockaddr)).resolve("blah") match {
-      case Return(g) => assert(g() === Set(sockaddr))
+    val sockaddr = new InetSocketAddress(0)
+    ConstResolver(Addr.Bound(Address(sockaddr))).resolve("blah") match {
+      case Return(g) => assert(g() == Set(sockaddr))
       case _ => fail()
     }
   }
@@ -67,7 +77,7 @@ class ResolverTest extends FunSuite {
   test("Resolver.evalLabeled: Resolve labels of labeled addresses") {
     val label = "foo"
     val binding = Resolver.evalLabeled(label + "=test!xyz")
-    assert(binding._2 === label)
+    assert(binding._2 == label)
   }
 
   test("Resolver.evalLabeled: Resolve empty string as label for unlabeled addresses") {
@@ -76,7 +86,7 @@ class ResolverTest extends FunSuite {
   }
 
   test("Return equatable names") {
-    assert(Resolver.eval("test!xyz") === Resolver.eval("test!xyz"))
+    assert(Resolver.eval("test!xyz") == Resolver.eval("test!xyz"))
     assert(Resolver.eval("test!xyz") != Resolver.eval("test!xxx"))
   }
 

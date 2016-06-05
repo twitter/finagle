@@ -18,7 +18,7 @@ class DtabFilterTest extends FunSuite with AssertionsForJUnit {
       Service.mk[Request, Response] { req =>
         val xDtabHeaders = req.headerMap.keys.filter(_.toLowerCase startsWith "x-dtab")
         assert(xDtabHeaders.isEmpty, "x-dtab headers not cleared")
-        assert(Dtab.local === dtab)
+        assert(Dtab.local == dtab)
         Future.value(Response())
       }
 
@@ -27,7 +27,7 @@ class DtabFilterTest extends FunSuite with AssertionsForJUnit {
     Dtab.unwind {
       Dtab.local = Dtab.empty
       val rsp = Await.result(service(req))
-      assert(rsp.status === Status.Ok)
+      assert(rsp.status == Status.Ok)
     }
   }
 
@@ -46,8 +46,8 @@ class DtabFilterTest extends FunSuite with AssertionsForJUnit {
     Dtab.unwind {
       Dtab.local = Dtab.empty
       val rsp = Await.result(service(req))
-      assert(rsp.status === Status.BadRequest)
-      assert(rsp.contentType === Some("text/plain; charset=UTF-8"))
+      assert(rsp.status == Status.BadRequest)
+      assert(rsp.contentType == Some("text/plain; charset=UTF-8"))
       assert(rsp.contentLength.getOrElse(0L) > 0, "content-length is zero")
       assert(rsp.contentString.nonEmpty, "content is empty")
     }

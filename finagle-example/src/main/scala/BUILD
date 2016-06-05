@@ -5,13 +5,11 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    'finagle/finagle-cacheresolver',
     'finagle/finagle-core',
     'finagle/finagle-example/src/main/thrift:thrift-scala',
     'finagle/finagle-http',
-    'finagle/finagle-httpx',
     'finagle/finagle-kestrel',
-    'finagle/finagle-memcachedx',
+    'finagle/finagle-memcached',
     'finagle/finagle-mysql',
     'finagle/finagle-ostrich4',
     'finagle/finagle-redis',
@@ -32,8 +30,8 @@ def binary(name, main=None):
 
 binary('http-client', 'com.twitter.finagle.example.http.HttpClient')
 binary('http-server', 'com.twitter.finagle.example.http.HttpServer')
-binary('httpx-streaming-client', 'com.twitter.finagle.example.httpx.HttpStreamingClient')
-binary('httpx-streaming-server', 'com.twitter.finagle.example.httpx.HttpStreamingServer')
+binary('http-streaming-client', 'com.twitter.finagle.example.http.HttpStreamingClient')
+binary('http-streaming-server', 'com.twitter.finagle.example.http.HttpStreamingServer')
 binary('kestrel-client', 'com.twitter.finagle.example.kestrel.KestrelClient')
 binary('memcached-ketama-stress', 'com.twitter.finagle.example.memcache.KetamaClientStress')
 binary('memcached-proxy', 'com.twitter.finagle.example.memcachedproxy.MemcachedProxy')
@@ -43,3 +41,4 @@ binary('redis-client', 'com.twitter.finagle.example.redis.RedisClient')
 binary('stress', 'com.twitter.finagle.example.stress.Stress')
 binary('thrift-client', 'com.twitter.finagle.example.thrift.ThriftClient')
 binary('thrift-server', 'com.twitter.finagle.example.thrift.ThriftServer')
+binary('thrift-service-iface', 'com.twitter.finagle.example.thrift.ThriftServiceIfaceExample')

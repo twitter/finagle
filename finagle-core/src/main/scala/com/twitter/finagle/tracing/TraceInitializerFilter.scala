@@ -3,49 +3,6 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle._
 import com.twitter.util.{Future, Return, Throw}
 
-private[finagle] object TracingFilter {
-  val role = Stack.Role("Tracer")
-
-  /**
-   * Creates a [[com.twitter.finagle.Stackable]] [[com.twitter.finagle.tracing.TracingFilter]].
-   */
-  @deprecated("Use TraceInitializerFilter and (Client|Server)TracingFilter", "6.20.0")
-  def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module2[param.Tracer, param.Label, ServiceFactory[Req, Rep]] {
-      val role = TracingFilter.role
-      val description = "Handle span lifecycle events to report tracing from protocols"
-      def make(_tracer: param.Tracer, _label: param.Label, next: ServiceFactory[Req, Rep]) = {
-        val param.Tracer(tracer) = _tracer
-        val param.Label(label) = _label
-        val tracingFilter = new TracingFilter[Req,Rep](tracer, label)
-        tracingFilter andThen next
-      }
-    }
-}
-
-/**
- * The TracingFilter takes care of span lifecycle events. It is always
- * placed first in the server filter chain so that protocols with
- * trace support will override the span resets, and still be properly
- * reported here.
- *
- * @param tracer An instance of a tracer to use. Eg: ZipkinTracer
- * @param label The name of the service being traced
- */
-@deprecated("Use TraceInitializerFilter and (Client|Server)TracingFilter", "6.20.0")
-class TracingFilter[Req, Rep](tracer: Tracer, label: String) extends SimpleFilter[Req, Rep] {
-
-  @deprecated("Please add a label to the tracing filter constructor", "6.13.x")
-  def this(tracer: Tracer) = this(tracer, "Unknown")
-
-  def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
-    Trace.letTracerAndNextId(tracer) {
-      Trace.recordBinary("finagle.version", Init.finagleVersion)
-      Trace.recordServiceName(label)
-      service(request)
-    }
-}
-
 private[finagle] object TraceInitializerFilter {
   val role = Stack.Role("TraceInitializerFilter")
 
@@ -56,8 +13,7 @@ private[finagle] object TraceInitializerFilter {
     val description = "Initialize the tracing system"
     def make(_tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
       val param.Tracer(tracer) = _tracer
-      val traceInitializer = new TraceInitializerFilter[Req,Rep](tracer, newId)
-      traceInitializer andThen next
+      new TraceInitializerFilter[Req,Rep](tracer, newId).andThen(next)
     }
   }
 
@@ -95,10 +51,13 @@ private[finagle] object TraceInitializerFilter {
  */
 class TraceInitializerFilter[Req, Rep](tracer: Tracer, newId: Boolean) extends SimpleFilter[Req, Rep] {
   def apply(request: Req, service: Service[Req, Rep]): Future[Rep] =
-    if (newId)
-      Trace.letTracerAndNextId(tracer) { service(request) }
-    else
-      Trace.letTracer(tracer) { service(request) }
+    if (tracer.isNull) {
+      if (newId) Trace.letId(Trace.nextId) { service(request) }
+      else service(request)
+    } else {
+      if (newId) Trace.letTracerAndNextId(tracer) { service(request) }
+      else Trace.letTracer(tracer) { service(request) }
+    }
 }
 
 /**
@@ -185,12 +144,16 @@ object ServerTracingFilter {
     finagleVersion)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ServerTracingFilter.role
       val description = "Report finagle information and server recv/send events"
-      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
-        val param.Label(label) = _label
-        TracingFilter[Req, Rep](label) andThen next
+      def make(_label: param.Label, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val param.Label(label) = _label
+          TracingFilter[Req, Rep](label).andThen(next)
+        }
       }
     }
 }
@@ -213,12 +176,16 @@ object ClientTracingFilter {
     finagleVersion)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ClientTracingFilter.role
       val description = "Report finagle information and client send/recv events"
-      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
-        val param.Label(label) = _label
-        TracingFilter[Req, Rep](label) andThen next
+      def make(_label: param.Label, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val param.Label(label) = _label
+          TracingFilter[Req, Rep](label) andThen next
+        }
       }
     }
 }
@@ -242,12 +209,16 @@ private[finagle] object WireTracingFilter {
     false)
 
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[param.Label, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[param.Label, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ClientTracingFilter.role
       val description = "Report finagle information and wire send/recv events"
-      def make(_label: param.Label, next: ServiceFactory[Req, Rep]) = {
-        val param.Label(label) = _label
-        TracingFilter[Req, Rep](label) andThen next
+      def make(_label: param.Label, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val param.Label(label) = _label
+          TracingFilter[Req, Rep](label) andThen next
+        }
       }
     }
 }

@@ -66,7 +66,7 @@ private class DeadlineSpanMap(
       val span = kv.getValue
       if (span.started <= deadline) {
         spanMap.remove(kv.getKey, span)
-        span.addAnnotation(ZipkinAnnotation(deadline, "finagle.flush", span.endpoint, None))
+        span.addAnnotation(ZipkinAnnotation(deadline, "finagle.flush", span.endpoint))
         ss.append(span.toSpan)
       }
     }

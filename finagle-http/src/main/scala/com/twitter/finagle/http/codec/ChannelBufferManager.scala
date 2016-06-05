@@ -1,11 +1,5 @@
 package com.twitter.finagle.http.codec
 
-/**
- * ChannelBufferUsageTracker tracks the channel buffer used by outstanding requests. An exception
- * will be thrown if the total size exceeds a limit.
- * ChannelBufferManager uses ChannelBufferUsageTracker.
- */
-
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 
 import org.jboss.netty.channel._
@@ -15,6 +9,11 @@ import com.twitter.finagle.ChannelBufferUsageException
 import com.twitter.util.StorageUnit
 import com.twitter.conversions.storage._
 
+/**
+ * ChannelBufferUsageTracker tracks the channel buffer used by outstanding
+ * requests. An exception will be thrown if the total size exceeds a limit.
+ * ChannelBufferManager uses ChannelBufferUsageTracker.
+ */
 class ChannelBufferUsageTracker(
   limit: StorageUnit,
   statsReceiver: StatsReceiver = NullStatsReceiver
@@ -63,6 +62,7 @@ class ChannelBufferUsageTracker(
   }
 }
 
+private[http]
 class ChannelBufferManager(usageTracker: ChannelBufferUsageTracker)
   extends SimpleChannelHandler
 {

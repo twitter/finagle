@@ -2,13 +2,16 @@ package com.twitter.finagle.stats
 
 import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.{HistogramInterface, AbstractGauge, Metrics}
-import com.twitter.finagle.httpx.HttpMuxHandler
+import com.twitter.finagle.http.HttpMuxHandler
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.Buf
-import com.twitter.logging.Logger
+import com.twitter.logging.{Level, Logger}
 import com.twitter.util.events.{Event, Sink}
+import com.twitter.util.lint.{Issue, Category, Rule, GlobalRules}
 import com.twitter.util.{Time, Throw, Try}
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.LongAdder
+import scala.collection.JavaConverters._
 
 private object Json {
   import com.fasterxml.jackson.annotation.JsonInclude
@@ -56,19 +59,33 @@ private object Json {
 // lifecycle, typically before Flags are loaded. By using a system
 // property you can avoid that brittleness.
 object debugLoggedStatNames extends GlobalFlag[Set[String]](
-    Set.empty,
-    "Comma separated stat names for logging observed values" +
-      " (set via a -D system property to avoid load ordering issues)")
+  Set.empty,
+  "Comma separated stat names for logging observed values" +
+    " (set via a -D system property to avoid load ordering issues)"
+)
+
+// It's possible to override the scope separator (the default value for `MetricsStatsReceiver` is
+// `"/"`), which is used to separate scopes defined by  `StatsReceiver`. This flag might be useful
+// while migrating from Commons Stats (i.e., `CommonsStatsReceiver`), which is configured to use
+// `"_"` as scope separator.
+object scopeSeparator extends GlobalFlag[String](
+  "/",
+  "Override the scope separator."
+)
 
 object MetricsStatsReceiver {
   val defaultRegistry = Metrics.root()
   private[this] val _defaultHostRegistry = Metrics.createDetached()
   val defaultHostRegistry = _defaultHostRegistry
 
-  private[this] val log = Logger.get()
-
   private def defaultFactory(name: String): HistogramInterface =
     new MetricsBucketedHistogram(name)
+
+  /**
+   * A semi-arbitrary value, but should a service call any counter/stat/addGauge
+   * this often, it's a good indication that they are not following best practices.
+   */
+  private val CreateRequestLimit = 100000L
 
   private[this] case class CounterIncrData(name: String, value: Long)
   private[this] case class StatAddData(name: String, delta: Long)
@@ -155,7 +172,8 @@ class MetricsStatsReceiver(
   val registry: Metrics,
   sink: Sink,
   histogramFactory: String => HistogramInterface
-) extends StatsReceiverWithCumulativeGauges {
+) extends WithHistogramDetails
+  with StatsReceiverWithCumulativeGauges {
   import MetricsStatsReceiver._
 
   def this(registry: Metrics, sink: Sink) = this(registry, sink, MetricsStatsReceiver.defaultFactory)
@@ -168,14 +186,57 @@ class MetricsStatsReceiver(
   private[this] val counters = new ConcurrentHashMap[Seq[String], Counter]
   private[this] val stats = new ConcurrentHashMap[Seq[String], Stat]
 
+  // Used to store underlying histogram counts
+  private[this] val histoDetails = new ConcurrentHashMap[String, HistogramDetail]
+
   private[this] val log = Logger.get()
 
   private[this] val loggedStats: Set[String] = debugLoggedStatNames()
+
+  private[this] val counterRequests = new LongAdder()
+  private[this] val statRequests = new LongAdder()
+  private[this] val gaugeRequests = new LongAdder()
+
+  private[this] def checkRequestsLimit(which: String, adder: LongAdder): Option[Issue] = {
+    // todo: ideally these would be computed as rates over time, but this is a
+    // relatively simple proxy for bad behavior.
+    val count = adder.sum()
+    if (count > CreateRequestLimit)
+      Some(Issue(s"StatReceiver.$which() has been called $count times"))
+    else
+      None
+  }
+
+  GlobalRules.get.add(
+    Rule(
+      Category.Performance,
+      "Elevated metric creation requests",
+      "For best performance, metrics should be created and stored in member variables " +
+        "and not requested via `StatsReceiver.{counter,stat,addGauge}` at runtime. " +
+        "Large numbers are an indication that these metrics are being requested " +
+        "frequently at runtime."
+    ) {
+      Seq(
+        checkRequestsLimit("counter", counterRequests),
+        checkRequestsLimit("stat", statRequests),
+        checkRequestsLimit("addGauge", gaugeRequests)
+      ).flatten
+    }
+  )
+
+  // Scope separator, a string value used to separate scopes defined by `StatsReceiver`.
+  private[this] val separator: String = scopeSeparator()
+  require(separator.length == 1, s"Scope separator should be one symbol: '$separator'")
+
+  override def toString: String = "MetricsStatsReceiver"
 
   /**
    * Create and register a counter inside the underlying Metrics library
    */
   def counter(names: String*): Counter = {
+    if (log.isLoggable(Level.TRACE))
+      log.trace(s"Calling StatsReceiver.counter on $names")
+    counterRequests.increment()
     var counter = counters.get(names)
     if (counter == null) counters.synchronized {
       counter = counters.get(names)
@@ -186,8 +247,9 @@ class MetricsStatsReceiver(
             metricsCounter.add(delta)
             if (sink.recording) {
               if (Trace.hasId) {
+                val traceId = Trace.id
                 sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta,
-                  traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+                  traceIdVal = traceId.traceId.self, spanIdVal = traceId.spanId.self)
               } else {
                 sink.event(CounterIncr, objectVal = metricsCounter.getName(), longVal = delta)
               }
@@ -204,6 +266,9 @@ class MetricsStatsReceiver(
    * Create and register a stat (histogram) inside the underlying Metrics library
    */
   def stat(names: String*): Stat = {
+    if (log.isLoggable(Level.TRACE))
+      log.trace(s"Calling StatsReceiver.stat for $names")
+    statRequests.increment()
     var stat = stats.get(names)
     if (stat == null) stats.synchronized {
       stat = stats.get(names)
@@ -218,18 +283,34 @@ class MetricsStatsReceiver(
             histogram.add(asLong)
             if (sink.recording) {
               if (Trace.hasId) {
+                val traceId = Trace.id
                 sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong,
-                  traceIdVal = Trace.id.traceId.self, spanIdVal = Trace.id.spanId.self)
+                  traceIdVal = traceId.traceId.self, spanIdVal = traceId.spanId.self)
               } else {
                 sink.event(StatAdd, objectVal = histogram.getName(), longVal = asLong)
               }
             }
+          }
+          // Provide read-only access to underlying histogram through histoDetails
+          val statName = format(names)
+          histogram match {
+            case histo: MetricsBucketedHistogram => 
+              histoDetails.put(statName, histo.histogramDetail)
+            case _ => 
+              log.debug(s"$statName's histogram implementation doesn't support details")
           }
         }
         stats.put(names, stat)
       }
     }
     stat
+  }
+
+  override def addGauge(name: String*)(f: => Float): Gauge = {
+    if (log.isLoggable(Level.TRACE))
+      log.trace(s"Calling StatsReceiver.addGauge for $name")
+    gaugeRequests.increment()
+    super.addGauge(name: _*)(f)
   }
 
   protected[this] def registerGauge(names: Seq[String], f: => Float) {
@@ -243,7 +324,10 @@ class MetricsStatsReceiver(
     registry.unregister(format(names))
   }
 
-  private[this] def format(names: Seq[String]) = names.mkString("/")
+  private[this] def format(names: Seq[String]) = names.mkString(separator)
+
+  def histogramDetails: Map[String, HistogramDetail] = histoDetails.asScala.toMap
+
 }
 
 class MetricsExporter(val registry: Metrics)

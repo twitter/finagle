@@ -1,28 +1,27 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.util.Rng
 import com.twitter.util._
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
-import org.scalactic.Tolerance
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import scala.collection.mutable
 
-private trait ApertureTesting {
+trait ApertureTesting {
   val N = 100000
 
   class Empty extends Exception
 
-  protected trait TestBal extends Balancer[Unit, Unit] with Aperture[Unit, Unit] {
+  trait TestBal extends Balancer[Unit, Unit] with Aperture[Unit, Unit] {
     protected val rng = Rng(12345L)
     protected val emptyException = new Empty
     protected val maxEffort = 10
     protected def statsReceiver = NullStatsReceiver
     protected val minAperture = 1
+
+    protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
 
     def applyn(n: Int): Unit = {
       val factories = Await.result(Future.collect(Seq.fill(n)(apply())))
@@ -79,34 +78,33 @@ private trait ApertureTesting {
 
     def apply(i: Int) = factories.getOrElseUpdate(i, new Factory(i))
 
-    def range(n: Int): Traversable[(ServiceFactory[Unit, Unit], Double)] =
-      Traversable.tabulate(n) { i => (apply(i) -> 1) }
+    def range(n: Int): Traversable[ServiceFactory[Unit, Unit]] =
+      Traversable.tabulate(n) { i => apply(i) }
   }
 
 }
 
 @RunWith(classOf[JUnitRunner])
-private class ApertureTest extends FunSuite with ApertureTesting {
-  import Tolerance._
+class ApertureTest extends FunSuite with ApertureTesting {
 
-  protected class Bal extends TestBal with LeastLoaded[Unit, Unit]
+  class Bal extends TestBal with LeastLoaded[Unit, Unit]
 
   test("Balance only within the aperture") {
     val counts = new Counts
     val bal = new Bal
     bal.update(counts.range(10))
-    assert(bal.unitsx === 10)
+    assert(bal.unitsx == 10)
     bal.applyn(100)
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
 
     bal.adjustx(1)
     bal.applyn(100)
-    assert(counts.aperture === 2)
+    assert(counts.aperture == 2)
 
     counts.clear()
     bal.adjustx(-1)
     bal.applyn(100)
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
   }
 
   test("Don't operate outside of aperture range") {
@@ -116,12 +114,12 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     bal.update(counts.range(10))
     bal.adjustx(10000)
     bal.applyn(1000)
-    assert(counts.aperture === 10)
+    assert(counts.aperture == 10)
 
     counts.clear()
     bal.adjustx(-100000)
     bal.applyn(1000)
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
   }
 
   test("Increase aperture to match available hosts") {
@@ -131,7 +129,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     bal.update(counts.range(10))
     bal.adjustx(1)
     bal.applyn(100)
-    assert(counts.aperture === 2)
+    assert(counts.aperture == 2)
 
     // Since tokens are assigned, we don't know apriori what's in the
     // aperture*, so figure it out by observation.
@@ -142,7 +140,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     counts(keys2.head).status = Status.Closed
 
     bal.applyn(100)
-    assert(counts.aperture === 3)
+    assert(counts.aperture == 3)
     // Apertures are additive.
     assert(keys2.forall(counts.nonzero.contains))
 
@@ -150,29 +148,7 @@ private class ApertureTest extends FunSuite with ApertureTesting {
     counts(keys2.head).status = Status.Open
     counts.clear()
     bal.applyn(100)
-    assert(counts.nonzero === keys2)
-  }
-
-  test("Distributes according to weights") {
-    val counts = new Counts
-    val bal = new Bal
-
-    bal.update(Traversable(
-      counts(0) -> 2,
-      counts(1) -> 1,
-      counts(2) -> 2,
-      counts(3) -> 1
-    ))
-
-    assert(bal.unitsx === 6)
-
-    bal.adjustx(5)
-    bal.applyn(N)
-
-    assert(counts(0).n.toDouble/N === 0.333 +- 0.05)
-    assert(counts(1).n.toDouble/N === 0.166 +- 0.05)
-    assert(counts(2).n.toDouble/N === 0.333 +- 0.05)
-    assert(counts(3).n.toDouble/N === 0.166 +- 0.05)
+    assert(counts.nonzero == keys2)
   }
 
   test("Empty vectors") {
@@ -191,21 +167,20 @@ private class ApertureTest extends FunSuite with ApertureTesting {
 
     bal.applyn(1000)
     // The correctness of this behavior could be argued either way.
-    assert(counts.aperture === 1)
+    assert(counts.aperture == 1)
     val Seq(badkey) = counts.nonzero.toSeq
     val goodkey = (badkey + 1) % 10
     counts(goodkey).status = Status.Open
 
     counts.clear()
     bal.applyn(1000)
-    assert(counts.nonzero === Set(goodkey))
+    assert(counts.nonzero == Set(goodkey))
   }
 }
 
 
 @RunWith(classOf[JUnitRunner])
-private class LoadBandTest extends FunSuite with ApertureTesting {
-  import Tolerance._
+class LoadBandTest extends FunSuite with ApertureTesting {
 
   val rng = Rng()
 

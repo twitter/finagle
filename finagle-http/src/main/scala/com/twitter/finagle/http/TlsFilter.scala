@@ -1,18 +1,15 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.Stack.Params
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.{ServiceFactory, Service, Stack, Stackable, SimpleFilter}
 import com.twitter.util.Future
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
 
 /**
- * Adds the host headers to the
- * [[org.jboss.netty.handler.codec.http.HttpRequest]] for TLS-enabled requests.
+ * Adds the host headers to for TLS-enabled requests.
  */
-class TlsFilter(host: String) extends SimpleFilter[HttpRequest, HttpResponse] {
-  def apply(req: HttpRequest, svc: Service[HttpRequest, HttpResponse]): Future[HttpResponse] = {
-    req.headers.set(HttpHeaders.Names.HOST, host)
+class TlsFilter(host: String) extends SimpleFilter[Request, Response] {
+  def apply(req: Request, svc: Service[Request, Response]): Future[Response] = {
+    req.headers.set(Fields.Host, host)
     svc(req)
   }
 }
@@ -20,11 +17,11 @@ class TlsFilter(host: String) extends SimpleFilter[HttpRequest, HttpResponse] {
 object TlsFilter {
   val role = Stack.Role("HttpTlsHost")
 
-  def module: Stackable[ServiceFactory[HttpRequest, HttpResponse]] =
-    new Stack.Module1[Transporter.TLSHostname, ServiceFactory[HttpRequest, HttpResponse]] {
+  def module: Stackable[ServiceFactory[Request, Response]] =
+    new Stack.Module1[Transporter.TLSHostname, ServiceFactory[Request, Response]] {
       val role = TlsFilter.role
       val description = "Add host headers to TLS-enabled requests"
-      def make(tlsHostname: Transporter.TLSHostname, next: ServiceFactory[HttpRequest, HttpResponse]) =
+      def make(tlsHostname: Transporter.TLSHostname, next: ServiceFactory[Request, Response]) =
         tlsHostname match {
           case Transporter.TLSHostname(Some(host)) => new TlsFilter(host) andThen next
           case Transporter.TLSHostname(None) => next

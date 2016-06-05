@@ -1,8 +1,8 @@
 package com.twitter.finagle.mdns
 
 import com.twitter.finagle.{Announcement, Announcer, Addr, Resolver, Name}
-import com.twitter.util.{Future, Try, Var}
-import java.net.{InetSocketAddress, SocketAddress}
+import com.twitter.util.{Future, Var}
+import java.net.InetSocketAddress
 
 private object Local {
   def mkAddr(name: String) = "mdns!" + name + "._finagle._tcp.local."

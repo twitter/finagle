@@ -1,10 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.builder.Cluster
-import com.twitter.finagle.service.Backoff
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.util.{Closable, Future, Duration, Timer, Var}
+import com.twitter.util._
 import java.net.SocketAddress
 import java.util.concurrent.atomic.AtomicReference
 
@@ -19,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference
  * '''Note:''' querying groups is nonblocking, which means that
  * derived groups are effectively eventually consistent.
  *
- * '''Note:''' `T`s must be hashable, definining `hashCode` and
+ * '''Note:''' `T`s must be hashable, defining `hashCode` and
  * `equals` to ensure that maps have exactly-once semantics.
  *
  * '''Note:''' Groups are invariant because Scala's Sets are. In
@@ -46,7 +43,7 @@ trait Group[T] { outer =>
   // identity to repeated calls to Group.members
   final protected[finagle] lazy val ref = {
     val r = new AtomicReference[Set[T]]()
-    set.observeTo(r)
+    set.changes.register(Witness(r))
     r
   }
 
@@ -106,14 +103,16 @@ trait Group[T] { outer =>
  * name, but mostly this is to ship names under the cover of old
  * APIs. (And hopefully will be deprecated soon enough.)
  */
+@deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
 private[finagle] case class NameGroup(name: Name.Bound)
   extends Group[SocketAddress] {
     protected[finagle] lazy val set: Var[Set[SocketAddress]] = name.addr map {
-      case Addr.Bound(set, _) => set
+      case Addr.Bound(set, _) => set.collect { case Address.Inet(ia, _) => ia }
       case _ => Set()
     }
   }
 
+@deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
 trait MutableGroup[T] extends Group[T] {
   def update(newMembers: Set[T])
 }
@@ -122,6 +121,7 @@ trait MutableGroup[T] extends Group[T] {
  * A mixin trait to assign a ``name`` to the group. This is used
  * to assign labels to groups that ascribe meaning to them.
  */
+@deprecated("Use `com.twitter.finagle.Name` to represent clusters instead", "6.7.x")
 case class LabelledGroup[T](underlying: Group[T], name: String) extends Group[T] {
   protected[finagle] lazy val set: Var[Set[T]] = underlying.set
 }
@@ -138,8 +138,8 @@ object Group {
   }
 
   def fromVarAddr(va: Var[Addr]): Group[SocketAddress] = new Group[SocketAddress] {
-    protected[finagle] val set = va map {
-      case Addr.Bound(sockaddrs, _) => sockaddrs
+    protected[finagle] val set: Var[Set[SocketAddress]]  = va map {
+      case Addr.Bound(addrs, _) => addrs.collect { case Address.Inet(ia, _) => ia }
       case _ => Set[SocketAddress]()
     }
   }

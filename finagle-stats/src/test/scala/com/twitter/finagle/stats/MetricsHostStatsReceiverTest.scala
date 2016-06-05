@@ -20,10 +20,10 @@ class MetricsHostStatsReceiverTest extends FunSuite {
     hostStatsReceiver.counter("my_counter").incr()
 
     assert(
-      readHostStatsReceiver("my_cumulative_gauge") ===
+      readHostStatsReceiver("my_cumulative_gauge") ==
         readUnderlyingStatsReceiver("my_cumulative_gauge"))
     assert(
-      readHostStatsReceiver("my_counter") ===
+      readHostStatsReceiver("my_counter") ==
         readUnderlyingStatsReceiver("my_counter"))
   }
 }

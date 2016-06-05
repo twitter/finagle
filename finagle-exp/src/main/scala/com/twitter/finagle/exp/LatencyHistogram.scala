@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp
 
-import com.twitter.finagle.util.WindowedAdder
+import com.twitter.util.WindowedAdder
 
 private[finagle] object LatencyHistogram {
 

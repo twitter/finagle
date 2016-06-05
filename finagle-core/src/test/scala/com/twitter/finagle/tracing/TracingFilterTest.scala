@@ -1,6 +1,6 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.{SimpleFilter, Filter, Dtab, Service}
+import com.twitter.finagle.{Filter, Dtab, Service}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -43,15 +43,6 @@ class TracingFilterTest
     captor.getAllValues.asScala
   }
 
-  test("TracingFilter: should trace Finagle version") {
-    val filter = new TracingFilter[Int, Int](tracer, "tracerTest")
-    val versionKeyFound = record(filter) exists {
-      case Record(_, _, Annotation.BinaryAnnotation(key, _), _) => key == "finagle.version"
-      case _ => false
-    }
-    assert(versionKeyFound, "Finagle version wasn't traced as a binary record")
-  }
-
   def testAnnotatingTracingFilter(
     prefix: String,
     mkFilter: String => Filter[Int, Int, Int, Int]
@@ -60,7 +51,7 @@ class TracingFilterTest
       val services = record(mkFilter("")) collect {
         case Record(_, _, Annotation.ServiceName(svc), _) => svc
       }
-      assert(services === Seq(serviceName))
+      assert(services == Seq(serviceName))
     }
 
     test(s"$prefix: should trace Finagle version") {
@@ -68,7 +59,7 @@ class TracingFilterTest
         case Record(_, _, Annotation.BinaryAnnotation(key, ver), _)
           if key == s"$prefix/finagle.version" => ver
       }
-      assert(versions === Seq("1.2.3"))
+      assert(versions == Seq("1.2.3"))
     }
 
     test(s"$prefix: should trace unknown Finagle version") {
@@ -76,7 +67,7 @@ class TracingFilterTest
         case Record(_, _, Annotation.BinaryAnnotation(key, ver), _)
           if key == s"$prefix/finagle.version" => ver
       }
-      assert(versions === Seq("?"))
+      assert(versions == Seq("?"))
     }
 
     def withDtab(dtab: Dtab) = Filter.mk[Int, Int, Int, Int] { (req, svc) =>
@@ -92,7 +83,7 @@ class TracingFilterTest
         case Record(_, _, Annotation.BinaryAnnotation(key, dtab), _)
           if key == s"$prefix/dtab.local" => dtab
       }
-      assert(dtabs === Seq(dtab.show))
+      assert(dtabs == Seq(dtab.show))
     }
 
     test(s"$prefix: should not trace empty Dtab.local") {
@@ -117,7 +108,7 @@ class TracingFilterTest
       case Record(_, _, a@Annotation.ClientSend(), _) => a
       case Record(_, _, a@Annotation.ClientRecv(), _) => a
     }
-    assert(annotations === Seq(Annotation.ClientSend(), Annotation.ClientRecv()))
+    assert(annotations == Seq(Annotation.ClientSend(), Annotation.ClientRecv()))
   }
 
   test("clnt: recv error") {
@@ -126,7 +117,7 @@ class TracingFilterTest
       case Record(_, _, a@Annotation.ClientRecv(), _) => a
       case Record(_, _, a@Annotation.ClientRecvError(_), _) => a
     }
-    assert(annotations === Seq(
+    assert(annotations == Seq(
       Annotation.ClientSend(),
       Annotation.ClientRecvError("java.lang.Exception: bummer"),
       Annotation.ClientRecv()))
@@ -145,6 +136,6 @@ class TracingFilterTest
       case Record(_, _, a@Annotation.ServerRecv(), _) => a
       case Record(_, _, a@Annotation.ServerSend(), _) => a
     }
-    assert(annotations === Seq(Annotation.ServerRecv(), Annotation.ServerSend()))
+    assert(annotations == Seq(Annotation.ServerRecv(), Annotation.ServerSend()))
   }
 }

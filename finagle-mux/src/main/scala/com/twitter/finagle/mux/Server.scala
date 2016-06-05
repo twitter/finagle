@@ -3,18 +3,18 @@ package com.twitter.finagle.mux
 import com.twitter.app.GlobalFlag
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor, nackOnExpiredLease}
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{NullTracer, Trace, Tracer}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.logging.HasLogLevel
 import com.twitter.util._
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
+import java.util.concurrent.ConcurrentHashMap
 import java.util.logging.{Level, Logger}
-import org.jboss.netty.buffer.ChannelBuffer
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
@@ -24,7 +24,12 @@ import scala.collection.JavaConverters._
  * This implies that the client issued a Tdiscarded message for a given tagged
  * request, as per [[com.twitter.finagle.mux]].
  */
-case class ClientDiscardedRequestException(why: String) extends Exception(why)
+case class ClientDiscardedRequestException(why: String)
+  extends Exception(why)
+  with HasLogLevel
+{
+  def logLevel: com.twitter.logging.Level = com.twitter.logging.Level.DEBUG
+}
 
 object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabled. " +
   "Temporary measure to allow servers to deploy without hurting clients.")
@@ -34,7 +39,7 @@ object gracefulShutdownEnabled extends GlobalFlag(true, "Graceful shutdown enabl
  * and coordinating draining.
  */
 private class Tracker[T] {
-  private[this] val pending = new ConcurrentHashMap[Int, Future[T]]
+  private[this] val pending = new ConcurrentHashMap[Int, Future[Unit]]
   private[this] val _drained: Promise[Unit] = new Promise
 
   // The state of a tracker is a single integer. Its absolute
@@ -67,35 +72,36 @@ private class Tracker[T] {
     } else if (!state.compareAndSet(n, n-1)) exit()
   }
 
-  private[this] val closedExit = (_: Try[Unit]) => exit()
-
   /**
    * Track a transaction. `track` manages the lifetime of a tag
-   * and its reply. Function `process` handles the result of `reply`.
-   * The ordering here is important: the tag is relinquished after
-   * `reply` is satisfied but before `process` is invoked, but is still
-   * considered pending until `process` completes. This is because:
-   * (1) the tag is freed once a client receives the reply, and, since
+   * including its reply and write. Function `process` handles the result
+   * of `reply`. The tag is freed once a client receives the reply, and, since
    * write completion is not synchronous with processing the next
    * request, there is a race between acknowledging the write and
    * receiving the next request from the client (which may then reuse
-   * the tag); (2) we can't complete draining until we've acknowledged
+   * the tag); We also can't complete draining until we've acknowledged
    * the write for the last request processed.
+   *
+   * @note `track` isn't synchronized across threads so this may have
+   * races in a multithreaded environment. In our case, each instance
+   * is owned by exactly one thread (i.e. we inherit netty's threading
+   * model).
    */
   def track(tag: Int, reply: Future[T])(process: Try[T] => Future[Unit]): Future[Unit] = {
     if (!enter()) return reply.transform(process)
 
-    pending.put(tag, reply)
-    reply transform { r =>
+    val f = reply.transform(process)
+    pending.put(tag, f)
+    f.ensure {
       pending.remove(tag)
-      process(r).respond(closedExit)
+      exit()
     }
   }
 
   /**
-   * Retrieve the value for the pending request matching `tag`.
+   * Retrieve the value for the pending transaction matching `tag`.
    */
-  def get(tag: Int): Option[Future[T]] =
+  def get(tag: Int): Option[Future[Unit]] =
     Option(pending.get(tag))
 
   /**
@@ -146,7 +152,7 @@ private[twitter] object ServerDispatcher {
    * Construct a new request-response dispatcher.
    */
   def newRequestResponse(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Message, Message],
     service: Service[Request, Response],
     lessor: Lessor,
     tracer: Tracer,
@@ -159,11 +165,14 @@ private[twitter] object ServerDispatcher {
    * null lessor, tracer, and statsReceiver.
    */
   def newRequestResponse(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Message, Message],
     service: Service[Request, Response]
   ): ServerDispatcher =
     newRequestResponse(trans, service, Lessor.nil, NullTracer, NullStatsReceiver)
 
+  /**
+   * Used when comparing the difference between leases.
+   */
   val Epsilon = 1.second
 
   object State extends Enumeration {
@@ -176,13 +185,12 @@ private[twitter] object ServerDispatcher {
  * handles concerns of leasing and draining.
  */
 private[twitter] class ServerDispatcher(
-    trans: Transport[ChannelBuffer, ChannelBuffer],
+    trans: Transport[Message, Message],
     service: Service[Message, Message],
     lessor: Lessor, // the lessor that the dispatcher should register with in order to get leases
     tracer: Tracer,
     statsReceiver: StatsReceiver
 ) extends Closable with Lessee {
-  import Message._
   import ServerDispatcher.State
 
   private[this] implicit val injectTimer = DefaultTimer.twitter
@@ -192,83 +200,95 @@ private[twitter] class ServerDispatcher(
   private[this] val state: AtomicReference[State.Value] =
     new AtomicReference(State.Open)
 
-  @volatile private[this] var lease = Tlease.MaxLease
+  @volatile private[this] var lease = Message.Tlease.MaxLease
   @volatile private[this] var curElapsed = NilStopwatch.start()
   lessor.register(this)
 
   private[this] def write(m: Message): Future[Unit] =
-    trans.write(encode(m))
+    trans.write(m)
 
   private[this] def isAccepting: Boolean =
     !tracker.isDraining && (!nackOnExpiredLease() || (lease > Duration.Zero))
 
   private[this] def process(m: Message): Unit = m match {
-    case (_: Tdispatch | _: Treq) if isAccepting =>
-      // A misbehaving client is sending duplicate pending tags.
-      // Note that, since the client is managing multiple outstanding
-      // requests for this tag, and we're returning an Rerr here, there
-      // are no guarantees about client behavior in this case. Possibly
-      // we should terminate the session in this case.
-      //
-      // TODO: introduce uniform handling of tag tracking
-      // (across all request types), and also uniform handling
-      // (e.g., session termination).
-      if (tracker.isTracking(m.tag)) {
-        log.warning(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
-        write(Rerr(m.tag, s"Duplicate tag ${m.tag}"))
-        return
-      }
-
+    case (_: Message.Tdispatch | _: Message.Treq) if isAccepting =>
       lessor.observeArrival()
       val elapsed = Stopwatch.start()
-      tracker.track(m.tag, service(m)) {
+
+      val reply: Try[Message] => Future[Unit] = {
         case Return(rep) =>
           lessor.observe(elapsed())
           write(rep)
         case Throw(exc) =>
           log.log(Level.WARNING, s"Error processing message $m", exc)
-          write(Rerr(m.tag, exc.toString))
+          write(Message.Rerr(m.tag, exc.toString))
+      }
+
+      if (!tracker.isTracking(m.tag)) {
+        tracker.track(m.tag, service(m))(reply)
+      } else {
+        // This can mean two things:
+        //
+        // 1. We have a pathalogical client which is sending duplicate tags.
+        // We push the responsibility of resolving the duplicate on the client
+        // and service the request.
+        //
+        // 2. We lost a race with the client where it reused a tag before we were
+        // able to cleanup the tracker. This is possible since we cleanup state on
+        // write closures which can be executed on a separate thread from the event
+        // loop thread (in netty3). We take extra precaution in the `ChannelTransport.write`
+        // to a avoid this, but technically it isn't guaranteed by netty3.
+        //
+        // In both cases, we forfeit the ability to track (and thus drain or interrupt)
+        // the request, but we can still service it.
+        log.fine(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
+        statsReceiver.counter("duplicate_tag").incr()
+        service(m).transform(reply)
       }
 
     // Dispatch when !isAccepting
-    case d: Tdispatch =>
-      write(RdispatchNack(d.tag, Nil))
-    case r: Treq =>
-      write(RreqNack(r.tag))
+    case d: Message.Tdispatch =>
+      write(Message.RdispatchNack(d.tag, Nil))
+    case r: Message.Treq =>
+      write(Message.RreqNack(r.tag))
 
-    case _: Tping =>
-      service(m) respond {
+    case _: Message.Tping =>
+      service(m).respond {
         case Return(rep) => write(rep)
-        case Throw(exc) => write(Rerr(m.tag, exc.toString))
+        case Throw(exc) => write(Message.Rerr(m.tag, exc.toString))
       }
 
-    case Tdiscarded(tag, why) =>
+    case Message.Tdiscarded(tag, why) =>
       tracker.get(tag) match {
         case Some(reply) =>
           reply.raise(new ClientDiscardedRequestException(why))
         case None =>
       }
 
-    case Rdrain(1) if state.get == State.Draining =>
+    case Message.Rdrain(1) if state.get == State.Draining =>
       tracker.drain()
 
-    case m@Tmessage(tag) =>
-      val msg = Rerr(tag, f"Did not understand Tmessage ${m.typ}%d")
-      write(msg)
+    case m: Message =>
+      val rerr = Message.Rerr(m.tag, s"Unexpected mux message type ${m.typ}")
+      write(rerr)
   }
 
   private[this] def loop(): Unit =
-    Future.each(trans.read) { buf =>
+    Future.each(trans.read) { msg =>
       val save = Local.save()
-      process(decode(buf))
+      process(msg)
       Local.restore(save)
     } ensure { hangup(Time.now) }
 
   Local.letClear {
     Trace.letTracer(tracer) {
-      trans.peerCertificate match {
-        case None => loop()
-        case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) { loop() }
+      Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
+        trans.peerCertificate match {
+          case None => loop()
+          case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+            loop()
+          }
+        }
       }
     }
   }
@@ -314,10 +334,10 @@ private[twitter] class ServerDispatcher(
     }
 
     statsReceiver.counter("draining").incr()
-    val done = write(Tdrain(1)) before
+    val done = write(Message.Tdrain(1)) before
       tracker.drained.within(deadline-Time.now) before
       trans.close(deadline)
-    done transform {
+    done.transform {
       case Return(_) =>
         statsReceiver.counter("drained").incr()
         Future.Done
@@ -333,14 +353,14 @@ private[twitter] class ServerDispatcher(
     * equal to 0, also nack all requests until a new lease is issued.
     */
   def issue(howlong: Duration): Unit = {
-    require(howlong >= Tlease.MinLease)
+    require(howlong >= Message.Tlease.MinLease)
 
     synchronized {
       val diff = (lease - curElapsed()).abs
       if (diff > ServerDispatcher.Epsilon) {
         curElapsed = Stopwatch.start()
         lease = howlong
-        write(Tlease(howlong min Tlease.MaxLease))
+        write(Message.Tlease(howlong min Message.Tlease.MaxLease))
       } else if ((howlong < Duration.Zero) && (lease > Duration.Zero)) {
         curElapsed = Stopwatch.start()
         lease = howlong
@@ -359,51 +379,52 @@ private[twitter] class ServerDispatcher(
  * (This arrangement permits interpositioning other filters to modify ping
  * or dispatch behavior, e.g., for testing.)
  */
-private object Processor extends Filter[Message, Message, Request, Response] {
+private[finagle] object Processor extends Filter[Message, Message, Request, Response] {
   import Message._
 
-  private[this] def dispatch(tdispatch: Tdispatch, service: Service[Request, Response]): Future[Message] = {
-    val Tdispatch(tag, contexts, dst, dtab, bytes) = tdispatch
+  private[this] def dispatch(
+    tdispatch: Message.Tdispatch,
+    service: Service[Request, Response]
+  ): Future[Message] = {
 
-    val contextBufs = contexts map { case (k, v) =>
-      ChannelBufferBuf(k) -> ChannelBufferBuf(v)
-    }
-    Contexts.broadcast.letUnmarshal(contextBufs) {
-      if (dtab.length > 0)
-        Dtab.local ++= dtab
-      service(Request(dst, ChannelBufferBuf.Owned(bytes))) transform {
+    Contexts.broadcast.letUnmarshal(tdispatch.contexts) {
+      if (tdispatch.dtab.nonEmpty)
+        Dtab.local ++= tdispatch.dtab
+      service(Request(tdispatch.dst, tdispatch.req)).transform {
         case Return(rep) =>
-          Future.value(RdispatchOk(tag, Nil, BufChannelBuffer(rep.body)))
+          Future.value(RdispatchOk(tdispatch.tag, Nil, rep.body))
 
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-          Future.value(RdispatchNack(tag, Nil))
+          Future.value(RdispatchNack(tdispatch.tag, Nil))
 
         case Throw(exc) =>
-          Future.value(RdispatchError(tag, Nil, exc.toString))
+          Future.value(RdispatchError(tdispatch.tag, Nil, exc.toString))
       }
     }
   }
 
-  private[this] def dispatch(treq: Treq, service: Service[Request, Response]): Future[Message] = {
-    val Treq(tag, traceId, bytes) = treq
-    Trace.letIdOption(traceId) {
-      service(Request(Path.empty, ChannelBufferBuf.Owned(bytes))) transform {
+  private[this] def dispatch(
+    treq: Message.Treq,
+    service: Service[Request, Response]
+  ): Future[Message] = {
+    Trace.letIdOption(treq.traceId) {
+      service(Request(Path.empty, treq.req)).transform {
         case Return(rep) =>
-          Future.value(RreqOk(tag, BufChannelBuffer(rep.body)))
+          Future.value(RreqOk(treq.tag, rep.body))
 
         case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
-          Future.value(RreqNack(tag))
+          Future.value(Message.RreqNack(treq.tag))
 
         case Throw(exc) =>
-          Future.value(RreqError(tag, exc.toString))
+          Future.value(Message.RreqError(treq.tag, exc.toString))
       }
     }
   }
 
   def apply(req: Message, service: Service[Request, Response]): Future[Message] = req match {
-    case d: Tdispatch => dispatch(d, service)
-    case r: Treq => dispatch(r, service)
-    case Tping(tag) => Future.value(Rping(tag))
+    case d: Message.Tdispatch => dispatch(d, service)
+    case r: Message.Treq => dispatch(r, service)
+    case Message.Tping(tag) => Future.value(Message.Rping(tag))
     case m => Future.exception(new IllegalArgumentException(s"Cannot process message $m"))
   }
 }

@@ -2,7 +2,7 @@ package com.twitter.finagle.tracing
 
 import com.twitter.finagle._
 import com.twitter.finagle.client.Transporter
-import java.net.{SocketAddress, InetSocketAddress}
+import java.net.InetSocketAddress
 
 /**
  * [[com.twitter.finagle.ServiceFactoryProxy]] used to trace the local addr and
@@ -44,12 +44,16 @@ private[finagle] object ClientDestTracingFilter {
    * $module [[com.twitter.finagle.tracing.ClientDestTracingFilter]].
    */
   def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module1[Transporter.EndpointAddr, ServiceFactory[Req, Rep]] {
+    new Stack.Module2[Transporter.EndpointAddr, param.Tracer, ServiceFactory[Req, Rep]] {
       val role = ClientDestTracingFilter.role
       val description = "Record remote address of server"
-      def make(_addr: Transporter.EndpointAddr, next: ServiceFactory[Req, Rep]) = {
-        val Transporter.EndpointAddr(addr) = _addr
-        new ClientDestTracingFilter(addr) andThen next
+      def make(_addr: Transporter.EndpointAddr, _tracer: param.Tracer, next: ServiceFactory[Req, Rep]) = {
+        val param.Tracer(tracer) = _tracer
+        if (tracer.isNull) next
+        else {
+          val Transporter.EndpointAddr(addr) = _addr
+          new ClientDestTracingFilter(addr) andThen next
+        }
       }
     }
 }
@@ -57,13 +61,13 @@ private[finagle] object ClientDestTracingFilter {
  * [[com.twitter.finagle.Filter]] for clients to record the remote address of the server.
  * We don't log the local addr here because it's already done in the client Dispatcher.
  */
-class ClientDestTracingFilter[Req,Rep](remoteSock: SocketAddress)
+class ClientDestTracingFilter[Req,Rep](addr: Address)
   extends SimpleFilter[Req,Rep]
 {
   def apply(request: Req, service: Service[Req, Rep]) = {
     val ret = service(request)
-    remoteSock match {
-      case ia: InetSocketAddress =>
+    addr match {
+      case Address.Inet(ia, _) =>
         Trace.recordServerAddr(ia)
       case _ => // do nothing for non-ip address
     }

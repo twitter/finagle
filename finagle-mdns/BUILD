@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-mdns',
   dependencies=[
     'finagle/finagle-mdns/src/main/scala'

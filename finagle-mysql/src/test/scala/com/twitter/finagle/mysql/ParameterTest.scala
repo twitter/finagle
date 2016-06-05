@@ -25,4 +25,8 @@ class ParameterTest extends FunSuite {
       assert(x.value == "Howdy")
     }
   }
+
+  test("Parameter.unsafeWrap(null)") {
+    assert(Parameter.unsafeWrap(null) == NullParameter)
+  }
 }

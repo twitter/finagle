@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
-import com.twitter.util.Await
+import com.twitter.util.{Await, Return}
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -13,13 +13,19 @@ final class ConnectionClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the SELECT command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.select(1)) === ((): Unit))
+      assert(Await.result(client.select(1).liftToTry) == Return.Unit)
     }
   }
 
   test("Correctly perform the QUIT command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.quit()) === ((): Unit))
+      assert(Await.result(client.quit().liftToTry) == Return.Unit)
+    }
+  }
+
+  test("Correctly perform the PING command without arguments", RedisTest, ClientTest) {
+    withRedisClient { client =>
+      assert(Await.result(client.ping().liftToTry) == Return.Unit)
     }
   }
 }

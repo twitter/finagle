@@ -28,8 +28,7 @@ case class Record(
     timestamp: Time,
     annotation: Annotation,
     duration: Option[Duration]) {
-  override def toString: String = "%s %s] %s".format(
-    RecordTimeFormat.format(timestamp), traceId, annotation)
+  override def toString: String = s"${RecordTimeFormat.format(timestamp)} $traceId] $annotation"
 }
 
 sealed trait Annotation
@@ -74,6 +73,11 @@ trait Tracer {
   def record(record: Record): Unit
 
   /**
+   * Indicates whether or not this tracer instance is [[NullTracer]].
+   */
+  def isNull: Boolean = false
+
+  /**
    * Should we sample this trace or not? Could be decided
    * that a percentage of all traces will be let through for example.
    * True: keep it
@@ -87,6 +91,7 @@ class NullTracer extends Tracer {
   val factory: Tracer.Factory = () => this
   def record(record: Record): Unit = {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
+  override def isNull: Boolean = true
 }
 
 object NullTracer extends NullTracer
@@ -100,6 +105,9 @@ object BroadcastTracer {
   }
 
   private class Two(first: Tracer, second: Tracer) extends Tracer {
+    override def toString: String =
+      s"BroadcastTracer($first, $second)"
+
     def record(record: Record): Unit = {
       first.record(record)
       second.record(record)
@@ -118,6 +126,10 @@ object BroadcastTracer {
   }
 
   private class N(tracers: Seq[Tracer]) extends Tracer {
+
+    override def toString: String =
+      s"BroadcastTracer(${tracers.mkString(", ")})"
+
     def record(record: Record): Unit = {
       tracers foreach { _.record(record) }
     }

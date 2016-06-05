@@ -9,44 +9,28 @@ import java.util.BitSet
 /**
  * A Path comprises a sequence of byte buffers naming a
  * hierarchically-addressed object.
+ *
+ * @see The [[http://twitter.github.io/finagle/guide/Names.html#paths user guide]]
+ *      for further details.
  */
 case class Path(elems: Buf*) {
   require(elems.forall(Path.nonemptyBuf))
 
-  def startsWith(other: Path) = elems startsWith other.elems
+  def startsWith(other: Path) = elems.startsWith(other.elems)
 
-  def take(n: Int) = Path((elems take n):_*)
-  def drop(n: Int) = Path((elems drop n):_*)
+  def take(n: Int) = Path(elems.take(n):_*)
+  def drop(n: Int) = Path(elems.drop(n):_*)
   def ++(that: Path) =
     if (that.isEmpty) this
     else Path((elems ++ that.elems):_*)
   def size = elems.size
   def isEmpty = elems.isEmpty
 
-  lazy val showElems = elems map { buf =>
-    // We're extra careful with allocation here because any time
-    // there are nonbase delegations, we need to serialize the paths
-    // to strings
-    val nbuf = buf.length
-    val bytes = Buf.ByteArray.Owned.extract(buf)
-    if (Path.showableAsString(bytes, nbuf))
-      new String(bytes, 0, nbuf, Path.Utf8Charset)
-    else {
-      val str = new StringBuilder(nbuf * 4)
-      var i = 0
-      while (i < nbuf) {
-        str.append("\\x")
-        str.append(Integer.toString((bytes(i) >> 4) & 0xf, 16))
-        str.append(Integer.toString(bytes(i) & 0xf, 16))
-        i += 1
-      }
-      str.toString
-    }
-  }
+  lazy val showElems = elems.map(Path.showElem(_))
 
-  lazy val show = "/"+(showElems mkString "/")
+  lazy val show = showElems.mkString("/", "/", "")
 
-  override def toString = "Path("+(showElems mkString ",")+")"
+  override def toString = s"""Path(${showElems.mkString(",")})"""
 }
 
 object Path {
@@ -90,7 +74,7 @@ object Path {
    */
   def isShowable(ch: Char): Boolean = charSet.get(ch.toInt)
 
-  private def showableAsString(bytes: Array[Byte], size: Int): Boolean = {
+  private[finagle] def showableAsString(bytes: Array[Byte], size: Int): Boolean = {
     var i = 0
     while (i < size) {
       if (!isShowable(bytes(i).toChar))
@@ -98,6 +82,27 @@ object Path {
       i += 1
     }
     true
+  }
+
+  // We're extra careful with allocation here because any time
+  // there are nonbase delegations, we need to serialize the paths
+  // to strings
+  private[finagle] val showElem: Buf => String = { buf =>
+    val nbuf = buf.length
+    val bytes = Buf.ByteArray.Owned.extract(buf)
+    if (Path.showableAsString(bytes, nbuf))
+      new String(bytes, 0, nbuf, Path.Utf8Charset)
+    else {
+      val str = new StringBuilder(nbuf * 4)
+      var i = 0
+      while (i < nbuf) {
+        str.append("\\x")
+        str.append(Integer.toString((bytes(i) >> 4) & 0xf, 16))
+        str.append(Integer.toString(bytes(i) & 0xf, 16))
+        i += 1
+      }
+      str.toString
+    }
   }
 
   /**

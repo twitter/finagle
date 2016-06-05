@@ -44,32 +44,52 @@ At Twitter, we use our open-source Thrift code-generator called
 `Scrooge <http://twitter.github.io/scrooge/>`_. Scrooge is written in Scala and
 can generate source code in Scala or Java. Given the following IDL:
 
-.. literalinclude:: ../../../finagle-example/src/main/thrift/hello.thrift
-   :lines: 4-7
+.. literalinclude:: ../../../finagle-example/src/main/thrift/logger.thrift
+   :lines: 7-11
 
 Scrooge will generate code that can be used by `finagle-thrift` with the
-following rich APIs [#]_:
+following rich APIs:
 
 .. _finagle_thrift_server:
 
 Serving the IDL:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServer.scala#thriftserverapi
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftserverapi
    :language: scala
 
 .. _finagle_thrift_client:
 
-and the symmetric remote dispatch:
+Construct a client:
 
-.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftClient.scala#thriftclientapi
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi
+
+A ServiceIface is a collection of Services, one for each Thrift method. Call the log method:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-call
+
+Thrift services can be combined with :api:`Filters <com.twitter.finagle.Filter$>`.
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-filters
    :language: scala
 
+Here's an example of a retry policy that retries on Thrift exceptions:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-retries
+   :language: scala
+
+Another way to construct Thrift clients is using the method interface:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-methodiface
+   :language: scala
+
+To convert the Service interface to the method interface use :api:`Thrift.newMethodIface <com.twitter.finagle.Thrift$>`:
+
+.. includecode:: ../../../finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala#thriftclientapi-method-adapter
+   :language: scala
+
+The complete example is at `ThriftServiceIfaceExample.scala <https://github.com/twitter/finagle/blob/develop/finagle-example/src/main/scala/com/twitter/finagle/example/thrift/ThriftServiceIfaceExample.scala>`_.
 Check out the `finagle-thrift` :api:`API <com.twitter.finagle.Thrift$>`
 for more info.
-
-.. [#] This API makes it difficult to wrap endpoints in Finagle
-       filters. We're still experimenting with how to make the `Service`
-       abstraction fit more cleanly into a world with IDLs.
 
 .. _mux:
 

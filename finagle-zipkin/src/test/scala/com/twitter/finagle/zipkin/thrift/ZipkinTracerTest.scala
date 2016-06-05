@@ -21,9 +21,9 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
 
     val underlying = mock[RawZipkinTracer]
     val tracer = new ZipkinTracer(underlying, 0f)
-    assert(tracer.sampleTrace(traceId) === Some(false))
+    assert(tracer.sampleTrace(traceId) == Some(false))
     tracer.setSampleRate(1f)
-    assert(tracer.sampleTrace(traceId) === Some(true))
+    assert(tracer.sampleTrace(traceId) == Some(true))
   }
 
   test("ZipkinTracer should pass through trace id with sampled true despite of sample rate") {

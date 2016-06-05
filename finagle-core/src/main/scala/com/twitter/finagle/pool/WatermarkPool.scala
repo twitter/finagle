@@ -22,6 +22,9 @@ object WatermarkPool {
  * watermark has been reached. Put another way: up to `lowWatermark'
  * items may persist indefinitely, while there are at no times more
  * than `highWatermark' items in concurrent existence.
+ *
+ * @see The [[https://twitter.github.io/finagle/guide/Clients.html#watermark-pool user guide]]
+ *      for more details.
  */
 class WatermarkPool[Req, Rep](
     factory: ServiceFactory[Req, Rep],

@@ -1,7 +1,5 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.Duration
-
 /**
  * Maintain an exponential moving average of Long-typed values over a
  * given window on a user-defined clock.
@@ -42,6 +40,14 @@ private[finagle] class Ema(window: Long) {
    * control your own clock, since the current value depends on it.
    */
   def last: Double = synchronized { ema }
+
+  /**
+   * Reset the average to 0 and erase all observations.
+   */
+  def reset(): Unit = synchronized {
+    time = Long.MinValue
+    ema = 0
+  }
 }
 
 private[finagle] object Ema {

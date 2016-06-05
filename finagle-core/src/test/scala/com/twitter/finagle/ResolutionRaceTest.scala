@@ -30,7 +30,7 @@ class ResolutionRaceTest extends FunSuite with AssertionsForJUnit {
         val echo = Echo.newService(dest)
         try {
           val echoed = Await.result(echo(phrase))
-          assert(echoed === phrase)
+          assert(echoed == phrase)
         } finally Await.ready(echo.close())
       }
     } catch {

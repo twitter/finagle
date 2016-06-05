@@ -3,7 +3,8 @@ package com.twitter.finagle.redis.protocol
 import _root_.java.lang.{Long => JLong}
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.util._
-import org.jboss.netty.buffer.ChannelBuffers
+import com.twitter.io.Buf
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 trait CommandArgument extends Command
 
@@ -117,8 +118,9 @@ object Aggregate {
 
 
 object Count {
-  val COUNT = "COUNT"
-  val COUNT_CB = StringToChannelBuffer(COUNT)
+  val COUNT: String = "COUNT"
+  val COUNT_BUF: Buf = StringToBuf(COUNT)
+  val COUNT_CB: ChannelBuffer = StringToChannelBuffer(COUNT)
 
   def apply(args: Seq[String]): Option[JLong] = {
     RequireClientProtocol(
@@ -135,8 +137,9 @@ object Count {
 
 
 object Pattern {
-  val PATTERN = "PATTERN"
-  val PATTERN_CB = StringToChannelBuffer(PATTERN)
+  val PATTERN: String = "PATTERN"
+  val PATTERN_BUF: Buf = StringToBuf(PATTERN)
+  val PATTERN_CB: ChannelBuffer = StringToChannelBuffer(PATTERN)
 
   def apply(args: Seq[String]): Option[String] = {
     RequireClientProtocol(

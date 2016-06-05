@@ -1,7 +1,6 @@
 package com.twitter.finagle.http
 
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
+import com.twitter.io.Buf
 import java.net.URL
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -14,7 +13,7 @@ class RequestBuilderTest extends FunSuite {
   val URL1 = new URL("https://www.google.com/")
   val URL2 = new URL("http://joe%40host.com:blow@www.google.com:77/xxx?foo=bar#xxx")
 
-  val BODY0 = copiedBuffer("blah".getBytes)
+  val BODY0 = Buf.Utf8("blah")
   val FORM0 = Seq (
     "k1" -> "v1",
     "k2" -> "v2",
@@ -56,11 +55,11 @@ v3
     val post = RequestBuilder().url(URL0).buildPost(BODY0)
 
     val expected = "www.google.com:77"
-    assert(get.headers.get(HttpHeaders.Names.HOST) === expected)
-    assert(head.headers.get(HttpHeaders.Names.HOST) === expected)
-    assert(delete.headers.get(HttpHeaders.Names.HOST) === expected)
-    assert(put.headers.get(HttpHeaders.Names.HOST) === expected)
-    assert(post.headers.get(HttpHeaders.Names.HOST) === expected)
+    assert(get.headers.get(Fields.Host) == expected)
+    assert(head.headers.get(Fields.Host) == expected)
+    assert(delete.headers.get(Fields.Host) == expected)
+    assert(put.headers.get(Fields.Host) == expected)
+    assert(post.headers.get(Fields.Host) == expected)
   }
 
   test("set the Authorization header when userInfo is present") {
@@ -78,25 +77,25 @@ v3
 
     val expected = "Basic am9lOmJsb3c="
     val expectedSpecial = "Basic am9lQGhvc3QuY29tOmJsb3c="
-    assert(req0.headers.get(HttpHeaders.Names.AUTHORIZATION) === expected)
-    assert(req1.headers.get(HttpHeaders.Names.AUTHORIZATION) === null)
-    assert(req2.headers.get(HttpHeaders.Names.AUTHORIZATION) === expected)
-    assert(req3.headers.get(HttpHeaders.Names.AUTHORIZATION) === null)
-    assert(req4.headers.get(HttpHeaders.Names.AUTHORIZATION) === expected)
-    assert(req5.headers.get(HttpHeaders.Names.AUTHORIZATION) === null)
-    assert(req6.headers.get(HttpHeaders.Names.AUTHORIZATION) === expected)
-    assert(req7.headers.get(HttpHeaders.Names.AUTHORIZATION) === null)
-    assert(req8.headers.get(HttpHeaders.Names.AUTHORIZATION) === expected)
-    assert(req9.headers.get(HttpHeaders.Names.AUTHORIZATION) === null)
-    assert(req10.headers.get(HttpHeaders.Names.AUTHORIZATION) === expectedSpecial)
+    assert(req0.headers.get(Fields.Authorization) == expected)
+    assert(req1.headers.get(Fields.Authorization) == null)
+    assert(req2.headers.get(Fields.Authorization) == expected)
+    assert(req3.headers.get(Fields.Authorization) == null)
+    assert(req4.headers.get(Fields.Authorization) == expected)
+    assert(req5.headers.get(Fields.Authorization) == null)
+    assert(req6.headers.get(Fields.Authorization) == expected)
+    assert(req7.headers.get(Fields.Authorization) == null)
+    assert(req8.headers.get(Fields.Authorization) == expected)
+    assert(req9.headers.get(Fields.Authorization) == null)
+    assert(req10.headers.get(Fields.Authorization) == expectedSpecial)
   }
 
   test("replace the empty path with /") {
     val req0 = RequestBuilder().url(new URL("http://a.com")).buildGet
     val req1 = RequestBuilder().url(new URL("http://a.com?xxx")).buildGet
 
-    req0.getUri === "/"
-    req1.getUri === "/?xxx"
+    req0.getUri == "/"
+    req1.getUri == "/?xxx"
   }
 
   test("not include the fragment in the resource") {
@@ -120,21 +119,21 @@ v3
     val post1 = RequestBuilder().url(u1).buildPost(BODY0)
     val post2 = RequestBuilder().url(u2).buildPost(BODY0)
 
-    assert(get0.getUri === "/")
-    assert(get1.getUri === "/")
-    assert(get2.getUri === "/?abc=def")
-    assert(head0.getUri === "/")
-    assert(head1.getUri === "/")
-    assert(head2.getUri === "/?abc=def")
-    assert(del0.getUri === "/")
-    assert(del1.getUri === "/")
-    assert(del2.getUri === "/?abc=def")
-    assert(put0.getUri === "/")
-    assert(put1.getUri === "/")
-    assert(put2.getUri === "/?abc=def")
-    assert(post0.getUri === "/")
-    assert(post1.getUri === "/")
-    assert(post2.getUri === "/?abc=def")
+    assert(get0.getUri == "/")
+    assert(get1.getUri == "/")
+    assert(get2.getUri == "/?abc=def")
+    assert(head0.getUri == "/")
+    assert(head1.getUri == "/")
+    assert(head2.getUri == "/?abc=def")
+    assert(del0.getUri == "/")
+    assert(del1.getUri == "/")
+    assert(del2.getUri == "/?abc=def")
+    assert(put0.getUri == "/")
+    assert(put1.getUri == "/")
+    assert(put2.getUri == "/?abc=def")
+    assert(post0.getUri == "/")
+    assert(post1.getUri == "/")
+    assert(post2.getUri == "/?abc=def")
   }
 
   test("not include the empty query string") {
@@ -158,21 +157,21 @@ v3
     val post1 = RequestBuilder().url(u1).buildPost(BODY0)
     val post2 = RequestBuilder().url(u2).buildPost(BODY0)
 
-    assert(get0.getUri === "/")
-    assert(get1.getUri === "/")
-    assert(get2.getUri === "/")
-    assert(head0.getUri === "/")
-    assert(head1.getUri === "/")
-    assert(head2.getUri === "/")
-    assert(del0.getUri === "/")
-    assert(del1.getUri === "/")
-    assert(del2.getUri === "/")
-    assert(put0.getUri === "/")
-    assert(put1.getUri === "/")
-    assert(put2.getUri === "/")
-    assert(post0.getUri === "/")
-    assert(post1.getUri === "/")
-    assert(post2.getUri === "/")
+    assert(get0.getUri == "/")
+    assert(get1.getUri == "/")
+    assert(get2.getUri == "/")
+    assert(head0.getUri == "/")
+    assert(head1.getUri == "/")
+    assert(head2.getUri == "/")
+    assert(del0.getUri == "/")
+    assert(del1.getUri == "/")
+    assert(del2.getUri == "/")
+    assert(put0.getUri == "/")
+    assert(put1.getUri == "/")
+    assert(put2.getUri == "/")
+    assert(post0.getUri == "/")
+    assert(post1.getUri == "/")
+    assert(post2.getUri == "/")
   }
 
   test("set the correct protocol version") {
@@ -187,16 +186,16 @@ v3
     val post0 = RequestBuilder().url(URL0).buildPost(BODY0)
     val post1 = RequestBuilder().url(URL0).http10.buildPost(BODY0)
 
-    assert(get0.getProtocolVersion === HttpVersion.HTTP_1_1)
-    assert(get1.getProtocolVersion === HttpVersion.HTTP_1_0)
-    assert(head0.getProtocolVersion === HttpVersion.HTTP_1_1)
-    assert(head1.getProtocolVersion === HttpVersion.HTTP_1_0)
-    assert(del0.getProtocolVersion === HttpVersion.HTTP_1_1)
-    assert(del1.getProtocolVersion === HttpVersion.HTTP_1_0)
-    assert(put0.getProtocolVersion === HttpVersion.HTTP_1_1)
-    assert(put1.getProtocolVersion === HttpVersion.HTTP_1_0)
-    assert(post0.getProtocolVersion === HttpVersion.HTTP_1_1)
-    assert(post1.getProtocolVersion === HttpVersion.HTTP_1_0)
+    assert(get0.version == Version.Http11)
+    assert(get1.version == Version.Http10)
+    assert(head0.version == Version.Http11)
+    assert(head1.version == Version.Http10)
+    assert(del0.version == Version.Http11)
+    assert(del1.version == Version.Http10)
+    assert(put0.version == Version.Http11)
+    assert(put1.version == Version.Http10)
+    assert(post0.version == Version.Http11)
+    assert(post1.version == Version.Http10)
   }
 
   test("set the correct method") {
@@ -206,11 +205,11 @@ v3
     val put = RequestBuilder().url(URL0).buildPut(BODY0)
     val post = RequestBuilder().url(URL0).buildPost(BODY0)
 
-    assert(get.getMethod === HttpMethod.GET)
-    assert(head.getMethod === HttpMethod.HEAD)
-    assert(del.getMethod === HttpMethod.DELETE)
-    assert(put.getMethod === HttpMethod.PUT)
-    assert(post.getMethod === HttpMethod.POST)
+    assert(get.method == Method.Get)
+    assert(head.method == Method.Head)
+    assert(del.method == Method.Delete)
+    assert(put.method == Method.Put)
+    assert(post.method == Method.Post)
   }
 
   test("set headers") {
@@ -222,49 +221,49 @@ v3
       .url(URL0)
       .setHeader(A, B)
 
-    assert(builder0.buildGet.headers.get(A) === B)
-    assert(builder0.buildHead.headers.get(A) === B)
-    assert(builder0.buildDelete.headers.get(A) === B)
-    assert(builder0.buildPut(BODY0).headers.get(A) === B)
-    assert(builder0.buildPost(BODY0).headers.get(A) === B)
+    assert(builder0.buildGet.headers.get(A) == B)
+    assert(builder0.buildHead.headers.get(A) == B)
+    assert(builder0.buildDelete.headers.get(A) == B)
+    assert(builder0.buildPut(BODY0).headers.get(A) == B)
+    assert(builder0.buildPost(BODY0).headers.get(A) == B)
 
     val builder1 = builder0
       .setHeader(A, C)
 
-    assert(builder1.buildGet.headers.get(A) === C)
-    assert(builder1.buildHead.headers.get(A) === C)
-    assert(builder1.buildDelete.headers.get(A) === C)
-    assert(builder1.buildPut(BODY0).headers.get(A) === C)
-    assert(builder1.buildPost(BODY0).headers.get(A) === C)
+    assert(builder1.buildGet.headers.get(A) == C)
+    assert(builder1.buildHead.headers.get(A) == C)
+    assert(builder1.buildDelete.headers.get(A) == C)
+    assert(builder1.buildPut(BODY0).headers.get(A) == C)
+    assert(builder1.buildPost(BODY0).headers.get(A) == C)
 
     val builder2 = builder1
       .setHeader(A, Seq())
 
-    assert(builder2.buildGet.headers.get(A) === null)
-    assert(builder2.buildHead.headers.get(A) === null)
-    assert(builder2.buildDelete.headers.get(A) === null)
-    assert(builder2.buildPut(BODY0).headers.get(A) === null)
-    assert(builder2.buildPost(BODY0).headers.get(A) === null)
+    assert(builder2.buildGet.headers.get(A) == null)
+    assert(builder2.buildHead.headers.get(A) == null)
+    assert(builder2.buildDelete.headers.get(A) == null)
+    assert(builder2.buildPut(BODY0).headers.get(A) == null)
+    assert(builder2.buildPost(BODY0).headers.get(A) == null)
 
     val builder3 = builder2
       .setHeader(A, Seq(B, C))
 
     val pair = Seq(B,C).asJava
-    assert(builder3.buildGet.headers.getAll(A) === pair)
-    assert(builder3.buildHead.headers.getAll(A) === pair)
-    assert(builder3.buildDelete.headers.getAll(A) === pair)
-    assert(builder3.buildPut(BODY0).headers.getAll(A) === pair)
-    assert(builder3.buildPost(BODY0).headers.getAll(A) === pair)
+    assert(builder3.buildGet.headers.getAll(A) == pair)
+    assert(builder3.buildHead.headers.getAll(A) == pair)
+    assert(builder3.buildDelete.headers.getAll(A) == pair)
+    assert(builder3.buildPut(BODY0).headers.getAll(A) == pair)
+    assert(builder3.buildPost(BODY0).headers.getAll(A) == pair)
 
     val builder4 = builder3
       .addHeader(A, D)
 
     val triple = Seq(B,C, D).asJava
-    assert(builder4.buildGet.headers.getAll(A) === triple)
-    assert(builder4.buildHead.headers.getAll(A) === triple)
-    assert(builder4.buildDelete.headers.getAll(A) === triple)
-    assert(builder4.buildPut(BODY0).headers.getAll(A) === triple)
-    assert(builder4.buildPost(BODY0).headers.getAll(A) === triple)
+    assert(builder4.buildGet.headers.getAll(A) == triple)
+    assert(builder4.buildHead.headers.getAll(A) == triple)
+    assert(builder4.buildDelete.headers.getAll(A) == triple)
+    assert(builder4.buildPut(BODY0).headers.getAll(A) == triple)
+    assert(builder4.buildPost(BODY0).headers.getAll(A) == triple)
   }
 
   test("build form") {
@@ -273,8 +272,8 @@ v3
       .addFormElement(FORM0:_*)
 
     val req0 = builder0.buildFormPost(false)
-    val content = Request(req0).contentString.replace("\r\n", "\n")
-    assert(content === FORMPOST0)
+    val content = req0.contentString.replace("\r\n", "\n")
+    assert(content == FORMPOST0)
   }
 
   test("build multipart form") {
@@ -283,8 +282,8 @@ v3
       .addFormElement(FORM0:_*)
 
     val req0 = builder0.buildFormPost(true)
-    val content = "--[^-\r\n]+".r.replaceAllIn(Request(req0).contentString, "--Boundary")
+    val content = "--[^-\r\n]+".r.replaceAllIn(req0.contentString, "--Boundary")
       .replace("\r\n", "\n")
-    assert(content === MULTIPART0)
+    assert(content == MULTIPART0)
   }
 }

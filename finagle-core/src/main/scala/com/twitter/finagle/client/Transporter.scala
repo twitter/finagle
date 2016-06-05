@@ -1,7 +1,7 @@
 package com.twitter.finagle.client
 
+import com.twitter.finagle.{Address, Stack}
 import com.twitter.finagle.socks.SocksProxyFlags
-import com.twitter.finagle.Stack
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import com.twitter.util.Future
@@ -29,23 +29,25 @@ object Transporter {
   /**
    * $param a `SocketAddress` that a `Transporter` connects to.
    */
-  case class EndpointAddr(addr: SocketAddress) {
+  case class EndpointAddr(addr: Address) {
     def mk(): (EndpointAddr, Stack.Param[EndpointAddr]) =
       (this, EndpointAddr.param)
   }
   object EndpointAddr {
-    implicit val param = Stack.Param(EndpointAddr(new SocketAddress {
-      override def toString = "noaddr"
-    }))
+    implicit val param =
+      Stack.Param(EndpointAddr(Address.failing))
   }
 
   /**
    * $param the connect timeout of a `Transporter`.
    *
-   * @param howlong A maximum amount of time a transport
-   * is allowed to spend connecting.
+   * @param howlong Maximum amount of time a transport is allowed to
+   *                spend connecting. Must be non-negative.
    */
   case class ConnectTimeout(howlong: Duration) {
+    if (howlong < Duration.Zero)
+      throw new IllegalArgumentException(s"howlong must be non-negative: saw $howlong")
+
     def mk(): (ConnectTimeout, Stack.Param[ConnectTimeout]) =
       (this, ConnectTimeout.param)
   }
@@ -91,6 +93,11 @@ object Transporter {
   }
   object HttpProxy {
     implicit val param = Stack.Param(HttpProxy(None, None))
+  }
+
+  case class HttpProxyTo(hostAndCredentials: Option[(String, Option[Credentials])])
+  object HttpProxyTo {
+    implicit val param = Stack.Param(HttpProxyTo(None))
   }
 
   /**

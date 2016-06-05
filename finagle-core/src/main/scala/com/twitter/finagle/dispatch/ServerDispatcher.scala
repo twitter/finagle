@@ -1,13 +1,14 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Contexts, RemoteInfo}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Service, NoStacktrace, CancelledRequestException}
+import com.twitter.finagle.{Service, CancelledRequestException}
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicReference
+import scala.util.control.NoStackTrace
 
 object GenSerialServerDispatcher {
-  private val Eof = Future.exception(new Exception("EOF") with NoStacktrace)
+  private val Eof = Future.exception(new Exception("EOF") with NoStackTrace)
   // We don't use Future.never here, because object equality is important here
   private val Idle = new NoFuture
   private val Closed = new NoFuture
@@ -47,10 +48,14 @@ abstract class GenSerialServerDispatcher[Req, Rep, In, Out](trans: Transport[In,
       if (state.compareAndSet(Idle, p)) {
         val eos = new Promise[Unit]
         val save = Local.save()
-        try trans.peerCertificate match {
-          case None => p.become(dispatch(req, eos))
-          case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
-            p.become(dispatch(req, eos))
+        try {
+          Contexts.local.let(RemoteInfo.Upstream.AddressCtx, trans.remoteAddress) {
+            trans.peerCertificate match {
+              case None => p.become(dispatch(req, eos))
+              case Some(cert) => Contexts.local.let(Transport.peerCertCtx, cert) {
+                p.become(dispatch(req, eos))
+              }
+            }
           }
         } finally Local.restore(save)
         p map { res => (res, eos) }

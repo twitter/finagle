@@ -14,6 +14,8 @@ class CommonsStatsReceiver extends StatsReceiverWithCumulativeGauges {
   @volatile private[this] var stats = Map.empty[Seq[String], Stat]
   @volatile private[this] var counters = Map.empty[Seq[String], Counter]
 
+  override def toString: String = "CommonsStatsReceiver"
+
   private[this] def variableName(name: Seq[String]) = name mkString "_"
 
   protected[this] def registerGauge(name: Seq[String], f: => Float): Unit = {

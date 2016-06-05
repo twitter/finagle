@@ -21,7 +21,11 @@ sealed trait Parameter {
   final def typeCode: Short = evidence.typeCode(value)
 }
 
+/**
+ * Note: There is a Java-friendly API for this object: [[com.twitter.finagle.exp.mysql.Parameters]].
+ */
 object Parameter {
+
   implicit def wrap[_A](_value: _A)(implicit _evidence: CanBeParameter[_A]): Parameter = {
     if (_value == null) {
       NullParameter
@@ -57,6 +61,7 @@ object Parameter {
     case v: Value => wrap(v)
     case v: java.sql.Timestamp => wrap(v)
     case v: java.sql.Date => wrap(v)
+    case null => Parameter.NullParameter
     case v =>
       // Unsupported type. Write the error to log, and write the type as null.
       // This allows us to safely skip writing the parameter without corrupting the buffer.
@@ -69,4 +74,16 @@ object Parameter {
     def value = null
     def evidence = CanBeParameter.nullCanBeParameter
   }
+}
+
+/**
+ * A Java adaptation of the [[com.twitter.finagle.exp.mysql.Parameter]] companion object.
+ */
+object Parameters {
+
+  def nullParameter: Parameter = Parameter.NullParameter
+
+  def unsafeWrap(value: Any): Parameter = Parameter.unsafeWrap(value)
+
+  //TODO: create an accessor to Parameter.wrap, so type errors are caught at compile time.
 }

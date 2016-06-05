@@ -7,11 +7,10 @@ import org.openjdk.jmh.annotations._
 // ./sbt 'project finagle-benchmark' 'run .*FilterBenchmark.*'
 @State(Scope.Benchmark)
 class FilterBenchmark extends StdBenchAnnotations {
+  import FilterBenchmark._
 
   @Param(Array("10"))
   var numAndThens: Int = _
-
-  class Mutable(var count: Int)
 
   val mutable = new Mutable(0)
 
@@ -37,5 +36,8 @@ class FilterBenchmark extends StdBenchAnnotations {
   def andThenFilter(): Future[Mutable] = {
     svc(mutable)
   }
+}
 
+object FilterBenchmark {
+  class Mutable(var count: Int)
 }

@@ -24,10 +24,10 @@ class SpdyRawFrameCodecTest extends FunSuite {
     val channel = new DecoderEmbedder(spdyFrameCodec)
     channel.offer(ChannelBuffers.wrappedBuffer(headersFrame))
     val spdyHeadersFrame = channel.poll().asInstanceOf[SpdyHeadersFrame]
-    assert(spdyHeadersFrame.headers.entries.size === 1)
-    assert(spdyHeadersFrame.headers.entries.get(0).getKey === "name")
-    assert(spdyHeadersFrame.headers.entries.get(0).getValue === "value")
-    assert(channel.finish === false)
+    assert(spdyHeadersFrame.headers.entries.size == 1)
+    assert(spdyHeadersFrame.headers.entries.get(0).getKey == "name")
+    assert(spdyHeadersFrame.headers.entries.get(0).getValue == "value")
+    assert(channel.finish == false)
   }
 
   test("encode") {
@@ -36,8 +36,8 @@ class SpdyRawFrameCodecTest extends FunSuite {
     spdyHeadersFrame.headers.add("name", "value")
     channel.offer(spdyHeadersFrame)
     val channelBuffer = channel.poll().asInstanceOf[ChannelBuffer]
-    assert(channelBuffer.readableBytes === headersFrame.length)
-    headersFrame foreach { b => assert(channelBuffer.readByte === b) }
-    assert(channel.finish === false)
+    assert(channelBuffer.readableBytes == headersFrame.length)
+    headersFrame foreach { b => assert(channelBuffer.readByte == b) }
+    assert(channel.finish == false)
   }
 }

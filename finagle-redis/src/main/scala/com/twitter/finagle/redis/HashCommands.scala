@@ -1,6 +1,7 @@
 package com.twitter.finagle.redis
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
@@ -36,7 +37,7 @@ trait Hashes { self: BaseClient =>
    */
   def hGet(key: ChannelBuffer, field: ChannelBuffer): Future[Option[ChannelBuffer]] =
     doRequest(HGet(key, field)) {
-      case BulkReply(message)   => Future.value(Some(message))
+      case BulkReply(message)   => Future.value(Some(ChannelBufferBuf.Owned.extract(message)))
       case EmptyBulkReply()     => Future.value(None)
     }
 

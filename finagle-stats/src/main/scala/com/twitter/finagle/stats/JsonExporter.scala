@@ -3,30 +3,43 @@ package com.twitter.finagle.stats
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.google.common.annotations.VisibleForTesting
 import com.twitter.app.GlobalFlag
 import com.twitter.common.metrics.Metrics
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
-import com.twitter.finagle.httpx.{RequestParamMap, Response, Request, MediaType}
+import com.twitter.finagle.http.{MediaType, RequestParamMap, Response, Request}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util._
 import com.twitter.util.registry.GlobalRegistry
 import java.util.concurrent.atomic.AtomicBoolean
+import java.io.{IOException, File}
 import scala.collection.JavaConverters.mapAsScalaMapConverter
 import scala.collection.immutable
+import scala.io.{Codec, Source}
 import scala.util.matching.Regex
 
 /**
- * Blacklist of regex, comma-separated. Comma is a reserved character and cannot be used.
+ * Blacklist of regex, comma-separated. Comma is a reserved character and
+ * cannot be used. Used with regexes from statsFilterFile.
  *
  * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
  */
 object statsFilter extends GlobalFlag[String](
   "",
   "Comma-separated regexes that indicate which metrics to filter out")
+
+
+/**
+ * Comma-separated blacklist of files. Each file may have multiple filters,
+ * separated by new lines. Used with regexes from statsFilter.
+ *
+ * See http://www.scala-lang.org/api/current/#scala.util.matching.Regex
+ */
+object statsFilterFile extends GlobalFlag[Set[File]](
+  Set.empty[File],
+  "Comma separated files of newline separated regexes that indicate which metrics to filter out")
 
 object useCounterDeltas extends GlobalFlag[Boolean](
   false,
@@ -36,7 +49,6 @@ object useCounterDeltas extends GlobalFlag[Boolean](
 
 object JsonExporter {
 
-  @VisibleForTesting
   private[stats] def startOfNextMinute: Time =
     Time.fromSeconds(Time.now.inMinutes * 60) + 1.minute
 
@@ -58,8 +70,19 @@ class JsonExporter(
   private[this] val writer = mapper.writer
   private[this] val prettyWriter = mapper.writer(new DefaultPrettyPrinter)
 
-  lazy val statsFilterRegex: Option[Regex] = statsFilter.get.flatMap { regexesString =>
-    mkRegex(regexesString)
+  lazy val statsFilterRegex: Option[Regex] = {
+    val regexesFromFile = statsFilterFile().flatMap { file =>
+      try {
+        Source.fromFile(file)(Codec.UTF8).getLines()
+      } catch {
+        case e: IOException =>
+          log.error(e, "Unable to read statsFilterFile: %s", file)
+          throw e
+      }
+    }
+    val regexesFromFlag = statsFilter.get.toSeq.flatMap(_.split(","))
+    val regexes: Seq[String] = regexesFromFlag ++ regexesFromFile
+    mkRegex(regexes)
   }
 
   private[this] val registryLoaded = new AtomicBoolean(false)
@@ -129,7 +152,14 @@ class JsonExporter(
     filtered: Boolean,
     counterDeltasOn: Boolean = false
   ): String = {
-    val gauges = registry.sampleGauges().asScala
+    val gauges = try registry.sampleGauges().asScala catch {
+      case NonFatal(e) =>
+        // because gauges run arbitrary user code, we want to protect ourselves here.
+        // while the underlying registry should protect against individual misbehaving
+        // gauges, an extra level of belt-and-suspenders seemed worthwhile.
+        log.error(e, "exception while collecting gauges")
+        Map.empty[String, Number]
+    }
     val histos = registry.sampleHistograms().asScala
     val counters = if (counterDeltasOn && useCounterDeltas()) {
       getOrRegisterLatchedStats().deltas
@@ -151,10 +181,18 @@ class JsonExporter(
     }
   }
 
+  private[this] def mkRegex(regexes: Seq[String]): Option[Regex] = {
+    if (regexes.isEmpty) {
+      None
+    } else {
+      Some(regexes.mkString("(", ")|(", ")").r)
+    }
+  }
+
   def mkRegex(regexesString: String): Option[Regex] = {
     regexesString.split(",") match {
       case Array("") => None
-      case regexes => Some(regexes.mkString("(", ")|(", ")").r)
+      case regexes => mkRegex(regexes)
     }
   }
 

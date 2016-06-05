@@ -1,11 +1,8 @@
 package com.twitter.finagle.netty3.channel
 
 import com.twitter.finagle.WriteTimedOutException
-import com.twitter.finagle.netty3.Conversions._
 import com.twitter.util.{Time, Duration, Timer}
-import org.jboss.netty.channel.{
-  ChannelHandlerContext, Channels, MessageEvent, SimpleChannelDownstreamHandler
-}
+import org.jboss.netty.channel._
 
 /**
  * A simple handler that times out a write if it fails to complete
@@ -22,7 +19,13 @@ private[finagle] class WriteCompletionTimeoutHandler(timer: Timer, timeout: Dura
       Channels.fireExceptionCaught(
         channel, new WriteTimedOutException(if (channel != null) channel.getRemoteAddress else null))
     }
-    e.getFuture onSuccessOrFailure { task.cancel() }
+    e.getFuture.addListener(new ChannelFutureListener {
+      override def operationComplete(f: ChannelFuture): Unit =
+        if (!f.isCancelled) { // on success or failure
+          task.cancel()
+        }
+    })
+
     super.writeRequested(ctx, e)
   }
 }

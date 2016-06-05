@@ -18,7 +18,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
   }
 
   // cleans up thread
-  def withCounter(fakeBean: FakeGarbageCollectorMXBean, fakePool: FakeMemoryPool)(
+  private[this] def withCounter(fakeBean: FakeGarbageCollectorMXBean, fakePool: FakeMemoryPool)(
     fn: (ByteCounter, () => Unit) => Unit
   ): Unit = {
     Time.withCurrentTimeFrozen { ctl =>
@@ -26,14 +26,14 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
       val counter = new WindowedByteCounter(nfo, Local.save())
       counter.start()
       eventually {
-        assert(counter.getState === Thread.State.TIMED_WAITING)
+        assert(counter.getState == Thread.State.TIMED_WAITING)
       }
 
       @volatile var closed = false
       @volatile var prev = 0
       val nextPeriod = { () =>
         eventually {
-          assert(counter.getState === Thread.State.TIMED_WAITING)
+          assert(counter.getState == Thread.State.TIMED_WAITING)
         }
         ctl.advance(WindowedByteCounter.P)
         eventually {
@@ -43,7 +43,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
         prev = counter.passCount
 
         if (!closed) eventually {
-          assert(counter.getState === Thread.State.TIMED_WAITING)
+          assert(counter.getState == Thread.State.TIMED_WAITING)
         }
       }
 
@@ -64,10 +64,10 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
     val counter = new WindowedByteCounter(nfo, Local.save())
     counter.start()
 
-    assert(counter.close().poll === Some(Return(())))
+    assert(counter.close().poll == Some(Return.Unit))
 
     counter.join()
-    assert(counter.isAlive === false)
+    assert(counter.isAlive == false)
   }
 
   test("ByteCounter should give a trivial rate without info") {
@@ -75,7 +75,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
     import h._
 
     withCounter(fakeBean, fakePool) { case (counter, _) =>
-      assert(counter.rate() === 0)
+      assert(counter.rate() == 0)
     }
   }
 
@@ -90,7 +90,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
         nextPeriod()
       }
 
-      assert(counter.rate() === (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
+      assert(counter.rate() == (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
     }
   }
 
@@ -105,14 +105,14 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
         nextPeriod()
       }
 
-      assert(counter.rate() === (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
+      assert(counter.rate() == (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds)
 
       for (i <- 1 to WindowedByteCounter.N) {
         fakePool.setSnapshot(usage.copy(used = WindowedByteCounter.N.kilobytes + (i * 2).kilobytes))
         nextPeriod()
       }
 
-      assert(counter.rate() === (2 * (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds))
+      assert(counter.rate() == (2 * (WindowedByteCounter.N.kilobytes).inBytes / WindowedByteCounter.W.inMilliseconds))
     }
   }
 
@@ -131,7 +131,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
         nextPeriod()
       }
 
-      assert(counter.rate() === x.inBytes / WindowedByteCounter.W.inMilliseconds)
+      assert(counter.rate() == x.inBytes / WindowedByteCounter.W.inMilliseconds)
     }
   }
 
@@ -161,7 +161,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
         nextPeriod()
       }
 
-      assert(counter.rate() === WindowedByteCounter.N.kilobytes.inBytes / WindowedByteCounter.W.inMilliseconds)
+      assert(counter.rate() == WindowedByteCounter.N.kilobytes.inBytes / WindowedByteCounter.W.inMilliseconds)
     }
   }
 
@@ -173,7 +173,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
       val usage = new FakeMemoryUsage(0.bytes, 10.megabytes)
       var x = StorageUnit.zero
 
-      assert(counter.lastGc === Time.now)
+      assert(counter.lastGc == Time.now)
 
       for (i <- 0 until WindowedByteCounter.N / 2) {
         x += 1.kilobytes
@@ -194,7 +194,7 @@ class WindowedByteCounterTest extends FunSuite with Eventually with IntegrationP
         nextPeriod()
       }
 
-      assert(counter.lastGc === saved)
+      assert(counter.lastGc == saved)
     }
   }
 }

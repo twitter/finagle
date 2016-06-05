@@ -1,0 +1,188 @@
+package com.twitter.finagle.netty4.http
+
+import com.twitter.finagle.dispatch.GenSerialClientDispatcher.wrapWriteException
+import com.twitter.finagle.http._
+import com.twitter.finagle.http.exp.{Multi, StreamTransportProxy}
+import com.twitter.finagle.netty4.{ByteBufAsBuf, BufAsByteBuf}
+import com.twitter.finagle.transport.Transport
+import com.twitter.io.{Writer, Buf, Reader}
+import com.twitter.util._
+import io.netty.handler.codec.{http => NettyHttp, TooLongFrameException}
+
+
+private[http] object StreamTransports {
+
+  /**
+   * Drain [[Transport]] messages into a [[Writer]] until `eos` indicates end
+   * of stream. Reads from the transport are interleaved with writes to the
+   * [[Writer]] so that no more than one message is ever buffered.
+   *
+   *  @note this method is identical to [[Transport.copyToWriter]] except for the
+   *        fact that this variant allows EOS messages to also carry data.
+   */
+  def copyToWriter[A](
+    trans: Transport[_, A],
+    writer: Writer
+   )(eos: A => Boolean)(chunkOfA: A => Buf): Future[Unit] =
+    trans.read().flatMap { a: A =>
+      val chunk = chunkOfA(a)
+      val writeF =
+        if (!chunk.isEmpty) writer.write(chunk)
+        else Future.Done
+      if (eos(a))
+        writeF
+      else
+        writeF.before(copyToWriter(trans, writer)(eos)(chunkOfA))
+    }
+
+  /**
+   * Collate [[Transport]] messages into a [[Reader]]. Processing terminates when an
+   * EOS message arrives.
+   *
+   * @ note This implementation differentiates itself from [[Transport.collate]]
+   *        by allowing EOS messages to carry data.
+   */
+  def collate[A](
+    trans: Transport[_, A],
+    chunkOfA: A => Buf
+  )(eos: A => Boolean): Reader with Future[Unit] = new Promise[Unit] with Reader {
+    private[this] val rw = Reader.writable()
+
+    become(copyToWriter(trans, rw)(eos)(chunkOfA).respond {
+      case Throw(t) => rw.fail(t)
+      case Return(_) => rw.close()
+    })
+
+    def read(n: Int): Future[Option[Buf]] = rw.read(n)
+
+    def discard(): Unit = {
+      rw.discard()
+      raise(new Reader.ReaderDiscarded)
+    }
+  }
+
+  def readChunk(chunk: Any): Buf = chunk match {
+    case chunk: NettyHttp.HttpContent if chunk.content.readableBytes == 0 =>
+      Buf.Empty
+    case chunk: NettyHttp.HttpContent =>
+      ByteBufAsBuf.Owned(chunk.content)
+  }
+
+  def chunkOfBuf(buf: Buf): NettyHttp.HttpContent =
+    new NettyHttp.DefaultHttpContent(BufAsByteBuf.Owned(buf))
+
+  /**
+   * Drain a [[Reader]] into a [[Transport]]. The inverse of collation.
+   */
+  def streamChunks(
+    trans: Transport[Any, Any],
+    r: Reader,
+    // TODO Find a better number for bufSize, e.g. 32KiB - Buf overhead
+    bufSize: Int = Int.MaxValue
+  ): Future[Unit] = {
+    r.read(bufSize).flatMap {
+      case None =>
+        trans.write(NettyHttp.LastHttpContent.EMPTY_LAST_CONTENT)
+      case Some(buf) =>
+        trans.write(chunkOfBuf(buf)).transform {
+          case Return(_) => streamChunks(trans, r, bufSize)
+          case _ => Future(r.discard())
+        }
+    }
+  }
+
+  val isLast: NettyHttp.HttpObject => Boolean = _.isInstanceOf[NettyHttp.LastHttpContent]
+}
+
+private[finagle] class Netty4ServerStreamTransport(
+    rawTransport: Transport[Any, Any])
+  extends StreamTransportProxy[Response, Request](rawTransport){
+  import StreamTransports._
+
+  private[this] val transport =
+    Transport.cast[NettyHttp.HttpResponse, NettyHttp.HttpRequest](rawTransport)
+
+  def write(in: Response): Future[Unit] = {
+    val nettyRep =
+      if (in.isChunked)
+        Bijections.finagle.responseHeadersToNetty(in)
+      else
+        Bijections.finagle.fullResponseToNetty(in)
+
+    transport.write(nettyRep).rescue(wrapWriteException).before {
+      if (in.isChunked) streamChunks(rawTransport, in.reader)
+      else Future.Done
+    }
+  }
+
+  def read(): Future[Multi[Request]] = {
+    transport.read().flatMap {
+      case req: NettyHttp.HttpRequest if req.decoderResult.isFailure =>
+        val exn = req.decoderResult.cause
+        val bad = exn match {
+          case ex: TooLongFrameException =>
+            if (ex.getMessage.startsWith("An HTTP line is larger than "))
+              BadRequest.uriTooLong(exn)
+            else
+              BadRequest.headerTooLong(exn)
+          case _ =>
+            BadRequest(exn)
+        }
+        Future.value(Multi(bad, Future.Done))
+
+      case req: NettyHttp.FullHttpRequest =>
+        val finagleReq = Bijections.netty.fullRequestToFinagle(req)
+        Future.value(Multi(finagleReq, Future.Done))
+
+      case req: NettyHttp.HttpRequest =>
+        assert(!req.isInstanceOf[NettyHttp.HttpContent]) // chunks are handled via collation
+        assert(NettyHttp.HttpUtil.isTransferEncodingChunked(req))
+
+        val coll = collate(transport, readChunk)(isLast)
+        val finagleReq = Bijections.netty.chunkedRequestToFinagle(req, coll)
+        Future.value(Multi(finagleReq, coll))
+
+      case invalid =>
+        // relies on GenSerialClientDispatcher satisfying `p`
+        Future.exception(new IllegalArgumentException(s"invalid message '$invalid'"))
+    }
+  }
+}
+
+private[finagle] class Netty4ClientStreamTransport(
+    rawTransport: Transport[Any, Any])
+  extends StreamTransportProxy[Request, Response](rawTransport){
+  import StreamTransports._
+
+  private[this] val transport =
+    Transport.cast[NettyHttp.HttpResponse, NettyHttp.HttpRequest](rawTransport)
+
+  def write(in: Request): Future[Unit] = {
+    val nettyReq = Bijections.finagle.requestToNetty(in)
+    rawTransport.write(nettyReq).rescue(wrapWriteException).before {
+      if (in.isChunked) streamChunks(rawTransport, in.reader)
+      else Future.Done
+    }
+  }
+
+  def read(): Future[Multi[Response]] = {
+    rawTransport.read().flatMap {
+      // fully buffered message
+      case rep: NettyHttp.FullHttpResponse =>
+        val finagleRep: Response = Bijections.netty.fullResponseToFinagle(rep)
+        Future.value(Multi(finagleRep, Future.Done))
+
+      // chunked message, collate the transport
+      case rep: NettyHttp.HttpResponse =>
+        assert(!rep.isInstanceOf[NettyHttp.HttpContent]) // chunks are handled via collation
+        assert(NettyHttp.HttpUtil.isTransferEncodingChunked(rep))
+        val coll = collate(transport, readChunk)(isLast)
+        val finagleRep: Response = Bijections.netty.chunkedResponseToFinagle(rep, coll)
+        Future.value(Multi(finagleRep, coll))
+
+      case invalid =>
+        // relies on GenSerialClientDispatcher satisfying `p`
+        Future.exception(new IllegalArgumentException(s"invalid message '$invalid'"))
+    }
+  }
+}

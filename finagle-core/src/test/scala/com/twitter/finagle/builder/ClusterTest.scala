@@ -33,9 +33,9 @@ class ClusterTest extends FunSuite {
         case Cluster.Rem(elem) => set -= elem
       }
     }
-    assert(set.size === N)
+    assert(set.size == N)
     0 until N foreach { cluster1.del(_) }
-    assert(set.size === 0)
+    assert(set.size == 0)
   }
 
   test("Cluster map should remove mapped objects in the same order they were received (for each key)") {
@@ -49,7 +49,7 @@ class ClusterTest extends FunSuite {
     cluster1.add(2)
     cluster1.add(1)
     cluster1.add(2)
-    assert(changes.toSeq === Seq(
+    assert(changes.toSeq == Seq(
       Cluster.Add(WrappedInt(1)),
       Cluster.Add(WrappedInt(2)),
       Cluster.Add(WrappedInt(1)),
@@ -57,21 +57,21 @@ class ClusterTest extends FunSuite {
     ))
 
     cluster1.del(1)
-    assert(changes.size === 5)
-    assert(changes(4).value === changes(0).value)
+    assert(changes.size == 5)
+    assert(changes(4).value == changes(0).value)
     cluster1.del(1)
-    assert(changes.size === 6)
-    assert(changes(5).value === changes(2).value)
+    assert(changes.size == 6)
+    assert(changes(5).value == changes(2).value)
 
     cluster1.del(2)
-    assert(changes.size === 7)
-    assert(changes(6).value === changes(1).value)
+    assert(changes.size == 7)
+    assert(changes(6).value == changes(1).value)
     cluster1.del(2)
-    assert(changes.size === 8)
-    assert(changes(7).value === changes(3).value)
+    assert(changes.size == 8)
+    assert(changes(7).value == changes(3).value)
 
     cluster1.del(100)
-    assert(changes.size === 9)
+    assert(changes.size == 9)
     for (ch <- changes take 8)
       assert(ch.value != changes(8).value)
   }

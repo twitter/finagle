@@ -1,6 +1,5 @@
 package com.twitter.finagle.stream
 
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.io.Buf
 
 case class StreamRequest(

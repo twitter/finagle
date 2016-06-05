@@ -2,7 +2,8 @@ package com.twitter.finagle.kestrel.integration
 
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.kestrel.Client
-import com.twitter.finagle.kestrel.protocol.Kestrel
+import com.twitter.finagle.Kestrel
+import com.twitter.finagle.kestrel.protocol.{Kestrel => KestrelCodec}
 import com.twitter.finagle.thrift.{ClientId, ThriftClientFramedCodec}
 import com.twitter.io.Buf
 import com.twitter.util.Await
@@ -16,19 +17,19 @@ class ClientTest extends FunSuite {
     "Connected client should set & get") {
     val serviceFactory = ClientBuilder()
       .hosts("localhost:22133")
-      .codec(Kestrel())
+      .codec(KestrelCodec())
       .hostConnectionLimit(1)
       .buildFactory()
     val client = Client(serviceFactory)
 
     Await.result(client.delete("foo"))
 
-    assert(Await.result(client.get("foo")) === None)
+    assert(Await.result(client.get("foo")) == None)
     Await.result(client.set("foo", Buf.Utf8("bar")))
     val rep = Await.result(client.get("foo")) map {
       case Buf.Utf8(s) => s
     }
-    assert(rep === Some("bar"))
+    assert(rep == Some("bar"))
   }
 
   ignore("This test requires a Kestrel server to run. Please run manually. " +
@@ -42,11 +43,28 @@ class ClientTest extends FunSuite {
 
     Await.result(client.delete("foo"))
 
-    assert(Await.result(client.get("foo")) === None)
+    assert(Await.result(client.get("foo")) == None)
     Await.result(client.set("foo", Buf.Utf8("bar")))
     val rep = Await.result(client.get("foo")) map {
       case Buf.Utf8(s) => s
     }
-    assert(rep === Some("bar"))
+    assert(rep == Some("bar"))
   }
-}
+
+  ignore("This test requires a Kestrel server to run. Please run manually. " +
+    "Connected stack client should set & get") {
+    val serviceFactory = ClientBuilder()
+      .hosts("localhost:22133")
+      .stack(Kestrel.client)
+      .buildFactory()
+    val client = Client(serviceFactory)
+
+    Await.result(client.delete("foo"))
+
+    assert(Await.result(client.get("foo")) == None)
+    Await.result(client.set("foo", Buf.Utf8("bar")))
+    val rep = Await.result(client.get("foo")) map {
+      case Buf.Utf8(s) => s
+    }
+    assert(rep == Some("bar"))
+  }}

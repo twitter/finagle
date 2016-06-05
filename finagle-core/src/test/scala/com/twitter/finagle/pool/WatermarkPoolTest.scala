@@ -51,7 +51,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         verify(factory)()
         promise() = Return(service)
         assert(f.isDefined)
-        assert(Await.result(Await.result(f)(123)) === 321)
+        assert(Await.result(Await.result(f)(123)) == 321)
       }
     }
 
@@ -118,10 +118,10 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         when(factory()).thenReturn(Future.value(service0))
         val exc = new Exception
         p() = Throw(exc)
-        assert(f0.poll === Some(Throw(exc)))
+        assert(f0.poll == Some(Throw(exc)))
 
         verify(factory, times(2))()
-        assert(f1.poll === Some(Return(service0)))
+        assert(f1.poll == Some(Return(service0)))
       }
     }
 
@@ -185,7 +185,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         verify(service0).status
         assert(f1.isDefined)
         verify(factory, times(2))()
-        assert(Await.result(Await.result(f1)(123)) === 111)
+        assert(Await.result(Await.result(f1)(123)) == 111)
 
         // Healthy again:
         Await.result(f1).close()
@@ -211,8 +211,8 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
     def numTooManyWaiters() = statsRecv.counter("pool_num_too_many_waiters")()
 
     it("should throw TooManyWaitersException when the number of waiters exceeds 2") {
-      assert(0 === numWaited())
-      assert(0 === numTooManyWaiters())
+      assert(0 == numWaited())
+      assert(0 == numTooManyWaiters())
       val f0 = pool()
       assert(f0.isDefined)
       verify(factory)()
@@ -220,21 +220,21 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
       // one waiter. this is cool.
       val f1 = pool()
       assert(!f1.isDefined)
-      assert(1 === numWaited())
-      assert(0 === numTooManyWaiters())
+      assert(1 == numWaited())
+      assert(0 == numTooManyWaiters())
 
       // two waiters. this is *still* cool.
       val f2 = pool()
       assert(!f2.isDefined)
-      assert(2 === numWaited())
-      assert(0 === numTooManyWaiters())
+      assert(2 == numWaited())
+      assert(0 == numTooManyWaiters())
 
       // three waiters and i freak out.
       val f3 = pool()
       assert(f3.isDefined)
       intercept[TooManyWaitersException] { Await.result(f3) }
-      assert(2 === numWaited())
-      assert(1 === numTooManyWaiters())
+      assert(2 == numWaited())
+      assert(1 == numTooManyWaiters())
 
       // give back my original item, and f1 should still get something.
       Await.result(f0).close()
@@ -316,7 +316,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         val promise = new Promise[Service[Int, Int]]
         when(factory()).thenReturn(promise)
         promise() = Return(service)
-        assert(Await.result(pool(), 1.second).status === Status.Open)
+        assert(Await.result(pool(), 1.second).status == Status.Open)
       }
     }
 
@@ -330,7 +330,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         val f = pool()
         verify(factory)()
         assert(f.isDefined)
-        assert(Await.result(f).status === Status.Open)
+        assert(Await.result(f).status == Status.Open)
 
 
         Await.result(f).close()
@@ -363,10 +363,10 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         f.raise(exc)
         assert(f.isDefined)
         f onFailure {
-          case WriteException(e) => assert(e === exc)
+          case WriteException(e) => assert(e == exc)
           case _ => assert(false, "expecting a WriteException, gets something else")
         }
-        assert(slowService.interrupted === None)
+        assert(slowService.interrupted == None)
 
         slowService.setValue(service)
         verify(service, never()).close(any[Time])
@@ -374,7 +374,7 @@ class WatermarkPoolTest extends FunSpec with MockitoSugar {
         val f1 = pool()
         verify(factory)()
         assert(f1.isDefined)
-        assert(Await.result(Await.result(f1)(123)) === 321)
+        assert(Await.result(Await.result(f1)(123)) == 321)
       }
     }
 

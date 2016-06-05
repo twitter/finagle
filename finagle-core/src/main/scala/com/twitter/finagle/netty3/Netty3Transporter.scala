@@ -7,7 +7,7 @@ import com.twitter.finagle.netty3.socks.SocksConnectHandler
 import com.twitter.finagle.netty3.ssl.SslConnectHandler
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.socks.{SocksProxyFlags, Unauthenticated, UsernamePassAuthenticationSetting}
-import com.twitter.finagle.ssl.Engine
+import com.twitter.finagle.ssl.{SessionVerifier, Engine}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
@@ -90,7 +90,7 @@ object Netty3Transporter {
   )
 
   val channelFactory: NettyChannelFactory = new NioClientSocketChannelFactory(
-    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer) {
+    Executor, 1 /*# boss threads*/, WorkerPool, DefaultTimer.netty) {
     override def releaseExternalResources() = ()  // no-op; unreleasable
   }
 
@@ -143,11 +143,12 @@ object Netty3Transporter {
       case Transport.Verbose(true) => Some(ChannelSnooper(label)(logger.log(Level.INFO, _, _)))
       case _ => None
     }
+    val Transport.Options(noDelay, reuseAddr) = params[Transport.Options]
 
     val opts = new mutable.HashMap[String, Object]()
     opts += "connectTimeoutMillis" -> ((connectTimeout + compensation).inMilliseconds: java.lang.Long)
-    opts += "tcpNoDelay" -> java.lang.Boolean.TRUE
-    opts += "reuseAddress" -> java.lang.Boolean.TRUE
+    opts += "tcpNoDelay" -> (noDelay: java.lang.Boolean)
+    opts += "reuseAddress" -> (reuseAddr: java.lang.Boolean)
     for (v <- keepAlive) opts += "keepAlive" -> (v: java.lang.Boolean)
     for (s <- sendBufSize) opts += "sendBufferSize" -> (s: java.lang.Integer)
     for (s <- recvBufSize) opts += "receiveBufferSize" -> (s: java.lang.Integer)
@@ -158,7 +159,7 @@ object Netty3Transporter {
       label,
       pipelineFactory,
       newChannel = cf.newChannel(_),
-      newTransport = (ch: Channel) => newTransport(ch).cast[In, Out],
+      newTransport = (ch: Channel) => Transport.cast[In, Out](newTransport(ch)),
       tlsConfig = tls map { case engine => Netty3TransporterTLSConfig(engine, tlsHostname) },
       httpProxy = httpProxy,
       httpProxyCredentials = httpProxyCredentials,
@@ -265,7 +266,7 @@ case class Netty3Transporter[In, Out](
   newChannel: ChannelPipeline => Channel =
     Netty3Transporter.channelFactory.newChannel,
   newTransport: Channel => Transport[In, Out] =
-    (ch: Channel) => new ChannelTransport(ch).cast[In, Out],
+    (ch: Channel) => Transport.cast[In, Out](new ChannelTransport[Any, Any](ch)),
   tlsConfig: Option[Netty3TransporterTLSConfig] = None,
   httpProxy: Option[SocketAddress] = None,
   socksProxy: Option[SocketAddress] = SocksProxyFlags.socksProxy,
@@ -311,7 +312,7 @@ case class Netty3Transporter[In, Out](
 
       pipeline.addFirst("idleReactor", new IdleChannelHandler(statsReceiver))
       pipeline.addFirst("idleDetector",
-        new IdleStateHandler(DefaultTimer, rms, wms, 0, TimeUnit.MILLISECONDS))
+        new IdleStateHandler(DefaultTimer.netty, rms, wms, 0, TimeUnit.MILLISECONDS))
     }
 
     for (Netty3TransporterTLSConfig(newEngine, verifyHost) <- tlsConfig) {
@@ -321,9 +322,9 @@ case class Netty3Transporter[In, Out](
       engine.self.setUseClientMode(true)
       engine.self.setEnableSessionCreation(true)
 
-      val verifier = verifyHost.map(SslConnectHandler.sessionHostnameVerifier).getOrElse {
-        Function.const(None) _
-      }
+      val verifier = verifyHost
+        .map(SessionVerifier.hostname)
+        .getOrElse(SessionVerifier.AlwaysValid)
 
       val sslHandler = new SslHandler(engine.self)
       val sslConnectHandler = new SslConnectHandler(sslHandler, verifier)
@@ -354,8 +355,7 @@ case class Netty3Transporter[In, Out](
               UsernamePassAuthenticationSetting(username, password)
             case _ => Unauthenticated
           }
-          pipeline.addFirst("socksConnect",
-            new SocksConnectHandler(proxyAddr, inetSockAddr, Seq(authentication)))
+          SocksConnectHandler.addHandler(proxyAddr, inetSockAddr, Seq(authentication), pipeline)
         }
       case _ =>
     }

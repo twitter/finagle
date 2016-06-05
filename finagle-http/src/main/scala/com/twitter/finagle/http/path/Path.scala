@@ -1,7 +1,6 @@
 package com.twitter.finagle.http.path
 
-import org.jboss.netty.handler.codec.http.HttpMethod
-import com.twitter.finagle.http.ParamMap
+import com.twitter.finagle.http.{ParamMap, Method}
 
 
 /** Base class for path extractors. */
@@ -81,7 +80,7 @@ object -> {
    *   (request.method, Path(request.path)) match {
    *     case Methd.Get -> Root / "test.json" => ...
    */
-  def unapply(x: (HttpMethod, Path)) = Some(x)
+  def unapply(x: (Method, Path)) = Some(x)
 }
 
 

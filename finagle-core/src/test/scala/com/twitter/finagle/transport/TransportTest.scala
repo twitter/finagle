@@ -5,15 +5,38 @@ import com.twitter.io.{Reader, Buf}
 import com.twitter.util.{Await, Future, Promise, Time, Return, Throw}
 import com.twitter.concurrent.AsyncQueue
 import java.net.SocketAddress
-import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
-import org.scalacheck.Prop.forAll
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
 class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
+
+  test("transport.map") {
+    val q = new AsyncQueue[Any]
+    val t0 = new QueueTransport[Any, Any](q, q)
+    val trans = t0.map[String, String](_.toInt, _.toString)
+
+    Await.result(trans.write("100"))
+    assert(Await.result(trans.read()) == "100")
+
+    Await.result(trans.write("10"))
+    assert(Await.result(q.poll()) == 10)
+
+    intercept[NumberFormatException] {
+      Await.result(trans.write("hello"))
+    }
+
+    val exc = new Exception("can't coerce to string")
+    q.offer(new Object {
+      override def toString() = throw exc
+    })
+
+    assert(exc == intercept[Exception] {
+      Await.result(trans.read())
+    })
+  }
 
   def fromList[A](seq: => List[A]) = new Transport[Any, Option[A]] {
     private[this] var next = seq
@@ -58,7 +81,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
     val f = reader.read(1)
     reader.discard()
-    assert(Await.result(f) === Some(Buf.Empty))
+    assert(Await.result(f) == Some(Buf.Empty))
     assert(done.isDefined)
     intercept[Reader.ReaderDiscarded] { Await.result(reader.read(1)) }
   }
@@ -76,7 +99,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val f = reader.read(1)
     intercept[IllegalStateException] { Await.result(reader.read(1)) }
     p.setDone()
-    assert(Await.result(f) === None)
+    assert(Await.result(f) == None)
   }
 
   test("Transport.copyToWriter - normal operation") {
@@ -92,7 +115,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
         case _ =>
       }
       val f = Reader.readAll(reader)
-      assert(Await.result(f) === Buf.Utf8(list.mkString))
+      assert(Await.result(f) == Buf.Utf8(list.mkString))
       assert(done.isDefined)
     }
   }
@@ -104,7 +127,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       val reader = Reader.writable()
       val done = Transport.copyToWriter(t, reader) {
         case None => Future.exception(exc)
-        case Some(b) => Future.value(Some(Buf.ByteArray(Array(b))))
+        case Some(b) => Future.value(Some(Buf.ByteArray.Owned(Array(b))))
       } respond {
         case Return(()) => reader.close()
         case Throw(exc) => reader.fail(exc)
@@ -112,11 +135,10 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       }
       val f = Reader.readAll(reader)
       val result = intercept[Exception] { Await.result(f) }
-      assert(result === exc)
+      assert(result == exc)
       assert(done.isDefined)
     }
   }
-
 
   trait Collate {
     val writeq = new AsyncQueue[String]
@@ -130,7 +152,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     }
     val coll = Transport.collate(trans, read)
     assert(!coll.isDefined)
-    
+
     def assertDiscarded(f: Future[_]) {
       assert(f.isDefined)
       intercept[Reader.ReaderDiscarded] { Await.result(f) }
@@ -142,31 +164,31 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
     val r1 = coll.read(10)
     assert(!r1.isDefined)
     readq.offer("hello")
-    assert(Await.result(r1) === Some(Buf.Utf8("hello")))
+    assert(Await.result(r1) == Some(Buf.Utf8("hello")))
 
     assert(!coll.isDefined)
-    
+
     // Short read
     val r2 = coll.read(2)
     assert(!r2.isDefined)
     readq.offer("hello")
-    assert(Await.result(r2) === Some(Buf.Utf8("he")))
+    assert(Await.result(r2) == Some(Buf.Utf8("he")))
 
     // Now, the EOF; but this isn't propagated yet.
     readq.offer("eof")
     assert(!coll.isDefined)
-    
+
     val r3 = coll.read(10)
     assert(r3.isDefined)
-    assert(Await.result(r3) === Some(Buf.Utf8("llo")))
-    
+    assert(Await.result(r3) == Some(Buf.Utf8("llo")))
+
     assert(coll.isDefined)
     Await.result(coll) // no exceptions
-    
+
     // Further reads are EOF
-    assert(Await.result(coll.read(10)) === None)
+    assert(Await.result(coll.read(10)) == None)
   })
-  
+
   test("Transport.collate: discard while reading") (new Collate {
     val trans1 = new Transport[String, String] {
       val p = new Promise[String]
@@ -184,19 +206,19 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
       def peerCertificate = ???
       def close(deadline: Time) = ???
     }
-    
+
     val coll1 = Transport.collate(trans1, read)
     val r1 = coll1.read(10)
     assert(!r1.isDefined)
-    
-    assert(trans1.theIntr === null)
+
+    assert(trans1.theIntr == null)
     coll1.discard()
     assertDiscarded(r1)
-    
+
     assert(!coll1.isDefined)
     assert(trans1.theIntr != null)
     assert(trans1.theIntr.isInstanceOf[Reader.ReaderDiscarded])
-    
+
     // This is what a typical transport will do.
     trans1.p.setException(trans1.theIntr)
     assertDiscarded(coll1)
@@ -213,7 +235,7 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("Transport.collate: discard while buffering") (new Collate {
     readq.offer("hello")
     val r1 = coll.read(1)
-    assert(Await.result(r1) === Some(Buf.Utf8("h")))
+    assert(Await.result(r1) == Some(Buf.Utf8("h")))
 
     coll.discard()
     assertDiscarded(coll)
@@ -223,19 +245,19 @@ class TransportTest extends FunSuite with GeneratorDrivenPropertyChecks {
   test("Transport.collate: conversion failure") (new Collate {
     readq.offer("hello")
     val r1 = coll.read(10)
-    assert(Await.result(r1) === Some(Buf.Utf8("hello")))
-    
+    assert(Await.result(r1) == Some(Buf.Utf8("hello")))
+
     val r2 = coll.read(10)
     assert(!r2.isDefined)
-    
+
     assert(!coll.isDefined)
 
     readq.offer("fail")
-    
+
     assert(r2.isDefined)
-    assert(r2.poll === Some(Throw(fail)))
-    
+    assert(r2.poll == Some(Throw(fail)))
+
     assert(coll.isDefined)
-    assert(coll.poll === Some(Throw(fail)))
+    assert(coll.poll == Some(Throw(fail)))
   })
 }

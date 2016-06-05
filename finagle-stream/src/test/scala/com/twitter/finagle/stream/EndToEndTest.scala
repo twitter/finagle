@@ -39,7 +39,7 @@ class EndToEndTest extends FunSuite {
   ) extends StreamResponse {
 
     val released = new Promise[Unit]
-    def release() = released.updateIfEmpty(Return(()))
+    def release() = released.updateIfEmpty(Return.Unit)
   }
 
   class MyService(response: StreamResponse) extends StreamService {
@@ -77,7 +77,7 @@ class EndToEndTest extends FunSuite {
       error !! EOF
 
       latch.within(1.second)
-      assert(result === "123")
+      assert(result == "123")
       client.close()
     }
 
@@ -99,7 +99,7 @@ class EndToEndTest extends FunSuite {
 
       latch.within(1.second)
       error !! EOF
-      assert(result === "123")
+      assert(result == "123")
       client.close()
     }
 
@@ -254,7 +254,7 @@ class EndToEndTest extends FunSuite {
       }
 
       latch.within(1.second)
-      assert(result === "1223")
+      assert(result == "1223")
     }
   }
 
@@ -264,7 +264,7 @@ class EndToEndTest extends FunSuite {
       .bindTo(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))
       .name("Streams")
       .build(new MyService(serverRes))
-    val address = server.boundAddress
+    val address = server.boundAddress.asInstanceOf[InetSocketAddress]
     val factory = ClientBuilder()
       .codec(codec)
       .hosts(Seq(address))
@@ -289,7 +289,7 @@ class EndToEndTest extends FunSuite {
 
     val serverClient = ClientBuilder()
       .codec(codec)
-      .hosts(Seq(server.boundAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()
 
@@ -301,7 +301,7 @@ class EndToEndTest extends FunSuite {
 
     val factory = ClientBuilder()
       .codec(codec)
-      .hosts(Seq(proxy.boundAddress))
+      .hosts(Seq(proxy.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .buildFactory()
 
@@ -335,7 +335,7 @@ class EndToEndTest extends FunSuite {
 
     val client = ClientBuilder()
       .codec(Stream[StreamRequest]())
-      .hosts(Seq(server.boundAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .build()
 
@@ -347,10 +347,11 @@ class EndToEndTest extends FunSuite {
     Closable.all(client, server).close()
   }
 
+  if (!sys.props.contains("SKIP_FLAKY"))
   test("Streams: delay release until complete response") {
     @volatile var count: Int = 0
     val c = new WorkItContext()
-    import c.{synchronized => _sync, _}
+    import c.{synchronized => _, _}
 
     val server = ServerBuilder()
       .codec(codec)
@@ -362,23 +363,23 @@ class EndToEndTest extends FunSuite {
       })
     val client = ClientBuilder()
       .codec(codec)
-      .hosts(Seq(server.boundAddress))
+      .hosts(Seq(server.boundAddress.asInstanceOf[InetSocketAddress]))
       .hostConnectionLimit(1)
       .retries(2)
       .build()
 
-    val res = Await.result(client(streamRequest), 1.second)
-    assert(count === 1)
+    val res = Await.result(client(streamRequest), 2.seconds)
+    assert(count == 1)
     val f2 = client(streamRequest)
     assert(f2.poll.isEmpty)  // because of the host connection limit
 
     messages !! Buf.Utf8("1")
-    assert((res.messages??) === Buf.Utf8("1"))
-    assert(count === 1)
-    error !! EOF
+    assert((res.messages??) == Buf.Utf8("1"))
+    assert(count == 1)
     res.release()
-    val res2 = Await.result(f2, 1.second)
-    assert(count === 2)
+    error !! EOF
+    val res2 = Await.result(f2, 2.seconds)
+    assert(count == 2)
     res2.release()
 
     Closable.all(client, server)

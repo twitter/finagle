@@ -1,13 +1,18 @@
 package com.twitter.finagle.http
 
+import com.twitter.finagle.http.netty.Bijections
+import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.util.Base64StringEncoder
+import com.twitter.io.Buf
 import java.net.URL
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpPostRequestEncoder, HttpDataFactory}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders, HttpVersion, HttpMethod, DefaultHttpRequest}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders}
 import scala.annotation.implicitNotFound
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
+
+import Bijections._
 
 /*
  * HTML form element.
@@ -22,7 +27,7 @@ case class SimpleElement(name: String, content: String) extends FormElement
 /*
  * HTML form file input field.
  */
-case class FileElement(name: String, content: ChannelBuffer, contentType: Option[String] = None,
+case class FileElement(name: String, content: Buf, contentType: Option[String] = None,
   filename: Option[String] = None) extends FormElement
 
 /**
@@ -66,13 +71,13 @@ case class FileElement(name: String, content: ChannelBuffer, contentType: Option
  */
 object RequestBuilder {
   @implicitNotFound("Http RequestBuilder is not correctly configured: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Nothing) ${HasForm}.")
-  private trait RequestEvidence[HasUrl, HasForm]
+  trait RequestEvidence[HasUrl, HasForm]
   private object RequestEvidence {
     implicit object FullyConfigured extends RequestEvidence[RequestConfig.Yes, Nothing]
   }
 
   @implicitNotFound("Http RequestBuilder is not correctly configured for form post: HasUrl (exp: Yes): ${HasUrl}, HasForm (exp: Yes): ${HasForm}.")
-  private trait PostRequestEvidence[HasUrl, HasForm]
+  trait PostRequestEvidence[HasUrl, HasForm]
   private object PostRequestEvidence {
     implicit object FullyConfigured extends PostRequestEvidence[RequestConfig.Yes, RequestConfig.Yes]
   }
@@ -90,50 +95,43 @@ object RequestBuilder {
   /**
    * Provides a typesafe `build` with content for Java.
    */
-  def safeBuild(builder: Complete, method: HttpMethod, content: Option[ChannelBuffer]): HttpRequest =
+  def safeBuild(builder: Complete, method: Method, content: Option[Buf]): Request =
     builder.build(method, content)(RequestEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildGet` for Java.
    */
-  def safeBuildGet(builder: Complete): HttpRequest =
+  def safeBuildGet(builder: Complete): Request =
     builder.buildGet()(RequestEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildHead` for Java.
    */
-  def safeBuildHead(builder: Complete): HttpRequest =
+  def safeBuildHead(builder: Complete): Request =
     builder.buildHead()(RequestEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildDelete` for Java.
    */
-  def safeBuildDelete(builder: Complete): HttpRequest =
+  def safeBuildDelete(builder: Complete): Request =
     builder.buildDelete()(RequestEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildPut` for Java.
    */
-  def safeBuildPut(builder: Complete, content: ChannelBuffer): HttpRequest =
+  def safeBuildPut(builder: Complete, content: Buf): Request =
     builder.buildPut(content)(RequestEvidence.FullyConfigured)
-
-  /**
-   * Provides a typesafe `buildPut` for Java.
-   */
-  @deprecated("Typo, use safeBuildPut instead", "5.3.7")
-  def safeBuidlPut(builder: Complete, content: ChannelBuffer): HttpRequest =
-    safeBuildPut(builder, content)
 
   /**
    * Provides a typesafe `buildPost` for Java.
    */
-  def safeBuildPost(builder: Complete, content: ChannelBuffer): HttpRequest =
+  def safeBuildPost(builder: Complete, content: Buf): Request =
     builder.buildPost(content)(RequestEvidence.FullyConfigured)
 
   /**
    * Provides a typesafe `buildFormPost` for Java.
    */
-  def safeBuildFormPost(builder: CompleteForm, multipart: Boolean): HttpRequest =
+  def safeBuildFormPost(builder: CompleteForm, multipart: Boolean): Request =
     builder.buildFormPost(multipart)(PostRequestEvidence.FullyConfigured)
 }
 
@@ -145,11 +143,11 @@ object RequestConfig {
 }
 
 private[http] final case class RequestConfig[HasUrl, HasForm](
-  url: Option[URL]                 = None,
-  headers: Map[String,Seq[String]] = Map(),
-  formElements: Seq[FormElement]   = Seq(),
-  version: HttpVersion             = HttpVersion.HTTP_1_1,
-  proxied: Boolean                 = false
+  url: Option[URL]                  = None,
+  headers: Map[String, Seq[String]] = Map.empty,
+  formElements: Seq[FormElement]    = Nil,
+  version: Version                  = Version.Http11,
+  proxied: Boolean                  = false
 )
 
 class RequestBuilder[HasUrl, HasForm] private[http](
@@ -226,7 +224,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Declare the HTTP protocol version be HTTP/1.0
    */
   def http10(): This =
-    new RequestBuilder(config.copy(version = HttpVersion.HTTP_1_0))
+    new RequestBuilder(config.copy(version = Version.Http10))
 
   /**
    * Set a new header with the specified name and value.
@@ -299,9 +297,9 @@ class RequestBuilder[HasUrl, HasForm] private[http](
   /**
    * Construct an HTTP request with a specified method.
    */
-  def build(method: HttpMethod, content: Option[ChannelBuffer])(
+  def build(method: Method, content: Option[Buf])(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = {
+  ): Request = {
     content match {
       case Some(content) => withContent(method, content)
       case None => withoutContent(method)
@@ -313,49 +311,54 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    */
   def buildGet()(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withoutContent(HttpMethod.GET)
+  ): Request = withoutContent(Method.Get)
 
   /**
    * Construct an HTTP HEAD request.
    */
   def buildHead()(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withoutContent(HttpMethod.HEAD)
+  ): Request = withoutContent(Method.Head)
 
   /**
    * Construct an HTTP DELETE request.
    */
   def buildDelete()(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withoutContent(HttpMethod.DELETE)
+  ): Request = withoutContent(Method.Delete)
 
   /**
    * Construct an HTTP POST request.
    */
-  def buildPost(content: ChannelBuffer)(
+  def buildPost(content: Buf)(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withContent(HttpMethod.POST, content)
+  ): Request = withContent(Method.Post, content)
 
   /**
    * Construct an HTTP PUT request.
    */
-  def buildPut(content: ChannelBuffer)(
+  def buildPut(content: Buf)(
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = withContent(HttpMethod.PUT, content)
+  ): Request = withContent(Method.Put, content)
 
   /**
    * Construct a form post request.
    */
   def buildFormPost(multipart: Boolean = false) (
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.PostRequestEvidence[HasUrl, HasForm]
-  ): HttpRequest = {
+  ): Request = {
     val dataFactory = new DefaultHttpDataFactory(false) // we don't use disk
-    val req = withoutContent(HttpMethod.POST)
-    val encoder = new HttpPostRequestEncoder(dataFactory, req, multipart)
+    val req = withoutContent(Method.Post)
+    val encoder = new HttpPostRequestEncoder(dataFactory, req.httpRequest, multipart)
 
     config.formElements.foreach {
       case FileElement(name, content, contentType, filename) =>
-        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req)(name, filename.getOrElse(""), content, contentType.getOrElse(null), false)
+        HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req.httpRequest)(
+          name, filename.getOrElse(""),
+          BufChannelBuffer(content),
+          contentType.getOrElse(null),
+          false)
+
       case SimpleElement(name, value) =>
         encoder.addBodyAttribute(name, value)
     }
@@ -376,7 +379,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       encodedReq.setContent(ChannelBuffers.wrappedBuffer(chunks:_*))
     }
 
-    encodedReq
+    from(encodedReq)
   }
 
   // absoluteURI if proxied, otherwise relativeURI
@@ -401,21 +404,19 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     }
   }
 
-  private[http] def withoutContent(method: HttpMethod): HttpRequest = {
-    val req = new DefaultHttpRequest(config.version, method, resource)
-    config.headers.foreach { case (k,vs) =>
-      vs.foreach { v =>
-        req.headers.add(k, v)
-      }
+  private[http] def withoutContent(method: Method): Request = {
+    val req = Request(config.version, method, resource)
+    config.headers foreach { case (field, values) =>
+      values foreach { v => req.headers.add(field, v) }
     }
     req
   }
 
-  private[http] def withContent(method: HttpMethod, content: ChannelBuffer): HttpRequest = {
+  private[http] def withContent(method: Method, content: Buf): Request = {
     require(content != null)
     val req = withoutContent(method)
-    req.setContent(content)
-    req.headers.set(HttpHeaders.Names.CONTENT_LENGTH, content.readableBytes.toString)
+    req.content = content
+    req.headers.set(HttpHeaders.Names.CONTENT_LENGTH, content.length.toString)
     req
   }
 }

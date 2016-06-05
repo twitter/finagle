@@ -2,6 +2,7 @@ package com.twitter.finagle.httpproxy
 
 import com.twitter.finagle.client.Transporter.Credentials
 import java.net.{InetAddress, SocketAddress, InetSocketAddress}
+import com.twitter.finagle.netty3.SocketAddressResolveHandler
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import org.junit.runner.RunWith
@@ -37,10 +38,10 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
       val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
       verify(pipeline).sendDownstream(ec.capture)
       val e = ec.getValue
-      assert(e.getChannel === channel)
-      assert(e.getFuture === closeFuture)
-      assert(e.getState === ChannelState.OPEN)
-      assert(e.getValue === java.lang.Boolean.FALSE)
+      assert(e.getChannel == channel)
+      assert(e.getFuture == closeFuture)
+      assert(e.getState == ChannelState.OPEN)
+      assert(e.getValue == java.lang.Boolean.FALSE)
     }
   }
 
@@ -52,10 +53,10 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx).sendDownstream(ec.capture)
     val e = ec.getValue
 
-    assert(e.getChannel === channel)
+    assert(e.getChannel == channel)
     assert(e.getFuture != connectFuture) // this is proxied
-    assert(e.getState === ChannelState.CONNECTED)
-    assert(e.getValue === proxyAddress)
+    assert(e.getState == ChannelState.CONNECTED)
+    assert(e.getValue == proxyAddress)
   }
 
   test("HttpConnectHandler should upon connect propagate cancellation") {
@@ -109,9 +110,9 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
       verify(ctx, atLeastOnce).sendDownstream(ec.capture)
       val e = ec.getValue
       val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
-      assert(req.getMethod === HttpMethod.CONNECT)
-      assert(req.getUri === "localhost:" + port)
-      assert(req.headers().get("Host") === "localhost:" + port)
+      assert(req.getMethod == HttpMethod.CONNECT)
+      assert(req.getUri == "localhost:" + port)
+      assert(req.headers().get("Host") == "localhost:" + port)
     }
 
     {
@@ -129,9 +130,9 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
       verify(ctx).sendUpstream(ec.capture)
       val e = ec.getValue
 
-      assert(e.getChannel === channel)
-      assert(e.getState === ChannelState.CONNECTED)
-      assert(e.getValue === remoteAddress)
+      assert(e.getChannel == channel)
+      assert(e.getState == ChannelState.CONNECTED)
+      assert(e.getValue == remoteAddress)
     }
   }
 
@@ -156,10 +157,10 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx, atLeastOnce).sendDownstream(ec.capture)
     val e = ec.getValue
     val req = e.getMessage.asInstanceOf[DefaultHttpRequest]
-    assert(req.getMethod === HttpMethod.CONNECT)
-    assert(req.getUri === "localhost:" + port)
-    assert(req.headers().get("Host") === "localhost:" + port)
-    assert(req.headers().get("Proxy-Authorization") === "Basic dXNlcjpwYXNz")
+    assert(req.getMethod == HttpMethod.CONNECT)
+    assert(req.getUri == "localhost:" + port)
+    assert(req.headers().get("Host") == "localhost:" + port)
+    assert(req.headers().get("Proxy-Authorization") == "Basic dXNlcjpwYXNz")
   }
 
   test("HttpConnectHandler should propagate connection failure") {
@@ -174,6 +175,29 @@ class HttpConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(!connectFuture.isDone)
     e.getFuture.setFailure(exc)
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause === exc)
+    assert(connectFuture.getCause == exc)
+  }
+
+  test("HttpConnectHandler should not add socket address resolve handler when proxy address is resolved") {
+    val pipeline = new DefaultChannelPipeline
+    HttpConnectHandler.addHandler(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 2222),
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
+      pipeline,
+      None
+    )
+
+    assert(pipeline.get("socketAddressResolver") == null)
+  }
+
+  test("HttpConnectHandler should add socket address resolve handler when proxy address is unresolved") {
+    val pipeline = new DefaultChannelPipeline
+    HttpConnectHandler.addHandler(
+      InetSocketAddress.createUnresolved("meow.meow", 2222),
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
+      pipeline,
+      None
+    )
+    assert(pipeline.get("socketAddressResolver").isInstanceOf[SocketAddressResolveHandler])
   }
 }

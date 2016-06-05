@@ -2,19 +2,19 @@ package com.twitter.finagle.http
 
 import com.twitter.io.{Writer, Reader}
 import com.twitter.util.Closable
+import org.jboss.netty.handler.codec.http.HttpRequest
 
 /**
  * Proxy for Request.  This can be used to create a richer request class
- * that wraps Request.
+ * that wraps Request without exposing the underlying netty http type.
  */
 abstract class RequestProxy extends Request {
   def request: Request
-  def getRequest(): Request = request
 
   override def ctx = request.ctx
 
-  override def httpRequest = request
-  override def httpMessage = request
+  protected[finagle] def httpRequest: HttpRequest = request.httpRequest
+
 
   override def reader: Reader = request.reader
   override def writer: Writer with Closable = request.writer

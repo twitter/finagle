@@ -34,11 +34,11 @@ class RawZipkinTracerTest extends FunSuite {
     val remoteEndpoint = Endpoint(333, 22)
 
     val annotations = Seq(
-      ZipkinAnnotation(Time.fromSeconds(123), "cs", localEndpoint, None),
-      ZipkinAnnotation(Time.fromSeconds(126), "cr", localEndpoint, None),
-      ZipkinAnnotation(Time.fromSeconds(123), "ss", remoteEndpoint, None),
-      ZipkinAnnotation(Time.fromSeconds(124), "sr", remoteEndpoint, None),
-      ZipkinAnnotation(Time.fromSeconds(123), "llamas", localEndpoint, None)
+      ZipkinAnnotation(Time.fromSeconds(123), "cs", localEndpoint),
+      ZipkinAnnotation(Time.fromSeconds(126), "cr", localEndpoint),
+      ZipkinAnnotation(Time.fromSeconds(123), "ss", remoteEndpoint),
+      ZipkinAnnotation(Time.fromSeconds(124), "sr", remoteEndpoint),
+      ZipkinAnnotation(Time.fromSeconds(123), "llamas", localEndpoint)
     )
 
     val span = Span(
@@ -60,7 +60,7 @@ class RawZipkinTracerTest extends FunSuite {
         "AABmxsYW1hcwwAAwgAAQAACRMGAAIAFwsAAwAAAAtoaWNrdXBxdWFpbAAAAgAJAQA=\n")
 
     tracer.logSpans(Seq(span))
-    assert(scribe.messages === Seq(expected))
+    assert(scribe.messages == Seq(expected))
   }
 
   test("send all traces to scribe") {
@@ -86,7 +86,7 @@ class RawZipkinTracerTest extends FunSuite {
     tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
 
     // Note: Since ports are ephemeral, we can't hardcode expected message.
-    assert(scribe.messages.size === 1)
+    assert(scribe.messages.size == 1)
   }
 
   test("logSpan if a timeout occurs") {
@@ -102,6 +102,6 @@ class RawZipkinTracerTest extends FunSuite {
     tracer.record(Record(traceId, Time.fromSeconds(3), ann3))
 
     // scribe Log method is in java
-    assert(scribe.messages.size === 1)
+    assert(scribe.messages.size == 1)
   }
 }

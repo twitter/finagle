@@ -47,30 +47,30 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar {
     val h = new ChannelHelper
     import h._
 
-    assert(filter.openConnections === 0)
+    assert(filter.openConnections == 0)
     val (_, closeFuture) = open(filter)
-    assert(filter.openConnections === 1)
+    assert(filter.openConnections == 1)
     closeFuture.setDone()
-    assert(filter.openConnections === 0)
+    assert(filter.openConnections == 0)
   }
 
   test("IdleConnectionFilter should refuse connection if above highWaterMark") {
     val h = new ChannelHelper
     import h._
 
-    assert(filter.openConnections === 0)
+    assert(filter.openConnections == 0)
     val closeFutures = (1 to threshold.highWaterMark) map { _ =>
       val (_, closeFuture) = open(filter)
       closeFuture
     }
-    assert(filter.openConnections === threshold.highWaterMark)
+    assert(filter.openConnections == threshold.highWaterMark)
     open(filter)
-    assert(filter.openConnections === threshold.highWaterMark)
+    assert(filter.openConnections == threshold.highWaterMark)
 
     closeFutures foreach {
       _.setDone()
     }
-    assert(filter.openConnections === 0)
+    assert(filter.openConnections == 0)
   }
 
   test("IdleConnectionFilter should try to close an idle connection if above lowerWaterMark") {
@@ -79,11 +79,11 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar {
 
     val spyFilter = Mockito.spy(new IdleConnectionFilter(underlying, threshold))
 
-    assert(spyFilter.openConnections === 0)
+    assert(spyFilter.openConnections == 0)
     (1 to threshold.lowWaterMark) map { _ =>
       open(spyFilter)
     }
-    assert(spyFilter.openConnections === threshold.lowWaterMark)
+    assert(spyFilter.openConnections == threshold.lowWaterMark)
 
     // open must try to close an idle connection
     open(spyFilter)
@@ -101,12 +101,12 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar {
       }
       val underlying = ServiceFactory.const(service)
       val spyFilter = Mockito.spy(new IdleConnectionFilter(underlying, threshold))
-      assert(spyFilter.openConnections === 0)
+      assert(spyFilter.openConnections == 0)
       (1 to threshold.highWaterMark) map { _ =>
         val (c, _) = open(spyFilter)
         spyFilter.filterFactory(c)("titi", service)
       }
-      assert(spyFilter.openConnections === threshold.highWaterMark)
+      assert(spyFilter.openConnections == threshold.highWaterMark)
 
       // wait a long time
       t += threshold.idleTimeout * 3
@@ -126,7 +126,7 @@ class IdleConnectionFilterTest extends FunSuite with MockitoSugar {
       spyFilter(c)
 
       verify(c, times(1)).close()
-      assert(spyFilter.openConnections === threshold.highWaterMark)
+      assert(spyFilter.openConnections == threshold.highWaterMark)
     }
   }
 

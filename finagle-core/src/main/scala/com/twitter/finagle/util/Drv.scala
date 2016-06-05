@@ -1,7 +1,6 @@
 package com.twitter.finagle.util
 
 import scala.collection.mutable
-import scala.util.Random
 
 trait Drv extends (Rng => Int)
 

@@ -2,19 +2,18 @@ package com.twitter.finagle.kestrel
 
 import com.twitter.concurrent.{Broker, Offer}
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Addr, Group, Name, ServiceFactory}
+import com.twitter.finagle._
 import com.twitter.finagle.builder._
-import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel}
+import com.twitter.finagle.kestrel.protocol.{Response, Command, Kestrel => KestrelCodec}
 import com.twitter.finagle.stats.{Gauge, NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.thrift.{ThriftClientFramedCodec, ClientId, ThriftClientRequest}
+import com.twitter.finagle.thrift.{ThriftClientFramedCodecFactory, ThriftClientFramedCodec, ClientId, ThriftClientRequest}
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.util._
-import _root_.java.{util => ju}
-import _root_.java.lang.UnsupportedOperationException
 import _root_.java.net.SocketAddress
 import _root_.java.util.concurrent.atomic.AtomicInteger
-import scala.collection.mutable
+import _root_.java.{util => ju}
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
  * Indicates that all [[com.twitter.finagle.kestrel.ReadHandle ReadHandles]]
@@ -186,12 +185,10 @@ private[finagle] object MultiReaderHelper {
  * there are multiple available messages, round-robin across them.  Otherwise,
  * wait for the first message to arrive.
  *
- * Var[Addr] example:
+ * Example with a custom client builder:
  * {{{
- *   val name: com.twitter.finagle.Name = Resolver.eval(...)
- *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReaderMemcache(va, "the-queue")
+ *     MultiReaderMemcache("/the/path", "the-queue")
  *       .clientBuilder(
  *         ClientBuilder()
  *           .codec(MultiReaderMemcache.codec)
@@ -203,12 +200,25 @@ private[finagle] object MultiReaderHelper {
  * }}}
  */
 object MultiReaderMemcache {
+  /**
+   * Create a new MultiReader which dispatches requests to `dest` using the memcache protocol.
+   * 
+   * @param dest the name of the destination which requests are dispatched to.
+   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   * @param queueName the name of the queue to read from
+   *
+   * TODO: `dest` is eagerly resolved at client creation time, so name resolution does not
+   * behave dynamically with respect to local dtabs (unlike
+   * [[com.twitter.finagle.factory.BindingFactory]]. In practice this is not a problem since
+   * ReadHandle is not on the request path. Weights are discarded.
+   */
+  def apply(dest: String, queueName: String): MultiReaderBuilderMemcache =
+    apply(Resolver.eval(dest), queueName)
+
   def apply(dest: Name, queueName: String): MultiReaderBuilderMemcache = {
     dest match {
       case Name.Bound(va) => apply(va, queueName)
-      case Name.Path(_) => throw new UnsupportedOperationException(
-        "Failed to bind Name.Path in `MultiReaderMemcache.apply`"
-      )
+      case Name.Path(path) => apply(Namer.resolve(path), queueName)
     }
   }
 
@@ -221,7 +231,7 @@ object MultiReaderMemcache {
    * Helper for getting the right codec for the memcache protocol
    * @return the Kestrel codec
    */
-  def codec = Kestrel()
+  def codec = KestrelCodec()
 }
 
 /**
@@ -233,10 +243,8 @@ object MultiReaderMemcache {
  *
  * Example with a custom client builder:
  * {{{
- *   val name: com.twitter.finagle.Name = Resolver.eval(...)
- *   val va: Var[Addr] = name.bind()
  *   val readHandle =
- *     MultiReaderThrift(va, "the-queue")
+ *     MultiReaderThrift("/the/path", "the-queue")
  *       .clientBuilder(
  *         ClientBuilder()
  *           .codec(MultiReaderThrift.codec(ClientId("myClientName"))
@@ -259,6 +267,22 @@ object MultiReaderMemcache {
  */
 object MultiReaderThrift {
   /**
+   * Create a new MultiReader which dispatches requests to `dest` using the thrift protocol.
+   * 
+   * @param dest the name of the destination which requests are dispatched to.
+   *             See [[http://twitter.github.io/finagle/guide/Names.html Names]] for more detail.
+   * @param queueName the name of the queue to read from
+   * @param clientId the clientid to be used
+   *
+   * TODO: `dest` is eagerly resolved at client creation time, so name resolution does not
+   * behave dynamically with respect to local dtabs (unlike
+   * [[com.twitter.finagle.factory.BindingFactory]]. In practice this is not a problem since
+   * ReadHandle is not on the request path. Weights are discarded.
+   */
+  def apply(dest: String, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThrift =
+    apply(Resolver.eval(dest), queueName, clientId)
+
+  /**
    * Used to create a thrift based MultiReader with a ClientId when a custom
    * client builder will not be used.  If a custom client builder will be
    * used then it is more reasonable to use the version of apply that does
@@ -273,9 +297,7 @@ object MultiReaderThrift {
   def apply(dest: Name, queueName: String, clientId: Option[ClientId]): MultiReaderBuilderThrift = {
     dest match {
       case Name.Bound(va) => apply(va, queueName, clientId)
-      case Name.Path(_) => throw new UnsupportedOperationException(
-        "Failed to bind Name.Path in `MultiReaderThrift.apply`"
-      )
+      case Name.Path(path) => apply(Namer.resolve(path), queueName, clientId)
     }
   }
 
@@ -316,7 +338,7 @@ object MultiReaderThrift {
    * Helper for getting the right codec for the thrift protocol
    * @return the ThriftClientFramedCodec codec
    */
-  def codec(clientId: ClientId) = ThriftClientFramedCodec(Some(clientId))
+  def codec(clientId: ClientId): ThriftClientFramedCodecFactory = ThriftClientFramedCodec(Some(clientId))
 }
 
 /**
@@ -453,8 +475,6 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
 
   private[this] val logger = DefaultLogger
 
-  private[this] val ReturnEmptySet = Return(Set.empty[ReadHandle])
-
   protected[kestrel] def copy(config: MultiReaderConfig[Req, Rep]): Builder
 
   protected[kestrel] def withConfig(
@@ -516,16 +536,16 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
     }
 
     // Use a mutable Map so that we can modify it in-place on cluster change.
-    val currentHandles = mutable.Map.empty[SocketAddress, ReadHandle]
+    val currentHandles = mutable.Map.empty[Address, ReadHandle]
 
     val event = config.va.changes map {
-      case Addr.Bound(socketAddrs, _) => {
-        (currentHandles.keySet &~ socketAddrs) foreach { socketAddr =>
-          logger.info(s"Host ${socketAddr} left for reading queue ${config.queueName}")
+      case Addr.Bound(addrs, _) => {
+        (currentHandles.keySet &~ addrs) foreach { addr =>
+          logger.info(s"Host ${addr} left for reading queue ${config.queueName}")
         }
-        val newHandles = (socketAddrs &~ currentHandles.keySet) map { socketAddr =>
+        val newHandles = (addrs &~ currentHandles.keySet) map { addr =>
           val factory = baseClientBuilder
-            .hosts(socketAddr)
+            .addrs(addr)
             .buildFactory()
 
           val client = createClient(factory)
@@ -537,27 +557,37 @@ abstract class MultiReaderBuilder[Req, Rep, Builder] private[kestrel](
           }
 
           handle.error foreach { case NonFatal(cause) =>
-            logger.warning(s"Closing service factory for address: ${socketAddr}")
+            logger.warning(s"Closing service factory for address: ${addr}")
             factory.close()
           }
 
-          logger.info(s"Host ${socketAddr} joined for reading ${config.queueName} " +
+          logger.info(s"Host ${addr} joined for reading ${config.queueName} " +
             s"(handle = ${_root_.java.lang.System.identityHashCode(handle)}).")
 
-          (socketAddr, handle)
+          (addr, handle)
         }
 
         synchronized {
-          currentHandles.retain { case (addr, _) => socketAddrs.contains(addr) }
+          currentHandles.retain { case (addr, _) => addrs.contains(addr) }
           currentHandles ++= newHandles
         }
 
         Return(currentHandles.values.toSet)
       }
 
-      case Addr.Failed(t) => Throw(t)
+      case Addr.Neg =>
+        logger.info(s"Address could not be bound while trying to read from ${config.queueName}")
+        currentHandles.clear()
+        Return(currentHandles.values.toSet)
 
-      case _ => ReturnEmptySet
+      case Addr.Pending =>
+        // If resolution goes back to pending, it can mean there is a
+        // transient problem with service discovery. Keep the existing
+        // set.
+        logger.info(s"Pending name resolution for reading from ${config.queueName}")
+        Return(currentHandles.values.toSet)
+
+      case Addr.Failed(t) => Throw(t)
     }
 
     Var(Return(Set.empty), event)
@@ -580,10 +610,9 @@ abstract class MultiReaderBuilderMemcacheBase[Builder] private[kestrel](
 
   protected[kestrel] def defaultClientBuilder: MemcacheClientBuilder =
     ClientBuilder()
-      .codec(Kestrel())
+      .stack(Kestrel.client)
       .connectTimeout(1.minute)
       .requestTimeout(1.minute)
-      .hostConnectionLimit(1)
       .daemon(true)
 
   protected[kestrel] def createClient(factory: ServiceFactory[Command, Response]): Client =

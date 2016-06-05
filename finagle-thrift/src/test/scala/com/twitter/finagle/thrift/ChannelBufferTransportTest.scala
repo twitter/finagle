@@ -37,8 +37,8 @@ class ChannelBufferTransportTest extends FunSuite with MockitoSugar {
     val nReadable = 5
     when(buf.readableBytes).thenReturn(nReadable)
     val b = new Array[Byte](nReadable)
-    assert(t.read(b, 0, 10) === nReadable)
-    assert(t.read(b, 0, 3) === 3)
+    assert(t.read(b, 0, 10) == nReadable)
+    assert(t.read(b, 0, 3) == 3)
   }
 }
 

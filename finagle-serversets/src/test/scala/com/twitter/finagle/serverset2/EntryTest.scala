@@ -12,26 +12,26 @@ class EntryTest extends FunSuite {
 
   test("Endpoint.parseJson: ok input") {
     val eps = Endpoint.parseJson(exampleJson)
-    assert(eps.size === 3)
+    assert(eps.size == 3)
     val epByName = eps.flatMap { ep => ep.names.map(_ -> ep) } .toMap
-    assert(epByName.size === 3)
+    assert(epByName.size == 3)
 
-    assert(epByName(null) ===
+    assert(epByName(null) ==
       Endpoint(Array(null), "10.0.0.3", port,
         0, Endpoint.Status.Alive, ""))
 
-    assert(epByName("aurora") ===
+    assert(epByName("aurora") ==
       Endpoint(Array("aurora"), "10.0.0.1", port,
         0, Endpoint.Status.Alive, ""))
 
-    assert(epByName("http") ===
+    assert(epByName("http") ==
       Endpoint(Array("http"), "10.0.0.2", port,
         0, Endpoint.Status.Alive, ""))
   }
 
   test("Endpoint.parseJson: ok input same hostports") {
     val eps = Endpoint.parseJson(exampleJson2)
-    assert(eps ===
+    assert(eps ==
       Seq(Endpoint(Array(null, "aurora", "http"), "10.0.0.1", port,
         0, Endpoint.Status.Alive, "")))
   }

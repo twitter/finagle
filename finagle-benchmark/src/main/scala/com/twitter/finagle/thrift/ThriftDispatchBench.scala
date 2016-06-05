@@ -4,7 +4,6 @@ import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.finagle.benchmark.thriftscala.Hello
 import com.twitter.finagle.Service
 import com.twitter.finagle.stats.NullStatsReceiver
-import com.twitter.finagle.thrift.ThriftClientRequest
 import com.twitter.util.{Await, Future}
 import java.util.Arrays
 import org.apache.thrift.protocol._

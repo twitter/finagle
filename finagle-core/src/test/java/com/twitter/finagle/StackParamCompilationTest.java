@@ -5,6 +5,9 @@ import java.net.SocketAddress;
 import scala.Option;
 import scala.Some;
 
+import org.junit.Test;
+
+import com.twitter.concurrent.AsyncSemaphore;
 import com.twitter.finagle.builder.ClientBuilder;
 import com.twitter.finagle.client.DefaultPool;
 import com.twitter.finagle.client.StackClient;
@@ -27,10 +30,15 @@ import com.twitter.finagle.param.Stats;
 import com.twitter.finagle.param.Timer;
 import com.twitter.finagle.param.Tracer;
 import com.twitter.finagle.server.Listener;
+import com.twitter.finagle.service.Backoff;
 import com.twitter.finagle.service.ExpiringService;
 import com.twitter.finagle.service.FailFastFactory;
 import com.twitter.finagle.service.FailureAccrualFactory;
+import com.twitter.finagle.service.Retries;
+import com.twitter.finagle.service.RetryBudgets;
+import com.twitter.finagle.service.RetryPolicy;
 import com.twitter.finagle.service.TimeoutFilter;
+import com.twitter.finagle.service.exp.FailureAccrualPolicy;
 import com.twitter.finagle.socks.SocksProxyFlags;
 import com.twitter.finagle.ssl.Engine;
 import com.twitter.finagle.stats.NullStatsReceiver;
@@ -38,17 +46,24 @@ import com.twitter.finagle.transport.Transport;
 import com.twitter.finagle.util.Rngs;
 import com.twitter.util.Duration;
 import com.twitter.util.Function0;
+import com.twitter.util.NullMonitor;
+import com.twitter.util.RootMonitor;
 
 public class StackParamCompilationTest {
-  void testParams() {
+
+  @Test
+  public void testParams() {
     StackClient<String, String> client =
       ClientBuilder.<String, String>stackClientOfCodec(null)
         .configured(new Label("").mk())
         .configured(new Timer(com.twitter.finagle.util.DefaultTimer.twitter()).mk())
         .configured(new Logger(java.util.logging.Logger.getLogger("com.twitter.finagle")).mk())
         .configured(new Stats(com.twitter.finagle.stats.DefaultStatsReceiver.get()).mk())
-        .configured(new Monitor(com.twitter.finagle.util.DefaultMonitor.get()).mk())
+        .configured(new Monitor(RootMonitor.getInstance()).mk())
+        .configured(new Monitor(NullMonitor.getInstance()).mk())
         .configured(new Reporter(com.twitter.finagle.util.LoadedReporterFactory.get()).mk())
+        .configured(new Retries.Budget(RetryBudgets.EMPTY).mk())
+        .configured(new Retries.Policy(RetryPolicy.Never()).mk())
         .configured(new Tracer(com.twitter.finagle.tracing.DefaultTracer.get()).mk())
         .configured(new FactoryToService.Enabled(true).mk())
         .configured(new IdleConnectionFilter.Param(Option.<OpenConnectionsThresholds>empty()).mk())
@@ -70,15 +85,30 @@ public class StackParamCompilationTest {
           }).mk())
         .configured(new TimeoutFactory.Param(Duration.Top()).mk())
         .configured(new MaskCancelFilter.Param(false).mk())
-        .configured(new RequestSemaphoreFilter.Param(Integer.MAX_VALUE).mk())
+        .configured(new RequestSemaphoreFilter.Param(
+          new Some<AsyncSemaphore>(new AsyncSemaphore(Integer.MAX_VALUE, 0))).mk())
         .configured(new LoadBalancerFactory.HostStats(new NullStatsReceiver()).mk())
         .configured(new LoadBalancerFactory.Param(Balancers.p2c(5, Rngs.threadLocal())).mk())
         .configured(new Netty3Transporter.ChannelFactory(null).mk())
-        .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get()).mk())
+        .configured(new Netty3Timer(com.twitter.finagle.util.DefaultTimer.get().netty()).mk())
         .configured(new Listener.Backlog(Option.empty()).mk())
         .configured(new ExpiringService.Param(Duration.Top(), Duration.Top()).mk())
-        .configured(new FailFastFactory.FailFast(true).mk())
+          .configured(new FailFastFactory.FailFast(true).mk())
         .configured(FailureAccrualFactory.Param(10, Duration.Bottom()).mk())
+        .configured(FailureAccrualFactory.Param(new Function0<FailureAccrualPolicy>() {
+          @Override
+          public FailureAccrualPolicy apply() {
+            return FailureAccrualPolicy.consecutiveFailures(
+                3, Backoff.constant(Duration.fromSeconds(1)));
+          }
+        }).mk())
+        .configured(FailureAccrualFactory.Param(new Function0<FailureAccrualPolicy>() {
+          @Override
+          public FailureAccrualPolicy apply() {
+            return FailureAccrualPolicy.successRate(
+                0.99, 100, Backoff.constant(Duration.fromSeconds(1)));
+          }
+        }).mk())
         .configured(new TimeoutFilter.Param(Duration.Top()).mk())
         .configured(new Transport.BufferSizes(Option.empty(), Option.empty()).mk())
         .configured(new Transport.Liveness(Duration.Top(), Duration.Top(), Option.empty()).mk())
@@ -90,9 +120,15 @@ public class StackParamCompilationTest {
             Option.<scala.Function1<SocketAddress, Engine>>empty()
           ).mk())
         .configured(new Transport.TLSServerEngine(Option.<scala.Function0<Engine>>empty()).mk());
+
+    StackClient<String, String> client1 =
+        new ClientBuilder()
+        .failFast(true)
+        .<String, String>stackClientOfCodec(null);
   }
 
-  void testModule1() {
+  @Test
+  public void testModule1() {
     // or use FactoryToService.Enabled$.MODULE$.param
     Stack.Param<FactoryToService.Enabled> param =
       new FactoryToService.Enabled(true).mk()._2();

@@ -27,7 +27,7 @@ private[client] case class ClientConfig(
     val password: Option[Buf],
     val timer: Timer)
 {
-  def toMap = Map(
+  def toMap: Map[String, Any] = Map(
     "hosts" -> hosts,
     "sessionTimeout" -> sessionTimeout,
     "statsReceiver" -> statsReceiver,
@@ -142,7 +142,7 @@ private[client] class ClientBuilder(config: ClientConfig) {
    * @return configured ClientBuilder
    */
   def hosts(zkHosts: Seq[InetSocketAddress]): ClientBuilder =
-    hosts(zkHosts map { h => "%s:%d,".format(h.getHostName, h.getPort) } mkString)
+    hosts(zkHosts.map { h => "%s:%d,".format(h.getHostName, h.getPort) }.mkString)
 
   /**
    * Configure builder with a session timeout.

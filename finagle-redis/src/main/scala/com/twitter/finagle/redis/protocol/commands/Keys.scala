@@ -1,66 +1,75 @@
 package com.twitter.finagle.redis.protocol
 
 import _root_.java.lang.{Long => JLong}
+import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
+import com.twitter.io.Buf
 import com.twitter.util.Time
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
-case class Del(keys: Seq[ChannelBuffer]) extends StrictKeysCommand {
-  def command = Commands.DEL
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(CommandBytes.DEL +: keys)
+case class Del(bufs: Seq[Buf]) extends StrictKeysCommand {
+  def keys: Seq[ChannelBuffer] = bufs.map(ChannelBufferBuf.Owned.extract)
+  def command: String = Commands.DEL
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(CommandBytes.DEL +: bufs)
 }
 object Del {
-  def apply(args: => Seq[Array[Byte]]) = new Del(args.map(ChannelBuffers.wrappedBuffer(_)))
+  def apply(args: => Seq[Array[Byte]]) = new Del(args.map(Buf.ByteArray.Owned(_)))
 }
 
-case class Dump(key: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.DUMP
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.DUMP, key))
+case class Dump(buf: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.DUMP
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.DUMP, buf))
 }
 object Dump {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "DUMP")
-    new Dump(ChannelBuffers.wrappedBuffer(list(0)))
+    new Dump(Buf.ByteArray.Owned(list(0)))
   }
 }
 
-case class Exists(key: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.EXISTS
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXISTS, key))
+case class Exists(buf: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.EXISTS
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.EXISTS, buf))
 }
 object Exists {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "EXISTS")
-    new Exists(ChannelBuffers.wrappedBuffer(list(0)))
+    new Exists(Buf.ByteArray.Owned(list(0)))
   }
 }
 
-case class Expire(key: ChannelBuffer, seconds: Long) extends StrictKeyCommand {
-  def command = Commands.EXPIRE
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXPIRE, key,
-      StringToChannelBuffer(seconds.toString)))
+case class Expire(buf: Buf, seconds: Long) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.EXPIRE
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(
+      Seq(CommandBytes.EXPIRE, buf, StringToBuf(seconds.toString)))
 }
 object Expire {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "EXPIRE")
     RequireClientProtocol.safe {
-      new Expire(ChannelBuffers.wrappedBuffer(list(0)),
-        NumberFormat.toLong(BytesToString(list(1))))
+      new Expire(Buf.ByteArray.Owned(list(0)), NumberFormat.toLong(BytesToString(list(1))))
     }
   }
 }
 
-case class ExpireAt(key: ChannelBuffer, timestamp: Time) extends StrictKeyCommand {
-  def command = Commands.EXPIREAT
+case class ExpireAt(buf: Buf, timestamp: Time) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.EXPIREAT
 
   val seconds = timestamp.inSeconds
 
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.EXPIREAT, key,
-      StringToChannelBuffer(seconds.toString)))
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(
+      Seq(CommandBytes.EXPIREAT, buf, StringToBuf(seconds.toString)))
 }
 object ExpireAt {
   def apply(args: Seq[Array[Byte]]) = {
@@ -69,68 +78,75 @@ object ExpireAt {
     val seconds = RequireClientProtocol.safe {
       Time.fromSeconds(NumberFormat.toInt(secondsString))
     }
-    new ExpireAt(ChannelBuffers.wrappedBuffer(list(0)), seconds)
+    new ExpireAt(Buf.ByteArray.Owned(list(0)), seconds)
   }
 }
 
-case class Keys(pattern: ChannelBuffer) extends Command {
-  def command = Commands.KEYS
-  RequireClientProtocol(pattern != null && pattern.readableBytes > 0, "Pattern must be specified")
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.KEYS, pattern))
+case class Keys(pattern: Buf) extends Command {
+  def command: String = Commands.KEYS
+  RequireClientProtocol(pattern != null && pattern.length > 0, "Pattern must be specified")
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.KEYS, pattern))
 }
 object Keys {
-  def apply(args: Seq[Array[Byte]]) = new Keys(ChannelBuffers.wrappedBuffer(args.head))
+  def apply(args: Seq[Array[Byte]]) = new Keys(Buf.ByteArray.Owned(args.head))
 }
 
-case class Move(key: ChannelBuffer, db: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.MOVE
-  RequireClientProtocol(db != null && db.readableBytes > 0, "Database must be specified")
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.MOVE, key, db))
+case class Move(buf: Buf, db: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.MOVE
+  RequireClientProtocol(db != null && db.length > 0, "Database must be specified")
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.MOVE, buf, db))
 }
 object Move {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "MOVE")
-    new Move(ChannelBuffers.wrappedBuffer(list(0)),
-      ChannelBuffers.wrappedBuffer(list(1)))
+    new Move(Buf.ByteArray.Owned(list(0)),
+      Buf.ByteArray.Owned(list(1)))
   }
 }
 
-case class Persist(key: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.PERSIST
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.PERSIST, key))
+case class Persist(buf: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.PERSIST
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.PERSIST, buf))
 }
 object Persist {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "PERSIST")
-    new Persist(ChannelBuffers.wrappedBuffer(list(0)))
+    new Persist(Buf.ByteArray.Owned(list(0)))
   }
 }
 
-case class PExpire(key: ChannelBuffer, milliseconds: Long) extends StrictKeyCommand {
-  def command = Commands.PEXPIRE
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.PEXPIRE, key,
-      StringToChannelBuffer(milliseconds.toString)))
+case class PExpire(buf: Buf, milliseconds: Long) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.PEXPIRE
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(
+      Seq(CommandBytes.PEXPIRE, buf,
+      StringToBuf(milliseconds.toString)))
 }
 object PExpire {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "PEXPIRE")
     RequireClientProtocol.safe {
-      new PExpire(ChannelBuffers.wrappedBuffer(list(0)),
+      new PExpire(Buf.ByteArray.Owned(list(0)),
         NumberFormat.toLong(BytesToString(list(1))))
     }
   }
 }
 
-case class PExpireAt(key: ChannelBuffer, timestamp: Time) extends StrictKeyCommand {
-  def command = Commands.PEXPIREAT
+case class PExpireAt(buf: Buf, timestamp: Time) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.PEXPIREAT
 
   val milliseconds = timestamp.inMilliseconds
 
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.PEXPIREAT, key,
-      StringToChannelBuffer(milliseconds.toString)))
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.PEXPIREAT, buf,
+      StringToBuf(milliseconds.toString)))
 }
 object PExpireAt {
   def apply(args: Seq[Array[Byte]]) = {
@@ -139,66 +155,70 @@ object PExpireAt {
     val milliseconds = RequireClientProtocol.safe {
       Time.fromMilliseconds(NumberFormat.toLong(millisecondsString))
     }
-    new PExpireAt(ChannelBuffers.wrappedBuffer(list(0)), milliseconds)
+    new PExpireAt(Buf.ByteArray.Owned(list(0)), milliseconds)
   }
 }
 
-case class PTtl(key: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.PTTL
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.PTTL, key))
+case class PTtl(buf: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.PTTL
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.PTTL, buf))
 }
 object PTtl {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "PTTL")
-    new PTtl(ChannelBuffers.wrappedBuffer(list(0)))
+    new PTtl(Buf.ByteArray.Owned(list(0)))
   }
 }
 
 case class Randomkey() extends Command {
-  def command = Commands.RANDOMKEY
-  val toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.RANDOMKEY))
+  def command: String = Commands.RANDOMKEY
+  val toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.RANDOMKEY))
 }
 
-case class Rename(key: ChannelBuffer, newkey: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.RENAME
-  RequireClientProtocol(newkey != null && newkey.readableBytes > 0, "New key must not be empty")
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.RENAME, key, newkey))
+case class Rename(buf: Buf, newkey: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.RENAME
+  RequireClientProtocol(newkey != null && newkey.length > 0, "New key must not be empty")
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.RENAME, buf, newkey))
 }
 object Rename {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "RENAME")
-    new Rename(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
+    new Rename(Buf.ByteArray.Owned(list(0)), Buf.ByteArray.Owned(list(1)))
   }
 }
 
-case class RenameNx(key: ChannelBuffer, newkey: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.RENAMENX
-  RequireClientProtocol(newkey != null && newkey.readableBytes > 0, "New key must not be empty")
-  def toChannelBuffer =
-    RedisCodec.toUnifiedFormat(Seq(CommandBytes.RENAMENX, key, newkey))
+case class RenameNx(buf: Buf, newkey: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.RENAMENX
+  RequireClientProtocol(newkey != null && newkey.length > 0, "New key must not be empty")
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.RENAMENX, buf, newkey))
 }
 object RenameNx {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "RENAMENX")
-    new RenameNx(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
+    new RenameNx(Buf.ByteArray.Owned(list(0)), Buf.ByteArray.Owned(list(1)))
   }
 }
 
-case class Scan(cursor: Long, count: Option[JLong] = None, pattern: Option[ChannelBuffer] = None)
+case class Scan(cursor: Long, count: Option[JLong] = None, pattern: Option[Buf] = None)
 extends Command {
-  def command = Commands.SCAN
-  def toChannelBuffer = {
-    val bufs = Seq(CommandBytes.SCAN, StringToChannelBuffer(cursor.toString))
+  def command: String = Commands.SCAN
+  def toChannelBuffer: ChannelBuffer = {
+    val bufs = Seq(CommandBytes.SCAN, StringToBuf(cursor.toString))
     val withCount = count match {
-      case Some(count) => bufs ++ Seq(Count.COUNT_CB, StringToChannelBuffer(count.toString))
+      case Some(count) => bufs ++ Seq(Count.COUNT_BUF, StringToBuf(count.toString))
       case None        => bufs
     }
     val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(Pattern.PATTERN_CB, pattern)
+      case Some(pattern) => withCount ++ Seq(Pattern.PATTERN_BUF, pattern)
       case None          => withCount
     }
-    RedisCodec.toUnifiedFormat(withPattern)
+    RedisCodec.bufToUnifiedChannelBuffer(withPattern)
   }
 }
 object Scan {
@@ -220,30 +240,34 @@ object Scan {
     val (args0, args1) = findArgs(sArgs)
     RequireClientProtocol(args0.size > 1, "Length of arguments must be > 1")
     val count = findCount(args0, args1)
-    val pattern = findPattern(args0, args1).map(StringToChannelBuffer(_))
+    val pattern = findPattern(args0, args1).map(StringToBuf(_))
     new Scan(cursor, count, pattern)
   }
 }
 
-case class Ttl(key: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.TTL
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.TTL, key))
+case class Ttl(buf: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.TTL
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.TTL, buf))
 }
 object Ttl {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "TTL")
-    new Ttl(ChannelBuffers.wrappedBuffer(list(0)))
+    new Ttl(Buf.ByteArray.Owned(list(0)))
   }
 }
 
-case class Type(key: ChannelBuffer) extends StrictKeyCommand {
-  def command = Commands.TYPE
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.TYPE, key))
+case class Type(buf: Buf) extends StrictKeyCommand {
+  def key: ChannelBuffer = ChannelBufferBuf.Owned.extract(buf)
+  def command: String = Commands.TYPE
+  def toChannelBuffer: ChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.TYPE, buf))
 }
 object Type {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 1, "TYPE")
-    new Type(ChannelBuffers.wrappedBuffer(list(0)))
+    new Type(Buf.ByteArray.Owned(list(0)))
   }
 }
 

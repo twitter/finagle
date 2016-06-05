@@ -27,11 +27,11 @@ class StatsFilterTest extends FunSuite {
       Await.result(filter(Request()))
     }
 
-    assert(receiver.counters(Seq("status", "404")) === 1)
-    assert(receiver.counters(Seq("status", "4XX")) === 1)
+    assert(receiver.counters(Seq("status", "404")) == 1)
+    assert(receiver.counters(Seq("status", "4XX")) == 1)
     // TODO: until we can mock stopwatches
     //      receiver.stats(Seq("time", "404"))      must_== Seq(0.0)
     //      receiver.stats(Seq("time", "4XX"))      must_== Seq(0.0)
-    assert(receiver.stats(Seq("response_size")) === Seq(5.0))
+    assert(receiver.stats(Seq("response_size")) == Seq(5.0))
   }
 }

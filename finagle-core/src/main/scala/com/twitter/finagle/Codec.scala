@@ -1,12 +1,6 @@
 package com.twitter.finagle
 
-/**
- * Codecs provide protocol encoding and decoding via netty pipelines
- * as well as a standard filter stack that are applied to services
- * from this codec.
- */
-
-import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
+import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.netty3.transport.ChannelTransport
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing.TraceInitializerFilter
@@ -16,7 +10,9 @@ import java.net.{InetSocketAddress, SocketAddress}
 import org.jboss.netty.channel.{Channel, ChannelPipeline, ChannelPipelineFactory}
 
 /**
- * Superclass for all codecs.
+ * Codecs provide protocol encoding and decoding via netty pipelines
+ * as well as a standard filter stack that is applied to services
+ * from this codec.
  */
 trait Codec[Req, Rep] {
   /**
@@ -41,31 +37,39 @@ trait Codec[Req, Rep] {
    * Prepare a connection factory. Used to allow codec modifications
    * to the service at the bottom of the stack (connection level).
    */
+  final def prepareConnFactory(underlying: ServiceFactory[Req, Rep]): ServiceFactory[Req, Rep] =
+    prepareConnFactory(underlying, Stack.Params.empty)
+
   def prepareConnFactory(
-    underlying: ServiceFactory[Req, Rep]
-  ): ServiceFactory[Req, Rep] =
-    underlying
+    underlying: ServiceFactory[Req, Rep],
+    params: Stack.Params
+  ): ServiceFactory[Req, Rep] = underlying
 
   /**
    * Note: the below ("raw") interfaces are low level, and require a
    * good understanding of finagle internals to implement correctly.
    * Proceed with care.
    */
-
   def newClientTransport(ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
     new ChannelTransport(ch)
 
-  def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
-    new SerialClientDispatcher(transport.cast[Req, Rep])
+  final def newClientDispatcher(transport: Transport[Any, Any]): Service[Req, Rep] =
+    newClientDispatcher(transport, Stack.Params.empty)
 
-  def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params): Service[Req, Rep] =
-    newClientDispatcher(transport)
+  def newClientDispatcher(
+    transport: Transport[Any, Any],
+    params: Stack.Params
+  ): Service[Req, Rep] =
+    new SerialClientDispatcher(
+      Transport.cast[Req, Rep](transport),
+      params[param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+    )
 
   def newServerDispatcher(
     transport: Transport[Any, Any],
     service: Service[Req, Rep]
   ): Closable =
-    new SerialServerDispatcher[Req, Rep](transport.cast[Rep, Req], service)
+    new SerialServerDispatcher[Req, Rep](Transport.cast[Rep, Req](transport), service)
 
   /**
    * Is this Codec OK for failfast? This is a temporary hack to

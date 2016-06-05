@@ -1,6 +1,7 @@
 package com.twitter.finagle.stats
 
 import com.twitter.common.metrics.{Histogram, Metrics}
+import com.twitter.common.stats.{Stats, Stat => CStat}
 import com.twitter.finagle.benchmark.StdBenchAnnotations
 import com.twitter.ostrich.stats.StatsSummary
 import com.twitter.util.events.Sink
@@ -81,6 +82,10 @@ class StatsReceiverBenchmark extends StdBenchAnnotations {
   @Benchmark
   def incrStatsCommons(state: CounterState): Unit =
     state.statsCounter.incr()
+
+  @Benchmark
+  def queryStatsCommons(state: QueryState): java.lang.Iterable[CStat[_]] =
+    state.statsGet()
 }
 
 object StatsReceiverBenchmark {
@@ -133,23 +138,27 @@ object StatsReceiverBenchmark {
     def ostrichGet(): StatsSummary = ostrich.repr.get()
     def metricsGet(): util.Map[String, Number] = metrics.registry.sample()
     def metricsBucketedGet(): util.Map[String, Number] = metricsBucketed.registry.sample()
+    def statsGet(): java.lang.Iterable[CStat[_]] = Stats.getVariables()
 
     @Setup(Level.Trial)
     def setup(): Unit = {
       val oStat = ostrich.stat("my_stat")
       val mStat = metrics.stat("my_stat")
       val mbStat = metricsBucketed.stat("my_stat")
+      val sStat = stats.stat("my_stat")
       (1 to 100000).foreach { x =>
         val rand = rng.nextInt(x)
         oStat.add(rand)
         mStat.add(rand)
         mbStat.add(rand)
+        sStat.add(rand)
       }
     }
 
     @TearDown(Level.Trial)
     def teardown(): Unit = {
       ostrich.repr.clearAll()
+      Stats.flush()
     }
   }
 }

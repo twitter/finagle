@@ -5,7 +5,7 @@ import com.twitter.common.zookeeper.{ServerSet, ServerSetImpl, ZooKeeperClient}
 import com.twitter.finagle.{Announcer, Announcement}
 import com.twitter.util.{Future, NonFatal, Promise}
 import java.net.InetSocketAddress
-import java.util.concurrent.{BlockingQueue, LinkedBlockingQueue}
+import java.util.concurrent.LinkedBlockingQueue
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 

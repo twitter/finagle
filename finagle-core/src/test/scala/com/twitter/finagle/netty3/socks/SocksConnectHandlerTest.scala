@@ -1,7 +1,8 @@
 package com.twitter.finagle.netty3.socks
 
 import com.twitter.finagle.ConnectionFailedException
-import com.twitter.finagle.socks.UsernamePassAuthenticationSetting
+import com.twitter.finagle.netty3.SocketAddressResolveHandler
+import com.twitter.finagle.socks.{Unauthenticated, UsernamePassAuthenticationSetting}
 import java.net.{SocketAddress, InetAddress, InetSocketAddress}
 import java.util.Arrays
 import org.jboss.netty.buffer.{ChannelBuffers, ChannelBuffer}
@@ -65,19 +66,19 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
       verify(ctx).sendUpstream(ec.capture)
       val e = ec.getValue
 
-      assert(e.getChannel === channel)
-      assert(e.getState === ChannelState.CONNECTED)
-      assert(e.getValue === remoteAddress)
+      assert(e.getChannel == channel)
+      assert(e.getState == ChannelState.CONNECTED)
+      assert(e.getValue == remoteAddress)
     }
 
     def checkDidClose() {
       val ec = ArgumentCaptor.forClass(classOf[DownstreamChannelStateEvent])
       verify(pipeline).sendDownstream(ec.capture)
       val e = ec.getValue
-      assert(e.getChannel === channel)
-      assert(e.getFuture === closeFuture)
-      assert(e.getState === ChannelState.OPEN)
-      assert(e.getValue === java.lang.Boolean.FALSE)
+      assert(e.getChannel == channel)
+      assert(e.getFuture == closeFuture)
+      assert(e.getState == ChannelState.OPEN)
+      assert(e.getValue == java.lang.Boolean.FALSE)
     }
   }
 
@@ -91,10 +92,10 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
     verify(ctx).sendDownstream(ec.capture)
     val e = ec.getValue
 
-    assert(e.getChannel === channel)
+    assert(e.getChannel == channel)
     assert(e.getFuture != connectFuture) // this is proxied
-    assert(e.getState === ChannelState.CONNECTED)
-    assert(e.getValue === proxyAddress)
+    assert(e.getState == ChannelState.CONNECTED)
+    assert(e.getValue == proxyAddress)
 
   }
 
@@ -189,7 +190,7 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
     assert(!connectFuture.isDone)
     e.getFuture.setFailure(exc)
     assert(connectFuture.isDone)
-    assert(connectFuture.getCause === exc)
+    assert(connectFuture.getCause == exc)
   }
 
   test("SocksConnectHandler should with username and password authentication when connect is successful do SOCKS negotiation") {
@@ -270,5 +271,28 @@ class SocksConnectHandlerTest extends FunSuite with MockitoSugar {
       assert(connectFuture.getCause.isInstanceOf[ConnectionFailedException])
       checkDidClose()
     }
+  }
+
+  test("SocksConnectHandler should not add socket address resolve handler when proxy address is resolved") {
+    val pipeline = new DefaultChannelPipeline
+    SocksConnectHandler.addHandler(
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 2222),
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
+      Seq(Unauthenticated),
+      pipeline
+    )
+
+    assert(pipeline.get("socketAddressResolver") == null)
+  }
+
+  test("SocksConnectHandler should add socket address resolve handler when proxy address is unresolved") {
+    val pipeline = new DefaultChannelPipeline
+    SocksConnectHandler.addHandler(
+      InetSocketAddress.createUnresolved("meow.meow", 2222),
+      new InetSocketAddress(InetAddress.getLoopbackAddress, 80),
+      Seq(Unauthenticated),
+      pipeline
+    )
+    assert(pipeline.get("socketAddressResolver").isInstanceOf[SocketAddressResolveHandler])
   }
 }

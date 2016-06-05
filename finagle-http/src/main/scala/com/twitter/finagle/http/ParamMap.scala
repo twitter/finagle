@@ -86,9 +86,9 @@ abstract class ParamMap
   def getLongOrElse(name: String, default: => Long): Long =
     getLong(name) getOrElse default
 
-  /** Get Boolean value.  True is "1" or "true", false is all other values. */
+  /** Get Boolean value.  Uses StringUtil.toBoolean to parse. */
   def getBoolean(name: String): Option[Boolean] =
-    get(name) map { _.toLowerCase } map { v => v == "1" || v == "t" || v == "true" }
+    get(name) map { StringUtil.toBoolean(_) }
 
   /** Get Boolean value or default. Equivalent to getBoolean(name).getOrElse(default). */
   def getBooleanOrElse(name: String, default: => Boolean): Boolean =
@@ -137,7 +137,7 @@ object MapParamMap {
     new MapParamMap(map.mapValues { value => Seq(value) })
 
   private[http] def tuplesToMultiMap(
-      tuples: Seq[Tuple2[String, String]]
+    tuples: Seq[Tuple2[String, String]]
   ): Map[String, Seq[String]] = {
     tuples
       .groupBy { case (k, v) => k }
@@ -235,7 +235,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
   // Get iterable for JMap, which might be null
   private def jiterator(params: JMap[String, JList[String]]): Iterator[(String, String)] =
     params.entrySet.asScala.flatMap { entry =>
-      entry.getValue.asScala.map { value =>
+      entry.getValue.asScala map { value =>
         (entry.getKey, value)
       }
     }.toIterator

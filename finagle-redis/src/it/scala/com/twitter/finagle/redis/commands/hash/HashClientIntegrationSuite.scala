@@ -15,32 +15,32 @@ final class HashClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform hash set and get commands", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hSet(foo, bar, baz))
-      assert(CBToString(Await.result(client.hGet(foo, bar)).get) === "baz")
-      assert(Await.result(client.hGet(foo, boo)) === None)
-      assert(Await.result(client.hGet(bar, baz)) === None)
+      assert(CBToString(Await.result(client.hGet(foo, bar)).get) == "baz")
+      assert(Await.result(client.hGet(foo, boo)) == None)
+      assert(Await.result(client.hGet(bar, baz)) == None)
     }
   }
 
   test("Correctly perform hash set and get an empty value", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hSet(foo, bar, StringToChannelBuffer("")))
-      assert(CBToString(Await.result(client.hGet(foo, bar)).get) === "")
+      assert(CBToString(Await.result(client.hGet(foo, bar)).get) == "")
     }
   }
 
   test("Correctly perform hash and field exists", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hSet(foo, bar, baz))
-      assert(Await.result(client.hExists(foo, bar)) === true)
-      assert(Await.result(client.hExists(foo, baz)) === false)
+      assert(Await.result(client.hExists(foo, bar)) == true)
+      assert(Await.result(client.hExists(foo, baz)) == false)
     }
   }
 
   test("Correctly delete a single field", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hSet(foo, bar, baz))
-      assert(Await.result(client.hDel(foo, Seq(bar))) === 1)
-      assert(Await.result(client.hDel(foo, Seq(baz))) === 0)
+      assert(Await.result(client.hDel(foo, Seq(bar))) == 1)
+      assert(Await.result(client.hDel(foo, Seq(baz))) == 0)
     }
   }
 
@@ -48,7 +48,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.hSet(foo, bar, baz))
       Await.result(client.hSet(foo, boo, moo))
-      assert(Await.result(client.hDel(foo, Seq(bar, boo))) === 2)
+      assert(Await.result(client.hDel(foo, Seq(bar, boo))) == 2)
     }
   }
 
@@ -57,7 +57,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       Await.result(client.hSet(foo, bar, baz))
       Await.result(client.hSet(foo, boo, moo))
       assert(CBToString.fromList(
-        Await.result(client.hMGet(foo, Seq(bar, boo))).toList) === Seq("baz", "moo"))
+        Await.result(client.hMGet(foo, Seq(bar, boo))).toList) == Seq("baz", "moo"))
     }
   }
 
@@ -65,7 +65,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.hMSet(foo, Map(baz -> bar, moo -> boo)))
       assert(CBToString.fromList(
-        Await.result(client.hMGet(foo, Seq(baz, moo))).toList) === Seq("bar", "boo"))
+        Await.result(client.hMGet(foo, Seq(baz, moo))).toList) == Seq("bar", "boo"))
     }
   }
 
@@ -77,7 +77,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.hMSet(foo, Map(baz -> bar, moo -> StringToChannelBuffer(""))))
       assert(CBToString.fromList(
-        Await.result(client.hMGet(foo, Seq(baz, moo))).toList) === Seq("bar", ""))
+        Await.result(client.hMGet(foo, Seq(baz, moo))).toList) == Seq("bar", ""))
     }
   }
 
@@ -86,7 +86,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       Await.result(client.hSet(foo, bar, baz))
       Await.result(client.hSet(foo, boo, moo))
       assert(CBToString.fromTuples(
-        Await.result(client.hGetAll(foo))) === Seq(("bar", "baz"), ("boo", "moo")))
+        Await.result(client.hGetAll(foo))) == Seq(("bar", "baz"), ("boo", "moo")))
     }
   }
 
@@ -95,33 +95,33 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       Await.result(client.hSet(foo, bar, StringToChannelBuffer("")))
       Await.result(client.hSet(foo, boo, moo))
       assert(CBToString.fromTuples(
-        Await.result(client.hGetAll(foo))) === Seq(("bar", ""), ("boo", "moo")))
+        Await.result(client.hGetAll(foo))) == Seq(("bar", ""), ("boo", "moo")))
     }
   }
 
   test("Correctly increment a value", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hIncrBy(foo, num, 4L))
-      assert(Await.result(client.hGet(foo, num)) === Some(StringToChannelBuffer(4L.toString)))
+      assert(Await.result(client.hGet(foo, num)) == Some(StringToChannelBuffer(4L.toString)))
       Await.result(client.hIncrBy(foo, num, 4L))
-      assert(Await.result(client.hGet(foo, num)) === Some(StringToChannelBuffer(8L.toString)))
+      assert(Await.result(client.hGet(foo, num)) == Some(StringToChannelBuffer(8L.toString)))
     }
   }
 
   test("Correctly do a setnx", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hDel(foo, Seq(bar)))
-      assert(Await.result(client.hSetNx(foo,bar, baz)) === 1)
-      assert(Await.result(client.hSetNx(foo,bar, moo)) === 0)
-      assert(CBToString(Await.result(client.hGet(foo, bar)).get) === "baz")
+      assert(Await.result(client.hSetNx(foo,bar, baz)) == 1)
+      assert(Await.result(client.hSetNx(foo,bar, moo)) == 0)
+      assert(CBToString(Await.result(client.hGet(foo, bar)).get) == "baz")
     }
   }
 
   test("Correctly get all the values", RedisTest, ClientTest) {
     withRedisClient { client =>
-      Await.result(client.del(Seq(foo)))
+      Await.result(client.dels(Seq(bufFoo)))
       Await.result(client.hMSet(foo, Map(baz -> bar, moo -> boo)))
-      assert(Await.result(client.hVals(foo)).map(CBToString(_)) === Seq("bar", "boo"))
+      assert(Await.result(client.hVals(foo)).map(CBToString(_)) == Seq("bar", "boo"))
     }
   }
 
@@ -130,16 +130,16 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       Await.result(client.hSet(foo, bar, baz))
       Await.result(client.hSet(foo, boo, moo))
       val res = Await.result(client.hScan(foo, 0, None, None))
-      assert(CBToString(res(1)) === "bar")
+      assert(CBToString(res(1)) == "bar")
       val withCount = Await.result(client.hScan(foo, 0, Some(2), None))
-      assert(CBToString(withCount(0)) === "0")
-      assert(CBToString(withCount(1)) === "bar")
-      assert(CBToString(withCount(2)) === "boo")
+      assert(CBToString(withCount(0)) == "0")
+      assert(CBToString(withCount(1)) == "bar")
+      assert(CBToString(withCount(2)) == "boo")
       val pattern = StringToChannelBuffer("b*")
       val withPattern = Await.result(client.hScan(foo, 0, None, Some(pattern)))
-      assert(CBToString(withCount(0)) === "0")
-      assert(CBToString(withCount(1)) === "bar")
-      assert(CBToString(withCount(2)) === "boo")
+      assert(CBToString(withCount(0)) == "0")
+      assert(CBToString(withCount(1)) == "bar")
+      assert(CBToString(withCount(2)) == "boo")
     }
   }
 }

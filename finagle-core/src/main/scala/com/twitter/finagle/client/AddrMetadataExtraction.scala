@@ -4,7 +4,7 @@ import com.twitter.finagle.factory.BindingFactory
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.service.DelayedFactory
 import com.twitter.finagle.{Addr, Name, Stack, Stackable, ServiceFactory}
-import com.twitter.util.{Future, Return, Try}
+import com.twitter.util.Future
 
 /**
  * Extraction of [[com.twitter.finagle.Addr.Metadata]] from a

@@ -2,7 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.finagle.Service
 import com.twitter.io.Reader
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Future
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, stub, verify}

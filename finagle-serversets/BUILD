@@ -1,5 +1,3 @@
-maven_layout()
-
 target(name='finagle-serversets',
   dependencies=[
     'finagle/finagle-serversets/src/main/scala'

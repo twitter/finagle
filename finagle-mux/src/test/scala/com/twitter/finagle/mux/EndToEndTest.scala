@@ -3,10 +3,9 @@ package com.twitter.finagle.mux
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.mux.Message._
-import com.twitter.finagle.mux.exp.FailureDetector
+import com.twitter.finagle.util.{BufReader, BufWriter}
 import com.twitter.finagle.mux.lease.exp.{Lessee, Lessor}
-import com.twitter.finagle.netty3.{ChannelBufferBuf, BufChannelBuffer}
+import com.twitter.finagle.mux.transport.Message
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.QueueTransport
@@ -15,17 +14,20 @@ import com.twitter.util.{Await, Future, Promise, Duration, Closable, Time}
 import java.io.{PrintWriter, StringWriter}
 import java.net.{Socket, InetSocketAddress}
 import java.util.concurrent.atomic.AtomicInteger
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.junit.runner.RunWith
 import org.scalatest.concurrent.{IntegrationPatience, Eventually}
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
-import org.scalatest.{BeforeAndAfter, FunSuite}
+import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends FunSuite
-  with Eventually with IntegrationPatience with BeforeAndAfter with AssertionsForJUnit {
+  with Eventually
+  with IntegrationPatience
+  with BeforeAndAfter
+  with AssertionsForJUnit {
 
   var saveBase: Dtab = Dtab.empty
+
   before {
     saveBase = Dtab.base
     Dtab.base = Dtab.read("/foo=>/bar; /baz=>/biz")
@@ -33,6 +35,13 @@ class EndToEndTest extends FunSuite
 
   after {
     Dtab.base = saveBase
+  }
+
+  // turn off failure detector since we don't need it for these tests.
+  override def test(testName: String, testTags: Tag*)(f: => Unit) {
+    super.test(testName, testTags:_*) {
+      mux.sessionFailureDetector.let("none") { f }
+    }
   }
 
   test("Discard request properly sent") {
@@ -44,12 +53,14 @@ class EndToEndTest extends FunSuite
 
     val svc = Service.mk[Request, Response](_ => p)
 
-    val q0, q1 = new AsyncQueue[ChannelBuffer]
-    val clientTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q0, q1)
-    val serverTrans = new QueueTransport[ChannelBuffer, ChannelBuffer](q1, q0)
+    val q0, q1 = new AsyncQueue[Message]
+    val clientTrans = new QueueTransport[Message, Message](q0, q1)
+    val serverTrans = new QueueTransport[Message, Message](q1, q0)
 
     val server = ServerDispatcher.newRequestResponse(serverTrans, svc)
-    val client = new ClientDispatcher("test", clientTrans, NullStatsReceiver, FailureDetector.NullConfig)
+    val session = new ClientSession(
+      clientTrans, FailureDetector.NullConfig, "test", NullStatsReceiver)
+    val client = ClientDispatcher.newRequestResponse(session)
 
     val f = client(Request(Path.empty, Buf.Empty))
     assert(!f.isDefined)
@@ -73,28 +84,33 @@ class EndToEndTest extends FunSuite
       for (n <- 0 until 2) {
         val rsp = Await.result(client(Request(Path.empty, Buf.Empty)), 30.seconds)
         val Buf.Utf8(str) = rsp.body
-        assert(str === "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
+        assert(str == "Dtab(2)\n\t/foo => /bar\n\t/web => /$/inet/twitter.com/80\n")
       }
     }
+    Await.result(server.close())
+    Await.result(client.close())
   }
 
   test("(no) Dtab propagation") {
     val server = Mux.serve("localhost:*", Service.mk[Request, Response] { _ =>
-      val buf = ChannelBuffers.buffer(4)
-      buf.writeInt(Dtab.local.size)
-      Future.value(Response(ChannelBufferBuf.Owned(buf)))
+      val bw = BufWriter.fixed(4)
+      bw.writeIntBE(Dtab.local.size)
+      Future.value(Response(bw.owned()))
     })
 
     val client = Mux.newService(server)
 
     val payload = Await.result(client(Request.empty), 30.seconds).body
-    val cb = BufChannelBuffer(payload)
-    assert(cb.readableBytes() === 4)
-    assert(cb.readInt() === 0)
+    val br = BufReader(payload)
+
+    assert(br.remaining == 4)
+    assert(br.readIntBE() == 0)
+    Await.result(server.close())
+    Await.result(client.close())
   }
 
   def assertAnnotationsInOrder(tracer: Seq[Record], annos: Seq[Annotation]) {
-    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } === annos)
+    assert(tracer.collect { case Record(_, _, ann, _) if annos.contains(ann) => ann } == annos)
   }
 
   test("trace propagation") {
@@ -131,6 +147,9 @@ class EndToEndTest extends FunSuite
       Annotation.ServerSend(),
       Annotation.ClientRecv()
     ))
+
+    Await.result(server.close(), 30.seconds)
+    Await.result(client.close(), 30.seconds)
   }
 
   test("requeue nacks") {
@@ -146,13 +165,16 @@ class EndToEndTest extends FunSuite
     }
 
     val a, b = Mux.serve("localhost:*", service)
-    val client = Mux.newService(Name.bound(a.boundAddress, b.boundAddress), "client")
+    val client = Mux.newService(Name.bound(Address(a.boundAddress.asInstanceOf[InetSocketAddress]), Address(b.boundAddress.asInstanceOf[InetSocketAddress])), "client")
 
     assert(n.get == 0)
     assert(Await.result(client(Request.empty), 30.seconds).body.isEmpty)
     assert(n.get == 2)
-  }
 
+    Await.result(a.close(), 30.seconds)
+    Await.result(b.close(), 30.seconds)
+    Await.result(client.close(), 30.seconds)
+  }
 
   test("gracefully reject sessions") {
     val factory = new ServiceFactory[Request, Response] {
@@ -170,6 +192,9 @@ class EndToEndTest extends FunSuite
 
     // Failure.Restartable is stripped.
     assert(!failure.isFlagged(Failure.Restartable))
+
+    Await.result(server.close(), 30.seconds)
+    Await.result(client.close(), 30.seconds)
   }
 
   private[this] def nextPort(): Int = {
@@ -234,16 +259,16 @@ EOF
     Await.result(client(req))
 
     // This will stop listening, drain, and then close the session.
-    Await.result(server.close())
+    Await.result(server.close(), 30.seconds)
 
     // Thus the next request should fail at session establishment.
-    intercept[Throwable/*ChannelWriteException*/] { Await.result(client(req)) }
+    intercept[Throwable] { Await.result(client(req)) }
 
     // And eventually we recover.
     server = Mux.serve(s"localhost:$port", echo)
     eventually { Await.result(client(req)) }
 
-    Await.result(server.close())
+    Await.result(server.close(), 30.seconds)
   }
 
   test("responds to lease") {
@@ -295,19 +320,44 @@ EOF
       }
       def format(duration: Duration): Float = duration.inMilliseconds.toFloat
 
-      eventually { assert(leaseDuration() === format(Time.Top - Time.now)) }
-      eventually { assert(available() === 1) }
-      lessor.list.foreach(_.issue(Tlease.MinLease))
-      eventually { assert(leaseCtr() === 1) }
+      eventually { assert(leaseDuration() == format(Time.Top - Time.now)) }
+      eventually { assert(available() == 1) }
+      lessor.list.foreach(_.issue(Message.Tlease.MinLease))
+      eventually { assert(leaseCtr() == 1) }
       ctl.advance(2.seconds) // must advance time to re-lease and expire
-      eventually { assert(leaseDuration() === format(Tlease.MinLease - 2.seconds)) }
-      eventually { assert(available() === 0) }
-      lessor.list.foreach(_.issue(Tlease.MaxLease))
-      eventually { assert(leaseCtr() === 2) }
-      eventually { assert(leaseDuration() === format(Tlease.MaxLease)) }
-      eventually { assert(available() === 1) }
+      eventually { assert(leaseDuration() == format(Message.Tlease.MinLease - 2.seconds)) }
+      eventually { assert(available() == 0) }
+      lessor.list.foreach(_.issue(Message.Tlease.MaxLease))
+      eventually { assert(leaseCtr() == 2) }
+      eventually { assert(leaseDuration() == format(Message.Tlease.MaxLease)) }
+      eventually { assert(available() == 1) }
 
       Closable.sequence(Await.result(fclient), server, factory).close()
     }
+  }
+
+  test("measures payload sizes") {
+    val sr = new InMemoryStatsReceiver
+    val service = new Service[Request, Response] {
+      def apply(req: Request) = Future.value(Response(req.body.concat(req.body)))
+    }
+    val server = Mux.server
+      .withLabel("server")
+      .withStatsReceiver(sr)
+      .serve("localhost:*", service)
+
+    val client = Mux.client
+      .withLabel("client")
+      .withStatsReceiver(sr)
+      .newService(server)
+
+    Await.ready(client(Request(Path.empty, Buf.Utf8("." * 10))))
+
+    assert(sr.stat("client", "request_payload_bytes")() == Seq(10.0f))
+    assert(sr.stat("client", "response_payload_bytes")() == Seq(20.0f))
+    assert(sr.stat("server", "request_payload_bytes")() == Seq(10.0f))
+    assert(sr.stat("server", "response_payload_bytes")() == Seq(20.0f))
+
+    Await.ready(Closable.all(server, client).close())
   }
 }

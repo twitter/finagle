@@ -7,12 +7,13 @@ scala_library(name='scala',
   dependencies=[
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
-    'finagle/finagle-httpx',
+    'finagle/finagle-http',
     'ostrich',
     'util/util-core',
     'util/util-registry',
     'util/util-stats',
   ],
+  fatal_warnings=True,
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-ostrich4/src/main/resources'

@@ -2,8 +2,8 @@ name := "protocols"
 
 version := "1.0"
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  "com.twitter" %% "finagle-mysql" % "6.26.0"
+  "com.twitter" %% "finagle-mysql" % "6.35.0"
 )

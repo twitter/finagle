@@ -4,10 +4,10 @@ import _root_.java.net.SocketAddress
 import _root_.java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
 import com.google.common.cache.{CacheBuilder, CacheLoader}
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
-import com.twitter.finagle.{ServiceFactory, ClientConnection}
+import com.twitter.finagle.kestrel.protocol.{Command, Kestrel, Response}
+import com.twitter.finagle.{ClientConnection, ServiceFactory}
 import com.twitter.io.Buf
 import com.twitter.util.{Future, Time}
-import protocol.{Kestrel, Command, Response}
 
 class Server(address: SocketAddress) {
   private[this] val serviceFactory = new ServiceFactory[Command, Response] {

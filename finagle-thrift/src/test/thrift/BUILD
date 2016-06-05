@@ -1,0 +1,12 @@
+java_thrift_library(
+  name='thrift-java',
+  language='java',
+  compiler='scrooge',
+  rpc_style='finagle',
+  sources=rglobs('*.thrift'),
+)
+java_thrift_library(
+  name='thrift-scala',
+  language='scala',
+  sources=rglobs('*.thrift'),
+)

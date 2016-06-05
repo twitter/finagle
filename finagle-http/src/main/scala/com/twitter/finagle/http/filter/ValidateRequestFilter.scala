@@ -10,9 +10,6 @@ import com.twitter.util.Future
  *   400 Bad Request is the request is /bad-http-request - Finagle sets this if the
  *      request is malformed.
  *   400 Bad Request if the parameters are invalid.
- *
- * The classic Http codec does this automatically.  RichHttp does not (because maybe
- * you want to log or count this).
  */
 class ValidateRequestFilter[REQUEST <: Request]
   extends SimpleFilter[REQUEST, Response] {
