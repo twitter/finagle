@@ -102,7 +102,7 @@ object ThriftMux
     with ClientParams[Client]
     with WithClientTransport[Client]
     with WithClientAdmissionControl[Client]
-    with WithSession[Client]
+    with WithClientSession[Client]
     with WithSessionQualifier[Client]
     with WithDefaultLoadBalancer[Client]
     with ThriftRichClient {
@@ -185,8 +185,8 @@ object ThriftMux
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ClientTransportParams[Client] =
       new ClientTransportParams(this)
-    override val withSession: SessionParams[Client] =
-      new SessionParams(this)
+    override val withSession: ClientSessionParams[Client] =
+      new ClientSessionParams(this)
     override val withLoadBalancer: DefaultLoadBalancingParams[Client] =
       new DefaultLoadBalancingParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
@@ -375,6 +375,7 @@ object ThriftMux
     with Stack.Parameterized[Server]
     with CommonParams[Server]
     with WithServerTransport[Server]
+    with WithServerSession[Server]
     with WithServerAdmissionControl[Server] {
 
     import Server.MuxToArrayFilter
@@ -434,6 +435,8 @@ object ThriftMux
     // See https://issues.scala-lang.org/browse/SI-8905
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams(this)
+    override val withSession: SessionParams[Server] =
+      new SessionParams(this)
     override val withAdmissionControl: ServerAdmissionControlParams[Server] =
       new ServerAdmissionControlParams(this)
 
