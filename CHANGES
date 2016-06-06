@@ -12,6 +12,9 @@ Deprecations
   * finagle-http: Deprecate channelBufferUsageTracker in favor of maxRequestSize.
     ``RB_ID=831233``
 
+  * finagle-zipkin: Deprecate `ZipkinTracer` in favor of `ScribeZipkinTracer`.
+    ``RB_ID=??``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -35,17 +38,15 @@ Breaking API Changes
     Use command line flags (see `c.t.f.socks.SocksProxyFlags.scala`) instead.
     ``RB_ID=834634``
 
-<<<<<<< e440b7d5ae2f3a6b9474c6dd90e4987078532bcf
   * finagle-core: Removed "closechans" and "closed" counters from `ChannelStatsHandler`.
     ``RB_ID=835194``
-=======
+
   * finagle-core: `c.t.finagle.NoStacktrace` is removed. Use `scala.util.control.NoStackTrace`
     instead. ``RB_ID=833188``
 
   * finagle-core: `c.t.finagle.Failure.withStackTrace` is removed. Use system property
     `scala.control.noTraceSuppression` instead to fill stacktraces in Finagle's failures.
     ``RB_ID=833188``
->>>>>>> source: NoStacktrace is dead. Long live NoStackTrace
 
   * finagle-core: Removed the "load" gauge from `StatsFilter` as it was duplicated
     by the "pending" gauge. ``RB_ID=835199``
@@ -55,6 +56,10 @@ Breaking API Changes
 
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
+
+  * finagle-zipkin: Moved case classes and companion objects `Span`, `ZipkinAnnotation`,
+    `BinaryAnnotation`, `Endpoint`, `Sampler` and `SamplingTracer` to finagle-zipkin-core.
+    ``RB_ID=??``
 
 Bug Fixes
 ~~~~~~~~~
@@ -74,6 +79,12 @@ New Features
   * finagle-core: Added a FailureAccrualPolicy that marks an endpoint
     dead when the success rate in a specified time window is under the
     required threshold. ``RB_ID=829984``
+
+  * finagle-zipkin-core: A new module containing most of the functionality
+    from finagle-zipkin, leaving finagle-zipkin with only Scribe specific code
+    and a service loader. This allows for other transports to be implemented
+    in separate modules. For example the upcoming finagle-zipkin-kafka.
+    ``RB_ID=??``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
