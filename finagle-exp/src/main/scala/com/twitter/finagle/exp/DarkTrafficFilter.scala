@@ -3,11 +3,13 @@ package com.twitter.finagle.exp
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{Service, SimpleFilter}
 import com.twitter.logging.Logger
-import com.twitter.util.Future
+import com.twitter.util.{Future, Promise}
+import scala.util.control.NonFatal
 
 /**
  * Forwards dark traffic to the given service when the given function returns true for a request.
- * @param darkService Service to take dark traffic
+  *
+  * @param darkService Service to take dark traffic
  * @param enableSampling if function returns true, the request will forward
  * @param statsReceiver keeps stats for requests forwarded, skipped and failed.
  * @Param forwardAfterService forward the dark request after the service has processed the request
@@ -38,13 +40,20 @@ class DarkTrafficFilter[Req, Rep](
         darkRequest(request)
       }
     } else {
+      val p = new Promise[Rep]
       val rep = service(request)
-      darkRequest(request)
-      rep
+      val darkRep = darkRequest(request)
+      rep.proxyTo(p)
+
+      p.setInterruptHandler { case NonFatal(t) =>
+        rep.raise(t)
+        darkRep.raise(t)
+      }
+      p
     }
   }
 
-  private[this] def darkRequest(request: Req): Unit = {
+  private[this] def darkRequest(request: Req): Future[Unit] = {
     if (enableSampling(request)) {
       requestsForwardedCounter.incr()
       darkService(request).onFailure { t: Throwable =>
@@ -52,9 +61,10 @@ class DarkTrafficFilter[Req, Rep](
         failedCounter.incr()
 
         log.error(t, t.getMessage)
-      }
+      }.unit
     } else {
       requestsSkippedCounter.incr()
+      Future.Done
     }
   }
 }
