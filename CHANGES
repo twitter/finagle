@@ -48,6 +48,9 @@ Breaking API Changes
     `scala.control.noTraceSuppression` instead to fill stacktraces in Finagle's failures.
     ``RB_ID=833188``
 
+  * finagle-core: `c.t.f.filter.RequestSerializingFilter` is removed.
+    Use `c.t.f.filter.RequestSemaphoreFilter` instead. ``RB_ID=839372``
+
   * finagle-thrift: As part of the migration off of `Codec`, remove
     `c.t.f.thrift.ThriftClientBufferedCodec` and `c.t.f.thrift.ThriftClientBufferedCodecFactory`
     which were used by `ClientBuilder.codec` and `ServerBuilder.codec`. Replace usage
