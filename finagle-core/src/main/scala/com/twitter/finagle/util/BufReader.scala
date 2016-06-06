@@ -19,22 +19,22 @@ private[finagle] trait BufReader {
   /**
    * Extract 8 bits and interpret as a signed integer, advancing the byte cursor by 1.
    */
-  def readByte(): Int
+  def readByte(): Byte
 
   /**
    * Extract 8 bits and interpret as an unsigned integer, advancing the byte cursor by 1.
    */
-  def readUnsignedByte(): Int
+  def readUnsignedByte(): Short
 
   /**
    * Extract 16 bits and interpret as a big endian integer, advancing the byte cursor by 2.
    */
-  def readShortBE(): Int
+  def readShortBE(): Short
 
   /**
    * Extract 16 bits and interpret as a little endian integer, advancing the byte cursor by 2.
    */
-  def readShortLE(): Int
+  def readShortLE(): Short
 
   /**
    * Extract 16 bits and interpret as a big endian unsigned integer, advancing the byte cursor by 2.
@@ -137,13 +137,13 @@ private[finagle] trait ProxyBufReader extends BufReader {
 
   def remaining: Int = reader.remaining
 
-  def readByte(): Int = reader.readByte()
+  def readByte(): Byte = reader.readByte()
 
-  def readUnsignedByte(): Int = reader.readUnsignedByte()
+  def readUnsignedByte(): Short = reader.readUnsignedByte()
 
-  def readShortBE(): Int = reader.readShortBE()
+  def readShortBE(): Short = reader.readShortBE()
 
-  def readShortLE(): Int = reader.readShortLE()
+  def readShortLE(): Short = reader.readShortLE()
 
   def readUnsignedShortBE(): Int = reader.readUnsignedShortBE()
 
@@ -212,7 +212,7 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
 
   def remaining: Int = buf.length
 
-  def readByte(): Int = {
+  def readByte(): Byte = {
     if (remaining < 1) {
       throw new UnderflowException(
         s"tried to read a byte when remaining bytes was ${remaining}")
@@ -222,29 +222,29 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
     nums(0)
   }
 
-  def readUnsignedByte(): Int = readByte() & 0xff
+  def readUnsignedByte(): Short = (readByte() & 0xff).toShort
 
   // - Short -
-  def readShortBE(): Int = {
+  def readShortBE(): Short = {
     if (remaining < 2) {
       throw new UnderflowException(
         s"tried to read 2 bytes when remaining bytes was ${remaining}")
     }
 
     readBytes(2).write(nums, 0)
-    ((nums(0) & 0xff) <<  8) |
-    ((nums(1) & 0xff)      )
+    (((nums(0) & 0xff) <<  8) |
+    ((nums(1) & 0xff)      )).toShort
   }
 
-  def readShortLE(): Int = {
+  def readShortLE(): Short = {
     if (remaining < 2) {
       throw new UnderflowException(
         s"tried to read 2 bytes when remaining bytes was ${remaining}")
     }
 
     readBytes(2).write(nums, 0)
-    ((nums(0) & 0xff)      ) |
-    ((nums(1) & 0xff) <<  8)
+    (((nums(0) & 0xff)      ) |
+    ((nums(1) & 0xff) <<  8)).toShort
   }
 
   def readUnsignedShortBE(): Int = readShortBE() & 0xffff

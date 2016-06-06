@@ -1,5 +1,6 @@
 package com.twitter.finagle.exp.mysql.transport
 
+import com.twitter.io.Buf
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{Channel, ChannelHandlerContext}
 import org.junit.runner.RunWith
@@ -25,11 +26,11 @@ class PacketFrameDecoderTest extends FunSuite with MockitoSugar {
     assert(result != null)
     assert(result.size == 2)
     assert(result.seq == 1)
-    assert(result.body.underlying.array === Array[Byte](0x01, 0x02))
+    assert(Buf.ByteArray.Owned.extract(result.body) === Array[Byte](0x01, 0x02))
   }
 
   test("16Mbyte packets") {
-    val ff = -1.toByte
+    val ff = (-1).toByte
     val frame: Array[Byte] = Array[Byte](ff, ff, ff, 0x01) ++ Array.fill[Byte](0xffffff)(0x00)
     val result = frameDecoder.decode(ctx, c, ChannelBuffers.wrappedBuffer(frame))
     assert(result != null)

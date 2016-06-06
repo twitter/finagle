@@ -1,9 +1,10 @@
 package com.twitter.finagle.exp.mysql
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.exp.mysql.transport.{Buffer, BufferReader, BufferWriter, Packet}
+import com.twitter.finagle.exp.mysql.transport.{Packet, MysqlBuf}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.util.Await
+import com.twitter.io.Buf
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -15,7 +16,7 @@ class ClientDispatcherTest extends FunSuite {
     48,79,126,0,-1,-9,33,2,0,15,-128,21,0,0,0,0,0,
     0,0,0,0,0,76,66,70,118,67,40,63,68,120,80,103,54,0
   )
-  val initPacket = Packet(0, Buffer(rawInit))
+  val initPacket = Packet(0, Buf.ByteArray.Owned(rawInit))
   val init = HandshakeInit.decode(initPacket)
 
   val handshake = Handshake(Some("username"), Some("password"))
@@ -32,16 +33,16 @@ class ClientDispatcherTest extends FunSuite {
     clientq.offer(okPacket)
   }
 
-  val okPacket = Packet(1, Buffer(Array[Byte](0x00, 0x00, 0x00, 0x02,
+  val okPacket = Packet(1, Buf.ByteArray.Owned(Array[Byte](0x00, 0x00, 0x00, 0x02,
     0x00, 0x00, 0x00)))
 
   test("handshaking") {
     val ctx = newCtx
     import ctx._
     val packet = Await.result(handshakeResponse)
-    val br = BufferReader(packet.body)
-    assert(br.readInt() == initReply().clientCap.mask)
-    assert(br.readInt() == initReply().maxPacketSize)
+    val br = MysqlBuf.reader(packet.body)
+    assert(br.readIntLE() == initReply().clientCap.mask)
+    assert(br.readIntLE() == initReply().maxPacketSize)
     assert(br.readByte() == initReply().charset)
     assert(br.take(23) === Array.fill(23)(0.toByte))
     assert(br.readNullTerminatedString() == "username")
@@ -75,12 +76,13 @@ class ClientDispatcherTest extends FunSuite {
     import ctx._
     val message = "Unknown table 'q'"
     val size = 9 + message.size
-    val errpacket = Packet(1, Buffer(new Array[Byte](size)))
-    val bw = BufferWriter(errpacket.body)
+    val bw = MysqlBuf.writer(new Array[Byte](size))
     bw.writeByte(0xff) // field count
-    bw.writeShort(0x041b) //err no
+    bw.writeShortLE(0x041b) //err no
     bw.writeBytes("#42S02".getBytes) // sqlstate
     bw.writeBytes(message.getBytes(Charset.defaultCharset.displayName))
+
+    val errpacket = Packet(1, bw.owned())
     val expectedError = Error.decode(errpacket)
 
     val r = service(QueryRequest("SELECT * FROM q"))
@@ -119,45 +121,47 @@ class ClientDispatcherTest extends FunSuite {
   }
 
   def toPacket(f: Field): Packet = {
-    def strLen(s: String) = Buffer.sizeOfLen(s.length) + s.length
+    def strLen(s: String) = MysqlBuf.sizeOfLen(s.length) + s.length
 
     val sizeOfField = (strLen(f.catalog) + strLen(f.db)
       + strLen(f.table) + strLen(f.origTable)
       + strLen(f.name) + strLen(f.origName) + 12)
 
-    val fieldData = new Array[Byte](sizeOfField)
-    val bw = BufferWriter(fieldData)
-    bw.writeLengthCodedString(f.catalog)
-    bw.writeLengthCodedString(f.db)
-    bw.writeLengthCodedString(f.table)
-    bw.writeLengthCodedString(f.origTable)
-    bw.writeLengthCodedString(f.name)
-    bw.writeLengthCodedString(f.origName)
+    val bw = MysqlBuf.writer(new Array[Byte](sizeOfField))
+
+    def writeString(s: String) = bw.writeLengthCodedString(s, Charset.defaultCharset)
+
+    writeString(f.catalog)
+    writeString(f.db)
+    writeString(f.table)
+    writeString(f.origTable)
+    writeString(f.name)
+    writeString(f.origName)
     bw.writeByte(0)
-    bw.writeShort(f.charset)
-    bw.writeInt(f.displayLength)
+    bw.writeShortLE(f.charset)
+    bw.writeIntLE(f.displayLength)
     bw.writeByte(f.fieldType)
-    bw.writeShort(f.flags)
+    bw.writeShortLE(f.flags)
     bw.writeByte(f.decimals)
-    Packet(0, bw)
+    Packet(0, bw.owned())
   }
 
   val numFields = 5
   val numRows = 3
-  val headerPacket = Packet(0, Buffer(Array(numFields.toByte)))
-  val eof = Packet(0, Buffer(Array[Byte](Packet.EofByte, 0x00, 0x00, 0x00, 0x00)))
+  val headerPacket = Packet(0, Buf.ByteArray.Owned(Array(numFields.toByte)))
+  val eof = Packet(0,  Buf.ByteArray.Owned(Array[Byte](Packet.EofByte, 0x00, 0x00, 0x00, 0x00)))
   val fields = createFields(numFields)
-  val fieldPackets = fields map { toPacket(_) }
+  val fieldPackets = fields.map(toPacket)
 
   def rowPacket: Packet = {
     val valueSize = 7
     val bufferSize = numFields * valueSize
-    val bw = BufferWriter(new Array[Byte](bufferSize))
+    val bw = MysqlBuf.writer(new Array[Byte](bufferSize))
     for (i <- 1 to numFields) {
-      bw.writeLengthCodedString("value"+i)
+      bw.writeLengthCodedString("value"+i, Charset.defaultCharset)
     }
 
-    Packet(0, bw)
+    Packet(0, bw.owned())
   }
 
   val rowPackets = for (i <- 1 to numRows) yield rowPacket
@@ -178,14 +182,14 @@ class ClientDispatcherTest extends FunSuite {
   }
 
   def makePreparedHeader(numColumns: Int, numParams: Int) = {
-    val bw = BufferWriter(new Array[Byte](12))
+    val bw = MysqlBuf.writer(new Array[Byte](12))
     bw.writeByte(0x00) // ok byte
-    bw.writeInt(1) // stmt id
-    bw.writeShort(numColumns)
-    bw.writeShort(numParams)
+    bw.writeIntLE(1) // stmt id
+    bw.writeShortLE(numColumns)
+    bw.writeShortLE(numParams)
     bw.writeByte(0x00) // reserved byte
-    bw.writeShort(0x00) // warning count
-    Packet(0, bw)
+    bw.writeShortLE(0x00) // warning count
+    Packet(0, bw.owned())
   }
 
   test("Decode PreparedStatement numParams = 0, numCols = 0") {
@@ -225,9 +229,9 @@ class ClientDispatcherTest extends FunSuite {
     val stmtId = 5
     val query = service(CloseRequest(5))
     val sent = Await.result(serverq.poll())
-    val br = BufferReader(sent.body)
+    val br = MysqlBuf.reader(sent.body)
     assert(br.readByte() == Command.COM_STMT_CLOSE)
-    assert(br.readInt() == stmtId)
+    assert(br.readIntLE() == stmtId)
     // response should be synthesized
     val resp = Await.result(query)
     assert(resp.isInstanceOf[OK])
@@ -237,7 +241,7 @@ class ClientDispatcherTest extends FunSuite {
     val ctx = newCtx
     import ctx._
     // offer an ill-formed packet
-    clientq.offer(Packet(0, Buffer(Array[Byte]())))
+    clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
     intercept[LostSyncException] { Await.result(service(PingRequest)) }
     assert(!service.isAvailable)
     assert(trans.onClose.isDefined)
@@ -248,7 +252,7 @@ class ClientDispatcherTest extends FunSuite {
     val trans = new QueueTransport[Packet, Packet](
       new AsyncQueue[Packet](), clientq)
     val service = new ClientDispatcher(trans, handshake)
-    clientq.offer(Packet(0, Buffer(Array[Byte]())))
+    clientq.offer(Packet(0, Buf.ByteArray.Owned(Array[Byte]())))
     intercept[LostSyncException] { Await.result(service(PingRequest)) }
     assert(!service.isAvailable)
     assert(trans.onClose.isDefined)
