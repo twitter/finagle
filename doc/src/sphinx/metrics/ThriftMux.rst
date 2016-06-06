@@ -12,7 +12,7 @@
 
 **<server_label>/thriftmux/downgraded_connections**
   A gauge of the number of active downgraded Thrift connections. These
-  are clients that are speaking Thrift, and not ThriftMux, at to a
+  are clients that are speaking Thrift, and not ThriftMux, to a
   ThriftMux server.
 
 
