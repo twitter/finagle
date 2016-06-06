@@ -151,6 +151,7 @@ object Http extends Client[Request, Response] with HttpRichClient
   object Client {
     val stack: Stack[ServiceFactory[Request, Response]] =
       StackClient.newStack
+        .insertBefore(StackClient.Role.prepConn, ClientContextFilter.module)
         .replace(StackClient.Role.prepConn, DelayedRelease.module)
         .replace(StackClient.Role.prepFactory, DelayedRelease.module)
         .replace(TraceInitializerFilter.role, new HttpClientTraceInitializer[Request, Response])
@@ -182,14 +183,11 @@ object Http extends Client[Request, Response] with HttpRichClient
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] = {
-      val dispatcher = new HttpClientDispatcher(
+    protected def newDispatcher(transport: Transport[Any, Any]): Service[Request, Response] =
+      new HttpClientDispatcher(
         newStreamTransport(transport),
         params[Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
       )
-
-      new ClientContextFilter[Request, Response].andThen(dispatcher)
-    }
 
     def withTls(cfg: Netty3TransporterTLSConfig): Client =
       configured(Transport.TLSClientEngine(Some(cfg.newEngine)))
@@ -295,6 +293,7 @@ object Http extends Client[Request, Response] with HttpRichClient
         .replace(TraceInitializerFilter.role, new HttpServerTraceInitializer[Request, Response])
         .replace(StackServer.Role.preparer, HttpNackFilter.module)
         .prepend(nonChunkedPayloadSize)
+        .prepend(ServerContextFilter.module)
   }
 
   case class Server(
@@ -313,17 +312,14 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): StreamTransport[Response, Request] =
       new HttpTransport(params[HttpImpl].serverTransport(transport))
 
-    protected def newDispatcher(transport: Transport[In, Out],
-        service: Service[Request, Response]) = {
-      val dtab = new DtabFilter.Finagle[Request]
-      val context = new ServerContextFilter[Request, Response]
+    protected def newDispatcher(
+      transport: Transport[In, Out],
+      service: Service[Request, Response]
+    ) = {
       val Stats(stats) = params[Stats]
-
-      val endpoint = dtab.andThen(context).andThen(service)
-
       new HttpServerDispatcher(
         newStreamTransport(transport),
-        endpoint,
+        service,
         stats.scope("dispatch"))
     }
 
