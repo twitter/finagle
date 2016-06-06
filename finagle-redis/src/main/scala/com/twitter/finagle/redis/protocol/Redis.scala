@@ -55,6 +55,8 @@ class Redis extends CodecFactory[Command, Reply] {
             .andThen(new RedisLoggingFilter(params[param.Stats].statsReceiver))
             .andThen(underlying)
         }
+
+        override def protocolLibraryName: String = Redis.this.protocolLibraryName
       }
     }
 

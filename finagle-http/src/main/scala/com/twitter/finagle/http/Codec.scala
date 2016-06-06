@@ -268,6 +268,8 @@ case class Http(
       override def newTraceInitializer =
         if (_enableTracing) new HttpClientTraceInitializer[Request, Response]
         else TraceInitializerFilter.empty[Request, Response]
+
+      override def protocolLibraryName: String = Http.this.protocolLibraryName
     }
   }
 

@@ -94,6 +94,8 @@ class Stream[Req: RequestType] extends CodecFactory[Req, StreamResponse] {
           ch: Channel, statsReceiver: StatsReceiver): Transport[Any, Any] =
         new ChannelTransport(ch)
 
+      override def protocolLibraryName: String = Stream.this.protocolLibraryName
+
     }
   }
 
