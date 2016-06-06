@@ -19,12 +19,17 @@ private[finagle] class ServerContextFilter[Req <: Request, Rep]
 private[finagle] object ServerContextFilter {
   val role = Stack.Role("ServerContext")
 
+  /**
+   * A stack module that extracts context information and sets it on the local Context:
+   *   - Dtab
+   *   - Deadline
+   */
   val module: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module0[ServiceFactory[Request, Response]] {
       val role = ServerContextFilter.role
       val description = "Extract context information from requests"
 
-      val dtab = new DtabFilter.Finagle[Request]
+      val dtab = DtabFilter.Decoder
       val context = new ServerContextFilter[Request, Response]
 
       def make(next: ServiceFactory[Request, Response]) =
@@ -48,11 +53,20 @@ private[finagle] class ClientContextFilter[Req <: Request, Rep]
 private[finagle] object ClientContextFilter {
   val role = Stack.Role("ClientContext")
 
+  /**
+   * A stack module that sets Context information on outgoing requests:
+   *   - Dtab
+   *   - Deadline
+   */
   val module: Stackable[ServiceFactory[Request, Response]] =
     new Stack.Module0[ServiceFactory[Request, Response]] {
       val role = ClientContextFilter.role
-      val description = "Set context information on client requests"
+      val description = "Set context information on outgoing requests"
+
+      val dtab = DtabFilter.Encoder
+      val context = new ClientContextFilter[Request, Response]
+
       def make(next: ServiceFactory[Request, Response]) =
-        new ClientContextFilter[Request, Response].andThen(next)
+        context.andThen(dtab).andThen(next)
     }
 }

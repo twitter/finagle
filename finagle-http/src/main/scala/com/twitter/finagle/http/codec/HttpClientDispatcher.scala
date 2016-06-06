@@ -17,10 +17,6 @@ private[http] object HttpClientDispatcher {
 /**
  * Client dispatcher for HTTP.
  *
- * The dispatcher modifies each request with Dtab encoding from Dtab.local
- * and streams chunked responses via `Reader`.  If the request already contains
- * Dtab headers they will be stripped and an error will be logged.
- *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
 private[finagle] class HttpClientDispatcher(
@@ -33,19 +29,6 @@ private[finagle] class HttpClientDispatcher(
   import HttpClientDispatcher._
 
   protected def dispatch(req: Request, p: Promise[Response]): Future[Unit] = {
-    val dtabHeaders = HttpDtab.strip(req)
-    if (dtabHeaders.nonEmpty) {
-      // Log an error immediately if we find any Dtab headers already in the request and report them
-      val headersString = dtabHeaders.map({case (k, v) => s"[$k: $v]"}).mkString(", ")
-      log.error(s"discarding manually set dtab headers in request: $headersString\n" +
-        s"set Dtab.local instead to send Dtab information.")
-    }
-
-    // It's kind of nasty to modify the request inline like this, but it's
-    // in-line with what we already do in finagle-http. For example:
-    // the body buf gets read without slicing.
-    HttpDtab.write(Dtab.local, req)
-
     if (!req.isChunked && !req.headerMap.contains(Fields.ContentLength)) {
       val len = req.getContent().readableBytes
       // Only set the content length if we are sure there is content. This
