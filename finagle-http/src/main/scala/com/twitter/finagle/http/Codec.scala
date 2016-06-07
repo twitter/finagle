@@ -247,11 +247,13 @@ case class Http(
         // Waiting on CSL-915 for a proper fix.
         underlying.map { u =>
           val filters =
-            new ClientContextFilter[Request, Response].andThenIf(!_streaming ->
-              new PayloadSizeFilter[Request, Response](
-                params[param.Stats].statsReceiver, _.content.length, _.content.length
+            new ClientContextFilter[Request, Response]
+              .andThen(new DtabFilter.Injector)
+              .andThenIf(!_streaming ->
+                new PayloadSizeFilter[Request, Response](
+                  params[param.Stats].statsReceiver, _.content.length, _.content.length
+                )
               )
-            )
 
           filters.andThen(new DelayedReleaseService(u))
         }
@@ -328,7 +330,7 @@ case class Http(
       ): ServiceFactory[Request, Response] = {
         val param.Stats(stats) = params[param.Stats]
         new HttpNackFilter(stats)
-          .andThen(new DtabFilter.Finagle[Request])
+          .andThen(new DtabFilter.Extractor)
           .andThen(new ServerContextFilter[Request, Response])
           .andThenIf(!_streaming -> new PayloadSizeFilter[Request, Response](
             stats, _.content.length, _.content.length)

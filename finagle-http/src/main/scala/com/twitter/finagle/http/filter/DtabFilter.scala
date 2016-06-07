@@ -40,7 +40,16 @@ object DtabFilter {
     Future.value(rsp)
   }
 
-  object Decoder extends DtabFilter[Request, Response] {
+  @deprecated("use DtabFilter.Decoder", "2016-06-07")
+  class Finagle[Req <: Message] extends DtabFilter[Req, Response] {
+    def respondToInvalid(req: Req, msg: String) = invalidResponse(msg)
+  }
+
+  /**
+   * Extracts Dtab-local headers from incoming requests and adds the
+   * Dtab to the local context.
+   */
+  class Extractor extends DtabFilter[Request, Response] {
     def respondToInvalid(req: Request, msg: String) = invalidResponse(msg)
   }
 
@@ -49,7 +58,7 @@ object DtabFilter {
    * streams chunked responses via `Reader`.  If the request already
    * contains Dtab headers they will be dropped silently.
    */
-  object Encoder extends SimpleFilter[Request, Response] {
+  class Injector extends SimpleFilter[Request, Response] {
     def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
       // XXX won't this behave poorly with retries?
       // val dtabHeaders = HttpDtab.strip(req)

@@ -29,7 +29,7 @@ private[finagle] object ServerContextFilter {
       val role = ServerContextFilter.role
       val description = "Extract context information from requests"
 
-      val dtab = DtabFilter.Decoder
+      val dtab = new DtabFilter.Extractor
       val context = new ServerContextFilter[Request, Response]
 
       def make(next: ServiceFactory[Request, Response]) =
@@ -63,7 +63,7 @@ private[finagle] object ClientContextFilter {
       val role = ClientContextFilter.role
       val description = "Set context information on outgoing requests"
 
-      val dtab = DtabFilter.Encoder
+      val dtab = new DtabFilter.Injector
       val context = new ClientContextFilter[Request, Response]
 
       def make(next: ServiceFactory[Request, Response]) =
