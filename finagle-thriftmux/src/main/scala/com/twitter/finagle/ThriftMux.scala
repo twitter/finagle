@@ -1,6 +1,7 @@
 package com.twitter.finagle
 
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
+import com.twitter.finagle.mux.lease.exp.Lessor
 import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
@@ -303,6 +304,7 @@ object ThriftMux
       service: Service[mux.Request, mux.Response]
     ): Closable = {
       val param.Tracer(tracer) = params[param.Tracer]
+      val Lessor.Param(lessor) = params[Lessor.Param]
       val Mux.param.MaxFrameSize(frameSize) = params[Mux.param.MaxFrameSize]
 
       val negotiatedTrans = mux.Handshake.server(
@@ -314,7 +316,7 @@ object ThriftMux
       mux.ServerDispatcher.newRequestResponse(
         negotiatedTrans,
         service,
-        mux.lease.exp.ClockedDrainer.flagged,
+        lessor,
         tracer,
         muxStatsReceiver)
     }
