@@ -240,8 +240,7 @@ be impacted:
 
 *ServerBuilder configuration*
 Certain `ServerBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder>`_
-connection management settings become obsolete: ``openConnectionsThresholds``,
-``hostConnectionMaxIdleTime``, and ``hostConnectionMaxLifeTime``.
+connection management settings become obsolete: ``openConnectionsThresholds``.
 
 What is ThriftMux?
 ~~~~~~~~~~~~~~~~~~

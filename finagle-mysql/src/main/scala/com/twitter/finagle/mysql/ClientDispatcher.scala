@@ -3,7 +3,7 @@ package com.twitter.finagle.exp.mysql
 import com.google.common.cache.{CacheBuilder, RemovalListener, RemovalNotification}
 import com.twitter.cache.guava.GuavaCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.exp.mysql.transport.{BufferReader, Packet}
+import com.twitter.finagle.exp.mysql.transport.{MysqlBuf, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledRequestException, Service, WriteException, ServiceProxy}
 import com.twitter.util.{Future, Promise, Return, Try, Throw}
@@ -172,57 +172,59 @@ class ClientDispatcher(
     packet: Packet,
     cmd: Byte,
     signal: Promise[Unit]
-  ): Future[Result] = packet.body.headOption match {
-    case Some(Packet.OkByte) if cmd == Command.COM_STMT_PREPARE =>
-      // decode PrepareOk Result: A header packet potentially followed
-      // by two transmissions that contain parameter and column
-      // information, respectively.
-      val result = for {
-        ok <- const(PrepareOK(packet))
-        (seq1, _) <- readTx(ok.numOfParams)
-        (seq2, _) <- readTx(ok.numOfCols)
-        ps <- Future.collect(seq1 map { p => const(Field(p)) })
-        cs <- Future.collect(seq2 map { p => const(Field(p)) })
-      } yield ok.copy(params = ps, columns = cs)
+  ): Future[Result] = {
+    MysqlBuf.peek(packet.body) match {
+      case Some(Packet.OkByte) if cmd == Command.COM_STMT_PREPARE =>
+        // decode PrepareOk Result: A header packet potentially followed
+        // by two transmissions that contain parameter and column
+        // information, respectively.
+        val result = for {
+          ok <- const(PrepareOK(packet))
+          (seq1, _) <- readTx(ok.numOfParams)
+          (seq2, _) <- readTx(ok.numOfCols)
+          ps <- Future.collect(seq1 map { p => const(Field(p)) })
+          cs <- Future.collect(seq2 map { p => const(Field(p)) })
+        } yield ok.copy(params = ps, columns = cs)
 
-      result ensure signal.setDone()
+        result ensure signal.setDone()
 
-    // decode OK Result
-    case Some(Packet.OkByte)  =>
-      signal.setDone()
-      const(OK(packet))
+      // decode OK Result
+      case Some(Packet.OkByte)  =>
+        signal.setDone()
+        const(OK(packet))
 
-    // decode Error result
-    case Some(Packet.ErrorByte) =>
-      signal.setDone()
-      const(Error(packet)) flatMap { err =>
-        val Error(code, state, msg) = err
-        Future.exception(ServerError(code, state, msg))
-      }
+      // decode Error result
+      case Some(Packet.ErrorByte) =>
+        signal.setDone()
+        const(Error(packet)) flatMap { err =>
+          val Error(code, state, msg) = err
+          Future.exception(ServerError(code, state, msg))
+        }
 
-    // decode ResultSet
-    case Some(byte) =>
-      val isBinaryEncoded = cmd != Command.COM_QUERY
-      val numCols = Try {
-        val br = BufferReader(packet.body)
-        br.readLengthCodedBinary().toInt
-      }
+      // decode ResultSet
+      case Some(byte) =>
+        val isBinaryEncoded = cmd != Command.COM_QUERY
+        val numCols = Try {
+          val br = MysqlBuf.reader(packet.body)
+          br.readVariableLong().toInt
+        }
 
-      val result = for {
-        cnt <- const(numCols)
-        (fields, _) <- readTx(cnt)
-        (rows, _) <- readTx()
-        res <- const(ResultSet(isBinaryEncoded)(packet, fields, rows))
-      } yield res
+        val result = for {
+          cnt <- const(numCols)
+          (fields, _) <- readTx(cnt)
+          (rows, _) <- readTx()
+          res <- const(ResultSet(isBinaryEncoded)(packet, fields, rows))
+        } yield res
 
-      // TODO: When streaming is implemented the
-      // done signal should dependent on the
-      // completion of the stream.
-      result ensure signal.setDone()
+        // TODO: When streaming is implemented the
+        // done signal should dependent on the
+        // completion of the stream.
+        result ensure signal.setDone()
 
-    case _ =>
-      signal.setDone()
-      Future.exception(lostSyncExc)
+      case _ =>
+        signal.setDone()
+        Future.exception(lostSyncExc)
+    }
   }
 
   /**
@@ -240,7 +242,7 @@ class ClientDispatcher(
     def aux(numRead: Int, xs: List[Packet]): Future[(List[Packet], EOF)] = {
       if (numRead > limit) Future.exception(lostSyncExc)
       else trans.read() flatMap { packet =>
-        packet.body.headOption match {
+        MysqlBuf.peek(packet.body) match {
           case Some(Packet.EofByte) =>
             const(EOF(packet)) map { eof =>
               (xs.reverse, eof)

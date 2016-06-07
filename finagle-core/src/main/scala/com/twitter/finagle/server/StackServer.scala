@@ -5,7 +5,7 @@ import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
-import com.twitter.finagle.service.{DeadlineStatsFilter, StatsFilter, TimeoutFilter}
+import com.twitter.finagle.service.{ExpiringService, DeadlineStatsFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
@@ -64,6 +64,10 @@ object StackServer {
     val stk = new StackBuilder[ServiceFactory[Req, Rep]](
       stack.nilStack[Req, Rep])
 
+    // We want to start expiring services as close to their instantiation
+    // as possible. By installing `ExpiringService` here, we are guaranteed
+    // to wrap the server's dispatcher.
+    stk.push(ExpiringService.server)
     stk.push(Role.serverDestTracing, ((next: ServiceFactory[Req, Rep]) =>
       new ServerDestTracingProxy[Req, Rep](next)))
     stk.push(TimeoutFilter.serverModule)
@@ -142,6 +146,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
   with Stack.Parameterized[This]
   with CommonParams[This]
   with WithServerTransport[This]
+  with WithServerSession[This]
   with WithServerAdmissionControl[This] { self =>
 
   /**
@@ -252,7 +257,7 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       // `serviceFactory` via `newDispatcher`.
       val listener = server.newListener()
       val underlying = listener.listen(addr) { transport =>
-        serviceFactory(newConn(transport)) respond {
+        serviceFactory(newConn(transport)).respond {
           case Return(service) =>
             val d = server.newDispatcher(transport, service)
             connections.add(d)

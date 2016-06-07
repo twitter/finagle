@@ -267,24 +267,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
         protected def newListener(): Listener[Any, Any] =
           Netty3Listener(codec.pipelineFactory, params)
 
-        protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1]) = {
-          // TODO: Expiration logic should be installed using ExpiringService
-          // in StackServer#newStack. Then we can thread through "closes"
-          // via ClientConnection.
-          val Timer(timer) = params[Timer]
-          val ExpiringService.Param(idleTime, lifeTime) = params[ExpiringService.Param]
-          val Stats(sr) = params[Stats]
-          val idle = if (idleTime.isFinite) Some(idleTime) else None
-          val life = if (lifeTime.isFinite) Some(lifeTime) else None
-          val dispatcher = codec.newServerDispatcher(transport, service)
-          (idle, life) match {
-            case (None, None) => dispatcher
-            case _ =>
-              new ExpiringService(service, idle, life, timer, sr.scope("expired")) {
-                protected def onExpire() { dispatcher.close(Time.now) }
-              }
-          }
-        }
+        protected def newDispatcher(transport: Transport[In, Out], service: Service[Req1, Rep1]) =
+          codec.newServerDispatcher(transport, service)
       }
 
       val proto = ps[ProtocolLibrary]

@@ -31,6 +31,15 @@ private[finagle] object StringClientPipeline extends ChannelPipelineFactory {
   }
 }
 
+private[finagle] object NoDelimStringPipeline extends ChannelPipelineFactory {
+  def getPipeline = {
+    val pipeline = Channels.pipeline()
+    pipeline.addLast("stringEncode", new StringEncoder(Charsets.Utf8))
+    pipeline.addLast("stringDecode", new StringDecoder(Charsets.Utf8))
+    pipeline
+  }
+}
+
 private[finagle] trait StringClient {
 
   case class RichClient(underlying: Service[String, String]) {
@@ -44,7 +53,8 @@ private[finagle] trait StringClient {
 
   case class Client(
       stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-      params: Stack.Params = Stack.Params.empty + ProtocolLibrary("string"))
+      params: Stack.Params = Stack.Params.empty + ProtocolLibrary("string"),
+      appendDelimeter: Boolean = true)
     extends StdStackClient[String, String, Client]
     with StringRichClient {
     protected def copy1(
@@ -56,7 +66,8 @@ private[finagle] trait StringClient {
     protected type Out = String
 
     protected def newTransporter(): Transporter[String, String] =
-      Netty3Transporter(StringClientPipeline, params)
+      if (appendDelimeter) Netty3Transporter(StringClientPipeline, params)
+      else Netty3Transporter(NoDelimStringPipeline, params)
 
     protected def newDispatcher(
       transport: Transport[In, Out]

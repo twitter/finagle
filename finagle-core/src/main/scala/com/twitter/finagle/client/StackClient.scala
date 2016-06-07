@@ -82,7 +82,7 @@ object StackClient {
      * (via CachingPool) is that this applies to *all* connections and `DefaultPool`
      * only expires connections above the low watermark.
      */
-    stk.push(ExpiringService.module)
+    stk.push(ExpiringService.client)
 
     /**
      * `FailFastFactory` accumulates failures per connection, marking the endpoint
@@ -120,7 +120,7 @@ object StackClient {
      * see exceptions with remote info added.
      */
     stk.push(ExceptionRemoteInfoFactory.module)
-    
+
     /**
      * `FailureAccrualFactory` accrues request failures per endpoint updating its
      * status so that modules higher in the stack may route around an unhealthy
@@ -414,7 +414,7 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
   with ClientParams[This]
   with WithClientAdmissionControl[This]
   with WithClientTransport[This]
-  with WithSession[This]
+  with WithClientSession[This]
   with WithSessionQualifier[This] { self =>
 
   /**

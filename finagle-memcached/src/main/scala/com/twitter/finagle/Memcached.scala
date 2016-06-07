@@ -308,8 +308,8 @@ object Memcached extends finagle.Client[Command, Response]
       new ConcurrentLoadBalancingParams(this)
     override val withTransport: ClientTransportParams[Client] =
       new ClientTransportParams(this)
-    override val withSession: SessionParams[Client] =
-      new SessionParams(this)
+    override val withSession: ClientSessionParams[Client] =
+      new ClientSessionParams(this)
     override val withAdmissionControl: ClientAdmissionControlParams[Client] =
       new ClientAdmissionControlParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
@@ -375,6 +375,8 @@ object Memcached extends finagle.Client[Command, Response]
     //See https://issues.scala-lang.org/browse/SI-8905
     override val withAdmissionControl: ServerAdmissionControlParams[Server] =
       new ServerAdmissionControlParams(this)
+    override val withSession: SessionParams[Server] =
+      new SessionParams(this)
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams(this)
 

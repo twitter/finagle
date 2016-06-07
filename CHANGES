@@ -63,6 +63,9 @@ Breaking API Changes
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
 
+  * finagle-core: `SessionParams` no longer contains `acquisitionTimeout`. Instead, it
+    was extracted into `ClientSessionParams`. ``RB_ID=837726``
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -84,6 +87,10 @@ New Features
   * finagle-core: Added a FailureAccrualPolicy that marks an endpoint
     dead when the success rate in a specified time window is under the
     required threshold. ``RB_ID=829984``
+
+  * finagle-core: `StackServer` now installs an `ExpiringService` module by default. This
+    allows servers to have control over session lifetime and brings the `StackServer` to
+    feature parity with `ServerBuilder`.  ``RB_ID=837726``
 
   * finagle-exp: Changed DarkTrafficFilter to forward interrupts to dark service. ``RB_ID=839286``
 

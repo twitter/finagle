@@ -86,6 +86,8 @@ case class Spdy(
 
       override def newClientDispatcher(transport: Transport[Any, Any], params: Stack.Params) =
         new SpdyClientDispatcher(Transport.cast[HttpRequest, HttpResponse](transport))
+
+      override def protocolLibraryName: String = Spdy.this.protocolLibraryName
     }
   }
 

@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.exp.mysql.transport.BufferWriter
+import com.twitter.finagle.exp.mysql.transport.MysqlBufWriter
 import java.util.logging.Logger
 import language.implicitConversions
 
@@ -13,7 +13,7 @@ sealed trait Parameter {
   def value: A
   def evidence: CanBeParameter[A]
 
-  final def writeTo(writer: BufferWriter): Unit = {
+  final def writeTo(writer: MysqlBufWriter): Unit = {
     evidence.write(writer, value)
   }
 

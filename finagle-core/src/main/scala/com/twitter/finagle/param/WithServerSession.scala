@@ -3,11 +3,11 @@ package com.twitter.finagle.param
 import com.twitter.finagle.Stack
 
 /**
- * Provides the `withSession` API entry point.
+ * Provides the `withSession` API entry point for servers.
  *
  * @see [[SessionParams]]
  */
-trait WithSession[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =>
+trait WithServerSession[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =>
 
   /**
    * An entry point for configuring the client's sessions.

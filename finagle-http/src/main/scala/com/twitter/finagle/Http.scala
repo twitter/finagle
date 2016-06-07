@@ -256,8 +256,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       new SessionQualificationParams(this)
     override val withAdmissionControl: ClientAdmissionControlParams[Client] =
       new ClientAdmissionControlParams(this)
-    override val withSession: SessionParams[Client] =
-      new SessionParams(this)
+    override val withSession: ClientSessionParams[Client] =
+      new ClientSessionParams(this)
     override val withTransport: ClientTransportParams[Client] =
       new ClientTransportParams(this)
 
@@ -382,6 +382,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       new ServerAdmissionControlParams(this)
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams[Server](this)
+    override val withSession: SessionParams[Server] =
+      new SessionParams(this)
 
     override def withResponseClassifier(responseClassifier: service.ResponseClassifier): Server =
       super.withResponseClassifier(responseClassifier)
