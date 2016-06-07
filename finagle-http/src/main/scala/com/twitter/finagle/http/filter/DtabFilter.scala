@@ -1,8 +1,10 @@
 package com.twitter.finagle.http.filter
 
+import com.twitter.collection.RecordSchema
 import com.twitter.finagle.http.codec.HttpDtab
 import com.twitter.finagle.http.{Request, Response, Status, Message}
 import com.twitter.finagle.{Dtab, SimpleFilter, Service}
+import com.twitter.logging.Logger
 import com.twitter.util.{Throw, Return, Future}
 
 /**
@@ -31,6 +33,8 @@ abstract class DtabFilter[Req <: Message, Rep <: Message]
 }
 
 object DtabFilter {
+  private val log = Logger(getClass.getName)
+
   private def invalidResponse(msg: String): Future[Response] = {
     val rspTxt = "Invalid Dtab headers: %s".format(msg)
     val rsp = Response(Status.BadRequest)
@@ -59,21 +63,22 @@ object DtabFilter {
    * contains Dtab headers they will be dropped silently.
    */
   class Injector extends SimpleFilter[Request, Response] {
-    def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
-      // XXX won't this behave poorly with retries?
-      // val dtabHeaders = HttpDtab.strip(req)
-      // if (dtabHeaders.nonEmpty) {
-      //   // Log an error immediately if we find any Dtab headers already in the request and report them
-      //   val headersString = dtabHeaders.map({case (k, v) => s"[$k: $v]"}).mkString(", ")
-      //   log.error(s"discarding manually set dtab headers in request: $headersString\n" +
-      //     s"set Dtab.local instead to send Dtab information.")
-      // }
+    private[this] val hasSetDtab = Request.Schema.newField[Boolean](false)
 
-      // It's kind of nasty to modify the request inline like this, but it's
-      // in-line with what we already do in finagle-http. For example:
-      // the body buf gets read without slicing.
-      HttpDtab.strip(req)
+    def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
+      // Log errors if a request already has dtab headers AND they
+      // were not set by this filter (i.e. on a previous attempt at
+      // emiting this request).
+      val dtabHeaders = HttpDtab.strip(req)
+      if (dtabHeaders.nonEmpty && !req.ctx(hasSetDtab)) {
+        // Log an error immediately if we find any Dtab headers already in the request and report them
+        val headersString = dtabHeaders.map({case (k, v) => s"[$k: $v]"}).mkString(", ")
+        log.error(s"discarding manually set dtab headers in request: $headersString\n" +
+          s"set Dtab.local instead to send Dtab information.")
+      }
+
       HttpDtab.write(Dtab.local, req)
+      req.ctx.update(hasSetDtab, true)
       service(req)
     }
   }
