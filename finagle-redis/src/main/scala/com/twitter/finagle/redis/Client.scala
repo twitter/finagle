@@ -51,6 +51,7 @@ trait NormalCommands
   with HyperLogLogs
   with PubSubs
   with ServerCommands
+  with ScriptCommands
   with ConnectionCommands {
   self: BaseClient =>
 }

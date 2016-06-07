@@ -158,6 +158,16 @@ object Commands {
   val PUNSUBSCRIBE      = "PUNSUBSCRIBE"
   val PUBSUB            = "PUBSUB"
 
+  // Scripts
+  val EVAL              = "EVAL"
+  val EVALSHA           = "EVALSHA"
+  val SCRIPT            = "SCRIPT"
+  val FLUSH             = "FLUSH"
+  val LOAD              = "LOAD"
+  val SCRIPTEXISTS      = "SCRIPT EXISTS"
+  val SCRIPTFLUSH       = "SCRIPT FLUSH"
+  val SCRIPTLOAD        = "SCRIPT LOAD"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -296,6 +306,8 @@ object Commands {
     // PubSub
     PUBLISH           -> {Publish(_)},
     PUBSUB            -> {PubSub(_)}
+
+    // TODO: add Scripts command map
   )
 
   def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd.toUpperCase).map {
@@ -456,6 +468,18 @@ object CommandBytes {
   val PSUBSCRIBE        = StringToChannelBuffer("PSUBSCRIBE")
   val PUNSUBSCRIBE      = StringToChannelBuffer("PUNSUBSCRIBE")
   val PUBSUB            = StringToChannelBuffer("PUBSUB")
+
+  // Scripts
+  val EVAL              = StringToBuf("EVAL")
+  val EVALSHA           = StringToBuf("EVALSHA")
+  val SCRIPT            = StringToBuf("SCRIPT")
+  val FLUSH             = StringToBuf("FLUSH")
+  val LOAD              = StringToBuf("LOAD")
+  val SCRIPTEXISTS      = StringToBuf("SCRIPT EXISTS")
+  val SCRIPTFLUSH       = StringToBuf("SCRIPT FLUSH")
+  val SCRIPTLOAD        = StringToBuf("SCRIPT LOAD")
+  // SCRIPT EXISTS, SCRIPT LOAD, SCRIPT FLUSH are subcommands
+  // which must not be transmitted as a whole ChannelBuffer
 }
 
 
