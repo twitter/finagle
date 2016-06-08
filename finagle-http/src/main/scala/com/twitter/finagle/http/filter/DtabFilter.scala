@@ -5,7 +5,7 @@ import com.twitter.finagle.http.codec.HttpDtab
 import com.twitter.finagle.http.{Request, Response, Status, Message}
 import com.twitter.finagle.{Dtab, SimpleFilter, Service}
 import com.twitter.logging.Logger
-import com.twitter.util.{Throw, Return, Future}
+import com.twitter.util.{Try, Throw, Return, Future}
 
 /**
  * Delegate to the dtab contained inside of the request.
@@ -15,8 +15,11 @@ abstract class DtabFilter[Req <: Message, Rep <: Message]
 
   def respondToInvalid(req: Req, msg: String): Future[Rep]
 
+  protected[this] def read(req: Req): Try[Dtab] = HttpDtab.read(req)
+  protected[this] def clear(req: Req): Unit = HttpDtab.clear(req)
+
   def apply(req: Req, service: Service[Req, Rep]): Future[Rep] =
-    HttpDtab.read(req) match {
+    read(req) match {
       case Throw(e) =>
         respondToInvalid(req, e.getMessage)
 
@@ -24,7 +27,7 @@ abstract class DtabFilter[Req <: Message, Rep <: Message]
         service(req)
 
       case Return(dtab) =>
-        HttpDtab.clear(req)
+        clear(req)
         Dtab.unwind {
           Dtab.local ++= dtab
           service(req)
@@ -65,11 +68,14 @@ object DtabFilter {
   class Injector extends SimpleFilter[Request, Response] {
     private[this] val hasSetDtab = Request.Schema.newField[Boolean](false)
 
+    protected[this] def strip(req: Request): Seq[(String, String)] = HttpDtab.strip(req)
+    protected[this] def write(dtab: Dtab, req: Request): Unit = HttpDtab.write(dtab, req)
+
     def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
       // Log errors if a request already has dtab headers AND they
       // were not set by this filter (i.e. on a previous attempt at
       // emiting this request).
-      val dtabHeaders = HttpDtab.strip(req)
+      val dtabHeaders = strip(req)
       if (dtabHeaders.nonEmpty && !req.ctx(hasSetDtab)) {
         // Log an error immediately if we find any Dtab headers already in the request and report them
         val headersString = dtabHeaders.map({case (k, v) => s"[$k: $v]"}).mkString(", ")
@@ -77,7 +83,7 @@ object DtabFilter {
           s"set Dtab.local instead to send Dtab information.")
       }
 
-      HttpDtab.write(Dtab.local, req)
+      write(Dtab.local, req)
       req.ctx.update(hasSetDtab, true)
       service(req)
     }
