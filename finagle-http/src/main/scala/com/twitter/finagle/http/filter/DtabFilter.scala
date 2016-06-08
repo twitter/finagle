@@ -61,12 +61,17 @@ object DtabFilter {
   }
 
   /**
+   * A request context key used to determine whether a Dtab has
+   * already been injected into the request.
+   */
+  private val HasSetDtab = Request.Schema.newField[Boolean](false)
+
+  /**
    * Modifies each request with Dtab encoding from Dtab.local and
    * streams chunked responses via `Reader`.  If the request already
    * contains Dtab headers they will be dropped silently.
    */
   class Injector extends SimpleFilter[Request, Response] {
-    private[this] val hasSetDtab = Request.Schema.newField[Boolean](false)
 
     protected[this] def strip(req: Request): Seq[(String, String)] = HttpDtab.strip(req)
     protected[this] def write(dtab: Dtab, req: Request): Unit = HttpDtab.write(dtab, req)
@@ -76,7 +81,7 @@ object DtabFilter {
       // were not set by this filter (i.e. on a previous attempt at
       // emiting this request).
       val dtabHeaders = strip(req)
-      if (dtabHeaders.nonEmpty && !req.ctx(hasSetDtab)) {
+      if (dtabHeaders.nonEmpty && !req.ctx(HasSetDtab)) {
         // Log an error immediately if we find any Dtab headers already in the request and report them
         val headersString = dtabHeaders.map({case (k, v) => s"[$k: $v]"}).mkString(", ")
         log.error(s"discarding manually set dtab headers in request: $headersString\n" +
