@@ -72,6 +72,25 @@ object MySqlClientTracingFilter {
  */
 object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
 
+  object param {
+    /**
+     * A class eligible for configuring the maximum number of prepare
+     * statements.  After creating `num` prepare statements, we'll start purging
+     * old ones.
+     */
+    case class MaxConcurrentPrepareStatements(num: Int) {
+      assert(num <= Int.MaxValue, s"$num is not <= Int.MaxValue bytes")
+      assert(num > 0, s"$num must be positive")
+
+      def mk(): (MaxConcurrentPrepareStatements, Stack.Param[MaxConcurrentPrepareStatements]) =
+        (this, MaxConcurrentPrepareStatements.param)
+    }
+
+    object MaxConcurrentPrepareStatements {
+      implicit val param = Stack.Param(MaxConcurrentPrepareStatements(20))
+    }
+  }
+
   /**
    * Implements a mysql client in terms of a
    * [[com.twitter.finagle.client.StackClient]]. The client inherits a wealth
@@ -102,8 +121,16 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
     protected type In = Packet
     protected type Out = Packet
     protected def newTransporter() = MysqlTransporter(params)
-    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] =
-      mysql.ClientDispatcher(transport, Handshake(params))
+    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] = {
+      val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
+      mysql.ClientDispatcher(transport, Handshake(params), num)
+    }
+
+    /**
+     * The maximum number of concurrent prepare statements.
+     */
+    def withMaxConcurrentPrepareStatements(num: Int): Client =
+      configured(param.MaxConcurrentPrepareStatements(num))
 
     /**
      * The credentials to use when authenticating a new session.
@@ -118,8 +145,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       configured(Handshake.Database(Option(db)))
 
     /**
-     * The default character set used when establishing
-     * a new session.
+     * The default character set used when establishing a new session.
      */
     def withCharset(charset: Short): Client =
       configured(Handshake.Charset(charset))

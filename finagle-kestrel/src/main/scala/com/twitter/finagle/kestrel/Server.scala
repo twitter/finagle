@@ -1,8 +1,10 @@
 package com.twitter.finagle.kestrel
 
+// never name a package "java"
 import _root_.java.net.SocketAddress
 import _root_.java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
-import com.google.common.cache.{CacheBuilder, CacheLoader}
+
+import com.github.benmanes.caffeine.cache.{Caffeine, CacheLoader}
 import com.twitter.finagle.builder.{Server => BuiltServer, ServerBuilder}
 import com.twitter.finagle.kestrel.protocol.{Command, Kestrel, Response}
 import com.twitter.finagle.{ClientConnection, ServiceFactory}
@@ -12,9 +14,9 @@ import com.twitter.util.{Future, Time}
 class Server(address: SocketAddress) {
   private[this] val serviceFactory = new ServiceFactory[Command, Response] {
 
-    private[this] val queues = CacheBuilder.newBuilder()
+    private[this] val queues = Caffeine.newBuilder()
       .build(new CacheLoader[Buf, BlockingDeque[Buf]] {
-        def load(k: Buf) = new LinkedBlockingDeque[Buf]
+        def load(k: Buf): BlockingDeque[Buf] = new LinkedBlockingDeque[Buf]
       })
 
     def apply(conn: ClientConnection) = Future.value(new InterpreterService(new Interpreter(queues)))

@@ -5,42 +5,44 @@ package com.twitter.finagle.stats
  * short-lived programs where you want summaries.
  */
 
-import com.google.common.util.concurrent.AtomicLongMap
-import com.google.common.cache.{CacheBuilder, CacheLoader}
+import com.github.benmanes.caffeine.cache.{Caffeine, CacheLoader}
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   val repr = this
 
-  private[this] val counters = AtomicLongMap.create[Seq[String]]()
+  private[this] val counters = new ConcurrentHashMap[Seq[String], AtomicLong]()
 
   // Just keep all the samples.
-  private[this] val stats = CacheBuilder.newBuilder()
+  private[this] val stats = Caffeine.newBuilder()
     .build(new CacheLoader[Seq[String], ArrayBuffer[Float]] {
-      def load(k: Seq[String]) = new ArrayBuffer[Float]
+      def load(k: Seq[String]): ArrayBuffer[Float] = new ArrayBuffer[Float]
     })
 
   // synchronized on `this`
   private[this] var _gauges = Map[Seq[String], () => Float]()
   def gauges: Map[Seq[String], () => Float] = synchronized { _gauges }
 
-  def counter(name: String*) = new Counter {
-    def incr(delta: Int) { counters.addAndGet(name, delta) }
+  def counter(name: String*): Counter = new Counter {
+    counters.putIfAbsent(name, new AtomicLong(0))
+    def incr(delta: Int) { counters.get(name).getAndAdd(delta) }
   }
 
-  def stat(name: String*) = new Stat {
+  def stat(name: String*): Stat = new Stat {
     def add(value: Float) = SummarizingStatsReceiver.this.synchronized {
       stats.get(name) += value
     }
   }
 
   // Ignoring gauges for now, but we may consider sampling them.
-  protected[this] def registerGauge(name: Seq[String], f: => Float) = synchronized {
+  protected[this] def registerGauge(name: Seq[String], f: => Float): Unit = synchronized {
     _gauges += (name -> (() => f))
   }
 
-  protected[this] def deregisterGauge(name: Seq[String]) = synchronized {
+  protected[this] def deregisterGauge(name: Seq[String]): Unit = synchronized {
     _gauges -= name
   }
 
@@ -52,7 +54,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
   def summary(): String = summary(false)
 
   def summary(includeTails: Boolean): String = synchronized {
-    val counterValues = counters.asMap.asScala
+    val counterValues = counters.asScala
     val gaugeValues = gauges.toSeq map {
       case (names, gauge) => variableName(names) -> gauge().toString
     }
@@ -65,7 +67,7 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
         (k, xs)
     }
 
-    val counterLines = (counterValues map { case (k, v) => (variableName(k), v.toString) }).toSeq
+    val counterLines = (counterValues map { case (k, v) => (variableName(k), v.get.toString) }).toSeq
     val statLines = (statValues map { case (k, xs) =>
       val n = xs.length
       def idx(ptile: Double) = math.floor(ptile*n).toInt
@@ -100,5 +102,5 @@ class SummarizingStatsReceiver extends StatsReceiverWithCumulativeGauges {
     (if (includeTails) "\n# stats-tails\n" + (fmtTails mkString "\n") else "")
   }
 
-  def print() = println(summary(false))
+  def print(): Unit = println(summary(false))
 }

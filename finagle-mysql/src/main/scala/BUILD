@@ -5,6 +5,8 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
+    '3rdparty/jvm/com/github/ben-manes/caffeine',
+    '3rdparty/jvm/com/google/code/findbugs:jsr305',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'util/util-core',

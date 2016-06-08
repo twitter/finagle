@@ -1,9 +1,9 @@
 package com.twitter.finagle.kestrel
 
+// never name a package "java"
 import _root_.java.util.concurrent.{TimeUnit, BlockingDeque}
 
-import com.google.common.cache.LoadingCache
-
+import com.github.benmanes.caffeine.cache.LoadingCache
 import com.twitter.conversions.time._
 import com.twitter.finagle.Service
 import com.twitter.finagle.kestrel.protocol._
@@ -11,7 +11,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{StateMachine, Future}
 import com.twitter.util.StateMachine.InvalidStateTransition
 
-class Interpreter(queues: LoadingCache[Buf, BlockingDeque[Buf]]) extends StateMachine {
+private[finagle] class Interpreter(queues: LoadingCache[Buf, BlockingDeque[Buf]]) extends StateMachine {
   case class NoTransaction() extends State
   case class OpenTransaction(queueName: Buf, item: Buf) extends State
   state = NoTransaction()

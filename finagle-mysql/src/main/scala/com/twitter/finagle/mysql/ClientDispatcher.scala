@@ -1,12 +1,12 @@
 package com.twitter.finagle.exp.mysql
 
-import com.google.common.cache.{CacheBuilder, RemovalListener, RemovalNotification}
-import com.twitter.cache.guava.GuavaCache
+import com.github.benmanes.caffeine.cache.{Caffeine, RemovalListener, RemovalCause}
+import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.exp.mysql.transport.{MysqlBuf, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.{CancelledRequestException, Service, WriteException, ServiceProxy}
-import com.twitter.util.{Future, Promise, Return, Try, Throw}
+import com.twitter.util.{Future, Promise, Return, Try, Throw, Closable, Time}
 
 /**
  * A catch-all exception class for errors returned from the upstream
@@ -33,22 +33,32 @@ private[mysql] class PrepareCache(
   max: Int = 20
 ) extends ServiceProxy[Request, Result](svc) {
 
+  def closable(num: Int): Closable = Closable.make { deadline: Time =>
+    svc(CloseRequest(num)).unit
+  }
+
   private[this] val fn = {
     val listener = new RemovalListener[Request, Future[Result]] {
       // make sure prepared futures get removed eventually
-      def onRemoval(notification: RemovalNotification[Request, Future[Result]]): Unit = {
-        notification.getValue() onSuccess {
-          case r: PrepareOK => svc(CloseRequest(r.id))
+      def onRemoval(request: Request, response: Future[Result], cause: RemovalCause): Unit = {
+        response.onSuccess {
+          case r: PrepareOK =>
+            Closable.closeOnCollect(
+              closable(r.id),
+              r
+            )
           case _ => // nop
         }
       }
     }
-    val underlying = CacheBuilder.newBuilder()
+    val underlying = Caffeine.newBuilder()
       .maximumSize(max)
       .removalListener(listener)
       .build[Request, Future[Result]]()
 
-    GuavaCache.fromCache(svc, underlying)
+    CaffeineCache.fromCache(Service.mk { req: Request =>
+      svc(req)
+    }, underlying)
   }
 
   /**
@@ -74,12 +84,15 @@ object ClientDispatcher {
    * @param trans A transport that reads a writes logical mysql packets.
    * @param handshake A function that is responsible for facilitating
    * the connection phase given a HandshakeInit.
+   * @param maxConcurrentPrepareStatements The maximum number of prepare
+   * statements that the cache will keep track of.
    */
   def apply(
     trans: Transport[Packet, Packet],
-    handshake: HandshakeInit => Try[HandshakeResponse]
+    handshake: HandshakeInit => Try[HandshakeResponse],
+    maxConcurrentPrepareStatements: Int
   ): Service[Request, Result] = {
-    new PrepareCache(new ClientDispatcher(trans, handshake))
+    new PrepareCache(new ClientDispatcher(trans, handshake), maxConcurrentPrepareStatements)
   }
 
   /**

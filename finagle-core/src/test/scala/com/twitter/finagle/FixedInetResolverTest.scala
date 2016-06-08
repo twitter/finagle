@@ -5,10 +5,11 @@ import com.twitter.util.{Future, Await}
 import java.net.{UnknownHostException, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class FixedInetResolverTest extends FunSuite {
+class FixedInetResolverTest extends FunSuite with Eventually {
 
   // The caching resolver (like the InetResolver, NilResolver)
   // should be installed by default and is capable of resolving addresses.
@@ -69,7 +70,7 @@ class FixedInetResolverTest extends FunSuite {
       val maxCacheSize = 1
       val resolver2 = new FixedInetResolver(statsReceiver, maxCacheSize, Some(resolve))
       // make the same request n-times
-      
+
       def assertBound(hostname: String): Unit = {
         val request = resolver2.bind(hostname).changes.filter(_ != Addr.Pending)
 
@@ -92,7 +93,7 @@ class FixedInetResolverTest extends FunSuite {
       assertBound("1.2.3.5:100")
       assert(numLookups == 2)
       assert(statsReceiver.counter("inet", "dns", "successes")() == iterations + 1)
-      assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "size"))() == 1)
+      eventually { assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "size"))() == 1) }
       assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "evicts"))() == 1)
 
       // evicted

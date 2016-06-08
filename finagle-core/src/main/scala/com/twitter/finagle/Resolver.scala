@@ -1,7 +1,7 @@
 package com.twitter.finagle
 
-import com.google.common.cache.{CacheLoader, CacheBuilder}
-import com.twitter.cache.guava.GuavaCache
+import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine}
+import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
@@ -254,7 +254,7 @@ private[finagle] class FixedInetResolver(
 
   // A size-bounded FutureCache backed by a LoaderCache
   private[this] val cache = {
-    var builder = CacheBuilder
+    var builder = Caffeine
       .newBuilder()
       .recordStats()
 
@@ -265,17 +265,17 @@ private[finagle] class FixedInetResolver(
     builder
       .build(
         new CacheLoader[String, Future[Seq[InetAddress]]]() {
-          def load(host: String) = resolveFn(host)
+          def load(host: String): Future[Seq[InetAddress]] = resolveFn(host)
         })
   }
 
   private[this] val cacheStatsReceiver = statsReceiver.scope("cache")
   private[this] val cacheGauges = Seq(
-    cacheStatsReceiver.addGauge("size") { cache.size },
+    cacheStatsReceiver.addGauge("size") { cache.estimatedSize },
     cacheStatsReceiver.addGauge("evicts") { cache.stats().evictionCount },
     cacheStatsReceiver.addGauge("hit_rate") { cache.stats().hitRate.toFloat })
 
-  private[this] val futureCache = GuavaCache.fromLoadingCache(cache)
+  private[this] val futureCache = CaffeineCache.fromLoadingCache(cache)
 
   override def resolveHost(host: String): Future[Seq[InetAddress]] =
     futureCache(host)

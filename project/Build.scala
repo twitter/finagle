@@ -21,6 +21,8 @@ object Finagle extends Build {
   val netty4Version = "4.1.0.CR7"
 
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
+  val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.0"
+  val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
     "io.netty" % "netty-handler" % netty4Version,
@@ -257,7 +259,9 @@ object Finagle extends Build {
       util("logging"),
       util("registry"),
       util("stats"),
+      caffeineLib,
       guavaLib,
+      jsr305Lib,
       nettyLib)
   )
 
@@ -349,6 +353,7 @@ object Finagle extends Build {
     name := "finagle-serversets",
     fork in Test := true,
     libraryDependencies ++= Seq(
+      caffeineLib,
       util("cache"),
       util("zk-common"),
       util("zk-test") % "test",
@@ -482,7 +487,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-kestrel",
-    libraryDependencies ++= scroogeLibs
+    libraryDependencies ++= scroogeLibs :+ caffeineLib
   ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
 
   lazy val finagleRedis = Project(
@@ -527,7 +532,7 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging"), util("cache")),
+      libraryDependencies ++= Seq(util("logging"), util("cache"), caffeineLib, jsr305Lib),
       excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
     ).dependsOn(finagleCore)
 

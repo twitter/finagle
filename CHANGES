@@ -76,6 +76,11 @@ Bug Fixes
     response for streaming clients who exceed the servers' configured max request size.
     ``RB_ID=828741``
 
+  * finagle-mysql: `c.t.f.exp.mysql.PreparedCache` now closes prepared statements when no one holds
+    a reference to the cached future any longer.  This fixes a race condition where the cached
+    future could be evicted and the prepared statement closed while a user tries to use that
+    prepared statement.  ``RB_ID=833970``
+
 New Features
 ~~~~~~~~~~~~
 
@@ -88,13 +93,16 @@ New Features
     dead when the success rate in a specified time window is under the
     required threshold. ``RB_ID=829984``
 
-  * finagle-redis: Adds support for scripting commands. ``RB_ID=837538``
-
   * finagle-core: `StackServer` now installs an `ExpiringService` module by default. This
     allows servers to have control over session lifetime and brings the `StackServer` to
     feature parity with `ServerBuilder`.  ``RB_ID=837726``
 
   * finagle-exp: Changed DarkTrafficFilter to forward interrupts to dark service. ``RB_ID=839286``
+
+  * finagle-mysql: Added a `withMaxConcurrentPreparedStatements` method to the client which lets you
+    specify how many prepared statements you want to cache at a time.  ``RB_ID=833970``
+
+  * finagle-redis: Adds support for scripting commands. ``RB_ID=837538``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
