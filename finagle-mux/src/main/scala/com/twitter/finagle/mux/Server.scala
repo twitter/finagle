@@ -196,6 +196,7 @@ private[twitter] class ServerDispatcher(
   private[this] implicit val injectTimer = DefaultTimer.twitter
   private[this] val tracker = new Tracker[Message]
   private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val orphanedTdiscardCounter = statsReceiver.counter("orphaned_tdiscard")
 
   private[this] val state: AtomicReference[State.Value] =
     new AtomicReference(State.Open)
@@ -263,6 +264,7 @@ private[twitter] class ServerDispatcher(
         case Some(reply) =>
           reply.raise(new ClientDiscardedRequestException(why))
         case None =>
+          orphanedTdiscardCounter.incr()
       }
 
     case Message.Rdrain(1) if state.get == State.Draining =>

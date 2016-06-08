@@ -12,6 +12,15 @@
   A counter of the number of times server-initiated draining completed
   successfully.
 
+**<server_label>/mux/duplicate_tag**
+  A counter of the number of requests with a tag while a server is
+  processing another request with the same tag.
+
+**<server_label>/mux/orphaned_tdiscard**
+  A counter of the number of Tdiscard messages that a server do not have
+  corresponding requests. This happens when a server already responded
+  when Tdicard arrives.
+
 **clienthangup**
   A counter of the number of times sessions have been abruptly terminated by
   the client.
