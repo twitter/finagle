@@ -47,3 +47,11 @@
   A guage indicating the maximum size of fragments when mux framing is enabled.
   A value of -1 means that writes are not fragmented.
 
+**<label>/mux/transport/read/failures/**
+  A counter indicating any exceptions that occur on the transport read path for mux.
+  This includes exceptions in handshaking, thrift downgrading (for servers), etc.
+
+**<label>/mux/transport/write/failures/**
+  A counter indicating any exceptions that occur on the transport write path for mux.
+  This includes exceptions in handshaking, thrift downgrading (for servers), etc.
+
