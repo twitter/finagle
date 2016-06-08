@@ -47,7 +47,7 @@ object DtabFilter {
     Future.value(rsp)
   }
 
-  @deprecated("use DtabFilter.Decoder", "2016-06-07")
+  @deprecated("use DtabFilter.Extractor", "2016-06-07")
   class Finagle[Req <: Message] extends DtabFilter[Req, Response] {
     def respondToInvalid(req: Req, msg: String) = invalidResponse(msg)
   }
