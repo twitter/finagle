@@ -9,8 +9,11 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 Deprecations
 ~~~~~~~~~~~~
+
   * finagle-http: Deprecate channelBufferUsageTracker in favor of maxRequestSize.
     ``RB_ID=831233``
+
+  * finagle-http: Deprecate DtabFilter.Finagle in favor of DtabFilter.Extractor.
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -95,6 +98,9 @@ New Features
     feature parity with `ServerBuilder`.  ``RB_ID=837726``
 
   * finagle-exp: Changed DarkTrafficFilter to forward interrupts to dark service. ``RB_ID=839286``
+
+  * finagle-http: ContextFilter and Dtab-extractor/injector logic has been moved from
+    the http dispatchers into the client and server stacks.
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

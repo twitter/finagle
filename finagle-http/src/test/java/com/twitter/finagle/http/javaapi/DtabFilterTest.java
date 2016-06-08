@@ -14,7 +14,7 @@ public class DtabFilterTest {
 
   @Test
   public void tesDtab() {
-    DtabFilter<Request, Response> finagleDtabFilter = new DtabFilter.Finagle<Request>();
+    DtabFilter<Request, Response> finagleDtabFilter = new DtabFilter.Extractor();
     Assert.assertNotNull(finagleDtabFilter);
   }
 }
