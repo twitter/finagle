@@ -13,6 +13,9 @@ Deprecations
   * finagle-http: Removed DtabFilter.Finagle in favor of DtabFilter.Extractor.
     ``RB_ID=840600``
 
+  * finagle-zipkin: Deprecate `ZipkinTracer` in favor of `ScribeZipkinTracer`.
+    ``RB_ID=840494``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -70,6 +73,10 @@ Breaking API Changes
     with `ClientBuilder.stack(Thrift.client.withBufferedTransport)`
     or `ServerBuilder.stack(Thrift.server.withBufferedTransport)`. ``RB_ID=838146``
 
+  * finagle-zipkin: Moved case classes and companion objects `Span`, `ZipkinAnnotation`,
+    `BinaryAnnotation`, `Endpoint`, `Sampler` and `SamplingTracer` to finagle-zipkin-core.
+    ``RB_ID=840494``
+
 Bug Fixes
 ~~~~~~~~~
 
@@ -112,6 +119,12 @@ New Features
   * finagle-redis: Adds support for scripting commands. ``RB_ID=837538``
 
   * finagle-netty4: SOCKS5 proxy support. ``RB_ID=839856``
+
+  * finagle-zipkin-core: A new module containing most of the functionality
+    from finagle-zipkin, leaving finagle-zipkin with only Scribe specific code
+    and a service loader. This allows for other transports to be implemented
+    in separate modules. For example the upcoming finagle-zipkin-kafka.
+    ``RB_ID=840494``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

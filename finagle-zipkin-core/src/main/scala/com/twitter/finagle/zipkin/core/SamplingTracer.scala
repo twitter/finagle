@@ -1,8 +1,6 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.zipkin.core
 
-import com.twitter.finagle.stats.{DefaultStatsReceiver, NullStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.{TraceId, Record, Tracer, Annotation, Trace}
-import com.twitter.finagle.zipkin.{host => Host, initialSampleRate => sampleRateFlag}
 import com.twitter.io.Buf
 import com.twitter.util.events.{Event, Sink}
 import com.twitter.util.{Time, Throw, Try}
@@ -69,9 +67,7 @@ private object Json {
     }
 }
 
-object ZipkinTracer {
-
-  lazy val default: Tracer = mk()
+object SamplingTracer {
 
   /**
    * The [[com.twitter.util.events.Event.Type Event.Type]] for trace events.
@@ -110,50 +106,6 @@ object ZipkinTracer {
     }
   }
 
-  /**
-   * @param scribeHost Host to send trace data to
-   * @param scribePort Port to send trace data to
-   * @param statsReceiver Where to log information about tracing success/failures
-   * @param sampleRate How much data to collect. Default sample rate 0.1%. Max is 1, min 0.
-   */
-  @deprecated("Use mk() instead", "6.1.0")
-  def apply(
-    scribeHost: String = Host().getHostName,
-    scribePort: Int = Host().getPort,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    sampleRate: Float = Sampler.DefaultSampleRate
-  ): Tracer.Factory = () => mk(scribeHost, scribePort, statsReceiver, sampleRate)
-
-  /**
-   * @param host Host to send trace data to
-   * @param port Port to send trace data to
-   * @param statsReceiver Where to log information about tracing success/failures
-   * @param sampleRate How much data to collect. Default sample rate 0.1%. Max is 1, min 0.
-   */
-  def mk(
-    host: String = Host().getHostName,
-    port: Int = Host().getPort,
-    statsReceiver: StatsReceiver = NullStatsReceiver,
-    sampleRate: Float = Sampler.DefaultSampleRate
-  ): Tracer =
-    new ZipkinTracer(
-      RawZipkinTracer(host, port, statsReceiver),
-      sampleRate)
-
-  /**
-   * Util method since named parameters can't be called from Java
-   * @param sr stats receiver to send successes/failures to
-   */
-  @deprecated("Use mk() instead", "6.1.0")
-  def apply(sr: StatsReceiver): Tracer.Factory = () =>
-    mk(Host().getHostName, Host().getPort, sr, Sampler.DefaultSampleRate)
-
-  /**
-   * Util method since named parameters can't be called from Java
-   * @param statsReceiver stats receiver to send successes/failures to
-   */
-  def mk(statsReceiver: StatsReceiver): Tracer =
-    mk(Host().getHostName, Host().getPort, statsReceiver, Sampler.DefaultSampleRate)
 }
 
 /**
@@ -179,13 +131,6 @@ class SamplingTracer(
   def this(underlyingTracer: Tracer, initialSampleRate: Float) =
     this(underlyingTracer, initialSampleRate, Sink.default)
 
-  /**
-   * Tracer that supports sampling. Will pass through a subset of the records.
-   */
-  def this() = this(
-    RawZipkinTracer(Host().getHostName, Host().getPort, DefaultStatsReceiver.scope("zipkin")),
-    sampleRateFlag())
-
   private[this] val sampler = new Sampler
   setSampleRate(initialSampleRate)
 
@@ -200,15 +145,13 @@ class SamplingTracer(
       if (sink.recording) {
         if (Trace.hasId) {
           val traceId = Trace.id
-          sink.event(ZipkinTracer.Trace, objectVal = record.annotation,
+          sink.event(SamplingTracer.Trace, objectVal = record.annotation,
             traceIdVal = traceId.traceId.self, spanIdVal = traceId.spanId.self)
         } else {
-          sink.event(ZipkinTracer.Trace, objectVal = record.annotation)
+          sink.event(SamplingTracer.Trace, objectVal = record.annotation)
         }
       }
     }
   }
 }
 
-class ZipkinTracer(tracer: RawZipkinTracer, initialRate: Float)
-  extends SamplingTracer(tracer, initialRate)

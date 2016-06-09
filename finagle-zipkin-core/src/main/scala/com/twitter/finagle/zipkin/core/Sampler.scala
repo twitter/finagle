@@ -1,4 +1,4 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.tracing.{Record, TraceId}
 import scala.util.Random
@@ -30,7 +30,7 @@ class Sampler {
    *
    * How much to let through? For everything, use 1 = 100.00%
    */
-  def setSampleRate(sampleRate: Float) = {
+  def setSampleRate(sampleRate: Float): Unit = {
     if (!validSampleRate(sampleRate)) {
       throw new IllegalArgumentException("Sample rate not within the valid range of 0-1, was " + sampleRate)
     }
@@ -45,7 +45,7 @@ class Sampler {
   /**
    * @return the current sample rate, 0.0-1.0
    */
-  def sampleRate = sr
+  def sampleRate: Float = sr
 
   /**
    * Should we drop this particular trace or send it on to Scribe?

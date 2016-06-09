@@ -1,4 +1,4 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.zipkin.core
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.NullStatsReceiver

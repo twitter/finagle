@@ -1,4 +1,4 @@
-package com.twitter.finagle.zipkin.thrift
+package com.twitter.finagle.zipkin.core
 
 import com.twitter.finagle.thrift.thrift
 import com.twitter.util.Time

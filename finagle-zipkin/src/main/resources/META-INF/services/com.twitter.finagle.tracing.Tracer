@@ -1,1 +1,1 @@
-com.twitter.finagle.zipkin.thrift.SamplingTracer
+com.twitter.finagle.zipkin.thrift.ScribeZipkinTracer
