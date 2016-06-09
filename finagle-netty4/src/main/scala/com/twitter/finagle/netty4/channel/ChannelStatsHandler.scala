@@ -50,9 +50,9 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   }
 
   override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
-    ctx.attr(ConnectionStatsKey).set(ChannelStats(new AtomicLong(0), new AtomicLong(0)))
-    ctx.attr(ChannelWasWritableKey).set(true) //netty channels start in writable state
-    ctx.attr(ChannelWritableDurationKey).set(Stopwatch.start())
+    ctx.channel.attr(ConnectionStatsKey).set(ChannelStats(new AtomicLong(0), new AtomicLong(0)))
+    ctx.channel.attr(ChannelWasWritableKey).set(true) //netty channels start in writable state
+    ctx.channel.attr(ChannelWritableDurationKey).set(Stopwatch.start())
     super.handlerAdded(ctx)
   }
 
@@ -60,12 +60,12 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
     connects.incr()
     connectionCount.incrementAndGet()
 
-    ctx.attr(ConnectionDurationKey).set(Stopwatch.start())
+    ctx.channel.attr(ConnectionDurationKey).set(Stopwatch.start())
     super.channelActive(ctx)
   }
 
   override def write(ctx: ChannelHandlerContext, msg: Object, p: ChannelPromise) {
-    val channelWriteCount = ctx.attr(ConnectionStatsKey).get.bytesWritten
+    val channelWriteCount = ctx.channel.attr(ConnectionStatsKey).get.bytesWritten
 
     msg match {
       case buffer: ByteBuf =>
@@ -82,7 +82,7 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   override def channelRead(ctx: ChannelHandlerContext, msg: Object) {
     msg match {
       case buffer: ByteBuf =>
-        val channelReadCount = ctx.attr(ConnectionStatsKey).get.bytesRead
+        val channelReadCount = ctx.channel.attr(ConnectionStatsKey).get.bytesRead
         val readableBytes = buffer.readableBytes
         channelReadCount.getAndAdd(readableBytes)
         receivedBytes.incr(readableBytes)
@@ -99,13 +99,13 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext) {
-    val channelStats = ctx.attr(ConnectionStatsKey).get
+    val channelStats = ctx.channel.attr(ConnectionStatsKey).get
     connectionReceivedBytes.add(channelStats.bytesRead.get)
     connectionSentBytes.add(channelStats.bytesWritten.get)
 
     // we do a null check here because ConnectionDurationKey is added on
     // `channelActive`, not `handlerAdded`.
-    ctx.attr(ConnectionDurationKey).get match {
+    ctx.channel.attr(ConnectionDurationKey).get match {
       case null => // the connection didn't initialize
       case elapsed => connectionDuration.add(elapsed().inMilliseconds)
     }
@@ -131,9 +131,9 @@ private[netty4] class ChannelStatsHandler(statsReceiver: StatsReceiver)
 
   override def channelWritabilityChanged(ctx: ChannelHandlerContext): Unit = {
     val isWritable = ctx.channel.isWritable()
-    val wasWritableAttr = ctx.attr(ChannelWasWritableKey)
+    val wasWritableAttr = ctx.channel.attr(ChannelWasWritableKey)
     if (isWritable != wasWritableAttr.get) {
-      val writableDuration = ctx.attr(ChannelWritableDurationKey)
+      val writableDuration = ctx.channel.attr(ChannelWritableDurationKey)
       val elapsed: Duration = writableDuration.get().apply()
       val stat = if (wasWritableAttr.get) writable else unwritable
       stat.incr(elapsed.inMilliseconds.toInt)

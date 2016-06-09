@@ -20,7 +20,7 @@ private[finagle] object BufAsByteBuf {
           Unpooled.wrappedBuffer(Buf.ByteBuffer.Owned.extract(buf))
       }
 
-      Unpooled.unmodifiableBuffer(bb)
+      bb.asReadOnly
     }
 
   }
@@ -41,7 +41,7 @@ private[finagle] object BufAsByteBuf {
           Unpooled.wrappedBuffer(Buf.ByteBuffer.Shared.extract(buf))
       }
 
-      Unpooled.unmodifiableBuffer(bb)
+      bb.asReadOnly
     }
   }
 }

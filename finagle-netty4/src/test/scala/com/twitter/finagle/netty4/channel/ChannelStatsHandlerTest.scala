@@ -35,8 +35,8 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
     when(chan.isWritable).thenReturn(false, true, false)
     when(ctx.channel).thenReturn(chan)
-    when(ctx.attr(ChannelStatsHandler.ChannelWasWritableKey)).thenReturn(mkAttr(true))
-    when(ctx.attr(ChannelStatsHandler.ChannelWritableDurationKey)).thenReturn(mkAttr(Stopwatch.start()))
+    when(chan.attr(ChannelStatsHandler.ChannelWasWritableKey)).thenReturn(mkAttr(true))
+    when(chan.attr(ChannelStatsHandler.ChannelWritableDurationKey)).thenReturn(mkAttr(Stopwatch.start()))
   }
 
   trait InMemoryStatsTest extends SocketTest {
@@ -67,6 +67,7 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
     val sr = new InMemoryStatsReceiver
     val handler = new ChannelStatsHandler(sr)
     val ctx = mock[ChannelHandlerContext]
+    val chan = mock[Channel]
     val bytesWritten = new AtomicLong(0)
     val bytesReceived = new AtomicLong(0)
 
@@ -77,14 +78,15 @@ class ChannelStatsHandlerTest extends FunSuite with MockitoSugar {
 
     val start = Time.now
     val statsAttr = mock[Attribute[ChannelStats]]
-    when(ctx.attr(ChannelStatsHandler.ConnectionStatsKey)).thenReturn(statsAttr)
+    when(ctx.channel).thenReturn(chan)
+    when(chan.attr(ChannelStatsHandler.ConnectionStatsKey)).thenReturn(statsAttr)
     when(statsAttr.get).thenReturn(ChannelStats(bytesReceived, bytesWritten))
 
     val durationAttr = mock[Attribute[() => Duration]]
     when(durationAttr.get).thenReturn(() => Time.now - start)
-    when(ctx.attr(ChannelStatsHandler.ConnectionDurationKey)).thenReturn(durationAttr)
-    when(ctx.attr(ChannelStatsHandler.ChannelWasWritableKey)).thenReturn(mkAttr(true))
-    when(ctx.attr(ChannelStatsHandler.ChannelWritableDurationKey)).thenReturn(mkAttr(Stopwatch.start()))
+    when(chan.attr(ChannelStatsHandler.ConnectionDurationKey)).thenReturn(durationAttr)
+    when(chan.attr(ChannelStatsHandler.ChannelWasWritableKey)).thenReturn(mkAttr(true))
+    when(chan.attr(ChannelStatsHandler.ChannelWritableDurationKey)).thenReturn(mkAttr(Stopwatch.start()))
   }
 
 

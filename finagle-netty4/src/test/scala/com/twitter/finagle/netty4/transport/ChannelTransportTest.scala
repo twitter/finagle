@@ -24,9 +24,6 @@ class ChannelTransportTest extends FunSuite
   val (transport, channel) = {
     val ch = new EmbeddedChannel()
     val tr = new ChannelTransport[String, String](ch)
-    // We have to remove EmbedChannels' LastInboundHandler to make sure inbound messages
-    // reach our own ChannelTransport.
-    ch.pipeline().removeFirst()
     (tr, ch)
   }
 
@@ -169,7 +166,6 @@ class ChannelTransportTest extends FunSuite
     when(engine.getSession).thenReturn(session)
     when(session.getPeerCertificates).thenReturn(Array(cert))
     val ch = new EmbeddedChannel(new SslHandler(engine))
-    ch.pipeline().removeLast()
     val tr = new ChannelTransport[String, String](ch)
 
     assert(tr.peerCertificate == Some(cert))

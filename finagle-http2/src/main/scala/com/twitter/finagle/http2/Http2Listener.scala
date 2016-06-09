@@ -4,6 +4,7 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.server.Listener
 import io.netty.channel.{ChannelHandler, ChannelPipeline}
+import io.netty.handler.codec.http2.Http2ServerDowngrader
 
 /**
  * Please note that the listener cannot be used for TLS yet.
