@@ -1,7 +1,6 @@
 package com.twitter.finagle.netty4.ssl
 
-import com.twitter.finagle.CancelledConnectionException
-import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
+import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
 import io.netty.channel._
 import io.netty.handler.ssl.SslHandler
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
@@ -17,10 +16,14 @@ import javax.net.ssl.SSLSession
  */
 private[netty4] class SslConnectHandler(
     ssl: SslHandler,
-    sessionValidation: SSLSession => Option[Throwable]) extends ChannelOutboundHandlerAdapter
-  with BufferingChannelOutboundHandler { self =>
+    sessionValidation: SSLSession => Option[Throwable])
+  extends ChannelOutboundHandlerAdapter
+  with BufferingChannelOutboundHandler
+  with ConnectPromiseDelayListeners { self =>
 
   private[this] def fail(p: ChannelPromise, ctx: ChannelHandlerContext, t: Throwable): Unit = {
+    // We "try" because it might be already cancelled and we don't need to handle
+    // cancellations here - it's already done by `proxyCancellationsTo`.
     p.tryFailure(t)
     failPendingWrites(ctx, t)
   }
@@ -34,30 +37,10 @@ private[netty4] class SslConnectHandler(
     val sslConnectPromise = ctx.newPromise()
 
     // Cancel new promise if the original one is canceled.
-    promise.addListener(new GenericFutureListener[NettyFuture[Any]] {
-      override def operationComplete(f: NettyFuture[Any]): Unit =
-        if (f.isCancelled) {
-          if (!sslConnectPromise.cancel(true) && sslConnectPromise.isSuccess) {
-            // New connect promise wasn't cancelled because it was already satisfied (connected) so
-            // we need to close the channel to prevent resource leaks.
-            // See https://github.com/twitter/finagle/issues/345
-            failPendingWrites(ctx, new CancelledConnectionException())
-            ctx.close()
-          }
-        }
-    })
+    promise.addListener(proxyCancellationsTo(sslConnectPromise, ctx))
 
     // Fail the original promise if a new one is failed.
-    sslConnectPromise.addListener(new GenericFutureListener[NettyFuture[Any]] {
-      override def operationComplete(f: NettyFuture[Any]): Unit =
-        // We filter cancellation here since we assume it was proxied from the original promise and
-        // is already being handled in a handler above.
-        if (!f.isSuccess && !f.isCancelled) {
-          // The connect request was failed so the channel was never active. Since no  writes are
-          // expected from the previous handler, no need to fail the pending writes.
-          promise.setFailure(f.cause)
-        }
-    })
+    sslConnectPromise.addListener(proxyFailuresTo(promise))
 
     // React on satisfied handshake promise.
     ssl.handshakeFuture().addListener(new GenericFutureListener[NettyFuture[Channel]] {

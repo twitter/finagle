@@ -4,9 +4,10 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
 import com.twitter.finagle.netty4.codec.{DecodeHandler, EncodeHandler}
-import com.twitter.finagle.netty4.proxy.HttpProxyConnectHandler
+import com.twitter.finagle.netty4.proxy.{SocksProxyConnectHandler, HttpProxyConnectHandler}
 import com.twitter.finagle.netty4.ssl.Netty4SslHandler
 import com.twitter.finagle.param.{Stats, Logger}
+import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import io.netty.channel._
@@ -75,7 +76,8 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
   private[this] val Transport.Liveness(readTimeout, writeTimeout, _) = params[Transport.Liveness]
   private[this] val Logger(logger) = params[Logger]
   private[this] val Stats(stats) = params[Stats]
-  private[this] val Transporter.HttpProxyTo(hostAndCredentials) = params[Transporter.HttpProxyTo]
+  private[this] val Transporter.HttpProxyTo(httpHostAndCredentials) =
+    params[Transporter.HttpProxyTo]
 
   private[this] val (channelRequestStatsHandler, channelStatsHandler) =
     if (!stats.isNull)
@@ -114,7 +116,15 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
     // Add SslHandler to the pipeline.
     pipe.addFirst("ssl init", new Netty4SslHandler(params))
 
-    hostAndCredentials.foreach {
+    // SOCKS proxy.
+    SocksProxyFlags.socksProxy.foreach { proxyAddress =>
+      pipe.addFirst("socks proxy connect", new SocksProxyConnectHandler(
+        proxyAddress, SocksProxyFlags.socksUsernameAndPassword.map(Transporter.Credentials.tupled)
+      ))
+    }
+
+    // TCP tunneling via HTTP proxy.
+    httpHostAndCredentials.foreach {
       case (host, credentials) => pipe.addFirst("http proxy connect",
         new HttpProxyConnectHandler(host, credentials))
     }

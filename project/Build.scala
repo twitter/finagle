@@ -26,7 +26,8 @@ object Finagle extends Build {
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
     "io.netty" % "netty-handler" % netty4Version,
-    "io.netty" % "netty-transport" % netty4Version
+    "io.netty" % "netty-transport" % netty4Version,
+    "io.netty" % "netty-handler-proxy" % netty4Version
   )
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version

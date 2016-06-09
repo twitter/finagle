@@ -104,6 +104,8 @@ New Features
 
   * finagle-redis: Adds support for scripting commands. ``RB_ID=837538``
 
+  * finagle-netty4: SOCKS5 proxy support. ``RB_ID=839856``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

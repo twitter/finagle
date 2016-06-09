@@ -1,11 +1,9 @@
 package com.twitter.finagle.netty4.proxy
 
-import com.twitter.finagle.{
-  CancelledConnectionException, ChannelClosedException, Failure, ConnectionFailedException
-}
+import com.twitter.finagle.{ChannelClosedException, Failure, ConnectionFailedException}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.client.Transporter.Credentials
-import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
+import com.twitter.finagle.netty4.channel.{ConnectPromiseDelayListeners, BufferingChannelOutboundHandler}
 import com.twitter.io.Charsets
 import com.twitter.util.Base64StringEncoder
 import io.netty.channel._
@@ -39,10 +37,12 @@ import java.net.SocketAddress
  * @param credentialsOption optional credentials for a proxy server
  */
 private[netty4] class HttpProxyConnectHandler(
-  host: String,
-  credentialsOption: Option[Transporter.Credentials],
-  httpClientCodec: ChannelHandler = new HttpClientCodec() // exposed for testing
-) extends ChannelDuplexHandler with BufferingChannelOutboundHandler { self =>
+    host: String,
+    credentialsOption: Option[Transporter.Credentials],
+    httpClientCodec: ChannelHandler = new HttpClientCodec()) // exposed for testing
+  extends ChannelDuplexHandler
+  with BufferingChannelOutboundHandler
+  with ConnectPromiseDelayListeners { self =>
 
   private[this] val httpCodecKey: String = "http proxy client codec"
   private[this] var connectPromise: ChannelPromise = _
@@ -53,6 +53,8 @@ private[netty4] class HttpProxyConnectHandler(
   }
 
   private[this] def fail(ctx: ChannelHandlerContext, t: Throwable): Unit = {
+    // We "try" because it might be already cancelled and we don't need to handle
+    // cancellations here - it's already done by `proxyCancellationsTo`.
     connectPromise.tryFailure(t)
     failPendingWrites(ctx, t)
   }
@@ -66,18 +68,7 @@ private[netty4] class HttpProxyConnectHandler(
     val proxyConnectPromise = ctx.newPromise()
 
     // Cancel new promise if an original one is canceled.
-    promise.addListener(new GenericFutureListener[NettyFuture[Any]] {
-      override def operationComplete(f: NettyFuture[Any]): Unit =
-        if (f.isCancelled) {
-          if (!proxyConnectPromise.cancel(true) && proxyConnectPromise.isSuccess) {
-            // New connect promise wasn't cancelled because it was already satisfied (connected) so
-            // we need to close the channel to prevent resource leaks.
-            // See https://github.com/twitter/finagle/issues/345
-            failPendingWrites(ctx, new CancelledConnectionException())
-            ctx.close()
-          }
-        }
-    })
+    promise.addListener(proxyCancellationsTo(proxyConnectPromise, ctx))
 
     // Fail old promise if a new one is failed.
     proxyConnectPromise.addListener(new GenericFutureListener[NettyFuture[Any]] {
