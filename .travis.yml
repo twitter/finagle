@@ -5,6 +5,30 @@ language: scala
 
 env:
   - JAVA_OPTS="-Xmx4G -DSKIP_FLAKY=1"
+  - PROJECT=finagle-commons-stats
+  - PROJECT=finagle-cacheresolver
+  - PROJECT=finagle-core
+  - PROJECT=finagle-exception
+  - PROJECT=finagle-exp
+  - PROJECT=finagle-http
+  - PROJECT=finagle-http-compat
+  - PROJECT=finagle-netty4-http
+  - PROJECT=finagle-http2
+  - PROJECT=finagle-integration
+  - PROJECT=finagle-kestrel
+  - PROJECT=finagle-mdns
+  - PROJECT=finagle-mux
+  - PROJECT=finagle-mysql
+  - PROJECT=finagle-netty4
+  - PROJECT=finagle-ostrich4
+  - PROJECT=finagle-redis
+  - PROJECT=finagle-serversets
+  - PROJECT=finagle-spdy
+  - PROJECT=finagle-stats
+  - PROJECT=finagle-stream
+  # These targets are currently failing for known limitations in scrooge-plugin
+  # - PROJECT=finagle-thrift
+  # - PROJECT=finagle-thriftmux
 
 # These directories are cached to S3 at the end of the build
 cache:
@@ -47,32 +71,8 @@ script:
     fi
 
   # run for all environments
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-commons-stats/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-cacheresolver/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-core/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exception/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-exp/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http-compat/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-netty4-http/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-http2/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-integration/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-kestrel/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mdns/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mux/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-mysql/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-netty4/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-ostrich4/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-redis/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-serversets/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-spdy/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stats/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-stream/test coverageReport
-  # These targets are currently failing for known limitations in scrooge-plugin
-  # - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thrift/test coverageReport
-  # - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-thriftmux/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-zipkin/test coverageReport
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage $PROJECT/test coverageReport
 
 after_success: 
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   - bash <(curl -s https://codecov.io/bash)
