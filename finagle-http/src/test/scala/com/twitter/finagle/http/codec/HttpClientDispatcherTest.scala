@@ -1,9 +1,8 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.{Dtab, Status}
+import com.twitter.finagle.Status
 import com.twitter.finagle.http.{Request, Response}
-import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.http.netty.Netty3ClientStreamTransport
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.transport.{Transport, QueueTransport}
@@ -285,113 +284,5 @@ class HttpClientDispatcherTest extends FunSuite {
     }
   }
 
-  test("ensure denial of new-style dtab headers") {
-    // create a test dispatcher and its transport mechanism
-    val (in, out) = mkPair()
-    val dispatcher = new HttpClientDispatcher(in, NullStatsReceiver)
-
-    // prepare a request and add a correct looking new-style dtab header
-    val sentRequest = Request()
-    sentRequest.headers().add("dtab-local", "/srv=>/srv#/staging")
-
-    // dispatch the request
-    val futureResult = dispatcher(sentRequest)
-
-    // get the netty request out of the other end of the transporter
-    val recvNettyReq = Await.result(out.read()).asInstanceOf[HttpRequest]
-
-    // apply the bijection to convert the netty request to a finagle one
-    val recvFinagleReq = from[HttpRequest, Request](recvNettyReq)
-
-    // extract the dtab from the sent request
-    val recvDtab = HttpDtab.read(recvFinagleReq).get()
-
-    // send back an http ok to the dispatcher
-    val sentResult = new DefaultHttpResponse(HTTP_1_1, OK)
-    out.write(sentResult)
-
-    // block until the dispatcher presents us with the result
-    val recvResult = Await.result(futureResult, timeout)
-
-    // ensure that no dtabs were received
-    assert(recvDtab.length == 0)
-
-    // ensure that the sent and received http requests are identical
-    assert(recvResult.httpResponse == sentResult)
-  }
-
-  test("ensure denial of old-style dtab headers") {
-    // create a test dispatcher and its transport mechanism
-    val (in, out) = mkPair()
-    val dispatcher = new HttpClientDispatcher(in, NullStatsReceiver)
-
-    // prepare a request and add a correct looking new-style dtab header
-    val sentRequest = Request()
-    sentRequest.headers().add("x-dtab-00-a", "/s/foo")
-    sentRequest.headers().add("x-dtab-00-b", "/s/bar")
-
-    // dispatch the request
-    val futureResult = dispatcher(sentRequest)
-
-    // get the netty request out of the other end of the transporter
-    val recvNettyReq = Await.result(out.read()).asInstanceOf[HttpRequest]
-
-    // apply the bijection to convert the netty request to a finagle one
-    val recvFinagleReq = from[HttpRequest, Request](recvNettyReq)
-
-    // extract the dtab from the sent request
-    val recvDtab = HttpDtab.read(recvFinagleReq).get()
-
-    // send back an http ok to the dispatcher
-    val sentResult = new DefaultHttpResponse(HTTP_1_1, OK)
-    out.write(sentResult)
-
-    // block until the dispatcher presents us with the result
-    val recvResult = Await.result(futureResult, timeout)
-
-    // ensure that no dtabs were received
-    assert(recvDtab.length == 0)
-
-    // ensure that the sent and received http requests are identical
-    assert(recvResult.httpResponse == sentResult)
-  }
-
-  test("ensure transmission of dtab local") {
-    Dtab.unwind {
-      // create a test dispatcher and its transport mechanism
-      val (in, out) = mkPair()
-      val dispatcher = new HttpClientDispatcher(in, NullStatsReceiver)
-
-      // prepare a request and a simple dtab with one dentry
-      val sentRequest = Request()
-      val sentDtab = Dtab.read("/s => /srv/smf1")
-
-      // augment dtab.local and dispatch the request
-      Dtab.local ++= sentDtab
-      val futureResult = dispatcher(sentRequest)
-
-      // get the netty request out of the other end of the transporter
-      val recvNettyReq = Await.result(out.read()).asInstanceOf[HttpRequest]
-
-      // apply the bijection to convert the netty request to a finagle one
-      val recvFinagleReq = from[HttpRequest, Request](recvNettyReq)
-
-      // extract the dtab from the sent request
-      val recvDtab = HttpDtab.read(recvFinagleReq).get()
-
-      // send back an http ok to the dispatcher
-      val sentResult = new DefaultHttpResponse(HTTP_1_1, OK)
-      out.write(sentResult)
-
-      // block until the dispatcher presents us with the result
-      val recvResult = Await.result(futureResult, timeout)
-
-      // ensure that the sent and received dtabs are identical
-      assert(sentDtab == recvDtab)
-
-      // ensure that the sent and received http requests are identical
-      assert(recvResult.httpResponse == sentResult)
-    }
-  }
 }
 
