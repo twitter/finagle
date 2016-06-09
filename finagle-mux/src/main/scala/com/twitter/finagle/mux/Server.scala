@@ -196,6 +196,7 @@ private[twitter] class ServerDispatcher(
   private[this] implicit val injectTimer = DefaultTimer.twitter
   private[this] val tracker = new Tracker[Message]
   private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val duplicateTagCounter = statsReceiver.counter("duplicate_tag")
   private[this] val orphanedTdiscardCounter = statsReceiver.counter("orphaned_tdiscard")
 
   private[this] val state: AtomicReference[State.Value] =
@@ -243,7 +244,7 @@ private[twitter] class ServerDispatcher(
         // In both cases, we forfeit the ability to track (and thus drain or interrupt)
         // the request, but we can still service it.
         log.fine(s"Received duplicate tag ${m.tag} from client ${trans.remoteAddress}")
-        statsReceiver.counter("duplicate_tag").incr()
+        duplicateTagCounter.incr()
         service(m).transform(reply)
       }
 

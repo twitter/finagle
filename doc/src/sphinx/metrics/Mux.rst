@@ -17,9 +17,9 @@
   processing another request with the same tag.
 
 **<server_label>/mux/orphaned_tdiscard**
-  A counter of the number of Tdiscard messages that a server do not have
-  corresponding requests. This happens when a server already responded
-  when Tdicard arrives.
+  A counter of the number of Tdiscard messages for which the server does
+  not have a corresponding request.  This happens when a server has already
+  responded to the request when it receives a Tdiscard.
 
 **clienthangup**
   A counter of the number of times sessions have been abruptly terminated by
