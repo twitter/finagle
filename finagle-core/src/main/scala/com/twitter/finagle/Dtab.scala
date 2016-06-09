@@ -25,8 +25,8 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
   private lazy val dentries = dentries0.reverse
 
   def apply(i: Int): Dentry = dentries0(i)
-  def length = dentries0.length
-  override def isEmpty = dentries0.isEmpty
+  def length: Int = dentries0.length
+  override def isEmpty: Boolean = dentries0.isEmpty
 
   /**
    * Lookup the given `path` with this dtab.
@@ -120,7 +120,7 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
   })
 
   def show: String = dentries0 map (_.show) mkString ";"
-  override def toString = "Dtab("+show+")"
+  override def toString: String = "Dtab("+show+")"
 }
 
 /**
@@ -129,8 +129,8 @@ case class Dtab(dentries0: IndexedSeq[Dentry])
  * tree for this prefix on lookup.
  */
 case class Dentry(prefix: Dentry.Prefix, dst: NameTree[Path]) {
-  def show = "%s=>%s".format(prefix.show, dst.show)
-  override def toString = "Dentry("+show+")"
+  def show: String = "%s=>%s".format(prefix.show, dst.show)
+  override def toString: String = "Dentry("+show+")"
 }
 
 object Dentry {
@@ -166,7 +166,8 @@ object Dentry {
   /**
    * A Prefix comprises a [[Path]]-matching expression.
    *
-   * Each element in a prefix may be either a [[Label]] or [[AnyElem]].
+   * Each element in a prefix may be either a [[Dentry.Prefix.Label]]
+   * or [[Dentry.Prefix.AnyElem]].
    * When matching a [[Path]], Label-elements must match exactly,
    * while Any-elements are ignored.
    */
@@ -187,8 +188,8 @@ object Dentry {
     }
 
     // A prefix acts somewhat like a Seq[Elem]
-    def take(n: Int) = Prefix(elems.take(n):_*)
-    def drop(n: Int) = Prefix(elems.drop(n):_*)
+    def take(n: Int): Prefix = Prefix(elems.take(n):_*)
+    def drop(n: Int): Prefix = Prefix(elems.drop(n):_*)
     def ++(that: Prefix): Prefix =
       if (that.isEmpty) this
       else Prefix((elems ++ that.elems):_*)
@@ -199,9 +200,9 @@ object Dentry {
       if (path.isEmpty) this
       else this ++ Prefix(path)
 
-    lazy val showElems = elems.map(_.show)
-    lazy val show = showElems.mkString("/", "/", "")
-    override def toString = s"""Prefix(${showElems.mkString(",")})"""
+    lazy val showElems: Seq[String] = elems.map(_.show)
+    lazy val show: String = showElems.mkString("/", "/", "")
+    override def toString: String = s"""Prefix(${showElems.mkString(",")})"""
   }
 
   object Prefix {
@@ -245,7 +246,7 @@ object Dentry {
      */
     def read(s: String): Prefix = NameTreeParsers.parseDentryPrefix(s)
 
-    val empty = new Prefix()
+    val empty: Prefix = new Prefix()
 
     sealed trait Elem {
       def show: String
@@ -257,7 +258,7 @@ object Dentry {
 
     case class Label(buf: Buf) extends Elem {
       require(!buf.isEmpty)
-      lazy val show = Path.showElem(buf)
+      lazy val show: String = Path.showElem(buf)
     }
 
     object Label {
@@ -302,7 +303,8 @@ object Dtab {
   /**
    * Java API for `base_=`
    */
-  def setBase(dtab: Dtab) { base = dtab }
+  def setBase(dtab: Dtab): Unit =
+    base = dtab
 
   private[this] val l = new Local[Dtab]
 
@@ -325,12 +327,14 @@ object Dtab {
     case Some(dtab) => dtab
     case None => Dtab.empty
   }
-  def local_=(dtab: Dtab) { l() = dtab }
+  def local_=(dtab: Dtab): Unit =
+    l() = dtab
 
   /**
    * Java API for `local_=`
    */
-  def setLocal(dtab: Dtab) { local = dtab }
+  def setLocal(dtab: Dtab): Unit =
+    local = dtab
 
   def unwind[T](f: => T): T = {
     val save = l()
@@ -365,14 +369,14 @@ object Dtab {
    * [[com.twitter.app.Flag]]s
    */
   implicit val flaggable: Flaggable[Dtab] = new Flaggable[Dtab] {
-    override def default = None
-    def parse(s: String) = Dtab.read(s)
-    override def show(dtab: Dtab) = dtab.show
+    override def default: Option[Dtab] = None
+    def parse(s: String): Dtab = Dtab.read(s)
+    override def show(dtab: Dtab): String = dtab.show
   }
 }
 
 final class DtabBuilder extends Builder[Dentry, Dtab] {
-  private var builder = new VectorBuilder[Dentry]
+  private[this] val builder = new VectorBuilder[Dentry]
 
   def +=(d: Dentry): this.type = {
     builder += d

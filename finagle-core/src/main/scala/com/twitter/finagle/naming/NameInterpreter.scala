@@ -4,7 +4,7 @@ import com.twitter.finagle._
 import com.twitter.util.Activity
 
 /**
- * Intepret names against a Dtab. Differs from
+ * Interpret names against a Dtab. Differs from
  * [[com.twitter.finagle.Namer Namers]] in that the passed in
  * [[com.twitter.finagle.Dtab Dtab]] can affect the resolution process.
  */
@@ -25,7 +25,8 @@ object NameInterpreter extends NameInterpreter {
   @volatile var global: NameInterpreter = DefaultInterpreter
 
   /** Java API for setting the interpreter */
-  def setGlobal(nameInterpreter: NameInterpreter) = { global = nameInterpreter }
+  def setGlobal(nameInterpreter: NameInterpreter): Unit =
+    global = nameInterpreter
 
   override def bind(dtab: Dtab, tree: Path): Activity[NameTree[Name.Bound]] =
     global.bind(dtab, tree)
