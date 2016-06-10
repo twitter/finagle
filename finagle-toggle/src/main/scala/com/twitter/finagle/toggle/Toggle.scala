@@ -47,16 +47,27 @@ object Toggle {
       fraction: Double,
       description: Option[String]) {
     validateId(id)
-    validateFraction(fraction)
+    validateFraction(id, fraction)
+    validateDescription(id, description)
   }
 
   private[toggle] def isValidFraction(f: Double): Boolean =
     f >= 0.0 && f <= 1.0
 
-  private[toggle] def validateFraction(f: Double): Unit = {
+  private[toggle] def validateFraction(id: String, f: Double): Unit = {
     if (!isValidFraction(f))
       throw new IllegalArgumentException(
-        s"fraction must be between 0.0 and 1.0 inclusive: $f")
+        s"fraction for $id must be between 0.0 and 1.0 inclusive: $f")
+  }
+
+  private[this] def validateDescription(id: String, desc: Option[String]): Unit = {
+    desc match {
+      case None =>
+      case Some(d) =>
+        if (d.trim.isEmpty)
+          throw new IllegalArgumentException(
+            s"description for $id must not be empty: '$d'")
+    }
   }
 
   private[this] val AllowedIdChars: Set[Char] = {

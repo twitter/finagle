@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
-import scala.collection.mutable
+import scala.collection.{breakOut, immutable, mutable}
 
 /**
  * A collection of Int-typed [[Toggle toggles]] which can be
@@ -17,8 +17,8 @@ import scala.collection.mutable
  * on every call.
  *
  * @see [[Toggle]]
- * @see `LoadedToggleMap` and `FinagleToggleMap` in `finagle-core`
- *     for typical usage entry points.
+ * @see [[ServiceLoadedToggleMap]] and [[StandardToggleMap]] for typical usage
+ *      entry points.
  * @see [[http://martinfowler.com/articles/feature-toggles.html Feature Toggles]]
  *      for detailed discussion on the topic.
  */
@@ -114,7 +114,7 @@ object ToggleMap {
    */
   private[toggle] def fractional(id: String, fraction: Double): Toggle[Int] = {
     Toggle.validateId(id)
-    Toggle.validateFraction(fraction)
+    Toggle.validateFraction(id, fraction)
 
     // we want a continuous range within the space of Int.MinValue
     // to Int.MaxValue, including overflowing Max.
@@ -163,6 +163,31 @@ object ToggleMap {
         acc.orElse(tm)
       }
     }
+  }
+
+  /**
+   * A [[ToggleMap]] implementation based on immutable [[Toggle.Metadata]].
+   */
+  private[toggle] class Immutable(
+      metadata: immutable.Seq[Toggle.Metadata])
+    extends ToggleMap {
+
+    private[this] val toggles: immutable.Map[String, Toggle[Int]] =
+      metadata.map { md =>
+        md.id -> fractional(md.id, md.fraction)
+      }(breakOut)
+
+    override def toString: String =
+      s"ToggleMap.Immutable(${System.identityHashCode(this)})"
+
+    def apply(id: String): Toggle[Int] =
+      toggles.get(id) match {
+        case Some(t) => t
+        case None => Toggle.Undefined
+      }
+
+    def iterator: Iterator[Toggle.Metadata] =
+      metadata.iterator
   }
 
   private[this] val NoFractionAndToggle = (Double.NaN, Toggle.Undefined)
@@ -244,7 +269,7 @@ object ToggleMap {
   val mutable: MutableToggleMap = newMutable()
 
   /**
-   * A [[ToggleMap]] that is backed by a [[com.twitter.app.GlobalFlag GlobalFlag]],
+   * A [[ToggleMap]] that is backed by a `com.twitter.app.GlobalFlag`,
    * [[flag.overrides]].
    *
    * Its [[Toggle Toggles]] will reflect changes to the underlying `Flag` which

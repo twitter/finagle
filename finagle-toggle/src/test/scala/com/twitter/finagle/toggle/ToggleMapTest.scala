@@ -3,9 +3,10 @@ package com.twitter.finagle.toggle
 import org.junit.runner.RunWith
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{FunSuite, Matchers}
-import org.scalatest.junit.JUnitRunner
+import scala.collection.immutable
 import scala.util.Random
 
 @RunWith(classOf[JUnitRunner])
@@ -47,6 +48,29 @@ class ToggleMapTest extends FunSuite
     assert(!toggle.isDefinedAt(12333))
   }
 
+  test("ToggleMap.Immutable") {
+    val map = new ToggleMap.Immutable(
+      immutable.Seq(
+        Toggle.Metadata("com.toggle.on", 1.0, None),
+        Toggle.Metadata("com.toggle.off", 0.0, None)
+      )
+    )
+    val on = map("com.toggle.on")
+    val off = map("com.toggle.off")
+    val doesntExist = map("com.toggle.ummm")
+    forAll(IntGen) { i =>
+      assert(on.isDefinedAt(i))
+      assert(on(i))
+      assert(off.isDefinedAt(i))
+      assert(!off(i))
+      assert(!doesntExist.isDefinedAt(i))
+    }
+
+    assert(map.iterator.size == 2)
+    assert(map.iterator.exists(_.id == "com.toggle.on"))
+    assert(map.iterator.exists(_.id == "com.toggle.off"))
+  }
+
   test("ToggleMap.fractional") {
     val on = ToggleMap.fractional("com.toggle.on", 1.0)
     forAll(IntGen) { i =>
@@ -81,6 +105,10 @@ class ToggleMapTest extends FunSuite
         trues.toDouble should be(expected +- epsilon)
       }
     }
+  }
+
+  test("ToggleMap.of with no ToggleMaps") {
+    assert(NullToggleMap == ToggleMap.of())
   }
 
   test("ToggleMap.Flags with empty Flags") {
