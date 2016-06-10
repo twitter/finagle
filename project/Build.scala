@@ -32,7 +32,7 @@ object Finagle extends Build {
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
-  val jacksonVersion = "2.4.4"
+  val jacksonVersion = "2.6.5"
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
