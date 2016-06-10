@@ -4,31 +4,34 @@ sudo: false
 language: scala
 
 env:
-  - JAVA_OPTS="-Xmx4G -DSKIP_FLAKY=1"
-  - PROJECT=finagle-commons-stats
-  - PROJECT=finagle-cacheresolver
-  - PROJECT=finagle-core
-  - PROJECT=finagle-exception
-  - PROJECT=finagle-exp
-  - PROJECT=finagle-http
-  - PROJECT=finagle-http-compat
-  - PROJECT=finagle-netty4-http
-  - PROJECT=finagle-http2
-  - PROJECT=finagle-integration
-  - PROJECT=finagle-kestrel
-  - PROJECT=finagle-mdns
-  - PROJECT=finagle-mux
-  - PROJECT=finagle-mysql
-  - PROJECT=finagle-netty4
-  - PROJECT=finagle-ostrich4
-  - PROJECT=finagle-redis
-  - PROJECT=finagle-serversets
-  - PROJECT=finagle-spdy
-  - PROJECT=finagle-stats
-  - PROJECT=finagle-stream
-  # These targets are currently failing for known limitations in scrooge-plugin
-  # - PROJECT=finagle-thrift
-  # - PROJECT=finagle-thriftmux
+  global:
+    - JAVA_OPTS="-DSKIP_FLAKY=1 -Xmx4G"
+
+  matrix:
+    - PROJECT=finagle-commons-stats
+    - PROJECT=finagle-cacheresolver
+    - PROJECT=finagle-core
+    - PROJECT=finagle-exception
+    - PROJECT=finagle-exp
+    - PROJECT=finagle-http
+    - PROJECT=finagle-http-compat
+    - PROJECT=finagle-netty4-http
+    - PROJECT=finagle-http2
+    - PROJECT=finagle-integration
+    - PROJECT=finagle-kestrel
+    - PROJECT=finagle-mdns
+    - PROJECT=finagle-mux
+    - PROJECT=finagle-mysql
+    - PROJECT=finagle-netty4
+    - PROJECT=finagle-ostrich4
+    - PROJECT=finagle-redis
+    - PROJECT=finagle-serversets
+    - PROJECT=finagle-spdy
+    - PROJECT=finagle-stats
+    - PROJECT=finagle-stream
+    # These targets are currently failing for known limitations in scrooge-plugin
+    # - PROJECT=finagle-thrift
+    # - PROJECT=finagle-thriftmux
 
 # These directories are cached to S3 at the end of the build
 cache:
@@ -37,6 +40,11 @@ cache:
    - $HOME/.ivy2
    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
    - $HOME/.gitshas
+
+before_cache:
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete
 
 scala:
   - 2.11.8
@@ -57,22 +65,18 @@ before_script:
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
   - >
     if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
-      ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/update
+      # run conditionally because they don't pass with openjdks
+      ./sbt ++$TRAVIS_SCALA_VERSION finagle-native/update finagle-native/test
     fi
-
-script:
+  
   # don't test these projects because they don't pass on travis-ci
   - ./sbt ++$TRAVIS_SCALA_VERSION finagle-memcached/test:compile
 
-  # run conditionally because they don't pass with openjdks
-  - >
-    if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then
-      ./sbt ++$TRAVIS_SCALA_VERSION coverage finagle-native/test;
-    fi
-
+script:
   # run for all environments
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverage $PROJECT/test coverageReport
+  - ./sbt ++$TRAVIS_SCALA_VERSION "$PROJECT/test"
 
-after_success: 
-  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-  - bash <(curl -s https://codecov.io/bash)
+# TODO: support code coverage
+# after_success: 
+#   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+#   - bash <(curl -s https://codecov.io/bash)
