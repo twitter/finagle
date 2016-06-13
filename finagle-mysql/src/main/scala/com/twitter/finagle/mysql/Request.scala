@@ -70,6 +70,13 @@ case object PingRequest
   extends SimpleCommandRequest(Command.COM_PING, Array.emptyByteArray)
 
 /**
+ * Tells the server that the client wants to close the connection.
+ * [[http://dev.mysql.com/doc/internals/en/com-quit.html]]
+ */
+case object QuitRequest
+  extends SimpleCommandRequest(Command.COM_QUIT, Array.emptyByteArray)
+
+/**
  * A UseRequest is used to change the default schema of the connection.
  * [[http://dev.mysql.com/doc/internals/en/com-init-db.html]]
  */

@@ -1,12 +1,13 @@
 package com.twitter.finagle.exp.mysql
 
-import com.github.benmanes.caffeine.cache.{Caffeine, RemovalListener, RemovalCause}
+import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.exp.mysql.transport.{MysqlBuf, Packet}
 import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{CancelledRequestException, Service, WriteException, ServiceProxy}
-import com.twitter.util.{Future, Promise, Return, Try, Throw, Closable, Time}
+import com.twitter.finagle.util.DefaultTimer
+import com.twitter.finagle.{CancelledRequestException, Service, ServiceProxy, WriteException}
+import com.twitter.util.{Closable, Future, Promise, Return, Throw, Time, Try}
 
 /**
  * A catch-all exception class for errors returned from the upstream
@@ -129,6 +130,10 @@ class ClientDispatcher(
       case e@LostSyncException(_) => close()
       case _ =>
     }
+
+  override def close(deadline: Time): Future[Unit] =
+    trans.write(QuitRequest.toPacket)
+      .within(DefaultTimer.twitter, deadline.sinceNow).ensure(super.close(deadline))
 
   /**
    * Performs the connection phase. The phase should only be performed
