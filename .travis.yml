@@ -9,7 +9,6 @@ env:
 
   matrix:
     - PROJECT=finagle-commons-stats
-    - PROJECT=finagle-cacheresolver
     - PROJECT=finagle-core
     - PROJECT=finagle-exception
     - PROJECT=finagle-exp
