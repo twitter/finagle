@@ -25,6 +25,10 @@ package object netty4 {
   //    https://github.com/netty/netty/issues/5294
   System.setProperty("io.netty.allocator.type", "unpooled")
 
+  // this forces netty to use a "cleaner" for direct byte buffers
+  // which we need as long as we don't release them.
+  System.setProperty("io.netty.maxDirectMemory", "0")
+
   object numWorkers extends GlobalFlag((numProcs() * 2).ceil.toInt, "number of netty4 worker threads")
 
   // global worker thread pool for finagle clients and servers.
