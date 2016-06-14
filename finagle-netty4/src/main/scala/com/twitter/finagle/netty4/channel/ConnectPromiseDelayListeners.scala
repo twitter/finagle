@@ -13,7 +13,7 @@ import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
  *
  * - [[com.twitter.finagle.netty4.ssl.SslConnectHandler]]
  * - [[com.twitter.finagle.netty4.proxy.HttpProxyConnectHandler]]
- * - [[com.twitter.finagle.netty4.proxy.SocksProxyConnectHandler]]
+ * - [[com.twitter.finagle.netty4.proxy.Netty4ProxyConnectHandler]]
  */
 private[netty4] trait ConnectPromiseDelayListeners { self: BufferingChannelOutboundHandler =>
 

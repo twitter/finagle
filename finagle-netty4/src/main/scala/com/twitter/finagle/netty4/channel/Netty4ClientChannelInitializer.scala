@@ -4,13 +4,13 @@ import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
 import com.twitter.finagle.netty4.codec.{DecodeHandler, EncodeHandler}
-import com.twitter.finagle.netty4.proxy.{SocksProxyConnectHandler, HttpProxyConnectHandler}
+import com.twitter.finagle.netty4.proxy.{Netty4ProxyConnectHandler, HttpProxyConnectHandler}
 import com.twitter.finagle.netty4.ssl.Netty4SslHandler
 import com.twitter.finagle.param.{Stats, Logger}
-import com.twitter.finagle.socks.SocksProxyFlags
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.Duration
 import io.netty.channel._
+import io.netty.handler.proxy.{Socks5ProxyHandler, HttpProxyHandler}
 import io.netty.handler.timeout.{ReadTimeoutHandler, WriteTimeoutHandler}
 
 private[netty4] object Netty4ClientChannelInitializer {
@@ -78,6 +78,10 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
   private[this] val Stats(stats) = params[Stats]
   private[this] val Transporter.HttpProxyTo(httpHostAndCredentials) =
     params[Transporter.HttpProxyTo]
+  private[this] val Transporter.SocksProxy(socksAddress, socksCredentials) =
+    params[Transporter.SocksProxy]
+  private[this] val Transporter.HttpProxy(httpAddress, httpCredentials) =
+    params[Transporter.HttpProxy]
 
   private[this] val (channelRequestStatsHandler, channelStatsHandler) =
     if (!stats.isNull)
@@ -116,14 +120,27 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer[In, Out](
     // Add SslHandler to the pipeline.
     pipe.addFirst("ssl init", new Netty4SslHandler(params))
 
-    // SOCKS proxy.
-    SocksProxyFlags.socksProxy.foreach { proxyAddress =>
-      pipe.addFirst("socks proxy connect", new SocksProxyConnectHandler(
-        proxyAddress, SocksProxyFlags.socksUsernameAndPassword.map(Transporter.Credentials.tupled)
-      ))
+    // SOCKS5 proxy via `Netty4ProxyConnectHandler`.
+    socksAddress.foreach { sa =>
+      val proxyHandler = socksCredentials match {
+        case None => new Socks5ProxyHandler(sa)
+        case Some((u, p)) => new Socks5ProxyHandler(sa, u, p)
+      }
+
+      pipe.addFirst("socks proxy connect", new Netty4ProxyConnectHandler(proxyHandler))
     }
 
-    // TCP tunneling via HTTP proxy.
+    // HTTP proxy via `Netty4ProxyConnectHandler`.
+    httpAddress.foreach { sa =>
+      val proxyHandler = httpCredentials match {
+        case None => new HttpProxyHandler(sa)
+        case Some(c) => new HttpProxyHandler(sa, c.username, c.password)
+      }
+
+      pipe.addFirst("http proxy connect", new Netty4ProxyConnectHandler(proxyHandler))
+    }
+
+    // TCP tunneling via HTTP proxy (using `HttpProxyConnectHandler`).
     httpHostAndCredentials.foreach {
       case (host, credentials) => pipe.addFirst("http proxy connect",
         new HttpProxyConnectHandler(host, credentials))
