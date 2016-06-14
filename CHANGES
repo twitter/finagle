@@ -170,6 +170,9 @@ Breaking API Changes
 
   * finagle-core: Dentry now takes a Dentry.Prefix instead of a Path. ``RB_ID=813914``
 
+  * finagle-core: Remove `*.client.withTransport.socksProxy` param as part of the initiative to
+    move to CLI flags based configuration for SOCKS. ``RB_ID=842512``
+
   * finagle-thrift/thriftmux: Thrift servers constructed using `Thrift.serveIface` now use
     `Thrift.server.serveIface`. ThriftMux servers constructed using `ThriftMux.serveIface` now use
     `ThriftMux.server.serveIface`. ``RB_ID=824865``
