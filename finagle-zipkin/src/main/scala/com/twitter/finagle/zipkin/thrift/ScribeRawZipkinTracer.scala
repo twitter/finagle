@@ -20,7 +20,7 @@ import org.apache.thrift.TByteArrayOutputStream
 import scala.collection.mutable.ArrayBuffer
 import scala.language.reflectiveCalls
 
-private[thrift] object ScribeRawZipkinTracer {
+object ScribeRawZipkinTracer {
   val tracerCache = new TracerCache[ScribeRawZipkinTracer]
 
   private[this] def newClient(
