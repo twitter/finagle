@@ -48,7 +48,7 @@ private[finagle] case class Netty4Listener[In, Out](
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params,
     transportFactory: Channel => Transport[In, Out] = new ChannelTransport[In, Out](_),
-    handlerDecorator: ChannelHandler => ChannelHandler = identity
+    handlerDecorator: ChannelInitializer[Channel] => ChannelHandler = identity
   ) extends Listener[In, Out] {
   import Netty4Listener.BackPressure
 
@@ -116,7 +116,7 @@ private[finagle] case class Netty4Listener[In, Out](
       // represents a bound server and if we don't block here there's
       // a race between #listen and #boundAddress being available.
       val ch = bootstrap.bind(addr).awaitUninterruptibly().channel()
-
+  
       /**
        * Immediately close the listening socket then shutdown the netty
        * boss threadpool with ``deadline`` timeout for existing tasks.

@@ -7,17 +7,22 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class EndToEndTest extends AbstractEndToEndTest {
-  def clientImpl(): finagle.Http.Client = finagle.Http.client.configured(Http2)
+  def clientImpl(): finagle.Http.Client =
+    finagle.Http.client.configured(Http2)
 
-  def serverImpl(): finagle.Http.Server = finagle.Http.server.configured(Http2)
+  def serverImpl(): finagle.Http.Server =
+    finagle.Http.server.configured(Http2)
 
   // must be lazy for initialization order reasons
-  private[this] lazy val featuresToBeImplemented = Set[Feature](
-    HandlesExpect,
+  private[this] lazy val featuresHttp2DoesNotSupport = Set[Feature](
+    HandlesExpect
+  )
+
+  // must be lazy for initialization order reasons
+  private[this] lazy val featuresToBeImplemented = featuresHttp2DoesNotSupport ++ Set[Feature](
     InitialLineLength,
     TooBigHeaders,
     ClientAbort,
-    MeasurePayload,
     MaxHeaderSize,
     TooLongStream,
     SetContentLength,

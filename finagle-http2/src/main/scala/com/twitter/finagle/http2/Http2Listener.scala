@@ -3,7 +3,7 @@ package com.twitter.finagle.http2
 import com.twitter.finagle.Stack
 import com.twitter.finagle.netty4.Netty4Listener
 import com.twitter.finagle.server.Listener
-import io.netty.channel.{ChannelHandler, ChannelPipeline}
+import io.netty.channel.{ChannelPipeline, ChannelInitializer, Channel}
 import io.netty.handler.codec.http2.Http2ServerDowngrader
 
 /**
@@ -18,5 +18,5 @@ private[http2] object Http2Listener {
     pipelineInit = init,
     // we turn off backpressure because Http2 only works with autoread on for now
     params = params + Netty4Listener.BackPressure(false),
-    handlerDecorator = { handler: ChannelHandler => new Http2ServerInitializer(handler) })
+    handlerDecorator = { init: ChannelInitializer[Channel] => new Http2ServerInitializer(init, params) })
 }

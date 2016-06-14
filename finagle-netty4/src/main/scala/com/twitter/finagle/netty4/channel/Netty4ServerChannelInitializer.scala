@@ -55,7 +55,7 @@ private[netty4] class Netty4ServerChannelInitializer(
 
   private[this] val exceptionHandler = new ChannelExceptionHandler(stats, logger)
 
-  def initChannel(ch: Channel): Unit = {
+  override def initChannel(ch: Channel): Unit = {
     // first => last
     // - a request flies from first to last
     // - a response flies from last to first

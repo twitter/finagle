@@ -1,9 +1,11 @@
 package com.twitter.finagle.http2
 
+import com.twitter.finagle.Http.{param => httpparam}
 import com.twitter.finagle.Stack
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
+import com.twitter.finagle.netty4.http.exp.initClient
 import com.twitter.finagle.transport.{TransportProxy, Transport}
 import com.twitter.util.{Future, Promise, Closable, Time}
 import io.netty.channel.{ChannelPipeline, ChannelDuplexHandler, ChannelHandlerContext,
@@ -33,12 +35,14 @@ private[http2] object Http2Transporter {
     { pipeline: ChannelPipeline =>
       val connection = new DefaultHttp2Connection(false /*server*/)
 
+      val maxResponseSize = params[httpparam.MaxResponseSize].size
+
       // decompresses data frames according to the content-encoding header
       val adapter = new DelegatingDecompressorFrameListener(
         connection,
         // adapters http2 to http 1.1
         new InboundHttp2ToHttpAdapterBuilder(connection)
-          .maxContentLength(Int.MaxValue)
+          .maxContentLength(maxResponseSize.inBytes.toInt)
           .propagateSettings(true)
           .build()
       )
@@ -47,13 +51,23 @@ private[http2] object Http2Transporter {
         .connection(connection)
         .build()
 
-      val sourceCodec = new HttpClientCodec()
+      val maxChunkSize = params[httpparam.MaxChunkSize].size
+      val maxHeaderSize = params[httpparam.MaxHeaderSize].size
+      val maxInitialLineSize = params[httpparam.MaxInitialLineSize].size
+
+      val sourceCodec = new HttpClientCodec(
+        maxInitialLineSize.inBytes.toInt,
+        maxHeaderSize.inBytes.toInt,
+        maxChunkSize.inBytes.toInt
+      )
       val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
       val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
 
       pipeline.addLast(sourceCodec,
         upgradeHandler,
         new UpgradeRequestHandler())
+
+      initClient(params)(pipeline)
     }
 
   def apply(params: Stack.Params): Transporter[Any, Any] = new Transporter[Any, Any] {
