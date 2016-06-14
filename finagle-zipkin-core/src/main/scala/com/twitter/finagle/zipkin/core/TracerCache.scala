@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @tparam T Any subtype of [[RawZipkinTracer]] to be stored
  */
 private[zipkin] class TracerCache[T <: RawZipkinTracer] {
-  // to make sure we only create one instance of the tracer per host and port
+  // to make sure we only create one instance of the tracer per host, port & category
   private[this] val map = new ConcurrentHashMap[String, T].asScala
 
   def getOrElseUpdate(key: String, mk: => T): T =

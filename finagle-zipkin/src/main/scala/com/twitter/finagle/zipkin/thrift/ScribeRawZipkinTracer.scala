@@ -25,10 +25,11 @@ private[thrift] object ScribeRawZipkinTracer {
 
   private[this] def newClient(
     scribeHost: String,
-    scribePort: Int
+    scribePort: Int,
+    name: String
   ): Scribe.FutureIface = {
     val transport = ClientBuilder()
-      .name("zipkin-tracer")
+      .name(name)
       .hosts(new InetSocketAddress(scribeHost, scribePort))
       .codec(ThriftClientFramedCodec())
       .reportTo(ClientStatsReceiver)
@@ -46,28 +47,83 @@ private[thrift] object ScribeRawZipkinTracer {
   }
 
   /**
-    * @param scribeHost Host to send trace data to
-    * @param scribePort Port to send trace data to
-    * @param statsReceiver Where to log information about tracing success/failures
-    */
+   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to scribe with the specified
+   * scribeCategory.
+   *
+   * @param scribeHost Host to send trace data to
+   * @param scribePort Port to send trace data to
+   * @param scribeCategory Category under which the trace data should be scribed
+   * @param statsReceiver Where to log information about tracing success/failures
+   */
+  def apply(
+    scribeHost: String,
+    scribePort: Int,
+    scribeCategory: String,
+    statsReceiver: StatsReceiver,
+    timer: Timer
+  ): ScribeRawZipkinTracer =
+    tracerCache.getOrElseUpdate(scribeHost + scribePort + scribeCategory,
+      apply(
+        newClient(scribeHost, scribePort, s"$scribeCategory-tracer"),
+        scribeCategory,
+        statsReceiver,
+        timer
+      )
+    )
+
+  /**
+   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to scribe with the specified
+   * scribeCategory.
+   *
+   * @param client The scribe client used to send traces to scribe
+   * @param scribeCategory Category under which the trace data should be scribed
+   * @param statsReceiver Where to log information about tracing success/failures
+   * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
+   */
+  def apply(
+    client: Scribe.FutureIface,
+    scribeCategory: String,
+    statsReceiver: StatsReceiver,
+    timer: Timer
+  ): ScribeRawZipkinTracer =
+    new ScribeRawZipkinTracer(client, statsReceiver.scope(scribeCategory), scribeCategory, timer)
+
+  /**
+   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to Zipkin via scribe.
+   *
+   * @param scribeHost Host to send trace data to
+   * @param scribePort Port to send trace data to
+   * @param statsReceiver Where to log information about tracing success/failures
+   */
   def apply(
     scribeHost: String = "localhost",
     scribePort: Int = 1463,
     statsReceiver: StatsReceiver = NullStatsReceiver,
     timer: Timer = DefaultTimer.twitter
   ): ScribeRawZipkinTracer =
-    tracerCache.getOrElseUpdate(scribeHost + scribePort,
-      apply(newClient(scribeHost, scribePort), statsReceiver, timer))
+    apply(scribeHost, scribePort, "zipkin", statsReceiver, timer)
 
-  def apply(client: Scribe.FutureIface, statsReceiver: StatsReceiver, timer: Timer): ScribeRawZipkinTracer =
-    new ScribeRawZipkinTracer(client, statsReceiver.scope("zipkin"), timer)
+  /**
+   * Creates a [[com.twitter.finagle.tracing.Tracer]] that sends traces to Zipkin via scribe.
+   *
+   * @param client The scribe client used to send traces to scribe
+   * @param statsReceiver Where to log information about tracing success/failures
+   * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
+   */
+  def apply(
+    client: Scribe.FutureIface,
+    statsReceiver: StatsReceiver,
+    timer: Timer
+  ): ScribeRawZipkinTracer =
+    apply(client, "zipkin", statsReceiver, timer)
 }
 
 /**
-  * Receives the Finagle generated traces and sends them off to Zipkin via scribe.
- *
+  * Receives traces and sends them off to scribe with the specified scribeCategory.
+  *
   * @param client The scribe client used to send traces to scribe
   * @param statsReceiver We generate stats to keep track of traces sent, failures and so on
+  * @param scribeCategory scribe category under which the trace will be logged
   * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
   * @param poolSize The number of Memory transports to make available for serializing Spans
   * @param initialBufferSize Initial size of each transport
@@ -77,13 +133,12 @@ private[thrift] object ScribeRawZipkinTracer {
 private[thrift] class ScribeRawZipkinTracer(
   client: Scribe.FutureIface,
   statsReceiver: StatsReceiver,
+  scribeCategory: String = "zipkin",
   timer: Timer = DefaultTimer.twitter,
   poolSize: Int = 10,
   initialBufferSize: StorageUnit = 512.bytes,
   maxBufferSize: StorageUnit = 1.megabyte
 ) extends RawZipkinTracer(statsReceiver, timer) {
-  private[this] val TraceCategory = "zipkin" // scribe category
-
   private[this] val scopedReceiver = statsReceiver.scope("log_span")
   private[this] val okCounter = scopedReceiver.counter("ok")
   private[this] val tryLaterCounter = scopedReceiver.counter("try_later")
@@ -147,7 +202,7 @@ private[thrift] class ScribeRawZipkinTracer(
       val transport = bufferPool.take()
       try {
         span.toThrift.write(transport.protocol)
-        entries.append(LogEntry(category = TraceCategory, message = transport.toBase64Line()))
+        entries.append(LogEntry(category = scribeCategory, message = transport.toBase64Line()))
       } catch {
         case NonFatal(e) => errorReceiver.counter(e.getClass.getName).incr()
       } finally {
