@@ -497,7 +497,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
       service(Set(key, flags, expiry, value)).map {
         case Stored() => ()
         case Error(e) => throw e
-        case response => throw new IllegalStateException(s"Invalid response: $response")
+        case _        => throw new IllegalStateException
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))

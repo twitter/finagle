@@ -16,7 +16,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.tracing.Annotation.{ClientSend, ServerRecv}
 import com.twitter.finagle.transport.Transport
 import com.twitter.io.Buf
-import com.twitter.util._
+import com.twitter.util.{Await, Awaitable, Closable, Duration, Future, Promise, Return, Throw, Time}
 import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 
 import com.twitter.finagle.util.HashedWheelTimer
@@ -746,7 +746,7 @@ class EndToEndTest extends FunSuite
 
     object OldPlainPipeliningThriftClient extends Thrift.Client(stack=StackClient.newStack) {
       override protected def newDispatcher(transport: Transport[ThriftClientRequest, Array[Byte]]) =
-        new PipeliningDispatcher(transport, NullStatsReceiver, new MockTimer)
+        new PipeliningDispatcher(transport)
     }
 
     val service = await(OldPlainPipeliningThriftClient.newClient(server)())
