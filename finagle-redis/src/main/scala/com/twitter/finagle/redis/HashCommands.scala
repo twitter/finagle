@@ -76,6 +76,16 @@ trait Hashes { self: BaseClient =>
     }
 
   /**
+   * Returns the number of fields contained in the hash stored at key
+   * @param hash key
+   * @return Number of fields in hash
+   */
+  def hLen(key: ChannelBuffer): Future[Long] =
+    doRequest(HLen(key)) {
+      case IntegerReply(n) => Future.value(n)
+    }
+
+  /**
    * Gets values for given fields in hash
    * @param hash key, fields
    * @return List of values
