@@ -1,0 +1,14 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.off",
+      "description": "Always disabled, yo.",
+      "fraction": 0.0
+    },
+    {
+      "id": "com.twitter.on",
+      "description": "Always enabled, dawg.",
+      "fraction": 1.0
+    }
+  ]
+}

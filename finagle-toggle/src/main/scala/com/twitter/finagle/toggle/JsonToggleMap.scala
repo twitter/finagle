@@ -1,8 +1,10 @@
 package com.twitter.finagle.toggle
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.twitter.util.Try
+import java.net.URL
 import scala.collection.{breakOut, immutable}
 
 /**
@@ -73,17 +75,25 @@ object JsonToggleMap {
     new ObjectMapper().registerModule(DefaultScalaModule)
 
   private[this] case class JsonToggle(
-      id: String,
-      fraction: Double,
-      description: String)
+      @JsonProperty(required = true) id: String,
+      @JsonProperty(required = true) fraction: Double,
+      @JsonProperty(required = true) description: String)
 
-  private[this] case class JsonToggles(toggles: Seq[JsonToggle]) {
+  private[this] case class JsonToggles(
+      @JsonProperty(required = true) toggles: Seq[JsonToggle]) {
 
     def toToggleMap: ToggleMap = {
       val metadata: immutable.Seq[Toggle.Metadata] =
         toggles.map { jsonToggle =>
           Toggle.Metadata(jsonToggle.id, jsonToggle.fraction, Some(jsonToggle.description))
         }(breakOut)
+
+      val ids = metadata.map(_.id)
+      val uniqueIds = ids.distinct
+      if (ids.size != uniqueIds.size) {
+        throw new IllegalArgumentException(
+          s"Duplicate Toggle ids found: ${ids.mkString(",")}")
+      }
       new ToggleMap.Immutable(metadata)
     }
   }
@@ -97,6 +107,20 @@ object JsonToggleMap {
    */
   def parse(json: String): Try[ToggleMap] = Try {
     val jsonToggles = mapper.readValue(json, classOf[JsonToggles])
+    jsonToggles.toToggleMap
+  }
+
+  /**
+   * Attempts to parse the given JSON `URL` into a [[ToggleMap]].
+   *
+   * Useful for loading resource files via [[StandardToggleMap]].
+   *
+   * $jsonschema
+   *
+   * $example
+   */
+  def parse(url: URL): Try[ToggleMap] = Try {
+    val jsonToggles = mapper.readValue(url, classOf[JsonToggles])
     jsonToggles.toToggleMap
   }
 

@@ -239,8 +239,9 @@ object Finagle extends Build {
     name := "finagle-toggle",
     libraryDependencies ++= Seq(
       util("app"),
-      util("core")),
-    libraryDependencies ++= jacksonLibs
+      util("core"),
+      util("logging")) ++
+      jacksonLibs
   )
 
   lazy val finagleCore = Project(

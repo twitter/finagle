@@ -6,6 +6,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class JsonToggleMapTest extends FunSuite
@@ -17,11 +18,30 @@ class JsonToggleMapTest extends FunSuite
       case Throw(_) => // expected
     }
 
+  test("parse invalid JSON string with no toggles") {
+    assertParseFails("{ }")
+  }
+
   test("parse invalid JSON string with no id") {
     assertParseFails("""
       |{"toggles": [
       |    { "description": "Dude, where's my id?",
       |      "fraction": 0.0
+      |    }
+      |  ]
+      |}""".stripMargin)
+  }
+
+  test("parse invalid JSON string with duplicate ids") {
+    assertParseFails("""
+      |{"toggles": [
+      |    { "id": "com.twitter.duplicate",
+      |      "description": "cannot have duplicate ids even if other fields differ",
+      |      "fraction": 0.0
+      |    },
+      |    { "id": "com.twitter.duplicate",
+      |      "description": "this is a duplicate",
+      |      "fraction": 1.0
       |    }
       |  ]
       |}""".stripMargin)
@@ -63,12 +83,14 @@ class JsonToggleMapTest extends FunSuite
     assertParseFails("""
       |{"toggles": [
       |    { "id": "com.twitter.NoFraction",
-      |      "description": "fractions must be present",
+      |      "description": "fractions must be present"
       |    }
       |  ]
       |}""".stripMargin)
   }
 
+  // NOTE: this input should match what's in the resources file for
+  // com/twitter/toggles/com.twitter.finagle.toggle.tests.Valid.json
   private val validInput = """
       |{
       |  "toggles": [
@@ -83,8 +105,7 @@ class JsonToggleMapTest extends FunSuite
       |      "fraction": 1.0
       |    }
       |  ]
-      |}
-    """.stripMargin
+      |}""".stripMargin
 
   private def validateParsedJson(toggleMap: Try[ToggleMap]): Unit = {
     toggleMap match {
@@ -110,6 +131,42 @@ class JsonToggleMapTest extends FunSuite
 
   test("parse valid JSON String") {
     validateParsedJson(JsonToggleMap.parse(validInput))
+  }
+
+  test("parse valid JSON String with empty toggles") {
+    val in = """
+        |{
+        |  "toggles": [ ]
+        |}""".stripMargin
+    JsonToggleMap.parse(in) match {
+      case Throw(t) =>
+        fail(t)
+      case Return(map) =>
+        assert(0 == map.iterator.size)
+    }
+  }
+
+  test("parse valid JSON resource file") {
+    val rscs = getClass.getClassLoader.getResources(
+      "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Valid.json"
+    ).asScala.toSeq
+
+    assert(1 == rscs.size)
+    validateParsedJson(JsonToggleMap.parse(rscs.head))
+  }
+
+  test("parse invalid JSON resource file") {
+    // this json file is missing an "id" on a toggle definition and therefore
+    // should fail to parse.
+    val rscs = getClass.getClassLoader.getResources(
+      "com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Invalid.json"
+    ).asScala.toSeq
+
+    assert(1 == rscs.size)
+    JsonToggleMap.parse(rscs.head) match {
+      case Return(_) => fail(s"Parsing should not succeed")
+      case Throw(_) => // expected
+    }
   }
 
 }

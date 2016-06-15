@@ -35,6 +35,25 @@ class StandardToggleMapTest extends FunSuite {
     }
   }
 
+  test("apply with resource-based configs") {
+    val togMap = StandardToggleMap(
+      "com.twitter.finagle.toggle.tests.StandardToggleMapTest",
+      NullToggleMap)
+
+    val togs = togMap.iterator.toSeq
+
+    def assertFraction(id: String, fraction: Double): Unit = {
+      togs.find(_.id == id) match {
+        case None => fail(s"$id not found in $togs")
+        case Some(md) => assert(md.fraction == fraction)
+      }
+    }
+
+    assertFraction("com.twitter.service-overrides-on", 1.0)
+    assertFraction("com.twitter.service-overrides-off", 0.0)
+    assertFraction("com.twitter.not-in-service-overrides", 0.0)
+  }
+
   test("Toggles use correct ordering") {
     // we want to see what the fractions are when the toggle
     // exists in multiple places.

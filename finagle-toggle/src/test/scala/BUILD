@@ -1,5 +1,6 @@
 junit_tests(name='scala',
   dependencies=[
+    '3rdparty/jvm/com/fasterxml/jackson/core:jackson-annotations',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',
