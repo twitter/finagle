@@ -2,7 +2,6 @@ package com.twitter.finagle.memcached.replication
 
 import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
 
-import scala.collection.JavaConversions._
 import scala.util.Random
 
 import com.twitter.conversions.time._
@@ -10,7 +9,6 @@ import com.twitter.finagle.builder.{Cluster, ClientBuilder, ClientConfig}
 import com.twitter.finagle.Group
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.protocol.Value
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver}
 import com.twitter.io.Buf
 import com.twitter.util._
