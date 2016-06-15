@@ -6,8 +6,9 @@ import com.twitter.finagle.param.Stats
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Local, Time}
+import com.twitter.util.{Future, Local, Time, Timer}
 
 object RedisPool {
 
@@ -28,7 +29,7 @@ object RedisPool {
     statsReceiver: StatsReceiver): Service[Command, Reply] =
     useFor() match {
       case Some(Subscription) => new SubscribeDispatcher(transport)
-      case _                  => new PipeliningDispatcher(transport, statsReceiver)
+      case _                  => new PipeliningDispatcher(transport, statsReceiver, DefaultTimer.twitter)
     }
 
   def module: Stackable[ServiceFactory[Command, Reply]] =

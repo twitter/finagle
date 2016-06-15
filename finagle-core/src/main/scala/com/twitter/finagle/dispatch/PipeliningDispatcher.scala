@@ -1,9 +1,12 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
-import com.twitter.finagle.transport.Transport
 import com.twitter.concurrent.{AsyncQueue, AsyncMutex}
-import com.twitter.util.{Future, Promise}
+import com.twitter.conversions.time._
+import com.twitter.finagle.Failure
+import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.transport.Transport
+import com.twitter.logging.Logger
+import com.twitter.util.{Future, Promise, Timer}
 
 /**
  * A generic pipelining dispatcher, which assumes that servers will
@@ -13,20 +16,25 @@ import com.twitter.util.{Future, Promise}
  *
  * Because many requests might be sharing the same transport,
  * [[com.twitter.util.Future Futures]] returned by PipeliningDispatcher#apply
- * are masked, and will ignore interrupts.  This ensures that interrupting a
- * Future in one request won't change the result of another request.
+ * are masked, and will only propagate the interrupt if the future doesn't
+ * return after 10 seconds after the interruption.  This ensures that
+ * interrupting a Future in one request won't change the result of another
+ * request unless the connection is stuck, and does not look like it will make
+ * progress.
  *
  * @param statsReceiver typically scoped to `clientName/dispatcher`
  */
-class PipeliningDispatcher[Req, Rep](
+private[finagle] class PipeliningDispatcher[Req, Rep](
     trans: Transport[Req, Rep],
-    statsReceiver: StatsReceiver)
+    statsReceiver: StatsReceiver,
+    timer: Timer)
   extends GenSerialClientDispatcher[Req, Rep, Req, Rep](
     trans,
     statsReceiver) {
-  def this(trans: Transport[Req, Rep]) =
-    this(trans, NullStatsReceiver)
+  import PipeliningDispatcher._
 
+  private[this] var stalled = false
+  private[this] val log = Logger.get(getClass.getName)
   private[this] val q = new AsyncQueue[Promise[Rep]]
 
   private[this] val queueSize =
@@ -60,5 +68,44 @@ class PipeliningDispatcher[Req, Rep](
       }
     }
 
-  override def apply(req: Req): Future[Rep] = super.apply(req).masked
+  override def apply(req: Req): Future[Rep] = {
+    val f = super.apply(req)
+    val p = Promise.attached(f)
+
+    p.setInterruptHandler {
+      case Timeout(t) =>
+        if (p.detach()) {
+          p.setException(t)
+          f.raiseWithin(TimeToWaitForStalledPipeline, StalledPipelineException)(timer)
+          synchronized {
+            if (!stalled) {
+              stalled = true
+              val addr = trans.remoteAddress
+              log.error(s"pipelined connection stalled with ${q.size} items, talking to $addr")
+            }
+          }
+        }
+      case t: Throwable =>
+        if (p.detach()) {
+          p.setException(t)
+          f.raise(t)
+        }
+    }
+    p
+  }
+}
+
+private[finagle] object PipeliningDispatcher {
+  val StalledPipelineException =
+    Failure("The connection pipeline could not make progress", Failure.Interrupted)
+
+  val TimeToWaitForStalledPipeline = 10.seconds
+
+  object Timeout {
+    def unapply(t: Throwable): Option[Throwable] = t match {
+      case exc: com.twitter.util.TimeoutException => Some(exc)
+      case exc: com.twitter.finagle.TimeoutException => Some(exc)
+      case _ => None
+    }
+  }
 }
