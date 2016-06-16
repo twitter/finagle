@@ -1,6 +1,6 @@
 package com.twitter.finagle.postgres.values
 
-import java.util.{TimeZone, Date}
+import java.util.{Date, TimeZone, UUID}
 
 import com.twitter.finagle.postgres.Spec
 
@@ -36,6 +36,11 @@ class ValuesSpec extends Spec {
 
       val timestamp2 = StringValueParser.parseTimestampTZ(StringValueEncoder.encode("2015-01-08 14:55:12+0800")).value
       timestamp2.getTime must equal(1420700112000L)
+    }
+
+    "parse UUIDs" in {
+      val uuid = StringValueParser.parseUUID(StringValueEncoder.encode("deadbeef-dead-dead-beef-deaddeadbeef")).value
+      uuid must equal(UUID.fromString("deadbeef-dead-dead-beef-deaddeadbeef"))
     }
   }
 }

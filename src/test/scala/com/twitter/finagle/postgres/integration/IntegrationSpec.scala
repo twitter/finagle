@@ -297,8 +297,22 @@ class IntegrationSpec extends Spec {
     "create an extension using CREATE EXTENSION" in {
       if(postgresAvailable) {
         val client = getClient
-        val preparedStatement = client.prepareAndExecute("CREATE EXTENSION hstore")
-        Await.result(preparedStatement)
+        val result = client.prepareAndExecute("CREATE EXTENSION hstore")
+        Await.result(result)
+      }
+    }
+
+    "support multi-statement DDL" in {
+      if(postgresAvailable) {
+        val client = getClient
+        val result = client.prepareAndExecute(
+          """
+            |CREATE TABLE multi_one(id integer);
+            |CREATE TABLE multi_two(id integer);
+            |DROP TABLE multi_one;
+            |DROP TABLE multi_two;
+          """.stripMargin)
+        Await.result(result)
       }
     }
 
