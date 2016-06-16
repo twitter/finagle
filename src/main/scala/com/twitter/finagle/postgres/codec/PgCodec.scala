@@ -49,7 +49,7 @@ class PgCodec(
         }
       }
 
-      override def prepareConnFactory(underlying: ServiceFactory[PgRequest, PgResponse]) = {
+      override def prepareConnFactory(underlying: ServiceFactory[PgRequest, PgResponse], params: Stack.Params) = {
         val errorHandling = new HandleErrorsProxy(underlying)
         new AuthenticationProxy(errorHandling, user, password, database, useSsl)
       }
