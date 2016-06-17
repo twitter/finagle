@@ -44,7 +44,11 @@ object Finagle extends Build {
     "org.slf4j" % "slf4j-api" % "1.7.7" % "provided"
   )
   val scroogeLibs = thriftLibs ++ Seq(
-    "com.twitter" %% "scrooge-core" % scroogeVersion)
+    "com.twitter" %% "scrooge-core" % scroogeVersion
+  )
+  val openTracingLibs = Seq(
+    "io.opentracing" % "opentracing-api" % "0.1.0-SNAPSHOT"
+  )
 
   def util(which: String) =
     "com.twitter" %% ("util-"+which) % utilVersion excludeAll(
@@ -63,6 +67,7 @@ object Finagle extends Build {
       "org.mockito" % "mockito-all" % "1.9.5" % "test"
     ),
     resolvers += "twitter-repo" at "https://maven.twttr.com",
+    resolvers += "opentracing-api" at "http://oss.jfrog.org/oss-snapshot-local/",
 
     ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true,
 
@@ -407,7 +412,7 @@ object Finagle extends Build {
       util("codec"), util("logging"),
       "commons-lang" % "commons-lang" % "2.6",
       guavaLib
-    )
+    ) ++ openTracingLibs
   ).dependsOn(finagleCore)
 
   lazy val finagleNetty4Http = Project(
@@ -580,7 +585,7 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("codec"),
       "org.slf4j" %  "slf4j-nop" % "1.7.7" % "provided"
-    ) ++ scroogeLibs
+    ) ++ scroogeLibs ++ openTracingLibs
   ).dependsOn(
     finagleCore,
     finagleHttp,

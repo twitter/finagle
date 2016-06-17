@@ -2,6 +2,7 @@ package com.twitter.finagle.http
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
+import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
 import com.twitter.finagle.filter.PayloadSizeFilter
 import com.twitter.finagle.http.codec._
@@ -519,5 +520,109 @@ private[finagle] class HttpServerTracingFilter[Req <: Request, Res](serviceName:
   def apply(request: Req, service: Service[Req, Res]) =
     TraceInfo.letTraceIdFromRequestHeaders(request) {
     service(request)
+  }
+}
+
+private[finagle] object OpenTracing {
+
+  import io.opentracing.Tracer
+  import io.opentracing.Span
+  import java.util.HashMap
+  import scala.collection.JavaConverters._
+
+  /**
+   * Set the parent span of all spans created during the scope
+   * of the enclosed function.
+   */
+  def letParentSpan[R](span: Span)(f: => R): R = {
+    Contexts.local.let(spanCtx, span)(f)
+  }
+
+  /**
+   * Set the operation name for all spans created during the scope
+   * of the enclosed function.
+   */
+  def letOperationName[R](operationName: String)(f: => R): R = {
+    Contexts.local.let(rpcCtx, operationName)(f)
+  }
+
+  private[this] val spanCtx = Contexts.local.newKey[Object]
+  private[this] val rpcCtx = Contexts.local.newKey[String]
+
+  /**
+   * Creates a new span for the HTTP request and injects the necessary
+   * parameters so the server can join the trace.
+   * 
+   * The parent span and operation name of the request can be set by
+   * calling letParentSpan and letOperationName on the request
+   *
+   * @param tracer the OpenTracing tracer to create the span
+   */
+  class ClientFilter[Req <: Request, Res](tracer: Tracer)
+    extends SimpleFilter[Req, Res]
+  {
+    def apply(request: Req, service: Service[Req, Res]) = {
+      val rpcName = Contexts.local.getOrElse(rpcCtx, () => "Finagle HTTP Request")
+      val span = createSpanFromContext(tracer, rpcName)
+      var textMap = new HashMap[String,String]()
+
+      // NOTE: OpenTracing uses `inject` to propagate arbitrary states
+      // across process boundaries without tightly coupling to any particular
+      // wire format or object type.
+      tracer.inject(span, textMap)
+      for((k:String, v:String) <- textMap.asScala) { request.headers.add(k, v) }
+
+      // close the span once the response is received
+      val response = service(request) onFailure { t: Throwable =>
+        span.log(t.getMessage, null)
+      } ensure {
+        span.close()
+      }
+      response
+    }
+  }
+
+  /**
+   * Traces this HTTP response using the injected headers. Depending on the
+   * OpenTracing implementation, this may continue the span from the
+   * client request or create a new child span for the server response.
+   * If there is no injected span to join, creates a new span from the
+   * current span context.
+   */
+  class ServerFilter[Req <: Request, Res](tracer: Tracer)
+    extends SimpleFilter[Req, Res]
+  {
+    def apply(request: Req, service: Service[Req, Res]) = {
+      // extract the span tracking the client request
+      var textMap: HashMap[String, String] = new HashMap[String, String]()
+      for((k: String, v:String) <- request.headerMap) {
+        textMap.put(k,v)
+      }
+      
+      // NOTE: OpenTracing uses `join` as the complement to `inject`:
+      // it uses a generic "carrier" / container to extract the trace
+      // context and resume the trace on the server.
+      val span: Span = try {
+        tracer.join(textMap).withOperationName("serve").start()
+      } catch {
+        case _: Throwable => {
+          createSpanFromContext(tracer, "serve").log("Failed to join span", null)
+        }
+      }
+      val response = service(request) ensure {
+        span.close()
+      }
+      response
+    }
+  }
+
+  private[this] def createSpanFromContext(tracer: Tracer, description: String): Span = {
+    val parentSpan = Contexts.local.getOrElse(spanCtx, () => None)
+    var sb = tracer.buildSpan(description)
+    if(parentSpan != None) {
+      sb = sb.withParent(parentSpan.asInstanceOf[Span])
+    }
+    val span = sb.start()
+    span
   }
 }
