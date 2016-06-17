@@ -124,6 +124,14 @@ private[finagle] trait BufReader {
    */
   def readBytes(n: Int): Buf
 
+
+  /**
+   * Skip over the next `n` bytes.
+   *
+   * @throws UnderflowException if there are < `n` bytes available
+   */
+  def skip(n: Int): Unit
+
   /**
    * Like `read`, but extracts the remainder of bytes from cursor
    * to the length. Note, this advances the cursor to the end of
@@ -178,6 +186,8 @@ private[finagle] trait ProxyBufReader extends BufReader {
   def readDoubleLE(): Double = reader.readDoubleLE()
 
   def readBytes(n: Int): Buf = reader.readBytes(n)
+
+  def skip(n: Int): Unit = reader.skip(n)
 
   def readAll(): Buf = reader.readAll()
 }
@@ -373,6 +383,19 @@ private class BufReaderImpl(underlying: Buf) extends BufReader {
     val b = buf.slice(0, n)
     buf = buf.slice(n, buf.length)
     b
+  }
+
+  def skip(n: Int): Unit = {
+    if (n < 0) {
+      throw new IllegalArgumentException(s"Invalid number of bytes to skip: $n. Must be >= 0")
+    }
+    if (remaining < n) {
+      throw new UnderflowException(
+        s"Tried to skip $n bytes when remaining bytes was $remaining")
+    }
+    if (n > 0) {
+      buf = buf.slice(n, buf.length)
+    }
   }
 
   def readAll(): Buf = {

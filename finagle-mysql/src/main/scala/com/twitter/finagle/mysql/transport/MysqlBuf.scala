@@ -54,13 +54,6 @@ class MysqlBufReader(buf: Buf) extends ProxyBufReader {
   }
 
   /**
-   * Skip over `n` bytes
-   */
-  def skip(n: Int): Unit = {
-    readBytes(n)
-  }
-
-  /**
    * Reads bytes until a null byte is encountered
    */
   def readNullTerminatedBytes(): Array[Byte] = {

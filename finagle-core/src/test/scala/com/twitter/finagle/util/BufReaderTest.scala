@@ -190,4 +190,12 @@ class BufReaderTest extends FunSuite with GeneratorDrivenPropertyChecks {
     assert(br.readAll() == Buf.ByteArray.Owned(bytes ++ bytes))
     assert(br.readAll() == Buf.Empty)
   })
+
+  test("underflow if too many bytes are skipped") {
+    val br = BufReader(Buf.ByteArray.Owned(new Array[Byte](2)))
+    br.skip(2)
+    intercept[UnderflowException] {
+      br.skip(2)
+    }
+  }
 }
