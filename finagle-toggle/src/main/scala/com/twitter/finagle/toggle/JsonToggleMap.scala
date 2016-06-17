@@ -32,7 +32,8 @@ import scala.collection.{breakOut, immutable}
  *             "maximum": 1.0,
  *             "exclusiveMinimum": false,
  *             "exclusiveMaxmimum": false
- *           }
+ *           },
+ *           "comment": { "type": "string" }
  *         },
  *         "required": [
  *           "id",
@@ -57,17 +58,21 @@ import scala.collection.{breakOut, immutable}
  *     {
  *       "id": "com.game.of.thrones.IsWinterComing",
  *       "description": "Controls whether or not winter is coming.",
- *       "fraction": 1.0
+ *       "fraction": 1.0,
+ *       "comment": "We've seen the white walkers, we know that winter is coming."
  *     }
  *   ]
  * }
  * }}}
  *
- * The properties correspond to the various fields on [[Toggle.Metadata]].
+ * With the exception of "comment", the properties correspond to the various
+ * fields on [[Toggle.Metadata]].
  *  - '''name''': Corresponds to `Toggle.Metadata.id`.
  *  - '''fraction''': Corresponds to `Toggle.Metadata.fraction` and values must be
  *    between `0.0` and `1.0`, inclusive.
  *  - '''description''': Corresponds to `Toggle.Metadata.description`.
+ *  - '''comment''': For documentation purposes only and is not used in the
+ *    creation of the [[ToggleMap]].
  */
 object JsonToggleMap {
 
@@ -77,7 +82,8 @@ object JsonToggleMap {
   private[this] case class JsonToggle(
       @JsonProperty(required = true) id: String,
       @JsonProperty(required = true) fraction: Double,
-      @JsonProperty(required = true) description: String)
+      @JsonProperty(required = true) description: String,
+      comment: Option[String])
 
   private[this] case class JsonToggles(
       @JsonProperty(required = true) toggles: Seq[JsonToggle]) {

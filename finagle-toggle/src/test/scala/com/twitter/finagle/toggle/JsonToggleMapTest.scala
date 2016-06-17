@@ -102,7 +102,8 @@ class JsonToggleMapTest extends FunSuite
       |    {
       |      "id": "com.twitter.on",
       |      "description": "Always enabled, dawg.",
-      |      "fraction": 1.0
+      |      "fraction": 1.0,
+      |      "comment": "Look, I'm on!"
       |    }
       |  ]
       |}""".stripMargin
