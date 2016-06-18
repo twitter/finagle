@@ -125,7 +125,7 @@ case class HScan(
       case None        => bufs
     }
     val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(Pattern.PATTERN_CB, pattern)
+      case Some(pattern) => withCount ++ Seq(Match.MATCH_CB, pattern)
       case None          => withCount
     }
     RedisCodec.toUnifiedFormat(withPattern)

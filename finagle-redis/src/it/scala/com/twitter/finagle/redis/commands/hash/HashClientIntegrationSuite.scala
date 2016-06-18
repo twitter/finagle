@@ -125,7 +125,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     }
   }
 
-  ignore("Correctly perform an hscan operation", RedisTest, ClientTest) {
+  test("Correctly perform an hscan operation", RedisTest, ClientTest) {
     withRedisClient { client =>
       Await.result(client.hSet(foo, bar, baz))
       Await.result(client.hSet(foo, boo, moo))
@@ -134,12 +134,16 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       val withCount = Await.result(client.hScan(foo, 0, Some(2), None))
       assert(CBToString(withCount(0)) == "0")
       assert(CBToString(withCount(1)) == "bar")
-      assert(CBToString(withCount(2)) == "boo")
+      assert(CBToString(withCount(2)) == "baz")
+      assert(CBToString(withCount(3)) == "boo")
+      assert(CBToString(withCount(4)) == "moo")
+
       val pattern = StringToChannelBuffer("b*")
       val withPattern = Await.result(client.hScan(foo, 0, None, Some(pattern)))
-      assert(CBToString(withCount(0)) == "0")
-      assert(CBToString(withCount(1)) == "bar")
-      assert(CBToString(withCount(2)) == "boo")
+      assert(CBToString(withPattern(0)) == "0")
+      assert(CBToString(withPattern(1)) == "bar")
+      assert(CBToString(withPattern(2)) == "baz")
+      assert(CBToString(withPattern(3)) == "boo")
     }
   }
 }

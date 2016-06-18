@@ -136,17 +136,17 @@ object Count {
 }
 
 
-object Pattern {
-  val PATTERN: String = "PATTERN"
-  val PATTERN_BUF: Buf = StringToBuf(PATTERN)
-  val PATTERN_CB: ChannelBuffer = StringToChannelBuffer(PATTERN)
+object Match {
+  val MATCH: String = "MATCH"
+  val MATCH_BUF: Buf = StringToBuf(MATCH)
+  val MATCH_CB: ChannelBuffer = StringToChannelBuffer(MATCH)
 
   def apply(args: Seq[String]): Option[String] = {
     RequireClientProtocol(
       args != null && !args.isEmpty,
       "AGGREGATE can not be specified with empty list")
     args.head.toUpperCase match {
-      case PATTERN => Some(args(1))
+      case MATCH => Some(args(1))
       case _ => None
     }
   }

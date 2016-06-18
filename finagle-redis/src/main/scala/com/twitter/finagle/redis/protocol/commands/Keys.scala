@@ -5,7 +5,7 @@ import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, Charsets}
 import com.twitter.util.Time
 import org.jboss.netty.buffer.ChannelBuffer
 
@@ -215,7 +215,7 @@ extends Command {
       case None        => bufs
     }
     val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(Pattern.PATTERN_BUF, pattern)
+      case Some(pattern) => withCount ++ Seq(Match.MATCH_BUF, pattern)
       case None          => withCount
     }
     RedisCodec.bufToUnifiedChannelBuffer(withPattern)
@@ -276,7 +276,7 @@ object ScanCompanion {
   def findArgs(args: Seq[String]): (Seq[String], Seq[String]) = {
     args.head.toUpperCase match {
       case Count.COUNT     => args.splitAt(2)
-      case Pattern.PATTERN => args.splitAt(2)
+      case Match.MATCH => args.splitAt(2)
       case s => throw ClientError("COUNT or PATTERN argument expected, found %s".format(s))
     }
   }
@@ -291,9 +291,9 @@ object ScanCompanion {
     case c => c
   }
 
-  def findPattern(args0: Seq[String], args1: Seq[String]) = Pattern(args0) match {
+  def findPattern(args0: Seq[String], args1: Seq[String]) = Match(args0) match {
     case None if args1.length > 0 =>
-      Pattern(args1) match {
+      Match(args1) match {
         case None => throw ClientError("Have additional arguments but unable to process")
         case pattern => pattern
       }

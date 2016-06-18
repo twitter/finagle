@@ -45,6 +45,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.set(bufFoo, bufBar))
       Await.result(client.set(bufBaz, bufBoo))
+
       assert(BufToString(Await.result(client.scans(0, None, None)).apply(1)) == "baz")
 
       val withCount = Await.result(client.scans(0, Some(10), None))
@@ -54,6 +55,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
 
       val pattern = StringToBuf("b*")
       val withPattern = Await.result(client.scans(0, None, Some(pattern)))
+
       assert(BufToString(withPattern(0)) == "0")
       assert(BufToString(withPattern(1)) == "baz")
     }
