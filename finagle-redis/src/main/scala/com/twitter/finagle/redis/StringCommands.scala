@@ -1,24 +1,11 @@
 package com.twitter.finagle.redis
 
-import _root_.java.lang.{Boolean => JBoolean, Long => JLong}
-import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
+import java.lang.{Boolean => JBoolean, Long => JLong}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.io.Buf
 import com.twitter.util.Future
-import org.jboss.netty.buffer.ChannelBuffer
 
-
-trait Strings { self: BaseClient =>
-  private[this] val unwrapBufOption: Option[Buf] => Option[ChannelBuffer] =
-    _.map(BufChannelBuffer(_))
-
-  private[this] val unwrapSeqBufOption: Seq[Option[Buf]] => Seq[Option[ChannelBuffer]] =
-    _.map(unwrapBufOption)
-
-  private[this] val wrapCB: ChannelBuffer => Buf = ChannelBufferBuf.Owned(_)
-
-  private[this] val wrapCBPair: ((ChannelBuffer, ChannelBuffer)) => (Buf, Buf) =
-    { x => ChannelBufferBuf.Owned(x._1) -> ChannelBufferBuf.Owned(x._2)}
+private[redis] trait StringCommands { self: BaseClient =>
 
   val FutureTrue: Future[JBoolean] = Future.value(true)
   val FutureFalse: Future[JBoolean] = Future.value(false)
@@ -36,23 +23,6 @@ trait Strings { self: BaseClient =>
       case IntegerReply(n) => Future.value(n)
     }
 
-  @deprecated("use append(key: Buf, value: Buf)", "2016-03-31")
-  def append(key: ChannelBuffer, value: ChannelBuffer): Future[JLong] =
-    append(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value))
-
-  /**
-   * Count the number of set bits (population counting) in a string.
-   *
-   * @param key
-   * @param start optional index bytes starting from.
-   * @param end   optional index bytes of the end.
-   * @return The number of bits set to 1.
-   * @see http://redis.io/commands/bitcount
-   */
-  @deprecated("use bitCount(key: Buf, start: Option[Int], end: Option[Int])", "2016-03-31")
-  def bitCount(key: ChannelBuffer, start: Option[Int] = None, end: Option[Int] = None): Future[JLong] =
-    bitCount(ChannelBufferBuf.Owned(key), start, end)
-
   def bitCount(key: Buf): Future[JLong] =
     doRequest(BitCount(key, None, None)) {
       case IntegerReply(n) => Future.value(n)
@@ -63,29 +33,10 @@ trait Strings { self: BaseClient =>
       case IntegerReply(n) => Future.value(n)
     }
 
-  /**
-   * Perform a bitwise operation between multiple keys (containing string
-   * values) and store the result in the destination key.
-   *
-   * @param op      operation type, one of AND/OR/XOR/NOT.
-   * @param dstKey  destination key.
-   * @param srcKeys source keys perform the operation between.
-   * @return The size of the string stored in the destination key,
-   *          that is equal to the size of the longest input string.
-   * @see http://redis.io/commands/bitop
-   */
-  @deprecated("use bitOp(op: Buf, dstKey: Buf, srcKeys: Seq[Buf])", "2016-03-31")
-  def bitOp(op: ChannelBuffer, dstKey: ChannelBuffer, srcKeys: Seq[ChannelBuffer]): Future[JLong] =
-    bitOp(ChannelBufferBuf.Owned(op), ChannelBufferBuf.Owned(dstKey), srcKeys.map(ChannelBufferBuf.Owned(_)))
-
   def bitOp(op: Buf, dstKey: Buf, srcKeys: Seq[Buf]): Future[JLong] =
     doRequest(BitOp(op, dstKey, srcKeys)) {
       case IntegerReply(n) => Future.value(n)
     }
-
-  @deprecated("use decr(key: Buf)", "2016-03-31")
-  def decr(key: ChannelBuffer): Future[JLong] =
-    decr(ChannelBufferBuf.Owned(key))
 
   /**
    * Decrements number stored at key by 1.
@@ -97,11 +48,6 @@ trait Strings { self: BaseClient =>
     doRequest(Decr(key)) {
       case IntegerReply(n) => Future.value(n)
     }
-
-
-  @deprecated("use decrBy(key: Buf, amount: Long)", "2016-03-31")
-  def decrBy(key: ChannelBuffer, amount: Long): Future[JLong] =
-    decrBy(ChannelBufferBuf.Owned(key), amount)
 
   /**
    * Decrements number stored at key by given amount. If key doesn't
@@ -117,12 +63,6 @@ trait Strings { self: BaseClient =>
       case IntegerReply(n) => Future.value(n)
     }
 
-
-
-  @deprecated("use get(key: Buf)", "2016-03-31")
-  def get(key: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    get(ChannelBufferBuf.Owned(key)).map(unwrapBufOption)
-
   /**
    * Gets the value associated with the given key
    *
@@ -135,11 +75,6 @@ trait Strings { self: BaseClient =>
       case EmptyBulkReply()     => Future.value(None)
   }
 
-  @deprecated("use getBit(key: Buf, offset: Int)", "2016-03-31")
-  def getBit(key: ChannelBuffer, offset: Int): Future[JLong] =
-    getBit(ChannelBufferBuf.Owned(key), offset)
-
-
   /**
    * Returns the bit value at offset in the string value stored at key.
    *
@@ -151,10 +86,6 @@ trait Strings { self: BaseClient =>
     doRequest(GetBit(key, offset)) {
       case IntegerReply(n) => Future.value(n)
     }
-
-  @deprecated("use getRange(key: Buf, start: Long, end: Long)", "2016-03-31")
-  def getRange(key: ChannelBuffer, start: Long, end: Long): Future[Option[ChannelBuffer]] =
-    getRange(ChannelBufferBuf.Owned(key), start, end).map(unwrapBufOption)
 
   /**
    * Gets the substring of the value associated with given key
@@ -169,11 +100,6 @@ trait Strings { self: BaseClient =>
       case BulkReply(message)   => Future.value(Some(message))
       case EmptyBulkReply()     => Future.value(None)
   }
-
-  @deprecated("use getSet(key: Buf, value: Buf)", "2016-03-31")
-  def getSet(key: ChannelBuffer, value: ChannelBuffer): Future[Option[ChannelBuffer]] =
-    getSet(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value)).map(unwrapBufOption)
-
 
   /**
    * Atomically sets key to value and returns the old value stored at key.
@@ -190,10 +116,6 @@ trait Strings { self: BaseClient =>
       case EmptyBulkReply()     => Future.value(None)
   }
 
-  @deprecated("use incr(key: Buf)", "2016-03-31")
-  def incr(key: ChannelBuffer): Future[JLong] =
-    incr(ChannelBufferBuf.Owned(key))
-
   /**
    * Increments the number stored at key by one.
    *
@@ -205,11 +127,6 @@ trait Strings { self: BaseClient =>
     doRequest(Incr(key)) {
       case IntegerReply(n) => Future.value(n)
     }
-
-  @deprecated("use incrBy(key: Buf, increment: Long)", "2016-03-31")
-  def incrBy(key: ChannelBuffer, increment: Long): Future[JLong] =
-    incrBy(ChannelBufferBuf.Owned(key), increment)
-
 
   /**
    * Increments the number stored at key by increment.
@@ -242,10 +159,6 @@ trait Strings { self: BaseClient =>
     case EmptyMBulkReply()    => Future.Nil
   }
 
-  @deprecated("use mGet(keys: Seq[Buf])", "2016-03-31")
-  def mGet2(keys: Seq[ChannelBuffer]): Future[Seq[Option[ChannelBuffer]]] =
-    mGet(keys.map(wrapCB)).map(unwrapSeqBufOption)
-
   /**
    * Sets the given keys to their respective values. MSET replaces existing
    * values with new values, just as regular SET.
@@ -257,10 +170,6 @@ trait Strings { self: BaseClient =>
     doRequest(MSet(kv)) {
       case StatusReply(message) => Future.Unit
     }
-
-  @deprecated("use mSet(kv: Map[Buf, Buf])", "2016-03-31")
-  def mSet2(kv: Map[ChannelBuffer, ChannelBuffer]): Future[Unit] =
-    mSet(kv.map(wrapCBPair))
 
   /**
    * Sets the given keys to their respective values. MSETNX will not perform
@@ -275,14 +184,6 @@ trait Strings { self: BaseClient =>
       case IntegerReply(n) => Future.value(n == 1)
     }
 
-  @deprecated("use mSetNx(kv: Map[Buf, Buf])", "2016-03-31")
-  def mSetNx2(kv: Map[ChannelBuffer, ChannelBuffer]): Future[JBoolean] =
-    mSetNx(kv.map(wrapCBPair))
-
-  @deprecated("use pSetEx(key: Buf, millis: Long, value: Buf)", "2016-03-31")
-  def pSetEx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[Unit] =
-    pSetEx(ChannelBufferBuf.Owned(key), millis, ChannelBufferBuf.Owned(value))
-
   /**
    * Works exactly like SETEX with the sole difference that the expire
    * time is specified in milliseconds instead of seconds.
@@ -294,10 +195,6 @@ trait Strings { self: BaseClient =>
     doRequest(PSetEx(key, millis, value)) {
       case StatusReply(message) => Future.Unit
     }
-
-  @deprecated("use set(key: Buf, value: Buf)", "2016-03-31")
-  def set(key: ChannelBuffer, value: ChannelBuffer): Future[Unit] =
-    set(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value))
 
   /**
    * Sets the given value to key. If a value already exists for the key,
@@ -311,11 +208,6 @@ trait Strings { self: BaseClient =>
       case StatusReply(message) => Future.Unit
     }
 
-  @deprecated("use setBit(key: Buf, offset: Int, value: Int)", "2016-03-31")
-  def setBit(key: ChannelBuffer, offset: Int, value: Int): Future[JLong] =
-    setBit(ChannelBufferBuf.Owned(key), offset, value)
-
-
   /**
    * Sets or clears the bit at offset in the string value stored at key.
    *
@@ -328,10 +220,6 @@ trait Strings { self: BaseClient =>
       case IntegerReply(n) => Future.value(n)
     }
 
-  @deprecated("use setEx(key: Buf, seconds: Long, value: Buf)", "2016-03-31")
-  def setEx(key: ChannelBuffer, seconds: Long, value: ChannelBuffer): Future[Unit] =
-    setEx(ChannelBufferBuf.Owned(key), seconds, ChannelBufferBuf.Owned(value))
-
   /**
    * Set key to hold the string value and set key to timeout after a given
    * number of seconds.
@@ -342,13 +230,6 @@ trait Strings { self: BaseClient =>
   def setEx(key: Buf, seconds: Long, value: Buf): Future[Unit] =
     doRequest(SetEx(key, seconds, value)) {
       case StatusReply(message) => Future.Unit
-    }
-
-  @deprecated("use setExNx(key: Buf, seconds: Long, value: Buf)", "2016-03-31")
-  def setExNx(key: ChannelBuffer, seconds: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value), Some(InSeconds(seconds)), true, false)) {
-      case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
     }
 
   /**
@@ -365,13 +246,6 @@ trait Strings { self: BaseClient =>
       case EmptyBulkReply() => FutureFalse
   }
 
-  @deprecated("use setExXx(key: Buf, seconds: Long, value: Buf)", "2016-03-31")
-  def setExXx(key: ChannelBuffer, seconds: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value), Some(InSeconds(seconds)), false, true)) {
-      case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
-    }
-
   /**
    * Set key to hold the string value with the specified expire time in seconds
    * only if the key already exist.
@@ -386,10 +260,6 @@ trait Strings { self: BaseClient =>
       case EmptyBulkReply() => FutureFalse
   }
 
-  @deprecated("use setNx(key: Buf, value: Buf)", "2016-03-31")
-  def setNx(key: ChannelBuffer, value: ChannelBuffer): Future[JBoolean] =
-    setNx(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value))
-
   /**
    * Set key to hold string value if key does not exist. In that case, it is
    * equal to SET. When key already holds a value, no operation is performed.
@@ -403,13 +273,6 @@ trait Strings { self: BaseClient =>
       case IntegerReply(n) => Future.value(n == 1)
     }
 
-  @deprecated("use setPx(key: Buf, millis: Long, value: Buf)", "2016-03-31")
-  def setPx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[Unit] =
-    doRequest(Set(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value), Some(InMilliseconds(millis)))) {
-      case StatusReply(_) => Future.Unit
-    }
-
-
   /**
    * Set key to hold the string value with the specified expire time in milliseconds.
    *
@@ -419,13 +282,6 @@ trait Strings { self: BaseClient =>
   def setPx(key: Buf, millis: Long, value: Buf): Future[Unit] =
     doRequest(Set(key, value, Some(InMilliseconds(millis)))) {
       case StatusReply(_) => Future.Unit
-    }
-
-  @deprecated("use setPxNx(key: Buf, millis: Long, value: Buf)", "2016-03-31")
-  def setPxNx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value), Some(InMilliseconds(millis)), true, false)) {
-      case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
     }
 
   /**
@@ -442,13 +298,6 @@ trait Strings { self: BaseClient =>
       case EmptyBulkReply() => FutureFalse
   }
 
-  @deprecated("use setPxXx(key: Buf, millis: Long, value: Buf)", "2016-03-31")
-  def setPxXx(key: ChannelBuffer, millis: Long, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value), Some(InMilliseconds(millis)), false, true)) {
-      case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
-    }
-
   /**
    * Set key to hold the string value with the specified expire time in milliseconds
    * only if the key already exist.
@@ -463,13 +312,6 @@ trait Strings { self: BaseClient =>
       case EmptyBulkReply() => FutureFalse
   }
 
-  @deprecated("use setXx(key: Buf, value: Buf)", "2016-03-31")
-  def setXx(key: ChannelBuffer, value: ChannelBuffer): Future[JBoolean] =
-    doRequest(Set(ChannelBufferBuf.Owned(key), ChannelBufferBuf.Owned(value), None, false, true)) {
-      case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
-    }
-
   /**
    * Set key to hold the string value only if the key already exist.
    *
@@ -483,10 +325,6 @@ trait Strings { self: BaseClient =>
       case EmptyBulkReply() => FutureFalse
   }
 
-  @deprecated("use setRange(key: Buf, offset: Int, value: Buf)", "2016-03-31")
-  def setRange(key: ChannelBuffer, offset: Int, value: ChannelBuffer): Future[JLong] =
-    setRange(ChannelBufferBuf.Owned(key), offset, ChannelBufferBuf.Owned(value))
-
   /**
    * Overwrites part of the string stored at key, starting at the specified
    * offset, for the entire length of value.
@@ -499,10 +337,6 @@ trait Strings { self: BaseClient =>
     doRequest(SetRange(key, offset, value)) {
       case IntegerReply(n) => Future.value(n)
     }
-
-  @deprecated("use strlen(key: Buf)", "2016-03-31")
-  def strlen(key: ChannelBuffer): Future[JLong] =
-    strlen(ChannelBufferBuf.Owned(key))
 
   /**
    * returns the length of the string value stored at key.

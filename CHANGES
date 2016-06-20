@@ -64,6 +64,12 @@ Breaking API Changes
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
 
+  * finagle-redis: Deprecated methods have been removed from the client API.
+    ``RB_ID=843455``
+
+  * finagle-redis: `c.t.f.redis.*Commands` traits are now package-private.
+    ``RB_ID=843455``
+
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
 

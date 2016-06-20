@@ -8,7 +8,7 @@ import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 
-trait Sets { self: BaseClient =>
+private[redis] trait SetCommands { self: BaseClient =>
   /**
    * Adds elements to the set, according to the set property.
    * Throws an exception if the key does not refer to a set.

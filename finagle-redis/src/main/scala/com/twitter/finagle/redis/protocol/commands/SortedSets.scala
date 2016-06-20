@@ -1,14 +1,19 @@
 package com.twitter.finagle.redis.protocol
 
+import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.redis.ClientError
 import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.finagle.redis.util._
+import com.twitter.io.Buf
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
-case class ZAdd(key: ChannelBuffer, members: Seq[ZMember])
+case class ZAdd(
+    key: ChannelBuffer, members: Seq[ZMember])
   extends StrictKeyCommand
-  with StrictZMembersCommand
-{
+  with StrictZMembersCommand {
+
+  def this(key: Buf, members: Seq[ZMember]) = this(BufChannelBuffer(key), members)
+
   def command = Commands.ZADD
   def toChannelBuffer = {
     val cmds = Seq(CommandBytes.ZADD, key)

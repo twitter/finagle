@@ -4,10 +4,10 @@ import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
-import _root_.java.lang.{Long => JLong}
+import java.lang.{Long => JLong}
 import com.twitter.finagle.redis.util.ReplyFormat
 
-trait Lists { self: BaseClient =>
+private[redis] trait ListCommands { self: BaseClient =>
   /**
    * Gets the length of the list.
    * If the key is a non-list element, an exception will be thrown.

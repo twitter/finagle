@@ -1,11 +1,11 @@
 package com.twitter.finagle.redis
 
-import _root_.java.lang.{Long => JLong,Boolean => JBoolean}
+import java.lang.{Long => JLong,Boolean => JBoolean}
 import com.twitter.finagle.redis.protocol.{IntegerReply, PFMerge, PFCount, PFAdd, StatusReply}
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 
-trait HyperLogLogs { self: BaseClient =>
+private[redis] trait HyperLogLogCommands { self: BaseClient =>
 
   /**
    * Adds elements to a HyperLogLog data structure.

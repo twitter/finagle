@@ -3,10 +3,10 @@ package com.twitter.finagle.redis
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
-import com.twitter.util.{Future, Time}
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import com.twitter.util.Future
+import org.jboss.netty.buffer.ChannelBuffer
 
-trait PubSubs { self: BaseClient =>
+private[redis] trait PubSubCommands { self: BaseClient =>
 
   def pubSubChannels(pattern: Option[ChannelBuffer] = None): Future[Seq[ChannelBuffer]] =
     doRequest(PubSubChannels(pattern)) {

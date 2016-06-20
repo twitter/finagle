@@ -1,13 +1,12 @@
 package com.twitter.finagle.redis
 
-import _root_.java.lang.{Boolean => JBoolean, Double => JDouble, Long => JLong}
+import java.lang.{Boolean => JBoolean, Double => JDouble, Long => JLong}
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BufToString, BytesToString, NumberFormat, ReplyFormat}
+import com.twitter.finagle.redis.util.{BufToString, NumberFormat, ReplyFormat}
 import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 
-
-trait SortedSets { self: BaseClient =>
+private[redis] trait SortedSetCommands { self: BaseClient =>
   private[this] def parseMBulkReply(
     withScores: JBoolean
   ): PartialFunction[Reply, Future[Either[ZRangeResults, Seq[ChannelBuffer]]]] = {
@@ -227,5 +226,4 @@ trait SortedSets { self: BaseClient =>
     doRequest(ZRange(key, start, stop, WithScores.option(withScores))) {
       parseMBulkReply(withScores)
     }
-
 }

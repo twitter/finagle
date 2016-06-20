@@ -12,7 +12,7 @@ import util.ReplyFormat
  * These commands are specific to twitter's internal fork of redis
  * and will be removed eventually
  */
-trait BtreeSortedSetCommands { self: BaseClient =>
+private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
 
   /**
    * Deletes fields from the given btree sorted set key

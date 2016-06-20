@@ -8,7 +8,7 @@ import com.twitter.util.Future
 import org.jboss.netty.buffer.ChannelBuffer
 
 
-trait Hashes { self: BaseClient =>
+private[redis] trait HashCommands { self: BaseClient =>
 
   /**
    * Deletes fields from given hash

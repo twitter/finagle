@@ -9,7 +9,7 @@ import com.twitter.util.Future
  * These commands are specific to twitter's internal fork of redis
  * and will be removed eventually
  */
-trait TopologyCommands { self: BaseClient =>
+private[redis] trait TopologyCommands { self: BaseClient =>
 
   /**
    * Adds a key to topology

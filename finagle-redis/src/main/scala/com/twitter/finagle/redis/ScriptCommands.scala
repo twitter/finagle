@@ -5,7 +5,7 @@ import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.io.Buf
 import com.twitter.util.Future
 
-trait ScriptCommands { self: BaseClient =>
+private[redis] trait ScriptCommands { self: BaseClient =>
   private[redis] val filterReply: PartialFunction[Reply, Future[Reply]] = {
     case ErrorReply(message) => Future.exception(new ServerError(message))
     case reply: Reply => Future.value(reply)
