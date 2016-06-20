@@ -8,6 +8,7 @@ junit_tests(name='scala',
     'util/util-app/src/main/java',
     'util/util-app/src/main/scala',
     'util/util-core',
+    'util/util-logging',
     'util/util-stats',
   ],
   resources=[

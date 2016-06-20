@@ -1,6 +1,7 @@
 package com.twitter.finagle.toggle
 
 import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
 import org.junit.runner.RunWith
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
@@ -77,6 +78,36 @@ class ToggleMapTest extends FunSuite
     assert(toggle(12333))
     m.remove(id)
     assert(!toggle.isDefinedAt(12333))
+  }
+
+  test("ToggleMap.mutable logs") {
+    val id = "com.toggle.hi"
+    def assertLog(log: String, fraction: String) = {
+      log should include(id)
+      log should include(fraction)
+    }
+
+    val handler = new StringHandler(BareFormatter, Some(Level.INFO))
+    val logger = Logger.get(classOf[ToggleMap].getName)
+    logger.addHandler(handler)
+
+    val map = ToggleMap.newMutable()
+
+    map.put(id, 0.0)
+    assertLog(handler.get, "set to fraction=0.0")
+    handler.clear()
+
+    map.remove(id)
+    assertLog(handler.get, "removed")
+    handler.clear()
+
+    map.put(id, 0.5)
+    assertLog(handler.get, "set to fraction=0.5")
+    handler.clear()
+
+    map.put(id, 1.1)
+    assertLog(handler.get, "ignoring invalid fraction=1.1")
+    handler.clear()
   }
 
   test("ToggleMap.Immutable") {

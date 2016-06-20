@@ -3,6 +3,7 @@ package com.twitter.finagle.toggle
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.toggle.Toggle.Metadata
 import com.twitter.io.Charsets
+import com.twitter.logging.Logger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.CRC32
@@ -244,6 +245,8 @@ object ToggleMap {
       metadata.iterator
   }
 
+  private[this] val log = Logger.get()
+
   private[this] val NoFractionAndToggle = (Double.NaN, Toggle.Undefined)
 
   private class MutableToggle(id: String) extends Toggle[Int](id) {
@@ -306,12 +309,17 @@ object ToggleMap {
 
     def put(id: String, fraction: Double): Unit = {
       if (Toggle.isValidFraction(fraction)) {
+        log.info(s"Mutable Toggle id='$id' set to fraction=$fraction")
         toggleFor(id).setFraction(fraction)
+      } else {
+        log.warning(s"Mutable Toggle id='$id' ignoring invalid fraction=$fraction")
       }
     }
 
-    def remove(id: String): Unit =
+    def remove(id: String): Unit = {
+      log.info(s"Mutable Toggle id='$id' removed")
       toggleFor(id).setFraction(Double.NaN)
+    }
   }
 
   /**
