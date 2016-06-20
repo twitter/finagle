@@ -24,6 +24,14 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatience {
 
+  object StringServerInit extends (ChannelPipeline => Unit) {
+    def apply(pipeline: ChannelPipeline): Unit = {
+      pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter(): _*))
+      pipeline.addLast("stringDecoder", new StringDecoder(Charsets.Utf8))
+      pipeline.addLast("stringEncoder", new StringEncoder(Charsets.Utf8))
+    }
+  }
+
   // a Transport whose reads and writes never complete
   private[netty4] class NullTransport[In,Out] extends Transport[In, Out] {
     val closeP = new Promise[Throwable]
@@ -74,14 +82,6 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
   test("frames pipeline messages and bridges transports and service dispatchers (aka it works end-to-end)") {
     val ctx = new StatsCtx { }
     import ctx._
-
-    object StringServerInit extends (ChannelPipeline => Unit) {
-      def apply(pipeline: ChannelPipeline): Unit = {
-        pipeline.addLast("line", new DelimiterBasedFrameDecoder(100, Delimiters.lineDelimiter(): _*))
-        pipeline.addLast("stringDecoder", new StringDecoder(Charsets.Utf8))
-        pipeline.addLast("stringEncoder", new StringEncoder(Charsets.Utf8))
-      }
-    }
 
     val p = Params.empty + Label("test") + Stats(sr)
     val listener = Netty4Listener[String, String](StringServerInit, p)
@@ -200,6 +200,47 @@ class Netty4ListenerTest extends FunSuite with Eventually with IntegrationPatien
     client3.getOutputStream.write(1)
 
     eventually { counterEquals("received_bytes")(3) }
+    Await.ready(server.close(), 2.seconds)
+  }
+
+  test("Netty4Listener notices when the client cuts the connection with autoread enabled") {
+    val ctx = new StatsCtx { }
+    import ctx._
+
+    // we need to turn backpressure off because netty doesn't notify you if the
+    // client cut the connection unless you're reading or writing.  disabling
+    // backpressure turns on autoread, so netty will alert us immediately that
+    // the connection was cut.
+    val params = Params.empty + Label("test") + Stats(sr) + BackPressure(false)
+    val listener = Netty4Listener[String, String](StringServerInit, params)
+
+    @volatile var observedRequest: Option[String] = None
+
+    val p = Promise[String]()
+    @volatile var interrupted = false
+    p.setInterruptHandler { case NonFatal(t) =>
+      interrupted = true
+    }
+    val service = new Service[String, String] {
+      def apply(request: String) = {
+        observedRequest = Some(request)
+        p
+      }
+    }
+
+    val serveTransport = (t: Transport[String, String]) => new SerialServerDispatcher(t, service)
+    val server = listener.listen(new InetSocketAddress(InetAddress.getLoopbackAddress, 0))(serveTransport(_))
+
+    val client = new Socket()
+    eventually { client.connect(server.boundAddress) }
+    client.getOutputStream.write("hello netty4!\n".getBytes("UTF-8"))
+    client.getOutputStream.flush()
+
+    eventually { assert(observedRequest == Some("hello netty4!")) }
+
+    client.close()
+    eventually { assert(interrupted) }
+
     Await.ready(server.close(), 2.seconds)
   }
 }
