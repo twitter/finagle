@@ -95,12 +95,12 @@ class TimestampValue(
    * the binary or text MySQL protocols.
    */
   def unapply(v: Value): Option[Timestamp] = v match {
-    case RawValue(t, Charset.Binary, false, bytes) if (t == Type.Timestamp || t == Type.DateTime) =>
-      val str = new String(bytes, Charset(Charset.Binary))
+    case RawValue(t, charset, false, bytes) if t == Type.Timestamp || t == Type.DateTime =>
+      val str = new String(bytes, Charset(charset))
       val ts = fromString(str, extractionTimeZone)
       Some(ts)
 
-    case RawValue(t, Charset.Binary, true, bytes) if (t == Type.Timestamp || t == Type.DateTime) =>
+    case RawValue(t, _, true, bytes) if t == Type.Timestamp || t == Type.DateTime =>
       val ts = fromBytes(bytes, extractionTimeZone)
       Some(ts)
 

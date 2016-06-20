@@ -1,9 +1,10 @@
 package com.twitter.finagle.exp.mysql
 
 import com.twitter.finagle.exp.mysql.transport.MysqlBuf
-import com.twitter.io.Buf
+import com.twitter.io.{Buf, Charsets}
 import java.sql.Timestamp
 import java.util.TimeZone
+
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -26,7 +27,7 @@ class TimestampValueTest extends FunSuite {
     assert(br.readIntLE()   == 123456)
   }
 
-  test("decode binary timestamp") {
+  private def timestampBinary: Array[Byte] = {
     val bw = MysqlBuf.writer(new Array[Byte](11))
     bw.writeShortLE(2015)
       .writeByte(1)
@@ -36,16 +37,30 @@ class TimestampValueTest extends FunSuite {
       .writeByte(5)
       .writeIntLE(678901)
 
-    val array = Buf.ByteArray.Owned.extract(bw.owned())
+    Buf.ByteArray.Owned.extract(bw.owned())
+  }
 
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, true, array)
+  test("decode binary timestamp with binary character set") {
+    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, true, timestampBinary)
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.678901"))
   }
 
-  test("decode text timestamp") {
+  test("decode binary timestamp with utf8_general_ci character set") {
+    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Utf8_general_ci, true, timestampBinary)
+    assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.678901"))
+  }
+
+  test("decode text timestamp with binary character set") {
     val str = "2015-01-02 03:04:05.67890"
 
-    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes)
+    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Binary, false, str.getBytes(Charsets.UsAscii))
+    assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
+  }
+
+  test("decode text timestamp with utf8_general_ci character set") {
+    val str = "2015-01-02 03:04:05.67890"
+
+    val timestampValueLocal(ts) = RawValue(Type.Timestamp, Charset.Utf8_general_ci, false, str.getBytes(Charsets.Utf8))
     assert(ts == Timestamp.valueOf("2015-01-02 03:04:05.6789"))
   }
 
