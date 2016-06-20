@@ -48,10 +48,19 @@ private[http] object StreamTransports {
   )(eos: A => Boolean): Reader with Future[Unit] = new Promise[Unit] with Reader {
     private[this] val rw = Reader.writable()
 
-    become(copyToWriter(trans, rw)(eos)(chunkOfA).respond {
-      case Throw(t) => rw.fail(t)
-      case Return(_) => rw.close()
-    })
+    // Ensure that collate's future is satisfied _before_ its reader
+    // is closed. This allows callers to observe the stream completion
+    // before readers are notified.
+    private[this] val writes = copyToWriter(trans, rw)(eos)(chunkOfA)
+    forwardInterruptsTo(writes)
+    writes.respond {
+      case ret@Throw(t) =>
+        updateIfEmpty(ret)
+        rw.fail(t)
+      case r@Return(_) =>
+        updateIfEmpty(r)
+        rw.close()
+    }
 
     def read(n: Int): Future[Option[Buf]] = rw.read(n)
 
