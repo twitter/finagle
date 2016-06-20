@@ -240,7 +240,8 @@ object Finagle extends Build {
     libraryDependencies ++= Seq(
       util("app"),
       util("core"),
-      util("logging")) ++
+      util("logging"),
+      util("stats")) ++
       jacksonLibs
   )
 

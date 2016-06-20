@@ -1,8 +1,11 @@
 package com.twitter.finagle.toggle
 
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.toggle.Toggle.Metadata
+import com.twitter.io.Charsets
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
+import java.util.zip.CRC32
 import scala.annotation.varargs
 import scala.collection.JavaConverters._
 import scala.collection.{breakOut, immutable, mutable}
@@ -73,6 +76,58 @@ abstract class ToggleMap { self =>
 
 object ToggleMap {
 
+  private[this] val MetadataOrdering: Ordering[Toggle.Metadata] =
+    new Ordering[Toggle.Metadata] {
+      def compare(x: Metadata, y: Metadata): Int = {
+        val ids = Ordering.String.compare(x.id, y.id)
+        if (ids != 0) ids
+        else Ordering.Double.compare(x.fraction, y.fraction)
+      }
+    }
+
+  /**
+   * Creates a [[ToggleMap]] with a `Gauge`, "checksum", which summarizes the
+   * current state of the `Toggles` which may be useful for comparing state
+   * across a cluster or over time.
+   *
+   * @param statsReceiver in typical usage by [[StandardToggleMap]], will be
+   *                      scoped to "toggles/$libraryName".
+   */
+  def observed(toggleMap: ToggleMap, statsReceiver: StatsReceiver): ToggleMap = {
+    new Proxy {
+      private[this] val checksum = statsReceiver.addGauge("checksum") {
+        // crc32 is not a cryptographic hash, but good enough for our purposes
+        // of summarizing the current state of the ToggleMap. we only need it
+        // to be efficient to compute and have small changes to the input affect
+        // the output.
+        val crc32 = new CRC32()
+
+        // need a consistent ordering, forcing the sort before computation
+        iterator.toIndexedSeq.sorted(MetadataOrdering).foreach { md =>
+          crc32.update(md.id.getBytes(Charsets.Utf8))
+          // convert the md's fraction to a Long and then feed each
+          // byte into the crc
+          val f = java.lang.Double.doubleToLongBits(md.fraction)
+          crc32.update((0xff &  f       ).toInt)
+          crc32.update((0xff & (f >> 8) ).toInt)
+          crc32.update((0xff & (f >> 16)).toInt)
+          crc32.update((0xff & (f >> 24)).toInt)
+          crc32.update((0xff & (f >> 32)).toInt)
+          crc32.update((0xff & (f >> 40)).toInt)
+          crc32.update((0xff & (f >> 48)).toInt)
+          crc32.update((0xff & (f >> 56)).toInt)
+        }
+        crc32.getValue.toFloat
+      }
+
+      protected def underlying: ToggleMap = toggleMap
+
+      override def toString: String =
+        s"observed($toggleMap, $statsReceiver)"
+
+    }
+  }
+
   /**
    * The [[ToggleMap]] interface is read only and this
    * is the mutable side of it.
@@ -113,7 +168,6 @@ object ToggleMap {
    *          `java.lang.IllegalArgumentException` will be thrown.
    */
   private[toggle] def fractional(id: String, fraction: Double): Toggle[Int] = {
-    Toggle.validateId(id)
     Toggle.validateFraction(id, fraction)
 
     // we want a continuous range within the space of Int.MinValue
@@ -137,9 +191,9 @@ object ToggleMap {
     val end: Int = (start + range).toInt
 
     if (range == 0) {
-      Toggle.False // 0%
+      Toggle.off(id) // 0%
     } else if (start == end) {
-      Toggle.True // 100%
+      Toggle.on(id) // 100%
     } else if (start <= end) {
       // the range is contiguous without overflows.
       Toggle(id, { case i => i >= start && i <= end })
@@ -192,9 +246,7 @@ object ToggleMap {
 
   private[this] val NoFractionAndToggle = (Double.NaN, Toggle.Undefined)
 
-  private class MutableToggle(id: String) extends Toggle[Int] {
-    Toggle.validateId(id)
-
+  private class MutableToggle(id: String) extends Toggle[Int](id) {
     private[this] val fractionAndToggle =
       new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
 
@@ -285,9 +337,7 @@ object ToggleMap {
     private[this] def fractions: Map[String, Double] =
       flag.overrides()
 
-    private[this] class FlagToggle(id: String) extends Toggle[Int] {
-      Toggle.validateId(id)
-
+    private[this] class FlagToggle(id: String) extends Toggle[Int](id) {
       private[this] val fractionAndToggle =
         new AtomicReference[(Double, Toggle[Int])](NoFractionAndToggle)
 

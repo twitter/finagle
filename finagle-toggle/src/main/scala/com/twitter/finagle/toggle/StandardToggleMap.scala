@@ -1,5 +1,6 @@
 package com.twitter.finagle.toggle
 
+import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{Return, Throw}
 import scala.collection.JavaConverters._
@@ -42,25 +43,30 @@ object StandardToggleMap {
    *                    found, this will fail with an `java.lang.IllegalStateException`.
    *                    The names should be in fully-qualified form to avoid
    *                    collisions, e.g. "com.twitter.finagle".
+   * @param statsReceiver used to record the outcomes of Toggles. For general
+   *                      usage this should not be scoped so that the metrics
+   *                      always end up scoped to "toggles/$libraryName".
    */
-  def apply(libraryName: String): ToggleMap =
-    apply(libraryName, ToggleMap.mutable)
+  def apply(libraryName: String, statsReceiver: StatsReceiver): ToggleMap =
+    apply(libraryName, statsReceiver, ToggleMap.mutable)
 
-  // exposed for testing
+  /** exposed for testing */
   private[toggle] def apply(
     libraryName: String,
+    statsReceiver: StatsReceiver,
     mutable: ToggleMap
   ): ToggleMap = {
     val svcsJson = loadJsonConfigFromResources(libraryName, s"$libraryName-service.json")
     val libsJson = loadJsonConfigFromResources(libraryName, s"$libraryName.json")
 
-    ToggleMap.of(
+    val stacked = ToggleMap.of(
       mutable,
       ToggleMap.flags,
       svcsJson,
       ServiceLoadedToggleMap(libraryName),
       libsJson
     )
+    ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
   }
 
   private[this] def loadJsonConfigFromResources(

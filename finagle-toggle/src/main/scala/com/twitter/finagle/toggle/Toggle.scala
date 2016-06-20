@@ -3,18 +3,29 @@ package com.twitter.finagle.toggle
 /**
  * `Toggles` are used for modifying behavior without changing code.
  *
+ * @param id the identifying name of the `Toggle`.
+ *           These should generally be fully qualified names to avoid conflicts
+ *           between libraries. For example, "com.twitter.finagle.CoolThing".
+ *           Valid characters are `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
+ *
  * @see [[http://martinfowler.com/articles/feature-toggles.html Feature Toggles]]
  *      for detailed discussion on the topic.
  * @see [[ToggleMap]]
  */
-abstract class Toggle[-T] extends PartialFunction[T, Boolean] { self =>
+abstract class Toggle[-T](
+    private[toggle] val id: String)
+  extends PartialFunction[T, Boolean] { self =>
+
+  Toggle.validateId(id)
 
   /**
    * Similar to `PartialFunction.orElse` but specialized
    * for [[Toggle Toggles]].
+   *
+   * @note the returned [[Toggle]] will keep the current `id`.
    */
   def orElse[T1 <: T](that: Toggle[T1]): Toggle[T1] = {
-    new Toggle[T1] {
+    new Toggle[T1](self.id) {
       override def toString: String =
         s"${self.toString}.orElse(${that.toString})"
 
@@ -25,7 +36,6 @@ abstract class Toggle[-T] extends PartialFunction[T, Boolean] { self =>
         self.applyOrElse(v1, that)
     }
   }
-
 }
 
 object Toggle {
@@ -97,35 +107,41 @@ object Toggle {
   }
 
   private[toggle] def apply[T](
-    string: String,
+    id: String,
     pf: PartialFunction[T, Boolean]
-  ): Toggle[T] = new Toggle[T] {
-    Toggle.validateId(string)
-    override def toString: String = s"Toggle($string)"
+  ): Toggle[T] = new Toggle[T](id) {
+    override def toString: String = s"Toggle($id)"
     def isDefinedAt(x: T): Boolean = pf.isDefinedAt(x)
     def apply(v1: T): Boolean = pf(v1)
   }
 
-  private[this] def constant[T](
-    value: Boolean
-  ): Toggle[T] =
-    apply("com.twitter.finagle.toggle." + value.toString, { case _ => value })
+  private[this] val AlwaysTrue: PartialFunction[Any, Boolean] =
+    { case _ => true }
+
+  private[toggle] def on[T](id: String): Toggle[T] =
+    apply(id, AlwaysTrue)
+
+  private[this] val AlwaysFalse: PartialFunction[Any, Boolean] =
+    { case _ => false }
+
+  private[toggle] def off[T](id: String): Toggle[T] =
+    apply(id, AlwaysFalse)
 
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `true`.
    */
-  val True: Toggle[Any] = constant(true)
+  val True: Toggle[Any] = on("com.twitter.finagle.toggle.True")
 
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `false`.
    */
-  val False: Toggle[Any] = constant(false)
+  val False: Toggle[Any] = off("com.twitter.finagle.toggle.False")
 
   /**
    * A [[Toggle]] which is defined for no inputs.
    */
   private[toggle] val Undefined: Toggle[Any] =
-    new Toggle[Any] {
+    new Toggle[Any]("com.twitter.finagle.toggle.Undefined") {
       def isDefinedAt(x: Any): Boolean = false
       def apply(v1: Any): Boolean = throw new UnsupportedOperationException()
       override def toString: String = "Undefined"

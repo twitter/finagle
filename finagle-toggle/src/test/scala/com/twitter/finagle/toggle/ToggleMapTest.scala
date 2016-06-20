@@ -1,5 +1,6 @@
 package com.twitter.finagle.toggle
 
+import com.twitter.finagle.stats.InMemoryStatsReceiver
 import org.junit.runner.RunWith
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
@@ -15,6 +16,36 @@ class ToggleMapTest extends FunSuite
   with Matchers {
 
   private val IntGen = arbitrary[Int]
+
+  test("ToggleMap.observed produces a checksum summary") {
+    val stats = new InMemoryStatsReceiver()
+    val inMem = ToggleMap.newMutable()
+    val map = ToggleMap.observed(inMem, stats)
+
+    val gauge: () => Float = stats.gauges(Seq("checksum"))
+    // these numbers were picked by observation and are used to
+    // make sure they stay consistent across code changes.
+    val initial = 0f
+    val state1 = 1.19006272E9f
+    val state2 = 3.58052019E9f
+
+    // run it twice to make sure the checksum remains consistent
+    // without changes
+    assert(initial == gauge())
+    assert(initial == gauge())
+
+    val toggleName = "com.id"
+
+    // validate checksum changes after an add
+    inMem.put(toggleName, 0.0)
+    assert(state1 == gauge())
+    assert(state1 == gauge())
+
+    // validate checksum changes after an update
+    inMem.put(toggleName, 0.1)
+    assert(state2 == gauge())
+    assert(state2 == gauge())
+  }
 
   test("ToggleMap.mutable") {
     val id = "com.toggle.hi"

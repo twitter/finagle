@@ -1,5 +1,6 @@
 package com.twitter.finagle.toggle
 
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -10,7 +11,7 @@ class StandardToggleMapTest extends FunSuite {
   test("apply with a known libraryName") {
     flag.overrides.let(Map.empty) {
       // should load `ServiceLoadedToggleTestA`
-      val tm = StandardToggleMap("A")
+      val tm = StandardToggleMap("A", NullStatsReceiver)
       val togs = tm.iterator.toSeq
       assert(togs.size == 1)
       assert(togs.head.id == "com.toggle.a")
@@ -19,7 +20,7 @@ class StandardToggleMapTest extends FunSuite {
 
   test("apply with an unknown libraryName") {
     flag.overrides.let(Map.empty) {
-      val tm = StandardToggleMap("ZZZ")
+      val tm = StandardToggleMap("ZZZ", NullStatsReceiver)
       assert(tm.iterator.isEmpty)
       val toggle = tm("com.toggle.XYZ")
       assert(!toggle.isDefinedAt(245))
@@ -31,13 +32,14 @@ class StandardToggleMapTest extends FunSuite {
 
   test("apply with a duplicate libraryName") {
     intercept[IllegalStateException] {
-      StandardToggleMap("B")
+      StandardToggleMap("B", NullStatsReceiver)
     }
   }
 
   test("apply with resource-based configs") {
     val togMap = StandardToggleMap(
       "com.twitter.finagle.toggle.tests.StandardToggleMapTest",
+      NullStatsReceiver,
       NullToggleMap)
 
     val togs = togMap.iterator.toSeq
@@ -69,7 +71,7 @@ class StandardToggleMapTest extends FunSuite {
 
     val inMem = ToggleMap.newMutable()
     // should load `ServiceLoadedToggleTestA`
-    val togMap = StandardToggleMap("A", inMem)
+    val togMap = StandardToggleMap("A", NullStatsReceiver, inMem)
     flag.overrides.letClear("com.toggle.a") {
       // start without the flag or in-memory, and only the service loaded
       assertFraction(togMap, 1.0)
@@ -95,6 +97,23 @@ class StandardToggleMapTest extends FunSuite {
       inMem.put("com.toggle.a", 0.8)
       assertFraction(togMap, 0.8)
     }
+  }
+
+  test("Toggles are observed") {
+    val toggleName = "com.toggle.Test"
+    val libraryName = "observedTest"
+    val stats = new InMemoryStatsReceiver()
+    val inMem = ToggleMap.newMutable()
+    // start with the toggle turned on.
+    inMem.put(toggleName, 1.0)
+
+    val togMap = StandardToggleMap(libraryName, stats, inMem)
+    val gauge = stats.gauges(Seq("toggles", libraryName, "checksum"))
+    val initial = gauge()
+
+    // turn the toggle off and make sure the checksum changes
+    inMem.put(toggleName, 0.0)
+    assert(initial != gauge())
   }
 
 }
