@@ -89,7 +89,7 @@ object Netty3Listener {
         }
       })
 
-      p.within(deadline - Time.now) transform { _ =>
+      p.by(deadline) transform { _ =>
         activeChannels.close()
         // Force close any remaining connections. Don't wait for success.
         bootstrap.releaseExternalResources()
