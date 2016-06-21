@@ -235,4 +235,9 @@ trait RedisClientServerIntegrationTest extends RedisTest with BeforeAndAfterAll 
     case BulkReply(msg) => assert(BufToString(msg) == expects)
     case _ => fail("Expected BulkReply")
   }
+
+  def assertBulkReply(reply: Future[Reply], expects: Buf) = Await.result(reply) match {
+    case BulkReply(msg) => assert(msg == expects)
+    case _ => fail("Expected BulkReply")
+  }
 }

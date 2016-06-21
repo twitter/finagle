@@ -429,17 +429,17 @@ object CommandBytes {
   val HVALS             = StringToBuf("HVALS")
 
   // Lists
-  val LLEN              = StringToChannelBuffer("LLEN")
-  val LINDEX            = StringToChannelBuffer("LINDEX")
-  val LINSERT           = StringToChannelBuffer("LINSERT")
-  val LPOP              = StringToChannelBuffer("LPOP")
-  val LPUSH             = StringToChannelBuffer("LPUSH")
-  val LREM              = StringToChannelBuffer("LREM")
-  val LSET              = StringToChannelBuffer("LSET")
-  val LRANGE            = StringToChannelBuffer("LRANGE")
-  val RPOP              = StringToChannelBuffer("RPOP")
-  val RPUSH             = StringToChannelBuffer("RPUSH")
-  val LTRIM             = StringToChannelBuffer("LTRIM")
+  val LLEN              = StringToBuf("LLEN")
+  val LINDEX            = StringToBuf("LINDEX")
+  val LINSERT           = StringToBuf("LINSERT")
+  val LPOP              = StringToBuf("LPOP")
+  val LPUSH             = StringToBuf("LPUSH")
+  val LREM              = StringToBuf("LREM")
+  val LSET              = StringToBuf("LSET")
+  val LRANGE            = StringToBuf("LRANGE")
+  val RPOP              = StringToBuf("RPOP")
+  val RPUSH             = StringToBuf("RPUSH")
+  val LTRIM             = StringToBuf("LTRIM")
 
   // Sets
   val SADD              = StringToChannelBuffer("SADD")
