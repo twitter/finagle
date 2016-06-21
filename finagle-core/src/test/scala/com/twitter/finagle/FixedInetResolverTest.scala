@@ -65,6 +65,8 @@ class FixedInetResolverTest extends FunSuite with Eventually {
     }
   }
 
+
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-2938
   test("Caching resolver respects cache size parameter") {
     new Ctx {
       val maxCacheSize = 1
