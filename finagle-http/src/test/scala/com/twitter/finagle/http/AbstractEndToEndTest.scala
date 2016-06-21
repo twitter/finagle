@@ -98,7 +98,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val request = Request("http://twitter.com/" + "a" * 4096)
       val response = Await.result(client(request), 5.seconds)
       assert(response.status == Status.RequestURITooLong)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     testIfImplemented(TooBigHeaders)(name + ": request header fields too large") {
@@ -110,7 +110,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       request.headers().add("header", "a" * 8192)
       val response = Await.result(client(request), 5.seconds)
       assert(response.status == Status.RequestHeaderFieldsTooLarge)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": with default client-side ResponseClassifier") {
@@ -128,7 +128,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       // by default any `Return` is a successful response.
       assert(statsRecv.counters(Seq("client", "success")) == 2)
 
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": with default server-side ResponseClassifier") {
@@ -143,7 +143,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       // by default any `Return` is a successful response.
       assert(statsRecv.counters(Seq("server", "success")) == 2)
 
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": unhandled exceptions are converted into 500s") {
@@ -154,7 +154,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service)
       val response = Await.result(client(Request("http://twitter.com")), 5.seconds)
       assert(response.status == Status.InternalServerError)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     testIfImplemented(TooLongFixed)(name + ": return 413s for fixed-length requests with too large payloads") {
@@ -171,7 +171,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
 
       assert(Await.result(client(tooBig), 5.seconds).status == Status.RequestEntityTooLarge)
       assert(Await.result(client(justRight), 5.seconds).status == Status.Ok)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     testIfImplemented(TooLongStream)(name + ": return 413s for chunked requests which stream too much data") {
@@ -189,7 +189,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       w.write(buf("a"*1000)).before(w.close)
       val res = Await.result(client(tooMuch), 2.seconds)
       assert(res.status == Status.RequestEntityTooLarge)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
   }
 
@@ -214,7 +214,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
           Future.value(names.exists(_.contains("Bar")))
       }
       assert(!Await.result(hasBar, 5.seconds))
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     testIfImplemented(SetContentLength)(name + ": client sets content length") {
@@ -231,7 +231,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val req = Request()
       req.contentString = body
       assert(Await.result(client(req), 5.seconds).contentString == body.length.toString)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": echo") {
@@ -246,7 +246,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service)
       val response = client(Request("123"))
       assert(Await.result(response, 5.seconds).contentString == "123")
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": dtab") {
@@ -270,7 +270,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
         assert(res.contentString == "Dtab(2)\n\t/a => /b\n\t/c => /d\n")
       }
 
-      client.close()
+      
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": (no) dtab") {
@@ -289,7 +290,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val res = Await.result(client(Request("/")), 5.seconds)
       assert(res.contentString == "0")
 
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": context") {
@@ -308,7 +309,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
         val client = connect(service)
         val res = Await.result(client(Request("/")), 5.seconds)
         assert(res.status == Status.Ok)
-        client.close()
+        Await.ready(client.close(), 5.seconds)
       }
     }
 
@@ -328,7 +329,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service(writer))
       val response = Await.result(client(Request()), 5.seconds)
       assert(response.contentString == "helloworld")
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     testIfImplemented(ClientAbort)(name + ": client abort") {
@@ -370,7 +371,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       assert(statsRecv.stat("client", "response_payload_bytes")() == Seq(20.0f))
       assert(statsRecv.stat("server", "request_payload_bytes")() == Seq(10.0f))
       assert(statsRecv.stat("server", "response_payload_bytes")() == Seq(20.0f))
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
   }
 
@@ -400,7 +401,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
 
       val content = Await.result(client(req).flatMap { rep => Reader.readAll(rep.reader) }, 5.seconds)
       assert(Buf.Utf8.unapply(content).get == "raw content")
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": symmetric reader and getContent") {
@@ -431,7 +432,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       assert(Await.result(readNBytes(5, reader), 5.seconds) == Buf.Utf8("hello"))
       Await.result(writer.write(buf("world")), 5.seconds)
       assert(Await.result(readNBytes(5, reader), 5.seconds) == Buf.Utf8("world"))
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name + ": transport closure propagates to request stream reader") {
@@ -444,7 +445,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val req = Request()
       req.setChunked(true)
       Await.result(client(req), 5.seconds)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
       intercept[ChannelClosedException] { Await.result(p, 5.seconds) }
     }
 
@@ -454,7 +455,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val req = Request()
       req.setChunked(true)
       client(req)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
       intercept[Reader.ReaderDiscarded] { Await.result(drip(req.writer), 5.seconds) }
     }
 
@@ -520,7 +521,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(svc)
       Await.result(client(Request()), 5.seconds)
       Await.result(client(Request()), 5.seconds)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
 
     test(name +": does not measure payload size") {
@@ -532,7 +533,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       assert(statsRecv.stat("client", "response_payload_bytes")() == Nil)
       assert(statsRecv.stat("server", "request_payload_bytes")() == Nil)
       assert(statsRecv.stat("server", "response_payload_bytes")() == Nil)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
   }
 
@@ -567,8 +568,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       assert(outerSpan == innerParent, "outer span vs inner parent")
       assert(innerSpan != outerSpan, "inner (%s) vs outer (%s) spanId".format(innerSpan, outerSpan))
 
-      outer.close()
-      inner.close()
+      Await.ready(outer.close(), 5.seconds)
+      Await.ready(inner.close(), 5.seconds)
     }
   }
 
@@ -674,7 +675,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       assert(st.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
       assert(st.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)
       assert(st.counters(Seq(clientName, "failures", "restartable")) == failureAccrualFailures)
-      client.close()
+      Await.ready(client.close(), 5.seconds)
     }
   }
 
@@ -739,8 +740,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     assert(statsRecv.counters(Seq("client", "requests")) == 2)
     assert(statsRecv.counters(Seq("client", "success")) == 1)
 
-    client.close()
-    server.close()
+    Await.ready(client.close(), 5.seconds)
+    Await.ready(server.close(), 5.seconds)
   }
 
   test("server-side ResponseClassifier based on status code") {
@@ -767,8 +768,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     assert(statsRecv.counters(Seq("server", "success")) == 1)
     assert(statsRecv.counters(Seq("server", "failures")) == 1)
 
-    client.close()
-    server.close()
+    Await.ready(client.close(), 5.seconds)
+    Await.ready(server.close(), 5.seconds)
   }
 
   test("codec should require a message size be less than 2Gb") {
@@ -809,8 +810,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     val res = client(req)
     assert(Await.result(res, 2.seconds).status == Status.Continue)
     assert(Await.result(expectP, 2.seconds) == false)
-    client.close()
-    server.close()
+    Await.ready(client.close(), 5.seconds)
+    Await.ready(server.close(), 5.seconds)
   }
 
   testIfImplemented(CompressedContent)("non-streaming clients can decompress content") {
@@ -834,7 +835,27 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
     val req = Request("/")
     req.headerMap.set("accept-encoding", "gzip")
     assert(Await.result(client(req), 5.seconds).contentString == "raw content")
-    client.close()
-    server.close()
+    Await.ready(client.close(), 5.seconds)
+    Await.ready(server.close(), 5.seconds)
+  }
+
+  test("request remote address") {
+    val svc = new Service[Request, Response] {
+      def apply(request: Request) = {
+        val response = Response()
+        response.contentString = request.remoteAddress.toString
+        Future.value(response)
+      }
+    }
+    val server = serverImpl()
+      .serve("localhost:*", svc)
+
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .newService(s"${addr.getHostName}:${addr.getPort}", "client")
+
+    assert(Await.result(client(Request("/")), 5.seconds).contentString.startsWith("/127.0.0.1"))
+    Await.ready(client.close(), 5.seconds)
+    Await.ready(server.close(), 5.seconds)
   }
 }

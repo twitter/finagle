@@ -98,6 +98,8 @@ Bug Fixes
     future could be evicted and the prepared statement closed while a user tries to use that
     prepared statement.  ``RB_ID=833970``
 
+  * finagle-netty4-http: Servers now see the correct client host address for requests. ``RB_ID=844076``
+
 New Features
 ~~~~~~~~~~~~
 
