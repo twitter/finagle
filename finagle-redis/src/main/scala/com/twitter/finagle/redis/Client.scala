@@ -114,7 +114,7 @@ abstract class BaseClient(
   /**
    * Helper function to convert a Redis multi-bulk reply into a map of pairs
    */
-  private[redis] def returnPairs(messages: Seq[ChannelBuffer]) = {
+  private[redis] def returnPairs[A](messages: Seq[A]) = {
     assert(messages.length % 2 == 0, "Odd number of items in response")
     messages.grouped(2).toSeq.flatMap {
       case Seq(a, b) => Some((a, b))
