@@ -135,5 +135,7 @@ private[this] class TestProducer extends ZipkinProducer {
     null
   }
   override def close(): Unit = ???
+  override def close(x: Long, t: java.util.concurrent.TimeUnit): Unit = ???
+  override def flush(): Unit = ???
 }
 
