@@ -58,6 +58,9 @@ Breaking API Changes
   * finagle-core: `SessionParams` no longer contains `acquisitionTimeout`. Instead, it
     was extracted into `ClientSessionParams`. ``RB_ID=837726``
 
+  * finagle-core: Changed visibility of PipeliningDispatcher to private[finagle].  Clients should
+    not be affected, since it's not a part of the end-user API. ``RB_ID=843153``.
+
   * finagle-http: Deprecate channelBufferUsageTracker in favor of maxRequestSize.
     ``RB_ID=831233``
 
@@ -144,6 +147,11 @@ New Features
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: Pipelined protocols (memcached, redis) no longer prevent
+    connections from being cut by interrupts.  Instead, interrupts are masked
+    until a subsequent ten second timeout has expired without a response in the
+    pipeline. ``RB_ID=843153``
 
   * finagle-core: MonitorFilter now installs the parameterized monitor, and will
     no longer fail the request automatically if any exception is thrown

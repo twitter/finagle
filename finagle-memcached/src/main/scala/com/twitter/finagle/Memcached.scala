@@ -20,6 +20,7 @@ import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{StatsReceiver, ExceptionStatsHandler}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.hashing
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Duration, Future, Monitor}
@@ -238,7 +239,8 @@ object Memcached extends finagle.Client[Command, Response]
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(
         transport,
-        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+        DefaultTimer.twitter
       )
 
     def newTwemcacheClient(dest: Name, label: String): TwemcacheClient = {
