@@ -7,6 +7,21 @@ object Packet {
   val OkByte     = 0x00.toByte
   val ErrorByte  = 0xFF.toByte
   val EofByte    = 0xFE.toByte
+
+  val MaxBodySize = 0xffffff
+
+  def fromBuf(buf: Buf): Packet = {
+    val br = MysqlBuf.reader(buf)
+
+    val size = br.readUnsignedMediumLE()
+    val seq = br.readUnsignedByte()
+    val body = br.readAll()
+    if (size != body.length) {
+      throw new IllegalStateException(
+        s"Bad Packet size. Expected: $size, actual ${body.length}")
+    }
+    Packet(seq, body)
+  }
 }
 
 /**

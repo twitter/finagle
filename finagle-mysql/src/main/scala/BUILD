@@ -9,6 +9,7 @@ scala_library(name='scala',
     '3rdparty/jvm/com/google/code/findbugs:jsr305',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
+    'finagle/finagle-netty4',
     'util/util-core',
     'util/util-cache',
     'util/util-logging'

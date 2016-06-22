@@ -93,6 +93,9 @@ Breaking API Changes
     `BinaryAnnotation`, `Endpoint`, `Sampler` and `SamplingTracer` to finagle-zipkin-core.
     ``RB_ID=840494``
 
+  * finagle-mysql: Removed `c.t.f.exp.mysql.transport.MysqlTransporter`, as it was not useful for it
+    to be public. ``RB_ID=840718``
+
 Bug Fixes
 ~~~~~~~~~
 

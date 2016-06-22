@@ -4,7 +4,7 @@ import com.twitter.finagle.codec.FrameDecoder
 import com.twitter.finagle.netty4.ByteBufAsBuf
 import com.twitter.logging.Logger
 import io.netty.buffer.ByteBuf
-import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.util.AttributeKey
 
 private[codec] object DecodeHandler {
@@ -16,6 +16,7 @@ private[codec] object DecodeHandler {
  * instance to inbound pipeline messages. Consequently it should be installed
  * before all pipeline handlers which expect an `In`-typed message.
  */
+@ChannelHandler.Sharable
 private[netty4] class DecodeHandler[In](
     decoderFactory: () => FrameDecoder[In])
   extends ChannelInboundHandlerAdapter {
