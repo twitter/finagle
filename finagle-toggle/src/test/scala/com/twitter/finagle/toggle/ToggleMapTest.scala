@@ -287,8 +287,8 @@ class ToggleMapTest extends FunSuite
     val tm2 = ToggleMap.newMutable()
     tm2.put("com.toggle.t2", 0.3)
 
-    val tm01 = tm0.orElse(tm1)
-    val tm012 = tm01.orElse(tm2)
+    val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
+    val tm012 = NullToggleMap.orElse(tm01).orElse(tm2)
 
     val mds01 = tm01.iterator.toSeq
     assert(mds01.size == 2)
@@ -309,7 +309,7 @@ class ToggleMapTest extends FunSuite
     val tm1 = ToggleMap.newMutable()
     tm1.put("com.toggle.t0", 1.0)
 
-    val tm01 = tm0.orElse(tm1)
+    val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
     val mds = tm01.iterator.toSeq
     assert(mds.size == 1)
     assert(mds.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 }, mds)
@@ -318,7 +318,7 @@ class ToggleMapTest extends FunSuite
   test("ToggleMap.orElse.apply") {
     val tm0 = ToggleMap.newMutable()
     val tm1 = ToggleMap.newMutable()
-    val tm01 = tm0.orElse(tm1)
+    val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
     val toggle = tm01("com.toggle.t")
 
     // the toggle doesn't exist in either underlying map
