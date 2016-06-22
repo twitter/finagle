@@ -459,9 +459,9 @@ object CommandBytes {
   val WATCH             = StringToBuf("WATCH")
 
   // HyperLogLogs
-  val PFADD             = StringToChannelBuffer("PFADD")
-  val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
-  val PFMERGE           = StringToChannelBuffer("PFMERGE")
+  val PFADD             = StringToBuf("PFADD")
+  val PFCOUNT           = StringToBuf("PFCOUNT")
+  val PFMERGE           = StringToBuf("PFMERGE")
 
   // PubSub
   val PUBLISH           = StringToChannelBuffer("PUBLISH")

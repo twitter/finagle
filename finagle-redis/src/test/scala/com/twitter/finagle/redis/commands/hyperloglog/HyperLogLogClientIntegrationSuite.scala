@@ -13,21 +13,21 @@ final class HyperLogLogClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly perform the PFADD command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.pfAdd(foo, List(bar))))
+      assert(Await.result(client.pfAdd(bufFoo, List(bufBar))))
     }
   }
 
   test("Correctly perform the PFCOUNT command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val pfCountResult = client.pfAdd(foo, List(bar, baz)).flatMap(_ => client.pfCount(List(foo)))
+      val pfCountResult = client.pfAdd(bufFoo, List(bufBar, bufBaz)).flatMap(_ => client.pfCount(List(bufFoo)))
       assert(Await.result(pfCountResult) == 2)
     }
   }
 
   test("Correctly perform the PFMERGE command", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val addHll = List((foo, List(bar, baz)), (bar, List(foo, baz))) map (client.pfAdd _).tupled
-      val pfMergeResult = Future.collect(addHll).flatMap(_ => client.pfMerge(baz, List(foo, bar)))
+      val addHll = List((bufFoo, List(bufBar, bufBaz)), (bufBar, List(bufFoo, bufBaz))) map (client.pfAdd _).tupled
+      val pfMergeResult = Future.collect(addHll).flatMap(_ => client.pfMerge(bufBaz, List(bufFoo, bufBar)))
       assert(Await.result(pfMergeResult.liftToTry) == Return.Unit)
     }
   }

@@ -78,12 +78,10 @@ Breaking API Changes
       - `HashCommands`: ``RB_ID=843596``
       - `ListCommands`: ``RB_ID=844596``
       - `BtreeSortedSetCommands`: ``RB_ID=844862``
+      - `HyperLogLogCommands`: ``RB_ID=844945``
 
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
-
-  * finagle-redis: Replace `ChannelBuffer`s with `Buf`s in client's `HashCommands`.
-    ``RB_ID=843596``
 
   * finagle-thrift: As part of the migration off of `Codec`, remove
     `c.t.f.thrift.ThriftClientBufferedCodec` and `c.t.f.thrift.ThriftClientBufferedCodecFactory`
