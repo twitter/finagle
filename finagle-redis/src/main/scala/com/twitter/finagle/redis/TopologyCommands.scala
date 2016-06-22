@@ -6,13 +6,13 @@ import com.twitter.io.Buf
 import com.twitter.util.Future
 
 /**
- * These commands are specific to twitter's internal fork of redis
- * and will be removed eventually
+ * @note These commands are specific to Twitter's internal fork of Redis
+ * and will be removed eventually.
  */
 private[redis] trait TopologyCommands { self: BaseClient =>
 
   /**
-   * Adds a key to topology
+   * Adds a `key` : `value` pair to a topology.
    */
   def topologyAdd(key: Buf, value: Buf): Future[Unit] =
     doRequest(TopologyAdd(key, value)) {
@@ -20,7 +20,7 @@ private[redis] trait TopologyCommands { self: BaseClient =>
     }
 
   /**
-   * Gets a key from topology
+   * Gets a value stored under `key` from a topology.
    */
   def topologyGet(key: Buf): Future[Option[Buf]] =
     doRequest(TopologyGet(key)) {
@@ -29,7 +29,7 @@ private[redis] trait TopologyCommands { self: BaseClient =>
     }
 
   /**
-   * Deletes a key from topology
+   * Deletes a pair with a `key` from a topology.
    */
   def topologyDelete(key: Buf): Future[Unit] =
     doRequest(TopologyDelete(key)) {

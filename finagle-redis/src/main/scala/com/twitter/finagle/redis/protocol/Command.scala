@@ -389,11 +389,11 @@ object CommandBytes {
 
   // Btree Sorted Set
   // These are twitter-internal commands and will be removed eventually
-  val BADD              = StringToChannelBuffer("BADD")
-  val BCARD             = StringToChannelBuffer("BCARD")
-  val BREM              = StringToChannelBuffer("BREM")
-  val BGET              = StringToChannelBuffer("BGET")
-  val BRANGE            = StringToChannelBuffer("BRANGE")
+  val BADD              = StringToBuf("BADD")
+  val BCARD             = StringToBuf("BCARD")
+  val BREM              = StringToBuf("BREM")
+  val BGET              = StringToBuf("BGET")
+  val BRANGE            = StringToBuf("BRANGE")
 
   // Topology
   // These are twitter-internal commands and will be removed eventually
