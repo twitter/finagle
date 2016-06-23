@@ -72,7 +72,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def get(key: Buf): Future[Option[Buf]] =
     doRequest(Get(key)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.value(None)
+      case EmptyBulkReply()     => Future.None
   }
 
   /**
@@ -98,7 +98,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def getRange(key: Buf, start: Long, end: Long): Future[Option[Buf]] =
     doRequest(GetRange(key, start, end)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.value(None)
+      case EmptyBulkReply()     => Future.None
   }
 
   /**

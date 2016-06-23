@@ -442,14 +442,14 @@ object CommandBytes {
   val LTRIM             = StringToBuf("LTRIM")
 
   // Sets
-  val SADD              = StringToChannelBuffer("SADD")
-  val SMEMBERS          = StringToChannelBuffer("SMEMBERS")
-  val SISMEMBER         = StringToChannelBuffer("SISMEMBER")
-  val SCARD             = StringToChannelBuffer("SCARD")
-  val SREM              = StringToChannelBuffer("SREM")
-  val SPOP              = StringToChannelBuffer("SPOP")
-  val SRANDMEMBER       = StringToChannelBuffer("SRANDMEMBER")
-  val SINTER            = StringToChannelBuffer("SINTER")
+  val SADD              = StringToBuf("SADD")
+  val SMEMBERS          = StringToBuf("SMEMBERS")
+  val SISMEMBER         = StringToBuf("SISMEMBER")
+  val SCARD             = StringToBuf("SCARD")
+  val SREM              = StringToBuf("SREM")
+  val SPOP              = StringToBuf("SPOP")
+  val SRANDMEMBER       = StringToBuf("SRANDMEMBER")
+  val SINTER            = StringToBuf("SINTER")
 
   // Transactions
   val DISCARD           = StringToChannelBuffer("DISCARD")

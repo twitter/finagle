@@ -27,7 +27,7 @@ private[redis] trait KeyCommands { self: BaseClient =>
   def dump(key: Buf): Future[Option[Buf]] =
     doRequest(Dump(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply()   => Future.None
     }
 
   /**
@@ -37,7 +37,7 @@ private[redis] trait KeyCommands { self: BaseClient =>
    */
   def exists(key: Buf): Future[JBoolean] =
     doRequest(Exists(key)) {
-      case IntegerReply(n) => Future.value((n == 1))
+      case IntegerReply(n) => Future.value(n == 1)
     }
 
   /**
@@ -150,13 +150,8 @@ private[redis] trait KeyCommands { self: BaseClient =>
    */
   def ttl(key: Buf): Future[Option[JLong]] =
     doRequest(Ttl(key)) {
-      case IntegerReply(n) => {
-        if (n != -1) {
-          Future.value(Some(n))
-        }
-        else {
-          Future.value(None)
-        }
-      }
+      case IntegerReply(n) =>
+        if (n != -1) Future.value(Some(n))
+        else Future.None
     }
 }

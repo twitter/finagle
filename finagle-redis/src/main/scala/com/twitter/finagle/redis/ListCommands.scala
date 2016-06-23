@@ -28,7 +28,7 @@ private[redis] trait ListCommands { self: BaseClient =>
   def lIndex(key: Buf, index: JLong): Future[Option[Buf]] =
     doRequest(LIndex(key, index)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply()   => Future.None
     }
 
   /**
@@ -74,7 +74,7 @@ private[redis] trait ListCommands { self: BaseClient =>
   def lPop(key: Buf): Future[Option[Buf]] =
     doRequest(LPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
+      case EmptyBulkReply() => Future.None
     }
 
   /**
@@ -134,7 +134,7 @@ private[redis] trait ListCommands { self: BaseClient =>
   def rPop(key: Buf): Future[Option[Buf]] =
     doRequest(RPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
+      case EmptyBulkReply() => Future.None
     }
 
   /**

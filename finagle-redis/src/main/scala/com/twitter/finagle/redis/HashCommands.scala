@@ -31,7 +31,7 @@ private[redis] trait HashCommands { self: BaseClient =>
   def hGet(key: Buf, field: Buf): Future[Option[Buf]] =
     doRequest(HGet(key, field)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.value(None)
+      case EmptyBulkReply()     => Future.None
     }
 
   /**
