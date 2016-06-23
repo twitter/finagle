@@ -248,16 +248,26 @@ object Trace {
   }
 
   /**
-   * Returns true if tracing is enabled with a good tracer pushed and the current
-   * trace is sampled
+   * Returns true if tracing is enabled with a good tracer pushed and at least one tracer
+   * decides to actively trace the current [[id]]
    */
   def isActivelyTracing: Boolean =
-    tracingEnabled && (id match {
-        case TraceId(_, _, _, Some(false), flags) if !flags.isDebug => false
-        case TraceId(_, _, _, _, Flags(Flags.Debug)) => true
-        case _ =>
-          tracers.nonEmpty && (tracers.size > 1 || tracers.head != NullTracer)
-      })
+    tracingEnabled && {
+      tracers match {
+        case Seq() => false
+        case Seq(tracer) => tracer.isActivelyTracing(id)
+        case Seq(first, second) => first.isActivelyTracing(id) || second.isActivelyTracing(id)
+        case _ => {
+          val iter = tracers.iterator
+          while (iter.hasNext) {
+            if (iter.next().isActivelyTracing(id)) {
+              return true
+            }
+          }
+          return false
+        }
+      }
+    }
 
   /**
    * Record a raw record without checking if it's sampled/enabled/etc.

@@ -18,7 +18,6 @@ import java.net.InetSocketAddress
 import java.util.concurrent.ArrayBlockingQueue
 import org.apache.thrift.TByteArrayOutputStream
 import scala.collection.mutable.ArrayBuffer
-import scala.language.reflectiveCalls
 
 object ScribeRawZipkinTracer {
   val tracerCache = new TracerCache[ScribeRawZipkinTracer]

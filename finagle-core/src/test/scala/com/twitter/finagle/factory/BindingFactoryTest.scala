@@ -2,7 +2,7 @@ package com.twitter.finagle.factory
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.tracing.{Annotation, NullTracer, Record, Trace, Tracer}
+import com.twitter.finagle.tracing.{Annotation, NullTracer, Record, Trace, TraceId, Tracer}
 import com.twitter.finagle.naming.{DefaultInterpreter, NameInterpreter}
 import com.twitter.finagle.stack.nilStack
 import com.twitter.finagle.stats._
@@ -52,6 +52,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
       expected: Seq[Annotation]
     ) {
       val tracer: Tracer = spy(new NullTracer)
+      when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
       val captor: ArgumentCaptor[Record] = ArgumentCaptor.forClass(classOf[Record])
       Trace.letTracer(tracer) { f }
       verify(tracer, atLeastOnce()).record(captor.capture())
