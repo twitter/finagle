@@ -464,12 +464,12 @@ object CommandBytes {
   val PFMERGE           = StringToBuf("PFMERGE")
 
   // PubSub
-  val PUBLISH           = StringToChannelBuffer("PUBLISH")
-  val SUBSCRIBE         = StringToChannelBuffer("SUBSCRIBE")
-  val UNSUBSCRIBE       = StringToChannelBuffer("UNSUBSCRIBE")
-  val PSUBSCRIBE        = StringToChannelBuffer("PSUBSCRIBE")
-  val PUNSUBSCRIBE      = StringToChannelBuffer("PUNSUBSCRIBE")
-  val PUBSUB            = StringToChannelBuffer("PUBSUB")
+  val PUBLISH           = StringToBuf("PUBLISH")
+  val SUBSCRIBE         = StringToBuf("SUBSCRIBE")
+  val UNSUBSCRIBE       = StringToBuf("UNSUBSCRIBE")
+  val PSUBSCRIBE        = StringToBuf("PSUBSCRIBE")
+  val PUNSUBSCRIBE      = StringToBuf("PUNSUBSCRIBE")
+  val PUBSUB            = StringToBuf("PUBSUB")
 
   // Scripts
   val EVAL              = StringToBuf("EVAL")

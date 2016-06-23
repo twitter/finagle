@@ -79,6 +79,7 @@ Breaking API Changes
       - `ListCommands`: ``RB_ID=844596``
       - `BtreeSortedSetCommands`: ``RB_ID=844862``
       - `HyperLogLogCommands`: ``RB_ID=844945``
+      - `PubSubCommands`: ``RB_ID=845087``
 
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
