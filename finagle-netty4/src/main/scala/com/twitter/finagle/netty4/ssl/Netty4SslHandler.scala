@@ -58,8 +58,6 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
 
   private[this] def finishServerSideHandler(ch: Channel, ssl: SslHandler): Unit = {
     ssl.engine().setUseClientMode(false)
-    // `true` is default for most of the engine implementations so we do that just in case.
-    ssl.engine().setEnableSessionCreation(true)
 
     ch.pipeline().addFirst("ssl", ssl)
   }
@@ -70,8 +68,6 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
     hostnameOption: Option[String]
   ): Unit = {
     ssl.engine().setUseClientMode(true)
-    // `true` is default for most of the engine implementations so we do that just in case.
-    ssl.engine().setEnableSessionCreation(true)
 
     // Close channel on close_notify received from a remote peer.
     ssl.sslCloseFuture().addListener(closeChannelOnCloseNotify)

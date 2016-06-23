@@ -320,7 +320,6 @@ case class Netty3Transporter[In, Out](
 
       val engine = newEngine(addr)
       engine.self.setUseClientMode(true)
-      engine.self.setEnableSessionCreation(true)
 
       val verifier = verifyHost
         .map(SessionVerifier.hostname)

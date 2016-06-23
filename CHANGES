@@ -152,6 +152,11 @@ New Features
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: For SSLEngine implementations supplied via configuration or
+    created by Finagle, the setEnableSessionCreation method is no longer called.
+    The supplied value, true, is the default for JSSE implementations, and for
+    other engines this can be an unsupported operation. ``RB_ID=845765``
+
   * finagle-core: Pipelined protocols (memcached, redis) no longer prevent
     connections from being cut by interrupts.  Instead, interrupts are masked
     until a subsequent ten second timeout has expired without a response in the

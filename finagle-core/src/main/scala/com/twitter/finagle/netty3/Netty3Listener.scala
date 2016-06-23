@@ -101,7 +101,6 @@ object Netty3Listener {
   def addTlsToPipeline(pipeline: ChannelPipeline, newEngine: () => Engine) {
     val engine = newEngine()
     engine.self.setUseClientMode(false)
-    engine.self.setEnableSessionCreation(true)
     val handler = new SslHandler(engine.self)
 
     // Certain engine implementations need to handle renegotiation internally,
