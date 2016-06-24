@@ -1,5 +1,6 @@
 package com.twitter.finagle.toggle
 
+import com.twitter.finagle.server.{ServerInfo, environment}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -38,9 +39,11 @@ class StandardToggleMapTest extends FunSuite {
 
   test("apply with resource-based configs") {
     val togMap = StandardToggleMap(
+      // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/
       "com.twitter.finagle.toggle.tests.StandardToggleMapTest",
       NullStatsReceiver,
-      NullToggleMap)
+      NullToggleMap,
+      ServerInfo.Empty)
 
     val togs = togMap.iterator.toSeq
 
@@ -54,6 +57,29 @@ class StandardToggleMapTest extends FunSuite {
     assertFraction("com.twitter.service-overrides-on", 1.0)
     assertFraction("com.twitter.service-overrides-off", 0.0)
     assertFraction("com.twitter.not-in-service-overrides", 0.0)
+  }
+
+  test("apply with resource-based configs and overrides") {
+    environment.let("staging") {
+      val togMap = StandardToggleMap(
+        // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/
+        "com.twitter.finagle.toggle.tests.EnvOverlays",
+        NullStatsReceiver,
+        NullToggleMap,
+        ServerInfo.Flag)
+
+      val togs = togMap.iterator.toSeq
+
+      def assertFraction(id: String, fraction: Double): Unit = {
+        togs.find(_.id == id) match {
+          case None => fail(s"$id not found in $togs")
+          case Some(md) => assert(md.fraction == fraction)
+        }
+      }
+
+      assertFraction("com.twitter.base-is-off", 1.0)
+      assertFraction("com.twitter.only-in-base", 0.0)
+    }
   }
 
   test("Toggles use correct ordering") {
@@ -71,7 +97,7 @@ class StandardToggleMapTest extends FunSuite {
 
     val inMem = ToggleMap.newMutable()
     // should load `ServiceLoadedToggleTestA`
-    val togMap = StandardToggleMap("A", NullStatsReceiver, inMem)
+    val togMap = StandardToggleMap("A", NullStatsReceiver, inMem, ServerInfo.Empty)
     flag.overrides.letClear("com.toggle.a") {
       // start without the flag or in-memory, and only the service loaded
       assertFraction(togMap, 1.0)
@@ -107,7 +133,7 @@ class StandardToggleMapTest extends FunSuite {
     // start with the toggle turned on.
     inMem.put(toggleName, 1.0)
 
-    val togMap = StandardToggleMap(libraryName, stats, inMem)
+    val togMap = StandardToggleMap(libraryName, stats, inMem, ServerInfo.Empty)
     val gauge = stats.gauges(Seq("toggles", libraryName, "checksum"))
     val initial = gauge()
 

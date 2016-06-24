@@ -241,6 +241,7 @@ object Finagle extends Build {
       util("app"),
       util("core"),
       util("logging"),
+      util("registry"),
       util("stats")) ++
       jacksonLibs
   )
