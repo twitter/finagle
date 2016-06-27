@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine}
+import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine, LoadingCache}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
@@ -84,39 +84,19 @@ trait Resolver {
  */
 abstract class AbstractResolver extends Resolver
 
-/**
- * Resolver for inet scheme.
- */
-object InetResolver {
-  def apply(): Resolver = apply(DefaultStatsReceiver)
-  def apply(statsReceiver: StatsReceiver): Resolver =
-    new InetResolver(statsReceiver, Some(5.seconds))
-}
-
-private[finagle] class InetResolver(
-  unscopedStatsReceiver: StatsReceiver,
-  pollIntervalOpt: Option[Duration]
-) extends Resolver {
-  import InetSocketAddressUtil._
-
-  type HostPortMetadata = (String, Int, Addr.Metadata)
-
-  val scheme = "inet"
-  protected[this] val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
-  private[this] val latencyStat = statsReceiver.stat("lookup_ms")
-  private[this] val successes = statsReceiver.counter("successes")
-  private[this] val failures = statsReceiver.counter("failures")
+private[finagle] class DnsResolver(statsReceiver: StatsReceiver)
+  extends (String => Future[Seq[InetAddress]]) {
   private[this] val dnsLookupFailures = statsReceiver.counter("dns_lookup_failures")
   private[this] val dnsLookups = statsReceiver.counter("dns_lookups")
-  private val log = Logger.getLogger(getClass.getName)
-  private val timer = DefaultTimer.twitter
+  private[this] val log = Logger.getLogger(getClass.getName)
 
   /*
    * Resolve hostnames asynchronously and concurrently.
    */
   private[this] val dnsCond = new AsyncSemaphore(100)
-  private val waitersGauge = statsReceiver.addGauge("queue_size") { dnsCond.numWaiters }
-  protected def resolveHost(host: String): Future[Seq[InetAddress]] = {
+  private[this] val waitersGauge = statsReceiver.addGauge("queue_size") { dnsCond.numWaiters }
+
+  override def apply(host: String): Future[Seq[InetAddress]] = {
     dnsLookups.incr()
     dnsCond.acquire().flatMap { permit =>
       FuturePool.unboundedPool(InetAddress.getAllByName(host).toSeq)
@@ -127,6 +107,34 @@ private[finagle] class InetResolver(
         .ensure { permit.release() }
     }
   }
+}
+
+/**
+ * Resolver for inet scheme.
+ */
+object InetResolver {
+  def apply(): Resolver = apply(DefaultStatsReceiver)
+  def apply(unscopedStatsReceiver: StatsReceiver): Resolver = {
+    val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
+    new InetResolver(new DnsResolver(statsReceiver), statsReceiver, Some(5.seconds))
+  }
+}
+
+private[finagle] class InetResolver(
+  resolveHost: String => Future[Seq[InetAddress]],
+  statsReceiver: StatsReceiver,
+  pollIntervalOpt: Option[Duration]
+) extends Resolver {
+  import InetSocketAddressUtil._
+
+  type HostPortMetadata = (String, Int, Addr.Metadata)
+
+  val scheme = "inet"
+  private[this] val latencyStat = statsReceiver.stat("lookup_ms")
+  private[this] val successes = statsReceiver.counter("successes")
+  private[this] val failures = statsReceiver.counter("failures")
+  private val log = Logger.getLogger(getClass.getName)
+  private val timer = DefaultTimer.twitter
 
   /**
     * Resolve all hostnames and merge into a final Addr.
@@ -223,37 +231,28 @@ object FixedInetResolver {
   def apply(): InetResolver =
     apply(DefaultStatsReceiver)
   
-  def apply(statsReceiver: StatsReceiver): InetResolver =
-    apply(statsReceiver, 16000)
+  def apply(unscopedStatsReceiver: StatsReceiver): InetResolver =
+    apply(unscopedStatsReceiver, 16000)
   
-  def apply(statsReceiver: StatsReceiver, maxCacheSize: Long): InetResolver =
-    new FixedInetResolver(statsReceiver, maxCacheSize, None)
-}
-
-/**
- * Uses a [[com.twitter.util.Future]] cache to memoize lookups.
- *
- * Allows unit tests to specify a CI-friendly resolve fn. Otherwise
- * defaults to InetResolver.resolveHost
- *
- * @param maxCacheSize Specifies the maximum number of `Futures` that can be cached.
- *                     No maximum size limit if Long.MaxValue.
- * @param resolveOverride Optional fn. If None, defaults back to superclass implementation
- */
-private[finagle] class FixedInetResolver(
-    unscopedStatsReceiver: StatsReceiver,
-    maxCacheSize: Long,
-    resolveOverride: Option[String => Future[Seq[InetAddress]]]
-  ) extends InetResolver(unscopedStatsReceiver, None) {
-
-  override val scheme = FixedInetResolver.scheme
-
-  // fallback to InetResolver.resolveHost if no override was provided
-  val resolveFn: (String => Future[Seq[InetAddress]]) =
-    resolveOverride.getOrElse(super.resolveHost)
+  /**
+   * Uses a [[com.twitter.util.Future]] cache to memoize lookups.
+   *
+   * @param maxCacheSize Specifies the maximum number of `Futures` that can be cached.
+   *                     No maximum size limit if Long.MaxValue.
+   */
+  def apply(unscopedStatsReceiver: StatsReceiver, maxCacheSize: Long): InetResolver = {
+    val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
+    new FixedInetResolver(cache(new DnsResolver(statsReceiver), maxCacheSize), statsReceiver)
+  }
 
   // A size-bounded FutureCache backed by a LoaderCache
-  private[this] val cache = {
+  private[finagle] def cache(
+    resolveHost: String => Future[Seq[InetAddress]],
+    maxCacheSize: Long
+  ): LoadingCache[String, Future[Seq[InetAddress]]] = {
+    val cacheLoader = new CacheLoader[String, Future[Seq[InetAddress]]]() {
+      def load(host: String): Future[Seq[InetAddress]] = resolveHost(host)
+    }
     var builder = Caffeine
       .newBuilder()
       .recordStats()
@@ -261,24 +260,27 @@ private[finagle] class FixedInetResolver(
     if (maxCacheSize != Long.MaxValue) {
       builder = builder.maximumSize(maxCacheSize)
     }
-
-    builder
-      .build(
-        new CacheLoader[String, Future[Seq[InetAddress]]]() {
-          def load(host: String): Future[Seq[InetAddress]] = resolveFn(host)
-        })
+    builder.build(cacheLoader)
   }
+}
+
+/**
+ * Uses a [[com.twitter.util.Future]] cache to memoize lookups.
+ *
+ * @param cache The lookup cache
+ */
+private[finagle] class FixedInetResolver(
+    cache: LoadingCache[String, Future[Seq[InetAddress]]],
+    statsReceiver: StatsReceiver)
+  extends InetResolver(CaffeineCache.fromLoadingCache(cache), statsReceiver, None) {
+
+  override val scheme = FixedInetResolver.scheme
 
   private[this] val cacheStatsReceiver = statsReceiver.scope("cache")
   private[this] val cacheGauges = Seq(
     cacheStatsReceiver.addGauge("size") { cache.estimatedSize },
     cacheStatsReceiver.addGauge("evicts") { cache.stats().evictionCount },
     cacheStatsReceiver.addGauge("hit_rate") { cache.stats().hitRate.toFloat })
-
-  private[this] val futureCache = CaffeineCache.fromLoadingCache(cache)
-
-  override def resolveHost(host: String): Future[Seq[InetAddress]] =
-    futureCache(host)
 }
 
 object NegResolver extends Resolver {
