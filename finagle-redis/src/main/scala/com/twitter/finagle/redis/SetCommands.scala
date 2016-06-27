@@ -1,11 +1,11 @@
 package com.twitter.finagle.redis
 
-import java.lang.{Long => JLong,Boolean => JBoolean}
 import com.twitter.io.Buf
-import scala.collection.immutable.{Set => ImmutableSet}
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.util.ReplyFormat
 import com.twitter.util.Future
+import java.lang.{Long => JLong,Boolean => JBoolean}
+import scala.collection.immutable.{Set => ImmutableSet}
 
 private[redis] trait SetCommands { self: BaseClient =>
   /**

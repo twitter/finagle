@@ -168,6 +168,14 @@ object Commands {
   val SCRIPTFLUSH       = "SCRIPT FLUSH"
   val SCRIPTLOAD        = "SCRIPT LOAD"
 
+  // Command Arguments
+  val WITHSCORES        = "WITHSCORES"
+  val LIMIT             = "LIMIT"
+  val WEIGHTS           = "WEIGHTS"
+  val AGGREGATE         = "AGGREGATE"
+  val COUNT             = "COUNT"
+  val PATTERN           = "PATTERN"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -370,22 +378,22 @@ object CommandBytes {
   val STRLEN            = StringToBuf("STRLEN")
 
   // Sorted Sets
-  val ZADD              = StringToChannelBuffer("ZADD")
-  val ZCARD             = StringToChannelBuffer("ZCARD")
-  val ZCOUNT            = StringToChannelBuffer("ZCOUNT")
-  val ZINCRBY           = StringToChannelBuffer("ZINCRBY")
-  val ZINTERSTORE       = StringToChannelBuffer("ZINTERSTORE")
-  val ZRANGE            = StringToChannelBuffer("ZRANGE")
-  val ZRANGEBYSCORE     = StringToChannelBuffer("ZRANGEBYSCORE")
-  val ZRANK             = StringToChannelBuffer("ZRANK")
-  val ZREM              = StringToChannelBuffer("ZREM")
-  val ZREMRANGEBYRANK   = StringToChannelBuffer("ZREMRANGEBYRANK")
-  val ZREMRANGEBYSCORE  = StringToChannelBuffer("ZREMRANGEBYSCORE")
-  val ZREVRANGE         = StringToChannelBuffer("ZREVRANGE")
-  val ZREVRANGEBYSCORE  = StringToChannelBuffer("ZREVRANGEBYSCORE")
-  val ZREVRANK          = StringToChannelBuffer("ZREVRANK")
-  val ZSCORE            = StringToChannelBuffer("ZSCORE")
-  val ZUNIONSTORE       = StringToChannelBuffer("ZUNIONSTORE")
+  val ZADD              = StringToBuf("ZADD")
+  val ZCARD             = StringToBuf("ZCARD")
+  val ZCOUNT            = StringToBuf("ZCOUNT")
+  val ZINCRBY           = StringToBuf("ZINCRBY")
+  val ZINTERSTORE       = StringToBuf("ZINTERSTORE")
+  val ZRANGE            = StringToBuf("ZRANGE")
+  val ZRANGEBYSCORE     = StringToBuf("ZRANGEBYSCORE")
+  val ZRANK             = StringToBuf("ZRANK")
+  val ZREM              = StringToBuf("ZREM")
+  val ZREMRANGEBYRANK   = StringToBuf("ZREMRANGEBYRANK")
+  val ZREMRANGEBYSCORE  = StringToBuf("ZREMRANGEBYSCORE")
+  val ZREVRANGE         = StringToBuf("ZREVRANGE")
+  val ZREVRANGEBYSCORE  = StringToBuf("ZREVRANGEBYSCORE")
+  val ZREVRANK          = StringToBuf("ZREVRANK")
+  val ZSCORE            = StringToBuf("ZSCORE")
+  val ZUNIONSTORE       = StringToBuf("ZUNIONSTORE")
 
   // Btree Sorted Set
   // These are twitter-internal commands and will be removed eventually
@@ -482,6 +490,14 @@ object CommandBytes {
   val SCRIPTLOAD        = StringToBuf("SCRIPT LOAD")
   // SCRIPT EXISTS, SCRIPT LOAD, SCRIPT FLUSH are subcommands
   // which must not be transmitted as a whole ChannelBuffer
+
+  // Command Arguments
+  val WITHSCORES        = StringToBuf("WITHSCORES")
+  val LIMIT             = StringToBuf("LIMIT")
+  val WEIGHTS           = StringToBuf("WEIGHTS")
+  val AGGREGATE         = StringToBuf("AGGREGATE")
+  val COUNT             = StringToBuf("COUNT")
+  val PATTERN           = StringToBuf("PATTERN")
 }
 
 

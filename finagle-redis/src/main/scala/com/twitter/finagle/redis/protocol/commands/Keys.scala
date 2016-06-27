@@ -211,11 +211,11 @@ extends Command {
   def toChannelBuffer: ChannelBuffer = {
     val bufs = Seq(CommandBytes.SCAN, StringToBuf(cursor.toString))
     val withCount = count match {
-      case Some(count) => bufs ++ Seq(Count.COUNT_BUF, StringToBuf(count.toString))
+      case Some(count) => bufs ++ Seq(CommandBytes.COUNT, StringToBuf(count.toString))
       case None        => bufs
     }
     val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(Pattern.PATTERN_BUF, pattern)
+      case Some(pattern) => withCount ++ Seq(CommandBytes.PATTERN, pattern)
       case None          => withCount
     }
     RedisCodec.bufToUnifiedChannelBuffer(withPattern)
@@ -275,8 +275,8 @@ object ScanCompanion {
 
   def findArgs(args: Seq[String]): (Seq[String], Seq[String]) = {
     args.head.toUpperCase match {
-      case Count.COUNT     => args.splitAt(2)
-      case Pattern.PATTERN => args.splitAt(2)
+      case Commands.COUNT     => args.splitAt(2)
+      case Commands.PATTERN => args.splitAt(2)
       case s => throw ClientError("COUNT or PATTERN argument expected, found %s".format(s))
     }
   }

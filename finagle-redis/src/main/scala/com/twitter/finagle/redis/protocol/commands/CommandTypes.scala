@@ -37,7 +37,7 @@ trait StrictValueCommand extends ValueCommand {
 }
 
 trait MemberCommand extends Command {
-  val member: ChannelBuffer
+  def member: ChannelBuffer
 }
 trait StrictMemberCommand extends MemberCommand {
   RequireClientProtocol(member != null && member.readableBytes > 0,

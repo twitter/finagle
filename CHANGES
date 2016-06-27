@@ -73,7 +73,7 @@ Breaking API Changes
   * finagle-redis: `c.t.f.redis.*Commands` traits are now package-private.
     ``RB_ID=843455``
 
-  * finagle-redis: Replace `ChannelBuffer` with `Buf in client's:
+  * finagle-redis: Replace `ChannelBuffer` with `Buf` in client's:
 
       - `HashCommands`: ``RB_ID=843596``
       - `ListCommands`: ``RB_ID=844596``
@@ -81,6 +81,7 @@ Breaking API Changes
       - `HyperLogLogCommands`: ``RB_ID=844945``
       - `PubSubCommands`: ``RB_ID=845087``
       - `SetCommands`: ``RB_ID=845578``
+      - `SortedSetCommands`: ``RB_ID=846074``
 
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
