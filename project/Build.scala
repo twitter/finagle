@@ -192,10 +192,6 @@ object Finagle extends Build {
     finagleNetty4Http
   )
 
-  // finagle-thrift and finagle-thriftmux tests do not currently compile under sbt
-  // due to scrooge-sbt-plugin limitations.
-  lazy val testableProjects = projectList diff Seq[sbt.ProjectReference](finagleThrift, finagleThriftMux)
-
   lazy val finagle = Project(
     id = "finagle",
     base = file("."),
@@ -206,15 +202,6 @@ object Finagle extends Build {
           inAnyProject -- inProjects(finagleExample)
       )
   ).aggregate(projectList: _*)
-
-  lazy val finagleTestCompile = Project(
-    id = "finagle-test-compile",
-    // use a different target so that we don't have conflicting output paths
-    // between this and the `scrooge` target.
-    base = file("finagle-test-compile"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).aggregate(testableProjects: _*)
 
   lazy val finagleIntegration = Project(
     id = "finagle-integration",
