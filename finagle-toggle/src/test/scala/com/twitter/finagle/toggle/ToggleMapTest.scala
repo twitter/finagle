@@ -173,6 +173,29 @@ class ToggleMapTest extends FunSuite
     assert(NullToggleMap == ToggleMap.of())
   }
 
+  private class NumApply extends ToggleMap.Proxy {
+    private var nApply = 0
+    def numApply: Int = nApply
+
+    protected val underlying: ToggleMap = ToggleMap.newMutable()
+    override def apply(id: String): Toggle[Int] = {
+      nApply += 1
+      super.apply(id)
+    }
+  }
+
+  test("ToggleMap.of adds each ToggleMap only once") {
+    val tm0 = new NumApply()
+    val tm1 = new NumApply()
+    val of = ToggleMap.of(tm0, tm1)
+    val tog = of("com.twitter.Toggle")
+
+    // we can use the number of times `ToggleMap.apply` was called as a proxy
+    // for how many times it was added to the aggregated ToggleMap
+    assert(1 == tm0.numApply)
+    assert(1 == tm1.numApply)
+  }
+
   test("ToggleMap.Flags with empty Flags") {
     flag.overrides.let(Map.empty) {
       assert(ToggleMap.flags.iterator.isEmpty)

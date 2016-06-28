@@ -211,12 +211,9 @@ object ToggleMap {
    */
   @varargs
   def of(toggleMaps: ToggleMap*): ToggleMap = {
-    if (toggleMaps.isEmpty) {
-      NullToggleMap
-    } else {
-      toggleMaps.foldLeft(toggleMaps.head) { case (acc, tm) =>
-        acc.orElse(tm)
-      }
+    val start: ToggleMap = NullToggleMap
+    toggleMaps.foldLeft(start) { case (acc, tm) =>
+      acc.orElse(tm)
     }
   }
 
