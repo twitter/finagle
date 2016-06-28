@@ -338,6 +338,27 @@ class ToggleMapTest extends FunSuite
     assert(mds.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 }, mds)
   }
 
+  test("ToggleMap.orElse.iterator uses first defined Toggle.Metadata.description") {
+    val md = Toggle.Metadata(
+      "com.twitter.T2",
+      0.999,
+      Some("ah'll be back"))
+    val noDescription = new ToggleMap.Immutable(
+      immutable.Seq(md.copy(description = None)))
+
+    val withDescription = new ToggleMap.Immutable(
+      immutable.Seq(md.copy(fraction = 0.111)))
+
+    // put the metadata without description before the one with it,
+    // make sure we get the fraction from the 1st metadata, but the
+    // description from the metadata that has it defined.
+    val mds = noDescription.orElse(withDescription).iterator.toSeq
+    assert(1 == mds.size)
+    val metadata = mds.head
+    assert(0.999 == metadata.fraction)
+    assert(md.description == metadata.description)
+  }
+
   test("ToggleMap.orElse.apply") {
     val tm0 = ToggleMap.newMutable()
     val tm1 = ToggleMap.newMutable()

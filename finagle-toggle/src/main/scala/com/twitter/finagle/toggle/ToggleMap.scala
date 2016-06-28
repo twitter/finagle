@@ -51,6 +51,10 @@ abstract class ToggleMap { self =>
    *
    * [[iterator]] includes metadata from both `self` and `that`,
    * with `self`'s metadata taking precedence on conflicting ids.
+   * Note however that if a `ToggleMetadata.description` is not defined on `self`,
+   * the description from `that` will be preferred. This is done because many
+   * sources of `ToggleMaps` do not have a description defined and we want to
+   * surface that information.
    */
   def orElse(that: ToggleMap): ToggleMap = {
     new ToggleMap {
@@ -67,7 +71,12 @@ abstract class ToggleMap { self =>
           byName.put(md.id, md)
         }
         self.iterator.foreach { md =>
-          byName.put(md.id, md)
+          val mdWithDesc = md.description match {
+            case Some(_) => md
+            case None => md.copy(description =
+              byName.get(md.id).flatMap(ToggleMap.MdDescFn))
+          }
+          byName.put(md.id, mdWithDesc)
         }
         byName.valuesIterator
       }
@@ -392,5 +401,8 @@ object ToggleMap {
     def apply(id: String): Toggle[Int] = underlying(id)
     def iterator: Iterator[Metadata] = underlying.iterator
   }
+
+  private val MdDescFn: Toggle.Metadata => Option[String] =
+    md => md.description
 
 }
