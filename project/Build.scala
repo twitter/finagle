@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import Tests._
+import com.twitter.scrooge.ScroogeSBT
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import pl.project13.scala.sbt.JmhPlugin
@@ -65,6 +66,7 @@ object Finagle extends Build {
     resolvers += "twitter-repo" at "https://maven.twttr.com",
 
     ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true,
+    ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
 
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
@@ -476,7 +478,10 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thrift",
-    libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ scroogeLibs
+    libraryDependencies ++=
+      Seq(
+        "silly" % "silly-thrift" % "0.5.0" % "test",
+        "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
   ).dependsOn(finagleCore)
 
   lazy val finagleMemcached = Project(
