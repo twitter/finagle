@@ -2,12 +2,11 @@ package com.twitter.finagle
 
 import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.util._
-import java.net.InetSocketAddress
 
 /**
  * A namer is a context in which a [[com.twitter.finagle.NameTree
  * NameTree]] is bound. The context is provided by the
- * [[com.twitter.finagle.Namer.lookup lookup]] method, which
+ * [[com.twitter.finagle.Namer#lookup lookup]] method, which
  * translates [[com.twitter.finagle.Path Paths]] into
  * [[com.twitter.finagle.NameTree NameTrees]]. Namers may represent
  * external processes, for example lookups through DNS or to ZooKeeper,
@@ -70,11 +69,21 @@ object Namer  {
   val global: Namer = new Namer {
 
     private[this] object InetPath {
-      def unapply(path: Path): Option[(Address, Path)] = path match {
+
+      private[this] def resolve(host: String, port: Int): Var[Addr] =
+        Resolver.eval(s"inet!$host:$port") match {
+          case Name.Bound(va) => va
+          case n: Name.Path => Var.value(Addr.Failed(
+            new IllegalStateException(s"InetResolver returned an unbound name: $n."))
+          )
+        }
+
+      def unapply(path: Path): Option[(Var[Addr], Path)] = path match {
         case Path.Utf8("$", "inet", host, IntegerString(port), residual@_*) =>
-          Some((Address(new InetSocketAddress(host, port)), Path.Utf8(residual:_*)))
+          Some((resolve(host, port), Path.Utf8(residual:_*)))
         case Path.Utf8("$", "inet", IntegerString(port), residual@_*) =>
-          Some((Address(new InetSocketAddress(port)), Path.Utf8(residual:_*)))
+          // no host provided means localhost
+          Some((resolve("", port), Path.Utf8(residual:_*)))
         case _ => None
       }
     }
@@ -103,9 +112,9 @@ object Namer  {
     def lookup(path: Path): Activity[NameTree[Name]] = path match {
       // Clients may depend on Name.Bound ids being Paths which resolve
       // back to the same Name.Bound.
-      case InetPath(addr, residual) =>
+      case InetPath(va, residual) =>
         val id = path.take(path.size - residual.size)
-        Activity.value(Leaf(Name.Bound(Var.value(Addr.Bound(addr)), id, residual)))
+        Activity.value(Leaf(Name.Bound(va, id, residual)))
 
       case FailPath() => Activity.value(Fail)
       case NilPath() => Activity.value(Empty)

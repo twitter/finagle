@@ -36,7 +36,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   before {
     saveBase = Dtab.base
     Dtab.base ++= Dtab.read("""
-      /test1010=>/$/inet/0/1010
+      /test1010=>/$/inet/1010
     """)
   }
 
@@ -157,7 +157,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
   test("Respects Dtab.base changes after service factory creation") (new Ctx {
     // factory is already created here
-    Dtab.base ++= Dtab.read("/test1010=>/$/inet/0/1011")
+    Dtab.base ++= Dtab.read("/test1010=>/$/inet/1011")
     val n1 = Dtab.read("/foo/bar=>/test1010")
     val s1 = newWith(n1)
     val v1 = Await.result(s1(()))
@@ -220,10 +220,10 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/0/1010"),
+        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.Message("namer.success"),
-        Annotation.BinaryAnnotation("namer.tree", "/$/inet/0/1010"),
-        Annotation.BinaryAnnotation("namer.name", "/$/inet/0/1010")
+        Annotation.BinaryAnnotation("namer.tree", "/$/inet/1010"),
+        Annotation.BinaryAnnotation("namer.name", "/$/inet/1010")
       ))
   })
 
@@ -239,7 +239,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/0/1010"),
+        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.BinaryAnnotation("namer.failure", "java.lang.RuntimeException")
       ))
   })
@@ -252,7 +252,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/0/1010"),
+        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.Message("namer.success"),
         Annotation.BinaryAnnotation("namer.tree", "~")
       ))
@@ -282,18 +282,18 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
     },
       Seq(
         Annotation.BinaryAnnotation("namer.path", "/foo/bar"),
-        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/0/1010"),
+        Annotation.BinaryAnnotation("namer.dtab.base", "/test1010=>/$/inet/1010"),
         Annotation.Message("namer.success"),
-        Annotation.BinaryAnnotation("namer.tree", "/$/inet/0/1010"),
-        Annotation.BinaryAnnotation("namer.name", "/$/inet/0/1010")
+        Annotation.BinaryAnnotation("namer.tree", "/$/inet/1010"),
+        Annotation.BinaryAnnotation("namer.name", "/$/inet/1010")
       ))
   })
 
   test("Caches namers") (new Ctx {
-    val n1 = Dtab.read("/foo/bar=>/$/inet/0/1")
-    val n2 = Dtab.read("/foo/bar=>/$/inet/0/2")
-    val n3 = Dtab.read("/foo/bar=>/$/inet/0/3")
-    val n4 = Dtab.read("/foo/bar=>/$/inet/0/4")
+    val n1 = Dtab.read("/foo/bar=>/$/inet/1")
+    val n2 = Dtab.read("/foo/bar=>/$/inet/2")
+    val n3 = Dtab.read("/foo/bar=>/$/inet/3")
+    val n4 = Dtab.read("/foo/bar=>/$/inet/4")
 
     assert(news == 0)
     Await.result(newWith(n1).close() before newWith(n1).close())
@@ -324,10 +324,10 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
   })
 
   test("Caches names") (new Ctx {
-    val n1 = Dtab.read("/foo/bar=>/$/inet/0/1; /bar/baz=>/$/nil")
-    val n2 = Dtab.read("/foo/bar=>/$/inet/0/1")
-    val n3 = Dtab.read("/foo/bar=>/$/inet/0/2")
-    val n4 = Dtab.read("/foo/bar=>/$/inet/0/3")
+    val n1 = Dtab.read("/foo/bar=>/$/inet/1; /bar/baz=>/$/nil")
+    val n2 = Dtab.read("/foo/bar=>/$/inet/1")
+    val n3 = Dtab.read("/foo/bar=>/$/inet/2")
+    val n4 = Dtab.read("/foo/bar=>/$/inet/3")
 
     assert(news == 0)
     Await.result(newWith(n1).close() before newWith(n1).close())
@@ -379,7 +379,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
 
   test("BindingFactory.Module: replaces Dest for bound name") {
     val unbound = Name.Path(Path.read("/foo"))
-    val baseDtab = () => Dtab.base ++ Dtab.read("/foo => /$/inet/0/1")
+    val baseDtab = () => Dtab.base ++ Dtab.read("/foo => /$/inet/1")
 
     val verifyModule =
       new Stack.Module1[BindingFactory.Dest, ServiceFactory[String, String]] {
@@ -389,7 +389,7 @@ class BindingFactoryTest extends FunSuite with MockitoSugar with BeforeAndAfter 
         def make(dest: BindingFactory.Dest, next: ServiceFactory[String, String]) = {
           dest match {
             case BindingFactory.Dest(bound: Name.Bound) =>
-              assert(bound.id == Path.read("/$/inet/0/1"))
+              assert(bound.id == Path.read("/$/inet/1"))
             case _ => fail()
           }
           ServiceFactory.const(Service.mk[String, String](Future.value))

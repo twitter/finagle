@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import java.net.InetSocketAddress
+import java.net.{InetAddress, InetSocketAddress}
 import java.util.{Map => JMap}
 import scala.collection.JavaConverters._
 import scala.util.control.NoStackTrace
@@ -42,7 +42,7 @@ object Address {
 
   /** Create a new loopback [[Address]] with the given `port`. */
   def apply(port: Int): Address =
-    Address(new InetSocketAddress(port))
+    Address(new InetSocketAddress(InetAddress.getLoopbackAddress, port))
 }
 
 package exp {

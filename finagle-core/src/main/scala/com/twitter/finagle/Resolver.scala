@@ -6,9 +6,9 @@ import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util._
+import com.twitter.logging.Logger
 import com.twitter.util._
 import java.net.{InetAddress, InetSocketAddress, SocketAddress, UnknownHostException}
-import java.util.logging.Logger
 import scala.util.control.NoStackTrace
 
 /**
@@ -86,25 +86,34 @@ abstract class AbstractResolver extends Resolver
 
 private[finagle] class DnsResolver(statsReceiver: StatsReceiver)
   extends (String => Future[Seq[InetAddress]]) {
+
   private[this] val dnsLookupFailures = statsReceiver.counter("dns_lookup_failures")
   private[this] val dnsLookups = statsReceiver.counter("dns_lookups")
-  private[this] val log = Logger.getLogger(getClass.getName)
+  private[this] val log = Logger()
 
-  /*
-   * Resolve hostnames asynchronously and concurrently.
-   */
+  // Resolve hostnames asynchronously and concurrently.
   private[this] val dnsCond = new AsyncSemaphore(100)
   private[this] val waitersGauge = statsReceiver.addGauge("queue_size") { dnsCond.numWaiters }
 
+  private[this] val Loopback = Future.value(Seq(InetAddress.getLoopbackAddress))
+
   override def apply(host: String): Future[Seq[InetAddress]] = {
-    dnsLookups.incr()
-    dnsCond.acquire().flatMap { permit =>
-      FuturePool.unboundedPool(InetAddress.getAllByName(host).toSeq)
-        .onFailure{ e =>
-          log.warning(s"Failed to resolve $host. Error $e")
-          dnsLookupFailures.incr()
-        }
-        .ensure { permit.release() }
+    if (host.isEmpty || host == "localhost") {
+      // Avoid using the thread pool to resolve localhost. Ideally we
+      // would always do that if hostname is an IP address, but there is
+      // no native API to determine if it is the case. localhost can
+      // safely be treated specially here, see rfc6761 section 6.3.3.
+      Loopback
+    } else {
+      dnsLookups.incr()
+      dnsCond.acquire().flatMap { permit =>
+        FuturePool.unboundedPool(InetAddress.getAllByName(host).toSeq)
+          .onFailure { e =>
+            log.info(s"Failed to resolve $host. Error $e")
+            dnsLookupFailures.incr()
+          }
+          .ensure { permit.release() }
+      }
     }
   }
 }
@@ -133,16 +142,16 @@ private[finagle] class InetResolver(
   private[this] val latencyStat = statsReceiver.stat("lookup_ms")
   private[this] val successes = statsReceiver.counter("successes")
   private[this] val failures = statsReceiver.counter("failures")
-  private val log = Logger.getLogger(getClass.getName)
-  private val timer = DefaultTimer.twitter
+  private[this] val log = Logger()
+  private[this] val timer = DefaultTimer.twitter
 
   /**
-    * Resolve all hostnames and merge into a final Addr.
-    * If all lookups are unknown hosts, returns Addr.Neg.
-    * If all lookups fail with unexpected errors, returns Addr.Failed.
-    * If any lookup succeeds the final result will be Addr.Bound
-    * with the successful results.
-    */
+   * Resolve all hostnames and merge into a final Addr.
+   * If all lookups are unknown hosts, returns Addr.Neg.
+   * If all lookups fail with unexpected errors, returns Addr.Failed.
+   * If any lookup succeeds the final result will be Addr.Bound
+   * with the successful results.
+   */
   def toAddr(hp: Seq[HostPortMetadata]): Future[Addr] = {
     val elapsed = Stopwatch.start()
     Future.collectToTry(hp.map {
@@ -168,7 +177,7 @@ private[finagle] class InetResolver(
         // Either no hosts or resolution failed for every host
         failures.incr()
         latencyStat.add(elapsed().inMilliseconds)
-        log.warning("Resolution failed for all hosts")
+        log.info(s"Resolution failed for all hosts in $hp")
 
         seq.collectFirst {
           case Throw(e) => e
@@ -304,7 +313,7 @@ private[finagle] abstract class BaseResolver(f: () => Seq[Resolver]) {
 
   private[this] lazy val resolvers = {
     val rs = f()
-    val log = Logger.getLogger(getClass.getName)
+    val log = Logger()
     val resolvers = Seq(inetResolver, fixedInetResolver, NegResolver, NilResolver, FailResolver) ++ rs
 
     val dups = resolvers
