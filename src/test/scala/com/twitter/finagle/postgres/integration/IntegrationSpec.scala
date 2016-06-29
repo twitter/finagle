@@ -1,62 +1,59 @@
 package com.twitter.finagle.postgres.integration
 
 import java.sql.Timestamp
+import java.time.{ZoneId, ZonedDateTime}
 
 import com.twitter.finagle.postgres.codec.ServerError
-import com.twitter.finagle.postgres.{Row, OK, Spec, Client}
-import com.twitter.util.{Duration, Await}
+import com.twitter.finagle.postgres.{Client, OK, Row, Spec}
+import com.twitter.util.{Await, Duration}
 
 object IntegrationSpec {
-  val pgHostPort = "localhost:5432"
-  val pgUser = "finagle_tester"
-  val pgPassword = "abc123"
-  val pgDbName = "finagle_postgres_test"
-
   val pgTestTable = "finagle_test"
 }
 
 /*
  * Note: For these to work, you need to have:
  *
- * (1) Postgres running locally on port 5432
- * (2) A database called "finagle_postgres_test"
- * (3) A user named "finagle_tester" with a password of "abc123" and full access to the previous DB
+ * (1) An environment variable PG_HOST_PORT which specifies "host:port" of the test server
+ * (2) Environment variables PG_USER and optionally PG_PASSWORD which specify the username and password to the server
+ * (3) An environment variable PG_DBNAME which specifies the test database
  *
- * If these are conditions are met, set the environment variable RUN_PG_INTEGRATION_TESTS to "1" before running pants.
+ * If these are conditions are met, the integration tests will be run.
  *
  * The tests can be run with SSL by also setting the USE_PG_SSL variable to "1".
  *
- * If the previous environment variable is not set, the tests will not be run.
  */
 class IntegrationSpec extends Spec {
-  def postgresAvailable: Boolean = {
-    sys.env.get("RUN_PG_INTEGRATION_TESTS") == Some("1")
-  }
 
-  def useSsl: Boolean = {
-    sys.env.get("USE_PG_SSL") == Some("1")
-  }
+  for {
+    hostPort <- sys.env.get("PG_HOST_PORT")
+    user <- sys.env.get("PG_USER")
+    password = sys.env.get("PG_PASSWORD")
+    dbname <- sys.env.get("PG_DBNAME")
+    useSsl = sys.env.getOrElse("USE_PG_SSL", "0") == "1"
+  } yield {
 
-  val queryTimeout = Duration.fromSeconds(2)
 
-  def getClient = {
-    Client(
-      IntegrationSpec.pgHostPort,
-      IntegrationSpec.pgUser,
-      Some(IntegrationSpec.pgPassword),
-      IntegrationSpec.pgDbName,
-      useSsl = useSsl
-    )
-  }
+    val queryTimeout = Duration.fromSeconds(2)
 
-  def cleanDb(client: Client): Unit = {
-    val dropQuery = client.executeUpdate("DROP TABLE IF EXISTS %s".format(IntegrationSpec.pgTestTable))
-    val response = Await.result(dropQuery, queryTimeout)
+    def getClient = {
+      Client(
+        hostPort,
+        user,
+        password,
+        dbname,
+        useSsl = useSsl
+      )
+    }
 
-    response must equal(OK(1))
+    def cleanDb(client: Client): Unit = {
+      val dropQuery = client.executeUpdate("DROP TABLE IF EXISTS %s".format(IntegrationSpec.pgTestTable))
+      val response = Await.result(dropQuery, queryTimeout)
 
-    val createTableQuery = client.executeUpdate(
-      """
+      response must equal(OK(1))
+
+      val createTableQuery = client.executeUpdate(
+        """
         |CREATE TABLE %s (
         | str_field VARCHAR(40),
         | int_field INT,
@@ -65,14 +62,13 @@ class IntegrationSpec extends Spec {
         | bool_field BOOLEAN
         |)
       """.stripMargin.format(IntegrationSpec.pgTestTable))
-    val response2 = Await.result(createTableQuery, queryTimeout)
+      val response2 = Await.result(createTableQuery, queryTimeout)
+      response2 must equal(OK(1))
+    }
 
-    response2 must equal(OK(1))
-  }
-
-  def insertSampleData(client: Client): Unit = {
-    val insertDataQuery = client.executeUpdate(
-      """
+    def insertSampleData(client: Client): Unit = {
+      val insertDataQuery = client.executeUpdate(
+        """
         |INSERT INTO %s VALUES
         | ('hello', 1234, 10.5, '2015-01-08 11:55:12-0800', TRUE),
         | ('hello', 5557, -4.51, '2015-01-08 12:55:12-0800', TRUE),
@@ -80,21 +76,21 @@ class IntegrationSpec extends Spec {
         | ('goodbye', 4567, 15.8, '2015-01-09 16:55:12+0500', FALSE)
       """.stripMargin.format(IntegrationSpec.pgTestTable))
 
-    val response = Await.result(insertDataQuery, queryTimeout)
+      val response = Await.result(insertDataQuery, queryTimeout)
 
-    response must equal(OK(4))
-  }
+      response must equal(OK(4))
+    }
 
-  "A postgres client" should {
-    "insert and select rows" in {
-      if (postgresAvailable) {
+    "A postgres client" should {
+      "insert and select rows" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
 
         val selectQuery = client.select(
           "SELECT * FROM %s WHERE str_field='hello' ORDER BY timestamp_field".format(IntegrationSpec.pgTestTable)
-        )(identity)
+        )(
+          identity)
 
         val resultRows = Await.result(selectQuery, queryTimeout)
 
@@ -106,61 +102,76 @@ class IntegrationSpec extends Spec {
         firstRow.getOption("str_field") must equal(Some("hello"))
         firstRow.getOption("int_field") must equal(Some(7787))
         firstRow.getOption("double_field") must equal(Some(-42.51))
-        firstRow.getOption("timestamp_field") must equal(Some(new Timestamp(1387897260000L)))
+        firstRow.getOption("timestamp_field") must equal(Some(
+          ZonedDateTime.ofLocal(new Timestamp(1387897260000L).toLocalDateTime, ZoneId.systemDefault, null).withFixedOffsetZone()
+        ))
         firstRow.getOption("bool_field") must equal(Some(false))
         firstRow.getOption("bad_column") must equal(None)
-      }
-    }
 
-    "execute a select that returns nothing" in {
-      if (postgresAvailable) {
+
+      }
+
+      "execute a select that returns nothing" in {
         val client = getClient
         cleanDb(client)
+
         insertSampleData(client)
 
-        val selectQuery = client.select(
-          "SELECT * FROM %s WHERE str_field='xxxx' ORDER BY timestamp_field".format(IntegrationSpec.pgTestTable)
+        val
+        selectQuery = client.select(
+          "SELECT * FROM %s WHERE str_field='xxxx' ORDER BY timestamp_field".
+            format(
+
+              IntegrationSpec.pgTestTable)
         )(identity)
 
-        val resultRows = Await.result(selectQuery, queryTimeout)
+        val
 
+        resultRows = Await.result(
+          selectQuery, queryTimeout)
         resultRows.size must equal(0)
       }
-    }
 
-    "update a row" in {
-      if (postgresAvailable) {
+
+      "update a row" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
 
         val updateQuery = client.executeUpdate(
+
           "UPDATE %s SET str_field='hello_updated' where int_field=4567".format(IntegrationSpec.pgTestTable)
         )
 
-        val response = Await.result(updateQuery, queryTimeout)
+        val response = Await.
+
+          result(updateQuery, queryTimeout)
 
         response must equal(OK(1))
 
         val selectQuery = client.select(
-          "SELECT * FROM %s WHERE str_field='hello_updated'".format(IntegrationSpec.pgTestTable)
-        )(identity)
 
-        val resultRows = Await.result(selectQuery, queryTimeout)
+          "SELECT * FROM %s WHERE str_field='hello_updated'".format(IntegrationSpec.pgTestTable)
+        )(
+
+          identity)
+
+        val
+        resultRows = Await.result(selectQuery, queryTimeout)
 
         resultRows.size must equal(1)
         resultRows(0).getOption("str_field") must equal(Some("hello_updated"))
       }
-    }
 
-    "delete rows" in {
-      if (postgresAvailable) {
+
+      "delete rows" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
 
         val updateQuery = client.executeUpdate(
-          "DELETE FROM %s WHERE str_field='hello'".format(IntegrationSpec.pgTestTable)
+          "DELETE FROM %s WHERE str_field='hello'"
+            .format(IntegrationSpec.pgTestTable)
         )
 
         val response = Await.result(updateQuery, queryTimeout)
@@ -173,19 +184,21 @@ class IntegrationSpec extends Spec {
 
         val resultRows = Await.result(selectQuery, queryTimeout)
 
-        resultRows.size must equal(1)
-        resultRows(0).getOption("str_field") must equal(Some("goodbye"))
+        resultRows.size must equal (1)
+        resultRows (0).getOption("str_field") must equal(Some("goodbye"))
       }
-    }
 
-    "select rows via a prepared query" in {
-      if (postgresAvailable) {
+
+      "select rows via a prepared query" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
 
-        val preparedQuery = client.prepareAndQuery("SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2"
-          .format(IntegrationSpec.pgTestTable), "hello", true)(identity)
+        val preparedQuery = client.prepareAndQuery(
+          "SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2".format(IntegrationSpec.pgTestTable),
+          "hello",
+          true)(identity)
+
         val resultRows = Await.result(
           preparedQuery,
           queryTimeout
@@ -198,14 +211,11 @@ class IntegrationSpec extends Spec {
             row.getOption("bool_field") must equal(Some(true))
         }
       }
-    }
-  
-    "execute an update via a prepared statement" in {
-      if (postgresAvailable) {
+
+      "execute an update via a prepared statement" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
-
 
         val preparedQuery = client.prepareAndExecute(
           "UPDATE %s SET str_field = $1 where int_field = 4567".format(IntegrationSpec.pgTestTable),
@@ -220,10 +230,8 @@ class IntegrationSpec extends Spec {
 
         resultRows.size must equal(numRows)
       }
-    }
 
-    "execute an update via a prepared statement using a Some(value)" in {
-      if (postgresAvailable) {
+      "execute an update via a prepared statement using a Some(value)" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
@@ -242,10 +250,8 @@ class IntegrationSpec extends Spec {
 
         resultRows.size must equal(numRows)
       }
-    }
 
-    "execute an update via a prepared statement using a None" in {
-      if (postgresAvailable) {
+      "execute an update via a prepared statement using a None" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
@@ -264,10 +270,8 @@ class IntegrationSpec extends Spec {
 
         resultRows.size must equal(numRows)
       }
-    }
-  
-    "return rows from UPDATE...RETURNING" in {
-      if (postgresAvailable) {
+
+      "return rows from UPDATE...RETURNING" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
@@ -283,19 +287,18 @@ class IntegrationSpec extends Spec {
         resultRows.size must equal(1)
         resultRows(0).get[String]("str_field") must equal("hello_updated")
       }
-    }
-  
-    "return rows from DELETE...RETURNING" in {
-      if (postgresAvailable) {
+
+      "return rows from DELETE...RETURNING" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
 
         Await.result(client.prepareAndExecute(
-          s"INSERT INTO ${IntegrationSpec.pgTestTable} VALUES ('delete', 9012, 15.8, '2015-01-09 16:55:12+0500', FALSE)"
+          s"""INSERT INTO ${IntegrationSpec.pgTestTable}
+              VALUES ('delete', 9012, 15.8, '2015-01-09 16:55:12+0500', FALSE)"""
         ))
 
-        val preparedQuery = client.prepareAndQuery(
+        val preparedQuery = client.prepareAndQuery (
           "DELETE FROM %s where int_field = 9012 RETURNING *".format(IntegrationSpec.pgTestTable)
         )(identity)
     
@@ -304,15 +307,12 @@ class IntegrationSpec extends Spec {
         resultRows.size must equal(1)
         resultRows(0).get[String]("str_field") must equal("delete")
       }
-    }
-  
-    "execute an UPDATE...RETURNING that updates nothing" in {
-      if (postgresAvailable) {
+
+
+      "execute an UPDATE...RETURNING that updates nothing" in {
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
-
-
         val preparedQuery = client.prepareAndQuery(
           "UPDATE %s SET str_field = $1 where str_field = $2 RETURNING *".format(IntegrationSpec.pgTestTable),
           "hello_updated",
@@ -323,14 +323,12 @@ class IntegrationSpec extends Spec {
 
         resultRows.size must equal(0)
       }
-    }
-  
-    "execute a DELETE...RETURNING that deletes nothing" in {
-      if (postgresAvailable) {
+
+      "execute a DELETE...RETURNING that deletes nothing" in {
+
         val client = getClient
         cleanDb(client)
         insertSampleData(client)
-
 
         val preparedQuery = client.prepareAndQuery(
           "DELETE FROM %s WHERE str_field=$1".format(IntegrationSpec.pgTestTable),
@@ -338,37 +336,32 @@ class IntegrationSpec extends Spec {
         )(identity)
     
         val resultRows = Await.result(preparedQuery)
-
         resultRows.size must equal(0)
       }
-    }
 
-    // this test will fail because the test DB user doesn't have permission
-    "create an extension using CREATE EXTENSION" ignore {
-      if(postgresAvailable) {
-        val client = getClient
-        val result = client.prepareAndExecute("CREATE EXTENSION hstore")
-        Await.result(result)
+      // this test will fail if the test DB user doesn't have permission
+      "create an extension using CREATE EXTENSION" in {
+        if(user == "postgres") {
+          val client = getClient
+          val result = client.prepareAndExecute("CREATE EXTENSION hstore")
+          Await.result(result)
+        }
       }
-    }
 
-    "support multi-statement DDL" in {
-      if(postgresAvailable) {
+      "support multi-statement DDL" in {
         val client = getClient
-        val result = client.query(
-          """
-            |CREATE TABLE multi_one(id integer);
-            |CREATE TABLE multi_two(id integer);
-            |DROP TABLE multi_one;
-            |DROP TABLE multi_two;
+        val result = client.query("""
+          |CREATE TABLE multi_one(id integer);
+          |CREATE TABLE multi_two(id integer);
+          |DROP TABLE multi_one;
+          |DROP TABLE multi_two;
           """.stripMargin)
         Await.result(result)
       }
-    }
 
-    "throw a ServerError" when {
-      "query has error" in {
-        if (postgresAvailable) {
+
+      "throw a ServerError" when {
+        "query has error" in {
           val client = getClient
           cleanDb(client)
 
@@ -380,24 +373,16 @@ class IntegrationSpec extends Spec {
             Await.result(selectQuery, queryTimeout)
           }
         }
-      }
 
-      "query in a prepared statement has an error" in {
-        if(postgresAvailable) {
-          val client = getClient
-          a [ServerError] must be thrownBy {
-            Await.result(client.prepareAndQuery("Garbage query")(identity))
-          }
-        }
-      }
+        "prepared query is missing parameters" in {
 
-      "prepared query is missing parameters" in {
-        if (postgresAvailable) {
           val client = getClient
           cleanDb(client)
 
-          val preparedQuery = client.prepareAndQuery("SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2"
-            .format(IntegrationSpec.pgTestTable), "hello")(identity)
+          val preparedQuery = client.prepareAndQuery(
+            "SELECT * FROM %s WHERE str_field=$1 AND bool_field=$2".format(IntegrationSpec.pgTestTable),
+            "hello"
+          )(identity)
 
           a [ServerError] must be thrownBy {
             Await.result(
@@ -405,8 +390,10 @@ class IntegrationSpec extends Spec {
               queryTimeout
             )
           }
+
         }
       }
     }
+
   }
 }

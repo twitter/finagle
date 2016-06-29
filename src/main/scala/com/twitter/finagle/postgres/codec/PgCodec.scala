@@ -29,9 +29,9 @@ class PgCodec(
     database: String,
     id: String,
     useSsl: Boolean,
-    trustManagerFactory: TrustManagerFactory = InsecureTrustManagerFactory.INSTANCE,
-    customTypes: Boolean = false)
-      extends CodecFactory[PgRequest, PgResponse] {
+    trustManagerFactory: TrustManagerFactory = InsecureTrustManagerFactory.INSTANCE
+) extends CodecFactory[PgRequest, PgResponse] {
+
   def server = throw new UnsupportedOperationException("client only")
 
   val sslContext: SslContext = SslContext.newClientContext(trustManagerFactory)
@@ -52,18 +52,6 @@ class PgCodec(
       override def prepareConnFactory(underlying: ServiceFactory[PgRequest, PgResponse], params: Stack.Params) = {
         val errorHandling = new HandleErrorsProxy(underlying)
         new AuthenticationProxy(errorHandling, user, password, database, useSsl)
-      }
-
-      override def prepareServiceFactory(underlying: ServiceFactory[PgRequest, PgResponse]) = {
-        if (customTypes) {
-          // Make query to DB to get custom types in current context
-          new CustomOIDProxy(underlying, id)
-        } else {
-          // Use empty custom types map
-          CustomOIDProxy.serviceOIDMap += id -> Map()
-
-          super.prepareServiceFactory(underlying)
-        }
       }
     }
   }
@@ -159,47 +147,6 @@ class AuthenticationProxy(
   }
 }
 
-object CustomOIDProxy {
-  val serviceOIDMap = new mutable.HashMap[String, Map[String, String]]()
-}
-
-/*
- * Filter for handling custom types in responses.
- */
-class CustomOIDProxy(
-    delegate: ServiceFactory[PgRequest, PgResponse], id:String) extends ServiceFactoryProxy(delegate) {
-  val customTypes = """
-    |SELECT      t.typname as type, t.oid as oid
-    |FROM        pg_type t
-    |LEFT JOIN   pg_catalog.pg_namespace n ON n.oid = t.typnamespace
-    |WHERE       (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid))
-    |AND         NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)
-    |AND         n.nspname NOT IN ('pg_catalog', 'information_schema')
-  """.stripMargin
-
-  override def apply(conn: ClientConnection): Future[Service[PgRequest, PgResponse]] = {
-    for {
-      service <- delegate.apply(conn)
-      typeResponse <- service(new PgRequest(new Query(customTypes)))
-      _ <- handleTypeResponse(typeResponse)
-    } yield service
-  }
-
-  def handleTypeResponse(response:PgResponse):Future[Unit] = {
-    val result: ResultSet = response match {
-      case SelectResult(fields, rows) => ResultSet(fields, rows, Map())
-      case _ => throw Errors.client("Expected a SelectResult")
-    }
-
-    val typeMap:Map[String, String] = result.rows.map { row =>
-      (row.get[String]("oid"), row.get[String]("type"))
-    }.toMap
-
-    CustomOIDProxy.serviceOIDMap += id -> typeMap
-
-    Future(Unit)
-  }
-}
 
 /*
  * Decodes a Packet into a BackendMessage.

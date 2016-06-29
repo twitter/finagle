@@ -49,6 +49,17 @@ object Buffers {
     buffer.readerIndex(buffer.readerIndex() + count)
     result
   }
+
+  def readBytes(buffer: ChannelBuffer) = {
+    val array = new Array[Byte](buffer.readableBytes())
+    buffer.readBytes(array)
+    array
+  }
+
+  def readString(buffer: ChannelBuffer, charset: Charset) = {
+    val array = readBytes(buffer)
+    new String(array, charset)
+  }
 }
 
 object Md5Encryptor {

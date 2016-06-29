@@ -1,11 +1,16 @@
 package com.twitter.finagle.postgres.values
 
-import com.twitter.logging.Logger
+import java.net.InetAddress
+import java.nio.charset.Charset
 
+import com.twitter.logging.Logger
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.util.{UUID, Date}
+import java.time._
+import java.time.temporal.{ChronoField, JulianFields}
+import java.util.{Date, TimeZone, UUID}
 
+import com.twitter.util.{Return, Try}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 
 import scala.util.matching.Regex
@@ -68,161 +73,254 @@ object Type {
   val UUID = 2950
 }
 
-/*
- * Abstract trait for parsing values.
- */
-trait ValueParser {
-  def parseBoolean(b: ChannelBuffer): Value[Boolean]
+object TimeUtils {
+  val POSTGRES_EPOCH_MICROS = 946684800000000L
+  val ZONE_REGEX = "(.*)(-|\\+)([0-9]{2})".r
 
-  def parseChar(b: ChannelBuffer): Value[String]
-
-  def parseName(b: ChannelBuffer): Value[String]
-
-  def parseInt8(b: ChannelBuffer): Value[Long]
-
-  def parseInt2(b: ChannelBuffer): Value[Int]
-
-  def parseInt4(b: ChannelBuffer): Value[Int]
-
-  def parseText(b: ChannelBuffer): Value[String]
-
-  def parseOid(b: ChannelBuffer): Value[String]
-
-  def parseFloat4(b: ChannelBuffer): Value[Float]
-
-  def parseFloat8(b: ChannelBuffer): Value[Double]
-
-  def parseInet(b: ChannelBuffer): Value[String]
-
-  def parseBpChar(b: ChannelBuffer): Value[String]
-
-  def parseVarChar(b: ChannelBuffer): Value[String]
-
-  def parseTimestamp(b: ChannelBuffer): Value[Timestamp]
-
-  def parseTimestampTZ(b: ChannelBuffer): Value[Timestamp]
-
-  def parseUUID(b:ChannelBuffer): Value[UUID]
-
-  def parseHStore(b: ChannelBuffer): Value[Map[String, String]]
-
-  def parseUnknown(b: ChannelBuffer): Value[String]
-}
-
-/*
- * Implementation of ValueParser.
- */
-object StringValueParser extends ValueParser {
-  def parseBoolean(b: ChannelBuffer) = Value[Boolean](b.toString(Charsets.Utf8) == "t")
-
-  def parseChar(b: ChannelBuffer) = parseStr(b)
-
-  def parseName(b: ChannelBuffer) = parseStr(b)
-
-  def parseInt8(b: ChannelBuffer) = Value[Long](b.toString(Charsets.Utf8).toLong)
-
-  def parseInt2(b: ChannelBuffer) = parseInt(b)
-
-  def parseInt4(b: ChannelBuffer) = parseInt(b)
-
-  def parseText(b: ChannelBuffer) = parseStr(b)
-
-  def parseOid(b: ChannelBuffer) = parseStr(b)
-
-  def parseFloat4(b: ChannelBuffer) = Value[Float](b.toString(Charsets.Utf8).toFloat)
-
-  def parseFloat8(b: ChannelBuffer) = Value[Double](b.toString(Charsets.Utf8).toDouble)
-
-  def parseInet(b: ChannelBuffer) = parseStr(b)
-
-  def parseBpChar(b: ChannelBuffer) = parseStr(b)
-
-  def parseVarChar(b: ChannelBuffer) = parseStr(b)
-
-  def parseTimestamp(b: ChannelBuffer) = Value[Timestamp](Timestamp.valueOf(b.toString(Charsets.Utf8)))
-
-  def parseTimestampTZ(b: ChannelBuffer) = {
-    val timestampStr = b.toString(Charsets.Utf8)
-
-    // scalastyle:off
-    lazy val timestampWithMsRegex = new Regex(
-      "(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})(\\.\\d*)?([+-]\\d{2,4})")
-    lazy val timestampWithTzFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ssX")
-    // scalastyle:on
-
-    // Ignore milliseconds in the result since Postgres is flaky about putting those in
-    // with a consistent precision
-    val timestampWithoutMs = timestampWithMsRegex.replaceAllIn(timestampStr, "$1$3")
-
-    val parsedDate: Date = timestampWithTzFormat.parse(timestampWithoutMs)
-
-    Value[Timestamp](new Timestamp(parsedDate.getTime))
+  def readTimestamp(buf: ChannelBuffer) = {
+    val micros = buf.readLong() + POSTGRES_EPOCH_MICROS
+    val seconds = micros / 1000000L
+    val nanos = (micros - seconds * 1000000L) * 1000
+    Instant.ofEpochSecond(seconds, nanos)
   }
 
-  def parseUUID(b:ChannelBuffer): Value[UUID] = Value[UUID](UUID.fromString(b.toString(Charsets.Utf8)))
-
-  def parseHStore(b: ChannelBuffer) = {
-    val data = b.toString(Charsets.Utf8)
-
-    HStoreStringParser(data) match {
-      case Some(map) => Value[Map[String, String]](map)
-      case _ => null
-    }
+  def writeTimestamp(timestamp: LocalDateTime) = {
+    val instant = timestamp.atZone(ZoneId.systemDefault()).toInstant
+    val seconds = instant.getEpochSecond
+    val micros = instant.getLong(ChronoField.MICRO_OF_SECOND) + seconds * 1000000
+    val buf = ChannelBuffers.buffer(8)
+    buf.writeLong(micros - POSTGRES_EPOCH_MICROS)
+    buf
   }
-
-  def parseUnknown(b: ChannelBuffer) = parseStr(b)
-
-  private[this] def parseInt(b: ChannelBuffer) = Value[Int](b.toString(Charsets.Utf8).toInt)
-
-  private[this] def parseStr(b: ChannelBuffer) = Value[String](b.toString(Charsets.Utf8))
 }
 
-/*
- * High-level parser helper object that converts response bytes into a wrapped value.
- */
-object ValueParser {
-  private[this] val logger = Logger("value parser")
+trait ValueDecoder[+T] {
+  def decodeText(text: String): Try[Value[T]]
+  def decodeBinary(bytes: ChannelBuffer, charset: Charset): Try[Value[T]]
+}
 
-  import Type._
+object ValueDecoder {
 
-  def parserOf(format: Int, dataType: Int, customTypes:Map[String, String]): ChannelBuffer => Value[Any] = {
-    val valueParser: ValueParser = format match {
-      case 0 => StringValueParser
-      case _ => throw new UnsupportedOperationException("TODO Add support for binary format")
-    }
+  def instance[T](text: String => Try[T], binary: (ChannelBuffer, Charset) => Try[T]): ValueDecoder[T] = new ValueDecoder[T] {
+    def decodeText(s: String) = text(s).map(t => Value(t))
+    def decodeBinary(b: ChannelBuffer, charset: Charset) = binary(b, charset).map(t => Value(t))
+  }
 
-    val r: ChannelBuffer => Value[Any] =
-      dataType match {
-        case BOOL => valueParser.parseBoolean
-        case CHAR => valueParser.parseChar
-        case NAME => valueParser.parseName
-        case INT_8 => valueParser.parseInt8
-        case INT_2 => valueParser.parseInt2
-        case INT_4 => valueParser.parseInt4
-        case TEXT => valueParser.parseText
-        case OID => valueParser.parseOid
-        case FLOAT_4 => valueParser.parseFloat4
-        case FLOAT_8 => valueParser.parseFloat8
-        case INET => valueParser.parseInet
-        case BP_CHAR => valueParser.parseBpChar
-        case VAR_CHAR => valueParser.parseVarChar
-        case TIMESTAMP => valueParser.parseTimestamp
-        case TIMESTAMP_TZ => valueParser.parseTimestampTZ
-        case Type.UUID => valueParser.parseUUID
-        case _ => {
-          customTypes.get(dataType.toString) match {
-            case Some("hstore") => {
-              valueParser.parseHStore
-            }
-            case _ => {
-              logger.warning("Unknown data type " + dataType + ", parsing as a unknown")
-              valueParser.parseUnknown
-            }
-          }
-        }
+  private def readInetAddress(buf: ChannelBuffer) = {
+    val family = buf.readByte()
+    val bits = buf.readByte()
+    val i = buf.readByte()
+    val nb = buf.readByte()
+    val arr = Array.fill(nb)(buf.readByte())
+    InetAddress.getByAddress(arr)
+  }
+
+  private def getUnsignedShort(buf: ChannelBuffer) = {
+    val high = buf.readByte().toInt
+    val low = buf.readByte()
+    (high << 8) | low
+  }
+
+  private val NUMERIC_POS = 0x0000
+  private val NUMERIC_NEG = 0x4000
+  private val NUMERIC_NAN = 0xC000
+  private val NUMERIC_NULL = 0xF000
+  private val NumericDigitBaseExponent = 4
+
+  private def readNumeric(buf: ChannelBuffer) = {
+    val len = getUnsignedShort(buf)
+    val weight = buf.readShort()
+    val sign = getUnsignedShort(buf)
+    val displayScale = getUnsignedShort(buf)
+
+    //digits are actually unsigned base-10000 numbers (not straight up bytes)
+    val digits = Array.fill(len)(buf.readShort())
+    val bdDigits = digits.map(BigDecimal(_))
+
+    if(bdDigits.length > 0) {
+      val unscaled = bdDigits.tail.foldLeft(bdDigits.head) {
+        case (accum, digit) => BigDecimal(accum.bigDecimal.scaleByPowerOfTen(NumericDigitBaseExponent)) + digit
       }
-    r
+
+      val firstDigitSize =
+        if (digits.head < 10) 1
+        else if (digits.head < 100) 2
+        else if (digits.head < 1000) 3
+        else 4
+
+      val scaleFactor = if (weight >= 0)
+        weight * NumericDigitBaseExponent + firstDigitSize
+      else
+        weight * NumericDigitBaseExponent + firstDigitSize
+      val unsigned = unscaled.bigDecimal.movePointLeft(unscaled.precision).movePointRight(scaleFactor).setScale(displayScale)
+
+      sign match {
+        case NUMERIC_POS => BigDecimal(unsigned)
+        case NUMERIC_NEG => BigDecimal(unsigned.negate())
+        case NUMERIC_NAN => throw new NumberFormatException("Decimal is NaN")
+        case NUMERIC_NULL => throw new NumberFormatException("Decimal is NUMERIC_NULL")
+      }
+    } else {
+      BigDecimal(0)
+    }
   }
+
+  val Boolean = instance(s => Return(s == "t" || s == "true"), (b,c) => Try(b.readByte() != 0))
+  val Bytea = instance(
+    s => Try(s.stripPrefix("\\x").sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)),
+    (b,c) => Try(Buffers.readBytes(b)))
+  val String = instance(s => Return(s), (b,c) => Try(Buffers.readString(b, c)))
+  val Int2 = instance(s => Try(s.toShort), (b,c) => Try(b.readShort()))
+  val Int4 = instance(s => Try(s.toInt), (b,c) => Try(b.readInt()))
+  val Int8 = instance(s => Try(s.toLong), (b,c) => Try(b.readLong()))
+  val Float4 = instance(s => Try(s.toFloat), (b,c) => Try(b.readFloat()))
+  val Float8 = instance(s => Try(s.toDouble), (b,c) => Try(b.readDouble()))
+  val Oid = instance(s => Try(s.toLong), (b,c) => Try(Integer.toUnsignedLong(b.readInt())))
+  val Inet = instance(s => Try(InetAddress.getByName(s)), (b, c) => Try(readInetAddress(b)))
+  val Date = instance(
+    s => Try(LocalDate.parse(s)),
+    (b, c) => Try(LocalDate.now().`with`(JulianFields.JULIAN_DAY, b.readInt() + 2451545)))
+  val Time = instance(
+    s => Try(LocalTime.parse(s)),
+    (b, c) => Try(LocalTime.ofNanoOfDay(b.readLong() * 1000))
+  )
+  val Timestamp = instance(
+    s => Try(LocalDateTime.ofInstant(java.sql.Timestamp.valueOf(s).toInstant, ZoneId.systemDefault())),
+    (b, c) => Try(LocalDateTime.ofInstant(TimeUtils.readTimestamp(b), ZoneOffset.UTC))
+  )
+  val TimestampTZ = instance(
+    s => Try {
+      val (str, zoneOffs) = TimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
+        case Some(m) => m.group(1) -> (m.group(2) match {
+          case "-" => -1 * m.group(3).toInt
+          case "+" => m.group(3).toInt
+        })
+        case None => throw new DateTimeException("TimestampTZ string could not be parsed")
+      }
+      val zone = ZoneId.ofOffset("", ZoneOffset.ofHours(zoneOffs))
+      LocalDateTime.ofInstant(
+        java.sql.Timestamp.valueOf(str).toInstant,
+        zone).atZone(zone)
+    },
+    (b, c) => Try(TimeUtils.readTimestamp(b).atZone(ZoneId.systemDefault()))
+  )
+  val Uuid = instance(s => Try(UUID.fromString(s)), (b, c) => Try(new UUID(b.readLong(), b.readLong())))
+  val Numeric = instance(
+    s => Try(BigDecimal(s)),
+    (b, c) => Try(readNumeric(b))
+  )
+  val Jsonb = instance(
+    s => Return(s),
+    (b, c) => Try {
+      b.readByte()  //discard version number
+      new String(Array.fill(b.readableBytes())(b.readByte()), c)
+    }
+  )
+
+  val HStore = instance(
+    s => Try {
+      HStoreStringParser(s)
+        .getOrElse(throw new IllegalArgumentException("Invalid format for hstore"))
+        .mapValues(Some.apply)  //TODO: HStoreStringParser should handle NULLs and return Map[String, Option[String]]
+    },
+    (b, c) => Try {
+      val count = b.readInt()
+      val pairs = Array.fill(count) {
+        val keyLength = b.readInt()
+        val key = Array.fill(keyLength)(b.readByte())
+        val valueLength = b.readInt()
+        val value = valueLength match {
+          case -1 => None
+          case l =>
+            val valueBytes = Array.fill(l)(b.readByte())
+            Some(valueBytes)
+        }
+        new String(key, c) -> value.map(new String(_, c))
+      }
+      pairs.toMap
+    }
+  )
+
+  val Unknown = instance[Either[String, Array[Byte]]](
+    s => Return(Left(s)),
+    (b, c) => Return(Right(Buffers.readBytes(b)))
+  )
+
+  def unknownBinary(t: (ChannelBuffer, Charset)): Try[Value[Any]] = Return(Value(Buffers.readBytes(t._1)))
+
+  val decoders: PartialFunction[String, ValueDecoder[T forSome { type T }]] = {
+    case "boolrecv" => Boolean
+    case "bytearecv" => Bytea
+    case   "charrecv" | "namerecv" | "varcharrecv" | "xml_recv" | "json_recv"
+         | "textrecv" | "bpcharrecv" | "cstring_recv" | "citextrecv" | "enum_recv"  => String
+    case "int8recv" => Int8
+    case "int4recv" => Int4
+    case "int2recv" => Int2
+    //TODO: cidr
+    case "float4recv" => Float4
+    case "float8recv" => Float8
+    case "inet_recv" => Inet
+    case "date_recv" => Date
+    case "time_recv" => Time
+    case "timestamp_recv" => Timestamp
+    case "timestamptz_recv" => TimestampTZ
+    //TODO: timetz
+    //TODO: interval
+    //TODO: bit
+    //TODO: varbit
+    case "numeric_recv" => Numeric
+    case "uuid_recv" => Uuid
+    case "jsonb_recv" => Jsonb
+    case "hstore_recv" => HStore
+  }
+
+}
+
+/**
+  * Responsible for encoding a parameter of type T for sending to postgres
+  * @tparam T
+  */
+trait ValueEncoder[-T] {
+  def encodeText(t: T): String
+  def encodeBinary(t: T, charset: Charset): ChannelBuffer
+  def recvFunction: String
+  def elemRecvFunction: Option[String]
+}
+
+object ValueEncoder {
+
+  def instance[T](recv: String, text: T => String, binary: (T, Charset) => ChannelBuffer): ValueEncoder[T] = new ValueEncoder[T] {
+    def encodeText(t: T) = text(t)
+    def encodeBinary(t: T, c: Charset) = binary(t, c)
+    def recvFunction = recv
+    def elemRecvFunction = None
+  }
+
+  private def buffer(capacity: Int)(fn: ChannelBuffer => Unit) = {
+    val cb = ChannelBuffers.buffer(capacity)
+    fn(cb)
+    cb
+  }
+
+  implicit val String = instance[String]("textrecv", identity, (s, c) => ChannelBuffers.wrappedBuffer(s.getBytes(c)))
+  implicit val Boolean = instance[Boolean](
+    "boolrecv",
+    b => if(b) "t" else "f",
+    (b, c) => ChannelBuffers.wrappedBuffer(Array(if(b) 1.toByte else 0.toByte)))
+  implicit val Bytea = instance[Array[Byte]](
+    "bytearecv",
+    bytes => "\\x" + bytes.map(Integer.toHexString(_)).mkString,
+    (b, c) => ChannelBuffers.copiedBuffer(b)
+  )
+  implicit val Int2 = instance[Short]("int2recv", _.toString, (i, c) => buffer(2)(_.writeShort(i)))
+  implicit val Int4 = instance[Int]("int4recv", _.toString, (i, c) => buffer(4)(_.writeInt(i)))
+  implicit val Int8 = instance[Long]("int8recv", _.toString, (i, c) => buffer(8)(_.writeLong(i)))
+  implicit val Float4 = instance[Float]("float4recv", _.toString, (i, c) => buffer(4)(_.writeFloat(i)))
+  implicit val Float8 = instance[Double]("float8recv", _.toString, (i, c) => buffer(8)(_.writeDouble(i)))
+  implicit val Date = instance[LocalDate]("date_recv", _.toString, (i, c) => buffer(4)(_.writeInt((i.getLong(JulianFields.JULIAN_DAY) - 2451545).toInt)))
+  implicit val Timestamp = instance[LocalDateTime]("timestamp_recv", t => java.sql.Timestamp.valueOf(t).toString, (i, c) => TimeUtils.writeTimestamp(i))
+
+
 }
 
 /*
@@ -243,6 +341,8 @@ object StringValueEncoder {
 
   def convertValue[A](value:A)(implicit mf:Manifest[A]):Any = {
     value match {
+        //need to use a proper format for this
+      case zdt:ZonedDateTime => zdt.toOffsetDateTime.toString
       case m:collection.Map[_, _] => { // this is an hstore, so turn it into one
         def escape(s:String):String = {
           s.replace("\\", "\\\\").replace("\"", "\\\"")

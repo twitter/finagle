@@ -1,26 +1,91 @@
 package com.twitter.finagle.postgres
 
+import java.nio.charset.{Charset, StandardCharsets}
+
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.builder.ClientBuilder
-import com.twitter.finagle.postgres.codec.{CustomOIDProxy, PgCodec, Errors}
+import com.twitter.finagle.postgres.codec.{Errors, PgCodec}
 import com.twitter.finagle.postgres.messages._
-import com.twitter.finagle.postgres.values.{StringValueEncoder, ValueParser, Value}
+import com.twitter.finagle.postgres.values._
 import com.twitter.logging.Logger
-import com.twitter.util.Future
-
+import com.twitter.util.{Future, Return, Throw, Try}
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.jboss.netty.buffer.ChannelBuffer
 
+import scala.collection.immutable.Queue
 import scala.util.Random
 
 /*
  * A Finagle client for communicating with Postgres.
  */
-class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
+class Client(
+  factory: ServiceFactory[PgRequest, PgResponse],
+  id:String,
+  types: Option[Map[Int, Client.TypeSpecifier]] = None,
+  customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
+  binaryResults: Boolean = false
+) {
   private[this] val counter = new AtomicInteger(0)
-  private[this] lazy val customTypes = CustomOIDProxy.serviceOIDMap(id)
   private[this] val logger = Logger(getClass.getName)
+  private val resultFormats = if(binaryResults) Seq(1) else Seq(0)
+
+  val charset = StandardCharsets.UTF_8
+
+  private def retrieveTypeMap() = {
+    //get a mapping of OIDs to the name of the receive function for all types in the remote DB.
+    //typreceive is the most reliable way to determine how a type should be decoded
+    val customTypesQuery =
+      """
+       |SELECT DISTINCT
+       |  CAST(t.typname AS text) AS type,
+       |  CAST(t.oid AS integer) AS oid,
+       |  CAST(t.typreceive AS text) AS typreceive,
+       |  CAST(t.typelem AS integer) AS typelem
+       |FROM           pg_type t
+       |WHERE          CAST(t.typreceive AS text) <> '-'
+     """.stripMargin
+
+    val serviceF = factory.apply
+
+    val bootstrapTypes = Map(
+      Type.INT_4 -> ValueDecoder.Int4,
+      Type.TEXT -> ValueDecoder.String
+    )
+
+    val customTypesResult = for {
+      service <- serviceF
+      response <- service.apply(new PgRequest(new Query(customTypesQuery)))
+    } yield response match {
+      case SelectResult(fields, rows) =>
+        val rowValues = rows.map {
+          row =>
+            row.data.zip(fields).map {
+              case (buf, field) =>
+                val decoder = bootstrapTypes(field.dataType)
+                if(field.format == 0)
+                  decoder.decodeText(Buffers.readString(buf, charset)).getOrElse(null)
+                else
+                  decoder.decodeBinary(buf, charset).getOrElse(null)
+            }
+        }
+        val fieldNames = fields.map(_.name)
+        rowValues.map(row => new Row(fieldNames, row)).map {
+          row => row.get[Int]("oid") -> Client.TypeSpecifier(row.get[String]("typreceive"), row.get[Int]("typelem"))
+        }.toMap
+    }
+
+    customTypesResult.ensure {
+      serviceF.foreach(_.close())
+    }
+
+    customTypesResult
+  }
+
+  val typeMap = types.map(Future(_)).getOrElse(retrieveTypeMap())
+
+  val decoders = customReceiveFunctions orElse ValueDecoder.decoders
+
 
   /*
    * Execute some actions inside of a transaction using a single connection
@@ -47,7 +112,9 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
    * Issue an arbitrary SQL query and get the response.
    */
   def query(sql: String): Future[QueryResponse] = sendQuery(sql) {
-    case SelectResult(fields, rows) => Future(ResultSet(fields, rows, customTypes))
+    case SelectResult(fields, rows) => processFields(fields).map {
+      case (names, parsers) => ResultSet(names, charset, parsers, rows)
+    }
     case CommandCompleteResponse(affected) => Future(OK(affected))
   }
 
@@ -68,9 +135,9 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
   /*
    * Run a single SELECT query and wrap the results with the provided function.
    */
-  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = fetch(sql) map {
+  def select[T](sql: String)(f: Row => T): Future[Seq[T]] = fetch(sql).flatMap {
     rs =>
-      extractRows(rs).map(f)
+      extractRows(rs).map(_.map(f))
   }
 
   /*
@@ -101,15 +168,15 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
     val preparedStatement = factory.apply().flatMap {
       service =>
         parse(sql, Some(service)).map { name =>
-	  new PreparedStatementImpl(name, service)
-	}
+          new PreparedStatementImpl(name, service)
+        }
     }
 
     preparedStatement.flatMap {
       statement =>
         statement.exec(params: _*).ensure {
-	  statement.closeService
-	}
+          statement.closeService
+        }
     } map {
       case OK(count) => count
     }
@@ -133,7 +200,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
       name: String,
       params: Seq[ChannelBuffer] = Seq(),
       optionalService: Option[Service[PgRequest, PgResponse]] = None): Future[Unit] = {
-    send(PgRequest(Bind(portal = name, name = name, params = params), flush = true), optionalService) {
+    send(PgRequest(Bind(portal = name, name = name, params = params, resultFormats = resultFormats), flush = true), optionalService) {
       case BindCompletedResponse => Future.value(())
     }
   }
@@ -141,11 +208,11 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
   private[this] def describe(
       name: String,
       optionalService: Option[Service[PgRequest, PgResponse]] = None
-    ): Future[(IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]])] = {
+    ): Future[(IndexedSeq[String], IndexedSeq[((ChannelBuffer, Charset)) => Try[Value[T]] forSome {type T}])] =
     send(PgRequest(Describe(portal = true, name = name), flush = true), optionalService) {
-      case RowDescriptions(fields) => Future.value(processFields(fields))
+      case RowDescriptions(fields) => processFields(fields)
     }
-  }
+
 
   private[this] def execute(
       name: String,
@@ -182,18 +249,33 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
   }
 
   private[this] def processFields(
-      fields: IndexedSeq[Field]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]]) = {
+      fields: IndexedSeq[Field]): Future[(IndexedSeq[String], IndexedSeq[((ChannelBuffer, Charset)) => Try[Value[T]] forSome {type T}])] = {
     val names = fields.map(f => f.name)
-    val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType, customTypes))
+    val parsers = fields.toList.map {
+      f => for {
+        types <- typeMap
+      } yield for {
+        Client.TypeSpecifier(recv, elem) <- types.get(f.dataType)
+        decoder <- decoders.lift.apply(recv)
+      } yield if(f.format != 0) (decoder.decodeBinary _).tupled else (Buffers.readString _).tupled.andThen(decoder.decodeText)
+    }.foldLeft(Future(Queue.empty[((ChannelBuffer, Charset)) => Try[Value[T]] forSome {type T}])) {
+      (accumF, next) => accumF flatMap {
+        accum => next map {
+          d => accum.enqueue(d.getOrElse(ValueDecoder.unknownBinary _))
+        }
+      }
+    }
 
-    (names, parsers)
+    parsers.map {
+      decoders => (names, decoders.toIndexedSeq)
+    }
   }
 
-  private[this] def extractRows(rs: SelectResult): List[Row] = {
-    val (fieldNames, fieldParsers) = processFields(rs.fields)
+  private[this] def extractRows(rs: SelectResult): Future[List[Row]] = processFields(rs.fields) map {
+    case (fieldNames, fieldParsers) =>
 
     rs.rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map {
-      case (d, p) => if (d == null) null else p(d)
+      case (d, p) => if (d == null) null else p(d, charset).getOrElse(null)
     }))
   }
 
@@ -213,7 +295,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
         exec <- execute(name, optionalService = Some(service))
       } yield exec match {
           case CommandCompleteResponse(rows) => OK(rows)
-          case Rows(rows, true) => ResultSet(fieldNames, fieldParsers, rows, customTypes)
+          case Rows(rows, true) => ResultSet(fieldNames, charset, fieldParsers, rows)
         }
       f transform {
         result =>
@@ -231,26 +313,81 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
  * Helper companion object that generates a client from authentication information.
  */
 object Client {
+
+  case class TypeSpecifier(receiveFunction: String, elemOid: Long = 0)
+
+  private[postgres] val defaultTypes = Map(
+    Type.BOOL -> TypeSpecifier("boolrecv"),
+    Type.BYTE_A -> TypeSpecifier("bytearecv"),
+    Type.CHAR -> TypeSpecifier("charrecv"),
+    Type.NAME -> TypeSpecifier("namerecv"),
+    Type.INT_8 -> TypeSpecifier("int8recv"),
+    Type.INT_2 -> TypeSpecifier("int2recv"),
+    Type.INT_4 -> TypeSpecifier("int4recv"),
+    Type.REG_PROC -> TypeSpecifier("regprocrecv"),
+    Type.TEXT -> TypeSpecifier("textrecv"),
+    Type.OID -> TypeSpecifier("oidrecv"),
+    Type.TID -> TypeSpecifier("tidrecv"),
+    Type.XID -> TypeSpecifier("xidrecv"),
+    Type.CID -> TypeSpecifier("cidrecv"),
+    Type.XML -> TypeSpecifier("xml_recv"),
+    Type.POINT -> TypeSpecifier("point_recv"),
+    Type.L_SEG -> TypeSpecifier("lseg_recv"),
+    Type.PATH -> TypeSpecifier("path_recv"),
+    Type.BOX -> TypeSpecifier("box_recv"),
+    Type.POLYGON -> TypeSpecifier("poly_recv"),
+    Type.LINE -> TypeSpecifier("line_recv"),
+    Type.CIDR -> TypeSpecifier("cidr_recv"),
+    Type.FLOAT_4 -> TypeSpecifier("float4recv"),
+    Type.FLOAT_8 -> TypeSpecifier("float8recv"),
+    Type.ABS_TIME -> TypeSpecifier("abstimerecv"),
+    Type.REL_TIME -> TypeSpecifier("reltimerecv"),
+    Type.T_INTERVAL -> TypeSpecifier("tinternalrecv"),
+    Type.UNKNOWN -> TypeSpecifier("unknownrecv"),
+    Type.CIRCLE -> TypeSpecifier("circle_recv"),
+    Type.MONEY -> TypeSpecifier("cash_recv"),
+    Type.MAC_ADDR -> TypeSpecifier("macaddr_recv"),
+    Type.INET -> TypeSpecifier("inet_recv"),
+    Type.BP_CHAR -> TypeSpecifier("bpcharrecv"),
+    Type.VAR_CHAR -> TypeSpecifier("varcharrecv"),
+    Type.DATE -> TypeSpecifier("date_recv"),
+    Type.TIME -> TypeSpecifier("time_recv"),
+    Type.TIMESTAMP -> TypeSpecifier("timestamp_recv"),
+    Type.TIMESTAMP_TZ -> TypeSpecifier("timestamptz_recv"),
+    Type.INTERVAL -> TypeSpecifier("interval_recv"),
+    Type.TIME_TZ -> TypeSpecifier("timetz_recv"),
+    Type.BIT -> TypeSpecifier("bit_recv"),
+    Type.VAR_BIT -> TypeSpecifier("varbit_recv"),
+    Type.NUMERIC -> TypeSpecifier("numeric_recv"),
+    Type.RECORD -> TypeSpecifier("record_recv"),
+    Type.VOID -> TypeSpecifier("void_recv"),
+    Type.UUID -> TypeSpecifier("uuid_recv")
+  )
+
   def apply(
-      host: String,
-      username: String,
-      password: Option[String],
-      database: String,
-      useSsl: Boolean = false,
-      hostConnectionLimit: Int = 1,
-      numRetries: Int = 4,
-      customTypes: Boolean = false): Client = {
+    host: String,
+    username: String,
+    password: Option[String],
+    database: String,
+    useSsl: Boolean = false,
+    hostConnectionLimit: Int = 1,
+    numRetries: Int = 4,
+    customTypes: Boolean = false,
+    customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
+    binaryResults: Boolean = false
+  ): Client = {
     val id = Random.alphanumeric.take(28).mkString
 
     val factory: ServiceFactory[PgRequest, PgResponse] = ClientBuilder()
-      .codec(new PgCodec(username, password, database, id, useSsl = useSsl, customTypes = customTypes))
+      .codec(new PgCodec(username, password, database, id, useSsl = useSsl))
       .hosts(host)
       .hostConnectionLimit(hostConnectionLimit)
       .retries(numRetries)
       .failFast(enabled = true)
       .buildFactory()
 
-    new Client(factory, id)
+    val types = if(!customTypes) Some(defaultTypes) else None
+    new Client(factory, id, types, customReceiveFunctions, binaryResults)
   }
 }
 

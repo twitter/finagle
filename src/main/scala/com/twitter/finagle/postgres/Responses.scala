@@ -1,8 +1,10 @@
 package com.twitter.finagle.postgres
 
-import com.twitter.finagle.postgres.messages.{DataRow, Field}
-import com.twitter.finagle.postgres.values.{Value, ValueParser}
+import java.nio.charset.Charset
 
+import com.twitter.finagle.postgres.messages.{DataRow, Field}
+import com.twitter.finagle.postgres.values.Value
+import com.twitter.util.Try
 import org.jboss.netty.buffer.ChannelBuffer
 
 /*
@@ -87,25 +89,16 @@ case class ResultSet(rows: List[Row]) extends QueryResponse
 object ResultSet {
   def apply(
       fieldNames: IndexedSeq[String],
-      fieldParsers: IndexedSeq[ChannelBuffer => Value[Any]],
-      rows: List[DataRow], customTypes:Map[String, String]) = {
+      charset: Charset,
+      fieldParsers: IndexedSeq[((ChannelBuffer, Charset)) => Try[Value[Any]]],
+      rows: List[DataRow]) = {
     new ResultSet(rows.map(dataRow => new Row(fieldNames, dataRow.data.zip(fieldParsers).map({
-      case (d, p) => if (d == null) null else p(d)
+      case (d, p) =>
+        if (d == null)
+          null
+        else
+          p(d, charset)
+            .getOrElse(null)
     }))))
-  }
-
-  def apply(fields: IndexedSeq[Field], rows: List[DataRow], customTypes:Map[String, String]): ResultSet = {
-    val (fieldNames, fieldParsers) = processFields(fields, customTypes)
-
-    apply(fieldNames, fieldParsers, rows, customTypes)
-  }
-
-  private[this] def processFields(
-      fields: IndexedSeq[Field],
-      customTypes:Map[String, String]): (IndexedSeq[String], IndexedSeq[ChannelBuffer => Value[Any]]) = {
-    val names = fields.map(f => f.name)
-    val parsers = fields.map(f => ValueParser.parserOf(f.format, f.dataType, customTypes))
-
-    (names, parsers)
   }
 }

@@ -67,6 +67,7 @@ case class Bind(portal: String = Strings.empty, name: String = Strings.empty, fo
     if (formats.isEmpty) {
       builder.writeShort(0)
     } else {
+      builder.writeShort(formats.length.toShort)
       for (format <- formats) {
         builder.writeShort(format.toShort)
       }
@@ -86,6 +87,7 @@ case class Bind(portal: String = Strings.empty, name: String = Strings.empty, fo
     if (resultFormats.isEmpty) {
       builder.writeShort(0)
     } else {
+      builder.writeShort(resultFormats.length.toShort)
       for (format <- resultFormats) {
         builder.writeShort(format.toShort)
       }
