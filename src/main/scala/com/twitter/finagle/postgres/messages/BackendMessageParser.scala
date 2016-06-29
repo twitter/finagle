@@ -219,26 +219,27 @@ class BackendMessageParser {
   }
 
   def parseTag(tag: String) : CommandCompleteStatus = {
-    if (tag == "CREATE TABLE") {
-      CreateTable
-    } else if (tag == "DROP TABLE") {
-      DropTable
-    } else if (tag == "DISCARD ALL") {
-      DiscardAll
-    } else {
-      val parts = tag.split(" ")
+    tag match {
+      case "CREATE TABLE" => CreateTable
+      case "CREATE EXTENSION"=> CreateExtension
+      case "CREATE TYPE" => CreateType
+      case "DO" => Do
+      case "DISCARD ALL" => DiscardAll
+      case "DROP TABLE" => DropTable
+      case _ =>
+        val parts = tag.split(" ")
 
-      parts(0) match {
-        case "SELECT" => Select(parts(1).toInt)
-        case "INSERT" => Insert(parts(2).toInt)
-        case "DELETE" => Delete(parts(1).toInt)
-        case "UPDATE" => Update(parts(1).toInt)
-        case "BEGIN"  => Begin
-        case "SAVEPOINT" => Savepoint
-        case "ROLLBACK"  => RollBack
-        case "COMMIT" => Commit
-        case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
-      }
+        parts(0) match {
+          case "SELECT" => Select(parts(1).toInt)
+          case "INSERT" => Insert(parts(2).toInt)
+          case "DELETE" => Delete(parts(1).toInt)
+          case "UPDATE" => Update(parts(1).toInt)
+          case "BEGIN"  => Begin
+          case "SAVEPOINT" => Savepoint
+          case "ROLLBACK"  => RollBack
+          case "COMMIT" => Commit
+          case _ => throw new IllegalStateException("Unknown command complete response tag " + tag)
+        }
     }
   }
 

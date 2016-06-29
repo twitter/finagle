@@ -37,7 +37,7 @@ object Generators {
   // arbitrary string that only contains valid UTF-8 characters
   implicit val arbString = {
     val encoder = StandardCharsets.UTF_8.newEncoder()
-    val chars = Arbitrary.arbChar.arbitrary.suchThat(ch => encoder.canEncode(ch))
+    val chars = Arbitrary.arbChar.arbitrary.suchThat(ch => ch.toInt != 0 && encoder.canEncode(ch))
     Arbitrary[String](Gen.listOf(chars).map(_.mkString))
   }
 
