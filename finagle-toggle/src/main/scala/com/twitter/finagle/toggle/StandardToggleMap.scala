@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
  * owners.
  *
  * The ordering is as such:
- *  i. The mutable, in-process [[ToggleMap]], provided via [[ToggleMap.mutable]].
+ *  i. A mutable, in-process [[ToggleMap.Mutable]].
  *  i. The `GlobalFlag`-backed [[ToggleMap]], provided via [[ToggleMap.flags]].
  *  i. The service-owner controlled JSON file-based [[ToggleMap]], provided via [[JsonToggleMap]].
  *  i. The dynamically loaded [[ToggleMap]], provided via [[ServiceLoadedToggleMap.apply]].
@@ -50,8 +50,9 @@ object StandardToggleMap {
   /**
    * @param libraryName if multiple matching service loaded implementations are
    *                    found, this will fail with an `java.lang.IllegalStateException`.
-   *                    The names should be in fully-qualified form to avoid
-   *                    collisions, e.g. "com.twitter.finagle".
+   *                    The names must be in fully-qualified form to avoid
+   *                    collisions, e.g. "com.twitter.finagle". Valid characters are
+   *                    `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
    * @param statsReceiver used to record the outcomes of Toggles. For general
    *                      usage this should not be scoped so that the metrics
    *                      always end up scoped to "toggles/$libraryName".
@@ -60,7 +61,7 @@ object StandardToggleMap {
     apply(
       libraryName,
       statsReceiver,
-      ToggleMap.mutable,
+      ToggleMap.newMutable(),
       ServerInfo())
 
   /** exposed for testing */
@@ -70,6 +71,8 @@ object StandardToggleMap {
     mutable: ToggleMap,
     serverInfo: ServerInfo
   ): ToggleMap = {
+    Toggle.validateId(libraryName)
+
     val svcsJson = loadJsonConfig(libraryName, s"$libraryName-service", serverInfo)
     val libsJson = loadJsonConfig(libraryName, libraryName, serverInfo)
 

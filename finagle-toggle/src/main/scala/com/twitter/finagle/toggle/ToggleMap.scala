@@ -142,7 +142,7 @@ object ToggleMap {
    * The [[ToggleMap]] interface is read only and this
    * is the mutable side of it.
    */
-  trait MutableToggleMap extends ToggleMap {
+  trait Mutable extends ToggleMap {
 
     /**
      * Add or replace the [[Toggle]] for this `id` with a
@@ -280,7 +280,7 @@ object ToggleMap {
       fractionAndToggle.get()._2(t)
   }
 
-  private[toggle] def newMutable(): MutableToggleMap = new MutableToggleMap {
+  private[toggle] def newMutable(): Mutable = new Mutable {
 
     override def toString: String =
       s"ToggleMap.Mutable(${System.identityHashCode(this)})"
@@ -327,12 +327,6 @@ object ToggleMap {
       toggleFor(id).setFraction(Double.NaN)
     }
   }
-
-  /**
-   * The shared, mutable, [[ToggleMap]] that can be manipulated
-   * by service owners.
-   */
-  val mutable: MutableToggleMap = newMutable()
 
   /**
    * A [[ToggleMap]] that is backed by a `com.twitter.app.GlobalFlag`,
