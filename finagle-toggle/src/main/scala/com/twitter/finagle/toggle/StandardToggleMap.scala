@@ -4,6 +4,7 @@ import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{Return, Throw}
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import scala.collection.JavaConverters._
 
 /**
@@ -47,7 +48,23 @@ object StandardToggleMap {
 
   private[this] val log = Logger.get()
 
+  private[this] val libs =
+    new ConcurrentHashMap[String, ToggleMap]()
+
   /**
+   * Returns all registered [[ToggleMap ToggleMaps]] that have been
+   * created by [[apply]], keyed by `libraryName`.
+   */
+  def registeredLibraries: Map[String, ToggleMap] =
+    libs.asScala.toMap
+
+  /**
+   * Get a [[ToggleMap]] for the given `libraryName`.
+   *
+   * @note If a given `libraryName` has already been loaded, only a single instance
+   * will always be returned for all calls to [[apply]] (even if the `StatsReceiver`
+   * differs).
+   *
    * @param libraryName if multiple matching service loaded implementations are
    *                    found, this will fail with an `java.lang.IllegalStateException`.
    *                    The names must be in fully-qualified form to avoid
@@ -62,14 +79,16 @@ object StandardToggleMap {
       libraryName,
       statsReceiver,
       ToggleMap.newMutable(),
-      ServerInfo())
+      ServerInfo(),
+      libs)
 
   /** exposed for testing */
   private[toggle] def apply(
     libraryName: String,
     statsReceiver: StatsReceiver,
     mutable: ToggleMap,
-    serverInfo: ServerInfo
+    serverInfo: ServerInfo,
+    registry: ConcurrentMap[String, ToggleMap]
   ): ToggleMap = {
     Toggle.validateId(libraryName)
 
@@ -83,7 +102,12 @@ object StandardToggleMap {
       ServiceLoadedToggleMap(libraryName),
       libsJson
     )
-    ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
+    val toggleMap = ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
+    val prev = registry.putIfAbsent(libraryName, toggleMap)
+    if (prev == null)
+      toggleMap
+    else
+      prev
   }
 
   private[this] def loadJsonConfig(

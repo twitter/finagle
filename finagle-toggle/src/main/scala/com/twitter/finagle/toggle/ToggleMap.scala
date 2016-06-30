@@ -57,7 +57,7 @@ abstract class ToggleMap { self =>
    * surface that information.
    */
   def orElse(that: ToggleMap): ToggleMap = {
-    new ToggleMap {
+    new ToggleMap with ToggleMap.Composite {
       override def toString: String =
         s"${self.toString}.orElse(${that.toString})"
 
@@ -79,6 +79,10 @@ abstract class ToggleMap { self =>
           byName.put(md.id, mdWithDesc)
         }
         byName.valuesIterator
+      }
+
+      def components: Seq[ToggleMap] = {
+        Seq(self, that)
       }
     }
   }
@@ -104,7 +108,7 @@ object ToggleMap {
    *                      scoped to "toggles/$libraryName".
    */
   def observed(toggleMap: ToggleMap, statsReceiver: StatsReceiver): ToggleMap = {
-    new Proxy {
+    new Proxy with Composite {
       private[this] val checksum = statsReceiver.addGauge("checksum") {
         // crc32 is not a cryptographic hash, but good enough for our purposes
         // of summarizing the current state of the ToggleMap. we only need it
@@ -135,6 +139,36 @@ object ToggleMap {
       override def toString: String =
         s"observed($toggleMap, $statsReceiver)"
 
+      def components: Seq[ToggleMap] =
+        Seq(underlying)
+    }
+  }
+
+  /**
+   * A marker interface in support of [[components(ToggleMap)]]
+   */
+  private trait Composite {
+    def components: Seq[ToggleMap]
+  }
+
+  /**
+   * For some administrative purposes, it can be useful to get at the
+   * component `ToggleMaps` that may make up a [[ToggleMap]].
+   *
+   * For example:
+   * {{{
+   * val toggleMap1: ToggleMap = ...
+   * val toggleMap2: ToggleMap = ...
+   * val combined = toggleMap1.orElse(toggleMap2)
+   * assert(Seq(toggleMap1, toggleMap2) == ToggleMap.components(combined))
+   * }}}
+   */
+  def components(toggleMap: ToggleMap): Seq[ToggleMap] = {
+    toggleMap match {
+      case composite: Composite =>
+        composite.components.flatMap(components)
+      case _ =>
+        Seq(toggleMap)
     }
   }
 
@@ -229,7 +263,7 @@ object ToggleMap {
   /**
    * A [[ToggleMap]] implementation based on immutable [[Toggle.Metadata]].
    */
-  private[toggle] class Immutable(
+  class Immutable(
       metadata: immutable.Seq[Toggle.Metadata])
     extends ToggleMap {
 
@@ -239,7 +273,7 @@ object ToggleMap {
       }(breakOut)
 
     override def toString: String =
-      s"ToggleMap.Immutable(${System.identityHashCode(this)})"
+      s"ToggleMap.Immutable@${System.identityHashCode(this)}"
 
     def apply(id: String): Toggle[Int] =
       toggles.get(id) match {
@@ -283,7 +317,7 @@ object ToggleMap {
   private[toggle] def newMutable(): Mutable = new Mutable {
 
     override def toString: String =
-      s"ToggleMap.Mutable(${System.identityHashCode(this)})"
+      s"ToggleMap.Mutable@${System.identityHashCode(this)}"
 
     // There will be minimal updates, so we can use a low concurrency level,
     // which makes the footprint smaller.
@@ -307,11 +341,13 @@ object ToggleMap {
     def apply(id: String): Toggle[Int] =
       toggleFor(id)
 
-    def iterator: Iterator[Toggle.Metadata] =
+    def iterator: Iterator[Toggle.Metadata] = {
+      val source = toString
       toggles.asScala.collect {
         case (id, toggle) if Toggle.isValidFraction(toggle.currentFraction) =>
-          Toggle.Metadata(id, toggle.currentFraction, None)
+          Toggle.Metadata(id, toggle.currentFraction, None, source)
       }.toIterator
+    }
 
     def put(id: String, fraction: Double): Unit = {
       if (Toggle.isValidFraction(fraction)) {
@@ -381,11 +417,12 @@ object ToggleMap {
     def apply(id: String): Toggle[Int] =
       new FlagToggle(id)
 
-    def iterator: Iterator[Toggle.Metadata] =
+    def iterator: Iterator[Toggle.Metadata] = {
+      val source = toString
       fractions.iterator.collect { case (id, f) if Toggle.isValidFraction(f) =>
-        Toggle.Metadata(id, f, None)
+        Toggle.Metadata(id, f, None, source)
       }
-
+    }
   }
 
   private[toggle] trait Proxy extends ToggleMap {

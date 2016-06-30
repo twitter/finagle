@@ -88,10 +88,14 @@ object JsonToggleMap {
   private[this] case class JsonToggles(
       @JsonProperty(required = true) toggles: Seq[JsonToggle]) {
 
-    def toToggleMap: ToggleMap = {
+    def toToggleMap(source: String): ToggleMap = {
       val metadata: immutable.Seq[Toggle.Metadata] =
         toggles.map { jsonToggle =>
-          Toggle.Metadata(jsonToggle.id, jsonToggle.fraction, Some(jsonToggle.description))
+          Toggle.Metadata(
+            jsonToggle.id,
+            jsonToggle.fraction,
+            Some(jsonToggle.description),
+            source)
         }(breakOut)
 
       val ids = metadata.map(_.id)
@@ -111,9 +115,9 @@ object JsonToggleMap {
    *
    * $example
    */
-  def parse(json: String): Try[ToggleMap] = Try {
+  private[toggle] def parse(json: String): Try[ToggleMap] = Try {
     val jsonToggles = mapper.readValue(json, classOf[JsonToggles])
-    jsonToggles.toToggleMap
+    jsonToggles.toToggleMap("JSON String")
   }
 
   /**
@@ -127,7 +131,7 @@ object JsonToggleMap {
    */
   def parse(url: URL): Try[ToggleMap] = Try {
     val jsonToggles = mapper.readValue(url, classOf[JsonToggles])
-    jsonToggles.toToggleMap
+    jsonToggles.toToggleMap(url.toString)
   }
 
 }
