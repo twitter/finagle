@@ -23,6 +23,27 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
   private[this] val logger = Logger(getClass.getName)
 
   /*
+   * Execute some actions inside of a transaction using a single connection
+   */
+  def inTransaction[T](fn: Client => Future[T]) = for {
+    service             <- factory()
+    constFactory        = ServiceFactory.const(service)
+    transactionalClient = new Client(constFactory, Random.alphanumeric.take(28).mkString)
+    _                   <- transactionalClient.query("BEGIN")
+    result              <- fn(transactionalClient).rescue {
+                          case err => for {
+                            _ <- transactionalClient.query("ROLLBACK")
+                            _ <- constFactory.close()
+                            _ <- service.close()
+                            _ <- Future.exception(err)
+                          } yield null.asInstanceOf[T]
+                        }
+    _                   <- transactionalClient.query("COMMIT")
+    _                   <- constFactory.close()
+    _                   <- service.close()
+  } yield result
+
+  /*
    * Issue an arbitrary SQL query and get the response.
    */
   def query(sql: String): Future[QueryResponse] = sendQuery(sql) {
@@ -201,7 +222,7 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
     }
   }
 
-  private[this] def genName() = "fin-pg-" + counter.incrementAndGet
+  private[this] def genName() = s"fin-pg-$id-" + counter.incrementAndGet
 }
 
 /*
