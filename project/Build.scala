@@ -18,7 +18,7 @@ object Finagle extends Build {
   val scroogeVersion = "4.7.0" + suffix
 
   val libthriftVersion = "0.5.0-1"
-  val netty4Version = "4.1.1.Final"
+  val netty4Version = "4.1.2.Final"
 
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
   val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.0"
