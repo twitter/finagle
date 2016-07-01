@@ -108,8 +108,8 @@ private[http2] object Http2Transporter {
       else super.write(ctx, msg, promise) // this buffers the write until the handler is removed
   }
 
-  private val unsafeCast: Transport[HttpObject, HttpObject] => Transport[Any, Any] =
-    (t: Transport[HttpObject, HttpObject]) => t.map(_.asInstanceOf[HttpObject], _.asInstanceOf[Any])
+  private def unsafeCast(t: Transport[HttpObject, HttpObject]): Transport[Any, Any] =
+    t.map(_.asInstanceOf[HttpObject], _.asInstanceOf[Any])
 }
 
 private[http2] class Http2Transporter(underlying: Transporter[Any, Any])
@@ -144,20 +144,17 @@ private[http2] class Http2Transporter(underlying: Transporter[Any, Any])
   final def apply(addr: SocketAddress): Future[Transport[Any, Any]] =
     Option(transporterCache.get(addr)) match {
       case Some(f) =>
-        println(s"aleady cached $addr")
         f.flatMap { multiplexed =>
-          multiplexed(addr).map(unsafeCast)
+          multiplexed(addr).map(unsafeCast _)
         }
 
       case None =>
         val p = Promise[MultiplexedTransporter]()
         if (transporterCache.putIfAbsent(addr, p) == null) {
-          println(s"cached $addr")
           val f = newConnection(addr).map { trans =>
             new MultiplexedTransporter(
               Transport.cast[HttpObject, HttpObject](trans),
               Closable.make { time: Time =>
-                println(s"cache remove $addr")
                 transporterCache.remove(addr, p)
                 Future.Done
               }
@@ -165,7 +162,7 @@ private[http2] class Http2Transporter(underlying: Transporter[Any, Any])
           }
           p.become(f)
           f.flatMap { multiplexed =>
-            multiplexed(addr).map(unsafeCast)
+            multiplexed(addr).map(unsafeCast _)
           }
         } else {
           apply(addr) // lost the race, try again
