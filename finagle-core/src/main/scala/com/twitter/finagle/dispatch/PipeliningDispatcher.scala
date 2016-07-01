@@ -93,12 +93,12 @@ private[finagle] class PipeliningDispatcher[Req, Rep](
 private object PipeliningDispatcher {
   val log = Logger.get(getClass.getName)
 
+  val TimeToWaitForStalledPipeline = 10.seconds
+
   val StalledPipelineException =
     Failure(
       s"The connection pipeline could not make progress in $TimeToWaitForStalledPipeline",
       Failure.Interrupted)
-
-  val TimeToWaitForStalledPipeline = 10.seconds
 
   object Timeout {
     def unapply(t: Throwable): Option[Throwable] = t match {
