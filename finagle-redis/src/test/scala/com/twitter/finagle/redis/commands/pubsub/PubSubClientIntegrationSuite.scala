@@ -4,13 +4,13 @@ import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
+import com.twitter.io.Buf
 import com.twitter.util._
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.Matchers._
 import org.scalatest.junit.JUnitRunner
-import org.jboss.netty.buffer.ChannelBuffer
 
 @Ignore
 @RunWith(classOf[JUnitRunner])
@@ -108,32 +108,32 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
 
     val q = collection.mutable.HashMap[String, Promise[(String, String, Option[String])]]()
 
-    def subscribe(channels: ChannelBuffer*) = {
+    def subscribe(channels: Buf*) = {
       result(c.subscribe(channels) { case (channel, message) =>
         q.get(message).map(_.setValue((channel, message, None)))
       })
     }
 
     def unsubscribe(channels: String*) = {
-      result(c.unsubscribe(channels.map(s2cb)))
+      result(c.unsubscribe(channels.map(s2b)))
     }
 
     def pSubscribe(patterns: String*) = {
-      result(c.pSubscribe(patterns.map(s2cb)) { case (pattern, channel, message) =>
+      result(c.pSubscribe(patterns.map(s2b)) { case (pattern, channel, message) =>
         q.get(message).map(_.setValue((channel, message, Some(pattern))))
       })
     }
 
     def pUnsubscribe(patterns: String*) = {
-      result(c.pUnsubscribe(patterns.map(s2cb)))
+      result(c.pUnsubscribe(patterns.map(s2b)))
     }
 
     def pubSubChannels(pattern: Option[String] = None) = {
-      result(c.pubSubChannels(pattern.map(s2cb))).map(cb2s).toSet
+      result(c.pubSubChannels(pattern.map(s2b))).map(b2s).toSet
     }
 
     def pubSubNumSub(channels: String*) = {
-      val r = result(c.pubSubNumSub(channels.map(s2cb)))
+      val r = result(c.pubSubNumSub(channels.map(s2b)))
       channels.map(r(_))
     }
 

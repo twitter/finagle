@@ -4,7 +4,7 @@ import com.twitter.finagle.http._
 import com.twitter.io.{BufReader, Buf}
 import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http._
-import java.net.URI
+import java.net.{InetSocketAddress, URI}
 import java.nio.charset.StandardCharsets.UTF_8
 import org.junit.runner.RunWith
 import org.scalacheck.{Gen, Arbitrary}
@@ -133,7 +133,7 @@ class BijectionsTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   test("netty http request -> finagle") {
     forAll(arbNettyRequest) { case (in: FullHttpRequest, body: String) =>
-      val out = Bijections.netty.fullRequestToFinagle(in)
+      val out = Bijections.netty.fullRequestToFinagle(in, new InetSocketAddress(0))
       assert(out.getUri == in.uri)
       assert(out.isChunked == false)
       assert(out.contentString == body)

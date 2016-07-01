@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import Tests._
+import com.twitter.scrooge.ScroogeSBT
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import pl.project13.scala.sbt.JmhPlugin
@@ -65,6 +66,7 @@ object Finagle extends Build {
     resolvers += "twitter-repo" at "https://maven.twttr.com",
 
     ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true,
+    ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
 
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
@@ -190,10 +192,6 @@ object Finagle extends Build {
     finagleNetty4Http
   )
 
-  // finagle-thrift and finagle-thriftmux tests do not currently compile under sbt
-  // due to scrooge-sbt-plugin limitations.
-  lazy val testableProjects = projectList diff Seq[sbt.ProjectReference](finagleThrift, finagleThriftMux)
-
   lazy val finagle = Project(
     id = "finagle",
     base = file("."),
@@ -204,15 +202,6 @@ object Finagle extends Build {
           inAnyProject -- inProjects(finagleExample)
       )
   ).aggregate(projectList: _*)
-
-  lazy val finagleTestCompile = Project(
-    id = "finagle-test-compile",
-    // use a different target so that we don't have conflicting output paths
-    // between this and the `scrooge` target.
-    base = file("finagle-test-compile"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).aggregate(testableProjects: _*)
 
   lazy val finagleIntegration = Project(
     id = "finagle-integration",
@@ -241,6 +230,7 @@ object Finagle extends Build {
       util("app"),
       util("core"),
       util("logging"),
+      util("registry"),
       util("stats")) ++
       jacksonLibs
   )
@@ -475,7 +465,10 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thrift",
-    libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ scroogeLibs
+    libraryDependencies ++=
+      Seq(
+        "silly" % "silly-thrift" % "0.5.0" % "test",
+        "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
   ).dependsOn(finagleCore)
 
   lazy val finagleMemcached = Project(
@@ -549,7 +542,7 @@ object Finagle extends Build {
       name := "finagle-mysql",
       libraryDependencies ++= Seq(util("logging"), util("cache"), caffeineLib, jsr305Lib),
       excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
-    ).dependsOn(finagleCore)
+    ).dependsOn(finagleCore, finagleNetty4)
 
   lazy val finagleExp = Project(
     id = "finagle-exp",

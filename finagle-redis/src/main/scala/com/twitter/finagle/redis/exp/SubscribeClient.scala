@@ -1,57 +1,54 @@
 package com.twitter.finagle.redis.exp
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.netty3.ChannelBufferBuf
-import com.twitter.finagle.{Service, ServiceClosedException, ServiceFactory}
+import com.twitter.finagle.{Service, ServiceClosedException}
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BufToString, StringToChannelBuffer}
-import com.twitter.finagle.util.DefaultTimer
-import com.twitter.io.Charsets
+import com.twitter.finagle.redis.util.{StringToBuf, BufToString}
+import com.twitter.io.Buf
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Futures, NonFatal, Throw, Timer}
 import java.util.concurrent.ConcurrentHashMap
-import org.jboss.netty.buffer.ChannelBuffer
 import scala.collection.JavaConverters._
 
 object SubscribeCommands {
 
   object MessageBytes {
-    val SUBSCRIBE = StringToChannelBuffer("subscribe")
-    val UNSUBSCRIBE = StringToChannelBuffer("unsubscribe")
-    val PSUBSCRIBE = StringToChannelBuffer("psubscribe")
-    val PUNSUBSCRIBE = StringToChannelBuffer("punsubscribe")
-    val MESSAGE = StringToChannelBuffer("message")
-    val PMESSAGE = StringToChannelBuffer("pmessage")
+    val SUBSCRIBE = StringToBuf("subscribe")
+    val UNSUBSCRIBE = StringToBuf("unsubscribe")
+    val PSUBSCRIBE = StringToBuf("psubscribe")
+    val PUNSUBSCRIBE = StringToBuf("punsubscribe")
+    val MESSAGE = StringToBuf("message")
+    val PMESSAGE = StringToBuf("pmessage")
   }
 }
 
 sealed trait SubscribeHandler {
-  def onSuccess(channel: ChannelBuffer, node: Service[SubscribeCommand, Reply]): Unit
+  def onSuccess(channel: Buf, node: Service[SubscribeCommand, Reply]): Unit
   def onException(node: Service[SubscribeCommand, Reply], ex: Throwable): Unit
   def onMessage(message: Reply): Unit
 }
 
 sealed trait SubscriptionType[Message] {
   type MessageHandler = Message => Unit
-  def subscribeCommand(channel: ChannelBuffer, handler: SubscribeHandler): SubscribeCommand
-  def unsubscribeCommand(channel: ChannelBuffer, handler: SubscribeHandler): SubscribeCommand
+  def subscribeCommand(channel: Buf, handler: SubscribeHandler): SubscribeCommand
+  def unsubscribeCommand(channel: Buf, handler: SubscribeHandler): SubscribeCommand
 }
 
-case object Channel extends SubscriptionType[(ChannelBuffer, ChannelBuffer)] {
-  def subscribeCommand(channel: ChannelBuffer, handler: SubscribeHandler) = {
+case object Channel extends SubscriptionType[(Buf, Buf)] {
+  def subscribeCommand(channel: Buf, handler: SubscribeHandler) = {
     Subscribe(Seq(channel), handler)
   }
-  def unsubscribeCommand(channel: ChannelBuffer, handler: SubscribeHandler) = {
+  def unsubscribeCommand(channel: Buf, handler: SubscribeHandler) = {
     Unsubscribe(Seq(channel), handler)
   }
 }
 
-case object Pattern extends SubscriptionType[(ChannelBuffer, ChannelBuffer, ChannelBuffer)] {
-  def subscribeCommand(channel: ChannelBuffer, handler: SubscribeHandler) = {
+case object Pattern extends SubscriptionType[(Buf, Buf, Buf)] {
+  def subscribeCommand(channel: Buf, handler: SubscribeHandler) = {
     PSubscribe(Seq(channel), handler)
   }
-  def unsubscribeCommand(channel: ChannelBuffer, handler: SubscribeHandler) = {
+  def unsubscribeCommand(channel: Buf, handler: SubscribeHandler) = {
     PUnsubscribe(Seq(channel), handler)
   }
 }
@@ -95,10 +92,10 @@ trait SubscribeCommands {
    * subscribed to successfully, or the subscription is cancelled by calling the unsubscribed
    * method.
    */
-  def subscribe(channels: Seq[ChannelBuffer])(handler: subManager.typ.MessageHandler)
-    : Future[Map[ChannelBuffer, Throwable]] = {
+  def subscribe(channels: Seq[Buf])(handler: subManager.typ.MessageHandler)
+    : Future[Map[Buf, Throwable]] = {
     val notSubscribed = subManager.uniquify(channels, handler)
-    val subscriptions = notSubscribed.map(subManager.subscribe(_))
+    val subscriptions = notSubscribed.map(subManager.subscribe)
     Futures.collectToTry(subscriptions.asJava)
       .map(_.asScala.zip(notSubscribed).collect {
         case (Throw(ex), channel) => (channel, ex)
@@ -122,10 +119,10 @@ trait SubscribeCommands {
    * subscribed to successfully, or the subscription is cancelled by calling the pUnsubscribed
    * method.
    */
-  def pSubscribe(patterns: Seq[ChannelBuffer])(handler: pSubManager.typ.MessageHandler)
-    : Future[Map[ChannelBuffer, Throwable]] = {
+  def pSubscribe(patterns: Seq[Buf])(handler: pSubManager.typ.MessageHandler)
+    : Future[Map[Buf, Throwable]] = {
     val notSubscribed = pSubManager.uniquify(patterns, handler)
-    val subscriptions = notSubscribed.map(pSubManager.subscribe(_))
+    val subscriptions = notSubscribed.map(pSubManager.subscribe)
     Futures.collectToTry(subscriptions.asJava)
       .map(_.asScala.zip(notSubscribed).collect {
         case (Throw(ex), pattern) => (pattern, ex)
@@ -138,8 +135,8 @@ trait SubscribeCommands {
    * subscriptions, and the failed ones are returned as a Future of map from the channel to the
    * exception object.
    */
-  def unsubscribe(channels: Seq[ChannelBuffer]): Future[Map[ChannelBuffer, Throwable]] = {
-    Futures.collectToTry(channels.map(subManager.unsubscribe(_)).asJava)
+  def unsubscribe(channels: Seq[Buf]): Future[Map[Buf, Throwable]] = {
+    Futures.collectToTry(channels.map(subManager.unsubscribe).asJava)
       .map(_.asScala.zip(channels).collect {
         case (Throw(ex), channel) => (channel, ex)
       }.toMap)
@@ -151,8 +148,8 @@ trait SubscribeCommands {
    * subscriptions, and the failed ones are returned as a Future of map from the pattern to the
    * exception object.
    */
-  def pUnsubscribe(patterns: Seq[ChannelBuffer]): Future[Map[ChannelBuffer, Throwable]] = {
-    Futures.collectToTry(patterns.map(pSubManager.unsubscribe(_)).asJava)
+  def pUnsubscribe(patterns: Seq[Buf]): Future[Map[Buf, Throwable]] = {
+    Futures.collectToTry(patterns.map(pSubManager.unsubscribe).asJava)
       .map(_.asScala.zip(patterns).collect {
         case (Throw(ex), pattern) => (pattern, ex)
       }.toMap)
@@ -171,15 +168,15 @@ trait SubscribeCommands {
 
     private case class Subscription(handler: typ.MessageHandler, state: State)
 
-    private[this] val subscriptions = new ConcurrentHashMap[ChannelBuffer, Subscription]().asScala
+    private[this] val subscriptions = new ConcurrentHashMap[Buf, Subscription]().asScala
 
-    def uniquify(channels: Seq[ChannelBuffer], handler: typ.MessageHandler): Seq[ChannelBuffer] = {
+    def uniquify(channels: Seq[Buf], handler: typ.MessageHandler): Seq[Buf] = {
       channels.filter { channel =>
         subscriptions.putIfAbsent(channel, Subscription(handler, Pending)).isEmpty
       }
     }
 
-    def onSuccess(channel: ChannelBuffer, node: Service[SubscribeCommand, Reply]): Unit = {
+    def onSuccess(channel: Buf, node: Service[SubscribeCommand, Reply]): Unit = {
       subscriptions.get(channel) match {
         case Some(subscription) =>
           subscriptions.put(channel, subscription.copy(state = Subscribed(node)))
@@ -193,17 +190,9 @@ trait SubscribeCommands {
     def onMessage(message: Reply): Unit = {
       message match {
         case MBulkReply(BulkReply(MessageBytes.MESSAGE) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
-          subManager.handleMessage(
-            ChannelBufferBuf.Owned.extract(channel),
-            (ChannelBufferBuf.Owned.extract(channel), ChannelBufferBuf.Owned.extract(message)))
+          subManager.handleMessage(channel, (channel, message))
         case MBulkReply(BulkReply(MessageBytes.PMESSAGE) :: BulkReply(pattern) :: BulkReply(channel) :: BulkReply(message) :: Nil) =>
-          pSubManager.handleMessage(
-            ChannelBufferBuf.Owned.extract(pattern),
-            (ChannelBufferBuf.Owned.extract(pattern),
-              ChannelBufferBuf.Owned.extract(channel),
-              ChannelBufferBuf.Owned.extract(message)
-            )
-          )
+          pSubManager.handleMessage(pattern, (pattern, channel, message))
         case MBulkReply(BulkReply(tpe) :: BulkReply(channel) :: IntegerReply(count) :: Nil) =>
           tpe match {
             case MessageBytes.PSUBSCRIBE
@@ -222,9 +211,9 @@ trait SubscribeCommands {
       }
     }
 
-    def handleMessage(channel: ChannelBuffer, message: Message): Unit = {
+    def handleMessage(channel: Buf, message: Message): Unit = {
       try {
-        subscriptions.get(channel).map(_.handler(message))
+        subscriptions.get(channel).foreach(_.handler(message))
       } catch {
         case NonFatal(ex) =>
           log.error(ex, "Failed to handle a message: %s", message)
@@ -245,10 +234,10 @@ trait SubscribeCommands {
       }
     }
 
-    private def retry(channel: ChannelBuffer): Future[Reply] =
+    private def retry(channel: Buf): Future[Reply] =
       doRequest(typ.subscribeCommand(channel, this))
 
-    def subscribe(channel: ChannelBuffer): Future[Reply] = {
+    def subscribe(channel: Buf): Future[Reply] = {
       // It is possible that the channel is unsubscribed, so we always check it before making
       // another attempt.
       if (subscriptions.get(channel).isEmpty) Future.value(NoReply)
@@ -260,7 +249,7 @@ trait SubscribeCommands {
       }
     }
 
-    def unsubscribe(channel: ChannelBuffer): Future[Reply] = {
+    def unsubscribe(channel: Buf): Future[Reply] = {
       subscriptions.remove(channel) match {
         case Some(Subscription(_, Subscribed(node))) =>
           node(typ.unsubscribeCommand(channel, this))

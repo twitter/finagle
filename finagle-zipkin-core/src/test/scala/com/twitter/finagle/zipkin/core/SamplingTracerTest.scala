@@ -76,14 +76,28 @@ class ZipkinTracerTest extends FunSuite with MockitoSugar with GeneratorDrivenPr
   }
 
   test("ZipkinTracer should pass through trace id with sampled true despite of sample rate") {
-    val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None)
-
     val underlying = mock[RawZipkinTracer]
     val tracer = new SamplingTracer(underlying, 0f)
     val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
     val record = Record(id, Time.now, Annotation.ClientSend())
     tracer.record(record)
     verify(underlying).record(record)
+  }
+
+  test("ZipkinTracer should return isActivelyTracing correctly based on sampled value") {
+    val underlying = mock[RawZipkinTracer]
+    val tracer = new SamplingTracer(underlying, 0f)
+    val id = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), Some(true))
+    val record = Record(id, Time.now, Annotation.ClientSend())
+
+    // true when sampled is true
+    assert(tracer.isActivelyTracing(id))
+    // true when sampled is not set
+    assert(tracer.isActivelyTracing(id.copy(_sampled = None)))
+    // true when debug is set
+    assert(tracer.isActivelyTracing(id.copy(_sampled = Some(false), flags = Flags(Flags.Debug))))
+    // false when sampled is false
+    assert(!tracer.isActivelyTracing(id.copy(_sampled = Some(false))))
   }
 
   test("serialize andThen deserialize = identity") {

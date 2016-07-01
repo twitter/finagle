@@ -1,19 +1,19 @@
 package com.twitter.finagle.util
 
-import com.twitter.util.TimerTask
+import com.twitter.util.TimeConversions._
+import com.twitter.util.{Timer, TimerTask}
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicInteger
 import org.jboss.netty.{util => nu}
-import org.mockito.ArgumentCaptor
-import com.twitter.util.TimeConversions._
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.Matchers._
+import org.mockito.Mockito.{atMost, verify, when, never}
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{verify, when, atMost}
-import org.mockito.Matchers._
-import org.mockito.stubbing.Answer
-import org.mockito.invocation.InvocationOnMock
 
 @RunWith(classOf[JUnitRunner])
 class HashedWheelTimerTest extends FunSuite with MockitoSugar {
@@ -48,5 +48,16 @@ class HashedWheelTimerTest extends FunSuite with MockitoSugar {
     verify(timer, atMost(1)).newTimeout(any[org.jboss.netty.util.TimerTask], any[Long], any[java.util.concurrent.TimeUnit])
   }
 
-  // ko todo: add test for locals
+  test("HashedWheelTimer.Default should ignore stop()") {
+    val underlying = mock[Timer]
+    val nonStop = HashedWheelTimer.unstoppable(underlying)
+    nonStop.stop()
+    verify(underlying, never()).stop()
+  }
+
+  test("HashedWheelTimer.Default.toString") {
+    val str = HashedWheelTimer.Default.toString
+    assert("UnstoppableTimer(HashedWheelTimer.Default)" == str)
+  }
+
 }

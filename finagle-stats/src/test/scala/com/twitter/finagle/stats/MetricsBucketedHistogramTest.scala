@@ -118,6 +118,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-2941
   test("histogram snapshot respects refresh window") {
     Time.withCurrentTimeFrozen { tc =>
       val ctx = new Ctx(tc)
@@ -141,6 +142,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-2941
   test("histogram snapshot stays up-to-date when snapshots are missed") {
     Time.withCurrentTimeFrozen { tc =>
       val ctx = new Ctx(tc)
@@ -203,6 +205,7 @@ class MetricsBucketedHistogramTest extends FunSuite {
     }
   }
 
+  if (!sys.props.contains("SKIP_FLAKY")) // CSL-2941
   test("histogram snapshot erases old data on refresh") {
     Time.withCurrentTimeFrozen { tc =>
       val ctx = new Ctx(tc)

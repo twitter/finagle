@@ -12,4 +12,9 @@ object NullToggleMap extends ToggleMap {
   def apply(id: String): Toggle[Int] = Toggle.Undefined
 
   def iterator: Iterator[Metadata] = Iterator.empty
+
+  // an optimization that allows for avoiding unnecessary NullToggleMaps
+  // by "flattening" them out.
+  override def orElse(that: ToggleMap): ToggleMap = that
+
 }

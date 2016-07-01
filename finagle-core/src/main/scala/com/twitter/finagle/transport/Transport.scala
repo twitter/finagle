@@ -247,10 +247,20 @@ object Transport {
   private[finagle] def collate[A](trans: Transport[_, A], chunkOfA: A => Future[Option[Buf]])
   : Reader with Future[Unit] = new Promise[Unit] with Reader {
     private[this] val rw = Reader.writable()
-    become(Transport.copyToWriter(trans, rw)(chunkOfA) respond {
-      case Throw(exc) => rw.fail(exc)
-      case Return(_) => rw.close()
-    })
+
+    // Ensure that collate's future is satisfied _before_ its reader
+    // is closed. This allows callers to observe the stream completion
+    // before readers do.
+    private[this] val writes = copyToWriter(trans, rw)(chunkOfA)
+    forwardInterruptsTo(writes)
+    writes.respond {
+      case ret@Throw(t) =>
+        updateIfEmpty(ret)
+        rw.fail(t)
+      case r@Return(_) =>
+        updateIfEmpty(r)
+        rw.close()
+    }
 
     def read(n: Int) = rw.read(n)
 

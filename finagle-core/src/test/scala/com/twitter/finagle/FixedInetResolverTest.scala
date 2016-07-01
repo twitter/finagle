@@ -5,11 +5,10 @@ import com.twitter.util.{Future, Await}
 import java.net.{UnknownHostException, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
-import org.scalatest.concurrent.Eventually
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class FixedInetResolverTest extends FunSuite with Eventually {
+class FixedInetResolverTest extends FunSuite {
 
   // The caching resolver (like the InetResolver, NilResolver)
   // should be installed by default and is capable of resolving addresses.
@@ -41,7 +40,7 @@ class FixedInetResolverTest extends FunSuite with Eventually {
       else Future.value(Seq[InetAddress](InetAddress.getLoopbackAddress))
     }
 
-    val resolver = new FixedInetResolver(statsReceiver, Long.MaxValue, Some(resolve))
+    val resolver = new FixedInetResolver(FixedInetResolver.cache(resolve, Long.MaxValue), statsReceiver)
   }
 
   test("Caching resolver caches successes") {
@@ -60,15 +59,17 @@ class FixedInetResolverTest extends FunSuite with Eventually {
 
       // there should have only been 1 lookup, but all N successes
       assert(numLookups == 5)
-      assert(statsReceiver.counter("inet", "dns", "successes")() == iterations * 5)
-      assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "size"))() == 5)
+      assert(statsReceiver.counter("successes")() == iterations * 5)
+      assert(statsReceiver.gauges(Seq("cache", "size"))() == 5)
     }
   }
+
 
   test("Caching resolver respects cache size parameter") {
     new Ctx {
       val maxCacheSize = 1
-      val resolver2 = new FixedInetResolver(statsReceiver, maxCacheSize, Some(resolve))
+      val cache = FixedInetResolver.cache(resolve, maxCacheSize)
+      val resolver2 = new FixedInetResolver(cache, statsReceiver)
       // make the same request n-times
 
       def assertBound(hostname: String): Unit = {
@@ -78,6 +79,7 @@ class FixedInetResolverTest extends FunSuite with Eventually {
           case Addr.Bound(_, _) =>
           case _ => fail("Resolution should have succeeded")
         }
+        cache.cleanUp()
       }
 
       val iterations = 10
@@ -85,23 +87,23 @@ class FixedInetResolverTest extends FunSuite with Eventually {
         assertBound("1.2.3.4:100")
       }
       assert(numLookups == 1)
-      assert(statsReceiver.counter("inet", "dns", "successes")() == iterations)
-      assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "size"))() == 1)
-      assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "evicts"))() == 0)
+      assert(statsReceiver.counter("successes")() == iterations)
+      assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
+      assert(statsReceiver.gauges(Seq("cache", "evicts"))() == 0)
 
       // evict 1.2.3.4
       assertBound("1.2.3.5:100")
       assert(numLookups == 2)
-      assert(statsReceiver.counter("inet", "dns", "successes")() == iterations + 1)
-      eventually { assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "size"))() == 1) }
-      assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "evicts"))() == 1)
+      assert(statsReceiver.counter("successes")() == iterations + 1)
+      assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
+      assert(statsReceiver.gauges(Seq("cache", "evicts"))() == 1)
 
       // evicted
       assertBound("1.2.3.4:100")
       assert(numLookups == 3)
-      assert(statsReceiver.counter("inet", "dns", "successes")() == iterations + 2)
-      assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "size"))() == 1)
-      assert(statsReceiver.gauges(Seq("inet", "dns", "cache", "evicts"))() == 2)
+      assert(statsReceiver.counter("successes")() == iterations + 2)
+      assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
+      assert(statsReceiver.gauges(Seq("cache", "evicts"))() == 2)
     }
   }
 
@@ -122,7 +124,7 @@ class FixedInetResolverTest extends FunSuite with Eventually {
 
       // there should have only been N lookups, and N failures
       assert(numLookups == iterations)
-      assert(statsReceiver.counter("inet", "dns", "failures")() == iterations)
+      assert(statsReceiver.counter("failures")() == iterations)
     }
   }
 }

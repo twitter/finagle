@@ -12,8 +12,8 @@ final class SetCodecSuite extends RedisRequestTest {
   test("Correctly encode SADD", CodecTest) {
     unwrap(codec(wrap("SADD foo bar\r\n"))) {
       case SAdd(key, List(member)) => {
-        assert(key == foo)
-        assert(member == bar)
+        assert(key == bufFoo)
+        assert(member == bufBar)
       }
     }
   }
@@ -27,7 +27,7 @@ final class SetCodecSuite extends RedisRequestTest {
   test("Correctly encode SINTER for one key", CodecTest) {
     unwrap(codec(wrap("SINTER foo\r\n"))) {
       case SInter(keys) => {
-        assert(keys(0) == foo)
+        assert(keys(0) == bufFoo)
       }
     }
   }
@@ -35,8 +35,8 @@ final class SetCodecSuite extends RedisRequestTest {
   test("Correctly encode SINTER for two keys", CodecTest) {
     unwrap(codec(wrap("SINTER foo bar\r\n"))) {
       case SInter(keys) => {
-        assert(keys(0) == foo)
-        assert(keys(1) == bar)
+        assert(keys(0) == bufFoo)
+        assert(keys(1) == bufBar)
       }
     }
   }

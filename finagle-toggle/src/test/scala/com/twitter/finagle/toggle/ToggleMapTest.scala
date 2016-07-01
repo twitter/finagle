@@ -173,6 +173,29 @@ class ToggleMapTest extends FunSuite
     assert(NullToggleMap == ToggleMap.of())
   }
 
+  private class NumApply extends ToggleMap.Proxy {
+    private var nApply = 0
+    def numApply: Int = nApply
+
+    protected val underlying: ToggleMap = ToggleMap.newMutable()
+    override def apply(id: String): Toggle[Int] = {
+      nApply += 1
+      super.apply(id)
+    }
+  }
+
+  test("ToggleMap.of adds each ToggleMap only once") {
+    val tm0 = new NumApply()
+    val tm1 = new NumApply()
+    val of = ToggleMap.of(tm0, tm1)
+    val tog = of("com.twitter.Toggle")
+
+    // we can use the number of times `ToggleMap.apply` was called as a proxy
+    // for how many times it was added to the aggregated ToggleMap
+    assert(1 == tm0.numApply)
+    assert(1 == tm1.numApply)
+  }
+
   test("ToggleMap.Flags with empty Flags") {
     flag.overrides.let(Map.empty) {
       assert(ToggleMap.flags.iterator.isEmpty)
@@ -287,8 +310,8 @@ class ToggleMapTest extends FunSuite
     val tm2 = ToggleMap.newMutable()
     tm2.put("com.toggle.t2", 0.3)
 
-    val tm01 = tm0.orElse(tm1)
-    val tm012 = tm01.orElse(tm2)
+    val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
+    val tm012 = NullToggleMap.orElse(tm01).orElse(tm2)
 
     val mds01 = tm01.iterator.toSeq
     assert(mds01.size == 2)
@@ -309,16 +332,37 @@ class ToggleMapTest extends FunSuite
     val tm1 = ToggleMap.newMutable()
     tm1.put("com.toggle.t0", 1.0)
 
-    val tm01 = tm0.orElse(tm1)
+    val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
     val mds = tm01.iterator.toSeq
     assert(mds.size == 1)
     assert(mds.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 }, mds)
   }
 
+  test("ToggleMap.orElse.iterator uses first defined Toggle.Metadata.description") {
+    val md = Toggle.Metadata(
+      "com.twitter.T2",
+      0.999,
+      Some("ah'll be back"))
+    val noDescription = new ToggleMap.Immutable(
+      immutable.Seq(md.copy(description = None)))
+
+    val withDescription = new ToggleMap.Immutable(
+      immutable.Seq(md.copy(fraction = 0.111)))
+
+    // put the metadata without description before the one with it,
+    // make sure we get the fraction from the 1st metadata, but the
+    // description from the metadata that has it defined.
+    val mds = noDescription.orElse(withDescription).iterator.toSeq
+    assert(1 == mds.size)
+    val metadata = mds.head
+    assert(0.999 == metadata.fraction)
+    assert(md.description == metadata.description)
+  }
+
   test("ToggleMap.orElse.apply") {
     val tm0 = ToggleMap.newMutable()
     val tm1 = ToggleMap.newMutable()
-    val tm01 = tm0.orElse(tm1)
+    val tm01 = NullToggleMap.orElse(tm0).orElse(tm1)
     val toggle = tm01("com.toggle.t")
 
     // the toggle doesn't exist in either underlying map

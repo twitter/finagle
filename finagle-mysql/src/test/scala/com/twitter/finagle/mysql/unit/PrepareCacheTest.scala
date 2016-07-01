@@ -10,6 +10,7 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience {
+
   test("cache prepare requests") {
 
     val q = new LinkedBlockingQueue[Request]()
@@ -26,7 +27,7 @@ class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience
     svc(r0)
     assert(q.poll() == r0)
 
-    for (i <- 1 to 10) svc(PrepareRequest("SELECT %d".format(i)))
+    for (i <- 1 to 10) svc(PrepareRequest(s"SELECT $i"))
     svc(PrepareRequest("SELECT 5"))
     assert(q.contains(PrepareRequest("SELECT 5")))
 
@@ -38,7 +39,6 @@ class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience
 
     // fill cache and evict eldest.
     svc(PrepareRequest("SELECT 11"))
-
     q.poll()
 
     eventually {
@@ -46,8 +46,12 @@ class PrepareCacheTest extends FunSuite with Eventually with IntegrationPatience
       assert(q.peek == CloseRequest(stmtId))
     }
 
-    // evicted element is not in cache.
-    svc(PrepareRequest("SELECT 1"))
-    assert(q.contains(PrepareRequest("SELECT 1")))
+    q.clear()
+
+    // Check that the evicted element is not in cache. Caffeine evicts older
+    // elements first, but its not strictly via an LRU policy. We don't actually
+    // need that guarantee so it's okay to loosely check for an eviction.
+    for (i <- 1 to 10) svc(PrepareRequest(s"SELECT $i"))
+    assert(!q.isEmpty)
   }
 }

@@ -1,68 +1,83 @@
 package com.twitter.finagle.redis.protocol.commands
 
+import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.finagle.redis.protocol._
 import com.twitter.finagle.redis.protocol.Commands._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import com.twitter.finagle.redis.util.StringToChannelBuffer
+import com.twitter.io.Buf
+import org.jboss.netty.buffer.ChannelBuffer
 
-case class BAdd(key: ChannelBuffer, field: ChannelBuffer, value: ChannelBuffer)
-    extends StrictKeyCommand {
+case class BAdd(keyBuf: Buf, field: Buf, value: Buf) extends StrictKeyCommand {
+  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
   def command = Commands.BADD
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.BADD, key, field, value))
+
+  def toChannelBuffer =
+    RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.BADD, keyBuf, field, value))
 }
 
 object BAdd {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 3, "BADD")
     new BAdd(
-      ChannelBuffers.wrappedBuffer(list(0)),
-      ChannelBuffers.wrappedBuffer(list(1)),
-      ChannelBuffers.wrappedBuffer(list(2)))
+      Buf.ByteArray.Owned(list(0)),
+      Buf.ByteArray.Owned(list(1)),
+      Buf.ByteArray.Owned(list(2))
+    )
   }
 }
 
 object BRem {
   def apply(args: Seq[Array[Byte]]) = {
     RequireClientProtocol(args.length > 2, "BREM requires a hash key and at least one field")
-    new BRem(ChannelBuffers.wrappedBuffer(args(0)),
-      args.drop(1).map(ChannelBuffers.wrappedBuffer(_)))
+
+    new BRem(Buf.ByteArray.Owned(args(0)), args.drop(1).map(Buf.ByteArray.Owned.apply))
   }
 }
-case class BRem(key: ChannelBuffer, fields: Seq[ChannelBuffer]) extends StrictKeyCommand {
+case class BRem(keyBuf: Buf, fields: Seq[Buf]) extends StrictKeyCommand {
+  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
+
   def command = Commands.BREM
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.BREM, key) ++ fields)
+  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.BREM, keyBuf) ++ fields)
 }
 
 object BGet {
   def apply(args: Seq[Array[Byte]]) = {
     val list = trimList(args, 2, "BGET")
-    new BGet(ChannelBuffers.wrappedBuffer(list(0)), ChannelBuffers.wrappedBuffer(list(1)))
+
+    new BGet(Buf.ByteArray.Owned(list(0)), Buf.ByteArray.Owned(list(1)))
   }
 }
 
-case class BGet(key: ChannelBuffer, field: ChannelBuffer) extends StrictKeyCommand {
+case class BGet(keyBuf: Buf, field: Buf) extends StrictKeyCommand {
+  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
+
   def command = Commands.BGET
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.BGET, key, field))
+  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.BGET, keyBuf, field))
 }
 
-case class BCard(key: ChannelBuffer) extends StrictKeyCommand {
+case class BCard(keyBuf: Buf) extends StrictKeyCommand {
+  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
+
   def command = Commands.BCARD
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.BCARD, key))
+  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.BCARD, keyBuf))
 }
 
 object BCard {
   def apply(args: Seq[Array[Byte]]) = {
     RequireClientProtocol(!args.isEmpty, "BCARD requires at least one member")
-    new BCard(ChannelBuffers.wrappedBuffer(args(0)))
+
+    new BCard(Buf.ByteArray.Owned(args(0)))
   }
 }
 
-case class BRange(key: ChannelBuffer, startField: Option[ChannelBuffer], endField: Option[ChannelBuffer]) extends StrictKeyCommand {
+case class BRange(keyBuf: Buf, startField: Option[Buf], endField: Option[Buf]) extends StrictKeyCommand {
+  override def key: ChannelBuffer = BufChannelBuffer(keyBuf)
   def command = Commands.BRANGE
-  val request: Seq[ChannelBuffer] =
-    if (startField.isEmpty && endField.isEmpty) Seq(key)
-    else if (!startField.isEmpty && endField.isEmpty) Seq(key, StringToChannelBuffer("start"), startField.get)
-    else if (startField.isEmpty && !endField.isEmpty) Seq(key, StringToChannelBuffer("end"), endField.get)
-    else Seq(key, StringToChannelBuffer("startend"), startField.get, endField.get)
-  def toChannelBuffer = RedisCodec.toUnifiedFormat(Seq(CommandBytes.BRANGE) ++ request)
+  val startEnd: Seq[Buf] = (startField, endField) match {
+    case (Some(s), Some(e)) => Seq(Buf.Utf8("startend"), s, e)
+    case (None, Some(e)) => Seq(Buf.Utf8("end"), e)
+    case (Some(s), None) => Seq(Buf.Utf8("start"), s)
+    case (None, None) => Seq.empty
+  }
+
+  def toChannelBuffer = RedisCodec.bufToUnifiedChannelBuffer(Seq(CommandBytes.BRANGE, keyBuf) ++ startEnd)
 }

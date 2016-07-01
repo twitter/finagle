@@ -26,28 +26,28 @@ class AbortedClientTest extends FunSuite with IntegrationClient {
         maxWaiters = 100
       ))
 
-  for (c <- client) {
-    test("MySql connections are closed cleanly, so MySql doesn't count them as aborted.") {
-      val abortedClientQuery = "SHOW GLOBAL STATUS LIKE '%Aborted_clients%'"
-      val initialAbortedValue: String = Await.result(c.select(abortedClientQuery) { row =>
-        val StringValue(abortedValue) = row("Value").get
-        abortedValue
-      }, 5.seconds).head
+ for (c <- client) {
+   test("MySql connections are closed cleanly, so MySql doesn't count them as aborted.") {
+     val abortedClientQuery = "SHOW GLOBAL STATUS LIKE '%Aborted_clients%'"
+     val initialAbortedValue: String = Await.result(c.select(abortedClientQuery) { row =>
+       val StringValue(abortedValue) = row("Value").get
+       abortedValue
+     }, 5.seconds).head
 
-      val query = "SELECT '1' as ONE, '2' as TWO from information_schema.processlist;"
-      // Run a query so the mysql client gets used
-      Await.result(c.select(query) { row =>
-        row("ONE").get
-        row("TWO").get
-      }, 5.seconds)
+     val query = "SELECT '1' as ONE, '2' as TWO from information_schema.processlist;"
+     // Run a query so the mysql client gets used
+     Await.result(c.select(query) { row =>
+       row("ONE").get
+       row("TWO").get
+     }, 5.seconds)
 
-      // Wait a bit longer than the idleTime so the connection used above is removed from the pool.
-      Thread.sleep((idleTime + 5.seconds).inMilliseconds)
+     // Wait a bit longer than the idleTime so the connection used above is removed from the pool.
+     Thread.sleep((idleTime + 5.seconds).inMilliseconds)
 
-      Await.result(c.select(abortedClientQuery) { row =>
-        val StringValue(abortedValue) = row("Value").get
-        assert(initialAbortedValue.toInt == abortedValue.toInt)
-      }, 5.seconds)
-    }
+     Await.result(c.select(abortedClientQuery) { row =>
+       val StringValue(abortedValue) = row("Value").get
+       assert(initialAbortedValue.toInt == abortedValue.toInt)
+     }, 5.seconds)
+   }
   }
 }

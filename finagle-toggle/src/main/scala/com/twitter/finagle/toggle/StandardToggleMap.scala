@@ -1,5 +1,6 @@
 package com.twitter.finagle.toggle
 
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{Return, Throw}
@@ -33,6 +34,14 @@ import scala.collection.JavaConverters._
  * `resources/com/twitter/toggles/configs/com.twitter.finagle.json` and service
  * owners can customize toggles via
  * `resources/com/twitter/toggles/configs/com.twitter.finagle-service.json`.
+ *
+ * The JSON files also support optional environment-specific overrides via
+ * files that are examined before the non-environment-specific configs.
+ * These environment-specific configs must be placed at
+ * `resources/com/twitter/toggles/configs/com.twitter.finagle-$environment.json`
+ * or `resources/com/twitter/toggles/configs/com.twitter.finagle-service-$environment.json`
+ * where the `environment` from [[ServerInfo.apply()]] is used to determine which
+ * one to load.
  */
 object StandardToggleMap {
 
@@ -48,16 +57,21 @@ object StandardToggleMap {
    *                      always end up scoped to "toggles/$libraryName".
    */
   def apply(libraryName: String, statsReceiver: StatsReceiver): ToggleMap =
-    apply(libraryName, statsReceiver, ToggleMap.mutable)
+    apply(
+      libraryName,
+      statsReceiver,
+      ToggleMap.mutable,
+      ServerInfo())
 
   /** exposed for testing */
   private[toggle] def apply(
     libraryName: String,
     statsReceiver: StatsReceiver,
-    mutable: ToggleMap
+    mutable: ToggleMap,
+    serverInfo: ServerInfo
   ): ToggleMap = {
-    val svcsJson = loadJsonConfigFromResources(libraryName, s"$libraryName-service.json")
-    val libsJson = loadJsonConfigFromResources(libraryName, s"$libraryName.json")
+    val svcsJson = loadJsonConfig(libraryName, s"$libraryName-service", serverInfo)
+    val libsJson = loadJsonConfig(libraryName, libraryName, serverInfo)
 
     val stacked = ToggleMap.of(
       mutable,
@@ -69,17 +83,35 @@ object StandardToggleMap {
     ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
   }
 
-  private[this] def loadJsonConfigFromResources(
+  private[this] def loadJsonConfig(
+    libraryName: String,
+    configName: String,
+    serverInfo: ServerInfo
+  ): ToggleMap = {
+    val withoutEnv = loadJsonConfigWithEnv(libraryName, configName)
+    val withEnv = serverInfo.environment match {
+      case Some(env) =>
+        val e = env.toString.toLowerCase
+        loadJsonConfigWithEnv(libraryName, s"$configName-$e")
+      case None =>
+        NullToggleMap
+    }
+
+    // prefer the environment specific config.
+    withEnv.orElse(withoutEnv)
+  }
+
+  private[this] def loadJsonConfigWithEnv(
     libraryName: String,
     configName: String
   ): ToggleMap = {
     val classLoader = getClass.getClassLoader
-    val rscs = classLoader.getResources(s"com/twitter/toggles/configs/$configName").asScala.toSeq
+    val rscPath = s"com/twitter/toggles/configs/$configName.json"
+    val rscs = classLoader.getResources(rscPath).asScala.toSeq
     if (rscs.size > 1) {
       throw new IllegalArgumentException(
-        s"Multiple Toggle config resources found for $configName: ${rscs.mkString(",")}")
+        s"Multiple Toggle config resources found for $configName, ${rscs.mkString(",")}")
     } else if (rscs.isEmpty) {
-      log.info(s"No Toggle config resources found for $configName, using an empty ToggleMap")
       NullToggleMap
     } else {
       val rsc = rscs.head
@@ -87,11 +119,10 @@ object StandardToggleMap {
       JsonToggleMap.parse(rsc) match {
         case Throw(t) =>
           throw new IllegalArgumentException(
-            s"Failure parsing Toggle config resources for $configName from $rsc", t)
-        case Return(map) =>
-          map
+            s"Failure parsing Toggle config resources for $configName, from $rsc", t)
+        case Return(toggleMap) =>
+          toggleMap
       }
     }
   }
-
 }

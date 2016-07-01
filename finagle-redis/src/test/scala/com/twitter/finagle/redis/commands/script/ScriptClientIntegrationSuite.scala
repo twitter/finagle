@@ -340,12 +340,12 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
     test(testName + " should succeed with returned Seq[Buf]") {
       withRedisClient { client =>
         assert(Await.result(for {
-          _ <- client.hMSet(stringToChannelBuffer("info"), stringToChannelBufferMap("x" -> "1", "y" -> "2"))
+          _ <- client.hMSet(Buf.Utf8("info"), Map("x" -> "1", "y" -> "2").map { case (k, v) => Buf.Utf8(k) -> Buf.Utf8(v)})
           s1 <- eval(client)(scriptHGetAll, stringsToBuffers("info"), Nil)
           s2 <- eval(client)(scriptHGetAll, stringsToBuffers("nonexsisting"), Nil)
           s3 <- eval(client)(scriptHMGet, stringsToBuffers("info"), stringsToBuffers("a", "b", "c"))
           s4 <- eval(client)(scriptHMGet, stringsToBuffers("info"), stringsToBuffers("x", "z"))
-          s5 <- client.hMGet(stringToChannelBuffer("info"), stringsToChannelBuffers("x", "z"))
+          s5 <- client.hMGet(Buf.Utf8("info"), stringsToBuffers("x", "z"))
         } yield (s1, s2, s3, s4, s5)).==(
           (
             stringsToBuffers("x", "1", "y", "2"),

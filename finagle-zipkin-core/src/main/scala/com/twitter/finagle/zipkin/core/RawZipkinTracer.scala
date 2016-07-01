@@ -33,6 +33,8 @@ abstract private[twitter] class RawZipkinTracer(
    */
   def sampleTrace(traceId: TraceId): Option[Boolean] = Some(true)
 
+  override def isActivelyTracing(traceId: TraceId): Boolean = true
+
   /**
    * Mutate the Span with whatever new info we have.
    * If we see an "end" annotation we remove the span and send it off.
