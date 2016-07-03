@@ -1,7 +1,7 @@
 package com.twitter.finagle.zipkin
 
 import com.twitter.app.GlobalFlag
-import com.twitter.finagle.zipkin.thrift.Sampler
+import com.twitter.finagle.zipkin.core.Sampler
 import java.net.InetSocketAddress
 
 object host extends GlobalFlag[InetSocketAddress](

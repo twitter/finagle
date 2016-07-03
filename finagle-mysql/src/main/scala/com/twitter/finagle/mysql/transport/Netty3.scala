@@ -1,14 +1,9 @@
 package com.twitter.finagle.exp.mysql.transport
 
-import com.twitter.finagle.client.Transporter
-import com.twitter.finagle.exp.mysql.{Request, Result}
-import com.twitter.finagle.netty3.{ChannelSnooper, Netty3Transporter}
-import com.twitter.finagle.Stack
+import com.twitter.io.Buf
 import com.twitter.util.NonFatal
-import java.util.logging.{Level, Logger}
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.channel._
-import org.jboss.netty.channel.{Channels, ChannelPipelineFactory}
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.channel.{ChannelPipelineFactory, Channels, _}
 import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 /**
@@ -25,9 +20,9 @@ class PacketFrameDecoder extends FrameDecoder {
 
     val header = new Array[Byte](Packet.HeaderSize)
     buffer.readBytes(header)
-    val br = BufferReader(header)
+    val br = MysqlBuf.reader(header)
 
-    val length = br.readUnsignedInt24()
+    val length = br.readUnsignedMediumLE()
     val seq  = br.readUnsignedByte()
 
     if (buffer.readableBytes < length) {
@@ -38,7 +33,7 @@ class PacketFrameDecoder extends FrameDecoder {
     val body = new Array[Byte](length)
     buffer.readBytes(body)
 
-    Packet(seq, Buffer(body))
+    Packet(seq, Buf.ByteArray.Owned(body))
   }
 }
 
@@ -47,7 +42,7 @@ class PacketEncoder extends SimpleChannelDownstreamHandler {
     evt.getMessage match {
       case p: Packet =>
         try {
-          val cb = p.toChannelBuffer
+          val cb = ChannelBuffers.copiedBuffer(Buf.ByteArray.Owned.extract(p.toBuf))
           Channels.write(ctx, evt.getFuture, cb, evt.getRemoteAddress)
         } catch {
           case NonFatal(e) =>
@@ -71,14 +66,4 @@ object MysqlClientPipelineFactory extends ChannelPipelineFactory {
     pipeline.addLast("packetEncoder", new PacketEncoder)
     pipeline
   }
-}
-
-/**
- * Responsible for the transport layer plumbing required to produce
- * a Transporter[Packet, Packet]. The current implementation uses
- * Netty3.
- */
-object MysqlTransporter {
-  def apply(params: Stack.Params): Transporter[Packet, Packet] =
-    Netty3Transporter(MysqlClientPipelineFactory, params)
 }

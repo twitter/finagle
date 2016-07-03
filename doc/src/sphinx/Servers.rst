@@ -44,7 +44,8 @@ behavior lives in the :ref:`clients <finagle_clients>`.
 
 .. figure:: _static/serverstack.svg
 
-    Fig. 1: A visual representation of each module in a default Finagle server. Requests flow from left to right.
+    Fig. 1: A visual representation of each module in a default Finagle server.
+            Requests flow from left to right.
 
 Many of the server modules act as `admission controllers` that make a decision (based on either a dynamic or
 static property) whether this server can handle the incoming request while maintaining some SLO (Service Level
@@ -122,3 +123,31 @@ Finagle clients, this module is disabled by default (the timeout is unbounded). 
 .. [#example] Configuration parameters/values provided in this example are only demonstrate
    the API usage, not the real world values. We do not recommend blindly applying those values
    to production systems.
+
+Session Expiration
+^^^^^^^^^^^^^^^^^^
+In certain cases, it may be useful for the server to control its resources via bounding
+the lifetime of a session. The `Session Expiration` module is attached at the connection level
+and expires a service/session after a certain amount of idle time. The module is
+implemented by :src:`ExpiringService <com/twitter/finagle/service/ExpiringService.scala>`.
+
+The default setting for the `Expiration` module is to never expire a session. Here is how
+it can be configured [#example]_.
+
+.. code-block:: scala
+
+  import com.twitter.conversions.time._
+  import com.twitter.finagle.Http
+
+  val twitter = Http.server
+    .withSession.maxLifeTime(20.seconds)
+    .withSession.maxIdleTime(10.seconds)
+    .newService("twitter.com")
+
+The `Expiration` module takes two parameters:
+
+1. `maxLifeTime` - the maximum duration for which a session is considered alive
+2. `maxIdleTime` - the maximum duration for which a session is allowed to idle
+   (not sending any requests)
+
+See :ref:`Expiration metrics <idle_apoptosis_stats>` for more details.

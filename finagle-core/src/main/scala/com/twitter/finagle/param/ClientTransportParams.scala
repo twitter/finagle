@@ -115,22 +115,6 @@ class ClientTransportParams[A <: Stack.Parameterized[A]](self: Stack.Parameteriz
   }
 
   /**
-   * Enables the SOCKS proxy on this client (default: global flags).
-   *
-   * @param socketAddress the socket address of the proxy server
-   *
-   * @param credentials the optional credentials for the proxy server
-   */
-  def socksProxy(
-    socketAddress: SocketAddress,
-    credentials: Option[Transporter.Credentials]
-  ): A = self.configured(Transporter.SocksProxy(
-    Some(socketAddress),
-    credentials.map(c => (c.username, c.password))
-  ))
-
-
-  /**
    * Enables TCP tunnelling through HTTP proxy [1] on this client (default: disabled).
    *
    * TCP tunneling might be used to flow any TCP traffic (not only HTTP), but is mostly used to

@@ -20,7 +20,7 @@ final class RequestEncodingSuite extends RedisRequestTest {
   }
 
   test("Correctly encode a HSet request with an empty string as value", CodecTest) {
-    assert(codec.send(HSet(foo, bar, string2ChanBuf(""))) ==
+    assert(codec.send(HSet(bufFoo, bufBar, Buf.Empty)) ==
       List("*4\r\n$4\r\nHSET\r\n$3\r\nfoo\r\n$3\r\nbar\r\n$0\r\n\r\n"))
   }
 }

@@ -215,6 +215,13 @@ private[finagle] trait ProxyBufWriter extends BufWriter {
 
 private[finagle] object BufWriter {
   /**
+   * Creates a fixed sized [[BufWriter]] that writes to `bytes`
+   */
+  def apply(bytes: Array[Byte]): BufWriter = {
+    new FixedBufWriter(bytes)
+  }
+
+  /**
    * Creates a fixed size [[BufWriter]].
    */
   def fixed(size: Int): BufWriter = {

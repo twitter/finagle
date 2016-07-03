@@ -12,18 +12,26 @@ import org.scalatest.junit.JUnitRunner
 class InetResolverTest extends FunSuite {
   val statsReceiver = new InMemoryStatsReceiver
 
-  val resolver = new InetResolver(statsReceiver, None) {
-    override def resolveHost(host: String): Future[Seq[InetAddress]] = {
-      if (host.equals("localhost")) super.resolveHost(host)
-      else Future.exception(new UnknownHostException())
-    }
+  val dnsResolver = new DnsResolver(statsReceiver)
+  def resolveHost(host: String): Future[Seq[InetAddress]] = {
+    if (host.isEmpty || host.equals("localhost")) dnsResolver(host)
+    else Future.exception(new UnknownHostException())
+  }
+  val resolver = new InetResolver(resolveHost, statsReceiver, None)
+
+  test("local address") {
+    val empty = resolver.bind(":9990")
+    assert(empty.sample() == Addr.Bound(Address(9990)))
+
+    val localhost = resolver.bind("localhost:9990")
+    assert(localhost.sample() == Addr.Bound(Address(9990)))
   }
 
   test("host not found") {
     val addr = resolver.bind("no_TLDs_for_old_humans:80")
     val f = addr.changes.filter(_ == Addr.Neg).toFuture
     assert(Await.result(f) == Addr.Neg)
-    assert(statsReceiver.counter("inet", "dns", "failures")() > 0)
+    assert(statsReceiver.counter("failures")() > 0)
   }
 
   test("resolution failure") {
@@ -43,8 +51,8 @@ class InetResolverTest extends FunSuite {
         assert(b.contains(Address("localhost", 80)))
       case _ => fail()
     }
-    assert(statsReceiver.counter("inet", "dns", "successes")() > 0)
-    assert(statsReceiver.stat("inet", "dns", "lookup_ms")().size > 0)
+    assert(statsReceiver.counter("successes")() > 0)
+    assert(statsReceiver.stat("lookup_ms")().size > 0)
   }
 
   test("empty host list returns an empty set") {
@@ -64,8 +72,8 @@ class InetResolverTest extends FunSuite {
         assert(b.contains(Address("localhost", 80)))
       case _ => fail()
     }
-    assert(statsReceiver.counter("inet", "dns", "successes")() > 0)
-    assert(statsReceiver.stat("inet", "dns", "lookup_ms")().size > 0)
+    assert(statsReceiver.counter("successes")() > 0)
+    assert(statsReceiver.stat("lookup_ms")().size > 0)
   }
 
 }

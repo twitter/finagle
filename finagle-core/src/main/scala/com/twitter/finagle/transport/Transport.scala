@@ -41,7 +41,7 @@ trait Transport[In, Out] extends Closable { self =>
    * write on the Transport, but this allows clients to listen to
    * close events.
    */
-  val onClose: Future[Throwable]
+  def onClose: Future[Throwable]
 
   /**
    * The locally bound address of this transport.
@@ -70,7 +70,7 @@ trait Transport[In, Out] extends Closable { self =>
       def write(req: In1): Future[Unit] = Future(f(req)).flatMap(self.write)
       def read(): Future[Out1] = self.read().map(g)
       def status: Status = self.status
-      val onClose: Future[Throwable] = self.onClose
+      def onClose: Future[Throwable] = self.onClose
       def localAddress: SocketAddress = self.localAddress
       def remoteAddress: SocketAddress = self.remoteAddress
       def peerCertificate: Option[Certificate] = self.peerCertificate
@@ -247,10 +247,20 @@ object Transport {
   private[finagle] def collate[A](trans: Transport[_, A], chunkOfA: A => Future[Option[Buf]])
   : Reader with Future[Unit] = new Promise[Unit] with Reader {
     private[this] val rw = Reader.writable()
-    become(Transport.copyToWriter(trans, rw)(chunkOfA) respond {
-      case Throw(exc) => rw.fail(exc)
-      case Return(_) => rw.close()
-    })
+
+    // Ensure that collate's future is satisfied _before_ its reader
+    // is closed. This allows callers to observe the stream completion
+    // before readers do.
+    private[this] val writes = copyToWriter(trans, rw)(chunkOfA)
+    forwardInterruptsTo(writes)
+    writes.respond {
+      case ret@Throw(t) =>
+        updateIfEmpty(ret)
+        rw.fail(t)
+      case r@Return(_) =>
+        updateIfEmpty(r)
+        rw.close()
+    }
 
     def read(n: Int) = rw.read(n)
 
@@ -282,9 +292,10 @@ trait TransportFactory {
  * A [[Transport]] that defers all methods except `read` and `write`
  * to `self`.
  */
-abstract class TransportProxy[In, Out](self: Transport[In, Out]) extends Transport[In, Out] {
+abstract class TransportProxy[In, Out](_self: Transport[In, Out]) extends Transport[In, Out] {
+  def self: Transport[In, Out] = _self
   def status: Status = self.status
-  val onClose: Future[Throwable] = self.onClose
+  def onClose: Future[Throwable] = self.onClose
   def localAddress: SocketAddress = self.localAddress
   def remoteAddress: SocketAddress = self.remoteAddress
   def peerCertificate: Option[Certificate] = self.peerCertificate

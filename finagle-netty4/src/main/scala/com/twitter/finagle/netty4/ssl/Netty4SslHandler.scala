@@ -23,12 +23,12 @@ import scala.collection.JavaConverters._
  * No matter if the underlying pipeline has been modified or not (or exception was thrown), this
  * handler removes itself from the pipeline on `handlerAdded`.
  */
-private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelHandlerAdapter {
+private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInitializer[Channel] {
 
   private[this] val Transport.Tls(config) = params[Transport.Tls]
 
-  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
-    try initTls(ctx) finally ctx.pipeline().remove(this)
+  def initChannel(ch: Channel): Unit = {
+    initTls(ch)
   }
 
   // The reason we can't close the channel immediately is because we're in process of decoding an
@@ -56,22 +56,18 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelHand
     }
   }
 
-  private[this] def finishServerSideHandler(ctx: ChannelHandlerContext, ssl: SslHandler): Unit = {
+  private[this] def finishServerSideHandler(ch: Channel, ssl: SslHandler): Unit = {
     ssl.engine().setUseClientMode(false)
-    // `true` is default for most of the engine implementations so we do that just in case.
-    ssl.engine().setEnableSessionCreation(true)
 
-    ctx.pipeline().addFirst("ssl", ssl)
+    ch.pipeline().addFirst("ssl", ssl)
   }
 
   private[this] def finishClientSideHandler(
-    ctx: ChannelHandlerContext,
+    ch: Channel,
     ssl: SslHandler,
     hostnameOption: Option[String]
   ): Unit = {
     ssl.engine().setUseClientMode(true)
-    // `true` is default for most of the engine implementations so we do that just in case.
-    ssl.engine().setEnableSessionCreation(true)
 
     // Close channel on close_notify received from a remote peer.
     ssl.sslCloseFuture().addListener(closeChannelOnCloseNotify)
@@ -80,12 +76,12 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelHand
       .map(SessionVerifier.hostname)
       .getOrElse(SessionVerifier.AlwaysValid)
 
-    ctx.pipeline().addFirst("ssl connect", new SslConnectHandler(ssl, sessionValidation))
-    ctx.pipeline().addFirst("ssl", ssl)
+    ch.pipeline().addFirst("ssl connect", new SslConnectHandler(ssl, sessionValidation))
+    ch.pipeline().addFirst("ssl", ssl)
   }
 
   private[this] def clientFromJavaContext(
-    ctx: ChannelHandlerContext,
+    ch: Channel,
     context: SSLContext,
     hostnameOption: Option[String]
   ): Unit = {
@@ -93,20 +89,20 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelHand
       case (hostname, port) => context.createSSLEngine(hostnameOption.getOrElse(hostname), port)
     })
 
-    finishClientSideHandler(ctx, handler, hostnameOption)
+    finishClientSideHandler(ch, handler, hostnameOption)
   }
 
   private[this] def clientFromNettyContext(
-    ctx: ChannelHandlerContext,
+    ch: Channel,
     context: SslContext,
     hostnameOption: Option[String]
   ): Unit = {
-    val handler = hostnameAndPort(params).fold(context.newHandler(ctx.alloc())) {
+    val handler = hostnameAndPort(params).fold(context.newHandler(ch.alloc())) {
       case (hostname, port) =>
-        context.newHandler(ctx.alloc(), hostnameOption.getOrElse(hostname), port)
+        context.newHandler(ch.alloc(), hostnameOption.getOrElse(hostname), port)
     }
 
-    finishClientSideHandler(ctx, handler, hostnameOption)
+    finishClientSideHandler(ch, handler, hostnameOption)
   }
 
   private[this] def appProtoConfig(nextProtocols: Iterable[String]): ApplicationProtocolConfig =
@@ -121,37 +117,37 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelHand
       )
     }
 
-  private[this] def initTls(ctx: ChannelHandlerContext): Unit = config match {
+  private[this] def initTls(ch: Channel): Unit = config match {
     case TlsConfig.ServerCertAndKey(certPath, keyPath, caCertPath, ciphers, nextProtocols) =>
-      finishServerSideHandler(ctx, SslContextBuilder
+      finishServerSideHandler(ch, SslContextBuilder
         .forServer(new File(certPath), new File(keyPath))
         .trustManager(caCertPath.map(path => new File(path)).orNull)
         .ciphers(ciphers.map(s => s.split(":").toIterable.asJava).orNull)
         .applicationProtocolConfig(appProtoConfig(nextProtocols.toList.flatMap(_.split(","))))
         .build()
-        .newHandler(ctx.alloc())
+        .newHandler(ch.alloc())
       )
 
     case TlsConfig.ServerSslContext(e) =>
-      finishServerSideHandler(ctx, new SslHandler(e.createSSLEngine()))
+      finishServerSideHandler(ch, new SslHandler(e.createSSLEngine()))
 
     case TlsConfig.ClientHostname(hostname) =>
-      clientFromNettyContext(ctx, SslContextBuilder.forClient().build(), Some(hostname))
+      clientFromNettyContext(ch, SslContextBuilder.forClient().build(), Some(hostname))
 
     case TlsConfig.Client =>
-      clientFromNettyContext(ctx, SslContextBuilder.forClient().build(), None)
+      clientFromNettyContext(ch, SslContextBuilder.forClient().build(), None)
 
     case TlsConfig.ClientNoValidation =>
-      clientFromNettyContext(ctx,
+      clientFromNettyContext(ch,
         SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build(),
         None
       )
 
     case TlsConfig.ClientSslContext(context) =>
-      clientFromJavaContext(ctx, context, None)
+      clientFromJavaContext(ch, context, None)
 
     case TlsConfig.ClientSslContextAndHostname(context, hostname) =>
-      clientFromJavaContext(ctx, context, Some(hostname))
+      clientFromJavaContext(ch, context, Some(hostname))
 
     case TlsConfig.Disabled => // TLS/SSL is disabled
   }

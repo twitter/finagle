@@ -3,7 +3,7 @@ package com.twitter.finagle.toggle.flag
 import com.twitter.app.GlobalFlag
 
 /**
- * [[GlobalFlag]] source for the Flag-based
+ * `GlobalFlag` source for the Flag-based
  * [[com.twitter.finagle.toggle.ToggleMap ToggleMap]].
  *
  * Usage is of the form:

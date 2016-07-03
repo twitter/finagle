@@ -1,8 +1,8 @@
 package com.twitter.finagle.serverset2
 
-import com.google.common.cache.{CacheLoader, CacheBuilder, LoadingCache}
+import com.github.benmanes.caffeine.cache.{CacheLoader, Caffeine, LoadingCache}
 import com.twitter.cache.EvictingCache
-import com.twitter.cache.guava.LoadingFutureCache
+import com.twitter.cache.caffeine.LoadingFutureCache
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.io.Buf
 import com.twitter.logging.{Level, Logger}
@@ -73,7 +73,7 @@ private[serverset2] abstract class ZkNodeDataCache[Entity](
     }
 
   private[this] val underlying: LoadingCache[String, Future[Seq[Entity]]] =
-    CacheBuilder
+    Caffeine
       .newBuilder()
       .build(
         new CacheLoader[String, Future[Seq[Entity]]] {
@@ -85,7 +85,7 @@ private[serverset2] abstract class ZkNodeDataCache[Entity](
 
   private[this] val entityCache = EvictingCache.lazily(new LoadingFutureCache(underlying))
 
-  private[this] val gauge = statsReceiver.addGauge(s"numberOf${entityType}Nodes") { underlying.size }
+  private[this] val gauge = statsReceiver.addGauge(s"numberOf${entityType}Nodes") { underlying.estimatedSize }
 
   protected def parseNode(path: String, data: String): Seq[Entity]
 

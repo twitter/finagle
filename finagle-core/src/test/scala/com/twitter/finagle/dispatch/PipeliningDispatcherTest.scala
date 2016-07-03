@@ -1,31 +1,94 @@
 package com.twitter.finagle.dispatch
 
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Promise, Future}
+import com.twitter.conversions.time._
+import com.twitter.finagle.{IndividualRequestTimeoutException => FinagleTimeoutException}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.finagle.transport.Transport
+import com.twitter.util.{Promise, Future, Time, MockTimer, TimeoutException => UtilTimeoutException}
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
-import org.mockito.Mockito.{when, never, verify}
+import org.mockito.Mockito.{when, never, verify, times}
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
 class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
-  test("PipeliningDispatcher: should treat interrupts properly") {
-    val closeP = new Promise[Throwable]
-    val trans = mock[Transport[Unit, Unit]]
-    when(trans.write(())).thenReturn(Future.Done)
-    when(trans.read()).thenReturn(Future.never)
-    when(trans.onClose).thenReturn(closeP)
-    val dispatch = new PipeliningDispatcher[Unit, Unit](trans)
-    val f = dispatch(())
-    f.raise(new Exception())
-    verify(trans, never()).close()
+  val exns = Seq(
+    ("util", new UtilTimeoutException("boom!"), never()),
+    ("finagle", new FinagleTimeoutException(1.second), never()))
+
+  exns.foreach { case (kind, exc, numClosed) =>
+    test(s"PipeliningDispatcher: should ignore $kind timeout interrupts immediately") {
+      val timer = new MockTimer
+      Time.withCurrentTimeFrozen { _ =>
+        val trans = mock[Transport[Unit, Unit]]
+        when(trans.write(())).thenReturn(Future.Done)
+        when(trans.read()).thenReturn(Future.never)
+        when(trans.onClose).thenReturn(Future.never)
+        val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+        val f = dispatch(())
+        f.raise(exc)
+        verify(trans, numClosed).close()
+      }
+    }
+  }
+
+  test("PipeliningDispatcher: should not fail the request on an interrupt") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { ctl =>
+      val trans = mock[Transport[Unit, Unit]]
+      when(trans.write(())).thenReturn(Future.Done)
+      when(trans.read()).thenReturn(Future.never)
+      when(trans.onClose).thenReturn(Future.never)
+      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+      val f = dispatch(())
+      f.raise(new UtilTimeoutException("boom!"))
+      assert(!f.isDefined)
+    }
+  }
+
+  test("PipeliningDispatcher: should actually handle timeout interrupts after waiting") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { ctl =>
+      val trans = mock[Transport[Unit, Unit]]
+      when(trans.write(())).thenReturn(Future.Done)
+      when(trans.read()).thenReturn(Future.never)
+      when(trans.onClose).thenReturn(Future.never)
+      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+      val f = dispatch(())
+      f.raise(new UtilTimeoutException("boom!"))
+      verify(trans, never()).close()
+
+      ctl.advance(PipeliningDispatcher.TimeToWaitForStalledPipeline)
+      timer.tick()
+      verify(trans, times(1)).close()
+    }
+  }
+
+  test("PipeliningDispatcher: should not handle interrupts after waiting if the pipeline clears") {
+    val timer = new MockTimer
+    Time.withCurrentTimeFrozen { ctl =>
+      val trans = mock[Transport[Unit, Unit]]
+      val readP = Promise[Unit]()
+      when(trans.write(())).thenReturn(Future.Done)
+      when(trans.read()).thenReturn(readP)
+      when(trans.onClose).thenReturn(Future.never)
+      val dispatch = new PipeliningDispatcher[Unit, Unit](trans, NullStatsReceiver, timer)
+      val f = dispatch(())
+      f.raise(new UtilTimeoutException("boom!"))
+      verify(trans, never()).close()
+      readP.setDone()
+
+      ctl.advance(PipeliningDispatcher.TimeToWaitForStalledPipeline)
+      timer.tick()
+      verify(trans, never()).close()
+    }
   }
 
   test("queue_size gauge") {
     val stats = new InMemoryStatsReceiver()
+    val timer = new MockTimer
 
     def assertGaugeSize(size: Int): Unit =
       assert(size == stats.gauges(Seq("pipelining", "pending"))())
@@ -39,7 +102,7 @@ class PipeliningDispatcherTest extends FunSuite with MockitoSugar {
       .thenReturn(p2)
     val closeP = new Promise[Throwable]
     when(trans.onClose).thenReturn(closeP)
-    val dispatcher = new PipeliningDispatcher[String, String](trans, stats)
+    val dispatcher = new PipeliningDispatcher[String, String](trans, stats, timer)
 
     assertGaugeSize(0)
 

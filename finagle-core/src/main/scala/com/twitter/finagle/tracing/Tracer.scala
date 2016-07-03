@@ -85,6 +85,27 @@ trait Tracer {
    * None: i'm going to defer making a decision on this to the child service
    */
   def sampleTrace(traceId: TraceId): Option[Boolean]
+
+  /**
+   * Is this tracer actively tracing this traceId?
+   *
+   * Return:
+   * If [[TraceId.sampled]] == None
+   *   [[sampleTrace()]] has not been called yet or the tracer still wants to
+   *   receive traces but not make the decision for child services. In either
+   *   case return true so that this tracer is still considered active for this
+   *   traceId.
+   *
+   * If [[TraceId.sampled]] == Some(decision)
+   *   [[sampleTrace()]] has already been called, or a previous service has already
+   *   made a decision whether to sample this trace or not. So respect that decision
+   *   and return it.
+   */
+  def isActivelyTracing(traceId: TraceId): Boolean =
+    traceId.sampled match {
+      case None => true
+      case Some(sample) => sample
+    }
 }
 
 class NullTracer extends Tracer {
@@ -92,6 +113,7 @@ class NullTracer extends Tracer {
   def record(record: Record): Unit = {/*ignore*/}
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
   override def isNull: Boolean = true
+  override def isActivelyTracing(traceId: TraceId): Boolean = false
 }
 
 object NullTracer extends NullTracer
@@ -123,6 +145,9 @@ object BroadcastTracer {
       else
         None
     }
+
+    override def isActivelyTracing(traceId: TraceId): Boolean =
+      first.isActivelyTracing(traceId) || second.isActivelyTracing(traceId)
   }
 
   private class N(tracers: Seq[Tracer]) extends Tracer {
@@ -142,6 +167,9 @@ object BroadcastTracer {
       else
         None
     }
+
+    override def isActivelyTracing(traceId: TraceId): Boolean =
+      tracers.exists { _.isActivelyTracing(traceId) }
   }
 }
 
@@ -162,6 +190,9 @@ object DefaultTracer extends Tracer with Proxy {
     if (self == null) None else self.sampleTrace(traceId)
 
   val get = this
+
+  override def isActivelyTracing(traceId: TraceId): Boolean =
+    self != null && self.isActivelyTracing(traceId)
 }
 
 /**
@@ -182,6 +213,8 @@ class BufferingTracer extends Tracer
   def clear(): Unit = synchronized { buf = Nil }
 
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
+
+  override def isActivelyTracing(traceId: TraceId): Boolean = true
 }
 
 object ConsoleTracer extends Tracer {
@@ -192,4 +225,6 @@ object ConsoleTracer extends Tracer {
   }
 
   def sampleTrace(traceId: TraceId): Option[Boolean] = None
+
+  override def isActivelyTracing(traceId: TraceId): Boolean = true
 }

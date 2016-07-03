@@ -226,8 +226,7 @@ which exposes new stats:
 Certain `ClientBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ClientBuilder>`_
 settings related to connection pooling become obsolete:
 ``hostConnectionCoresize``, ``hostConnectionLimit``, ``hostConnectionIdleTime``,
-``hostConnectionMaxWaiters``, ``hostConnectionMaxIdleTime``,
-``hostConnectionMaxLifeTime``, and ``hostConnectionBufferSize``
+``hostConnectionMaxWaiters``, and ``expHostConnectionBufferSize``
 
 *Server Connection Stats*
 
@@ -241,11 +240,12 @@ be impacted:
 
 *ServerBuilder configuration*
 Certain `ServerBuilder <http://twitter.github.io/finagle/docs/#com.twitter.finagle.builder.ServerBuilder>`_
-connection management settings become obsolete: ``openConnectionsThresholds``,
-``hostConnectionMaxIdleTime``, and ``hostConnectionMaxLifeTime``.
+connection management settings become obsolete: ``openConnectionsThresholds``.
 
 What is ThriftMux?
 ~~~~~~~~~~~~~~~~~~
+
+.. _whats_thriftmux:
 
 `ThriftMux <http://twitter.github.io/finagle/docs/#com.twitter.finagle.ThriftMux$>`_
 is an implementation of the Thrift protocol built on top of Mux.

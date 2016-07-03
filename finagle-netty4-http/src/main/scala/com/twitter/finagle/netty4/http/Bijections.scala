@@ -5,6 +5,7 @@ import com.twitter.finagle.netty4.{ByteBufAsBuf, BufAsByteBuf}
 import com.twitter.finagle.{http => FinagleHttp}
 import com.twitter.io.{BufReader, Reader}
 import io.netty.handler.codec.{http => NettyHttp}
+import java.net.InetSocketAddress
 
 private[finagle] object Bijections {
 
@@ -25,13 +26,19 @@ private[finagle] object Bijections {
       FinagleHttp.Status.fromCode(s.code)
 
 
-    def chunkedRequestToFinagle(in: NettyHttp.HttpRequest, r: Reader): FinagleHttp.Request = {
+    def chunkedRequestToFinagle(
+      in: NettyHttp.HttpRequest,
+      r: Reader,
+      remoteAddr: InetSocketAddress
+    ): FinagleHttp.Request = {
+
       val result =
         FinagleHttp.Request(
           version = Bijections.netty.versionToFinagle(in.protocolVersion),
           method = Bijections.netty.methodToFinagle(in.method),
           uri = in.uri,
-          reader = r
+          reader = r,
+          remoteAddr = remoteAddr
         )
 
       result.setChunked(true)
@@ -48,12 +55,17 @@ private[finagle] object Bijections {
       }
     }
 
-    def fullRequestToFinagle(r: NettyHttp.FullHttpRequest): FinagleHttp.Request = {
+    def fullRequestToFinagle(
+      r: NettyHttp.FullHttpRequest,
+      remoteAddr: InetSocketAddress
+    ): FinagleHttp.Request = {
+
       val result = FinagleHttp.Request(
         method = methodToFinagle(r.method),
         uri = r.uri,
         version = versionToFinagle(r.protocolVersion),
-        reader = BufReader(ByteBufAsBuf.Owned(r.content))
+        reader = BufReader(ByteBufAsBuf.Owned(r.content)),
+        remoteAddr = remoteAddr
       )
       result.setChunked(false)
       copyHeadersAndBody(r, result)

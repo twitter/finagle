@@ -140,15 +140,6 @@ strategies.
 
 .. include:: metrics/AdmissionControl.rst
 
-Mux
----
-
-.. _mux_stats:
-
-These stats pertain to the :ref:`Mux <mux>` protocol.
-
-.. include:: metrics/Mux.rst
-
 Threshold Failure Detector
 --------------------------
 
@@ -191,3 +182,22 @@ These stats pertain to the HTTP protocol.
 **nacks**
   A counter of the number of retryable HTTP 503 responses the Http server returns. Those
   responses are automatically retried by Finagle Http client.
+
+
+Mux
+---
+
+.. _mux_stats:
+
+These stats pertain to the :ref:`Mux <mux>` protocol.
+
+.. include:: metrics/Mux.rst
+
+ThriftMux
+---------
+
+.. _thriftmux_stats:
+
+These stats pertain to the :ref:`ThriftMux <whats_thriftmux>` protocol.
+
+.. include:: metrics/ThriftMux.rst

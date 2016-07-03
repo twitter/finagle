@@ -1,47 +1,44 @@
 package com.twitter.finagle.redis
 
-import _root_.java.lang.{Long => JLong,Boolean => JBoolean}
+import java.lang.{Long => JLong,Boolean => JBoolean}
 import com.twitter.finagle.redis.protocol.{IntegerReply, PFMerge, PFCount, PFAdd, StatusReply}
+import com.twitter.io.Buf
 import com.twitter.util.Future
-import org.jboss.netty.buffer.ChannelBuffer
 
-trait HyperLogLogs { self: BaseClient =>
+private[redis] trait HyperLogLogCommands { self: BaseClient =>
 
   /**
-   * Adds elements to a HyperLogLog data structure.
+   * Adds `elements` to a HyperLogLog data structure stored under hash `key`.
    *
-   * @param key
-   * @param elements
-   * @return True if a bit was set in the HyperLogLog data structure
    * @see http://redis.io/commands/pfadd
+   *
+   * @return Whether a bit was set in the HyperLogLog data structure.
    */
-  def pfAdd(key: ChannelBuffer, elements: List[ChannelBuffer]): Future[JBoolean] =
+  def pfAdd(key: Buf, elements: List[Buf]): Future[JBoolean] =
     doRequest(PFAdd(key, elements)) {
       case IntegerReply(n) => Future.value(n == 1)
     }
 
 
   /**
-   * Get the approximated cardinality of sets observed by the HyperLogLog at key(s)
-   * @param keys
-   * @return Approximated number of unique elements
+   * Gets the approximated cardinality (number of unique elements) of sets
+   * observed by the HyperLogLog at `keys`.
+   *
    * @see http://redis.io/commands/pfcount
    */
-  def pfCount(keys: Seq[ChannelBuffer]): Future[JLong] =
+  def pfCount(keys: Seq[Buf]): Future[JLong] =
     doRequest(PFCount(keys)) {
       case IntegerReply(n) => Future.value(n)
     }
 
 
   /**
-   * Merge HyperLogLogs at srcKeys to create a new HyperLogLog at destKey
-   * @param destKey
-   * @param srcKeys
+   * Merges HyperLogLogs at `srcKeys` to create a new HyperLogLog at `destKey`.
+   *
    * @see http://redis.io/commands/pfmerge
    */
-  def pfMerge(destKey: ChannelBuffer, srcKeys: Seq[ChannelBuffer]): Future[Unit] =
+  def pfMerge(destKey: Buf, srcKeys: Seq[Buf]): Future[Unit] =
     doRequest(PFMerge(destKey, srcKeys)) {
       case StatusReply(_) => Future.Unit
     }
-
 }

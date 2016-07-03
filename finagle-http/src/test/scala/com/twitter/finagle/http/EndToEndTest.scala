@@ -8,5 +8,6 @@ import org.scalatest.junit.JUnitRunner
 class EndToEndTest extends AbstractEndToEndTest {
   def clientImpl(): finagle.Http.Client = finagle.Http.client
   def serverImpl(): finagle.Http.Server = finagle.Http.server
-  def featureImplemented(feature: Feature): Boolean = true
+  def featureImplemented(feature: Feature): Boolean =
+    feature != TooLongStream // Disabled due to flakiness. see CSL-2946.
 }

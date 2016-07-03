@@ -3,7 +3,7 @@ package com.twitter.finagle.exp
 import com.twitter.finagle._
 import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
 import com.twitter.finagle.exp.mysql._
-import com.twitter.finagle.exp.mysql.transport.{MysqlTransporter, Packet}
+import com.twitter.finagle.exp.mysql.transport.{Packet, TransportImpl}
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -72,6 +72,25 @@ object MySqlClientTracingFilter {
  */
 object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichClient {
 
+  object param {
+    /**
+     * A class eligible for configuring the maximum number of prepare
+     * statements.  After creating `num` prepare statements, we'll start purging
+     * old ones.
+     */
+    case class MaxConcurrentPrepareStatements(num: Int) {
+      assert(num <= Int.MaxValue, s"$num is not <= Int.MaxValue bytes")
+      assert(num > 0, s"$num must be positive")
+
+      def mk(): (MaxConcurrentPrepareStatements, Stack.Param[MaxConcurrentPrepareStatements]) =
+        (this, MaxConcurrentPrepareStatements.param)
+    }
+
+    object MaxConcurrentPrepareStatements {
+      implicit val param = Stack.Param(MaxConcurrentPrepareStatements(20))
+    }
+  }
+
   /**
    * Implements a mysql client in terms of a
    * [[com.twitter.finagle.client.StackClient]]. The client inherits a wealth
@@ -101,9 +120,17 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     protected type In = Packet
     protected type Out = Packet
-    protected def newTransporter() = MysqlTransporter(params)
-    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] =
-      mysql.ClientDispatcher(transport, Handshake(params))
+    protected def newTransporter() = params[TransportImpl].transporter(params)
+    protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] = {
+      val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
+      mysql.ClientDispatcher(transport, Handshake(params), num)
+    }
+
+    /**
+     * The maximum number of concurrent prepare statements.
+     */
+    def withMaxConcurrentPrepareStatements(num: Int): Client =
+      configured(param.MaxConcurrentPrepareStatements(num))
 
     /**
      * The credentials to use when authenticating a new session.
@@ -118,8 +145,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       configured(Handshake.Database(Option(db)))
 
     /**
-     * The default character set used when establishing
-     * a new session.
+     * The default character set used when establishing a new session.
      */
     def withCharset(charset: Short): Client =
       configured(Handshake.Charset(charset))
@@ -132,8 +158,8 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
       new DefaultLoadBalancingParams(this)
     override val withTransport: ClientTransportParams[Client] =
       new ClientTransportParams(this)
-    override val withSession: SessionParams[Client] =
-      new SessionParams(this)
+    override val withSession: ClientSessionParams[Client] =
+      new ClientSessionParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
       new SessionQualificationParams(this)
     override val withAdmissionControl: ClientAdmissionControlParams[Client] =

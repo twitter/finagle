@@ -4,9 +4,9 @@ import com.twitter.app.LoadService
 
 /**
  * A `ServiceLoadedToggleMap` is a [[ToggleMap]] that uses util-app's
- * [[LoadService service loading mechanism]] to be loaded.
+ * service loading mechanism (see `com.twitter.app.LoadService`) to be loaded.
  *
- * @see [[StandardToggleMap.apply(String)]]
+ * @see [[StandardToggleMap]]
  */
 trait ServiceLoadedToggleMap extends ToggleMap {
 

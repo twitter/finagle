@@ -136,6 +136,10 @@ class MonitorFilterTest extends FunSuite with MockitoSugar with IntegrationBase 
       Matchers.eq(Level.SEVERE),
       Matchers.eq("The 'FakeService2' service FakeService2 on behalf of FakeService1 threw an exception"),
       Matchers.eq(outer))
+
+    // need to properly close the client and the server, otherwise they will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
+    Await.ready(server.close(), 1.second)
   }
 
   test("MonitorFilter should when attached to a client, report source for sourced exceptions") {

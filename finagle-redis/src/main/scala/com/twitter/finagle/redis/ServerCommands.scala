@@ -1,13 +1,12 @@
 package com.twitter.finagle.redis
 
-import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol.StatusReply
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import com.twitter.finagle.redis.protocol._
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
-trait BasicServerCommands { self: BaseClient =>
+private[redis] trait BasicServerCommands { self: BaseClient =>
 
   // TODO: CLIENT KILL
 
@@ -18,17 +17,6 @@ trait BasicServerCommands { self: BaseClient =>
   // TODO: CLIENT PAUSE
 
   // TODO: CLIENT SETNAME
-
-  /**
-   * Returns information and statistics about the server
-   * @param section used to select a specific section of information
-   * @return ChannelBuffer with collection of \r\n terminated lines if server has info on section
-   */
-  @deprecated("remove netty3 types from public API", "2016-03-15")
-  def info(section: ChannelBuffer = ChannelBuffers.EMPTY_BUFFER): Future[Option[ChannelBuffer]] =
-    info(ChannelBufferBuf.Owned(section)).map { opt =>
-      opt.map(ChannelBufferBuf.Owned.extract(_))
-    }
 
   /**
    * Returns information and statistics about the server

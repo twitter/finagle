@@ -13,7 +13,7 @@ import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
-import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.transport.{Transport, StatsTransport}
 import com.twitter.finagle.{param => fparam}
 import com.twitter.io.Buf
 import com.twitter.util.{Closable, Future, StorageUnit}
@@ -152,9 +152,10 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
     protected def newDispatcher(
       transport: Transport[In, Out]
     ): Service[mux.Request, mux.Response] = {
+      val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
+      val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
       val fparam.Label(name) = params[fparam.Label]
       val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
-      val FailureDetector.Param(detectorConfig) = params[FailureDetector.Param]
 
       val negotiatedTrans = mux.Handshake.client(
         trans = transport,
@@ -162,8 +163,13 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         headers = Client.headers(maxFrameSize),
         negotiate = negotiate(maxFrameSize, statsReceiver))
 
-      val session = new mux.ClientSession(
+      val statsTrans = new StatsTransport(
         negotiatedTrans,
+        excRecorder,
+        statsReceiver.scope("transport"))
+
+      val session = new mux.ClientSession(
+        statsTrans,
         detectorConfig,
         name,
         statsReceiver)
@@ -229,8 +235,9 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
       service: Service[mux.Request, mux.Response]
     ): Closable = {
       val fparam.Tracer(tracer) = params[fparam.Tracer]
-      val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
       val Lessor.Param(lessor) = params[Lessor.Param]
+      val fparam.ExceptionStatsHandler(excRecorder) = params[fparam.ExceptionStatsHandler]
+      val param.MaxFrameSize(maxFrameSize) = params[param.MaxFrameSize]
 
       val negotiatedTrans = mux.Handshake.server(
         trans = transport,
@@ -238,8 +245,13 @@ object Mux extends Client[mux.Request, mux.Response] with Server[mux.Request, mu
         headers = Server.headers(_, maxFrameSize),
         negotiate = negotiate(maxFrameSize, statsReceiver))
 
-      mux.ServerDispatcher.newRequestResponse(
+      val statsTrans = new StatsTransport(
         negotiatedTrans,
+        excRecorder,
+        statsReceiver.scope("transport"))
+
+      mux.ServerDispatcher.newRequestResponse(
+        statsTrans,
         service,
         lessor,
         tracer,

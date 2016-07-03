@@ -1,13 +1,15 @@
 package com.twitter.finagle.exp
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import com.twitter.finagle.Service
-import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Await, Future}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import com.twitter.util.{Await, Future, FutureCancelledException, Promise}
 import org.junit.runner.RunWith
-import org.scalatest.FunSuite
-import org.scalatest.junit.JUnitRunner
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 
 @RunWith(classOf[JUnitRunner])
@@ -42,7 +44,7 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
 
   test("send light traffic for all requests") {
     new Fixture {
-      when(gate()) thenReturn false
+      when(gate()).thenReturn(false)
       assert(Await.result(filter(request, service)) == response)
 
       verify(service).apply(request)
@@ -55,7 +57,7 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
 
   test("when decider is on, send dark traffic to darkService and light to service") {
     new Fixture {
-      when(gate()) thenReturn true
+      when(gate()).thenReturn(true)
       assert(Await.result(filter(request, service)) == response)
 
       verify(service).apply(request)
@@ -67,7 +69,7 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
 
   test("count failures in forwarding") {
     new Fixture {
-      when(gate()) thenReturn true
+      when(gate()).thenReturn(true)
       val failingService = new Service[String, String] {
         override def apply(request: String) = Future.exception(new Exception("fail"))
       }
@@ -76,5 +78,28 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
 
       assert(statsReceiver.counters.get(failed) == Some(1))
     }
+  }
+
+  test("interrupts are propagated to dark traffic") {
+    val lightServiceCancelled = new AtomicBoolean(false)
+    val darkServiceCancelled = new AtomicBoolean(false)
+
+
+    val lightPromise = new Promise[String]
+    lightPromise.setInterruptHandler { case t: Throwable => lightServiceCancelled.set(true) }
+    val darkPromise = new Promise[String]
+    darkPromise.setInterruptHandler { case t: Throwable => darkServiceCancelled.set(true) }
+
+    val service = Service.mk { s: String => lightPromise }
+    val darkService = Service.mk { s: String =>  darkPromise }
+
+    val filter = new DarkTrafficFilter(darkService, Function.const(true), NullStatsReceiver)
+    val chainedService = filter.andThen(service)
+
+    val lightFuture = chainedService("test")
+    lightFuture.raise(new FutureCancelledException)
+
+    assert(lightServiceCancelled.get)
+    assert(darkServiceCancelled.get)
   }
 }

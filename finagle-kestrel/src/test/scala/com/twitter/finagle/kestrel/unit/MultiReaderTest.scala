@@ -4,7 +4,7 @@ import _root_.java.net.{InetSocketAddress, SocketAddress}
 import _root_.java.nio.charset.Charset
 import _root_.java.util.concurrent.{BlockingDeque, ExecutorService, Executors, LinkedBlockingDeque}
 
-import com.google.common.cache.{CacheBuilder, CacheLoader, LoadingCache}
+import com.github.benmanes.caffeine.cache.{Caffeine, CacheLoader, LoadingCache}
 import com.twitter.concurrent.{Broker, Spool}
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
@@ -87,9 +87,9 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
     }
 
     val hostQueuesMap = hosts.map { host =>
-      val queues = CacheBuilder.newBuilder()
+      val queues = Caffeine.newBuilder()
         .build(new CacheLoader[Buf, BlockingDeque[Buf]] {
-        def load(k: Buf) = new LinkedBlockingDeque[Buf]
+        def load(k: Buf): BlockingDeque[Buf] = new LinkedBlockingDeque[Buf]
       })
       (host, queues)
     }.toMap
@@ -196,9 +196,9 @@ class MultiReaderTest extends FunSuite with MockitoSugar with Eventually with In
     }
 
     val hostQueuesMap = hosts.map { host =>
-      val queues = CacheBuilder.newBuilder()
+      val queues = Caffeine.newBuilder()
         .build(new CacheLoader[Buf, BlockingDeque[Buf]] {
-        def load(k: Buf) = new LinkedBlockingDeque[Buf]
+        def load(k: Buf): BlockingDeque[Buf] = new LinkedBlockingDeque[Buf]
       })
       (host, queues)
     }.toMap

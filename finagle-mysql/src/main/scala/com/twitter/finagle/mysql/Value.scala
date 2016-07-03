@@ -1,6 +1,6 @@
 package com.twitter.finagle.exp.mysql
 
-import com.twitter.finagle.exp.mysql.transport.{BufferReader, BufferWriter}
+import com.twitter.finagle.exp.mysql.transport.MysqlBuf
 import com.twitter.util.TwitterDateFormat
 import java.sql.{Date, Timestamp}
 import java.text.ParsePosition
@@ -75,17 +75,17 @@ class TimestampValue(
    */
   def apply(ts: Timestamp): Value = {
     val bytes = new Array[Byte](11)
-    val bw = BufferWriter(bytes)
+    val bw = MysqlBuf.writer(bytes)
     val cal = Calendar.getInstance(injectionTimeZone)
     cal.setTimeInMillis(ts.getTime)
-    bw.writeShort(cal.get(Calendar.YEAR))
+    bw.writeShortLE(cal.get(Calendar.YEAR))
     bw.writeByte(cal.get(Calendar.MONTH) + 1) // increment 0 indexed month
     bw.writeByte(cal.get(Calendar.DATE))
     bw.writeByte(cal.get(Calendar.HOUR_OF_DAY))
     bw.writeByte(cal.get(Calendar.MINUTE))
     bw.writeByte(cal.get(Calendar.SECOND))
-    bw.writeInt(ts.getNanos / 1000) // sub-second part is written as microseconds
-    RawValue(Type.Timestamp, Charset.Binary, true, bytes)
+    bw.writeIntLE(ts.getNanos / 1000) // sub-second part is written as microseconds
+    RawValue(Type.Timestamp, Charset.Binary, isBinary = true, bytes)
   }
 
   /**
@@ -95,12 +95,12 @@ class TimestampValue(
    * the binary or text MySQL protocols.
    */
   def unapply(v: Value): Option[Timestamp] = v match {
-    case RawValue(t, Charset.Binary, false, bytes) if (t == Type.Timestamp || t == Type.DateTime) =>
-      val str = new String(bytes, Charset(Charset.Binary))
+    case RawValue(t, charset, false, bytes) if t == Type.Timestamp || t == Type.DateTime =>
+      val str = new String(bytes, Charset(charset))
       val ts = fromString(str, extractionTimeZone)
       Some(ts)
 
-    case RawValue(t, Charset.Binary, true, bytes) if (t == Type.Timestamp || t == Type.DateTime) =>
+    case RawValue(t, _, true, bytes) if t == Type.Timestamp || t == Type.DateTime =>
       val ts = fromBytes(bytes, extractionTimeZone)
       Some(ts)
 
@@ -131,12 +131,12 @@ class TimestampValue(
     if (str == Zero.toString) {
       return Zero
     }
-    
+
     val parsePosition = new ParsePosition(0)
     val format = TwitterDateFormat("yyyy-MM-dd HH:mm:ss")
     format.setTimeZone(extractionTimeZone)
     val timeInMillis = format.parse(str, parsePosition).getTime
-        
+
     /**
      * Extracts the fractional part of a timestamp, up to the
      * nanoseconds. It takes care of padding properly so that .1
@@ -154,17 +154,17 @@ class TimestampValue(
         }
       }
     }
-    
+
     // Parse fractional part
     str.substring(parsePosition.getIndex) match {
-      case Nanos(nanos) => 
+      case Nanos(nanos) =>
         val ts = new Timestamp(timeInMillis)
         ts.setNanos(nanos)
         ts
       case _ => Zero
     }
   }
-  
+
   /**
    * Convert a binary-encoded timestamp into a [[java.sql.Timestamp]] in a given
    * timezone.
@@ -182,12 +182,12 @@ class TimestampValue(
     }
 
     var year, month, day, hour, min, sec, micro = 0
-    val br = BufferReader(bytes)
+    val br = MysqlBuf.reader(bytes)
 
     // If the len was not zero, we can strictly
     // expect year, month, and day to be included.
-    if (br.readable(4)) {
-      year = br.readUnsignedShort()
+    if (br.remaining >= 4) {
+      year = br.readUnsignedShortLE()
       month = br.readUnsignedByte()
       day = br.readUnsignedByte()
     } else {
@@ -195,15 +195,15 @@ class TimestampValue(
     }
 
     // if the time-part is 00:00:00, it isn't included.
-    if (br.readable(3)) {
+    if (br.remaining >= 3) {
       hour = br.readUnsignedByte()
       min = br.readUnsignedByte()
       sec = br.readUnsignedByte()
     }
 
     // if the sub-seconds are 0, they aren't included.
-    if (br.readable(4)) {
-      micro = br.readInt()
+    if (br.remaining >= 4) {
+      micro = br.readIntLE()
     }
 
     val cal = Calendar.getInstance(timeZone)
@@ -253,10 +253,10 @@ object DateValue extends Injectable[Date] with Extractable[Date] {
    */
   def apply(date: Date): Value = {
     val bytes = new Array[Byte](4)
-    val bw = BufferWriter(bytes)
+    val bw = MysqlBuf.writer(bytes)
     val cal = Calendar.getInstance
     cal.setTimeInMillis(date.getTime)
-    bw.writeShort(cal.get(Calendar.YEAR))
+    bw.writeShortLE(cal.get(Calendar.YEAR))
     bw.writeByte(cal.get(Calendar.MONTH) + 1) // increment 0 indexed month
     bw.writeByte(cal.get(Calendar.DATE))
     RawValue(Type.Date, Charset.Binary, true, bytes)
@@ -299,10 +299,10 @@ object DateValue extends Injectable[Date] with Extractable[Date] {
     }
 
     var year, month, day = 0
-    val br = BufferReader(bytes)
+    val br = MysqlBuf.reader(bytes)
 
-    if (br.readable(4)) {
-      year = br.readUnsignedShort()
+    if (br.remaining >= 4) {
+      year = br.readUnsignedShortLE()
       month = br.readUnsignedByte()
       day = br.readUnsignedByte()
     } else {

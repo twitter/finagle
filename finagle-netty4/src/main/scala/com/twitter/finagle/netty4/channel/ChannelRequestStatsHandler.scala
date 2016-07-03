@@ -26,18 +26,18 @@ private[finagle] class ChannelRequestStatsHandler(statsReceiver: StatsReceiver)
 
   private[this] val requestCount = statsReceiver.stat("connection_requests")
 
-  override def channelActive(ctx: ChannelHandlerContext): Unit = {
-    ctx.attr(ConnectionRequestsKey).set(new AtomicInteger(0))
-    super.channelActive(ctx)
+  override def handlerAdded(ctx: ChannelHandlerContext): Unit = {
+    ctx.channel.attr(ConnectionRequestsKey).set(new AtomicInteger(0))
+    super.handlerAdded(ctx)
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-    requestCount.add(ctx.attr(ConnectionRequestsKey).get.get)
+    requestCount.add(ctx.channel.attr(ConnectionRequestsKey).get.get)
     super.channelInactive(ctx)
   }
 
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
-    val readCount = ctx.attr(ConnectionRequestsKey).get
+    val readCount = ctx.channel.attr(ConnectionRequestsKey).get
     readCount.incrementAndGet()
     super.channelRead(ctx, msg)
   }

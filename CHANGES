@@ -9,8 +9,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 
 Deprecations
 ~~~~~~~~~~~~
-  * finagle-http: Deprecate channelBufferUsageTracker in favor of maxRequestSize.
-    ``RB_ID=831233``
+
+  * finagle-http: Removed DtabFilter.Finagle in favor of DtabFilter.Extractor.
+    ``RB_ID=840600``
+
+  * finagle-zipkin: Deprecate `ZipkinTracer` in favor of `ScribeZipkinTracer`.
+    ``RB_ID=840494``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
@@ -35,33 +39,82 @@ Breaking API Changes
     Use command line flags (see `c.t.f.socks.SocksProxyFlags.scala`) instead.
     ``RB_ID=834634``
 
-<<<<<<< e440b7d5ae2f3a6b9474c6dd90e4987078532bcf
   * finagle-core: Removed "closechans" and "closed" counters from `ChannelStatsHandler`.
     ``RB_ID=835194``
-=======
+
+  * finagle-core: Removed the "load" gauge from `StatsFilter` as it was duplicated
+    by the "pending" gauge. ``RB_ID=835199``
+
   * finagle-core: `c.t.finagle.NoStacktrace` is removed. Use `scala.util.control.NoStackTrace`
     instead. ``RB_ID=833188``
 
   * finagle-core: `c.t.finagle.Failure.withStackTrace` is removed. Use system property
     `scala.control.noTraceSuppression` instead to fill stacktraces in Finagle's failures.
     ``RB_ID=833188``
->>>>>>> source: NoStacktrace is dead. Long live NoStackTrace
 
-  * finagle-core: Removed the "load" gauge from `StatsFilter` as it was duplicated
-    by the "pending" gauge. ``RB_ID=835199``
+  * finagle-core: `c.t.f.filter.RequestSerializingFilter` is removed.
+    Use `c.t.f.filter.RequestSemaphoreFilter` instead. ``RB_ID=839372``
+
+  * finagle-core: `SessionParams` no longer contains `acquisitionTimeout`. Instead, it
+    was extracted into `ClientSessionParams`. ``RB_ID=837726``
+
+  * finagle-core: Changed visibility of PipeliningDispatcher to private[finagle].  Clients should
+    not be affected, since it's not a part of the end-user API. ``RB_ID=843153``.
+
+  * finagle-http: Deprecate channelBufferUsageTracker in favor of maxRequestSize.
+    ``RB_ID=831233``
 
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
 
+  * finagle-redis: Deprecated methods have been removed from the client API.
+    ``RB_ID=843455``
+
+  * finagle-redis: `c.t.f.redis.*Commands` traits are now package-private.
+    ``RB_ID=843455``
+
+  * finagle-redis: Replace `ChannelBuffer` with `Buf` in client's:
+
+      - `HashCommands`: ``RB_ID=843596``
+      - `ListCommands`: ``RB_ID=844596``
+      - `BtreeSortedSetCommands`: ``RB_ID=844862``
+      - `HyperLogLogCommands`: ``RB_ID=844945``
+      - `PubSubCommands`: ``RB_ID=845087``
+      - `SetCommands`: ``RB_ID=845578``
+      - `SortedSetCommands`: ``RB_ID=846074``
+
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
+
+  * finagle-thrift: As part of the migration off of `Codec`, remove
+    `c.t.f.thrift.ThriftClientBufferedCodec` and `c.t.f.thrift.ThriftClientBufferedCodecFactory`
+    which were used by `ClientBuilder.codec` and `ServerBuilder.codec`. Replace usage
+    with `ClientBuilder.stack(Thrift.client.withBufferedTransport)`
+    or `ServerBuilder.stack(Thrift.server.withBufferedTransport)`. ``RB_ID=838146``
+
+  * finagle-zipkin: Moved case classes and companion objects `Span`, `ZipkinAnnotation`,
+    `BinaryAnnotation`, `Endpoint`, `Sampler` and `SamplingTracer` to finagle-zipkin-core.
+    ``RB_ID=840494``
+
+  * finagle-mysql: Removed `c.t.f.exp.mysql.transport.MysqlTransporter`, as it was not useful for it
+    to be public. ``RB_ID=840718``
 
 Bug Fixes
 ~~~~~~~~~
 
+  * finagle-core: PipeliningDispatcher now serializes "write and enqueue Promise" so it's no longer
+    possible for the wrong response to be given to a request. ``RB_ID=834927``
+
   * finagle-http: Servers which aggregate content chunks (streaming == false) now return a 413
     response for streaming clients who exceed the servers' configured max request size.
     ``RB_ID=828741``
+
+  * finagle-mysql: `c.t.f.exp.mysql.PreparedCache` now closes prepared statements when no one holds
+    a reference to the cached future any longer.  This fixes a race condition where the cached
+    future could be evicted and the prepared statement closed while a user tries to use that
+    prepared statement.  ``RB_ID=833970``
+
+  * finagle-netty4-http: Servers now see the correct client host address for requests. ``RB_ID=844076``
 
 New Features
 ~~~~~~~~~~~~
@@ -75,8 +128,40 @@ New Features
     dead when the success rate in a specified time window is under the
     required threshold. ``RB_ID=829984``
 
+  * finagle-core: `StackServer` now installs an `ExpiringService` module by default. This
+    allows servers to have control over session lifetime and brings the `StackServer` to
+    feature parity with `ServerBuilder`.  ``RB_ID=837726``
+
+  * finagle-exp: Changed DarkTrafficFilter to forward interrupts to dark service. ``RB_ID=839286``
+
+  * finagle-http: ContextFilter and Dtab-extractor/injector logic has been moved from
+    the http dispatchers into the client and server stacks. ``RB_ID=840600``
+
+  * finagle-mysql: Added a `withMaxConcurrentPreparedStatements` method to the client which lets you
+    specify how many prepared statements you want to cache at a time.  ``RB_ID=833970``
+
+  * finagle-redis: Adds support for scripting commands. ``RB_ID=837538``
+
+  * finagle-netty4: SOCKS5 proxy support. ``RB_ID=839856``
+
+  * finagle-zipkin-core: A new module containing most of the functionality
+    from finagle-zipkin, leaving finagle-zipkin with only Scribe specific code
+    and a service loader. This allows for other transports to be implemented
+    in separate modules. For example the upcoming finagle-zipkin-kafka.
+    ``RB_ID=840494``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: For SSLEngine implementations supplied via configuration or
+    created by Finagle, the setEnableSessionCreation method is no longer called.
+    The supplied value, true, is the default for JSSE implementations, and for
+    other engines this can be an unsupported operation. ``RB_ID=845765``
+
+  * finagle-core: Pipelined protocols (memcached, redis) no longer prevent
+    connections from being cut by interrupts.  Instead, interrupts are masked
+    until a subsequent ten second timeout has expired without a response in the
+    pipeline. ``RB_ID=843153``
 
   * finagle-core: MonitorFilter now installs the parameterized monitor, and will
     no longer fail the request automatically if any exception is thrown
@@ -112,12 +197,15 @@ Breaking API Changes
   * finagle-redis: Deprecated ChannelBuffer exposing apis for string commands. ``RB_ID=817766``.
 
   * finagle-core: DefaultClient has been removed. Implementors should prefer `c.t.f.StackClient`
-  ``RB_ID=812681``.
+    ``RB_ID=812681``.
 
   * finagle-core: When a client is created, its server set resolution is started eagerly.
-  ``RB_ID=806940``
+    ``RB_ID=806940``
 
   * finagle-core: Dentry now takes a Dentry.Prefix instead of a Path. ``RB_ID=813914``
+
+  * finagle-core: Remove `*.client.withTransport.socksProxy` param as part of the initiative to
+    move to CLI flags based configuration for SOCKS. ``RB_ID=842512``
 
   * finagle-thrift/thriftmux: Thrift servers constructed using `Thrift.serveIface` now use
     `Thrift.server.serveIface`. ThriftMux servers constructed using `ThriftMux.serveIface` now use
@@ -256,7 +344,7 @@ Breaking API Changes
     use `c.t.f.service.exp.FailureAccrualPolicy` instead.
 
   * finagle-core: DefaultServer is removed. Protocol implementors should use StackServer instead.
-  ``RB_ID=811918``
+    ``RB_ID=811918``
 
   * finagle-memcached: `c.t.f.memcached.protocol.text.Memcached` no longer takes a `StatsReceiver`,
     pass it to a `(Client/Server)Builder` instead. ``RB_ID=797821``

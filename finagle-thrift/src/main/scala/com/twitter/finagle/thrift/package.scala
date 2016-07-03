@@ -4,15 +4,13 @@ package com.twitter.finagle
  * =Deprecation=
  *
  * Please use the new interface, [[com.twitter.finagle.Thrift]],
- * for constructing thrift clients and servers.
+ * for constructing Thrift clients and servers.
  *
  * ==Thrift codecs==
  *
- * We provide both framed and buffered client protocol support, and
- * server support for the framed protocol. The public implementations
- * are:
+ * We provide client and server protocol support for the framed protocol.
+ * The public implementations are:
  *
- *  - [[com.twitter.finagle.thrift.ThriftClientBufferedCodec]]
  *  - [[com.twitter.finagle.thrift.ThriftClientFramedCodec]]
  *  - [[com.twitter.finagle.thrift.ThriftServerFramedCodec]]
  *

@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import Tests._
+import com.twitter.scrooge.ScroogeSBT
 import com.typesafe.sbt.SbtSite.site
 import com.typesafe.sbt.site.SphinxSupport.Sphinx
 import pl.project13.scala.sbt.JmhPlugin
@@ -18,19 +19,21 @@ object Finagle extends Build {
   val scroogeVersion = "4.7.0" + suffix
 
   val libthriftVersion = "0.5.0-1"
-  val netty4Version = "4.1.0.CR7"
+  val netty4Version = "4.1.1.Final"
 
-  val commonsCodecLib = "commons-codec" % "commons-codec" % "1.9"
   val guavaLib = "com.google.guava" % "guava" % "16.0.1"
+  val caffeineLib = "com.github.ben-manes.caffeine" % "caffeine" % "2.3.0"
+  val jsr305Lib = "com.google.code.findbugs" % "jsr305" % "2.0.1"
   val nettyLib = "io.netty" % "netty" % "3.10.1.Final"
   val netty4Libs = Seq(
     "io.netty" % "netty-handler" % netty4Version,
-    "io.netty" % "netty-transport" % netty4Version
+    "io.netty" % "netty-transport" % netty4Version,
+    "io.netty" % "netty-handler-proxy" % netty4Version
   )
   val netty4Http = "io.netty" % "netty-codec-http" % netty4Version
   val netty4Http2 = "io.netty" % "netty-codec-http2" % netty4Version
   val ostrichLib = "com.twitter" %% "ostrich" % ostrichVersion
-  val jacksonVersion = "2.4.4"
+  val jacksonVersion = "2.6.5"
   val jacksonLibs = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
     "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
@@ -63,6 +66,7 @@ object Finagle extends Build {
     resolvers += "twitter-repo" at "https://maven.twttr.com",
 
     ScoverageSbtPlugin.ScoverageKeys.coverageHighlighting := true,
+    ScroogeSBT.autoImport.scroogeLanguages in Test := Seq("java", "scala"),
 
     javaOptions in Test := Seq("-DSKIP_FLAKY=1"),
 
@@ -161,6 +165,7 @@ object Finagle extends Build {
     finagleCore,
     finagleStats,
     finagleNetty4,
+    finagleZipkinCore,
     finagleZipkin,
     finagleServersets,
     finagleException,
@@ -187,10 +192,6 @@ object Finagle extends Build {
     finagleNetty4Http
   )
 
-  // finagle-thrift and finagle-thriftmux tests do not currently compile under sbt
-  // due to scrooge-sbt-plugin limitations.
-  lazy val testableProjects = projectList diff Seq[sbt.ProjectReference](finagleThrift, finagleThriftMux)
-
   lazy val finagle = Project(
     id = "finagle",
     base = file("."),
@@ -201,15 +202,6 @@ object Finagle extends Build {
           inAnyProject -- inProjects(finagleExample)
       )
   ).aggregate(projectList: _*)
-
-  lazy val finagleTestCompile = Project(
-    id = "finagle-test-compile",
-    // use a different target so that we don't have conflicting output paths
-    // between this and the `scrooge` target.
-    base = file("finagle-test-compile"),
-    settings = Defaults.coreDefaultSettings ++
-      sharedSettings
-  ).aggregate(testableProjects: _*)
 
   lazy val finagleIntegration = Project(
     id = "finagle-integration",
@@ -236,7 +228,11 @@ object Finagle extends Build {
     name := "finagle-toggle",
     libraryDependencies ++= Seq(
       util("app"),
-      util("core"))
+      util("core"),
+      util("logging"),
+      util("registry"),
+      util("stats")) ++
+      jacksonLibs
   )
 
   lazy val finagleCore = Project(
@@ -258,8 +254,9 @@ object Finagle extends Build {
       util("logging"),
       util("registry"),
       util("stats"),
-      commonsCodecLib,
+      caffeineLib,
       guavaLib,
+      jsr305Lib,
       nettyLib)
   )
 
@@ -304,6 +301,17 @@ object Finagle extends Build {
     libraryDependencies ++= jacksonLibs
   ).dependsOn(finagleCore, finagleHttp)
 
+  lazy val finagleZipkinCore = Project(
+    id = "finagle-zipkin-core",
+    base = file("finagle-zipkin-core"),
+    settings = Defaults.coreDefaultSettings ++
+      sharedSettings
+  ).settings(
+    name := "finagle-zipkin-core",
+    libraryDependencies ++= Seq(util("codec"), util("events"), util("core")) ++ scroogeLibs,
+    libraryDependencies ++= jacksonLibs
+  ).dependsOn(finagleCore, finagleThrift)
+
   lazy val finagleZipkin = Project(
     id = "finagle-zipkin",
     base = file("finagle-zipkin"),
@@ -311,9 +319,8 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-zipkin",
-    libraryDependencies ++= Seq(util("codec"), util("events")) ++ scroogeLibs,
-    libraryDependencies ++= jacksonLibs
-  ).dependsOn(finagleCore, finagleThrift)
+    libraryDependencies ++= scroogeLibs
+  ).dependsOn(finagleCore, finagleThrift, finagleZipkinCore)
 
   lazy val finagleException = Project(
     id = "finagle-exception",
@@ -351,7 +358,7 @@ object Finagle extends Build {
     name := "finagle-serversets",
     fork in Test := true,
     libraryDependencies ++= Seq(
-      commonsCodecLib,
+      caffeineLib,
       util("cache"),
       util("zk-common"),
       util("zk-test") % "test",
@@ -458,7 +465,10 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-thrift",
-    libraryDependencies ++= Seq("silly" % "silly-thrift" % "0.5.0" % "test") ++ scroogeLibs
+    libraryDependencies ++=
+      Seq(
+        "silly" % "silly-thrift" % "0.5.0" % "test",
+        "commons-lang" % "commons-lang" % "2.6" % "test") ++ scroogeLibs
   ).dependsOn(finagleCore)
 
   lazy val finagleMemcached = Project(
@@ -485,7 +495,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-kestrel",
-    libraryDependencies ++= scroogeLibs
+    libraryDependencies ++= scroogeLibs :+ caffeineLib
   ).dependsOn(finagleCore, finagleMemcached, finagleThrift)
 
   lazy val finagleRedis = Project(
@@ -529,9 +539,9 @@ object Finagle extends Build {
       sharedSettings
     ).settings(
       name := "finagle-mysql",
-      libraryDependencies ++= Seq(util("logging"), util("cache")),
+      libraryDependencies ++= Seq(util("logging"), util("cache"), caffeineLib, jsr305Lib),
       excludeFilter in unmanagedSources := { "EmbeddableMysql.scala" || "ClientTest.scala" }
-    ).dependsOn(finagleCore)
+    ).dependsOn(finagleCore, finagleNetty4)
 
   lazy val finagleExp = Project(
     id = "finagle-exp",

@@ -1,8 +1,8 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
 import com.twitter.finagle.Namer.AddrWeightKey
 import com.twitter.util._
-import java.net.{InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -80,7 +80,7 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assert(res.run.sample() == Activity.Pending)
 
     // Ok(Bound) & Pending
-    namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
+    namer("/test/1").notify(Return(NameTree.read("/$/inet/1")))
     assertEval(res, boundWithWeight(1.0, Address(1)))
 
     // Failed(exc) & Pending
@@ -88,8 +88,8 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     intercept[TestException] { res.sample() }
 
     // Ok(Bound) & Ok(Bound)
-    namer("/test/1").notify(Return(NameTree.read("/$/inet/0/1")))
-    namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
+    namer("/test/1").notify(Return(NameTree.read("/$/inet/1")))
+    namer("/test/2").notify(Return(NameTree.read("/$/inet/2")))
     assertEval(res, boundWithWeight(1.0, Address(1)), boundWithWeight(1.0, Address(2)))
 
     // Ok(Bound) & Ok(Neg)
@@ -124,16 +124,16 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
 
     assert(res.sample().eval == Some(Set.empty))
 
-    namer("/test/0").notify(Return(NameTree.read("/$/inet/0/1")))
+    namer("/test/0").notify(Return(NameTree.read("/$/inet/1")))
     assertEval(res, Name.bound(Address(1)))
 
     namer("/test/0").notify(Return(NameTree.Neg))
     assert(res.sample().eval == None)
 
-    namer("/test/2").notify(Return(NameTree.read("/$/inet/0/2")))
+    namer("/test/2").notify(Return(NameTree.read("/$/inet/2")))
     assertEval(res, boundWithWeight(1.0, Address(2)))
 
-    namer("/test/0").notify(Return(NameTree.read("/$/inet/0/3")))
+    namer("/test/0").notify(Return(NameTree.read("/$/inet/3")))
     assertEval(res, Name.bound(Address(3)))
   })
 
@@ -143,25 +143,27 @@ class NamerTest extends FunSuite with AssertionsForJUnit {
     assert(namer.bind(NameTree.read("(/$/nil | /$/fail | /test/1)")).sample() == NameTree.Empty)
   })
 
-  def assertLookup(path: String, addrs: Address*) {
-    Namer.global.lookup(Path.read(path)).sample() match {
-      case NameTree.Leaf(Name.Bound(addr)) => assert(addr.sample() == Addr.Bound(addrs.toSet))
+  test("Namer.global: /$/inet") {
+    Namer.global.lookup(Path.read("/$/inet/1234")).sample() match {
+      case NameTree.Leaf(Name.Bound(addr)) => assert(addr.sample() == Addr.Bound(Set(Address(1234))))
       case _ => fail()
     }
-  }
 
-  test("Namer.global: /$/inet") {
-    assertLookup("/$/inet/1234", Address(1234))
-    assertLookup("/$/inet/127.0.0.1/1234", Address("127.0.0.1", 1234))
+    Await.result(Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234")).values.toFuture(), 1.second)() match {
+      case NameTree.Leaf(Name.Bound(addr)) =>
+        assert(Await.result(addr.changes.filter(_ != Addr.Pending).toFuture(), 1.second)
+          == Addr.Bound(Set(Address("127.0.0.1", 1234))))
+      case _ => fail()
+    }
 
     intercept[ClassNotFoundException] {
       Namer.global.lookup(Path.read("/$/inet")).sample()
     }
 
-    Namer.global.lookup(Path.read("/$/inet/127.0.0.1/1234/foobar")).sample() match {
+    Namer.global.lookup(Path.read("/$/inet/1234/foobar")).sample() match {
       case NameTree.Leaf(bound: Name.Bound) =>
-        assert(bound.addr.sample() == Addr.Bound(Address("127.0.0.1", 1234)))
-        assert(bound.id == Path.Utf8("$", "inet", "127.0.0.1", "1234"))
+        assert(bound.addr.sample() == Addr.Bound(Address(1234)))
+        assert(bound.id == Path.Utf8("$", "inet", "1234"))
         assert(bound.path == Path.Utf8("foobar"))
 
       case _ => fail()

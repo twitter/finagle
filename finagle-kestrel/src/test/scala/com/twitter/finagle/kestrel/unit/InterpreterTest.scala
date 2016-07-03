@@ -2,7 +2,7 @@ package com.twitter.finagle.kestrel.unit
 
 import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
 
-import com.google.common.cache.{CacheBuilder, CacheLoader}
+import com.github.benmanes.caffeine.cache.{Caffeine, CacheLoader}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -18,9 +18,9 @@ import com.twitter.util.Time
 @RunWith(classOf[JUnitRunner])
 class InterpreterTest extends FunSuite {
   trait InterpreterHelper {
-    val queues = CacheBuilder.newBuilder()
+    val queues = Caffeine.newBuilder()
       .build(new CacheLoader[Buf, BlockingDeque[Buf]] {
-      def load(k: Buf) = new LinkedBlockingDeque[Buf]
+      def load(k: Buf): BlockingDeque[Buf] = new LinkedBlockingDeque[Buf]
     })
     val interpreter = new Interpreter(queues)
   }

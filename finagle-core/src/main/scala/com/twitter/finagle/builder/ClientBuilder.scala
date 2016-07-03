@@ -484,7 +484,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     codec: Codec[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     this.codec(Function.const(codec)(_))
-      .configured(ProtocolLibrary(codec.protocolLibraryName))
 
   /**
    * A variation of `codec` that supports codec factories.  This is
@@ -503,7 +502,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     codecFactory: CodecFactory[Req1, Rep1]
   ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
     this.codec(codecFactory.client)
-      .configured(ProtocolLibrary(codecFactory.protocolLibraryName))
 
   /**
    * A variation of codec for codecs that support only client-codecs.
@@ -518,8 +516,14 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def codec[Req1, Rep1](
     codecFactory: CodecFactory[Req1, Rep1]#Client
-  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] =
+  ): ClientBuilder[Req1, Rep1, HasCluster, Yes, HasHostConnectionLimit] = {
+    // in order to know the protocol library name, we need to produce
+    // a throw-away codec. given that the codec API is on its way out
+    // in favor of Stack, this is a reasonable compromise.
+    val codec = codecFactory(ClientCodecConfig("ClientBuilder protocolLibraryName"))
     copy(CodecClient[Req1, Rep1](codecFactory).withParams(params))
+      .configured(ProtocolLibrary(codec.protocolLibraryName))
+  }
 
   /**
    * Overrides the stack and [[com.twitter.finagle.Client]] that will be used
@@ -719,6 +723,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client.withSessionPool.maxSize(value)
    * }}}
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionLimit(value: Int): ClientBuilder[Req, Rep, HasCluster, HasCodec, Yes] =
     configured(params[DefaultPool.Param].copy(high = value))
@@ -733,6 +741,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client.withSessionPool.minSize(value)
    * }}}
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionCoresize(value: Int): This =
     configured(params[DefaultPool.Param].copy(low = value))
@@ -741,6 +753,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * The amount of time a connection is allowed to linger (when it
    * otherwise would have been closed by the pool) before being
    * closed.
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionIdleTime(timeout: Duration): This =
     configured(params[DefaultPool.Param].copy(idleTime = timeout))
@@ -755,6 +771,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client.withSessionPool.maxWaiters(nWaiters)
    * }}}
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def hostConnectionMaxWaiters(nWaiters: Int): This =
     configured(params[DefaultPool.Param].copy(maxWaiters = nWaiters))
@@ -797,6 +817,10 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * @note This will be integrated into the mainline pool, at
    * which time the experimental option will go away.
+   *
+   * @note not all protocol implementations support this style of connection
+   *       pooling, such as `com.twitter.finagle.ThriftMux` and
+   *       `com.twitter.finagle.Memcached`.
    */
   def expHostConnectionBufferSize(size: Int): This =
     configured(params[DefaultPool.Param].copy(bufferSize = size))

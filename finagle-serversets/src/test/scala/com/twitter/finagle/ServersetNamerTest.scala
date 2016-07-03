@@ -14,7 +14,7 @@ class ServersetNamerTest
 {
 
   def mkNamer(f: String => Var[Addr]): Namer = new com.twitter.serverset {
-    override protected[this] def resolve(spec: String) = f(spec)
+    override protected[this] def resolve0(spec: String) = f(spec)
   }
 
   def schemeOk(scheme: String): Unit = {

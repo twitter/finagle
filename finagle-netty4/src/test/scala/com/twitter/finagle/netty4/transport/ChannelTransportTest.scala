@@ -24,9 +24,6 @@ class ChannelTransportTest extends FunSuite
   val (transport, channel) = {
     val ch = new EmbeddedChannel()
     val tr = new ChannelTransport[String, String](ch)
-    // We have to remove EmbedChannels' LastInboundHandler to make sure inbound messages
-    // reach our own ChannelTransport.
-    ch.pipeline().removeFirst()
     (tr, ch)
   }
 
@@ -39,7 +36,7 @@ class ChannelTransportTest extends FunSuite
     assert(transport.status == Status.Closed)
   }
 
-  test("channel.write before transport.read") {
+  test("ChannelTransport still works if we channel.write before transport.read") {
     forAll { ss: Seq[String] =>
       val written = ss.map(s => channel.writeInbound(s))
       written.zip(ss).foreach { case (w, s) =>
@@ -53,7 +50,7 @@ class ChannelTransportTest extends FunSuite
     assertFailedRead(transport.read(), e)
   }
 
-  test("transport.read before channel.write") {
+  test("ChannelTransport still works if we transport.read before channel.write") {
     forAll { ss: Seq[String] =>
       val seen = ss.map(_ => transport.read())
       val written = ss.map(s => channel.writeInbound(s))
@@ -71,7 +68,7 @@ class ChannelTransportTest extends FunSuite
     assertFailedRead(seen, e)
   }
 
-  test("write (failure)") {
+  test("ChannelTransport propagates failures back up on write") {
     val e = new Exception()
     channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
       override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
@@ -85,13 +82,13 @@ class ChannelTransportTest extends FunSuite
     }
   }
 
-  test("write (ok)") {
+  test("ChannelTransport writes successfully") {
     forAll { s: String =>
       assert(transport.write(s).map(_ => channel.readOutbound[String]).poll == Some(Return(s)))
     }
   }
 
-  test("write (interrupted by caller)") {
+  test("ChannelTransport cancels the underlying write when interrupted by the caller") {
     var p: Option[ChannelPromise] = None
     channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
       override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
@@ -109,7 +106,7 @@ class ChannelTransportTest extends FunSuite
     }
   }
 
-  test("write (canceled by callee)") {
+  test("ChannelTransport write propagates a failure back when it's cancelled in the netty layer") {
     channel.pipeline.addLast(new ChannelOutboundHandlerAdapter {
       override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
         // we cancel every single write
@@ -119,22 +116,24 @@ class ChannelTransportTest extends FunSuite
 
     forAll { s: String =>
       val thrown = intercept[Exception](Await.result(transport.write(s), timeout))
+      // we do this because forAll doesn't seem to work with just intercepts
       assert(thrown.isInstanceOf[CancelledWriteException])
     }
   }
 
-  test("write (dropped by callee)") {
+  test("ChannelTransport throws properly on writes when the other end hangs up") {
     channel.unsafe().outboundBuffer().setUserDefinedWritability(1, false)
     assert(!channel.isWritable)
     assert(transport.status == Status.Busy)
 
     forAll { s: String =>
-      val thrown = intercept[Exception](Await.result(transport.write(s), timeout))
-      assert(thrown.isInstanceOf[DroppedWriteException])
+      val e = intercept[Exception](Await.result(transport.write(s), timeout))
+      // we do this because forAll doesn't seem to work with just intercepts
+      assert(e.isInstanceOf[DroppedWriteException])
     }
   }
 
-  test("read (interrupted by caller)") {
+  test("ChannelTransport fails the connection when the read is interrupted") {
     val e = new Exception
     val seen = transport.read()
     assert(!seen.isDefined)
@@ -142,9 +141,11 @@ class ChannelTransportTest extends FunSuite
     seen.raise(e)
     assert(Await.result(transport.onClose, timeout) == e)
     assert(transport.status == Status.Closed)
+    assert(!channel.isOpen)
+    assert(!channel.isActive)
   }
 
-  test("onClose") {
+  test("ChannelTransport satisfies onClose when it closes") {
     val e = new Exception
     assert(!transport.onClose.isDefined)
     channel.pipeline.fireExceptionCaught(e)
@@ -153,13 +154,31 @@ class ChannelTransportTest extends FunSuite
     assert(transport.status == Status.Closed)
   }
 
-  test("close") {
+  test("ChannelTransport cuts the connection on close") {
     assert(!transport.onClose.isDefined)
 
     Await.ready(transport.close(), timeout)
-    assert(Await.result(transport.onClose, timeout).isInstanceOf[ChannelClosedException])
+    intercept[ChannelClosedException] {
+      throw Await.result(transport.onClose, timeout)
+    }
     assert(transport.status == Status.Closed)
     assert(!channel.isOpen)
+    assert(!channel.isActive)
+  }
+
+  test("ChannelTransport closes when the remote closes") {
+    channel.close()
+    assert(!channel.isOpen)
+    assert(!channel.isActive)
+
+    // this is subtle.  transport.onClose returns a Future[Throwable].  we want
+    // to ensure that we expect a ChannelClosedException, but it should be from
+    // a successful Future, not a failed one.
+    val Return(t) = Await.result(transport.onClose.liftToTry, 5.seconds)
+    intercept[ChannelClosedException] {
+      throw t
+    }
+    assert(transport.status == Status.Closed)
   }
 
   test("peerCertificate") {
@@ -169,7 +188,6 @@ class ChannelTransportTest extends FunSuite
     when(engine.getSession).thenReturn(session)
     when(session.getPeerCertificates).thenReturn(Array(cert))
     val ch = new EmbeddedChannel(new SslHandler(engine))
-    ch.pipeline().removeLast()
     val tr = new ChannelTransport[String, String](ch)
 
     assert(tr.peerCertificate == Some(cert))

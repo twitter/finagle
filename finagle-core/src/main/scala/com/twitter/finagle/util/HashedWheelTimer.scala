@@ -3,12 +3,14 @@ package com.twitter.finagle.util
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.conversions.time._
 import com.twitter.finagle.stats.FinagleStatsReceiver
+import com.twitter.logging.Logger
 import com.twitter.util._
 import java.util.concurrent.{Executors, ThreadFactory, TimeUnit}
 import org.jboss.netty.{util => netty}
 
 // Wrapper around Netty timers.
 private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
+
   protected def scheduleOnce(when: Time)(f: => Unit): TimerTask = {
     val timeout = underlying.newTimeout(new netty.TimerTask {
       def run(to: netty.Timeout): Unit = {
@@ -48,6 +50,7 @@ private class HashedWheelTimer(underlying: netty.Timer) extends Timer {
   private[this] def toTimerTask(task: netty.Timeout) = new TimerTask {
     def cancel(): Unit = task.cancel()
   }
+
 }
 
 /**
@@ -61,8 +64,8 @@ object HashedWheelTimer {
    * milliseconds worth of scheduling. This should suffice for most usage
    * without having tasks scheduled for a later round.
    */
-  val TickDuration = 10.milliseconds
-  val TicksPerWheel = 512
+  val TickDuration: Duration = 10.milliseconds
+  val TicksPerWheel: Int = 512
 
   /**
    * Create a default `HashedWheelTimer`.
@@ -106,7 +109,8 @@ object HashedWheelTimer {
   /**
    * Create a `HashedWheelTimer` based on a netty.HashedWheelTimer.
    */
-  def apply(nettyTimer: netty.HashedWheelTimer): Timer = new HashedWheelTimer(nettyTimer)
+  def apply(nettyTimer: netty.HashedWheelTimer): Timer =
+    new HashedWheelTimer(nettyTimer)
 
   // Note: this uses the default `ticksPerWheel` size of 512 and 10 millisecond
   // ticks, which gives ~5100 milliseconds worth of scheduling. This should
@@ -116,7 +120,37 @@ object HashedWheelTimer {
     TickDuration.inMilliseconds, TimeUnit.MILLISECONDS,
     TicksPerWheel)
 
-  val Default: Timer = new HashedWheelTimer(nettyHwt)
+  private[this] val log = Logger.get()
+
+  /**
+   * Create a [[Timer]] that proxies all calls except for [[Timer.stop()]].
+   */
+  private[util] def unstoppable(timer: Timer): Timer =
+    new ProxyTimer {
+      override protected def self: Timer = timer
+      override def stop(): Unit = {
+        val stackTrace = Thread.currentThread.getStackTrace
+        log.warning(
+          s"Ignoring call to `Timer.stop()` on an unstoppable Timer: $timer." +
+            s"Current stack trace: ${stackTrace.mkString("\n")}")
+      }
+
+      override def toString: String =
+        s"UnstoppableTimer($timer)"
+    }
+
+  /**
+   * The default [[Timer]] shared by Finagle.
+   *
+   * Note that calls to [[Timer.stop()]] are logged and ignored as
+   * Finagle relies on it being available.
+   */
+  val Default: Timer =
+    unstoppable(
+      new HashedWheelTimer(nettyHwt) {
+        override def toString: String = "HashedWheelTimer.Default"
+      }
+    )
 
   TimerStats.deviation(
     nettyHwt,
@@ -135,9 +169,13 @@ object HashedWheelTimer {
 object DefaultTimer {
   private[finagle] val netty = HashedWheelTimer.nettyHwt
 
+  /**
+   * An alias for [[HashedWheelTimer.Default]].
+   */
   val twitter: Timer = HashedWheelTimer.Default
 
   val get: DefaultTimer.type = this
 
   override def toString: String = "DefaultTimer"
+
 }

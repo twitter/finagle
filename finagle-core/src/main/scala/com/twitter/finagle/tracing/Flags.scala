@@ -1,6 +1,30 @@
 package com.twitter.finagle.tracing
 
 object Flags {
+
+  /**
+   * Overview of Tracing flags
+   * size in bits:
+   *  1  2                  40                               20          1
+   * +-+--+----------------------------------------+--------------------+-+
+   * | |  |                                        |      Extension     |0|
+   * | |  |                                        |        Flags       |0|
+   * +-+--+----------------------------------------+--------------------+-+
+   *  |  |                                                               |
+   *  |  +-[[SamplingKnown]][[Sampled]]                                  +-Most Significant Bit
+   *  +-[[Debug]]
+   *
+   * Extension Flags:
+   *  The [[Sampled]] & [[Debug]] flags which are used to propagate trace sampling decisions
+   *  are tightly coupled to the underlying sampling tracer implementation. These flags
+   *  cannot be reused by other "non sampling" tracers without triggering unintended side effects
+   *  in the existing sampling tracers. Hence the highest 20 bits (positions 43...62) excluding the
+   *  most significant bit are reserved for use by custom tracers to propagate their tracing
+   *  decisions safely without affecting any existing tracer implementations.
+   *
+   *  Finagle will never mutate extension flags, so it's safe to set your own extension flags.
+   */
+
   /*
    * The debug flag is used to ensure this the current trace passes
    * all of the sampling stages.
@@ -20,6 +44,23 @@ object Flags {
    * @return a flags instance with no flags set.
    */
   def apply(): Flags = Empty
+
+  /**
+   * The most significant [[ExtensionFlagsNumBits]] bits (excluding the sign bit) are reserved
+   * for ExtensionFlags which is used to encode tracing decisions of custom tracers.
+   */
+  private val ExtensionFlagsNumBits: Int = 20
+  private val MaxExtensionFlagsValue: Long = (1L << ExtensionFlagsNumBits) - 1
+
+  /**
+   * Represents the lowest bit position of extension flags.
+   */
+  val ExtensionFlagsShift: Int = 43
+
+  /**
+   * Bitmask which represents the bit range of extension flags.
+   */
+  val ExtensionFlagsMask: Long = MaxExtensionFlagsValue << ExtensionFlagsShift
 }
 
 /**

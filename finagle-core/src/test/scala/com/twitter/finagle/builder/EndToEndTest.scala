@@ -12,7 +12,7 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.tracing.Trace
 import com.twitter.util._
-import java.net.{InetAddress, SocketAddress, InetSocketAddress}
+import java.net.{InetAddress, InetSocketAddress, SocketAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -208,6 +208,9 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     assert(!response.isDefined)
     constRes.setValue("foo")
     assert(Await.result(response, 1.second) == "foo")
+
+    // need to properly close the server, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(server.close(), 1.second)
   }
 
   test("Finagle client should queue requests while waiting for cluster to initialize") {
@@ -249,6 +252,9 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
     }
     thread.start()
     thread.join()
+
+    // need to properly close the server, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(server.close(), 1.second)
   }
 
   test("ClientBuilder should be properly instrumented on service application failure") {
@@ -347,6 +353,9 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
     assert(requests == 1)
     assert(triesRequests == 1)
+
+    // need to properly close the client, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 
   test("ClientBuilderClient.ofCodec should be properly instrumented on success") {
@@ -381,5 +390,8 @@ class EndToEndTest extends FunSuite with StringClient with StringServer {
 
     assert(requests == 1)
     assert(triesRequests == 1)
+
+    // need to properly close the client, otherwise it will prevent ExitGuard from exiting and interfere with ExitGuardTest
+    Await.ready(client.close(), 1.second)
   }
 }

@@ -12,6 +12,15 @@
   A counter of the number of times server-initiated draining completed
   successfully.
 
+**<server_label>/mux/duplicate_tag**
+  A counter of the number of requests with a tag while a server is
+  processing another request with the same tag.
+
+**<server_label>/mux/orphaned_tdiscard**
+  A counter of the number of Tdiscard messages for which the server does
+  not have a corresponding request.  This happens when a server has already
+  responded to the request when it receives a Tdiscard.
+
 **clienthangup**
   A counter of the number of times sessions have been abruptly terminated by
   the client.
@@ -37,4 +46,12 @@
 **<label>/mux/framer/write_window_bytes**
   A guage indicating the maximum size of fragments when mux framing is enabled.
   A value of -1 means that writes are not fragmented.
+
+**<label>/mux/transport/read/failures/**
+  A counter indicating any exceptions that occur on the transport read path for mux.
+  This includes exceptions in handshaking, thrift downgrading (for servers), etc.
+
+**<label>/mux/transport/write/failures/**
+  A counter indicating any exceptions that occur on the transport write path for mux.
+  This includes exceptions in handshaking, thrift downgrading (for servers), etc.
 

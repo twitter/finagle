@@ -102,7 +102,10 @@ abstract class Request extends Message {
     }
   }
 
-  /** Remote InetSocketAddress */
+  /**
+   * The InetSocketAddress of the client or a place-holder
+   * ephemeral address for requests that have yet to be dispatched.
+   */
   @BeanProperty
   def remoteSocketAddress: InetSocketAddress
 
@@ -317,6 +320,18 @@ object Request {
     val httpReq = new DefaultHttpRequest(from(version), from(method), uri)
     httpReq.setChunked(true)
     apply(httpReq, reader, new InetSocketAddress(0))
+  }
+
+  private[finagle] def apply(
+    version: Version,
+    method: Method,
+    uri: String,
+    reader: Reader,
+    remoteAddr: InetSocketAddress
+  ): Request = {
+    val httpReq = new DefaultHttpRequest(from(version), from(method), uri)
+    httpReq.setChunked(true)
+    apply(httpReq, reader, remoteAddr)
   }
 
   private[http] def apply(

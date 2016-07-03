@@ -1,0 +1,15 @@
+{
+  "toggles": [
+    {
+      "id": "com.twitter.base-is-off",
+      "description": "Will be overriden to 1.0 by env-specific config",
+      "fraction": 0.0,
+      "comment": "This corresponds to StandardToggleMapTest.apply with resource-based configs and overrides"
+    },
+    {
+      "id": "com.twitter.only-in-base",
+      "description": "A toggle thats only in the base config",
+      "fraction": 0.0
+    }
+  ]
+}

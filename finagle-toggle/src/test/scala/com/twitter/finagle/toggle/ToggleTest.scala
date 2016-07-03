@@ -137,4 +137,15 @@ class ToggleTest extends FunSuite
     Toggle.Metadata("com.toggle.Test", 1.0, None)
   }
 
+  test("Toggle.Metadata constructor checks description") {
+    intercept[IllegalArgumentException] {
+      Toggle.Metadata("com.toggle.Test", 0.0, Some(""))
+    }
+    intercept[IllegalArgumentException] {
+      Toggle.Metadata("com.toggle.Test", 0.0, Some("  "))
+    }
+
+    Toggle.Metadata("com.toggle.Test", 0.0, Some("a description"))
+  }
+
 }

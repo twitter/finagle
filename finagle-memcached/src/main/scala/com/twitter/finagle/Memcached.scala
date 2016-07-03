@@ -11,7 +11,7 @@ import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.text.{MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
-import com.twitter.finagle.netty3.{BufChannelBuffer, Netty3Listener, Netty3Transporter}
+import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.pool.SingletonPool
 import com.twitter.finagle.server.{Listener, StackServer, StdStackServer}
@@ -20,51 +20,57 @@ import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.{StatsReceiver, ExceptionStatsHandler}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.util.DefaultTimer
 import com.twitter.hashing
 import com.twitter.io.Buf
-import com.twitter.util.{Closable, Duration, Future, Monitor}
+import com.twitter.util.{Closable, Duration, Monitor}
 import com.twitter.util.registry.GlobalRegistry
 import scala.collection.mutable
 
-/**
- * Defines a [[Tracer]] that understands the finagle-memcached request type.
- * This is installed as the `ClientTracingFilter` in the default stack.
- */
-private[finagle] object MemcachedTraceInitializer {
-  object Module extends Stack.Module1[param.Tracer, ServiceFactory[Command, Response]] {
-    val role = TraceInitializerFilter.role
-    val description = "Initialize traces for the client and record hits/misses"
-    def make(_tracer: param.Tracer, next: ServiceFactory[Command, Response]) = {
-      val param.Tracer(tracer) = _tracer
-      val filter = new Filter(tracer)
-      filter andThen next
+private[finagle] object MemcachedTracingFilter {
+
+  object Module extends Stack.Module1[param.Label, ServiceFactory[Command, Response]] {
+    val role = ClientTracingFilter.role
+    val description = "Add Memcached client specific annotations to the trace"
+
+    def make(_label: param.Label, next: ServiceFactory[Command, Response]) = {
+      val param.Label(label) = _label
+      val annotations = new AnnotatingTracingFilter[Command, Response](
+        label, Annotation.ClientSend(), Annotation.ClientRecv())
+      annotations andThen TracingFilter andThen next
     }
   }
 
-  class Filter(tracer: Tracer) extends SimpleFilter[Command, Response] {
-    def apply(command: Command, service: Service[Command, Response]): Future[Response] =
-      Trace.letTracerAndNextId(tracer) {
-        val response = service(command)
+  object TracingFilter extends SimpleFilter[Command, Response] {
+    def apply(command: Command, service: Service[Command, Response]) = {
+      val response = service(command)
+      if (Trace.isActivelyTracing) {
+        // Submitting rpc name here assumes there is no further tracing lower in the stack
         Trace.recordRpc(command.name)
         command match {
-          case command: RetrievalCommand if Trace.isActivelyTracing =>
-            response onSuccess {
+          case command: RetrievalCommand =>
+            response.onSuccess {
               case Values(vals) =>
                 val cmd = command.asInstanceOf[RetrievalCommand]
                 val misses = mutable.Set.empty[String]
-                cmd.keys foreach { case Buf.Utf8(key) => misses += key }
-                vals foreach { value =>
+                cmd.keys.foreach { case Buf.Utf8(key) => misses += key }
+                vals.foreach { value =>
                   val Buf.Utf8(key) = value.key
                   Trace.recordBinary(key, "Hit")
                   misses.remove(key)
                 }
-                misses foreach { Trace.recordBinary(_, "Miss") }
+                misses.foreach {
+                  Trace.recordBinary(_, "Miss")
+                }
               case _ =>
             }
           case _ =>
+            response
         }
+      } else {
         response
       }
+    }
   }
 }
 
@@ -187,7 +193,7 @@ object Memcached extends finagle.Client[Command, Response]
     def newStack: Stack[ServiceFactory[Command, Response]] = StackClient.newStack
       .replace(LoadBalancerFactory.role, ConcurrentLoadBalancerFactory.module[Command, Response])
       .replace(DefaultPool.Role, SingletonPool.module[Command, Response])
-      .replace(ClientTracingFilter.role, MemcachedTraceInitializer.Module)
+      .replace(ClientTracingFilter.role, MemcachedTracingFilter.Module)
 
     /**
      * The memcached client should be using fixed hosts that do not change
@@ -238,7 +244,8 @@ object Memcached extends finagle.Client[Command, Response]
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(
         transport,
-        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope)
+        params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
+        DefaultTimer.twitter
       )
 
     def newTwemcacheClient(dest: Name, label: String): TwemcacheClient = {
@@ -308,8 +315,8 @@ object Memcached extends finagle.Client[Command, Response]
       new ConcurrentLoadBalancingParams(this)
     override val withTransport: ClientTransportParams[Client] =
       new ClientTransportParams(this)
-    override val withSession: SessionParams[Client] =
-      new SessionParams(this)
+    override val withSession: ClientSessionParams[Client] =
+      new ClientSessionParams(this)
     override val withAdmissionControl: ClientAdmissionControlParams[Client] =
       new ClientAdmissionControlParams(this)
     override val withSessionQualifier: SessionQualificationParams[Client] =
@@ -375,6 +382,8 @@ object Memcached extends finagle.Client[Command, Response]
     //See https://issues.scala-lang.org/browse/SI-8905
     override val withAdmissionControl: ServerAdmissionControlParams[Server] =
       new ServerAdmissionControlParams(this)
+    override val withSession: SessionParams[Server] =
+      new SessionParams(this)
     override val withTransport: ServerTransportParams[Server] =
       new ServerTransportParams(this)
 

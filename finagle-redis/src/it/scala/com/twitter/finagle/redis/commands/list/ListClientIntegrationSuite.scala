@@ -2,6 +2,7 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.naggati.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
+import com.twitter.finagle.redis.util.StringToBuf
 import com.twitter.util.Await
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -16,152 +17,152 @@ final class ListClientIntegrationSuite extends RedisClientTest {
 
   test("Correctly push elements onto a list", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.lPush(foo, List(bar))) == 1)
-      assert(Await.result(client.lPush(foo, List(baz))) == 2)
+      assert(Await.result(client.lPush(bufFoo, List(bufBar))) == 1)
+      assert(Await.result(client.lPush(bufFoo, List(bufBaz))) == 2)
     }
   }
 
   test("Correctly pop elements off a list", RedisTest, ClientTest) {
     withRedisClient { client =>
-      assert(Await.result(client.lPush(foo, List(bar))) == 1)
-      assert(Await.result(client.lPush(foo, List(baz))) == 2)
-      assert(Await.result(client.lPop(foo)).getOrElse(fail(PopFailureMessage)) == baz)
-      assert(Await.result(client.lPop(foo)).getOrElse(fail(PopFailureMessage)) == bar)
+      assert(Await.result(client.lPush(bufFoo, List(bufBar))) == 1)
+      assert(Await.result(client.lPush(bufFoo, List(bufBaz))) == 2)
+      assert(Await.result(client.lPop(bufFoo)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(Await.result(client.lPop(bufFoo)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
   test("Correctly measure length of an actively changing list", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = foo
+      val key = bufFoo
 
       assert(Await.result(client.lLen(key)) == 0)
-      assert(Await.result(client.lPush(foo, List(bar))) == 1, "Failed to insert list item.")
+      assert(Await.result(client.lPush(bufFoo, List(bufBar))) == 1, "Failed to insert list item.")
       assert(Await.result(client.lLen(key)) == 1)
       assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) ==
-        string2ChanBuf("bar"))
+        bufBar)
       assert(Await.result(client.lLen(key)) == 0)
     }
   }
 
   test("Correctly index elements of an actively changing list", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("lindex")
+      val key = StringToBuf("lindex")
 
-      assert(Await.result(client.lIndex(key, 0)) == None)
-      assert(Await.result(client.lPush(key, List(bar))) == 1)
-      assert(Await.result(client.lIndex(key, 0)).getOrElse(fail(IndexFailureMessage)) == bar)
-      assert(Await.result(client.lPush(key, List(baz))) == 2)
-      assert(Await.result(client.lIndex(key, 0)).getOrElse(fail(IndexFailureMessage)) == baz)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == baz)
-      assert(Await.result(client.lIndex(key, 0)).getOrElse(fail(IndexFailureMessage)) == bar)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bar)
+      assert(Await.result(client.lIndex(key, 0L)) == None)
+      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
+      assert(Await.result(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBar)
+      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
+      assert(Await.result(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBaz)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(Await.result(client.lIndex(key, 0L)).getOrElse(fail(IndexFailureMessage)) == bufBar)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
   test("Correctly insert before & after a pushed element", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("linsert")
+      val key = StringToBuf("linsert")
       val PivotFailureMessage = "Pivot not found"
 
-      assert(Await.result(client.lPush(key, List(moo))) == 1)
+      assert(Await.result(client.lPush(key, List(bufMoo))) == 1)
       assert(
-        Await.result(client.lInsertAfter(key, moo, bar)).getOrElse(fail(PivotFailureMessage)) == 2)
+        Await.result(client.lInsertAfter(key, bufMoo, bufBar)).getOrElse(fail(PivotFailureMessage)) == 2)
       assert(
         Await.result(
-          client.lInsertBefore(key, moo, foo)).getOrElse(fail(PivotFailureMessage)) == 3)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == foo)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == moo)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bar)
+          client.lInsertBefore(key, bufMoo, bufFoo)).getOrElse(fail(PivotFailureMessage)) == 3)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufFoo)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
   test("Correctly Push -->> Remove -->> Pop elements in order", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("lremove")
+      val key = StringToBuf("lremove")
 
-      assert(Await.result(client.lPush(key, List(bar))) == 1)
-      assert(Await.result(client.lPush(key, List(baz))) == 2)
-      assert(Await.result(client.lRem(key, 1, baz)) == 1)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bar)
+      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
+      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
+      assert(Await.result(client.lRem(key, 1L, bufBaz)) == 1)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
   test("Correctly push members, set one, then pop them off in order", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("lset")
+      val key = StringToBuf("lset")
 
-      assert(Await.result(client.lPush(key, List(bar))) == 1)
-      assert(Await.result(client.lPush(key, List(baz))) == 2)
+      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
+      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
 
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
       */
-      Await.result(client.lSet(key, 0, moo))
+      Await.result(client.lSet(key, 0L, bufMoo))
 
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == moo)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bar)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
   test("Correctly push members, examine the range, then pop them off", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("lrange")
+      val key = StringToBuf("lrange")
 
-      assert(Await.result(client.lPush(key, List(bar))) == 1)
-      assert(Await.result(client.lPush(key, List(baz))) == 2)
-      assert(Await.result(client.lRange(key, 0, -1)) == List(baz, bar))
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == baz)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bar)
+      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
+      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
+      assert(Await.result(client.lRange(key, 0L, -1L)) == List(bufBaz, bufBar))
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
   test("Correctly push members, the poll members queue style (RPOP)", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("rpop")
+      val key = StringToBuf("rpop")
 
-      assert(Await.result(client.lPush(key, List(bar))) == 1)
-      assert(Await.result(client.lPush(key, List(baz))) == 2)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bar)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == baz)
+      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
+      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
+      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
+      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
     }
   }
 
   test("Correctly push then pop members from the HEAD (RPUSH RPOP)", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("rpush")
+      val key = StringToBuf("rpush")
 
-      assert(Await.result(client.rPush(key, List(bar))) == 1)
-      assert(Await.result(client.rPush(key, List(baz))) == 2)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == baz)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bar)
+      assert(Await.result(client.rPush(key, List(bufBar))) == 1)
+      assert(Await.result(client.rPush(key, List(bufBaz))) == 2)
+      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBaz)
+      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
     }
   }
 
   test("Correctly push and trim members, then pop the two remaining", RedisTest, ClientTest) {
     withRedisClient { client =>
-      val key = string2ChanBuf("ltrim")
+      val key = StringToBuf("ltrim")
 
-      assert(Await.result(client.lPush(key, List(bar))) == 1)
-      assert(Await.result(client.lPush(key, List(baz))) == 2)
-      assert(Await.result(client.lPush(key, List(boo))) == 3)
-
-      /*
-       * We ingloriously side effect here as the API returns no verification,
-       * if the key isn't found in the List a ServerError is thrown
-      */
-      Await.result(client.lTrim(key, 0, 1))
-
-      assert(Await.result(client.lPush(key, List(moo))) == 3)
+      assert(Await.result(client.lPush(key, List(bufBar))) == 1)
+      assert(Await.result(client.lPush(key, List(bufBaz))) == 2)
+      assert(Await.result(client.lPush(key, List(bufBoo))) == 3)
 
       /*
        * We ingloriously side effect here as the API returns no verification,
        * if the key isn't found in the List a ServerError is thrown
       */
-      Await.result(client.lTrim(key, 0, 1))
+      Await.result(client.lTrim(key, 0L, 1L))
 
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == boo)
-      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == moo)
+      assert(Await.result(client.lPush(key, List(bufMoo))) == 3)
+
+      /*
+       * We ingloriously side effect here as the API returns no verification,
+       * if the key isn't found in the List a ServerError is thrown
+      */
+      Await.result(client.lTrim(key, 0L, 1L))
+
+      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufBoo)
+      assert(Await.result(client.rPop(key)).getOrElse(fail(PopFailureMessage)) == bufMoo)
     }
   }
 }

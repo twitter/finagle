@@ -37,24 +37,26 @@ class ChannelRequestStatsHandlerTest extends FunSuite with MockitoSugar {
     requestsEqual(Seq.empty[Float])
 
     val ctx = mock[ChannelHandlerContext]
+    val chan = mock[Channel]
     val reqAttr = mkAttr(new AtomicInteger(0))
-    when(ctx.attr(ChannelRequestStatsHandler.ConnectionRequestsKey)).thenReturn(reqAttr)
+    when(ctx.channel).thenReturn(chan)
+    when(chan.attr(ChannelRequestStatsHandler.ConnectionRequestsKey)).thenReturn(reqAttr)
 
 
     val msg = new Object
 
     // first connection sends two messages
-    handler.channelActive(ctx)
+    handler.handlerAdded(ctx)
     handler.channelRead(ctx, msg)
     handler.channelRead(ctx, msg)
     handler.channelInactive(ctx)
 
     // second connection sends zero
-    handler.channelActive(ctx)
+    handler.handlerAdded(ctx)
     handler.channelInactive(ctx)
 
     // third connection sends one
-    handler.channelActive(ctx)
+    handler.handlerAdded(ctx)
     handler.channelRead(ctx, msg)
     handler.channelInactive(ctx)
 

@@ -70,7 +70,7 @@ class Memcached extends CodecFactory[Command, Response] {
       override def prepareConnFactory(underlying: ServiceFactory[Command, Response], params: Stack.Params) =
         new MemcachedLoggingFilter(params[param.Stats].statsReceiver).andThen(underlying)
 
-      override def newTraceInitializer = MemcachedTraceInitializer.Module
+      override def protocolLibraryName: String = Memcached.this.protocolLibraryName
     }
   }
 

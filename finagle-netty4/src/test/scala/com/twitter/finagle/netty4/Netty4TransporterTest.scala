@@ -55,6 +55,27 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     }
   }
 
+  test("interrupts on read cut connections") {
+    new Ctx(Netty4Transporter(Some(defaultEnc), Some(() => defaultDec), params)) {
+      connect()
+
+      val read = clientsideTransport.read()
+
+      assert(!server.isClosed)
+      val expected = new Exception("boom!")
+      read.raise(expected)
+      val actual = intercept[Exception] {
+        Await.result(read, 5.seconds)
+      }
+      assert(actual == expected)
+
+      Await.result(clientsideTransport.onClose, 5.seconds)
+
+      assert(acceptedSocket.getInputStream().read() == -1)
+      server.close()
+    }
+  }
+
   test("Netty4ClientChannelInitializer produces a readable Transport") {
     new Ctx(Netty4Transporter(Some(defaultEnc), Some(() => defaultDec), params)) {
       connect()
