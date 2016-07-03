@@ -5,7 +5,7 @@ import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.{Service, ServiceClosedException, ServiceFactory}
 import com.twitter.finagle.redis.Client
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.util.{BufToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.util.{BufToString, StringToChannelBuffer, StringToBuf}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.io.Charsets
 import com.twitter.logging.Logger
@@ -17,12 +17,12 @@ import scala.collection.JavaConverters._
 object SubscribeCommands {
 
   object MessageBytes {
-    val SUBSCRIBE = StringToChannelBuffer("subscribe")
-    val UNSUBSCRIBE = StringToChannelBuffer("unsubscribe")
-    val PSUBSCRIBE = StringToChannelBuffer("psubscribe")
-    val PUNSUBSCRIBE = StringToChannelBuffer("punsubscribe")
-    val MESSAGE = StringToChannelBuffer("message")
-    val PMESSAGE = StringToChannelBuffer("pmessage")
+    val SUBSCRIBE = StringToBuf("subscribe")
+    val UNSUBSCRIBE = StringToBuf("unsubscribe")
+    val PSUBSCRIBE = StringToBuf("psubscribe")
+    val PUNSUBSCRIBE = StringToBuf("punsubscribe")
+    val MESSAGE = StringToBuf("message")
+    val PMESSAGE = StringToBuf("pmessage")
   }
 }
 
