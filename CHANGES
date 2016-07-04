@@ -150,6 +150,8 @@ New Features
     in separate modules. For example the upcoming finagle-zipkin-kafka.
     ``RB_ID=840494``
 
+  * finagle-zipkin-kafka: A new Zipkin tracer that sends traces via Kafka.
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
