@@ -150,6 +150,9 @@ New Features
     in separate modules. For example the upcoming finagle-zipkin-kafka.
     ``RB_ID=840494``
 
+  * finagle-thriftmux: Introduce a Netty4 implementation of mux and thrift-mux.
+    ``RB_ID=842869``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
