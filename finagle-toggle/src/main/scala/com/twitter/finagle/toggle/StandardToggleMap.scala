@@ -92,8 +92,10 @@ object StandardToggleMap {
   ): ToggleMap = {
     Toggle.validateId(libraryName)
 
-    val svcsJson = loadJsonConfig(libraryName, s"$libraryName-service", serverInfo)
-    val libsJson = loadJsonConfig(libraryName, libraryName, serverInfo)
+    val svcsJson = loadJsonConfig(
+      libraryName, s"$libraryName-service", serverInfo, JsonToggleMap.DescriptionIgnored)
+    val libsJson = loadJsonConfig(
+      libraryName, libraryName, serverInfo, JsonToggleMap.DescriptionRequired)
 
     val stacked = ToggleMap.of(
       mutable,
@@ -113,13 +115,14 @@ object StandardToggleMap {
   private[this] def loadJsonConfig(
     libraryName: String,
     configName: String,
-    serverInfo: ServerInfo
+    serverInfo: ServerInfo,
+    descriptionMode: JsonToggleMap.DescriptionMode
   ): ToggleMap = {
-    val withoutEnv = loadJsonConfigWithEnv(libraryName, configName)
+    val withoutEnv = loadJsonConfigWithEnv(libraryName, configName, descriptionMode)
     val withEnv = serverInfo.environment match {
       case Some(env) =>
         val e = env.toString.toLowerCase
-        loadJsonConfigWithEnv(libraryName, s"$configName-$e")
+        loadJsonConfigWithEnv(libraryName, s"$configName-$e", descriptionMode)
       case None =>
         NullToggleMap
     }
@@ -130,7 +133,8 @@ object StandardToggleMap {
 
   private[this] def loadJsonConfigWithEnv(
     libraryName: String,
-    configName: String
+    configName: String,
+    descriptionMode: JsonToggleMap.DescriptionMode
   ): ToggleMap = {
     val classLoader = getClass.getClassLoader
     val rscPath = s"com/twitter/toggles/configs/$configName.json"
@@ -143,7 +147,7 @@ object StandardToggleMap {
     } else {
       val rsc = rscs.head
       log.debug(s"Toggle config resources found for $configName, using $rsc")
-      JsonToggleMap.parse(rsc) match {
+      JsonToggleMap.parse(rsc, descriptionMode) match {
         case Throw(t) =>
           throw new IllegalArgumentException(
             s"Failure parsing Toggle config resources for $configName, from $rsc", t)

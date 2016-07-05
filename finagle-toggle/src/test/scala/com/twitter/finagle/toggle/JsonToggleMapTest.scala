@@ -12,8 +12,18 @@ import scala.collection.JavaConverters._
 class JsonToggleMapTest extends FunSuite
   with GeneratorDrivenPropertyChecks {
 
-  private def assertParseFails(input: String): Unit =
-    JsonToggleMap.parse(input) match {
+  import JsonToggleMap.{DescriptionIgnored, DescriptionRequired}
+
+  private def assertParseFails(input: String): Unit = {
+    assertParseFails(input, DescriptionIgnored)
+    assertParseFails(input, DescriptionRequired)
+  }
+
+  private def assertParseFails(
+    input: String,
+    descriptionMode: JsonToggleMap.DescriptionMode
+  ): Unit =
+    JsonToggleMap.parse(input, descriptionMode) match {
       case Return(_) => fail(s"Parsing should not succeed for $input")
       case Throw(_) => // expected
     }
@@ -55,17 +65,29 @@ class JsonToggleMapTest extends FunSuite
       |      "fraction": 0.0
       |    }
       |  ]
-      |}""".stripMargin)
+      |}""".stripMargin,
+      DescriptionRequired)
   }
 
-  test("parse invalid JSON string with no description") {
-    assertParseFails("""
+  private val jsonWithNoDescription = """
       |{"toggles": [
       |    { "id": "com.twitter.NoDescription",
       |      "fraction": 0.0
       |    }
       |  ]
-      |}""".stripMargin)
+      |}""".stripMargin
+
+  test("parse JSON string with no description and is required") {
+    assertParseFails(jsonWithNoDescription, DescriptionRequired)
+  }
+
+  test("parse JSON string with no description and is ignored") {
+    JsonToggleMap.parse(jsonWithNoDescription, DescriptionIgnored) match {
+      case Throw(t) =>
+        fail(t)
+      case Return(tm) =>
+        assert(tm.iterator.size == 1)
+    }
   }
 
   test("parse invalid JSON string with invalid fraction") {
@@ -131,7 +153,8 @@ class JsonToggleMapTest extends FunSuite
   }
 
   test("parse valid JSON String") {
-    validateParsedJson(JsonToggleMap.parse(validInput))
+    validateParsedJson(JsonToggleMap.parse(validInput, DescriptionIgnored))
+    validateParsedJson(JsonToggleMap.parse(validInput, DescriptionRequired))
   }
 
   test("parse valid JSON String with empty toggles") {
@@ -139,7 +162,7 @@ class JsonToggleMapTest extends FunSuite
         |{
         |  "toggles": [ ]
         |}""".stripMargin
-    JsonToggleMap.parse(in) match {
+    JsonToggleMap.parse(in, DescriptionRequired) match {
       case Throw(t) =>
         fail(t)
       case Return(map) =>
@@ -153,7 +176,8 @@ class JsonToggleMapTest extends FunSuite
     ).asScala.toSeq
 
     assert(1 == rscs.size)
-    validateParsedJson(JsonToggleMap.parse(rscs.head))
+    validateParsedJson(JsonToggleMap.parse(rscs.head, DescriptionIgnored))
+    validateParsedJson(JsonToggleMap.parse(rscs.head, DescriptionRequired))
   }
 
   test("parse invalid JSON resource file") {
@@ -164,7 +188,7 @@ class JsonToggleMapTest extends FunSuite
     ).asScala.toSeq
 
     assert(1 == rscs.size)
-    JsonToggleMap.parse(rscs.head) match {
+    JsonToggleMap.parse(rscs.head, DescriptionIgnored) match {
       case Return(_) => fail(s"Parsing should not succeed")
       case Throw(_) => // expected
     }

@@ -175,6 +175,8 @@ object ToggleMap {
   /**
    * The [[ToggleMap]] interface is read only and this
    * is the mutable side of it.
+   *
+   * Implementations are expected to be thread-safe.
    */
   trait Mutable extends ToggleMap {
 
@@ -314,7 +316,7 @@ object ToggleMap {
       fractionAndToggle.get()._2(t)
   }
 
-  private[toggle] def newMutable(): Mutable = new Mutable {
+  def newMutable(): Mutable = new Mutable {
 
     override def toString: String =
       s"ToggleMap.Mutable@${System.identityHashCode(this)}"
@@ -425,7 +427,10 @@ object ToggleMap {
     }
   }
 
-  private[toggle] trait Proxy extends ToggleMap {
+  /**
+   * A [[ToggleMap]] that proxies work to `underlying`.
+   */
+  trait Proxy extends ToggleMap {
     protected def underlying: ToggleMap
 
     override def toString: String = underlying.toString
