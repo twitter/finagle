@@ -28,12 +28,12 @@ In an HTTP server:
 
 .. code-block:: scala
 
-  import com.twitter.finagle.ThriftMux
-  import com.twitter.finagle.thrift.service.ThriftResponseClassifier
+  import com.twitter.finagle.Http
+  import com.twitter.finagle.http.service.HttpResponseClassifier
 
   Http.server
     ...
-    .withResponseClassifier(ThriftResponseClassifier.ThriftExceptionsAsFailures)
+    .withResponseClassifier(HttpResponseClassifier.ServerErrorsAsFailures)
 
 If a classifier is not specified on a client or server or if a user's classifier isn't
 defined for a given request/response pair then ``ResponseClassifier.Default``
