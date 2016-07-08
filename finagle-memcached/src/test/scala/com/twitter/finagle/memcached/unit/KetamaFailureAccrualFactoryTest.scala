@@ -4,7 +4,7 @@ import com.twitter.concurrent.Broker
 import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.memcached._
-import com.twitter.finagle.service.Backoff
+import com.twitter.finagle.service.{Backoff, ResponseClassifier}
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
 import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.util.{Await, Future, MockTimer, Time}
@@ -41,7 +41,15 @@ class KetamaFailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     val label = "test"
     val factory =
       new KetamaFailureAccrualFactory[Int, Int](
-        underlying, FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(10.seconds)), timer, key, broker, ejectFailedHost, label, NullStatsReceiver)
+        underlying = underlying,
+        policy = FailureAccrualPolicy.consecutiveFailures(3, Backoff.const(10.seconds)),
+        responseClassifier = ResponseClassifier.Default,
+        timer = timer,
+        statsReceiver = NullStatsReceiver,
+        key = key,
+        healthBroker = broker,
+        ejectFailedHost = ejectFailedHost,
+        label = label)
 
     val service = Await.result(factory())
     verify(underlying)()
