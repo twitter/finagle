@@ -48,7 +48,10 @@
       <div class="occurrences"><a href="../com/twitter/finagle/redis/protocol/package.html" class="extype" name="com.twitter.finagle.redis.protocol">protocol</a> </div>
     </div><div class="entry">
       <div class="name">HLEN</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/protocol/Commands$.html" class="extype" name="com.twitter.finagle.redis.protocol.Commands">Commands</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/redis/protocol/CommandBytes$.html" class="extype" name="com.twitter.finagle.redis.protocol.CommandBytes">CommandBytes</a> <a href="../com/twitter/finagle/redis/protocol/Commands$.html" class="extype" name="com.twitter.finagle.redis.protocol.Commands">Commands</a> </div>
+    </div><div class="entry">
+      <div class="name">HLen</div>
+      <div class="occurrences"><a href="../com/twitter/finagle/redis/protocol/package.html" class="extype" name="com.twitter.finagle.redis.protocol">protocol</a> </div>
     </div><div class="entry">
       <div class="name">HMGET</div>
       <div class="occurrences"><a href="../com/twitter/finagle/redis/protocol/CommandBytes$.html" class="extype" name="com.twitter.finagle.redis.protocol.CommandBytes">CommandBytes</a> <a href="../com/twitter/finagle/redis/protocol/Commands$.html" class="extype" name="com.twitter.finagle.redis.protocol.Commands">Commands</a> </div>
@@ -100,9 +103,6 @@
     </div><div class="entry">
       <div class="name">HashedWheelTimer</div>
       <div class="occurrences"><a href="../com/twitter/finagle/util/package.html" class="extype" name="com.twitter.finagle.util">util</a> </div>
-    </div><div class="entry">
-      <div class="name">Hashes</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/package.html" class="extype" name="com.twitter.finagle.redis">redis</a> </div>
     </div><div class="entry">
       <div class="name">Head</div>
       <div class="occurrences"><a href="../com/twitter/finagle/Stack$.html" class="extype" name="com.twitter.finagle.Stack">Stack</a> <a href="../com/twitter/finagle/http/Method$.html" class="extype" name="com.twitter.finagle.http.Method">Method</a> <a href="../com/twitter/finagle/stream/StreamRequest$$Method$.html" class="extype" name="com.twitter.finagle.stream.StreamRequest.Method">Method</a> </div>
@@ -191,9 +191,6 @@
       <div class="name">Http11</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/Version$.html" class="extype" name="com.twitter.finagle.http.Version">Version</a> </div>
     </div><div class="entry">
-      <div class="name">HttpClientDispatcher</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/http/codec/package.html" class="extype" name="com.twitter.finagle.http.codec">codec</a> </div>
-    </div><div class="entry">
       <div class="name">HttpConnectHandler</div>
       <div class="occurrences"><a href="../com/twitter/finagle/httpproxy/package.html" class="extype" name="com.twitter.finagle.httpproxy">httpproxy</a> </div>
     </div><div class="entry">
@@ -205,6 +202,9 @@
     </div><div class="entry">
       <div class="name">HttpFilter</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/filter/Cors$.html" class="extype" name="com.twitter.finagle.http.filter.Cors">Cors</a> </div>
+    </div><div class="entry">
+      <div class="name">HttpImpl</div>
+      <div class="occurrences"><a href="../com/twitter/finagle/Http$$param$.html" class="extype" name="com.twitter.finagle.Http.param">param</a> </div>
     </div><div class="entry">
       <div class="name">HttpMuxHandler</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/package.html" class="extype" name="com.twitter.finagle.http">http</a> </div>
@@ -230,59 +230,14 @@
       <div class="name">HttpRichClient</div>
       <div class="occurrences"><a href="../com/twitter/finagle/package.html" class="extype" name="com.twitter.finagle">finagle</a> </div>
     </div><div class="entry">
-      <div class="name">HttpServerDispatcher</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/http/codec/package.html" class="extype" name="com.twitter.finagle.http.codec">codec</a> <a href="../com/twitter/finagle/http/exp/package.html" class="extype" name="com.twitter.finagle.http.exp">exp</a> </div>
-    </div><div class="entry">
       <div class="name">HttpTracing</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/http/package.html" class="extype" name="com.twitter.finagle.http">http</a> </div>
-    </div><div class="entry">
-      <div class="name">HttpTransport</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/package.html" class="extype" name="com.twitter.finagle.http">http</a> </div>
     </div><div class="entry">
       <div class="name">HttpVersionNotSupported</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/Status$.html" class="extype" name="com.twitter.finagle.http.Status">Status</a> </div>
     </div><div class="entry">
-      <div class="name">HyperLogLogs</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/package.html" class="extype" name="com.twitter.finagle.redis">redis</a> </div>
-    </div><div class="entry">
-      <div class="name">hDel</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hExists</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hGet</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hGetAll</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hIncrBy</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hKeys</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hMGet</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hMSet</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hScan</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hSet</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hSetNx</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
-      <div class="name">hVals</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/Hashes.html" class="extype" name="com.twitter.finagle.redis.Hashes">Hashes</a> </div>
-    </div><div class="entry">
       <div class="name">handle</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/builder/SourceTrackingMonitor.html" class="extype" name="com.twitter.finagle.builder.SourceTrackingMonitor">SourceTrackingMonitor</a> <a href="../com/twitter/finagle/dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a> <a href="../com/twitter/finagle/dispatch/SerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher">SerialServerDispatcher</a> <a href="../com/twitter/finagle/exception/Reporter.html" class="extype" name="com.twitter.finagle.exception.Reporter">Reporter</a> <a href="../com/twitter/finagle/http/codec/HttpServerDispatcher.html" class="extype" name="com.twitter.finagle.http.codec.HttpServerDispatcher">HttpServerDispatcher</a> <a href="../com/twitter/finagle/http/exp/HttpServerDispatcher.html" class="extype" name="com.twitter.finagle.http.exp.HttpServerDispatcher">HttpServerDispatcher</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/builder/SourceTrackingMonitor.html" class="extype" name="com.twitter.finagle.builder.SourceTrackingMonitor">SourceTrackingMonitor</a> <a href="../com/twitter/finagle/dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a> <a href="../com/twitter/finagle/dispatch/SerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.SerialServerDispatcher">SerialServerDispatcher</a> <a href="../com/twitter/finagle/exception/Reporter.html" class="extype" name="com.twitter.finagle.exception.Reporter">Reporter</a> </div>
     </div><div class="entry">
       <div class="name">handleDownstream</div>
       <div class="occurrences"><a href="../com/twitter/finagle/netty3/ChannelBufferSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelBufferSnooper">ChannelBufferSnooper</a> <a href="../com/twitter/finagle/netty3/SimpleChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.SimpleChannelSnooper">SimpleChannelSnooper</a> <a href="../com/twitter/finagle/redis/naggati/Codec.html" class="extype" name="com.twitter.finagle.redis.naggati.Codec">Codec</a> </div>
@@ -297,7 +252,7 @@
       <div class="occurrences"><a href="../com/twitter/finagle/http/SafeHttpServerCodec.html" class="extype" name="com.twitter.finagle.http.SafeHttpServerCodec">SafeHttpServerCodec</a> <a href="../com/twitter/finagle/netty3/ChannelBufferSnooper.html" class="extype" name="com.twitter.finagle.netty3.ChannelBufferSnooper">ChannelBufferSnooper</a> <a href="../com/twitter/finagle/netty3/SimpleChannelSnooper.html" class="extype" name="com.twitter.finagle.netty3.SimpleChannelSnooper">SimpleChannelSnooper</a> <a href="../com/twitter/finagle/netty3/transport/ChannelTransport.html" class="extype" name="com.twitter.finagle.netty3.transport.ChannelTransport">ChannelTransport</a> </div>
     </div><div class="entry">
       <div class="name">handler</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/redis/protocol/PSubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.PSubscribe">PSubscribe</a> <a href="../com/twitter/finagle/redis/protocol/PUnsubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.PUnsubscribe">PUnsubscribe</a> <a href="../com/twitter/finagle/redis/protocol/Subscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Subscribe">Subscribe</a> <a href="../com/twitter/finagle/redis/protocol/SubscribeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.SubscribeCommand">SubscribeCommand</a> <a href="../com/twitter/finagle/redis/protocol/Unsubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Unsubscribe">Unsubscribe</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/netty4/http/package.html" class="extype" name="com.twitter.finagle.netty4.http">http</a> <a href="../com/twitter/finagle/redis/protocol/PSubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.PSubscribe">PSubscribe</a> <a href="../com/twitter/finagle/redis/protocol/PUnsubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.PUnsubscribe">PUnsubscribe</a> <a href="../com/twitter/finagle/redis/protocol/Subscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Subscribe">Subscribe</a> <a href="../com/twitter/finagle/redis/protocol/SubscribeCommand.html" class="extype" name="com.twitter.finagle.redis.protocol.SubscribeCommand">SubscribeCommand</a> <a href="../com/twitter/finagle/redis/protocol/Unsubscribe.html" class="extype" name="com.twitter.finagle.redis.protocol.Unsubscribe">Unsubscribe</a> </div>
     </div><div class="entry">
       <div class="name">handlers</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/HttpMuxer.html" class="extype" name="com.twitter.finagle.http.HttpMuxer">HttpMuxer</a> </div>
@@ -338,9 +293,6 @@
       <div class="name">headItem</div>
       <div class="occurrences"><a href="../com/twitter/finagle/kestrel/net/lag/kestrel/thriftscala/QueueInfo.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo">QueueInfo</a> <a href="../com/twitter/finagle/kestrel/net/lag/kestrel/thriftscala/QueueInfo$$Immutable.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo.Immutable">Immutable</a> <a href="../com/twitter/finagle/kestrel/net/lag/kestrel/thriftscala/QueueInfo$$Proxy.html" class="extype" name="com.twitter.finagle.kestrel.net.lag.kestrel.thriftscala.QueueInfo.Proxy">Proxy</a> </div>
     </div><div class="entry">
-      <div class="name">headOption</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/exp/mysql/transport/Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a> </div>
-    </div><div class="entry">
       <div class="name">headerMap</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> </div>
     </div><div class="entry">
@@ -372,7 +324,7 @@
       <div class="occurrences"><a href="../com/twitter/finagle/memcached/GetResult.html" class="extype" name="com.twitter.finagle.memcached.GetResult">GetResult</a> <a href="../com/twitter/finagle/memcached/GetsResult.html" class="extype" name="com.twitter.finagle.memcached.GetsResult">GetsResult</a> </div>
     </div><div class="entry">
       <div class="name">host</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/cacheresolver/CacheNode.html" class="extype" name="com.twitter.finagle.cacheresolver.CacheNode">CacheNode</a> <a href="../com/twitter/finagle/exception/package.html" class="extype" name="com.twitter.finagle.exception">exception</a> <a href="../com/twitter/finagle/http/Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> <a href="../com/twitter/finagle/redis/protocol/SlaveOf.html" class="extype" name="com.twitter.finagle.redis.protocol.SlaveOf">SlaveOf</a> <a href="../com/twitter/finagle/serverset2/Endpoint.html" class="extype" name="com.twitter.finagle.serverset2.Endpoint">Endpoint</a> <a href="../com/twitter/finagle/thrift/thriftscala/Annotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation">Annotation</a> <a href="../com/twitter/finagle/thrift/thriftscala/Annotation$$Immutable.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation.Immutable">Immutable</a> <a href="../com/twitter/finagle/thrift/thriftscala/Annotation$$Proxy.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation.Proxy">Proxy</a> <a href="../com/twitter/finagle/thrift/thriftscala/BinaryAnnotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation">BinaryAnnotation</a> <a href="../com/twitter/finagle/thrift/thriftscala/BinaryAnnotation$$Immutable.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.Immutable">Immutable</a> <a href="../com/twitter/finagle/thrift/thriftscala/BinaryAnnotation$$Proxy.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.Proxy">Proxy</a> <a href="../com/twitter/finagle/zipkin/package.html" class="extype" name="com.twitter.finagle.zipkin">zipkin</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/exception/package.html" class="extype" name="com.twitter.finagle.exception">exception</a> <a href="../com/twitter/finagle/http/Message.html" class="extype" name="com.twitter.finagle.http.Message">Message</a> <a href="../com/twitter/finagle/memcached/CacheNode.html" class="extype" name="com.twitter.finagle.memcached.CacheNode">CacheNode</a> <a href="../com/twitter/finagle/redis/protocol/SlaveOf.html" class="extype" name="com.twitter.finagle.redis.protocol.SlaveOf">SlaveOf</a> <a href="../com/twitter/finagle/serverset2/Endpoint.html" class="extype" name="com.twitter.finagle.serverset2.Endpoint">Endpoint</a> <a href="../com/twitter/finagle/thrift/thriftscala/Annotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation">Annotation</a> <a href="../com/twitter/finagle/thrift/thriftscala/Annotation$$Immutable.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation.Immutable">Immutable</a> <a href="../com/twitter/finagle/thrift/thriftscala/Annotation$$Proxy.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.Annotation.Proxy">Proxy</a> <a href="../com/twitter/finagle/thrift/thriftscala/BinaryAnnotation.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation">BinaryAnnotation</a> <a href="../com/twitter/finagle/thrift/thriftscala/BinaryAnnotation$$Immutable.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.Immutable">Immutable</a> <a href="../com/twitter/finagle/thrift/thriftscala/BinaryAnnotation$$Proxy.html" class="extype" name="com.twitter.finagle.thrift.thriftscala.BinaryAnnotation.Proxy">Proxy</a> <a href="../com/twitter/finagle/zipkin/package.html" class="extype" name="com.twitter.finagle.zipkin">zipkin</a> </div>
     </div><div class="entry">
       <div class="name">hostAddresses</div>
       <div class="occurrences"><a href="../com/twitter/finagle/redis/util/RedisCluster$.html" class="extype" name="com.twitter.finagle.redis.util.RedisCluster">RedisCluster</a> </div>
@@ -414,7 +366,7 @@
       <div class="occurrences"><a href="../com/twitter/finagle/client/Transporter$$ConnectTimeout.html" class="extype" name="com.twitter.finagle.client.Transporter.ConnectTimeout">ConnectTimeout</a> </div>
     </div><div class="entry">
       <div class="name">http</div>
-      <div class="occurrences"><a href="../com/twitter/finagle/package.html" class="extype" name="com.twitter.finagle">finagle</a> </div>
+      <div class="occurrences"><a href="../com/twitter/finagle/package.html" class="extype" name="com.twitter.finagle">finagle</a> <a href="../com/twitter/finagle/netty4/package.html" class="extype" name="com.twitter.finagle.netty4">netty4</a> </div>
     </div><div class="entry">
       <div class="name">http10</div>
       <div class="occurrences"><a href="../com/twitter/finagle/http/RequestBuilder.html" class="extype" name="com.twitter.finagle.http.RequestBuilder">RequestBuilder</a> </div>

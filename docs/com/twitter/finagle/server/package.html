@@ -49,7 +49,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -60,7 +60,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -73,7 +73,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -97,7 +97,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="Listener.html"><span class="name">Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Listener.html"><span class="name">Listener</span></a><span class="tparams">[<span name="In">In</span>, <span name="Out">Out</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.server.package@Listener[In,Out]extendsAnyRef" title="Permalink" target="_top">
@@ -111,6 +111,23 @@ connection. It is furnished with a typed <code>Transport</code> representing
 this connection.</p><p>The returned <code>ListeningServer</code> is used to inspect the server, and
 is also used to shut it down.
 </p></div></div>
+    </li><li name="com.twitter.finagle.server.ServerInfo" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ServerInfoextendsAnyRef"></a>
+      <a id="ServerInfo:ServerInfo"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerInfo.html"><span class="name">ServerInfo</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@ServerInfoextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Information about a server.</p>
     </li><li name="com.twitter.finagle.server.StackBasedServer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="StackBasedServer[Req,Rep]extendsServer[Req,Rep]withStack.Parameterized[com.twitter.finagle.server.StackBasedServer[Req,Rep]]"></a>
       <a id="StackBasedServer[Req,Rep]:StackBasedServer[Req,Rep]"></a>
@@ -148,7 +165,7 @@ parameterized.</p>
       <p class="shortcomment cmt">A <a href="../Server.html" class="extype" name="com.twitter.finagle.Server">com.twitter.finagle.Server</a> that composes a
 <a href="../Stack.html" class="extype" name="com.twitter.finagle.Stack">com.twitter.finagle.Stack</a>.</p>
     </li><li name="com.twitter.finagle.server.StdStackServer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerAdmissionControl[This]"></a>
+      <a id="StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerSession[This]withWithServerAdmissionControl[This]"></a>
       <a id="StdStackServer[Req,Rep,This&lt;:StdStackServer[Req,Rep,This]]:StdStackServer[Req,Rep,This]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -156,10 +173,10 @@ parameterized.</p>
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="StdStackServer.html"><span class="name">StdStackServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>]</span><span class="result"> extends <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>
+        <a href="StdStackServer.html"><span class="name">StdStackServer</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>, <span name="This">This &lt;: <a href="StdStackServer.html" class="extype" name="com.twitter.finagle.server.StdStackServer">StdStackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>]</span><span class="result"> extends <a href="StackServer.html" class="extype" name="com.twitter.finagle.server.StackServer">StackServer</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.Req">Req</span>, <span class="extype" name="com.twitter.finagle.server.StdStackServer.Rep">Rep</span>] with <a href="../Stack$$Parameterized.html" class="extype" name="com.twitter.finagle.Stack.Parameterized">Parameterized</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerTransport.html" class="extype" name="com.twitter.finagle.param.WithServerTransport">WithServerTransport</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerSession.html" class="extype" name="com.twitter.finagle.param.WithServerSession">WithServerSession</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>] with <a href="../param/WithServerAdmissionControl.html" class="extype" name="com.twitter.finagle.param.WithServerAdmissionControl">WithServerAdmissionControl</a>[<span class="extype" name="com.twitter.finagle.server.StdStackServer.This">This</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.server.package@StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerAdmissionControl[This]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@StdStackServer[Req,Rep,This&lt;:com.twitter.finagle.server.StdStackServer[Req,Rep,This]]extendsStackServer[Req,Rep]withStack.Parameterized[This]withCommonParams[This]withWithServerTransport[This]withWithServerSession[This]withWithServerAdmissionControl[This]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -220,7 +237,7 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="NullListener$.html"><span class="name">NullListener</span></a><span class="result"> extends <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
+        <a href="NullListener$.html"><span class="name">NullListener</span></a><span class="result"> extends <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listener">Listener</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.server.package@NullListener" title="Permalink" target="_top">
@@ -228,6 +245,23 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
       </a>
     </span>
       <p class="shortcomment cmt">An empty Listener that can be used as a placeholder.</p>
+    </li><li name="com.twitter.finagle.server.ServerInfo" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerInfo"></a>
+      <a id="ServerInfo:ServerInfo"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerInfo$.html"><span class="name">ServerInfo</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@ServerInfo" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.server.StackServer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StackServer"></a>
       <a id="StackServer:StackServer"></a>
@@ -245,6 +279,23 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.server.environment" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="environment"></a>
+      <a id="environment:environment"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="environment$.html"><span class="name">environment</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.server.package@environment" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="ServerInfo$.html#Flag:com.twitter.finagle.server.ServerInfo" class="extmbr" name="com.twitter.finagle.server.ServerInfo#Flag">ServerInfo.Flag</a></p></span></dd></dl></div>
     </li></ol>
             </div>
 
@@ -255,9 +306,9 @@ a <a href="Listener.html" class="extype" name="com.twitter.finagle.server.Listen
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

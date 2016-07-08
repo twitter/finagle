@@ -97,7 +97,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="DistributorT.html"><span class="name">DistributorT</span></a><span class="tparams">[<span name="Node">Node</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="DistributorT.html"><span class="name">DistributorT</span></a><span class="tparams">[<span name="Node">Node</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@DistributorT[Node]extendsAnyRef" title="Permalink" target="_top">
@@ -156,7 +156,7 @@ data across updates.
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="LoadBalancerFactory.html"><span class="name">LoadBalancerFactory</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@LoadBalancerFactoryextendsAnyRef" title="Permalink" target="_top">
@@ -364,6 +364,30 @@ options. Thus, it increases concurrency of each endpoint.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.loadbalancer.defaultBalancer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="defaultBalancer"></a>
+      <a id="defaultBalancer:defaultBalancer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="defaultBalancer$.html"><span class="name">defaultBalancer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@defaultBalancer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">We expose the ability to configure balancers per-process via flags.</p><div class="fullcomment"><div class="comment cmt"><p>We expose the ability to configure balancers per-process via flags. 'heap',
+'choice', and 'aperture' are valid choices for defaultBalancer. However, using
+this is generally not a good idea, as Finagle processes usually contain many clients.
+To configure the load balancer method on a client, use the <code>configured</code> method like so:</p><p>{{
+   val balancer = Balancers.aperture(...)
+   Protocol.configured(LoadBalancerFactory.Param(balancer))
+}}
+</p></div></div>
     </li><li name="com.twitter.finagle.loadbalancer.exp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="exp"></a>
       <a id="exp:exp"></a>
@@ -390,7 +414,7 @@ options. Thus, it increases concurrency of each endpoint.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <a href="perHostStats$.html"><span class="name">perHostStats</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@perHostStats" title="Permalink" target="_top">
@@ -403,38 +427,7 @@ options. Thus, it increases concurrency of each endpoint.
 
         
 
-        <div id="values" class="values members">
-              <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.loadbalancer.defaultBalancer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="defaultBalancer"></a>
-      <a id="defaultBalancer:defaultBalancer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="defaultBalancer$.html"><span class="name deprecated" title="Deprecated: (Since version 2015-06-15) Use com.twitter.finagle.loadbalancer.Balancers per-client.">defaultBalancer</span></a><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.package@defaultBalancer" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">We expose the ability to configure balancers per-process via flags.</p><div class="fullcomment"><div class="comment cmt"><p>We expose the ability to configure balancers per-process via flags. However,
-this is generally not a good idea as Finagle processes usually contain many clients.
-This will likely go away in the future or be no-op and, therfore, should not be
-depended on. Instead, configure your balancers via the <code>configured</code> method on
-clients:</p><p>{{
-   val balancer = Balancers.aperture(...)
-   Protocol.configured(LoadBalancerFactory.Param(balancer))
-}}
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-06-15)</i> Use com.twitter.finagle.loadbalancer.Balancers per-client.</p></dd></dl></div>
-    </li></ol>
-            </div>
+        
         </div>
 
         <div id="inheritedMembers">

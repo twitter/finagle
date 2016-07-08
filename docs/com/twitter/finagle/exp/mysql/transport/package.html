@@ -66,84 +66,53 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.exp.mysql.transport.Buffer" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="BufferextendsAnyRef"></a>
-      <a id="Buffer:Buffer"></a>
+              <ol><li name="com.twitter.finagle.exp.mysql.transport.MysqlBufReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MysqlBufReaderextendsProxyBufReader"></a>
+      <a id="MysqlBufReader:MysqlBufReader"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier">sealed </span>
-        <span class="kind">trait</span>
+        <span class="modifier"></span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Buffer.html"><span class="name">Buffer</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="MysqlBufReader.html"><span class="name">MysqlBufReader</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.ProxyBufReader">ProxyBufReader</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferextendsAnyRef" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@MysqlBufReaderextendsProxyBufReader" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferReader" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="BufferReaderextendsBuffer"></a>
-      <a id="BufferReader:BufferReader"></a>
+    </li><li name="com.twitter.finagle.exp.mysql.transport.MysqlBufWriter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MysqlBufWriterextendsBufWriterwithProxyBufWriter"></a>
+      <a id="MysqlBufWriter:MysqlBufWriter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="BufferReader.html"><span class="name">BufferReader</span></a><span class="result"> extends <a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></span>
+        <a href="MysqlBufWriter.html"><span class="name">MysqlBufWriter</span></a><span class="result"> extends <span class="extype" name="com.twitter.finagle.util.BufWriter">BufWriter</span> with <span class="extype" name="com.twitter.finagle.util.ProxyBufWriter">ProxyBufWriter</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferReaderextendsBuffer" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@MysqlBufWriterextendsBufWriterwithProxyBufWriter" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Provides convenient methods for reading
-data in a packet body.</p><div class="fullcomment"><div class="comment cmt"><p>Provides convenient methods for reading
-data in a packet body. All data is decoded
-in little endian byte order in accordance with
-the mysql protocol. Operations are side-effecting,
-that is, all operations increase the offset
-into the underlying buffer.
-</p></div></div>
-    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="BufferWriterextendsBuffer"></a>
-      <a id="BufferWriter:BufferWriter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="BufferWriter.html"><span class="name">BufferWriter</span></a><span class="result"> extends <a href="Buffer.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Buffer">Buffer</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferWriterextendsBuffer" title="Permalink" target="_top">
-        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Provides convenient methods for writing the
-data in a mysql packet body.</p><div class="fullcomment"><div class="comment cmt"><p>Provides convenient methods for writing the
-data in a mysql packet body. All data is encoded
-in little endian byte order in accordance with
-the mysql protocol. Operations are side-effecting,
-that is, all operations increase the offset
-into the underlying buffer.
-</p></div></div>
-    </li><li name="com.twitter.finagle.exp.mysql.transport.Packet" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="PacketextendsAnyRef"></a>
+      
+    </li><li name="com.twitter.finagle.exp.mysql.transport.Packet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PacketextendsProductwithSerializable"></a>
       <a id="Packet:Packet"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Packet.html"><span class="name">Packet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Packet.html"><span class="name">Packet</span></a><span class="params">(<span name="seq">seq: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Short" class="extype" target="_top">Short</a></span>, <span name="body">body: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@PacketextendsAnyRef" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@PacketextendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -190,6 +159,23 @@ frames.</p><div class="fullcomment"><div class="comment cmt"><p>Decodes logical 
 frames. MySQL packets are a length encoded set of bytes written
 in little endian byte order.
 </p></div></div>
+    </li><li name="com.twitter.finagle.exp.mysql.transport.TransportImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TransportImplextendsProductwithSerializable"></a>
+      <a id="TransportImpl:TransportImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TransportImpl.html"><span class="name">TransportImpl</span></a><span class="params">(<span name="transporter">transporter: (<a href="../../../Stack$$Params.html" class="extype" name="com.twitter.finagle.Stack.Params">Params</a>) ⇒ <a href="../../../client/Transporter.html" class="extype" name="com.twitter.finagle.client.Transporter">Transporter</a>[<a href="Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>, <a href="Packet.html" class="extype" name="com.twitter.finagle.exp.mysql.transport.Packet">Packet</a>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@TransportImplextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
@@ -197,62 +183,26 @@ in little endian byte order.
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.exp.mysql.transport.Buffer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Buffer"></a>
-      <a id="Buffer:Buffer"></a>
+              <ol><li name="com.twitter.finagle.exp.mysql.transport.MysqlBuf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MysqlBuf"></a>
+      <a id="MysqlBuf:MysqlBuf"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Buffer$.html"><span class="name">Buffer</span></a>
+        <a href="MysqlBuf$.html"><span class="name">MysqlBuf</span></a>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@Buffer" title="Permalink" target="_top">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@MysqlBuf" title="Permalink" target="_top">
         <img src="../../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The Buffer interfaces provide convenience methods for reading/writing
-a logical packet exchanged between a mysql client and server.</p><div class="fullcomment"><div class="comment cmt"><p>The Buffer interfaces provide convenience methods for reading/writing
-a logical packet exchanged between a mysql client and server.
-Additionally, a buffer is guaranteed to be read from and written to
-in little endian byte order, which conforms to the mysql spec.
+      <p class="shortcomment cmt">MysqlBuf provides convenience methods for reading/writing a logical packet
+exchanged between a mysql client and server.</p><div class="fullcomment"><div class="comment cmt"><p>MysqlBuf provides convenience methods for reading/writing a logical packet
+exchanged between a mysql client and server. All data is little endian ordered.
 </p></div></div>
-    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferReader" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BufferReader"></a>
-      <a id="BufferReader:BufferReader"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="BufferReader$.html"><span class="name">BufferReader</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferReader" title="Permalink" target="_top">
-        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.exp.mysql.transport.BufferWriter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="BufferWriter"></a>
-      <a id="BufferWriter:BufferWriter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="BufferWriter$.html"><span class="name">BufferWriter</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@BufferWriter" title="Permalink" target="_top">
-        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.twitter.finagle.exp.mysql.transport.MysqlClientPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MysqlClientPipelineFactory"></a>
       <a id="MysqlClientPipelineFactory:MysqlClientPipelineFactory"></a>
@@ -271,27 +221,6 @@ in little endian byte order, which conforms to the mysql spec.
     </span>
       <p class="shortcomment cmt">A Netty3 pipeline that is responsible for framing network
 traffic in terms of mysql logical packets.</p>
-    </li><li name="com.twitter.finagle.exp.mysql.transport.MysqlTransporter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MysqlTransporter"></a>
-      <a id="MysqlTransporter:MysqlTransporter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="MysqlTransporter$.html"><span class="name">MysqlTransporter</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@MysqlTransporter" title="Permalink" target="_top">
-        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet].</p><div class="fullcomment"><div class="comment cmt"><p>Responsible for the transport layer plumbing required to produce
-a Transporter[Packet, Packet]. The current implementation uses
-Netty3.
-</p></div></div>
     </li><li name="com.twitter.finagle.exp.mysql.transport.Packet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Packet"></a>
       <a id="Packet:Packet"></a>
@@ -301,7 +230,7 @@ Netty3.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="Packet$.html"><span class="name">Packet</span></a>
+        <a href="Packet$.html"><span class="name">Packet</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@Packet" title="Permalink" target="_top">
@@ -309,6 +238,26 @@ Netty3.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.exp.mysql.transport.TransportImpl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TransportImpl"></a>
+      <a id="TransportImpl:TransportImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TransportImpl$.html"><span class="name">TransportImpl</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.exp.mysql.transport.package@TransportImpl" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Responsible for the transport layer plumbing required to produce
+a Transporter[Packet, Packet].</p><div class="fullcomment"><div class="comment cmt"><p>Responsible for the transport layer plumbing required to produce
+a Transporter[Packet, Packet]. The current default is Netty3
+</p></div></div>
     </li></ol>
             </div>
 

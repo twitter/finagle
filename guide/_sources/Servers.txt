@@ -44,7 +44,8 @@ behavior lives in the :ref:`clients <finagle_clients>`.
 
 .. figure:: _static/serverstack.svg
 
-    Fig. 1: A visual representation of each module in a default Finagle server. Requests flow from left to right.
+    Fig. 1: A visual representation of each module in a default Finagle server.
+            Requests flow from left to right.
 
 Many of the server modules act as `admission controllers` that make a decision (based on either a dynamic or
 static property) whether this server can handle the incoming request while maintaining some SLO (Service Level
@@ -100,40 +101,6 @@ All the incoming requests on top of ``(maxConcurrentRequests + maxWaiters)`` wil
 
 See :ref:`Requests Concurrency metrics <requests_concurrency_limit>` for more details.
 
-Request Deadline
-^^^^^^^^^^^^^^^^
-
-The `Request Deadline` module acts as deadline driven server-side `static admission controller` and
-`rejects` [#nack]_ all the incoming requests that expire their deadline. Generally, the deadline for
-each request is set up by a frontend service and propagated over the wire to the downstream services.
-
-The `Request Deadline` module is implemented by
-:src:`DeadlineFilter <com/twitter/finagle/filter/DeadlineFilter.scala>` and configured with
-following params [#example]_.
-
-.. code-block:: scala
-
-  import com.twitter.conversions.time._
-  import com.twitter.finagle.Http
-
-  val server = Http.server
-    .withAdmissionControl.deadlineTolerance(200.milliseconds)
-    .withAdmissionControl.deadlineMaxRejectedPercentage(0.3)
-    .serve(":8080", service)
-
-There are two arguments passed to the `Request Deadline` module, which might be configured
-separately:
-
-1. `deadlineTolerance` (default: 170 ms) - the maximum elapsed time since a request's deadline
-   when it will be considered for rejection
-2. `deadlineMaxRejectedPercentage` (default: 20%) - the maximum percentage of requests that can be
-   rejected
-
-See :ref:`Deadline Admission Control metrics <deadline_admission_control_stats>` for more details.
-
-.. note:: The `Request Deadline` module is currently in an experimental mode where it doesn't actually
-          reject any of the `expired` requests, but only maintains metrics.
-
 Request Timeout
 ^^^^^^^^^^^^^^^
 
@@ -156,3 +123,31 @@ Finagle clients, this module is disabled by default (the timeout is unbounded). 
 .. [#example] Configuration parameters/values provided in this example are only demonstrate
    the API usage, not the real world values. We do not recommend blindly applying those values
    to production systems.
+
+Session Expiration
+^^^^^^^^^^^^^^^^^^
+In certain cases, it may be useful for the server to control its resources via bounding
+the lifetime of a session. The `Session Expiration` module is attached at the connection level
+and expires a service/session after a certain amount of idle time. The module is
+implemented by :src:`ExpiringService <com/twitter/finagle/service/ExpiringService.scala>`.
+
+The default setting for the `Expiration` module is to never expire a session. Here is how
+it can be configured [#example]_.
+
+.. code-block:: scala
+
+  import com.twitter.conversions.time._
+  import com.twitter.finagle.Http
+
+  val twitter = Http.server
+    .withSession.maxLifeTime(20.seconds)
+    .withSession.maxIdleTime(10.seconds)
+    .newService("twitter.com")
+
+The `Expiration` module takes two parameters:
+
+1. `maxLifeTime` - the maximum duration for which a session is considered alive
+2. `maxIdleTime` - the maximum duration for which a session is allowed to idle
+   (not sending any requests)
+
+See :ref:`Expiration metrics <idle_apoptosis_stats>` for more details.

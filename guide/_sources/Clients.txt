@@ -38,6 +38,62 @@ does exactly this. For cases like Thrift, where IDLs are part of
 the rich API, a more specialized API is exposed. See the protocols section on
 :ref:`Thrift <thrift_and_scrooge>` for more details.
 
+Transport
+---------
+
+Finagle clients come with a variety of transport-level parameters that not only wire up TCP socket
+options, but also upgrade the transport protocol to support encryption (e.g. TLS/SSL) and proxy
+servers (e.g. HTTP, SOCKS5).
+
+HTTP Proxy
+~~~~~~~~~~
+
+There is built-in support for `tunneling TCP-based protocols <http://www.web-cache.com/Writings/Internet-Drafts/draft-luotonen-web-proxy-tunneling-01.txt>`_
+through web proxy servers in a default Finagle client that might be used with any TCP traffic, not
+only HTTP(S). See `Squid documentation <http://wiki.squid-cache.org/Features/HTTPS>`_ on this feature.
+
+The following example enables tunneling HTTP traffic through a web proxy server `my-proxy-server.com`
+to `twitter.com`.
+
+.. code-block:: scala
+
+  import com.twitter.finagle.{Service, Http}
+  import com.twitter.finagle.http.{Request, Response}
+  import com.twitter.finagle.client.Transporter
+  import java.net.SocketAddress
+
+  val twitter: Service[Request, Response] = Http.client
+    .configured(Transporter.HttpProxy(Some(new InetSocketAddress("my-proxy-server.com", 3128))))
+    .withSessionQualifier.noFailFast
+    .newService("twitter.com")
+
+
+.. note::
+
+  The web proxy server, represented as a static `SocketAddress`, acts as a single point of failure
+  for a client. Whenever a proxy server is down, no traffic is served through the client no matter
+  how big its replica set. This is why :ref:`Fail Fast <client_fail_fast>` is disabled on this
+  client.
+
+  There is better HTTP proxy support coming to Finagle along with the Netty 4 upgrade.
+
+SOCKS5 Proxy
+~~~~~~~~~~~~
+
+SOCKS5 proxy support in Finagle is designed and implemented exclusively for testing/development
+(assuming that SOCKS proxy is provided via `ssh -D`), not for production usage. For production
+traffic, an HTTP proxy should be used instead.
+
+Use the following CLI flags to enable SOCKS proxy on every Finagle client on a given JVM instance
+(username and password are optional).
+
+.. code-block:: shell
+
+  -com.twitter.finagle.socks.socksProxyHost=localhost \
+  -com.twitter.finagle.socks.socksProxyPort=50001 \
+  -com.twitter.finagle.socks.socksUsername=$TheUsername \
+  -com.twitter.finagle.socks.socksPassword=$ThePassword
+
 .. _client_modules:
 
 Client Modules

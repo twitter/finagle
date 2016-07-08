@@ -75,7 +75,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ChannelBufferUsageTracker.html"><span class="name">ChannelBufferUsageTracker</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="ChannelBufferUsageTracker.html"><span class="name">ChannelBufferUsageTracker</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.http.codec.package@ChannelBufferUsageTrackerextendsAnyRef" title="Permalink" target="_top">
@@ -87,64 +87,6 @@ requests.</p><div class="fullcomment"><div class="comment cmt"><p>ChannelBufferU
 requests. An exception will be thrown if the total size exceeds a limit.
 ChannelBufferManager uses ChannelBufferUsageTracker.
 </p></div></div>
-    </li><li name="com.twitter.finagle.http.codec.ConnectionManager" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="ConnectionManagerextendsAnyRef"></a>
-      <a id="ConnectionManager:ConnectionManager"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ConnectionManager.html"><span class="name">ConnectionManager</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.http.codec.package@ConnectionManagerextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The HTTP connection manager implements connection management in
-accordance with RFC 2616 § 8.</p><div class="fullcomment"><div class="comment cmt"><p>The HTTP connection manager implements connection management in
-accordance with RFC 2616 § 8. This is just the state machine: the
-codec implementations are in {Server,Client}ConnectionManager.
-</p></div></div>
-    </li><li name="com.twitter.finagle.http.codec.HttpClientDispatcher" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HttpClientDispatcherextendsGenSerialClientDispatcher[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,Any,Any]"></a>
-      <a id="HttpClientDispatcher:HttpClientDispatcher"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpClientDispatcher.html"><span class="name">HttpClientDispatcher</span></a><span class="result"> extends <a href="../../dispatch/GenSerialClientDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialClientDispatcher">GenSerialClientDispatcher</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.http.codec.package@HttpClientDispatcherextendsGenSerialClientDispatcher[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,Any,Any]" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Client dispatcher for HTTP.</p><div class="fullcomment"><div class="comment cmt"><p>Client dispatcher for HTTP.</p><p>The dispatcher modifies each request with Dtab encoding from Dtab.local
-and streams chunked responses via <code>Reader</code>.  If the request already contains
-Dtab headers they will be stripped and an error will be logged.
-</p></div></div>
-    </li><li name="com.twitter.finagle.http.codec.HttpServerDispatcher" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HttpServerDispatcherextendsGenSerialServerDispatcher[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,Any,Any]"></a>
-      <a id="HttpServerDispatcher:HttpServerDispatcher"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpServerDispatcher.html"><span class="name">HttpServerDispatcher</span></a><span class="result"> extends <a href="../../dispatch/GenSerialServerDispatcher.html" class="extype" name="com.twitter.finagle.dispatch.GenSerialServerDispatcher">GenSerialServerDispatcher</a>[<a href="../Request.html" class="extype" name="com.twitter.finagle.http.Request">Request</a>, <a href="../Response.html" class="extype" name="com.twitter.finagle.http.Response">Response</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.http.codec.package@HttpServerDispatcherextendsGenSerialServerDispatcher[com.twitter.finagle.http.Request,com.twitter.finagle.http.Response,Any,Any]" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li></ol>
             </div>
 

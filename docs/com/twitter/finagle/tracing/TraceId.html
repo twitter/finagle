@@ -47,15 +47,29 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">TraceId</span><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">TraceId</span><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A trace id represents one particular trace for one request.</p></div><dl class="paramcmts block"><dt class="param">_traceId</dt><dd class="cmt"><p>The id for this request.</p></dd><dt class="param">_parentId</dt><dd class="cmt"><p>The id for the request one step up the service stack.</p></dd><dt class="param">spanId</dt><dd class="cmt"><p>The id for this particular request</p></dd><dt class="param">_sampled</dt><dd class="cmt"><p>Should we sample this request or not? True means sample, false means don't, none means we defer
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A trace id represents one particular trace for one request.</p><p>A request is composed of one or more spans, which are generally RPCs but
+may be other in-process activity. The TraceId for each span is a tuple of
+three ids:</p><ol class="decimal"><li>a shared id common to all spans in an overall request (trace id)
+  2. an id unique to this part of the request (span id)
+  3. an id for the parent request that caused this span (parent id)</li></ol><p>For example, when service M calls service N, they may have respective
+TraceIds like these:</p><pre>           TRACE ID         SPAN ID           PARENT ID
+SERVICE M  e4bbb7c0f6a2ff07.a5f47e9fced314a2<span class="kw">&lt;:</span><span class="num">694</span>eb2f05b8fd7d1
+                  |                |
+                  |                +-----------------+
+                  |                                  |
+                  v                                  v
+SERVICE N  e4bbb7c0f6a2ff07.<span class="num">263</span>edc9b65773b08<span class="kw">&lt;:</span>a5f47e9fced314a2</pre><p>Parent id and trace id are optional when constructing a TraceId because
+they are not present for the very first span in a request. In this case all
+three ids in the resulting TraceId are the same:</p><pre>           TRACE ID         SPAN ID           PARENT ID
+SERVICE A  <span class="num">34429</span>b04b6bbf478.<span class="num">34429</span>b04b6bbf478<span class="kw">&lt;:</span><span class="num">34429</span>b04b6bbf478</pre></div><dl class="paramcmts block"><dt class="param">_traceId</dt><dd class="cmt"><p>The id for this request.</p></dd><dt class="param">_parentId</dt><dd class="cmt"><p>The id for the request one step up the service stack.</p></dd><dt class="param">spanId</dt><dd class="cmt"><p>The id for this particular request</p></dd><dt class="param">_sampled</dt><dd class="cmt"><p>Should we sample this request or not? True means sample, false means don't, none means we defer
                decision to someone further down in the stack.</p></dd><dt class="param">flags</dt><dd class="cmt"><p>Flags relevant to this request. Could be things like debug mode on/off. The sampled flag could eventually
              be moved in here.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -66,7 +80,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -79,7 +93,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -101,7 +115,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">TraceId</span><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>)</span>
+        <span class="name">TraceId</span><span class="params">(<span name="_traceId">_traceId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="_parentId">_parentId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>, <span name="spanId">spanId: <a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a></span>, <span name="_sampled">_sampled: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>, <span name="flags">flags: <a href="Flags.html" class="extype" name="com.twitter.finagle.tracing.Flags">Flags</a></span>)</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@&lt;init&gt;(_traceId:Option[com.twitter.finagle.tracing.SpanId],_parentId:Option[com.twitter.finagle.tracing.SpanId],spanId:com.twitter.finagle.tracing.SpanId,_sampled:Option[Boolean],flags:com.twitter.finagle.tracing.Flags):com.twitter.finagle.tracing.TraceId" title="Permalink" target="_top">
@@ -129,7 +143,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@!=(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -146,7 +160,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@##():Int" title="Permalink" target="_top">
@@ -163,7 +177,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@==(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -180,7 +194,7 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_parentId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>
+        <span class="name">_parentId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@_parentId:Option[com.twitter.finagle.tracing.SpanId]" title="Permalink" target="_top">
@@ -197,7 +211,7 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_sampled</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <span class="name">_sampled</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@_sampled:Option[Boolean]" title="Permalink" target="_top">
@@ -215,7 +229,7 @@
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">_traceId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>
+        <span class="name">_traceId</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="SpanId.html" class="extype" name="com.twitter.finagle.tracing.SpanId">SpanId</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@_traceId:Option[com.twitter.finagle.tracing.SpanId]" title="Permalink" target="_top">
@@ -249,7 +263,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@clone():Object" title="Permalink" target="_top">
@@ -272,7 +286,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
@@ -289,7 +303,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="other">other: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="other">other: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@equals(other:Any):Boolean" title="Permalink" target="_top">
@@ -306,7 +320,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@finalize():Unit" title="Permalink" target="_top">
@@ -355,6 +369,24 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.tracing.TraceId#getSampled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getSampled():Option[Boolean]"></a>
+      <a id="getSampled():Option[Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSampled</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@getSampled():Option[Boolean]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Java-friendly API to convert <a href="#sampled:Option[Boolean]" class="extmbr" name="com.twitter.finagle.tracing.TraceId#sampled">sampled</a> to a <span class="extype" name="Option">Option</span> of <span class="extype" name="java.lang.Boolean">java.lang.Boolean</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Java-friendly API to convert <a href="#sampled:Option[Boolean]" class="extmbr" name="com.twitter.finagle.tracing.TraceId#sampled">sampled</a> to a <span class="extype" name="Option">Option</span> of <span class="extype" name="java.lang.Boolean">java.lang.Boolean</span>.</p></div><dl class="attributes block"> <dt>Since</dt><dd><p>Java generics require objects, using <a href="#sampled:Option[Boolean]" class="extmbr" name="com.twitter.finagle.tracing.TraceId#sampled">sampled</a> from
+       Java would give an Option&lt;Object&gt; instead of Option&lt;Boolean&gt;</p></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.TraceId#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -364,7 +396,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@hashCode():Int" title="Permalink" target="_top">
@@ -381,7 +413,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
@@ -398,7 +430,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
@@ -415,7 +447,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@notify():Unit" title="Permalink" target="_top">
@@ -432,7 +464,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@notifyAll():Unit" title="Permalink" target="_top">
@@ -457,7 +489,7 @@
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.tracing.TraceId#sampled" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.tracing.TraceId#sampled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="sampled:Option[Boolean]"></a>
       <a id="sampled:Option[Boolean]"></a>
       <h4 class="signature">
@@ -466,14 +498,14 @@
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">sampled</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
+        <span class="name">sampled</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@sampled:Option[Boolean]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Override <a href="#_sampled:Option[Boolean]" class="extmbr" name="com.twitter.finagle.tracing.TraceId#_sampled">_sampled</a> to Some(true) if the debug flag is set.</p><div class="fullcomment"><div class="comment cmt"><p>Override <a href="#_sampled:Option[Boolean]" class="extmbr" name="com.twitter.finagle.tracing.TraceId#_sampled">_sampled</a> to Some(true) if the debug flag is set.</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#getSampled():Option[Boolean]" class="extmbr" name="com.twitter.finagle.tracing.TraceId#getSampled">getSampled</a> for a Java-friendly API.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.tracing.TraceId#spanId" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="spanId:com.twitter.finagle.tracing.SpanId"></a>
       <a id="spanId:SpanId"></a>
@@ -551,7 +583,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@wait():Unit" title="Permalink" target="_top">
@@ -574,7 +606,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
@@ -597,7 +629,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.tracing.TraceId@wait(x$1:Long):Unit" title="Permalink" target="_top">
@@ -621,17 +653,17 @@
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></h3>
             </div><div class="parent" name="java.io.Serializable">
               <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
             </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a></h3>
             </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a></h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

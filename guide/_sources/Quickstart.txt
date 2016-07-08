@@ -3,7 +3,7 @@ Quickstart
 
 In this section we'll use Finagle to build a very simple HTTP server
 that is also an HTTP client — an HTTP proxy. We assume that you
-are familiar with Scala_ (if not, may we recommend 
+are familiar with Scala_ (if not, may we recommend
 `Scala School <http://twitter.github.com/scala_school/>`_).
 
 .. _Scala: http://www.scala-lang.org
@@ -21,8 +21,7 @@ Setting up SBT
 --------------
 
 We'll use sbt_ to build our project. Finagle is published to Maven Central,
-so little setup is needed: put the following into a file called ``build.sbt`` in
-a fresh directory:
+so little setup is needed: see the ``build.sbt`` in the ``quickstart`` directory.
 
 .. parsed-literal::
 
@@ -32,16 +31,8 @@ a fresh directory:
 
 	libraryDependencies += "com.twitter" %% "finagle-http" % "|release|"
 
-Any file in this directory will now be compiled by ``sbt``. In order to simplify
-installation, we recommend that you use the bootstrap ``sbt`` script available
-here_, or:
+Any file in this directory will now be compiled by ``sbt``.
 
-::
-
-	$ curl https://raw.githubusercontent.com/twitter/finagle/master/doc/src/sphinx/code/quickstart/sbt > code/sbt
-	$ chmod u+rx code/sbt
-
-.. _here: https://raw.github.com/twitter/finagle/master/doc/src/sphinx/code/quickstart/sbt
 .. _sbt: http://www.scala-sbt.org
 
 A minimal HTTP server
@@ -54,7 +45,7 @@ We'll need to import a few things into our namespace.
 
 ``Service`` is the interface used to represent a server or a client
 (:doc:`about which more later <ServicesAndFilters>`). ``Http`` is Finagle's HTTP
-client and server. 
+client and server.
 
 Next, we'll define a ``Service`` to serve our HTTP requests:
 
@@ -137,7 +128,8 @@ which in turn is run by:
 ::
 
 	$ ./sbt 'run-main Client'
-	GET success: Response("Http11 Status(200)")
+	...
+	GET success: Response("HTTP/1.1 Status(200)")
 	...
 
 Putting it together
@@ -145,21 +137,22 @@ Putting it together
 
 Now we're ready to create an HTTP proxy! Notice the symmetry above:
 servers *provide* a ``Service``, while a client *uses* it. Indeed, an HTTP
-proxy can be constructed by just replacing the service we defined with
-one that was imported with a ``Http.newService``:
+proxy can be constructed by just replacing the service we defined in the Server
+example with one that was imported with a ``Http.newService``:
 
 .. includecode:: code/quickstart/Proxy.scala
    :language: scala
 
-And we can run it and dispatch requests to it:
+And we can run it and dispatch requests to it
+(be sure to shutdown the Server example from earlier):
 
 ::
 
 	$ ./sbt 'run-main Proxy' &
-	$ curl -D - localhost:8080
-	HTTP/1.1 302 Found
-	Location: http://www.google.com/
-	Cache-Control: private
-	Content-Type: text/html; charset=UTF-8
-	X-Content-Type-Options: nosniff
+	$ curl --dump-header - --header "Host: twitter.com" localhost:8080
+	HTTP/1.1 301 Moved Permanently
+	content-length: 0
+	date: Wed, 01 Jun 2016 21:26:57 GMT
+	location: https://twitter.com/
 	...
+

@@ -79,6 +79,12 @@ Current TLS peer certificate
 A local ``Context`` that represents the ``Transport``\s
 ``java.security.cert.Certificate`` if a TLS session is established.
 
+Upstream Address
+~~~~~~~~~~~~~~~~
+``com.twitter.finagle.context.RemoteInfo.Upstream.addr`` —
+A local ``Context`` that represents the upstream (ingress)
+``java.net.SocketAddress`` of the current request.
+
 Creating new Contexts
 ---------------------
 

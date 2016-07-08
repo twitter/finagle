@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Contexts &mdash; Finagle 6.35.0 documentation</title>
+    <title>Contexts &mdash; Finagle 6.36.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.35.0',
+        VERSION:     '6.36.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.35.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.36.0 documentation" href="index.html" />
     <link rel="next" title="Names and Naming in Finagle" href="Names.html" />
     <link rel="prev" title="Clients" href="Clients.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,37 +57,37 @@
         <li class="right" >
           <a href="Clients.html" title="Clients"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="contexts">
 <h1>Contexts<a class="headerlink" href="#contexts" title="Permalink to this headline">¶</a></h1>
 <p>Finagle uses <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/context/Contexts.scala">Contexts</a>, which give you something akin to Java&#8217;s <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html">ThreadLocals</a>
-across <a class="reference internal" href="Futures.html"><em>asynchronous</em></a> code.
+across <a class="reference internal" href="Futures.html"><span class="doc">asynchronous</span></a> code.
 They give you access to request-scoped state, such as a request&#8217;s deadline,
 throughout the logical life of a request without requiring them to be explicitly passed.
 Finagle explicitly manages them for you across threads and execution
-contexts such as <tt class="docutils literal"><span class="pre">Future</span></tt> composition, <tt class="docutils literal"><span class="pre">FuturePools</span></tt>, <tt class="docutils literal"><span class="pre">Timers</span></tt>,
+contexts such as <code class="docutils literal"><span class="pre">Future</span></code> composition, <code class="docutils literal"><span class="pre">FuturePools</span></code>, <code class="docutils literal"><span class="pre">Timers</span></code>,
 and in some cases — across the client/server boundary.</p>
 <p>Contexts can be either <em>local</em> or <em>broadcast</em>.
 Local contexts do not cross process boundaries while broadcast
 contexts may be marshalled and transmitted across process boundaries.</p>
-<p>Most <tt class="docutils literal"><span class="pre">Context</span></tt> usage is hidden behind other APIs, which means you may not
-realize you are using this functionality. This example shows how a <tt class="docutils literal"><span class="pre">ClientId</span></tt>
-is available within <tt class="docutils literal"><span class="pre">Timer</span></tt> functions:</p>
-<div class="highlight-scala"><pre>scala&gt; import com.twitter.conversions.time._, com.twitter.finagle.thrift.ClientId, com.twitter.finagle.util.HashedWheelTimer, com.twitter.util.{Await, Future}
+<p>Most <code class="docutils literal"><span class="pre">Context</span></code> usage is hidden behind other APIs, which means you may not
+realize you are using this functionality. This example shows how a <code class="docutils literal"><span class="pre">ClientId</span></code>
+is available within <code class="docutils literal"><span class="pre">Timer</span></code> functions:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span>scala&gt; import com.twitter.conversions.time._, com.twitter.finagle.thrift.ClientId, com.twitter.finagle.util.HashedWheelTimer, com.twitter.util.{Await, Future}
 import com.twitter.conversions.time._
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.finagle.util.HashedWheelTimer
 import com.twitter.util.{Await, Future}
 
-scala&gt; val aClientId = ClientId("test-client") // Create a ClientId to use
+scala&gt; val aClientId = ClientId(&quot;test-client&quot;) // Create a ClientId to use
 aClientId: com.twitter.finagle.thrift.ClientId = ClientId(test-client)
 
 scala&gt; val clientIdInTimer: Future[String] =
@@ -95,52 +95,59 @@ scala&gt; val clientIdInTimer: Future[String] =
          // work on a Timer
          aClientId.asCurrent {
            HashedWheelTimer.Default.doLater(100.milliseconds) {
-             // Check the value when the Timer's function is
+             // Check the value when the Timer&#39;s function is
              // evaluated 100 milliseconds later
              ClientId.current match {
                case Some(cId) =&gt; cId.name
-               case None =&gt; "no-client-id"
+               case None =&gt; &quot;no-client-id&quot;
              }
            }
          }
 clientIdInTimer: com.twitter.util.Future[String] = Promise@2147108131(state=Interruptible(List(),&lt;function1&gt;))
 
-scala&gt; println(s"Timer saw: '${Await.result(clientIdInTimer)}'")
-Timer saw: 'test-client'</pre>
+scala&gt; println(s&quot;Timer saw: &#39;${Await.result(clientIdInTimer)}&#39;&quot;)
+Timer saw: &#39;test-client&#39;
+</pre></div>
 </div>
 <div class="section" id="commonly-used-instances">
 <h2>Commonly used instances<a class="headerlink" href="#commonly-used-instances" title="Permalink to this headline">¶</a></h2>
-<p>Because <tt class="docutils literal"><span class="pre">Context</span></tt>s are not passed directly into methods, discovery of which
+<p>Because <code class="docutils literal"><span class="pre">Context</span></code>s are not passed directly into methods, discovery of which
 ones exist is challenging.
 To aid with this, here is a listing of some commonly used instances that Finagle
 makes available:</p>
 <div class="section" id="current-trace-id">
 <h3>Current trace id<a class="headerlink" href="#current-trace-id" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.tracing.Trace.id</span></tt> —
-A broadcast <tt class="docutils literal"><span class="pre">Context</span></tt> that represents this request&#8217;s distributed tracing <tt class="docutils literal"><span class="pre">TraceId</span></tt>.</p>
+<p><code class="docutils literal"><span class="pre">com.twitter.finagle.tracing.Trace.id</span></code> —
+A broadcast <code class="docutils literal"><span class="pre">Context</span></code> that represents this request&#8217;s distributed tracing <code class="docutils literal"><span class="pre">TraceId</span></code>.</p>
 </div>
 <div class="section" id="current-client-id">
 <h3>Current client id<a class="headerlink" href="#current-client-id" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.thrift.ClientId.current</span></tt> —
-A broadcast <tt class="docutils literal"><span class="pre">Context</span></tt> that represents the client identifier of a request.</p>
+<p><code class="docutils literal"><span class="pre">com.twitter.finagle.thrift.ClientId.current</span></code> —
+A broadcast <code class="docutils literal"><span class="pre">Context</span></code> that represents the client identifier of a request.</p>
 </div>
 <div class="section" id="current-request-deadline">
 <h3>Current request deadline<a class="headerlink" href="#current-request-deadline" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.Deadline.current</span></tt> —
-A broadcast <tt class="docutils literal"><span class="pre">Context</span></tt> that represents when the request should be completed by.</p>
+<p><code class="docutils literal"><span class="pre">com.twitter.finagle.Deadline.current</span></code> —
+A broadcast <code class="docutils literal"><span class="pre">Context</span></code> that represents when the request should be completed by.</p>
 </div>
 <div class="section" id="current-tls-peer-certificate">
 <h3>Current TLS peer certificate<a class="headerlink" href="#current-tls-peer-certificate" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">com.twitter.finagle.transport.Transport.peerCertificate</span></tt> —
-A local <tt class="docutils literal"><span class="pre">Context</span></tt> that represents the <tt class="docutils literal"><span class="pre">Transport</span></tt>s
-<tt class="docutils literal"><span class="pre">java.security.cert.Certificate</span></tt> if a TLS session is established.</p>
+<p><code class="docutils literal"><span class="pre">com.twitter.finagle.transport.Transport.peerCertificate</span></code> —
+A local <code class="docutils literal"><span class="pre">Context</span></code> that represents the <code class="docutils literal"><span class="pre">Transport</span></code>s
+<code class="docutils literal"><span class="pre">java.security.cert.Certificate</span></code> if a TLS session is established.</p>
+</div>
+<div class="section" id="upstream-address">
+<h3>Upstream Address<a class="headerlink" href="#upstream-address" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">com.twitter.finagle.context.RemoteInfo.Upstream.addr</span></code> —
+A local <code class="docutils literal"><span class="pre">Context</span></code> that represents the upstream (ingress)
+<code class="docutils literal"><span class="pre">java.net.SocketAddress</span></code> of the current request.</p>
 </div>
 </div>
 <div class="section" id="creating-new-contexts">
 <h2>Creating new Contexts<a class="headerlink" href="#creating-new-contexts" title="Permalink to this headline">¶</a></h2>
 <p>Instances should be immutable or must provide proper memory visibility
 so that changes will be seen across thread boundaries.</p>
-<p>Care should be taken when creating new broadcast <tt class="docutils literal"><span class="pre">Context</span></tt>s as they
+<p>Care should be taken when creating new broadcast <code class="docutils literal"><span class="pre">Context</span></code>s as they
 will be sent across the entire downstream request graph. Considerations
 should include serialization/deserialization costs, serialized size, and
 schema evolution.</p>
@@ -151,7 +158,7 @@ schema evolution.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>
@@ -172,6 +179,7 @@ schema evolution.</p>
 <li><a class="reference internal" href="#current-client-id">Current client id</a></li>
 <li><a class="reference internal" href="#current-request-deadline">Current request deadline</a></li>
 <li><a class="reference internal" href="#current-tls-peer-certificate">Current TLS peer certificate</a></li>
+<li><a class="reference internal" href="#upstream-address">Upstream Address</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#creating-new-contexts">Creating new Contexts</a></li>

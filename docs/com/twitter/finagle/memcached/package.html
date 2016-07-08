@@ -75,7 +75,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="BaseClient.html"><span class="name">BaseClient</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@BaseClient[T]extendsAnyRef" title="Permalink" target="_top">
@@ -83,6 +83,65 @@
       </a>
     </span>
       <p class="shortcomment cmt">A friendly client to talk to a Memcached server.</p>
+    </li><li name="com.twitter.finagle.memcached.CacheNode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CacheNodeextendsSocketAddresswithProductwithSerializable"></a>
+      <a id="CacheNode:CacheNode"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CacheNode.html"><span class="name">CacheNode</span></a><span class="params">(<span name="host">host: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="port">port: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="weight">weight: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="key">key: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="java.net.SocketAddress">SocketAddress</span> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@CacheNodeextendsSocketAddresswithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.memcached.CachePoolCluster" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CachePoolClusterextendsCluster[com.twitter.finagle.memcached.CacheNode]"></a>
+      <a id="CachePoolCluster:CachePoolCluster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="CachePoolCluster.html"><span class="name">CachePoolCluster</span></a><span class="result"> extends <a href="../builder/Cluster.html" class="extype" name="com.twitter.finagle.builder.Cluster">Cluster</a>[<a href="CacheNode.html" class="extype" name="com.twitter.finagle.memcached.CacheNode">CacheNode</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@CachePoolClusterextendsCluster[com.twitter.finagle.memcached.CacheNode]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.memcached.CachePoolConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CachePoolConfigextendsProductwithSerializable"></a>
+      <a id="CachePoolConfig:CachePoolConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CachePoolConfig.html"><span class="name">CachePoolConfig</span></a><span class="params">(<span name="cachePoolSize">cachePoolSize: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="detectKeyRemapping">detectKeyRemapping: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@CachePoolConfigextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Cache pool config data format
+Currently this data format is only used by ZookeeperCachePoolManager to read the config data
+from zookeeper serverset parent node, and the expected cache pool size is the only attribute
+we need for now.</p><div class="fullcomment"><div class="comment cmt"><p>Cache pool config data format
+Currently this data format is only used by ZookeeperCachePoolManager to read the config data
+from zookeeper serverset parent node, and the expected cache pool size is the only attribute
+we need for now. In the future this can be extended for other config attributes like cache
+pool migrating state, backup cache servers list, or replication role, etc
+</p></div></div>
     </li><li name="com.twitter.finagle.memcached.CasResult" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CasResultextendsAnyRef"></a>
       <a id="CasResult:CasResult"></a>
@@ -92,7 +151,7 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="CasResult.html"><span class="name">CasResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="CasResult.html"><span class="name">CasResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@CasResultextendsAnyRef" title="Permalink" target="_top">
@@ -161,7 +220,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="Entry.html"><span class="name">Entry</span></a><span class="params">(<span name="value">value: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="expiry">expiry: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@EntryextendsProductwithSerializable" title="Permalink" target="_top">
@@ -195,7 +254,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetResult.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetResult.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@GetResultextendsProductwithSerializable" title="Permalink" target="_top">
@@ -212,7 +271,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="GetsResult.html"><span class="name">GetsResult</span></a><span class="params">(<span name="getResult">getResult: <a href="GetResult.html" class="extype" name="com.twitter.finagle.memcached.GetResult">GetResult</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetsResult.html"><span class="name">GetsResult</span></a><span class="params">(<span name="getResult">getResult: <a href="GetResult.html" class="extype" name="com.twitter.finagle.memcached.GetResult">GetResult</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@GetsResultextendsProductwithSerializable" title="Permalink" target="_top">
@@ -229,7 +288,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Interpreter.html"><span class="name">Interpreter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Interpreter.html"><span class="name">Interpreter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@InterpreterextendsAnyRef" title="Permalink" target="_top">
@@ -263,7 +322,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="KetamaClientKey.html"><span class="name">KetamaClientKey</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClientKeyextendsAnyRef" title="Permalink" target="_top">
@@ -315,7 +374,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="PHPMemCacheClientBuilder.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_hashName">_hashName: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PHPMemCacheClientBuilder.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_hashName">_hashName: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@PHPMemCacheClientBuilderextendsProductwithSerializable" title="Permalink" target="_top">
@@ -405,7 +464,7 @@ subset of operations (just get, set, and delete).
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RubyMemCacheClientBuilder.html"><span class="name">RubyMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="RubyMemCacheClientBuilder.html"><span class="name">RubyMemCacheClientBuilder</span></a><span class="params">(<span name="_nodes">_nodes: <span class="extype" name="scala.Seq">Seq</span>[(<span class="extype" name="scala.Predef.String">String</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>)]</span>, <span name="_clientBuilder">_clientBuilder: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="../builder/ClientBuilder.html" class="extype" name="com.twitter.finagle.builder.ClientBuilder">ClientBuilder</a>[_, _, _, _, <a href="../builder/ClientConfig$$Yes.html" class="extype" name="com.twitter.finagle.builder.ClientConfig.Yes">Yes</a>]]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@RubyMemCacheClientBuilderextendsProductwithSerializable" title="Permalink" target="_top">
@@ -413,6 +472,23 @@ subset of operations (just get, set, and delete).
       </a>
     </span>
       <p class="shortcomment cmt">Builder for memcache-client (MemCache) compatible client.</p>
+    </li><li name="com.twitter.finagle.memcached.StaticCachePoolCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StaticCachePoolClusterextendsCachePoolCluster"></a>
+      <a id="StaticCachePoolCluster:StaticCachePoolCluster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StaticCachePoolCluster.html"><span class="name">StaticCachePoolCluster</span></a><span class="result"> extends <a href="CachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.CachePoolCluster">CachePoolCluster</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@StaticCachePoolClusterextendsCachePoolCluster" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"> Cache pool based on a static list</p>
     </li><li name="com.twitter.finagle.memcached.TwemcacheClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="TwemcacheClientextendsClient"></a>
       <a id="TwemcacheClient:TwemcacheClient"></a>
@@ -468,6 +544,64 @@ This trait can only be mixed into a memcache client implementation as extension.
       <p class="shortcomment cmt">Twemcache commands implemenation for a partitioned client.</p><div class="fullcomment"><div class="comment cmt"><p>Twemcache commands implemenation for a partitioned client.
 This trait can only be mixed into a ParitionedClient that is delegating twemcache compatible clients.
 </p></div></div>
+    </li><li name="com.twitter.finagle.memcached.TwitterCacheResolver" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TwitterCacheResolverextendsResolver"></a>
+      <a id="TwitterCacheResolver:TwitterCacheResolver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TwitterCacheResolver.html"><span class="name">TwitterCacheResolver</span></a><span class="result"> extends <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">Resolver</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@TwitterCacheResolverextendsResolver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="../Resolver.html" class="extype" name="com.twitter.finagle.Resolver">com.twitter.finagle.Resolver</a> for resolving destination names associated
+with Twitter cache pools.</p>
+    </li><li name="com.twitter.finagle.memcached.TwitterCacheResolverException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TwitterCacheResolverExceptionextendsException"></a>
+      <a id="TwitterCacheResolverException:TwitterCacheResolverException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="TwitterCacheResolverException.html"><span class="name">TwitterCacheResolverException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@TwitterCacheResolverExceptionextendsException" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates that an error occurred while resolving a cache address.</p><div class="fullcomment"><div class="comment cmt"><p>Indicates that an error occurred while resolving a cache address.
+See <a href="TwitterCacheResolver.html" class="extype" name="com.twitter.finagle.memcached.TwitterCacheResolver">com.twitter.finagle.memcached.TwitterCacheResolver</a> for details.
+</p></div></div>
+    </li><li name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ZookeeperCachePoolClusterextendsCachePoolClusterwithZookeeperStateMonitor"></a>
+      <a id="ZookeeperCachePoolCluster:ZookeeperCachePoolCluster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ZookeeperCachePoolCluster.html"><span class="name">ZookeeperCachePoolCluster</span></a><span class="result"> extends <a href="CachePoolCluster.html" class="extype" name="com.twitter.finagle.memcached.CachePoolCluster">CachePoolCluster</a> with <a href="ZookeeperStateMonitor.html" class="extype" name="com.twitter.finagle.memcached.ZookeeperStateMonitor">ZookeeperStateMonitor</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ZookeeperCachePoolClusterextendsCachePoolClusterwithZookeeperStateMonitor" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Zookeeper based cache pool cluster with a serverset as the underlying pool.</p><div class="fullcomment"><div class="comment cmt"><p>Zookeeper based cache pool cluster with a serverset as the underlying pool.
+It will monitor the underlying serverset changes and report the detected underlying pool size.
+It will also monitor the serverset parent node for cache pool config data, cache pool cluster
+update will be triggered whenever cache config data change event happens.
+</p></div></div>
     </li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="ZookeeperStateMonitorextendsAnyRef"></a>
       <a id="ZookeeperStateMonitor:ZookeeperStateMonitor"></a>
@@ -477,7 +611,7 @@ This trait can only be mixed into a ParitionedClient that is delegating twemcach
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="ZookeeperStateMonitor.html"><span class="name">ZookeeperStateMonitor</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="ZookeeperStateMonitor.html"><span class="name">ZookeeperStateMonitor</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@ZookeeperStateMonitorextendsAnyRef" title="Permalink" target="_top">
@@ -502,7 +636,7 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2015-02-22) Use the com.twitter.finagle.Memcached builder">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="KetamaClientBuilder.html"><span class="name deprecated" title="Deprecated: (Since version 2015-02-22) Use the com.twitter.finagle.Memcached builder">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClientBuilderextendsProductwithSerializable" title="Permalink" target="_top">
@@ -522,7 +656,7 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="Server.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Moved into test">Server</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <a href="Server.html"><span class="name deprecated" title="Deprecated: (Since version 7.0.0) Moved into test">Server</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@ServerextendsAnyRef" title="Permalink" target="_top">
@@ -541,7 +675,64 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.memcached.CasResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.memcached.CacheNodeGroup" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CacheNodeGroup"></a>
+      <a id="CacheNodeGroup:CacheNodeGroup"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CacheNodeGroup$.html"><span class="name">CacheNodeGroup</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@CacheNodeGroup" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.memcached.CachePoolCluster" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CachePoolCluster"></a>
+      <a id="CachePoolCluster:CachePoolCluster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CachePoolCluster$.html"><span class="name">CachePoolCluster</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@CachePoolCluster" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Cache specific cluster implementation.</p><div class="fullcomment"><div class="comment cmt"><p>Cache specific cluster implementation.
+- A cache pool is a Cluster of cache nodes.
+- cache pool requires a underlying pool manager as the source of the cache nodes
+- the underlying pool manager encapsulates logic of monitoring the cache node changes and
+deciding when to update the cache pool cluster
+</p></div></div>
+    </li><li name="com.twitter.finagle.memcached.CachePoolConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CachePoolConfig"></a>
+      <a id="CachePoolConfig:CachePoolConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CachePoolConfig$.html"><span class="name">CachePoolConfig</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@CachePoolConfig" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Cache pool config data object
+</p>
+    </li><li name="com.twitter.finagle.memcached.CasResult" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CasResult"></a>
       <a id="CasResult:CasResult"></a>
       <h4 class="signature">
@@ -584,7 +775,7 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="GetResult$.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="GetResult$.html"><span class="name">GetResult</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@GetResult" title="Permalink" target="_top">
@@ -618,7 +809,7 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="KetamaClientBuilder$.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="KetamaClientBuilder$.html"><span class="name">KetamaClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@KetamaClientBuilder" title="Permalink" target="_top">
@@ -652,7 +843,7 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="PHPMemCacheClientBuilder$.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <a href="PHPMemCacheClientBuilder$.html"><span class="name">PHPMemCacheClientBuilder</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.memcached.package@PHPMemCacheClientBuilder" title="Permalink" target="_top">
@@ -694,6 +885,24 @@ you can also invoke loadZKData() in your class anytime to force reading zk data 
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.memcached.ZookeeperCachePoolCluster" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZookeeperCachePoolCluster"></a>
+      <a id="ZookeeperCachePoolCluster:ZookeeperCachePoolCluster"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ZookeeperCachePoolCluster$.html"><span class="name">ZookeeperCachePoolCluster</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.memcached.package@ZookeeperCachePoolCluster" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">ZooKeeper based cache pool cluster companion object
+</p>
     </li><li name="com.twitter.finagle.memcached.ZookeeperStateMonitor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ZookeeperStateMonitor"></a>
       <a id="ZookeeperStateMonitor:ZookeeperStateMonitor"></a>

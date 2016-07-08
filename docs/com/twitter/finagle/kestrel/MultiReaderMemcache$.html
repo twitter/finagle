@@ -53,10 +53,8 @@
 style using Kestrel's memcache protocol.  The load balancing is simple,
 and falls out naturally from the user of the {{Offer}} mechanism: When
 there are multiple available messages, round-robin across them.  Otherwise,
-wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span class="kw">val</span> name: com.twitter.finagle.Name = Resolver.eval(...)
-<span class="kw">val</span> va: Var[Addr] = name.bind()
-<span class="kw">val</span> readHandle =
-  MultiReaderMemcache(va, <span class="lit">"the-queue"</span>)
+wait for the first message to arrive.</p><p>Example with a custom client builder:</p><pre><span class="kw">val</span> readHandle =
+  MultiReaderMemcache(<span class="lit">"/the/path"</span>, <span class="lit">"the-queue"</span>)
     .clientBuilder(
       ClientBuilder()
         .codec(MultiReaderMemcache.codec)
@@ -66,7 +64,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
     .retryBackoffs(<span class="cmt">/* Stream[Duration], Timer; optional */</span>)
     .build()</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -77,7 +75,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -90,7 +88,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -118,7 +116,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -135,7 +133,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@##():Int" title="Permalink" target="_top">
@@ -152,7 +150,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@==(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -194,6 +192,29 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.kestrel.MultiReaderMemcache#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(dest:String,queueName:String):com.twitter.finagle.kestrel.MultiReaderBuilderMemcache"></a>
+      <a id="apply(String,String):MultiReaderBuilderMemcache"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="dest">dest: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="queueName">queueName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="MultiReaderBuilderMemcache.html" class="extype" name="com.twitter.finagle.kestrel.MultiReaderBuilderMemcache">MultiReaderBuilderMemcache</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@apply(dest:String,queueName:String):com.twitter.finagle.kestrel.MultiReaderBuilderMemcache" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Create a new MultiReader which dispatches requests to <code>dest</code> using the memcache protocol.</p><div class="fullcomment"><div class="comment cmt"><p>Create a new MultiReader which dispatches requests to <code>dest</code> using the memcache protocol.
+</p></div><dl class="paramcmts block"><dt class="param">dest</dt><dd class="cmt"><p>the name of the destination which requests are dispatched to.
+            See <a href="http://twitter.github.io/finagle/guide/Names.html" target="_blank">Names</a> for more detail.</p></dd><dt class="param">queueName</dt><dd class="cmt"><p>the name of the queue to read from
+TODO: <code>dest</code> is eagerly resolved at client creation time, so name resolution does not
+behave dynamically with respect to local dtabs (unlike
+<span class="extype" name="com.twitter.finagle.factory.BindingFactory">com.twitter.finagle.factory.BindingFactory</span>. In practice this is not a problem since
+ReadHandle is not on the request path. Weights are discarded.</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -220,7 +241,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@clone():Object" title="Permalink" target="_top">
@@ -260,7 +281,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
@@ -277,7 +298,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -294,7 +315,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@finalize():Unit" title="Permalink" target="_top">
@@ -334,7 +355,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@hashCode():Int" title="Permalink" target="_top">
@@ -351,7 +372,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
@@ -368,7 +389,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
@@ -385,7 +406,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@notify():Unit" title="Permalink" target="_top">
@@ -402,7 +423,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@notifyAll():Unit" title="Permalink" target="_top">
@@ -453,7 +474,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@wait():Unit" title="Permalink" target="_top">
@@ -476,7 +497,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
@@ -499,7 +520,7 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.kestrel.MultiReaderMemcache$@wait(x$1:Long):Unit" title="Permalink" target="_top">
@@ -523,9 +544,9 @@ wait for the first message to arrive.</p><p>Var[Addr] example:</p><pre><span cla
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>

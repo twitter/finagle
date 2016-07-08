@@ -37,28 +37,32 @@
   </defs>
 
   <g id="serverStack" transform="translate(100, 20)">
-    <g id="observed" transform="translate(0, 100) rotate(-90)">
+    <g transform="translate(100, 100) rotate(-90)">
       <rect class="node" width="110" height="25"/>
-      <text class="node-label" x="55" y="17.5" text-anchor="middle">Observe</text>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Session Expiration</text>
     </g>
 
-    <g id="serviceTimeout" transform="translate(25, 100) rotate(-90)">
-      <rect class="node" width="110" height="25"/>
-      <text class="node-label" x="55" y="17.5" text-anchor="middle">Concurrency Limit</text>
-    </g>
-
-    <g id="refcounted" transform="translate(50, 100) rotate(-90)">
-      <rect class="node" width="110" height="25"/>
-      <text class="node-label" x="55" y="17.5" text-anchor="middle">Request Deadline</text>
-    </g>
-
-    <g id="refcounted" transform="translate(75, 100) rotate(-90)">
+    <g transform="translate(75, 100) rotate(-90)">
       <rect class="node" width="110" height="25"/>
       <text class="node-label" x="55" y="17.5" text-anchor="middle">Request Timeout</text>
     </g>
 
+    <g transform="translate(50, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Request Deadline</text>
+    </g>
 
-    <g id="loadbalancer" transform="translate(100, 100) rotate(-90)">
+    <g transform="translate(25, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Concurrency Limit</text>
+    </g>
+
+    <g transform="translate(0, 100) rotate(-90)">
+      <rect class="node" width="110" height="25"/>
+      <text class="node-label" x="55" y="17.5" text-anchor="middle">Observe</text>
+    </g>
+
+    <g transform="translate(125, 100) rotate(-90)">
       <rect class="node" width="110" height="100"/>
       <text class="heavy-label node-label" x="55" y="-50" text-anchor="middle"
         transform="rotate(90)">Endpoint</text>

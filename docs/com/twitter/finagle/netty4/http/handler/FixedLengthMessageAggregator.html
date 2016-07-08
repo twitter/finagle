@@ -1,0 +1,1177 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>FixedLengthMessageAggregator - com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator</title>
+          <meta name="description" content="FixedLengthMessageAggregator - com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator" />
+          <meta name="keywords" content="FixedLengthMessageAggregator com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../../../index.html';
+            var hash = 'com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Class" src="../../../../../../lib/class_big.png" />
+        <p id="owner"><a href="../../../../../package.html" class="extype" name="com">com</a>.<a href="../../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle.netty4">netty4</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.netty4.http">http</a>.<a href="package.html" class="extype" name="com.twitter.finagle.netty4.http.handler">handler</a></p>
+        <h1>FixedLengthMessageAggregator</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="com.twitter.finagle.netty4.http.handler">package handler</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FixedLengthMessageAggregator</span><span class="result"> extends <span class="extype" name="io.netty.handler.codec.http.HttpObjectAggregator">HttpObjectAggregator</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>netty can chunk fixed length messages so we dechunk them so that streaming clients
+and servers can access message contents via <code>content</code> and <code>contentString</code>. Chunked
+transfer encoded messages still require accessing <code>reader</code>.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="io.netty.handler.codec.http.HttpObjectAggregator">HttpObjectAggregator</span>, <span class="extype" name="io.netty.handler.codec.MessageAggregator">MessageAggregator</span>[<span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span>, <span class="extype" name="io.netty.handler.codec.http.HttpMessage">HttpMessage</span>, <span class="extype" name="io.netty.handler.codec.http.HttpContent">HttpContent</span>, <span class="extype" name="io.netty.handler.codec.http.FullHttpMessage">FullHttpMessage</span>], <span class="extype" name="io.netty.handler.codec.MessageToMessageDecoder">MessageToMessageDecoder</span>[<span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span>], <span class="extype" name="io.netty.channel.ChannelInboundHandlerAdapter">ChannelInboundHandlerAdapter</span>, <span class="extype" name="io.netty.channel.ChannelInboundHandler">ChannelInboundHandler</span>, <span class="extype" name="io.netty.channel.ChannelHandlerAdapter">ChannelHandlerAdapter</span>, <span class="extype" name="io.netty.channel.ChannelHandler">ChannelHandler</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator"><span>FixedLengthMessageAggregator</span></li><li class="in" name="io.netty.handler.codec.http.HttpObjectAggregator"><span>HttpObjectAggregator</span></li><li class="in" name="io.netty.handler.codec.MessageAggregator"><span>MessageAggregator</span></li><li class="in" name="io.netty.handler.codec.MessageToMessageDecoder"><span>MessageToMessageDecoder</span></li><li class="in" name="io.netty.channel.ChannelInboundHandlerAdapter"><span>ChannelInboundHandlerAdapter</span></li><li class="in" name="io.netty.channel.ChannelInboundHandler"><span>ChannelInboundHandler</span></li><li class="in" name="io.netty.channel.ChannelHandlerAdapter"><span>ChannelHandlerAdapter</span></li><li class="in" name="io.netty.channel.ChannelHandler"><span>ChannelHandler</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(maxContentLength:com.twitter.util.StorageUnit):com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator"></a>
+      <a id="&lt;init&gt;:FixedLengthMessageAggregator"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">FixedLengthMessageAggregator</span><span class="params">(<span name="maxContentLength">maxContentLength: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.StorageUnit" class="extype" target="_top">StorageUnit</a></span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@&lt;init&gt;(maxContentLength:com.twitter.util.StorageUnit):com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@##():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator#acceptInboundMessage" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="acceptInboundMessage(msg:Any):Boolean"></a>
+      <a id="acceptInboundMessage(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">acceptInboundMessage</span><span class="params">(<span name="msg">msg: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@acceptInboundMessage(msg:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator">FixedLengthMessageAggregator</a> → MessageAggregator → MessageToMessageDecoder</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#aggregate" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="aggregate(x$1:io.netty.handler.codec.http.FullHttpMessage,x$2:io.netty.handler.codec.http.HttpContent):Unit"></a>
+      <a id="aggregate(FullHttpMessage,HttpContent):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">aggregate</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.FullHttpMessage">FullHttpMessage</span></span>, <span name="arg1">arg1: <span class="extype" name="io.netty.handler.codec.http.HttpContent">HttpContent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@aggregate(x$1:io.netty.handler.codec.http.FullHttpMessage,x$2:io.netty.handler.codec.http.HttpContent):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#beginAggregation" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="beginAggregation(x$1:io.netty.handler.codec.http.HttpMessage,x$2:io.netty.buffer.ByteBuf):io.netty.handler.codec.http.FullHttpMessage"></a>
+      <a id="beginAggregation(HttpMessage,ByteBuf):FullHttpMessage"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">beginAggregation</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>, <span name="arg1">arg1: <span class="extype" name="io.netty.buffer.ByteBuf">ByteBuf</span></span>)</span><span class="result">: <span class="extype" name="io.netty.handler.codec.http.FullHttpMessage">FullHttpMessage</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@beginAggregation(x$1:io.netty.handler.codec.http.HttpMessage,x$2:io.netty.buffer.ByteBuf):io.netty.handler.codec.http.FullHttpMessage" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelActive" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelActive(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="channelActive(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelActive</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@channelActive(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#channelInactive" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelInactive(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="channelInactive(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelInactive</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@channelInactive(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageAggregator → ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageToMessageDecoder#channelRead" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelRead(x$1:io.netty.channel.ChannelHandlerContext,x$2:Any):Unit"></a>
+      <a id="channelRead(ChannelHandlerContext,Any):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelRead</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@channelRead(x$1:io.netty.channel.ChannelHandlerContext,x$2:Any):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageToMessageDecoder → ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelReadComplete" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelReadComplete(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="channelReadComplete(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelReadComplete</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@channelReadComplete(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelRegistered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelRegistered(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="channelRegistered(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelRegistered</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@channelRegistered(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelUnregistered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelUnregistered(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="channelUnregistered(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelUnregistered</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@channelUnregistered(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#channelWritabilityChanged" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="channelWritabilityChanged(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="channelWritabilityChanged(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">channelWritabilityChanged</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@channelWritabilityChanged(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@clone():Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#closeAfterContinueResponse" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="closeAfterContinueResponse(x$1:Any):Boolean"></a>
+      <a id="closeAfterContinueResponse(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">closeAfterContinueResponse</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@closeAfterContinueResponse(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#ctx" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ctx():io.netty.channel.ChannelHandlerContext"></a>
+      <a id="ctx():ChannelHandlerContext"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ctx</span><span class="params">()</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@ctx():io.netty.channel.ChannelHandlerContext" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec.html" class="extype" name="io.netty.handler.codec">io.netty.handler.codec</a>] </dd><dt>Definition Classes</dt><dd>MessageAggregator</dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#decode" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="decode(x$1:io.netty.channel.ChannelHandlerContext,x$2:I,x$3:java.util.List[Object]):Unit"></a>
+      <a id="decode(ChannelHandlerContext,HttpObject,List[AnyRef]):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decode</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span></span>, <span name="arg2">arg2: <span class="extype" name="java.util.List">List</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>]</span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@decode(x$1:io.netty.channel.ChannelHandlerContext,x$2:I,x$3:java.util.List[Object]):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec.html" class="extype" name="io.netty.handler.codec">io.netty.handler.codec</a>] </dd><dt>Definition Classes</dt><dd>MessageAggregator → MessageToMessageDecoder</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator#decoding" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="decoding:Boolean"></a>
+      <a id="decoding:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decoding</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@decoding:Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#exceptionCaught" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="exceptionCaught(x$1:io.netty.channel.ChannelHandlerContext,x$2:Throwable):Unit"></a>
+      <a id="exceptionCaught(ChannelHandlerContext,Throwable):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exceptionCaught</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="java.lang.Throwable">Throwable</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@exceptionCaught(x$1:io.netty.channel.ChannelHandlerContext,x$2:Throwable):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler → ChannelHandlerAdapter → ChannelHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator#finishAggregation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finishAggregation(aggregated:io.netty.handler.codec.http.FullHttpMessage):Unit"></a>
+      <a id="finishAggregation(FullHttpMessage):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finishAggregation</span><span class="params">(<span name="aggregated">aggregated: <span class="extype" name="io.netty.handler.codec.http.FullHttpMessage">FullHttpMessage</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@finishAggregation(aggregated:io.netty.handler.codec.http.FullHttpMessage):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator">FixedLengthMessageAggregator</a> → HttpObjectAggregator → MessageAggregator</dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#handleOversizedMessage" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handleOversizedMessage(x$1:io.netty.channel.ChannelHandlerContext,x$2:io.netty.handler.codec.http.HttpMessage):Unit"></a>
+      <a id="handleOversizedMessage(ChannelHandlerContext,HttpMessage):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handleOversizedMessage</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <span class="extype" name="io.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@handleOversizedMessage(x$1:io.netty.channel.ChannelHandlerContext,x$2:io.netty.handler.codec.http.HttpMessage):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#handlerAdded" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handlerAdded(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="handlerAdded(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handlerAdded</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@handlerAdded(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageAggregator → ChannelHandlerAdapter → ChannelHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#handlerRemoved" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handlerRemoved(x$1:io.netty.channel.ChannelHandlerContext):Unit"></a>
+      <a id="handlerRemoved(ChannelHandlerContext):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handlerRemoved</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@handlerRemoved(x$1:io.netty.channel.ChannelHandlerContext):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageAggregator → ChannelHandlerAdapter → ChannelHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#ignoreContentAfterContinueResponse" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ignoreContentAfterContinueResponse(x$1:Any):Boolean"></a>
+      <a id="ignoreContentAfterContinueResponse(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ignoreContentAfterContinueResponse</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@ignoreContentAfterContinueResponse(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#isAggregated" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isAggregated(x$1:io.netty.handler.codec.http.HttpObject):Boolean"></a>
+      <a id="isAggregated(HttpObject):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isAggregated</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isAggregated(x$1:io.netty.handler.codec.http.HttpObject):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#isContentLengthInvalid" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isContentLengthInvalid(x$1:io.netty.handler.codec.http.HttpMessage,x$2:Int):Boolean"></a>
+      <a id="isContentLengthInvalid(HttpMessage,Int):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isContentLengthInvalid</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isContentLengthInvalid(x$1:io.netty.handler.codec.http.HttpMessage,x$2:Int):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#isContentMessage" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isContentMessage(x$1:io.netty.handler.codec.http.HttpObject):Boolean"></a>
+      <a id="isContentMessage(HttpObject):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isContentMessage</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isContentMessage(x$1:io.netty.handler.codec.http.HttpObject):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#isHandlingOversizedMessage" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isHandlingOversizedMessage():Boolean"></a>
+      <a id="isHandlingOversizedMessage():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isHandlingOversizedMessage</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isHandlingOversizedMessage():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageAggregator</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#isLastContentMessage" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isLastContentMessage(x$1:io.netty.handler.codec.http.HttpContent):Boolean"></a>
+      <a id="isLastContentMessage(HttpContent):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isLastContentMessage</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.HttpContent">HttpContent</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isLastContentMessage(x$1:io.netty.handler.codec.http.HttpContent):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.channel.ChannelHandlerAdapter#isSharable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isSharable():Boolean"></a>
+      <a id="isSharable():Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isSharable</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isSharable():Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelHandlerAdapter</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#isStartMessage" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isStartMessage(x$1:io.netty.handler.codec.http.HttpObject):Boolean"></a>
+      <a id="isStartMessage(HttpObject):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isStartMessage</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@isStartMessage(x$1:io.netty.handler.codec.http.HttpObject):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#maxContentLength" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="maxContentLength():Int"></a>
+      <a id="maxContentLength():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxContentLength</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@maxContentLength():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageAggregator</dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#maxCumulationBufferComponents" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="maxCumulationBufferComponents():Int"></a>
+      <a id="maxCumulationBufferComponents():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maxCumulationBufferComponents</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@maxCumulationBufferComponents():Int" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageAggregator</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="io.netty.handler.codec.http.HttpObjectAggregator#newContinueResponse" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newContinueResponse(x$1:io.netty.handler.codec.http.HttpMessage,x$2:Int,x$3:io.netty.channel.ChannelPipeline):Object"></a>
+      <a id="newContinueResponse(HttpMessage,Int,ChannelPipeline):AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newContinueResponse</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.handler.codec.http.HttpMessage">HttpMessage</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="arg2">arg2: <span class="extype" name="io.netty.channel.ChannelPipeline">ChannelPipeline</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@newContinueResponse(x$1:io.netty.handler.codec.http.HttpMessage,x$2:Int,x$3:io.netty.channel.ChannelPipeline):Object" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../../../../io$netty$handler$codec$http.html" class="extype" name="io.netty.handler.codec.http">io.netty.handler.codec.http</a>] </dd><dt>Definition Classes</dt><dd>HttpObjectAggregator → MessageAggregator</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="io.netty.handler.codec.MessageAggregator#setMaxCumulationBufferComponents" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setMaxCumulationBufferComponents(x$1:Int):Unit"></a>
+      <a id="setMaxCumulationBufferComponents(Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setMaxCumulationBufferComponents</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@setMaxCumulationBufferComponents(x$1:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MessageAggregator</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@toString():String" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="io.netty.channel.ChannelInboundHandlerAdapter#userEventTriggered" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="userEventTriggered(x$1:io.netty.channel.ChannelHandlerContext,x$2:Any):Unit"></a>
+      <a id="userEventTriggered(ChannelHandlerContext,Any):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">userEventTriggered</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="io.netty.channel.ChannelHandlerContext">ChannelHandlerContext</span></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@userEventTriggered(x$1:io.netty.channel.ChannelHandlerContext,x$2:Any):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChannelInboundHandlerAdapter → ChannelInboundHandler</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Exception]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../../index.html#com.twitter.finagle.netty4.http.handler.FixedLengthMessageAggregator@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="io.netty.handler.codec.http.HttpObjectAggregator">
+              <h3>Inherited from <span class="extype" name="io.netty.handler.codec.http.HttpObjectAggregator">HttpObjectAggregator</span></h3>
+            </div><div class="parent" name="io.netty.handler.codec.MessageAggregator">
+              <h3>Inherited from <span class="extype" name="io.netty.handler.codec.MessageAggregator">MessageAggregator</span>[<span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span>, <span class="extype" name="io.netty.handler.codec.http.HttpMessage">HttpMessage</span>, <span class="extype" name="io.netty.handler.codec.http.HttpContent">HttpContent</span>, <span class="extype" name="io.netty.handler.codec.http.FullHttpMessage">FullHttpMessage</span>]</h3>
+            </div><div class="parent" name="io.netty.handler.codec.MessageToMessageDecoder">
+              <h3>Inherited from <span class="extype" name="io.netty.handler.codec.MessageToMessageDecoder">MessageToMessageDecoder</span>[<span class="extype" name="io.netty.handler.codec.http.HttpObject">HttpObject</span>]</h3>
+            </div><div class="parent" name="io.netty.channel.ChannelInboundHandlerAdapter">
+              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelInboundHandlerAdapter">ChannelInboundHandlerAdapter</span></h3>
+            </div><div class="parent" name="io.netty.channel.ChannelInboundHandler">
+              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelInboundHandler">ChannelInboundHandler</span></h3>
+            </div><div class="parent" name="io.netty.channel.ChannelHandlerAdapter">
+              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelHandlerAdapter">ChannelHandlerAdapter</span></h3>
+            </div><div class="parent" name="io.netty.channel.ChannelHandler">
+              <h3>Inherited from <span class="extype" name="io.netty.channel.ChannelHandler">ChannelHandler</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &mdash; Finagle 6.35.0 documentation</title>
+    <title>Configuration &mdash; Finagle 6.36.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.35.0',
+        VERSION:     '6.36.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.35.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.36.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -41,11 +41,11 @@
   </script>
 
   </head>
-  <body>
+  <body role="document">
   
   
 
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -57,26 +57,26 @@
         <li class="right" >
           <a href="ServicesAndFilters.html" title="Services &amp; Filters"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Finagle</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Finagle</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
-<p>Prior to <a class="reference internal" href="changelog.html"><em>version 6.0</em></a>, the <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ServerBuilder</span></tt> API was the
-primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><em>client</em></a>
-or <a class="reference internal" href="Servers.html#finagle-servers"><em>server</em></a>. We are moving away from this model for various
-<a class="reference internal" href="FAQ.html#configuring-finagle6"><em>reasons</em></a>.</p>
+<p>Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API was the
+primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a>
+or <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a>. We are moving away from this model for various
+<a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">reasons</span></a>.</p>
 <p>The modern way of configuring Finagle clients or servers is to use the Finagle 6 API,
-which is generally available via the <tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods. For example, the following
+which is generally available via the <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods. For example, the following
 code snippet creates a new HTTP client altered with two extra parameters: label and transport
 verbosity.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withLabel</span><span class="o">(</span><span class="s">&quot;my-http-client&quot;</span><span class="o">)</span>
@@ -88,17 +88,17 @@ verbosity.</p>
 <p class="first admonition-title">Note</p>
 <p class="last">All the examples in this user guide use the Finagle 6 API as a main configuration
 method and we encourage all the Finagle users to follow this pattern given that
-the <tt class="docutils literal"><span class="pre">ClientBuilder</span></tt>/<tt class="docutils literal"><span class="pre">ServerBuilder</span></tt> API will eventually be deprecated.
-For help migrating, see <a class="reference internal" href="FAQ.html#configuring-finagle6"><em>the FAQ</em></a> as well as
-<a class="reference internal" href="Clients.html#finagle-clients"><em>client</em></a> and <a class="reference internal" href="Servers.html#finagle-servers"><em>server</em></a> configuration.</p>
+the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API will eventually be deprecated.
+For help migrating, see <a class="reference internal" href="FAQ.html#configuring-finagle6"><span class="std std-ref">the FAQ</span></a> as well as
+<a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a> and <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a> configuration.</p>
 </div>
-<p>In addition to <tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods that provide easy-to-use and safe-to-configure
+<p>In addition to <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods that provide easy-to-use and safe-to-configure
 parameters of Finagle clients and servers, there is an expert-level <cite>Stack API</cite>.</p>
-<p>The Stack API is available via the <tt class="docutils literal"><span class="pre">configured</span></tt> method on a Finagle client/server
+<p>The Stack API is available via the <code class="docutils literal"><span class="pre">configured</span></code> method on a Finagle client/server
 that takes a stack param: a value of arbitrary type for which there is an implicit instance
-of <tt class="docutils literal"><span class="pre">Stack.Param</span></tt> type-class available in the scope. For example, the following code
-demonstrates how to use <tt class="docutils literal"><span class="pre">.configured</span></tt> to override TCP socket options provided by default.</p>
-<div class="highlight-scala"><div class="highlight"><pre><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
+of <code class="docutils literal"><span class="pre">Stack.Param</span></code> type-class available in the scope. For example, the following code
+demonstrates how to use <code class="docutils literal"><span class="pre">.configured</span></code> to override TCP socket options provided by default.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.Http</span>
 <span class="k">import</span> <span class="nn">com.twitter.transport.Transport</span>
 
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Http</span><span class="o">.</span><span class="n">client</span>
@@ -116,25 +116,25 @@ you&#8217;re doing.</p>
 <h2>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h2>
 <p>Finagle has many different components and we tried to faithfully model our configuration
 to help understand the constituents and the resulting behavior. For the sake of consistency,
-the current version of the <tt class="docutils literal"><span class="pre">with</span></tt> API is designed with the following principles in mind.</p>
+the current version of the <code class="docutils literal"><span class="pre">with</span></code> API is designed with the following principles in mind.</p>
 <ol class="arabic simple">
 <li><strong>Reasonable grouping of parameters</strong>: We target for the fine grained API so most of the
-<tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods take a single argument. Although, there is a common sense driven
+<code class="docutils literal"><span class="pre">with</span></code>-prefixed methods take a single argument. Although, there is a common sense driven
 exception from this rule: some of the parameters only make sense when viewed as a group
 rather than separately (e.g. it makes no sense to specify SOCKS proxy credentials when
 the proxy itself is disabled).</li>
 <li><strong>No boolean flags (i.e., enabled, yesOrNo)</strong>: Boolean values are usually hard to
 reason about because their type doesn&#8217;t encode it&#8217;s mission in the domain (e.g. in
-most of the cases it&#8217;s impossible to tell what <tt class="docutils literal"><span class="pre">true</span></tt> or <tt class="docutils literal"><span class="pre">false</span></tt> means in a function
-call). Instead of boolean flags, we use a pair of methods <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">noX</span></tt> to indicate
-whether the <tt class="docutils literal"><span class="pre">x</span></tt> feature is enabled or disabled.</li>
+most of the cases it&#8217;s impossible to tell what <code class="docutils literal"><span class="pre">true</span></code> or <code class="docutils literal"><span class="pre">false</span></code> means in a function
+call). Instead of boolean flags, we use a pair of methods <code class="docutils literal"><span class="pre">x</span></code> and <code class="docutils literal"><span class="pre">noX</span></code> to indicate
+whether the <code class="docutils literal"><span class="pre">x</span></code> feature is enabled or disabled.</li>
 <li><strong>Less primitive number types in the API</strong>: We promote a sane level of type-full
 programming, where a reasonable level of guarantees is encoded into a type-system.
 Thus, we never use primitive number types for durations and storage units given that
-there are utility types: <tt class="docutils literal"><span class="pre">Duration</span></tt> and <tt class="docutils literal"><span class="pre">StorageUnit</span></tt>.</li>
+there are utility types: <code class="docutils literal"><span class="pre">Duration</span></code> and <code class="docutils literal"><span class="pre">StorageUnit</span></code>.</li>
 <li><strong>No experimental and/or advanced features</strong>: While, it&#8217;s relatively safe to configure
-parameters exposed via <tt class="docutils literal"><span class="pre">with</span></tt>-prefixed methods, you should never assume the same about
-the <cite>Stack API</cite> (i.e., <tt class="docutils literal"><span class="pre">.configured</span></tt>). It&#8217;s <em>easy</em> to configure basic parameters; it&#8217;s
+parameters exposed via <code class="docutils literal"><span class="pre">with</span></code>-prefixed methods, you should never assume the same about
+the <cite>Stack API</cite> (i.e., <code class="docutils literal"><span class="pre">.configured</span></code>). It&#8217;s <em>easy</em> to configure basic parameters; it&#8217;s
 <em>possible</em> to configure expert-level parameters.</li>
 </ol>
 </div>
@@ -144,7 +144,7 @@ the <cite>Stack API</cite> (i.e., <tt class="docutils literal"><span class="pre"
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><p class="logo"><a href="index.html">
   <img class="logo" src="_static/logo_small.png" alt="Logo"/>
 </a></p><a href="index.html"><h3>Finagle</h3></a>

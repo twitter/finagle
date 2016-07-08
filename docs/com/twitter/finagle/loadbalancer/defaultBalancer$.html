@@ -45,24 +45,20 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 2015-06-15) Use com.twitter.finagle.loadbalancer.Balancers per-client.">defaultBalancer</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <span class="name">defaultBalancer</span><span class="result"> extends <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>We expose the ability to configure balancers per-process via flags. However,
-this is generally not a good idea as Finagle processes usually contain many clients.
-This will likely go away in the future or be no-op and, therfore, should not be
-depended on. Instead, configure your balancers via the <code>configured</code> method on
-clients:</p><p>{{
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>We expose the ability to configure balancers per-process via flags. 'heap',
+'choice', and 'aperture' are valid choices for defaultBalancer. However, using
+this is generally not a good idea, as Finagle processes usually contain many clients.
+To configure the load balancer method on a client, use the <code>configured</code> method like so:</p><p>{{
    val balancer = Balancers.aperture(...)
    Protocol.configured(LoadBalancerFactory.Param(balancer))
 }}
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2015-06-15)</i> Use com.twitter.finagle.loadbalancer.Balancers per-client.</p></dd></dl><div class="toggleContainer block">
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="java.lang.String">String</span>], <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.GlobalFlag" class="extype" target="_top">GlobalFlag</a>[<span class="extype" name="java.lang.String">String</span>], <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="java.lang.String">String</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -73,7 +69,7 @@ clients:</p><p>{{
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -86,7 +82,7 @@ clients:</p><p>{{
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -114,7 +110,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -131,7 +127,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@##():Int" title="Permalink" target="_top">
@@ -148,7 +144,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@==(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -199,7 +195,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@clone():Object" title="Permalink" target="_top">
@@ -239,7 +235,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
@@ -256,7 +252,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
@@ -273,7 +269,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@finalize():Unit" title="Permalink" target="_top">
@@ -313,7 +309,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <span class="name">get</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@get:Option[T]" title="Permalink" target="_top">
@@ -364,7 +360,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getValue</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <span class="name">getValue</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@getValue:Option[T]" title="Permalink" target="_top">
@@ -381,7 +377,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getWithDefault</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+        <span class="name">getWithDefault</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="java.lang.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@getWithDefault:Option[T]" title="Permalink" target="_top">
@@ -398,7 +394,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@hashCode():Int" title="Permalink" target="_top">
@@ -432,7 +428,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isDefined</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isDefined</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@isDefined:Boolean" title="Permalink" target="_top">
@@ -449,7 +445,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
@@ -466,7 +462,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">let</span><span class="params">(<span name="t">t: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">let</span><span class="params">(<span name="t">t: <span class="extype" name="java.lang.String">String</span></span>)</span><span class="params">(<span name="f">f: ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@let(t:T)(f:=&gt;Unit):Unit" title="Permalink" target="_top">
@@ -500,7 +496,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
@@ -517,7 +513,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">noArgumentOk</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">noArgumentOk</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@noArgumentOk:Boolean" title="Permalink" target="_top">
@@ -534,7 +530,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@notify():Unit" title="Permalink" target="_top">
@@ -551,7 +547,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@notifyAll():Unit" title="Permalink" target="_top">
@@ -568,7 +564,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parse</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">parse</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@parse():Unit" title="Permalink" target="_top">
@@ -585,7 +581,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parse</span><span class="params">(<span name="raw">raw: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">parse</span><span class="params">(<span name="raw">raw: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@parse(raw:String):Unit" title="Permalink" target="_top">
@@ -602,7 +598,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">parsingDone</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+        <span class="name">parsingDone</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@parsingDone:Boolean" title="Permalink" target="_top">
@@ -619,7 +615,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">reset</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">reset</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@reset():Unit" title="Permalink" target="_top">
@@ -687,7 +683,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@wait():Unit" title="Permalink" target="_top">
@@ -710,7 +706,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="arg1">arg1: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
@@ -733,7 +729,7 @@ clients:</p><p>{{
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.defaultBalancer$@wait(x$1:Long):Unit" title="Permalink" target="_top">
@@ -761,9 +757,9 @@ clients:</p><p>{{
             </div><div class="parent" name="com.twitter.app.Flag">
               <h3>Inherited from <a href="https://twitter.github.io/util/docs/index.html#com.twitter.app.Flag" class="extype" target="_top">Flag</a>[<span class="extype" name="java.lang.String">String</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.7/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></h3>
             </div>
         
         </div>
