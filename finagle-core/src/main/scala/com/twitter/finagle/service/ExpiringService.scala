@@ -48,7 +48,6 @@ object ExpiringService {
               self(conn).map { service =>
                 new ExpiringService(service, idle, life, timer, statsReceiver) {
                   def onExpire(): Unit = {
-                    println("expiring conn")
                     conn.close()
                   }
                 }
