@@ -29,7 +29,7 @@ class Http2TransporterTest extends FunSuite {
     Await.result(transport.close(), 5.seconds)
   }
 
-  test("sends a regular upgrade") {
+  ignore("sends a regular upgrade") {
     evaluate { case (reader, transport) =>
       val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://")
       val written = transport.write(req)
@@ -51,7 +51,7 @@ class Http2TransporterTest extends FunSuite {
     }
   }
 
-  test("sends a regular upgrade with headers") {
+  ignore("sends a regular upgrade with headers") {
     evaluate { case (reader, transport) =>
       val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://")
       req.headers.add("bleh", "OK")
@@ -75,7 +75,7 @@ class Http2TransporterTest extends FunSuite {
     }
   }
 
-  test("sends a regular upgrade with long headers") {
+  ignore("sends a regular upgrade with long headers") {
     evaluate { case (reader, transport) =>
       val req = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://")
       val manyAs = "a" * 8192

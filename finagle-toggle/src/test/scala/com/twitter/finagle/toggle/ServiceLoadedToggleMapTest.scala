@@ -13,24 +13,24 @@ class ServiceLoadedToggleTestA extends ServiceLoadedToggleMap with ToggleMap.Pro
   tm.put("com.toggle.a", 1.0)
 
   protected def underlying: ToggleMap = tm
-  def libraryName: String = "A"
+  def libraryName: String = "com.twitter.finagle.toggle.test.A"
 }
 
 class ServiceLoadedToggleTestB extends ServiceLoadedToggleMap with ToggleMap.Proxy {
   protected def underlying: ToggleMap = NullToggleMap
-  def libraryName: String = "B"
+  def libraryName: String = "com.twitter.finagle.toggle.test.B"
 }
 
 class ServiceLoadedToggleTestBToo extends ServiceLoadedToggleMap with ToggleMap.Proxy {
   protected def underlying: ToggleMap = NullToggleMap
-  def libraryName: String = "B"
+  def libraryName: String = "com.twitter.finagle.toggle.test.B"
 }
 
 @RunWith(classOf[JUnitRunner])
 class ServiceLoadedToggleMapTest extends FunSuite {
 
   test("one libraryName match") {
-    val tm = ServiceLoadedToggleMap("A")
+    val tm = ServiceLoadedToggleMap("com.twitter.finagle.toggle.test.A")
 
     // make sure we got ToggleMap we expected
     assert(tm("com.toggle.a")(500))
@@ -40,13 +40,13 @@ class ServiceLoadedToggleMapTest extends FunSuite {
   }
 
   test("no libraryName matches") {
-    val tm = ServiceLoadedToggleMap("ZZZ")
+    val tm = ServiceLoadedToggleMap("com.twitter.finagle.toggle.test.ZZZ")
     assert(tm.iterator.isEmpty)
   }
 
   test("two libraryName matches") {
     intercept[IllegalStateException] {
-      ServiceLoadedToggleMap("B")
+      ServiceLoadedToggleMap("com.twitter.finagle.toggle.test.B")
     }
   }
 

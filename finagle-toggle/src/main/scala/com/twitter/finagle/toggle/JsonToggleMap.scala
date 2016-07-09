@@ -37,7 +37,6 @@ import scala.collection.{breakOut, immutable}
  *         },
  *         "required": [
  *           "id",
- *           "description",
  *           "fraction"
  *         ]
  *       }
@@ -79,19 +78,65 @@ object JsonToggleMap {
   private[this] val mapper: ObjectMapper =
     new ObjectMapper().registerModule(DefaultScalaModule)
 
+  /**
+   * How to treat the "description" field on a toggle.
+   *
+   * @see [[DescriptionIgnored]] and [[DescriptionRequired]].
+   */
+  sealed abstract class DescriptionMode
+
+  /**
+   * Requires toggles to have a "description" field.
+   *
+   * This is useful for the library owner's base definitions of [[Toggle]].
+   */
+  object DescriptionRequired extends DescriptionMode
+
+  /**
+   * Transforms the Toggle's "description" field into being empty.
+   *
+   * This is useful for service owner overrides of a toggle where
+   * the developer making modifications is not the one who has defined
+   * the toggle itself.
+   */
+  object DescriptionIgnored extends DescriptionMode
+
   private[this] case class JsonToggle(
       @JsonProperty(required = true) id: String,
       @JsonProperty(required = true) fraction: Double,
-      @JsonProperty(required = true) description: String,
+      description: Option[String],
       comment: Option[String])
 
   private[this] case class JsonToggles(
       @JsonProperty(required = true) toggles: Seq[JsonToggle]) {
 
-    def toToggleMap: ToggleMap = {
+    def toToggleMap(
+      source: String,
+      descriptionMode: DescriptionMode
+    ): ToggleMap = {
+      val invalid = toggles.find { md =>
+        descriptionMode match {
+          case DescriptionRequired => md.description.isEmpty
+          case DescriptionIgnored => false
+        }
+      }
+      invalid match {
+        case None => ()
+        case Some(md) =>
+          throw new IllegalArgumentException(s"Mandatory description is missing for: $md")
+      }
+
       val metadata: immutable.Seq[Toggle.Metadata] =
         toggles.map { jsonToggle =>
-          Toggle.Metadata(jsonToggle.id, jsonToggle.fraction, Some(jsonToggle.description))
+          val description = descriptionMode match {
+            case DescriptionRequired => jsonToggle.description
+            case DescriptionIgnored => None
+          }
+          Toggle.Metadata(
+            jsonToggle.id,
+            jsonToggle.fraction,
+            description,
+            source)
         }(breakOut)
 
       val ids = metadata.map(_.id)
@@ -110,10 +155,12 @@ object JsonToggleMap {
    * $jsonschema
    *
    * $example
+   *
+   * @param descriptionMode how to treat the "description" field for a toggle.
    */
-  def parse(json: String): Try[ToggleMap] = Try {
+  def parse(json: String, descriptionMode: DescriptionMode): Try[ToggleMap] = Try {
     val jsonToggles = mapper.readValue(json, classOf[JsonToggles])
-    jsonToggles.toToggleMap
+    jsonToggles.toToggleMap("JSON String", descriptionMode)
   }
 
   /**
@@ -124,10 +171,12 @@ object JsonToggleMap {
    * $jsonschema
    *
    * $example
+   *
+   * @param descriptionMode how to treat the "description" field for a toggle.
    */
-  def parse(url: URL): Try[ToggleMap] = Try {
+  def parse(url: URL, descriptionMode: DescriptionMode): Try[ToggleMap] = Try {
     val jsonToggles = mapper.readValue(url, classOf[JsonToggles])
-    jsonToggles.toToggleMap
+    jsonToggles.toToggleMap(url.toString, descriptionMode)
   }
 
 }

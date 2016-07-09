@@ -2,6 +2,7 @@ package com.twitter.finagle.toggle
 
 import com.twitter.finagle.server.{ServerInfo, environment}
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -9,10 +10,54 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class StandardToggleMapTest extends FunSuite {
 
+  private def newRegistry(): ConcurrentMap[String, ToggleMap] =
+    new ConcurrentHashMap[String, ToggleMap]()
+
+  test("registeredLibraries") {
+    val uniqueLibName = s"com.twitter.${System.nanoTime}"
+    assert(!StandardToggleMap.registeredLibraries.contains(uniqueLibName))
+
+    val tm = StandardToggleMap(uniqueLibName, NullStatsReceiver)
+    assert(StandardToggleMap.registeredLibraries.contains(uniqueLibName))
+    assert(tm == StandardToggleMap.registeredLibraries(uniqueLibName))
+  }
+
+  // note the underlying utility (Toggle.validateId) is heavily tested in ToggleTest
+  test("apply validates libraryName") {
+    def assertNotAllowed(libraryName: String): Unit = {
+      intercept[IllegalArgumentException] {
+        StandardToggleMap(libraryName, NullStatsReceiver)
+      }
+    }
+
+    assertNotAllowed("")
+    assertNotAllowed("A")
+    assertNotAllowed("finagle")
+    assertNotAllowed("com.toggle!")
+  }
+
+  test("apply returns the same instance for a given libraryName") {
+    val name = "com.twitter.Test"
+    val registry = newRegistry()
+    val tm0 = StandardToggleMap(
+      name,
+      NullStatsReceiver,
+      ToggleMap.newMutable(),
+      ServerInfo(),
+      registry)
+    val tm1 = StandardToggleMap(
+      name,
+      NullStatsReceiver,
+      ToggleMap.newMutable(),
+      ServerInfo(),
+      registry)
+    assert(tm0 eq tm1)
+  }
+
   test("apply with a known libraryName") {
     flag.overrides.let(Map.empty) {
       // should load `ServiceLoadedToggleTestA`
-      val tm = StandardToggleMap("A", NullStatsReceiver)
+      val tm = StandardToggleMap("com.twitter.finagle.toggle.test.A", NullStatsReceiver)
       val togs = tm.iterator.toSeq
       assert(togs.size == 1)
       assert(togs.head.id == "com.toggle.a")
@@ -21,7 +66,7 @@ class StandardToggleMapTest extends FunSuite {
 
   test("apply with an unknown libraryName") {
     flag.overrides.let(Map.empty) {
-      val tm = StandardToggleMap("ZZZ", NullStatsReceiver)
+      val tm = StandardToggleMap("com.twitter.finagle.toggle.test.ZZZ", NullStatsReceiver)
       assert(tm.iterator.isEmpty)
       val toggle = tm("com.toggle.XYZ")
       assert(!toggle.isDefinedAt(245))
@@ -33,7 +78,7 @@ class StandardToggleMapTest extends FunSuite {
 
   test("apply with a duplicate libraryName") {
     intercept[IllegalStateException] {
-      StandardToggleMap("B", NullStatsReceiver)
+      StandardToggleMap("com.twitter.finagle.toggle.test.B", NullStatsReceiver)
     }
   }
 
@@ -43,7 +88,8 @@ class StandardToggleMapTest extends FunSuite {
       "com.twitter.finagle.toggle.tests.StandardToggleMapTest",
       NullStatsReceiver,
       NullToggleMap,
-      ServerInfo.Empty)
+      ServerInfo.Empty,
+      newRegistry())
 
     val togs = togMap.iterator.toSeq
 
@@ -66,7 +112,8 @@ class StandardToggleMapTest extends FunSuite {
         "com.twitter.finagle.toggle.tests.EnvOverlays",
         NullStatsReceiver,
         NullToggleMap,
-        ServerInfo.Flag)
+        ServerInfo.Flag,
+        newRegistry())
 
       val togs = togMap.iterator.toSeq
 
@@ -97,7 +144,12 @@ class StandardToggleMapTest extends FunSuite {
 
     val inMem = ToggleMap.newMutable()
     // should load `ServiceLoadedToggleTestA`
-    val togMap = StandardToggleMap("A", NullStatsReceiver, inMem, ServerInfo.Empty)
+    val togMap = StandardToggleMap(
+      "com.twitter.finagle.toggle.test.A",
+      NullStatsReceiver,
+      inMem,
+      ServerInfo.Empty,
+      newRegistry())
     flag.overrides.letClear("com.toggle.a") {
       // start without the flag or in-memory, and only the service loaded
       assertFraction(togMap, 1.0)
@@ -127,19 +179,30 @@ class StandardToggleMapTest extends FunSuite {
 
   test("Toggles are observed") {
     val toggleName = "com.toggle.Test"
-    val libraryName = "observedTest"
+    val libraryName = "com.twitter.finagle.toggle.test.Observed"
     val stats = new InMemoryStatsReceiver()
     val inMem = ToggleMap.newMutable()
     // start with the toggle turned on.
     inMem.put(toggleName, 1.0)
 
-    val togMap = StandardToggleMap(libraryName, stats, inMem, ServerInfo.Empty)
+    val togMap = StandardToggleMap(
+      libraryName, stats, inMem, ServerInfo.Empty, newRegistry())
     val gauge = stats.gauges(Seq("toggles", libraryName, "checksum"))
     val initial = gauge()
 
     // turn the toggle off and make sure the checksum changes
     inMem.put(toggleName, 0.0)
     assert(initial != gauge())
+  }
+
+  test("components") {
+    val inMem = ToggleMap.newMutable()
+    val togMap = StandardToggleMap(
+      "com.twitter.components", NullStatsReceiver, inMem, ServerInfo.Empty, newRegistry())
+
+    val components = ToggleMap.components(togMap)
+    assert(5 == components.size, components.mkString(", "))
+    assert(components.exists(_ eq inMem))
   }
 
 }

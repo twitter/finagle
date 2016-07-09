@@ -7,6 +7,9 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+6.36.0
+------
+
 Deprecations
 ~~~~~~~~~~~~
 
@@ -149,6 +152,9 @@ New Features
     and a service loader. This allows for other transports to be implemented
     in separate modules. For example the upcoming finagle-zipkin-kafka.
     ``RB_ID=840494``
+
+  * finagle-thriftmux: Introduce a Netty4 implementation of mux and thrift-mux.
+    ``RB_ID=842869``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -984,7 +990,7 @@ New Features
 
   * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
 
-  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`\s.
+  * finagle-core: Introduce the ability to add metadata to a bound `com.twitter.finagle.Addr`.
 
   * finagle-core: Introduce per-address latency compensation.  Clients may be configured with
     a 'Compensator' function that uses the client's address metadata to adjust connection and

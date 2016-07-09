@@ -4,6 +4,7 @@ import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{Return, Throw}
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import scala.collection.JavaConverters._
 
 /**
@@ -13,7 +14,7 @@ import scala.collection.JavaConverters._
  * owners.
  *
  * The ordering is as such:
- *  i. The mutable, in-process [[ToggleMap]], provided via [[ToggleMap.mutable]].
+ *  i. A mutable, in-process [[ToggleMap.Mutable]].
  *  i. The `GlobalFlag`-backed [[ToggleMap]], provided via [[ToggleMap.flags]].
  *  i. The service-owner controlled JSON file-based [[ToggleMap]], provided via [[JsonToggleMap]].
  *  i. The dynamically loaded [[ToggleMap]], provided via [[ServiceLoadedToggleMap.apply]].
@@ -47,11 +48,28 @@ object StandardToggleMap {
 
   private[this] val log = Logger.get()
 
+  private[this] val libs =
+    new ConcurrentHashMap[String, ToggleMap]()
+
   /**
+   * Returns all registered [[ToggleMap ToggleMaps]] that have been
+   * created by [[apply]], keyed by `libraryName`.
+   */
+  def registeredLibraries: Map[String, ToggleMap] =
+    libs.asScala.toMap
+
+  /**
+   * Get a [[ToggleMap]] for the given `libraryName`.
+   *
+   * @note If a given `libraryName` has already been loaded, only a single instance
+   * will always be returned for all calls to [[apply]] (even if the `StatsReceiver`
+   * differs).
+   *
    * @param libraryName if multiple matching service loaded implementations are
    *                    found, this will fail with an `java.lang.IllegalStateException`.
-   *                    The names should be in fully-qualified form to avoid
-   *                    collisions, e.g. "com.twitter.finagle".
+   *                    The names must be in fully-qualified form to avoid
+   *                    collisions, e.g. "com.twitter.finagle". Valid characters are
+   *                    `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
    * @param statsReceiver used to record the outcomes of Toggles. For general
    *                      usage this should not be scoped so that the metrics
    *                      always end up scoped to "toggles/$libraryName".
@@ -60,18 +78,24 @@ object StandardToggleMap {
     apply(
       libraryName,
       statsReceiver,
-      ToggleMap.mutable,
-      ServerInfo())
+      ToggleMap.newMutable(),
+      ServerInfo(),
+      libs)
 
   /** exposed for testing */
   private[toggle] def apply(
     libraryName: String,
     statsReceiver: StatsReceiver,
     mutable: ToggleMap,
-    serverInfo: ServerInfo
+    serverInfo: ServerInfo,
+    registry: ConcurrentMap[String, ToggleMap]
   ): ToggleMap = {
-    val svcsJson = loadJsonConfig(libraryName, s"$libraryName-service", serverInfo)
-    val libsJson = loadJsonConfig(libraryName, libraryName, serverInfo)
+    Toggle.validateId(libraryName)
+
+    val svcsJson = loadJsonConfig(
+      libraryName, s"$libraryName-service", serverInfo, JsonToggleMap.DescriptionIgnored)
+    val libsJson = loadJsonConfig(
+      libraryName, libraryName, serverInfo, JsonToggleMap.DescriptionRequired)
 
     val stacked = ToggleMap.of(
       mutable,
@@ -80,19 +104,25 @@ object StandardToggleMap {
       ServiceLoadedToggleMap(libraryName),
       libsJson
     )
-    ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
+    val toggleMap = ToggleMap.observed(stacked, statsReceiver.scope("toggles", libraryName))
+    val prev = registry.putIfAbsent(libraryName, toggleMap)
+    if (prev == null)
+      toggleMap
+    else
+      prev
   }
 
   private[this] def loadJsonConfig(
     libraryName: String,
     configName: String,
-    serverInfo: ServerInfo
+    serverInfo: ServerInfo,
+    descriptionMode: JsonToggleMap.DescriptionMode
   ): ToggleMap = {
-    val withoutEnv = loadJsonConfigWithEnv(libraryName, configName)
+    val withoutEnv = loadJsonConfigWithEnv(libraryName, configName, descriptionMode)
     val withEnv = serverInfo.environment match {
       case Some(env) =>
         val e = env.toString.toLowerCase
-        loadJsonConfigWithEnv(libraryName, s"$configName-$e")
+        loadJsonConfigWithEnv(libraryName, s"$configName-$e", descriptionMode)
       case None =>
         NullToggleMap
     }
@@ -103,7 +133,8 @@ object StandardToggleMap {
 
   private[this] def loadJsonConfigWithEnv(
     libraryName: String,
-    configName: String
+    configName: String,
+    descriptionMode: JsonToggleMap.DescriptionMode
   ): ToggleMap = {
     val classLoader = getClass.getClassLoader
     val rscPath = s"com/twitter/toggles/configs/$configName.json"
@@ -116,7 +147,7 @@ object StandardToggleMap {
     } else {
       val rsc = rscs.head
       log.debug(s"Toggle config resources found for $configName, using $rsc")
-      JsonToggleMap.parse(rsc) match {
+      JsonToggleMap.parse(rsc, descriptionMode) match {
         case Throw(t) =>
           throw new IllegalArgumentException(
             s"Failure parsing Toggle config resources for $configName, from $rsc", t)

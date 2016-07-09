@@ -1,6 +1,6 @@
 package com.twitter.finagle.toggle
 
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import com.twitter.logging.{BareFormatter, Level, Logger, StringHandler}
 import org.junit.runner.RunWith
 import org.scalacheck.Arbitrary.arbitrary
@@ -113,8 +113,8 @@ class ToggleMapTest extends FunSuite
   test("ToggleMap.Immutable") {
     val map = new ToggleMap.Immutable(
       immutable.Seq(
-        Toggle.Metadata("com.toggle.on", 1.0, None),
-        Toggle.Metadata("com.toggle.off", 0.0, None)
+        Toggle.Metadata("com.toggle.on", 1.0, None, "test"),
+        Toggle.Metadata("com.toggle.off", 0.0, None, "test")
       )
     )
     val on = map("com.toggle.on")
@@ -194,6 +194,7 @@ class ToggleMapTest extends FunSuite
     // for how many times it was added to the aggregated ToggleMap
     assert(1 == tm0.numApply)
     assert(1 == tm1.numApply)
+    assert(Seq(tm0, tm1) == ToggleMap.components(of))
   }
 
   test("ToggleMap.Flags with empty Flags") {
@@ -338,27 +339,6 @@ class ToggleMapTest extends FunSuite
     assert(mds.exists { md => md.id == "com.toggle.t0" && md.fraction == 0.0 }, mds)
   }
 
-  test("ToggleMap.orElse.iterator uses first defined Toggle.Metadata.description") {
-    val md = Toggle.Metadata(
-      "com.twitter.T2",
-      0.999,
-      Some("ah'll be back"))
-    val noDescription = new ToggleMap.Immutable(
-      immutable.Seq(md.copy(description = None)))
-
-    val withDescription = new ToggleMap.Immutable(
-      immutable.Seq(md.copy(fraction = 0.111)))
-
-    // put the metadata without description before the one with it,
-    // make sure we get the fraction from the 1st metadata, but the
-    // description from the metadata that has it defined.
-    val mds = noDescription.orElse(withDescription).iterator.toSeq
-    assert(1 == mds.size)
-    val metadata = mds.head
-    assert(0.999 == metadata.fraction)
-    assert(md.description == metadata.description)
-  }
-
   test("ToggleMap.orElse.apply") {
     val tm0 = ToggleMap.newMutable()
     val tm1 = ToggleMap.newMutable()
@@ -386,4 +366,17 @@ class ToggleMapTest extends FunSuite
     }
   }
 
+  test("ToggleMap.components") {
+    val tm0 = ToggleMap.newMutable()
+    val tm1 = ToggleMap.newMutable()
+    val tm2 = ToggleMap.newMutable()
+
+    assert(Seq(NullToggleMap) == ToggleMap.components(NullToggleMap))
+    assert(Seq(tm0) == ToggleMap.components(tm0))
+    assert(Seq(tm0, tm1) == ToggleMap.components(tm0.orElse(tm1)))
+    assert(Seq(tm1, tm0) == ToggleMap.components(tm1.orElse(tm0)))
+    assert(Seq(tm0, tm1, tm2) == ToggleMap.components(tm0.orElse(tm1).orElse(tm2)))
+    assert(Seq(tm0, tm1, tm2) == ToggleMap.components(
+      ToggleMap.observed(tm0.orElse(tm1).orElse(tm2), NullStatsReceiver)))
+  }
 }

@@ -2,7 +2,6 @@ package com.twitter.finagle
 
 import com.twitter.finagle.client.{StackClient, StackBasedClient}
 import com.twitter.finagle.mux.lease.exp.Lessor
-import com.twitter.finagle.netty3.Netty3Listener
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.server.{StackBasedServer, Listener, StackServer, StdStackServer}
 import com.twitter.finagle.service._
@@ -278,7 +277,7 @@ object ThriftMux
     ) = copy(stack, params)
 
     protected def newListener(): Listener[In, Out] =
-      Netty3Listener(mux.transport.Netty3Framer, params)
+      params[Mux.param.MuxImpl].listener(params)
 
     protected def newDispatcher(
       transport: Transport[In, Out],
