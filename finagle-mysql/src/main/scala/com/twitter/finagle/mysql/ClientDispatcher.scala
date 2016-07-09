@@ -27,11 +27,10 @@ case class LostSyncException(underlying: Throwable)
  * managed by the underlying service (a ClientDispatcher). This decreases
  * the chances of leaking prepared statements and can simplify the
  * implementation of prepared statements in the presence of a connection pool.
- * The cache is capped at `max` and least recently used elements are evicted.
  */
 private[mysql] class PrepareCache(
   svc: Service[Request, Result],
-  max: Int = 20
+  cache: Caffeine[Object, Object]
 ) extends ServiceProxy[Request, Result](svc) {
 
   def closable(num: Int): Closable = Closable.make { deadline: Time =>
@@ -43,23 +42,17 @@ private[mysql] class PrepareCache(
       // make sure prepared futures get removed eventually
       def onRemoval(request: Request, response: Future[Result], cause: RemovalCause): Unit = {
         response.onSuccess {
-          case r: PrepareOK =>
-            Closable.closeOnCollect(
-              closable(r.id),
-              r
-            )
+          case r: PrepareOK => Closable.closeOnCollect(closable(r.id), r)
           case _ => // nop
         }
       }
     }
-    val underlying = Caffeine.newBuilder()
-      .maximumSize(max)
+
+    val underlying = cache
       .removalListener(listener)
       .build[Request, Future[Result]]()
 
-    CaffeineCache.fromCache(Service.mk { req: Request =>
-      svc(req)
-    }, underlying)
+    CaffeineCache.fromCache(Service.mk { req: Request => svc(req) }, underlying)
   }
 
   /**
@@ -93,7 +86,10 @@ object ClientDispatcher {
     handshake: HandshakeInit => Try[HandshakeResponse],
     maxConcurrentPrepareStatements: Int
   ): Service[Request, Result] = {
-    new PrepareCache(new ClientDispatcher(trans, handshake), maxConcurrentPrepareStatements)
+    new PrepareCache(
+      new ClientDispatcher(trans, handshake),
+      Caffeine.newBuilder().maximumSize(maxConcurrentPrepareStatements)
+    )
   }
 
   /**

@@ -64,6 +64,9 @@ Breaking API Changes
   * finagle-core: Changed visibility of PipeliningDispatcher to private[finagle].  Clients should
     not be affected, since it's not a part of the end-user API. ``RB_ID=843153``.
 
+  * finagle-core: Simplified and unified the constructors for FailureAccrualFactory into
+    a single constructor. ``RB_ID=849660``
+
   * finagle-http: Deprecate channelBufferUsageTracker in favor of maxRequestSize.
     ``RB_ID=831233``
 
