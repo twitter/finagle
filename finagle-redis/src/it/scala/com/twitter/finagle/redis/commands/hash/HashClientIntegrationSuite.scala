@@ -85,7 +85,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar, bufMoo -> Buf.Empty)), TIMEOUT)
       val result = Await.result(client.hMGet(bufFoo, Seq(bufBaz, bufMoo)), TIMEOUT).toList
 
-      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bufBar", ""))
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar", ""))
     }
   }
 
@@ -134,7 +134,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.dels(Seq(bufFoo)), TIMEOUT)
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar, bufMoo -> bufBoo)), TIMEOUT)
-      assert(Await.result(client.hVals(bufFoo), TIMEOUT).map(BufToString(_)) == Seq("bufBar", "bufBoo"))
+      assert(Await.result(client.hVals(bufFoo), TIMEOUT).map(BufToString(_)) == Seq("bar", "boo"))
     }
   }
 
@@ -153,16 +153,25 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       Await.result(client.hSet(bufFoo, bufBar, bufBaz))
       Await.result(client.hSet(bufFoo, bufBoo, bufMoo))
       val res = Await.result(client.hScan(bufFoo, 0L, None, None), TIMEOUT)
-      assert(BufToString(res(1)) == "bar")
+      val resList = res.flatMap(Buf.Utf8.unapply)
+      val expected = Seq("0", "bar", "baz", "boo", "moo")
+
+      assert(resList == expected)
+
+      // count is not the same as limit, so all elements are returned even with
+      // a smaller count
       val withCount = Await.result(client.hScan(bufFoo, 0L, Some(2L), None), TIMEOUT)
-      assert(BufToString(withCount(0)) == "0")
-      assert(BufToString(withCount(1)) == "bar")
-      assert(BufToString(withCount(2)) == "boo")
-      val pattern = Buf.Utf8("b*")
+      val withCountList = withCount.flatMap(Buf.Utf8.unapply)
+      val expectedWithCount = Seq("0", "bar", "baz", "boo", "moo")
+
+      assert(withCountList == expectedWithCount)
+
+      val pattern = Buf.Utf8("bo*")
       val withPattern = Await.result(client.hScan(bufFoo, 0L, None, Some(pattern)), TIMEOUT)
-      assert(BufToString(withCount(0)) == "0")
-      assert(BufToString(withCount(1)) == "bar")
-      assert(BufToString(withCount(2)) == "boo")
+      val withMatchList = withPattern.flatMap(Buf.Utf8.unapply)
+      val expectedMatchList = Seq("0", "boo", "moo")
+
+      assert(withMatchList == expectedMatchList)
     }
   }
 }

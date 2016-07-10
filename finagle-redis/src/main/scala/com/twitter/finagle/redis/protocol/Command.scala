@@ -174,7 +174,7 @@ object Commands {
   val WEIGHTS           = "WEIGHTS"
   val AGGREGATE         = "AGGREGATE"
   val COUNT             = "COUNT"
-  val MATCH             = "PATTERN"
+  val MATCH             = "MATCH"
 
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
