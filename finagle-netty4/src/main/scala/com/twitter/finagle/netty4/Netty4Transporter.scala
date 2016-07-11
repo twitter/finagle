@@ -80,7 +80,23 @@ private[finagle] object Netty4Transporter {
             case e: UnresolvedAddressException => e
             case NonFatal(e) => Failure.rejected(e)
           })
-          else transportP.setValue(new ChannelTransport[In, Out](channelF.channel()))
+          else {
+            // A connection has been established. Wait until the
+            // channel is active before returning a transport.
+            val ch = channelF.channel
+            ch.pipeline.addLast(new ChannelInboundHandlerAdapter {
+              override def channelActive(ctx: ChannelHandlerContext): Unit = {
+                transportP.setValue(new ChannelTransport[In, Out](ch))
+                ch.pipeline.remove(this)
+              }
+
+            // The channel never went active...
+            override def exceptionCaught(ctx: ChannelHandlerContext, exn: Throwable): Unit = {
+                transportP.setException(exn)
+                val _ = ctx.fireExceptionCaught(exn)
+              }
+            })
+          }
         }
       })
 
