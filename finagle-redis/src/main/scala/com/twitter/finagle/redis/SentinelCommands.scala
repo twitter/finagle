@@ -1,16 +1,11 @@
 package com.twitter.finagle.redis
 
-import java.lang.{ Long => JLong, Boolean => JBoolean }
-import java.net.InetAddress
 import java.net.InetSocketAddress
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.finagle.redis.util._
 import com.twitter.util.Future
-import org.jboss.netty.buffer.ChannelBuffer
-import scala.collection.immutable.{ Set => ImmutableSet }
 
-trait SentinelCommands { self: BaseClient =>
+private[redis] trait SentinelCommands { self: BaseClient =>
 
   import SentinelClient._
 

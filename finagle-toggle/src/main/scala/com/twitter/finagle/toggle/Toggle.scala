@@ -50,12 +50,15 @@ object Toggle {
    * @param fraction must be between `0.0 and 1.0`, inclusive.
    *                 This represents the percentage of inputs that will
    *                 return `true`.
-   * @param description an optional human-readable description of the Toggle's purpose.
+   * @param description human-readable description of the Toggle's purpose.
+   * @param source the origin of this [[Toggle]] which is often given by
+   *               `toString` of the [[ToggleMap]] that created it.
    */
   case class Metadata(
       id: String,
       fraction: Double,
-      description: Option[String]) {
+      description: Option[String],
+      source: String) {
     validateId(id)
     validateFraction(id, fraction)
     validateDescription(id, description)
@@ -145,6 +148,10 @@ object Toggle {
       def isDefinedAt(x: Any): Boolean = false
       def apply(v1: Any): Boolean = throw new UnsupportedOperationException()
       override def toString: String = "Undefined"
+
+      // an optimization that allows for avoiding unnecessary Toggles
+      // by "flattening" them out.
+      override def orElse[T](that: Toggle[T]): Toggle[T] = that
     }
 
 }

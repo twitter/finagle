@@ -34,18 +34,18 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val txResult = Await.result(
         client.transaction(Seq(
-          HSet(foo, bar, baz),
-          HSet(foo, boo, moo),
-          HMGet(foo, Seq(bar, boo)))))
+          HSet(bufFoo, bufBar, bufBaz),
+          HSet(bufFoo, bufBoo, bufMoo),
+          HMGet(bufFoo, Seq(bufBar, bufBoo)))))
       assert(ReplyFormat.toString(txResult.toList) == Seq("1", "1", "baz", "moo"))
     }
 
     withRedisClient { client =>
       val txResult = Await.result(
         client.transaction { tx =>
-          tx.hSet(foo, bar, baz).unit before
-          tx.hSet(foo, boo, moo).unit before
-          tx.hMGet(foo, Seq(bar, boo))
+          tx.hSet(bufFoo, bufBar, bufBaz).unit before
+          tx.hSet(bufFoo, bufBoo, bufMoo).unit before
+          tx.hMGet(bufFoo, Seq(bufBar, bufBoo))
         })
       assert(ReplyFormat.toString(txResult.toList) == Seq("1", "1", "baz", "moo"))
     }
@@ -54,7 +54,7 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
   test("Correctly perform key command on incorrect data type", RedisTest, ClientTest) {
     withRedisClient { client =>
       val txResult = Await.result(
-        client.transaction(Seq(HSet(foo, boo, moo), Get(bufFoo), HDel(foo, Seq(boo)))))
+        client.transaction(Seq(HSet(bufFoo, bufBoo, bufMoo), Get(bufFoo), HDel(bufFoo, Seq(bufBoo)))))
       txResult.toList match {
         case Seq(IntegerReply(1), ErrorReply(message), IntegerReply(1)) =>
           // TODO: the exact error message varies in different versions of redis. fix this later
@@ -65,9 +65,9 @@ final class TransactionClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       val txResult = Await.result(
         client.transaction { tx =>
-          tx.hSet(foo, boo, moo).unit before
+          tx.hSet(bufFoo, bufBoo, bufMoo).unit before
           tx.get(bufFoo).unit before
-          tx.hDel(foo, Seq(boo))
+          tx.hDel(bufFoo, Seq(bufBoo))
         })
       txResult.toList match {
         case Seq(IntegerReply(1), ErrorReply(message), IntegerReply(1)) =>

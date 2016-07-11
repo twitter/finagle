@@ -4,7 +4,8 @@ import com.twitter.finagle.{Filter, Dtab, Service}
 import com.twitter.util.{Await, Future}
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{spy, verify, atLeastOnce}
+import org.mockito.Mockito.{spy, verify, when, atLeastOnce}
+import org.mockito.Matchers.any
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
@@ -24,6 +25,7 @@ class TracingFilterTest
   override def test(testName: String, testTags: Tag*)(f: => Unit) {
     super.test(testName, testTags:_*) {
       tracer = spy(new NullTracer)
+      when(tracer.isActivelyTracing(any[TraceId])).thenReturn(true)
       captor = ArgumentCaptor.forClass(classOf[Record])
       Trace.letTracer(tracer) { f }
     }

@@ -3,7 +3,7 @@ package com.twitter.finagle.exp
 import com.twitter.finagle._
 import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
 import com.twitter.finagle.exp.mysql._
-import com.twitter.finagle.exp.mysql.transport.{MysqlTransporter, Packet}
+import com.twitter.finagle.exp.mysql.transport.{Packet, TransportImpl}
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
@@ -120,7 +120,7 @@ object Mysql extends com.twitter.finagle.Client[Request, Result] with MysqlRichC
 
     protected type In = Packet
     protected type Out = Packet
-    protected def newTransporter() = MysqlTransporter(params)
+    protected def newTransporter() = params[TransportImpl].transporter(params)
     protected def newDispatcher(transport: Transport[Packet, Packet]):  Service[Request, Result] = {
       val param.MaxConcurrentPrepareStatements(num) = params[param.MaxConcurrentPrepareStatements]
       mysql.ClientDispatcher(transport, Handshake(params), num)

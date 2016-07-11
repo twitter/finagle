@@ -14,7 +14,6 @@ env:
     - PROJECT=finagle-exp
     - PROJECT=finagle-http
     - PROJECT=finagle-http-compat
-    - PROJECT=finagle-netty4-http
     - PROJECT=finagle-http2
     - PROJECT=finagle-integration
     - PROJECT=finagle-kestrel
@@ -22,15 +21,18 @@ env:
     - PROJECT=finagle-mux
     - PROJECT=finagle-mysql
     - PROJECT=finagle-netty4
+    - PROJECT=finagle-netty4-http
     - PROJECT=finagle-ostrich4
     - PROJECT=finagle-redis
     - PROJECT=finagle-serversets
     - PROJECT=finagle-spdy
     - PROJECT=finagle-stats
     - PROJECT=finagle-stream
-    # These targets are currently failing for known limitations in scrooge-plugin
-    # - PROJECT=finagle-thrift
-    # - PROJECT=finagle-thriftmux
+    - PROJECT=finagle-thrift
+    - PROJECT=finagle-thriftmux
+    - PROJECT=finagle-toggle
+    - PROJECT=finagle-zipkin-core
+    - PROJECT=finagle-zipkin
 
 # These directories are cached to S3 at the end of the build
 cache:

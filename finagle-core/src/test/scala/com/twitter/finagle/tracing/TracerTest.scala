@@ -6,11 +6,13 @@ import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class TracerTest extends FunSuite {
+  case class TestTracer(res: Option[Boolean]) extends Tracer {
+    def record(record: Record) {}
+    def sampleTrace(traceId: TraceId): Option[Boolean] = res
+    override def isActivelyTracing(traceId: TraceId): Boolean = res.getOrElse(true)
+  }
+
   test("Combined tracers sample correctly") {
-    case class TestTracer(res: Option[Boolean]) extends Tracer {
-      def record(record: Record) {}
-      def sampleTrace(traceId: TraceId): Option[Boolean] = res
-    }
     val id = TraceId(None, None, SpanId(0L), None)
     assert(BroadcastTracer(
       Seq(TestTracer(None), TestTracer(None), TestTracer(None))
@@ -31,6 +33,17 @@ class TracerTest extends FunSuite {
     assert(BroadcastTracer(
       Seq(TestTracer(Some(false)), TestTracer(Some(false)), TestTracer(Some(false)))
     ).sampleTrace(id) == Some(false), "If all Some(false) returns Some(false)")
+  }
+
+  test("Combined tracers determine active tracing correctly") {
+    val id = TraceId(None, None, SpanId(0L), None)
+    assert(BroadcastTracer(
+      Seq(TestTracer(Some(true)), TestTracer(Some(false)), TestTracer(Some(false)))
+    ).isActivelyTracing(id) == true, "If any Some(true) returns true")
+
+    assert(BroadcastTracer(
+      Seq(TestTracer(Some(false)), TestTracer(Some(false)), TestTracer(Some(false)))
+    ).isActivelyTracing(id) == false, "If all Some(false) returns false")
   }
 
   test("check equality of tracers") {

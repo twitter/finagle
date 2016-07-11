@@ -8,6 +8,7 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.io.{Writer, Buf, Reader}
 import com.twitter.util._
 import io.netty.handler.codec.{http => NettyHttp, TooLongFrameException}
+import java.net.InetSocketAddress
 
 
 private[http] object StreamTransports {
@@ -48,10 +49,19 @@ private[http] object StreamTransports {
   )(eos: A => Boolean): Reader with Future[Unit] = new Promise[Unit] with Reader {
     private[this] val rw = Reader.writable()
 
-    become(copyToWriter(trans, rw)(eos)(chunkOfA).respond {
-      case Throw(t) => rw.fail(t)
-      case Return(_) => rw.close()
-    })
+    // Ensure that collate's future is satisfied _before_ its reader
+    // is closed. This allows callers to observe the stream completion
+    // before readers are notified.
+    private[this] val writes = copyToWriter(trans, rw)(eos)(chunkOfA)
+    forwardInterruptsTo(writes)
+    writes.respond {
+      case ret@Throw(t) =>
+        updateIfEmpty(ret)
+        rw.fail(t)
+      case r@Return(_) =>
+        updateIfEmpty(r)
+        rw.close()
+    }
 
     def read(n: Int): Future[Option[Buf]] = rw.read(n)
 
@@ -131,7 +141,12 @@ private[finagle] class Netty4ServerStreamTransport(
         Future.value(Multi(bad, Future.Done))
 
       case req: NettyHttp.FullHttpRequest =>
-        val finagleReq = Bijections.netty.fullRequestToFinagle(req)
+        val finagleReq = Bijections.netty.fullRequestToFinagle(req,
+          transport.remoteAddress match {
+            case ia: InetSocketAddress => ia
+            case _ => new InetSocketAddress(0)
+          }
+        )
         Future.value(Multi(finagleReq, Future.Done))
 
       case req: NettyHttp.HttpRequest =>
@@ -139,7 +154,14 @@ private[finagle] class Netty4ServerStreamTransport(
         assert(NettyHttp.HttpUtil.isTransferEncodingChunked(req))
 
         val coll = collate(transport, readChunk)(isLast)
-        val finagleReq = Bijections.netty.chunkedRequestToFinagle(req, coll)
+        val finagleReq = Bijections.netty.chunkedRequestToFinagle(
+          req,
+          coll,
+          transport.remoteAddress match {
+            case ia: InetSocketAddress => ia
+            case _ => new InetSocketAddress(0)
+          }
+        )
         Future.value(Multi(finagleReq, coll))
 
       case invalid =>

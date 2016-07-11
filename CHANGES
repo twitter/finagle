@@ -7,6 +7,9 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+6.36.0
+------
+
 Deprecations
 ~~~~~~~~~~~~
 
@@ -58,11 +61,33 @@ Breaking API Changes
   * finagle-core: `SessionParams` no longer contains `acquisitionTimeout`. Instead, it
     was extracted into `ClientSessionParams`. ``RB_ID=837726``
 
+  * finagle-core: Changed visibility of PipeliningDispatcher to private[finagle].  Clients should
+    not be affected, since it's not a part of the end-user API. ``RB_ID=843153``.
+
+  * finagle-core: Simplified and unified the constructors for FailureAccrualFactory into
+    a single constructor. ``RB_ID=849660``
+
   * finagle-http: Deprecate channelBufferUsageTracker in favor of maxRequestSize.
     ``RB_ID=831233``
 
   * finagle-http: HttpClientDispatcher, HttpServerDispatcher, and
     ConnectionManager are no longer public. ``RB_ID=830150``
+
+  * finagle-redis: Deprecated methods have been removed from the client API.
+    ``RB_ID=843455``
+
+  * finagle-redis: `c.t.f.redis.*Commands` traits are now package-private.
+    ``RB_ID=843455``
+
+  * finagle-redis: Replace `ChannelBuffer` with `Buf` in client's:
+
+      - `HashCommands`: ``RB_ID=843596``
+      - `ListCommands`: ``RB_ID=844596``
+      - `BtreeSortedSetCommands`: ``RB_ID=844862``
+      - `HyperLogLogCommands`: ``RB_ID=844945``
+      - `PubSubCommands`: ``RB_ID=845087``
+      - `SetCommands`: ``RB_ID=845578``
+      - `SortedSetCommands`: ``RB_ID=846074``
 
   * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
     instead of `c.t.u.Bijection`. ``RB_ID=834383``
@@ -76,6 +101,9 @@ Breaking API Changes
   * finagle-zipkin: Moved case classes and companion objects `Span`, `ZipkinAnnotation`,
     `BinaryAnnotation`, `Endpoint`, `Sampler` and `SamplingTracer` to finagle-zipkin-core.
     ``RB_ID=840494``
+
+  * finagle-mysql: Removed `c.t.f.exp.mysql.transport.MysqlTransporter`, as it was not useful for it
+    to be public. ``RB_ID=840718``
 
 Bug Fixes
 ~~~~~~~~~
@@ -91,6 +119,8 @@ Bug Fixes
     a reference to the cached future any longer.  This fixes a race condition where the cached
     future could be evicted and the prepared statement closed while a user tries to use that
     prepared statement.  ``RB_ID=833970``
+
+  * finagle-netty4-http: Servers now see the correct client host address for requests. ``RB_ID=844076``
 
 New Features
 ~~~~~~~~~~~~
@@ -126,8 +156,21 @@ New Features
     in separate modules. For example the upcoming finagle-zipkin-kafka.
     ``RB_ID=840494``
 
+  * finagle-thriftmux: Introduce a Netty4 implementation of mux and thrift-mux.
+    ``RB_ID=842869``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: For SSLEngine implementations supplied via configuration or
+    created by Finagle, the setEnableSessionCreation method is no longer called.
+    The supplied value, true, is the default for JSSE implementations, and for
+    other engines this can be an unsupported operation. ``RB_ID=845765``
+
+  * finagle-core: Pipelined protocols (memcached, redis) no longer prevent
+    connections from being cut by interrupts.  Instead, interrupts are masked
+    until a subsequent ten second timeout has expired without a response in the
+    pipeline. ``RB_ID=843153``
 
   * finagle-core: MonitorFilter now installs the parameterized monitor, and will
     no longer fail the request automatically if any exception is thrown
@@ -950,7 +993,7 @@ New Features
 
   * finagle-core: improved Java compatiblity for `c.t.f.Stack.Params` / `c.t.f.Stack.Parameterized`.
 
-  * finagle-core: Introduce the ability to add metadata to bound `com.twitter.finagle.Addr`\s.
+  * finagle-core: Introduce the ability to add metadata to a bound `com.twitter.finagle.Addr`.
 
   * finagle-core: Introduce per-address latency compensation.  Clients may be configured with
     a 'Compensator' function that uses the client's address metadata to adjust connection and

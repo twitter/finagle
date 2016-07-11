@@ -8,18 +8,20 @@ import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ClientConfig, Cluster}
-import com.twitter.finagle.memcached.{CacheNode, CacheNodeGroup}
+import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.memcached.exp.LocalMemcached
 import com.twitter.finagle.memcached.protocol.{text, _}
 import com.twitter.finagle.memcached.util.Bufs.{RichBuf, nonEmptyStringToBuf, seqOfNonEmptyStringToBuf}
-import com.twitter.finagle.service.{FailedService, ReqRep, Backoff, FailureAccrualFactory}
 import com.twitter.finagle.service.exp.FailureAccrualPolicy
-import com.twitter.finagle.stats.{NullStatsReceiver, ClientStatsReceiver, StatsReceiver}
+import com.twitter.finagle.service.{FailedService, ReqRep, ResponseClassifier, FailureAccrualFactory}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.hashing._
 import com.twitter.io.{Buf, Charsets}
+import com.twitter.logging.Level
 import com.twitter.util.{Command => _, Function => _, _}
-import scala.collection.{immutable, mutable}
 import scala.collection.breakOut
+import scala.collection.{immutable, mutable}
+
 
 object Client {
   /**
@@ -497,7 +499,7 @@ protected class ConnectedClient(protected val service: Service[Command, Response
       service(Set(key, flags, expiry, value)).map {
         case Stored() => ()
         case Error(e) => throw e
-        case _        => throw new IllegalStateException
+        case response => throw new IllegalStateException(s"Invalid response: $response")
       }
     } catch {
       case t: IllegalArgumentException => Future.exception(new ClientError(t.getMessage + " For key: " + key))
@@ -741,38 +743,57 @@ private[finagle] object KetamaFailureAccrualFactory {
     key: KetamaClientKey,
     healthBroker: Broker[NodeHealth]
   ): Stackable[ServiceFactory[Req, Rep]] =
-    new Stack.Module5[
-      FailureAccrualFactory.Param,
-      Memcached.param.EjectFailedHost,
-      finagle.param.Label,
-      finagle.param.Timer,
-      finagle.param.Stats,
-      ServiceFactory[Req, Rep]] {
+    new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
       import FailureAccrualFactory.Param
       val role = FailureAccrualFactory.role
-      val description = "Memcached ketama failure accrual"
+      val description: String = "Memcached ketama failure accrual"
+      override def parameters: Seq[Stack.Param[_]] = Seq(
+        implicitly[Stack.Param[param.Stats]],
+        implicitly[Stack.Param[FailureAccrualFactory.Param]],
+        implicitly[Stack.Param[param.Timer]],
+        implicitly[Stack.Param[param.Label]],
+        implicitly[Stack.Param[param.Logger]],
+        implicitly[Stack.Param[param.ResponseClassifier]],
+        implicitly[Stack.Param[Transporter.EndpointAddr]]
+      )
 
-      def make(
-        failureAccrual: Param,
-        _ejectFailedHost: Memcached.param.EjectFailedHost,
-        _label: finagle.param.Label,
-        _timer: finagle.param.Timer,
-        _stats: finagle.param.Stats,
-        next: ServiceFactory[Req, Rep]
-      ) = failureAccrual match {
-          case Param.Configured(policy) =>
-            val Memcached.param.EjectFailedHost(ejectFailedHost) = _ejectFailedHost
-            val finagle.param.Timer(timer) = _timer
-            val finagle.param.Stats(stats) = _stats
-            val finagle.param.Label(label) = _label
-            new KetamaFailureAccrualFactory[Req, Rep](next, policy(), timer, key,
-              healthBroker, ejectFailedHost, label, stats)
+      def make(params: Stack.Params, next: ServiceFactory[Req, Rep]) =
+        params[FailureAccrualFactory.Param] match {
+            case Param.Configured(policy) =>
+              val Memcached.param.EjectFailedHost(ejectFailedHost) =
+                params[Memcached.param.EjectFailedHost]
+              val timer = params[finagle.param.Timer].timer
+              val stats = params[finagle.param.Stats].statsReceiver
+              val classifier = params[finagle.param.ResponseClassifier].responseClassifier
 
-          case Param.Replaced(f) =>
-            val param.Timer(timer) = _timer
-            f(timer) andThen next
+              val label = params[finagle.param.Label].label
+              val logger = params[finagle.param.Logger].log
+              val endpoint = params[Transporter.EndpointAddr].addr
 
-          case Param.Disabled => next
+              new KetamaFailureAccrualFactory[Req, Rep](
+                underlying = next,
+                policy = policy(),
+                responseClassifier = classifier,
+                statsReceiver = stats,
+                timer = timer,
+                key = key,
+                healthBroker = healthBroker,
+                ejectFailedHost = ejectFailedHost,
+                label = label) {
+                override def didMarkDead(): Unit = {
+                  logger.log(Level.INFO,
+                    s"""FailureAccrualFactory marking connection to "$label" as dead. """+
+                    s"""Remote Address: $endpoint. """+
+                    s"""Eject failed host from ring: $ejectFailedHost""")
+                  super.didMarkDead()
+                }
+              }
+
+            case Param.Replaced(f) =>
+              val timer = params[finagle.param.Timer].timer
+              f(timer).andThen(next)
+
+            case Param.Disabled => next
         }
     }
 }
@@ -784,39 +805,22 @@ private[finagle] object KetamaFailureAccrualFactory {
  */
 private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
     underlying: ServiceFactory[Req, Rep],
-    failureAccrualPolicy: FailureAccrualPolicy,
+    policy: FailureAccrualPolicy,
+    responseClassifier: ResponseClassifier,
     timer: Timer,
+    statsReceiver: StatsReceiver,
     key: KetamaClientKey,
     healthBroker: Broker[NodeHealth],
     ejectFailedHost: Boolean,
-    label: String,
-    statsReceiver: StatsReceiver)
+    label: String)
   extends FailureAccrualFactory[Req, Rep](
     underlying,
-    failureAccrualPolicy,
+    policy,
+    responseClassifier,
     timer,
     statsReceiver)
 {
   import FailureAccrualFactory._
-
-  def this(
-    underlying: ServiceFactory[Req, Rep],
-    numFailures: Int,
-    markDeadFor: () => Duration,
-    timer: Timer,
-    key: KetamaClientKey,
-    healthBroker: Broker[NodeHealth],
-    ejectFailedHost: Boolean,
-    label: String
-  ) = this(
-    underlying,
-    FailureAccrualPolicy.consecutiveFailures(numFailures, Backoff.fromFunction(markDeadFor)),
-    timer,
-    key,
-    healthBroker,
-    ejectFailedHost,
-    label,
-    ClientStatsReceiver.scope("memcached_client"))
 
   private[this] val failureAccrualEx =
     Future.exception(new FailureAccrualException("Endpoint is marked dead by failureAccrual") { serviceName = label })
@@ -842,7 +846,7 @@ private[finagle] class KetamaFailureAccrualFactory[Req, Rep](
   // immediately after it is woken, so it can satisfy a probe request
   override def startProbing() = synchronized {
     super.startProbing()
-    if(ejectFailedHost) healthBroker ! NodeRevived(key)
+    if (ejectFailedHost) healthBroker ! NodeRevived(key)
   }
 
   override def apply(conn: ClientConnection): Future[Service[Req, Rep]] =

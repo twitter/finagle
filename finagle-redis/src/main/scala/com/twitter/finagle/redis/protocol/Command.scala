@@ -168,6 +168,14 @@ object Commands {
   val SCRIPTFLUSH       = "SCRIPT FLUSH"
   val SCRIPTLOAD        = "SCRIPT LOAD"
 
+  // Command Arguments
+  val WITHSCORES        = "WITHSCORES"
+  val LIMIT             = "LIMIT"
+  val WEIGHTS           = "WEIGHTS"
+  val AGGREGATE         = "AGGREGATE"
+  val COUNT             = "COUNT"
+  val PATTERN           = "PATTERN"
+
   val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
     // key commands
     DEL               -> {Del(_)},
@@ -370,30 +378,30 @@ object CommandBytes {
   val STRLEN            = StringToBuf("STRLEN")
 
   // Sorted Sets
-  val ZADD              = StringToChannelBuffer("ZADD")
-  val ZCARD             = StringToChannelBuffer("ZCARD")
-  val ZCOUNT            = StringToChannelBuffer("ZCOUNT")
-  val ZINCRBY           = StringToChannelBuffer("ZINCRBY")
-  val ZINTERSTORE       = StringToChannelBuffer("ZINTERSTORE")
-  val ZRANGE            = StringToChannelBuffer("ZRANGE")
-  val ZRANGEBYSCORE     = StringToChannelBuffer("ZRANGEBYSCORE")
-  val ZRANK             = StringToChannelBuffer("ZRANK")
-  val ZREM              = StringToChannelBuffer("ZREM")
-  val ZREMRANGEBYRANK   = StringToChannelBuffer("ZREMRANGEBYRANK")
-  val ZREMRANGEBYSCORE  = StringToChannelBuffer("ZREMRANGEBYSCORE")
-  val ZREVRANGE         = StringToChannelBuffer("ZREVRANGE")
-  val ZREVRANGEBYSCORE  = StringToChannelBuffer("ZREVRANGEBYSCORE")
-  val ZREVRANK          = StringToChannelBuffer("ZREVRANK")
-  val ZSCORE            = StringToChannelBuffer("ZSCORE")
-  val ZUNIONSTORE       = StringToChannelBuffer("ZUNIONSTORE")
+  val ZADD              = StringToBuf("ZADD")
+  val ZCARD             = StringToBuf("ZCARD")
+  val ZCOUNT            = StringToBuf("ZCOUNT")
+  val ZINCRBY           = StringToBuf("ZINCRBY")
+  val ZINTERSTORE       = StringToBuf("ZINTERSTORE")
+  val ZRANGE            = StringToBuf("ZRANGE")
+  val ZRANGEBYSCORE     = StringToBuf("ZRANGEBYSCORE")
+  val ZRANK             = StringToBuf("ZRANK")
+  val ZREM              = StringToBuf("ZREM")
+  val ZREMRANGEBYRANK   = StringToBuf("ZREMRANGEBYRANK")
+  val ZREMRANGEBYSCORE  = StringToBuf("ZREMRANGEBYSCORE")
+  val ZREVRANGE         = StringToBuf("ZREVRANGE")
+  val ZREVRANGEBYSCORE  = StringToBuf("ZREVRANGEBYSCORE")
+  val ZREVRANK          = StringToBuf("ZREVRANK")
+  val ZSCORE            = StringToBuf("ZSCORE")
+  val ZUNIONSTORE       = StringToBuf("ZUNIONSTORE")
 
   // Btree Sorted Set
   // These are twitter-internal commands and will be removed eventually
-  val BADD              = StringToChannelBuffer("BADD")
-  val BCARD             = StringToChannelBuffer("BCARD")
-  val BREM              = StringToChannelBuffer("BREM")
-  val BGET              = StringToChannelBuffer("BGET")
-  val BRANGE            = StringToChannelBuffer("BRANGE")
+  val BADD              = StringToBuf("BADD")
+  val BCARD             = StringToBuf("BCARD")
+  val BREM              = StringToBuf("BREM")
+  val BGET              = StringToBuf("BGET")
+  val BRANGE            = StringToBuf("BRANGE")
 
   // Topology
   // These are twitter-internal commands and will be removed eventually
@@ -414,42 +422,42 @@ object CommandBytes {
   val SENTINEL          = StringToChannelBuffer("SENTINEL")
 
   // Hash Sets
-  val HDEL              = StringToChannelBuffer("HDEL")
-  val HEXISTS           = StringToChannelBuffer("HEXISTS")
-  val HGET              = StringToChannelBuffer("HGET")
-  val HGETALL           = StringToChannelBuffer("HGETALL")
-  val HINCRBY           = StringToChannelBuffer("HINCRBY")
-  val HKEYS             = StringToChannelBuffer("HKEYS")
-  val HLEN              = StringToChannelBuffer("HLEN")
-  val HMGET             = StringToChannelBuffer("HMGET")
-  val HMSET             = StringToChannelBuffer("HMSET")
-  val HSCAN             = StringToChannelBuffer("HSCAN")
-  val HSET              = StringToChannelBuffer("HSET")
-  val HSETNX            = StringToChannelBuffer("HSETNX")
-  val HVALS             = StringToChannelBuffer("HVALS")
+  val HDEL              = StringToBuf("HDEL")
+  val HEXISTS           = StringToBuf("HEXISTS")
+  val HGET              = StringToBuf("HGET")
+  val HGETALL           = StringToBuf("HGETALL")
+  val HINCRBY           = StringToBuf("HINCRBY")
+  val HKEYS             = StringToBuf("HKEYS")
+  val HLEN              = StringToBuf("HLEN")
+  val HMGET             = StringToBuf("HMGET")
+  val HMSET             = StringToBuf("HMSET")
+  val HSCAN             = StringToBuf("HSCAN")
+  val HSET              = StringToBuf("HSET")
+  val HSETNX            = StringToBuf("HSETNX")
+  val HVALS             = StringToBuf("HVALS")
 
   // Lists
-  val LLEN              = StringToChannelBuffer("LLEN")
-  val LINDEX            = StringToChannelBuffer("LINDEX")
-  val LINSERT           = StringToChannelBuffer("LINSERT")
-  val LPOP              = StringToChannelBuffer("LPOP")
-  val LPUSH             = StringToChannelBuffer("LPUSH")
-  val LREM              = StringToChannelBuffer("LREM")
-  val LSET              = StringToChannelBuffer("LSET")
-  val LRANGE            = StringToChannelBuffer("LRANGE")
-  val RPOP              = StringToChannelBuffer("RPOP")
-  val RPUSH             = StringToChannelBuffer("RPUSH")
-  val LTRIM             = StringToChannelBuffer("LTRIM")
+  val LLEN              = StringToBuf("LLEN")
+  val LINDEX            = StringToBuf("LINDEX")
+  val LINSERT           = StringToBuf("LINSERT")
+  val LPOP              = StringToBuf("LPOP")
+  val LPUSH             = StringToBuf("LPUSH")
+  val LREM              = StringToBuf("LREM")
+  val LSET              = StringToBuf("LSET")
+  val LRANGE            = StringToBuf("LRANGE")
+  val RPOP              = StringToBuf("RPOP")
+  val RPUSH             = StringToBuf("RPUSH")
+  val LTRIM             = StringToBuf("LTRIM")
 
   // Sets
-  val SADD              = StringToChannelBuffer("SADD")
-  val SMEMBERS          = StringToChannelBuffer("SMEMBERS")
-  val SISMEMBER         = StringToChannelBuffer("SISMEMBER")
-  val SCARD             = StringToChannelBuffer("SCARD")
-  val SREM              = StringToChannelBuffer("SREM")
-  val SPOP              = StringToChannelBuffer("SPOP")
-  val SRANDMEMBER       = StringToChannelBuffer("SRANDMEMBER")
-  val SINTER            = StringToChannelBuffer("SINTER")
+  val SADD              = StringToBuf("SADD")
+  val SMEMBERS          = StringToBuf("SMEMBERS")
+  val SISMEMBER         = StringToBuf("SISMEMBER")
+  val SCARD             = StringToBuf("SCARD")
+  val SREM              = StringToBuf("SREM")
+  val SPOP              = StringToBuf("SPOP")
+  val SRANDMEMBER       = StringToBuf("SRANDMEMBER")
+  val SINTER            = StringToBuf("SINTER")
 
   // Transactions
   val DISCARD           = StringToChannelBuffer("DISCARD")
@@ -459,17 +467,17 @@ object CommandBytes {
   val WATCH             = StringToBuf("WATCH")
 
   // HyperLogLogs
-  val PFADD             = StringToChannelBuffer("PFADD")
-  val PFCOUNT           = StringToChannelBuffer("PFCOUNT")
-  val PFMERGE           = StringToChannelBuffer("PFMERGE")
+  val PFADD             = StringToBuf("PFADD")
+  val PFCOUNT           = StringToBuf("PFCOUNT")
+  val PFMERGE           = StringToBuf("PFMERGE")
 
   // PubSub
-  val PUBLISH           = StringToChannelBuffer("PUBLISH")
-  val SUBSCRIBE         = StringToChannelBuffer("SUBSCRIBE")
-  val UNSUBSCRIBE       = StringToChannelBuffer("UNSUBSCRIBE")
-  val PSUBSCRIBE        = StringToChannelBuffer("PSUBSCRIBE")
-  val PUNSUBSCRIBE      = StringToChannelBuffer("PUNSUBSCRIBE")
-  val PUBSUB            = StringToChannelBuffer("PUBSUB")
+  val PUBLISH           = StringToBuf("PUBLISH")
+  val SUBSCRIBE         = StringToBuf("SUBSCRIBE")
+  val UNSUBSCRIBE       = StringToBuf("UNSUBSCRIBE")
+  val PSUBSCRIBE        = StringToBuf("PSUBSCRIBE")
+  val PUNSUBSCRIBE      = StringToBuf("PUNSUBSCRIBE")
+  val PUBSUB            = StringToBuf("PUBSUB")
 
   // Scripts
   val EVAL              = StringToBuf("EVAL")
@@ -482,6 +490,14 @@ object CommandBytes {
   val SCRIPTLOAD        = StringToBuf("SCRIPT LOAD")
   // SCRIPT EXISTS, SCRIPT LOAD, SCRIPT FLUSH are subcommands
   // which must not be transmitted as a whole ChannelBuffer
+
+  // Command Arguments
+  val WITHSCORES        = StringToBuf("WITHSCORES")
+  val LIMIT             = StringToBuf("LIMIT")
+  val WEIGHTS           = StringToBuf("WEIGHTS")
+  val AGGREGATE         = StringToBuf("AGGREGATE")
+  val COUNT             = StringToBuf("COUNT")
+  val PATTERN           = StringToBuf("PATTERN")
 }
 
 

@@ -56,6 +56,11 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
     assert(Await.result(client.get("foo")).get == Buf.Utf8("bar"))
   }
 
+  test("set with data containing newline") {
+    Await.result(client.set("foo", Buf.Utf8("bar\r\nbaz\r\nqux\r\n")), 2.seconds)
+    assert(Await.result(client.get("foo"), 2.seconds).get == Buf.Utf8("bar\r\nbaz\r\nqux\r\n"))
+  }
+
   test("get") {
     Await.result(client.set("foo", Buf.Utf8("bar")))
     Await.result(client.set("baz", Buf.Utf8("boing")))

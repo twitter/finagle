@@ -41,6 +41,9 @@ object BytesToString {
 object GetMonadArg {
   def apply(args: Seq[Array[Byte]], command: ChannelBuffer): ChannelBuffer =
     ChannelBuffers.wrappedBuffer(trimList(args, 1, CBToString(command))(0))
+
+  def apply(args: Seq[Array[Byte]], command: Buf): Buf =
+    Buf.ByteArray.Owned(trimList(args, 1, BufToString(command))(0))
 }
 
 object StringToBytes {

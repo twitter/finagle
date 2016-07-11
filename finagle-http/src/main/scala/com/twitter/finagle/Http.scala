@@ -21,6 +21,7 @@ import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.util.{Duration, Future, StorageUnit, Monitor}
+import com.twitter.util.registry.GlobalRegistry
 import java.net.SocketAddress
 
 /**
@@ -52,14 +53,18 @@ object Http extends Client[Request, Response] with HttpRichClient
     /**
      * configure alternative http 1.1 implementations
      *
-     * note: the listener and transporter don't strictly need to be
-     *       coupled but we do so for ease of configuration.
+     * @param clientTransport client [[StreamTransport]] factory
+     * @param serverTransport server [[StreamTransport]] factory
+     * @param transporter [[Transporter]] factory
+     * @param listener [[Listener]] factory
+     * @param ioEngineName name of the underlying i/o multiplexer (ie; netty4)
      */
     case class HttpImpl(
       clientTransport: Transport[Any, Any] => StreamTransport[Request, Response],
       serverTransport: Transport[Any, Any] => StreamTransport[Response, Request],
       transporter: Stack.Params => Transporter[Any, Any],
-      listener: Stack.Params => Listener[Any, Any]
+      listener: Stack.Params => Listener[Any, Any],
+      ioEngineName: String
     )
 
     implicit object HttpImpl extends Stack.Param[HttpImpl] {
@@ -70,7 +75,8 @@ object Http extends Client[Request, Response] with HttpRichClient
       new Netty3ClientStreamTransport(_),
       new Netty3ServerStreamTransport(_),
       Netty3HttpTransporter,
-      Netty3HttpListener
+      Netty3HttpListener,
+      "netty3"
     )
 
     /**
@@ -175,8 +181,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     ): StreamTransport[Request, Response] =
       new HttpTransport(params[HttpImpl].clientTransport(transport))
 
-    protected def newTransporter(): Transporter[Any, Any] =
+    protected def newTransporter(): Transporter[Any, Any] = {
+      registerImpl(ClientRegistry.registryName, params)
       params[param.HttpImpl].transporter(params)
+    }
 
     protected def copy1(
       stack: Stack[ServiceFactory[Request, Response]] = this.stack,
@@ -281,6 +289,12 @@ object Http extends Client[Request, Response] with HttpRichClient
 
   val client: Http.Client = Client()
 
+  private[this] def registerImpl(registryName: String, params: Stack.Params): Unit =
+    GlobalRegistry.get.put(
+      Seq(registryName, "http", params[Label].label, "IoEngineImpl"),
+      params[param.HttpImpl].ioEngineName
+    )
+
   def newService(dest: Name, label: String): Service[Request, Response] =
     client.newService(dest, label)
 
@@ -304,8 +318,10 @@ object Http extends Client[Request, Response] with HttpRichClient
     protected type In = Any
     protected type Out = Any
 
-    protected def newListener(): Listener[Any, Any] =
+    protected def newListener(): Listener[Any, Any] = {
+      registerImpl(ServerRegistry.registryName, params)
       params[param.HttpImpl].listener(params)
+    }
 
     protected def newStreamTransport(
       transport: Transport[Any, Any]

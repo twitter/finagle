@@ -89,7 +89,7 @@ object Netty3Listener {
         }
       })
 
-      p.within(deadline - Time.now) transform { _ =>
+      p.by(deadline) transform { _ =>
         activeChannels.close()
         // Force close any remaining connections. Don't wait for success.
         bootstrap.releaseExternalResources()
@@ -101,7 +101,6 @@ object Netty3Listener {
   def addTlsToPipeline(pipeline: ChannelPipeline, newEngine: () => Engine) {
     val engine = newEngine()
     engine.self.setUseClientMode(false)
-    engine.self.setEnableSessionCreation(true)
     val handler = new SslHandler(engine.self)
 
     // Certain engine implementations need to handle renegotiation internally,

@@ -92,7 +92,7 @@ class ToggleTest extends FunSuite
   test("Toggle.Metadata constructor checks id") {
     def assertNotAllowed(id: String): Unit = {
       intercept[IllegalArgumentException] {
-        Toggle.Metadata(id, 0.0, None)
+        Toggle.Metadata(id, 0.0, None, "test")
       }
     }
 
@@ -109,15 +109,15 @@ class ToggleTest extends FunSuite
     assertNotAllowed(".com.toggle.A")
 
     // test boundaries are ok
-    Toggle.Metadata("com.toggle.A", 0.0, None)
-    Toggle.Metadata("com.toggle.Z", 0.0, None)
-    Toggle.Metadata("com.toggle.a", 0.0, None)
-    Toggle.Metadata("com.toggle.z", 0.0, None)
-    Toggle.Metadata("com.toggle.0", 0.0, None)
-    Toggle.Metadata("com.toggle.9", 0.0, None)
-    Toggle.Metadata("com.toggle._", 0.0, None)
-    Toggle.Metadata("com.toggle..", 0.0, None)
-    Toggle.Metadata("com.toggle.-", 0.0, None)
+    Toggle.Metadata("com.toggle.A", 0.0, None, "test")
+    Toggle.Metadata("com.toggle.Z", 0.0, None, "test")
+    Toggle.Metadata("com.toggle.a", 0.0, None, "test")
+    Toggle.Metadata("com.toggle.z", 0.0, None, "test")
+    Toggle.Metadata("com.toggle.0", 0.0, None, "test")
+    Toggle.Metadata("com.toggle.9", 0.0, None, "test")
+    Toggle.Metadata("com.toggle._", 0.0, None, "test")
+    Toggle.Metadata("com.toggle..", 0.0, None, "test")
+    Toggle.Metadata("com.toggle.-", 0.0, None, "test")
 
     forAll(ToggleGenerator.Id) { id =>
       Toggle.validateId(id)
@@ -126,26 +126,26 @@ class ToggleTest extends FunSuite
 
   test("Toggle.Metadata constructor checks fraction") {
     intercept[IllegalArgumentException] {
-      Toggle.Metadata("com.toggle.Test", -0.1, None)
+      Toggle.Metadata("com.toggle.Test", -0.1, None, "test")
     }
     intercept[IllegalArgumentException] {
-      Toggle.Metadata("com.toggle.Test", 1.1, None)
+      Toggle.Metadata("com.toggle.Test", 1.1, None, "test")
     }
 
     // test boundaries are ok
-    Toggle.Metadata("com.toggle.Test", 0.0, None)
-    Toggle.Metadata("com.toggle.Test", 1.0, None)
+    Toggle.Metadata("com.toggle.Test", 0.0, None, "test")
+    Toggle.Metadata("com.toggle.Test", 1.0, None, "test")
   }
 
   test("Toggle.Metadata constructor checks description") {
     intercept[IllegalArgumentException] {
-      Toggle.Metadata("com.toggle.Test", 0.0, Some(""))
+      Toggle.Metadata("com.toggle.Test", 0.0, Some(""), "test")
     }
     intercept[IllegalArgumentException] {
-      Toggle.Metadata("com.toggle.Test", 0.0, Some("  "))
+      Toggle.Metadata("com.toggle.Test", 0.0, Some("  "), "test")
     }
 
-    Toggle.Metadata("com.toggle.Test", 0.0, Some("a description"))
+    Toggle.Metadata("com.toggle.Test", 0.0, Some("a description"), "test")
   }
 
 }
