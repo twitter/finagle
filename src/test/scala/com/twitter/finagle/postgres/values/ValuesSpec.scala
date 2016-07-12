@@ -70,6 +70,7 @@ class ValuesSpec extends Spec with GeneratorDrivenPropertyChecks {
         (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY)
       )
       "parse uuids" in test(ValueDecoder.Uuid)("uuid_send", "uuid")
+      "parse dates" in test(ValueDecoder.Date)("date_send", "date")
     }
   }
 }
