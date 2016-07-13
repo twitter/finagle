@@ -338,6 +338,15 @@ class IntegrationSpec extends Spec {
         }
       }
 
+      "query in a prepared statement has an error" in {
+        if(postgresAvailable) {
+          val client = getClient
+          a [ServerError] must be thrownBy {
+            Await.result(client.prepareAndQuery("Garbage query")(identity))
+          }
+        }
+      }
+
       "prepared query is missing parameters" in {
         if (postgresAvailable) {
           val client = getClient

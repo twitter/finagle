@@ -81,6 +81,8 @@ class Client(factory: ServiceFactory[PgRequest, PgResponse], id:String) {
       service =>
         parse(sql, Some(service)).map { name =>
           new PreparedStatementImpl(name, service)
+        }.onFailure {
+          err => service.close()
         }
     }
 
