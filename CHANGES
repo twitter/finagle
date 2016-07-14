@@ -7,6 +7,15 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: Expose metrics on util's default `FuturePool` implementations
+    `unboundedPool` and `interruptibleUnboundedPool`:
+    "finagle/future_pool/pool_size", "finagle/future_pool/queue_size",
+    "finagle/future_pool/active_tasks", and "finagle/future_pool/completed_tasks".
+    ``RB_ID=850652``
+
 6.36.0
 ------
 

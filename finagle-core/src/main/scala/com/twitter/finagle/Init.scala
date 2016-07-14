@@ -2,8 +2,9 @@ package com.twitter.finagle
 
 import com.twitter.concurrent.Once
 import com.twitter.finagle.exp.FinagleScheduler
+import com.twitter.finagle.stats.FinagleStatsReceiver
 import com.twitter.finagle.util.DefaultLogger
-import com.twitter.util.NonFatal
+import com.twitter.util.{FuturePool, NonFatal}
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
@@ -18,6 +19,18 @@ private[twitter] object Init {
   private val unknownVersion = "?"
   private val _finagleVersion = new AtomicReference[String](unknownVersion)
   private val _finagleBuildRevision = new AtomicReference[String](unknownVersion)
+
+  private[this] val gauges = {
+    // because unboundedPool and interruptibleUnboundedPool share a common
+    // `ExecutorService`, these metrics apply to both of the FuturePools.
+    val pool = FuturePool.unboundedPool
+    val stats = FinagleStatsReceiver.scope("future_pool")
+    Seq(
+      stats.addGauge("pool_size") { pool.poolSize },
+      stats.addGauge("active_tasks") { pool.numActiveTasks },
+      stats.addGauge("completed_tasks") { pool.numCompletedTasks }
+    )
+  }
 
   def finagleVersion: String = _finagleVersion.get
 
@@ -51,7 +64,6 @@ private[twitter] object Init {
   private[finagle] def loadBuildProperties: Option[Properties] = {
     val candidates = Seq(
       "finagle-core",
-      "finagle-core_2.10",
       "finagle-core_2.11",
       "finagle-core_2.12"
     )
