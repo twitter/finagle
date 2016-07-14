@@ -1,8 +1,9 @@
 package com.twitter.finagle.util
 
-import com.twitter.finagle.Failure
+import com.twitter.conversions.time._
+import com.twitter.finagle.{Failure, TimeoutException}
 import com.twitter.logging.{BareFormatter, StringHandler, Level, Logger}
-import com.twitter.util.TimeoutException
+import com.twitter.util.{Duration, TimeoutException => UtilTimeoutException}
 import org.junit.runner.RunWith
 import org.scalatest.{Matchers, FunSuite}
 import org.scalatest.junit.JUnitRunner
@@ -11,6 +12,11 @@ import org.scalatest.junit.JUnitRunner
 class DefaultMonitorTest extends FunSuite
   with Matchers
 {
+  private[this] class MyTimeoutException(
+    protected val timeout: Duration,
+    protected val explanation: String
+  ) extends TimeoutException
+
   private val handler = new StringHandler(BareFormatter, Some(Level.TRACE))
   private val logger = Logger.get("DefaultMonitorTest")
   logger.addHandler(handler)
@@ -42,7 +48,16 @@ class DefaultMonitorTest extends FunSuite
     handler.clear()
     val monitor = new DefaultMonitor(logger)
 
-    assert(monitor.handle(new TimeoutException("7 minute abs")))
+    assert(monitor.handle(new UtilTimeoutException("7 minute abs")))
+
+    handler.get should include("Exception propagated to DefaultMonitor")
+  }
+
+  test("c.t.finagle.TimeoutExceptions are handled") {
+    handler.clear()
+    val monitor = new DefaultMonitor(logger)
+
+    assert(monitor.handle(new MyTimeoutException(30.seconds, "5 minute abs")))
 
     handler.get should include("Exception propagated to DefaultMonitor")
   }
