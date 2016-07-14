@@ -332,6 +332,38 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       Await.ready(client.close(), 5.seconds)
     }
 
+    test(name + ": stream via ResponseProxy") {
+      class ResponseProxyFilter extends SimpleFilter[Request, Response] {
+        override def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+          service(request).map { responseOriginal =>
+            new ResponseProxy {
+              override def response: Response = responseOriginal
+            }
+          }
+        }
+      }
+
+      def service = new HttpService {
+        def apply(request: Request) = {
+          val response = Response()
+          response.setChunked(true)
+          response.writer.write(buf("goodbye")).before {
+            response.writer.write(buf("world")).before {
+              response.close()
+            }
+          }
+          Future.value(response)
+        }
+      }
+
+      val serviceWithResponseProxy = (new ResponseProxyFilter).andThen(service)
+
+      val client = connect(serviceWithResponseProxy)
+      val response = Await.result(client(Request()), 5.seconds)
+      assert(response.contentString == "goodbyeworld")
+      Await.ready(client.close(), 5.seconds)
+    }
+
     testIfImplemented(ClientAbort)(name + ": client abort") {
       import com.twitter.conversions.time._
       val timer = new JavaTimer
