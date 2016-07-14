@@ -182,7 +182,8 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         intercept[Exception] {
           Await.result(service(123))
         }
-        assert(statsReceiver.counters.get(List("probes")).getOrElse(0) >= 1)
+        val probeStat = statsReceiver.counters.get(List("probes"))
+        assert(probeStat.isDefined && probeStat.get >= 1)
       }
     }
   }

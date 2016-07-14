@@ -1,6 +1,5 @@
 package com.twitter.finagle.service
 
-import java.net.InetSocketAddress
 import com.twitter.conversions.time._
 import com.twitter.finagle.Stack.{Params, Role}
 import com.twitter.finagle._
@@ -311,8 +310,8 @@ class FailureAccrualFactory[Req, Rep](
   /**
     * Exit 'Probing' state (if necessary)
     *
-    * The follow-on operation (i.e. the result of first request while probing) will determine
-    * whether the factory transitions to Alive (successful) or Dead (unsuccessful).
+    * The result of the subsequent request will determine whether the factory transitions to
+    * Alive (successful) or Dead (unsuccessful).
     */
   private[this] def stopProbing() = self.synchronized {
     state match {
@@ -337,7 +336,6 @@ class FailureAccrualFactory[Req, Rep](
           // (unsuccessful).
           stopProbing()
 
-          // Invoke service
           service(request).respond { rep =>
             if (isSuccess(ReqRep(request, rep))) didSucceed()
             else didFail()
