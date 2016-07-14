@@ -68,4 +68,20 @@ class StatsFormatterTest extends FunSuite {
     assert(formatted("histo1_min") == 0)
     assert(formatted("histo1_avg") == 50)
   }
+
+  test("includeEmptyHistograms") {
+    val metrics = Metrics.createDetached()
+    val stats = new ImmediateMetricsStatsReceiver(metrics)
+    stats.stat("empty_histo")
+    val values = SampledValues(
+      Map.empty,
+      Map.empty,
+      metrics.sampleHistograms().asScala)
+
+    val formatter = StatsFormatter.Ostrich
+    includeEmptyHistograms.let(false) {
+      val formatted = formatter(values)
+      assert(Map("empty_histo.count" -> 0) == formatted)
+    }
+  }
 }
