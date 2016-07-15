@@ -15,7 +15,9 @@ import java.nio.ByteBuffer
  * @param statsReceiver We generate stats to keep track of traces sent, failures and so on
  * @param timer A Timer used for timing out spans in the [[DeadlineSpanMap]]
  */
-abstract private[twitter] class RawZipkinTracer(
+// Not private, so that this can be extended to support other transports, such as Kafka.
+// See https://github.com/openzipkin/zipkin-finagle
+abstract class RawZipkinTracer(
     statsReceiver: StatsReceiver,
     timer: Timer = DefaultTimer.twitter)
   extends Tracer
