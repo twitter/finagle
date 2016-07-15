@@ -17,16 +17,22 @@ private[finagle] class HttpTransport[A <: Message, B <: Message](
     manager: ConnectionManager)
   extends StreamTransportProxy[A, B](self) {
 
-  private[this] val readFn: Multi[B] => Unit = { case Multi(m, onFinish) =>
-    manager.observeMessage(m, onFinish)
-    if (manager.shouldClose)
-      self.close()
-  }
+  def this(self: StreamTransport[A, B]) =
+    this(self, new ConnectionManager)
 
-  def this(self: StreamTransport[A, B]) = this(self, new ConnectionManager)
+  // Servers are don't use `status` to determine when they should
+  // close a transport, so we close the transport when the connection
+  // is ready to be closed.
+  manager.onClose.before(self.close())
+
 
   def read(): Future[Multi[B]] =
     self.read().onSuccess(readFn)
+
+  private[this] val readFn: Multi[B] => Unit = { case Multi(m, onFinish) =>
+    manager.observeMessage(m, onFinish)
+  }
+
 
   def write(m: A): Future[Unit] =
     try {
@@ -34,11 +40,11 @@ private[finagle] class HttpTransport[A <: Message, B <: Message](
       manager.observeMessage(m, p)
       val f = self.write(m)
       p.become(f)
-      if (manager.shouldClose) f.before(self.close())
-      else f
+      f
     } catch {
       case NonFatal(e) => Future.exception(e)
     }
+
 
   override def status: CoreStatus = if (manager.shouldClose) CoreStatus.Closed else self.status
 }

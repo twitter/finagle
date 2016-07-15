@@ -25,6 +25,13 @@ Breaking API Changes
     "dark_traffic_filter/forwarded", "dark_traffic_filter/skipped", and
     "dark_traffic_filter/failed". ``RB_ID=852548``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-http: HttpTransport now eagerly closes client connection after
+    processing non-keepalive requests.
+
+
 6.36.0
 ------
 
