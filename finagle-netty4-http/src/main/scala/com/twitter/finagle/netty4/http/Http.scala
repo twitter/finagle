@@ -126,7 +126,5 @@ object exp {
       new Netty4ClientStreamTransport(_),
       new Netty4ServerStreamTransport(_),
       Netty4HttpTransporter,
-      Netty4HttpListener,
-      "netty4"
-    )
+      Netty4HttpListener)
 }

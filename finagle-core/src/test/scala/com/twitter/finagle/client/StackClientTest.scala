@@ -17,13 +17,14 @@ import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.StackRegistry
 import com.twitter.finagle.{param, Name}
 import com.twitter.util._
+import com.twitter.util.registry.{GlobalRegistry, SimpleRegistry, Entry}
 import java.net.{InetAddress, InetSocketAddress}
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.{BeforeAndAfter, FunSuite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
+import org.scalatest.junit.JUnitRunner
 
 private object StackClientTest {
   case class LocalCheckingStringClient(
@@ -62,10 +63,9 @@ private object StackClientTest {
 class StackClientTest extends FunSuite
   with StringClient
   with StringServer
-  with AssertionsForJUnit
+  with BeforeAndAfter
   with Eventually
-  with IntegrationPatience
-  with BeforeAndAfter {
+  with IntegrationPatience {
 
   trait Ctx {
     val sr = new InMemoryStatsReceiver
@@ -587,5 +587,28 @@ class StackClientTest extends FunSuite
     Await.result(e2r6, 3.seconds)
 
     assert(endpoint2.satisfied.get() == 5)
+  }
+
+  test("exports transporter type to registry") {
+    val listeningServer = stringServer
+      .serve(":*", Service.mk[String, String](Future.value(_)))
+    val boundAddress = listeningServer.boundAddress.asInstanceOf[InetSocketAddress]
+
+    val label = "stringClient"
+    val svc = stringClient.newService(Name.bound(Address(boundAddress)), label)
+
+    val registry = new SimpleRegistry
+    Await.result(GlobalRegistry.withRegistry(registry) {
+      svc("hello world")
+    }, 5.seconds)
+
+    val expectedEntry = Entry(
+      key = Seq("client", StringClient.protocolLibrary, label, "Transporter"),
+      value = "Netty3Transporter")
+
+    assert(registry.iterator.contains(expectedEntry))
+
+    Await.result(listeningServer.close(), 5.seconds)
+    Await.result(svc.close(), 5.seconds)
   }
 }

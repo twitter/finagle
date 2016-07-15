@@ -40,7 +40,12 @@ private[finagle] object NoDelimStringPipeline extends ChannelPipelineFactory {
   }
 }
 
+private[finagle] object StringClient {
+  val protocolLibrary = "string"
+}
+
 private[finagle] trait StringClient {
+  import StringClient._
 
   case class RichClient(underlying: Service[String, String]) {
     def ping(): Future[String] = underlying("ping")
@@ -53,7 +58,7 @@ private[finagle] trait StringClient {
 
   case class Client(
       stack: Stack[ServiceFactory[String, String]] = StackClient.newStack,
-      params: Stack.Params = Stack.Params.empty + ProtocolLibrary("string"),
+      params: Stack.Params = Stack.Params.empty + ProtocolLibrary(protocolLibrary),
       appendDelimeter: Boolean = true)
     extends StdStackClient[String, String, Client]
     with StringRichClient {

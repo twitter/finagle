@@ -15,6 +15,7 @@ import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.Showable
 import com.twitter.util.Future
+import com.twitter.util.registry.GlobalRegistry
 
 object StackClient {
   /**
@@ -512,6 +513,15 @@ trait StdStackClient[Req, Rep, This <: StdStackClient[Req, Rep, This]]
           case Address.Inet(ia, _) =>
             val endpointClient = copy1(params=prms)
             val transporter = endpointClient.newTransporter()
+            // Export info about the transporter type so that we can query info
+            // about its implementation at runtime. This assumes that the `toString`
+            // of the implementation is sufficiently descriptive.
+            val transporterImplKey = Seq(
+              ClientRegistry.registryName,
+              endpointClient.params[ProtocolLibrary].name,
+              endpointClient.params[Label].label,
+              "Transporter")
+            GlobalRegistry.get.put(transporterImplKey, transporter.toString)
             val mkFutureSvc: () => Future[Service[Req, Rep]] =
               () => transporter(ia).map { trans =>
                 // we do not want to capture and request specific Locals

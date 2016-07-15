@@ -86,6 +86,8 @@ private[finagle] object Netty4Transporter {
 
       transportP
     }
+
+    override def toString: String = "Netty4Transporter"
   }
 
   /**

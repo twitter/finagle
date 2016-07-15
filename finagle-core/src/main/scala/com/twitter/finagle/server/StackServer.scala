@@ -1,16 +1,17 @@
 package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle._
 import com.twitter.finagle.filter._
 import com.twitter.finagle.param._
 import com.twitter.finagle.service.{ExpiringService, DeadlineStatsFilter, StatsFilter, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint
+import com.twitter.finagle.Stack.{Role, Param}
 import com.twitter.finagle.stats.ServerStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.transport.Transport
 import com.twitter.jvm.Jvm
+import com.twitter.util.registry.GlobalRegistry
 import com.twitter.util.{Closable, CloseAwaitably, Future, Return, Throw, Time}
 import java.net.SocketAddress
 import java.util.Collections
@@ -256,6 +257,17 @@ trait StdStackServer[Req, Rep, This <: StdStackServer[Req, Rep, This]]
       // Listen over `addr` and serve traffic from incoming transports to
       // `serviceFactory` via `newDispatcher`.
       val listener = server.newListener()
+
+      // Export info about the listener type so that we can query info
+      // about its implementation at runtime. This assumes that the `toString`
+      // of the implementation is sufficiently descriptive.
+      val listenerImplKey = Seq(
+        ServerRegistry.registryName,
+        params[ProtocolLibrary].name,
+        params[Label].label,
+        "Listener")
+      GlobalRegistry.get.put(listenerImplKey, listener.toString)
+
       val underlying = listener.listen(addr) { transport =>
         serviceFactory(newConn(transport)).respond {
           case Return(service) =>

@@ -341,6 +341,8 @@ case class Netty3Listener[In, Out](
       }
       def boundAddress = ch.getLocalAddress()
     }
+
+  override def toString: String = "Netty3Listener"
 }
 
 private[netty3] object ServerBridge {
