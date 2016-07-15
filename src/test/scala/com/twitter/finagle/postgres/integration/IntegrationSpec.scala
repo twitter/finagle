@@ -221,6 +221,50 @@ class IntegrationSpec extends Spec {
         resultRows.size must equal(numRows)
       }
     }
+
+    "execute an update via a prepared statement using a Some(value)" in {
+      if (postgresAvailable) {
+        val client = getClient
+        cleanDb(client)
+        insertSampleData(client)
+
+
+        val preparedQuery = client.prepareAndExecute(
+          "UPDATE %s SET str_field = $1 where int_field = 4567".format(IntegrationSpec.pgTestTable),
+          Some("hello_updated_some")
+        )
+
+        val numRows = Await.result(preparedQuery)
+
+        val resultRows = Await.result(client.select(
+          "SELECT * from %s WHERE str_field = 'hello_updated_some' AND int_field = 4567".format(IntegrationSpec.pgTestTable)
+        )(identity))
+
+        resultRows.size must equal(numRows)
+      }
+    }
+
+    "execute an update via a prepared statement using a None" in {
+      if (postgresAvailable) {
+        val client = getClient
+        cleanDb(client)
+        insertSampleData(client)
+
+
+        val preparedQuery = client.prepareAndExecute(
+          "UPDATE %s SET str_field = $1 where int_field = 4567".format(IntegrationSpec.pgTestTable),
+          None
+        )
+
+        val numRows = Await.result(preparedQuery)
+
+        val resultRows = Await.result(client.select(
+          "SELECT * from %s WHERE str_field IS NULL AND int_field = 4567".format(IntegrationSpec.pgTestTable)
+        )(identity))
+
+        resultRows.size must equal(numRows)
+      }
+    }
   
     "return rows from UPDATE...RETURNING" in {
       if (postgresAvailable) {

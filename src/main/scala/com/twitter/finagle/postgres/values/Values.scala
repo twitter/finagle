@@ -251,6 +251,7 @@ object StringValueEncoder {
           """"%s" => "%s"""".format(escape(k), escape(v))
         }.mkString(",")
       }
+      case Some(v) => v
       case _ => value
     }
   }
