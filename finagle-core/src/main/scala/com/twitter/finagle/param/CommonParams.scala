@@ -64,7 +64,7 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
    * For client-side response classification using [[com.twitter.finagle.builder.ClientBuilder]],
    * see `com.twitter.finagle.builder.ClientBuilder.responseClassifier`
    *
-   * @see [[com.twitter.finagle.http.service.HttpResponseClassifier]] for some
+   * @see `com.twitter.finagle.http.service.HttpResponseClassifier` for some
    * HTTP classification tools.
    *
    * @note If unspecified, the default classifier is
@@ -83,6 +83,9 @@ trait CommonParams[A <: Stack.Parameterized[A]] { self: Stack.Parameterized[A] =
 
   /**
    * Configures the request `timeout` of this server or client (default: unbounded).
+   *
+   * If the request has not completed within the given `timeout`, the pending
+   * work will be interrupted via [[com.twitter.util.Future.raise]].
    *
    * == Client's Request Timeout ==
    *
