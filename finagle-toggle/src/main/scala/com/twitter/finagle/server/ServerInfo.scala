@@ -1,7 +1,7 @@
 package com.twitter.finagle.server
 
-import com.twitter.app.GlobalFlag
 import com.twitter.finagle.toggle.WriteOnce
+import com.twitter.util.NetUtil
 import com.twitter.util.registry.GlobalRegistry
 
 /**
@@ -19,6 +19,13 @@ abstract class ServerInfo {
    */
   def environment: Option[String]
 
+  /**
+   * An identifier for this server.
+   *
+   * The implementation is generally specific to a user's operating environment.
+   */
+  def id: String
+
 }
 
 object ServerInfo {
@@ -29,15 +36,7 @@ object ServerInfo {
   val Empty: ServerInfo = new ServerInfo {
     override def toString: String = "ServerInfo.Empty"
     def environment: Option[String] = None
-  }
-
-  /**
-   * A [[ServerInfo]] that gets its value from the [[environment]] `GlobalFlag`.
-   */
-  val Flag: ServerInfo = new ServerInfo {
-    override def toString: String = s"ServerInfo.Flag($environment)"
-    def environment: Option[String] =
-      com.twitter.finagle.server.environment.get
+    val id: String = NetUtil.getLocalHostName()
   }
 
   private[this] def registerServerInfo(serverInfo: ServerInfo): Unit =
@@ -64,9 +63,3 @@ object ServerInfo {
     global()
 
 }
-
-/**
- * @see [[ServerInfo.Flag]]
- */
-object environment extends GlobalFlag[String](
-    "The environment the server is running in.")
