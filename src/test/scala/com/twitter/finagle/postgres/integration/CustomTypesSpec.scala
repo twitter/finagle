@@ -3,33 +3,44 @@ package com.twitter.finagle.postgres.integration
 import java.time.ZoneId
 import java.time.temporal.ChronoField
 
-import com.twitter.finagle.postgres.values.ValueDecoder
-import com.twitter.finagle.postgres.{Client, ResultSet, Spec, Generators}, Generators._
+import com.twitter.finagle.postgres.values.{ValueDecoder, ValueEncoder}
+import com.twitter.finagle.postgres.{Client, Generators, ResultSet, Spec}
 import com.twitter.util.Await
 import org.jboss.netty.buffer.ChannelBuffers
 import org.scalacheck.Arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import Generators._
 
 class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
 
   def test[T : Arbitrary](
     decoder: ValueDecoder[T])(
     typ: String,
-    toStr: T => String = (t: T) => t.toString,
     tester: (T, T) => Boolean = (a: T, b: T) => a == b)(
-    implicit client: Client
+    implicit client: Client,
+    manifest: Manifest[T],
+    binaryParams: Boolean,
+    valueEncoder: ValueEncoder[T]
   ) = forAll {
     (t: T) =>
-      //TODO: change this once prepared statements are available
-      val result = Await.result(client.prepareAndQuery(s"SELECT $$1::$typ AS out", t) {
-        row => row.get(0).value.asInstanceOf[T]
-      }).head
+      val m = manifest
+      val encoder = valueEncoder
+      val query = if(binaryParams)
+        client.prepareAndQuery(s"SELECT $$1::$typ AS out", t) {
+          row => row.get(0).value.asInstanceOf[T]
+        }
+      else
+        client.prepareAndQuery(s"SELECT $$1::$typ AS out", t) {
+          row => row.get(0).value.asInstanceOf[T]
+        }
+      val result = Await.result(query).head
       if(!tester(t, result))
         fail(s"$t does not match $result")
   }
 
   for {
-    binary <- Seq(false, true)
+    binaryResults <- Seq(false, true)
+    binaryParams <- Seq(false, true)
     hostPort <- sys.env.get("PG_HOST_PORT")
     user <- sys.env.get("PG_USER")
     password = sys.env.get("PG_PASSWORD")
@@ -37,11 +48,25 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
     useSsl = sys.env.getOrElse("USE_PG_SSL", "0") == "1"
   } yield {
 
-    implicit val client = Client(hostPort, user, password, dbname, useSsl, customTypes = true, binaryResults = binary)
+    implicit val client = Client(
+      hostPort,
+      user,
+      password,
+      dbname,
+      useSsl,
+      customTypes = true,
+      binaryResults = binaryResults,
+      binaryParams = binaryParams)
 
-    val mode = if(binary) "binary mode" else "text mode"
+    val mode = if(binaryResults) "binary mode" else "text mode"
+    val paramsMode = if(binaryParams)
+      "binary"
+    else
+      "text"
 
-    s"A $mode postgres client" should {
+    implicit val useBinaryParams = binaryParams
+
+    s"A $mode postgres client with $paramsMode params" should {
       "retrieve the available types from the remote DB" in {
         val types = Await.result(client.typeMap)
         assert(types.nonEmpty)
@@ -49,10 +74,10 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
       }
     }
 
-    s"Retrieved type map decoders for $mode client" must {
+    s"Retrieved type map decoders for $mode client with $paramsMode params" must {
       "parse varchars" in test(ValueDecoder.String)("varchar")
       "parse text" in test(ValueDecoder.String)("text")
-      "parse booleans" in test(ValueDecoder.Boolean)("boolean", b => if(b) "t" else "f")
+      "parse booleans" in test(ValueDecoder.Boolean)("boolean")
       "parse shorts" in test(ValueDecoder.Int2)("int2")
       "parse ints" in test(ValueDecoder.Int4)("int4")
       "parse longs" in test(ValueDecoder.Int8)("int8")
@@ -62,15 +87,23 @@ class CustomTypesSpec extends Spec with GeneratorDrivenPropertyChecks {
       "parse numerics" in test(ValueDecoder.Numeric)("numeric")
       "parse timestamps" in test(ValueDecoder.Timestamp)(
         "timestamp",
-        ts => java.sql.Timestamp.from(ts.atZone(ZoneId.systemDefault()).toInstant).toString,
         (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY)
       )
       "parse timestamps with time zone" in test(ValueDecoder.TimestampTZ)(
         "timestamptz",
-        ts => java.sql.Timestamp.from(ts.toInstant).toString,
         (a, b) => a.getLong(ChronoField.MICRO_OF_DAY) == b.getLong(ChronoField.MICRO_OF_DAY)
       )
+      "parse times" in test(ValueDecoder.Time)("time")
+      "parse times with timezone" in test(ValueDecoder.TimeTz)("timetz")
+      "parse intervals" in test(ValueDecoder.Interval)("interval")
       "parse uuids" in test(ValueDecoder.Uuid)("uuid")
+
+      try {
+        Await.result(client.query("CREATE EXTENSION IF NOT EXISTS hstore"))
+        "parse hstore maps" in test(ValueDecoder.HStore)("hstore")
+      } catch {
+        case err: Throwable => // can't run this one because we're not superuser
+      }
     }
 
   }

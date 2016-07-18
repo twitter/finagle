@@ -259,7 +259,7 @@ class IntegrationSpec extends Spec {
 
         val preparedQuery = client.prepareAndExecute(
           "UPDATE %s SET str_field = $1 where int_field = 4567".format(IntegrationSpec.pgTestTable),
-          None
+          None: Option[String]
         )
 
         val numRows = Await.result(preparedQuery)

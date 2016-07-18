@@ -1,6 +1,10 @@
 package com.twitter.finagle.postgres
 
 import java.nio.charset.{Charset, StandardCharsets}
+import java.util.concurrent.atomic.AtomicInteger
+
+import scala.collection.immutable.Queue
+import scala.util.Random
 
 import com.twitter.finagle.{Service, ServiceFactory}
 import com.twitter.finagle.builder.ClientBuilder
@@ -9,12 +13,10 @@ import com.twitter.finagle.postgres.messages._
 import com.twitter.finagle.postgres.values._
 import com.twitter.logging.Logger
 import com.twitter.util.{Future, Return, Throw, Try}
-import java.util.concurrent.atomic.AtomicInteger
-
 import org.jboss.netty.buffer.ChannelBuffer
 
-import scala.collection.immutable.Queue
-import scala.util.Random
+import scala.language.implicitConversions
+
 
 /*
  * A Finagle client for communicating with Postgres.
@@ -24,11 +26,13 @@ class Client(
   id:String,
   types: Option[Map[Int, Client.TypeSpecifier]] = None,
   customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
-  binaryResults: Boolean = false
+  binaryResults: Boolean = false,
+  binaryParams: Boolean = false
 ) {
   private[this] val counter = new AtomicInteger(0)
   private[this] val logger = Logger(getClass.getName)
   private val resultFormats = if(binaryResults) Seq(1) else Seq(0)
+  private val paramFormats = if(binaryParams) Seq(1) else Seq(0)
 
   val charset = StandardCharsets.UTF_8
 
@@ -82,9 +86,16 @@ class Client(
     customTypesResult
   }
 
-  val typeMap = types.map(Future(_)).getOrElse(retrieveTypeMap())
+  private[postgres] val typeMap = types.map(Future(_)).getOrElse(retrieveTypeMap())
 
-  val decoders = customReceiveFunctions orElse ValueDecoder.decoders
+  // The OIDs to be used when sending parameters for each function
+  private[postgres] val encodeOids = typeMap.map {
+    tm => tm.toIndexedSeq.map {
+      case (oid, Client.TypeSpecifier(receiveFn, elemOid)) => receiveFn -> oid
+    }.groupBy(_._1).mapValues(_.map(_._2).min)
+  }
+
+  private[postgres] val decoders = customReceiveFunctions orElse ValueDecoder.decoders
 
 
   /*
@@ -143,10 +154,10 @@ class Client(
   /*
    * Issue a single, prepared SELECT query and wrap the response rows with the provided function.
    */
-  def prepareAndQuery[T](sql: String, params: Any*)(f: Row => T): Future[Seq[T]] = {
+  def prepareAndQuery[T](sql: String, params: Param[_]*)(f: Row => T): Future[Seq[T]] = {
     val preparedStatement = factory.apply().flatMap {
       service =>
-        parse(sql, Some(service)).map { name =>
+        parse(sql, Some(service), params: _*).map { name =>
           new PreparedStatementImpl(name, service)
         }.rescue {
           case err => sync(Some(service)).flatMap {
@@ -169,12 +180,12 @@ class Client(
   /*
    * Issue a single, prepared arbitrary query without an expected result set, and provide the affected row count
    */
-  def prepareAndExecute(sql: String, params: Any*):Future[Int] = {
+  def prepareAndExecute(sql: String, params: Param[_]*):Future[Int] = {
     val preparedStatement = factory.apply().flatMap {
       service =>
-        parse(sql, Some(service)).map { name =>
+        parse(sql, Some(service), params: _*).map { name =>
           new PreparedStatementImpl(name, service)
-	}.rescue {
+        }.rescue {
           case err => sync(Some(service)).flatMap {
             _ =>
               service.close().flatMap {
@@ -200,11 +211,22 @@ class Client(
 
   private[this] def parse(
       sql: String,
-      optionalService: Option[Service[PgRequest, PgResponse]] = None): Future[String] = {
+      optionalService: Option[Service[PgRequest, PgResponse]],
+      params: Param[_]*): Future[String] = {
     val name = genName()
 
-    send(PgRequest(Parse(name, sql), flush = true), optionalService) {
-      case ParseCompletedResponse => Future.value(name)
+    val paramTypes = encodeOids.map {
+      oidMap => params.map {
+        param => oidMap.getOrElse(param.encoder.recvFunction, 0)
+      }
+    }
+
+    paramTypes.flatMap {
+      types =>
+        val req = Parse(name, sql, types)
+        send(PgRequest(req, flush = true), optionalService) {
+          case ParseCompletedResponse => Future.value(name)
+        }
     }
   }
 
@@ -212,7 +234,16 @@ class Client(
       name: String,
       params: Seq[ChannelBuffer] = Seq(),
       optionalService: Option[Service[PgRequest, PgResponse]] = None): Future[Unit] = {
-    send(PgRequest(Bind(portal = name, name = name, params = params, resultFormats = resultFormats), flush = true), optionalService) {
+
+    val req =  Bind(
+      portal = name,
+      name = name,
+      formats = paramFormats,
+      params = params,
+      resultFormats = resultFormats
+    )
+
+    send(PgRequest(req, flush = true), optionalService) {
       case BindCompletedResponse => Future.value(())
     }
   }
@@ -296,13 +327,19 @@ class Client(
       service: Service[PgRequest, PgResponse]) extends PreparedStatement {
     def closeService = service.close()
 
-    override def fire(params: Any*): Future[QueryResponse] = {
-      val binaryParams = params.map {
-        p => StringValueEncoder.encode(p)
+    override def fire(params: Param[_]*): Future[QueryResponse] = {
+      val paramBuffers = if(binaryParams) {
+        params.map {
+          p => p.encodeBinary(StandardCharsets.UTF_8)
+        }
+      } else {
+        params.map {
+          p => p.encodeText(StandardCharsets.UTF_8)
+        }
       }
 
       val f = for {
-        _ <- bind(name, binaryParams, Some(service))
+        _ <- bind(name, paramBuffers, Some(service))
         (fieldNames, fieldParsers) <- describe(name, Some(service))
         exec <- execute(name, optionalService = Some(service))
       } yield exec match {
@@ -386,7 +423,8 @@ object Client {
     numRetries: Int = 4,
     customTypes: Boolean = false,
     customReceiveFunctions: PartialFunction[String, ValueDecoder[T] forSome {type T}] = { case "noop" => ValueDecoder.Unknown },
-    binaryResults: Boolean = false
+    binaryResults: Boolean = false,
+    binaryParams: Boolean = false
   ): Client = {
     val id = Random.alphanumeric.take(28).mkString
 
@@ -399,7 +437,7 @@ object Client {
       .buildFactory()
 
     val types = if(!customTypes) Some(defaultTypes) else None
-    new Client(factory, id, types, customReceiveFunctions, binaryResults)
+    new Client(factory, id, types, customReceiveFunctions, binaryResults, binaryParams)
   }
 }
 
@@ -407,18 +445,27 @@ object Client {
  * A query that supports parameter substitution. Can help prevent SQL injection attacks.
  */
 trait PreparedStatement {
-  def fire(params: Any*): Future[QueryResponse]
+  def fire(params: Param[_]*): Future[QueryResponse]
 
-  def exec(params: Any*): Future[OK] = fire(params: _*) map {
+  def exec(params: Param[_]*): Future[OK] = fire(params: _*) map {
     case ok: OK => ok
     case ResultSet(_) => throw Errors.client("Update query expected")
   }
 
-  def select[T](params: Any*)(f: Row => T): Future[Seq[T]] = fire(params: _*) map {
+  def select[T](params: Param[_]*)(f: Row => T): Future[Seq[T]] = fire(params: _*) map {
     case ResultSet(rows) => rows.map(f)
     case OK(_) => Seq.empty[Row].map(f)
   }
 
-  def selectFirst[T](params: Any*)(f: Row => T): Future[Option[T]] =
+  def selectFirst[T](params: Param[_]*)(f: Row => T): Future[Option[T]] =
     select[T](params:_*)(f) flatMap { rows => Future.value(rows.headOption) }
+}
+
+case class Param[T](value: T)(implicit val encoder: ValueEncoder[T]) {
+  def encodeText(charset: Charset = StandardCharsets.UTF_8) = ValueEncoder.encodeText(value, encoder, charset)
+  def encodeBinary(charset: Charset = StandardCharsets.UTF_8) = ValueEncoder.encodeBinary(value, encoder, charset)
+}
+
+object Param {
+  implicit def convert[T : ValueEncoder](t: T): Param[T] = Param(t)
 }

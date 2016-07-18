@@ -1,7 +1,8 @@
 package com.twitter.finagle.postgres.values
 
+import java.math.BigInteger
 import java.net.InetAddress
-import java.nio.charset.Charset
+import java.nio.charset.{Charset, StandardCharsets}
 
 import com.twitter.logging.Logger
 import java.sql.Timestamp
@@ -12,7 +13,6 @@ import java.util.{Date, TimeZone, UUID}
 
 import com.twitter.util.{Return, Try}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.RegexParsers
 
@@ -73,27 +73,6 @@ object Type {
   val UUID = 2950
 }
 
-object TimeUtils {
-  val POSTGRES_EPOCH_MICROS = 946684800000000L
-  val ZONE_REGEX = "(.*)(-|\\+)([0-9]{2})".r
-
-  def readTimestamp(buf: ChannelBuffer) = {
-    val micros = buf.readLong() + POSTGRES_EPOCH_MICROS
-    val seconds = micros / 1000000L
-    val nanos = (micros - seconds * 1000000L) * 1000
-    Instant.ofEpochSecond(seconds, nanos)
-  }
-
-  def writeTimestamp(timestamp: LocalDateTime) = {
-    val instant = timestamp.atZone(ZoneId.systemDefault()).toInstant
-    val seconds = instant.getEpochSecond
-    val micros = instant.getLong(ChronoField.MICRO_OF_SECOND) + seconds * 1000000
-    val buf = ChannelBuffers.buffer(8)
-    buf.writeLong(micros - POSTGRES_EPOCH_MICROS)
-    buf
-  }
-}
-
 trait ValueDecoder[+T] {
   def decodeText(text: String): Try[Value[T]]
   def decodeBinary(bytes: ChannelBuffer, charset: Charset): Try[Value[T]]
@@ -115,56 +94,6 @@ object ValueDecoder {
     InetAddress.getByAddress(arr)
   }
 
-  private def getUnsignedShort(buf: ChannelBuffer) = {
-    val high = buf.readByte().toInt
-    val low = buf.readByte()
-    (high << 8) | low
-  }
-
-  private val NUMERIC_POS = 0x0000
-  private val NUMERIC_NEG = 0x4000
-  private val NUMERIC_NAN = 0xC000
-  private val NUMERIC_NULL = 0xF000
-  private val NumericDigitBaseExponent = 4
-
-  private def readNumeric(buf: ChannelBuffer) = {
-    val len = getUnsignedShort(buf)
-    val weight = buf.readShort()
-    val sign = getUnsignedShort(buf)
-    val displayScale = getUnsignedShort(buf)
-
-    //digits are actually unsigned base-10000 numbers (not straight up bytes)
-    val digits = Array.fill(len)(buf.readShort())
-    val bdDigits = digits.map(BigDecimal(_))
-
-    if(bdDigits.length > 0) {
-      val unscaled = bdDigits.tail.foldLeft(bdDigits.head) {
-        case (accum, digit) => BigDecimal(accum.bigDecimal.scaleByPowerOfTen(NumericDigitBaseExponent)) + digit
-      }
-
-      val firstDigitSize =
-        if (digits.head < 10) 1
-        else if (digits.head < 100) 2
-        else if (digits.head < 1000) 3
-        else 4
-
-      val scaleFactor = if (weight >= 0)
-        weight * NumericDigitBaseExponent + firstDigitSize
-      else
-        weight * NumericDigitBaseExponent + firstDigitSize
-      val unsigned = unscaled.bigDecimal.movePointLeft(unscaled.precision).movePointRight(scaleFactor).setScale(displayScale)
-
-      sign match {
-        case NUMERIC_POS => BigDecimal(unsigned)
-        case NUMERIC_NEG => BigDecimal(unsigned.negate())
-        case NUMERIC_NAN => throw new NumberFormatException("Decimal is NaN")
-        case NUMERIC_NULL => throw new NumberFormatException("Decimal is NUMERIC_NULL")
-      }
-    } else {
-      BigDecimal(0)
-    }
-  }
-
   val Boolean = instance(s => Return(s == "t" || s == "true"), (b,c) => Try(b.readByte() != 0))
   val Bytea = instance(
     s => Try(s.stripPrefix("\\x").sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)),
@@ -184,13 +113,17 @@ object ValueDecoder {
     s => Try(LocalTime.parse(s)),
     (b, c) => Try(LocalTime.ofNanoOfDay(b.readLong() * 1000))
   )
+  val TimeTz = instance(
+    s => Try(DateTimeUtils.parseTimeTz(s)),
+    (b, c) => Try(DateTimeUtils.readTimeTz(b))
+  )
   val Timestamp = instance(
     s => Try(LocalDateTime.ofInstant(java.sql.Timestamp.valueOf(s).toInstant, ZoneId.systemDefault())),
-    (b, c) => Try(LocalDateTime.ofInstant(TimeUtils.readTimestamp(b), ZoneOffset.UTC))
+    (b, c) => Try(LocalDateTime.ofInstant(DateTimeUtils.readTimestamp(b), ZoneOffset.UTC))
   )
   val TimestampTZ = instance(
     s => Try {
-      val (str, zoneOffs) = TimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
+      val (str, zoneOffs) = DateTimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
         case Some(m) => m.group(1) -> (m.group(2) match {
           case "-" => -1 * m.group(3).toInt
           case "+" => m.group(3).toInt
@@ -202,12 +135,16 @@ object ValueDecoder {
         java.sql.Timestamp.valueOf(str).toInstant,
         zone).atZone(zone)
     },
-    (b, c) => Try(TimeUtils.readTimestamp(b).atZone(ZoneId.systemDefault()))
+    (b, c) => Try(DateTimeUtils.readTimestamp(b).atZone(ZoneId.systemDefault()))
+  )
+  val Interval = instance(
+    s => Try(com.twitter.finagle.postgres.values.Interval.parse(s)),
+    (b, c) => Try(DateTimeUtils.readInterval(b))
   )
   val Uuid = instance(s => Try(UUID.fromString(s)), (b, c) => Try(new UUID(b.readLong(), b.readLong())))
   val Numeric = instance(
     s => Try(BigDecimal(s)),
-    (b, c) => Try(readNumeric(b))
+    (b, c) => Try(Numerics.readNumeric(b))
   )
   val Jsonb = instance(
     s => Return(s),
@@ -219,26 +156,10 @@ object ValueDecoder {
 
   val HStore = instance(
     s => Try {
-      HStoreStringParser(s)
+      HStores.parseHStoreString(s)
         .getOrElse(throw new IllegalArgumentException("Invalid format for hstore"))
-        .mapValues(Some.apply)  //TODO: HStoreStringParser should handle NULLs and return Map[String, Option[String]]
     },
-    (b, c) => Try {
-      val count = b.readInt()
-      val pairs = Array.fill(count) {
-        val keyLength = b.readInt()
-        val key = Array.fill(keyLength)(b.readByte())
-        val valueLength = b.readInt()
-        val value = valueLength match {
-          case -1 => None
-          case l =>
-            val valueBytes = Array.fill(l)(b.readByte())
-            Some(valueBytes)
-        }
-        new String(key, c) -> value.map(new String(_, c))
-      }
-      pairs.toMap
-    }
+    (buf, charset) => Try(HStores.decodeHStoreBinary(buf, charset))
   )
 
   val Unknown = instance[Either[String, Array[Byte]]](
@@ -262,10 +183,10 @@ object ValueDecoder {
     case "inet_recv" => Inet
     case "date_recv" => Date
     case "time_recv" => Time
+    case "timetz_recv" => TimeTz
     case "timestamp_recv" => Timestamp
     case "timestamptz_recv" => TimestampTZ
-    //TODO: timetz
-    //TODO: interval
+    case "interval_recv" => Interval
     //TODO: bit
     //TODO: varbit
     case "numeric_recv" => Numeric
@@ -281,20 +202,62 @@ object ValueDecoder {
   * @tparam T
   */
 trait ValueEncoder[-T] {
-  def encodeText(t: T): String
-  def encodeBinary(t: T, charset: Charset): ChannelBuffer
+  def encodeText(t: T): Option[String]
+  def encodeBinary(t: T, charset: Charset): Option[ChannelBuffer]
   def recvFunction: String
   def elemRecvFunction: Option[String]
+
+  def contraMap[U](fn: U => T): ValueEncoder[U] = {
+    val prev = this
+    new ValueEncoder[U] {
+      def encodeText(u: U) = prev.encodeText(fn(u))
+      def encodeBinary(u: U, charset: Charset) = prev.encodeBinary(fn(u), charset)
+      val recvFunction = prev.recvFunction
+      val elemRecvFunction = prev.elemRecvFunction
+    }
+  }
 }
 
-object ValueEncoder {
+object ValueEncoder extends LowPriorityEncoder {
 
-  def instance[T](recv: String, text: T => String, binary: (T, Charset) => ChannelBuffer): ValueEncoder[T] = new ValueEncoder[T] {
-    def encodeText(t: T) = text(t)
-    def encodeBinary(t: T, c: Charset) = binary(t, c)
-    def recvFunction = recv
-    def elemRecvFunction = None
+  private val nullParam = {
+    val buf = ChannelBuffers.buffer(4)
+    buf.writeInt(-1)
+    buf
   }
+
+  def instance[T](
+    recv: String,
+    text: T => String,
+    binary: (T, Charset) => Option[ChannelBuffer]
+  ): ValueEncoder[T] = new ValueEncoder[T] {
+    def encodeText(t: T) = Option(t).map(text)
+    def encodeBinary(t: T, c: Charset) = binary(t, c)
+    val recvFunction = recv
+    val elemRecvFunction = None
+  }
+
+  def encodeText[T](t: T, encoder: ValueEncoder[T], charset: Charset = StandardCharsets.UTF_8) =
+    Option(t).flatMap(encoder.encodeText) match {
+      case None => nullParam
+      case Some(str) =>
+        val bytes = str.getBytes(charset)
+        val buf = ChannelBuffers.buffer(bytes.length + 4)
+        buf.writeInt(bytes.length)
+        buf.writeBytes(bytes)
+        buf
+    }
+
+  def encodeBinary[T](t: T, encoder: ValueEncoder[T], charset: Charset = StandardCharsets.UTF_8) =
+    Option(t).flatMap(encoder.encodeBinary(_, charset)) match {
+      case None => nullParam
+      case Some(inBuf) =>
+        inBuf.resetReaderIndex()
+        val outBuf = ChannelBuffers.buffer(inBuf.readableBytes() + 4)
+        outBuf.writeInt(inBuf.readableBytes())
+        outBuf.writeBytes(inBuf)
+        outBuf
+    }
 
   private def buffer(capacity: Int)(fn: ChannelBuffer => Unit) = {
     val cb = ChannelBuffers.buffer(capacity)
@@ -302,72 +265,91 @@ object ValueEncoder {
     cb
   }
 
-  implicit val String = instance[String]("textrecv", identity, (s, c) => ChannelBuffers.wrappedBuffer(s.getBytes(c)))
-  implicit val Boolean = instance[Boolean](
+  implicit val string = instance[String](
+    "textrecv",
+    identity,
+    (s, c) => Option(s).map(s => ChannelBuffers.wrappedBuffer(s.getBytes(c)))
+  )
+
+  implicit val boolean: ValueEncoder[Boolean] = instance[Boolean](
     "boolrecv",
     b => if(b) "t" else "f",
-    (b, c) => ChannelBuffers.wrappedBuffer(Array(if(b) 1.toByte else 0.toByte)))
-  implicit val Bytea = instance[Array[Byte]](
+    (b, c) => Some {
+      val buf = ChannelBuffers.buffer(1)
+      buf.writeByte(if(b) 1.toByte else 0.toByte)
+      buf
+    }
+  )
+
+  implicit val bytea = instance[Array[Byte]](
     "bytearecv",
     bytes => "\\x" + bytes.map(Integer.toHexString(_)).mkString,
-    (b, c) => ChannelBuffers.copiedBuffer(b)
+    (b, c) => Some(ChannelBuffers.copiedBuffer(b))
   )
-  implicit val Int2 = instance[Short]("int2recv", _.toString, (i, c) => buffer(2)(_.writeShort(i)))
-  implicit val Int4 = instance[Int]("int4recv", _.toString, (i, c) => buffer(4)(_.writeInt(i)))
-  implicit val Int8 = instance[Long]("int8recv", _.toString, (i, c) => buffer(8)(_.writeLong(i)))
-  implicit val Float4 = instance[Float]("float4recv", _.toString, (i, c) => buffer(4)(_.writeFloat(i)))
-  implicit val Float8 = instance[Double]("float8recv", _.toString, (i, c) => buffer(8)(_.writeDouble(i)))
-  implicit val Date = instance[LocalDate]("date_recv", _.toString, (i, c) => buffer(4)(_.writeInt((i.getLong(JulianFields.JULIAN_DAY) - 2451545).toInt)))
-  implicit val Timestamp = instance[LocalDateTime]("timestamp_recv", t => java.sql.Timestamp.valueOf(t).toString, (i, c) => TimeUtils.writeTimestamp(i))
+  implicit val int2 = instance[Short]("int2recv", _.toString, (i, c) => Some(buffer(2)(_.writeShort(i))))
+  implicit val int4 = instance[Int]("int4recv", _.toString, (i, c) => Some(buffer(4)(_.writeInt(i))))
+  implicit val int8 = instance[Long]("int8recv", _.toString, (i, c) => Some(buffer(8)(_.writeLong(i))))
+  implicit val float4 = instance[Float]("float4recv", _.toString, (i, c) => Some(buffer(4)(_.writeFloat(i))))
+  implicit val float8 = instance[Double]("float8recv", _.toString, (i, c) => Some(buffer(8)(_.writeDouble(i))))
+  implicit val date = instance[LocalDate]("date_recv", _.toString, (i, c) =>
+    Option(i).map(i => buffer(4)(_.writeInt((i.getLong(JulianFields.JULIAN_DAY) - 2451545).toInt)))
+  )
+  implicit val timestamp = instance[LocalDateTime](
+    "timestamp_recv",
+    t => java.sql.Timestamp.valueOf(t).toString,
+    (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestamp(ts))
+  )
+  implicit val timestampTz = instance[ZonedDateTime](
+    "timestamptz_recv",
+    t => t.toOffsetDateTime.toString,
+    (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestampTz(ts))
+  )
+  implicit val time = instance[LocalTime](
+    "time_recv",
+    t => t.toString,
+    (t, c) => Option(t).map(t => buffer(8)(_.writeLong(t.toNanoOfDay / 1000)))
+  )
+  implicit val timeTz = instance[OffsetTime](
+    "timetz_recv",
+    t => t.toString,
+    (t, c) => Option(t).map(DateTimeUtils.writeTimeTz)
+  )
+  implicit val interval = instance[Interval](
+    "interval_recv",
+    i => i.toString,
+    (i, c) => Option(i).map(DateTimeUtils.writeInterval)
+  )
+  implicit val numeric = instance[BigDecimal](
+    "numeric_recv",
+    d => d.bigDecimal.toPlainString,
+    (d, c) => Option(d).map(d => Numerics.writeNumeric(d))
+  )
+  implicit val uuid = instance[UUID](
+    "uuid_recv",
+    u => u.toString,
+    (u, c) => Option(u).map(u => buffer(16) {
+      b =>
+        b.writeLong(u.getMostSignificantBits)
+        b.writeLong(u.getLeastSignificantBits)
+    })
+  )
+  implicit val hstore = instance[Map[String, Option[String]]](
+    "hstore_recv",
+    m => HStores.formatHStoreString(m),
+    (m, c) => Option(m).map(HStores.encodeHStoreBinary(_, c))
+  )
+  implicit val hstoreNoNulls = hstore.contraMap {
+    m: Map[String, String] => m.mapValues(Option(_))
+  }
 
-
+  implicit def option[T](implicit encodeT: ValueEncoder[T]): ValueEncoder[Option[T]] = new ValueEncoder[Option[T]] {
+    val recvFunction = encodeT.recvFunction
+    val elemRecvFunction = None
+    def encodeText(optT: Option[T]) = optT.flatMap(encodeT.encodeText)
+    def encodeBinary(tOpt: Option[T], c: Charset) = tOpt.flatMap(t => encodeT.encodeBinary(t, c))
+  }
 }
 
-/*
- * Helpers for converting strings into bytes (i.e., for Postgres requests).
- */
-object StringValueEncoder {
-  def encode(value: Any): ChannelBuffer = {
-    val result = ChannelBuffers.dynamicBuffer()
+trait LowPriorityEncoder {
 
-    if (value == null || value == None) {
-      result.writeInt(-1)
-    } else {
-      result.writeBytes(convertValue(value).toString.getBytes(Charsets.Utf8))
-    }
-
-    result
-  }
-
-  def convertValue[A](value:A)(implicit mf:Manifest[A]):Any = {
-    value match {
-        //need to use a proper format for this
-      case zdt:ZonedDateTime => zdt.toOffsetDateTime.toString
-      case m:collection.Map[_, _] => { // this is an hstore, so turn it into one
-        def escape(s:String):String = {
-          s.replace("\\", "\\\\").replace("\"", "\\\"")
-        }
-        m.map { case (k:String, v:String) =>
-          """"%s" => "%s"""".format(escape(k), escape(v))
-        }.mkString(",")
-      }
-      case Some(v) => v
-      case _ => value
-    }
-  }
-}
-
-object HStoreStringParser extends RegexParsers {
-  def term:Parser[String] = "\"" ~ """([^"\\]*(\\.[^"\\]*)*)""".r ~ "\"" ^^ {
-    case o~value~c => value.replace("\\\"", "\"").replace("\\\\", "\\")
-  }
-
-  def item:Parser[(String, String)] = term ~ "=>" ~ term ^^ { case key~arrow~value => (key, value) }
-
-  def items:Parser[Map[String, String]] = repsep(item, ", ") ^^ { l => l.toMap }
-
-  def apply(input:String):Option[Map[String, String]] = parseAll(items, input) match {
-    case Success(result, _) => Some(result)
-    case failure:NoSuccess => None
-  }
 }

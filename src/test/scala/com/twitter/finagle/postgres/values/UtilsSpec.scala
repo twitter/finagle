@@ -2,8 +2,10 @@ package com.twitter.finagle.postgres.values
 
 import com.twitter.finagle.postgres.Spec
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import com.twitter.finagle.postgres.Generators._
 
-class UtilsSpec extends Spec {
+class UtilsSpec extends Spec with GeneratorDrivenPropertyChecks {
   "Buffers.readCString" should {
     def newBuffer(): (ChannelBuffer, String, String) = {
       val str = "Some string"
@@ -93,6 +95,14 @@ class UtilsSpec extends Spec {
       an[IllegalArgumentException] must be thrownBy {
         Md5Encryptor.encrypt(user, password, null)
       }
+    }
+  }
+
+  "Numeric utils" should {
+    "write a numeric value" in forAll {
+      bd: BigDecimal =>
+        val read = Numerics.readNumeric(Numerics.writeNumeric(bd))
+        read must equal (bd)
     }
   }
 }
