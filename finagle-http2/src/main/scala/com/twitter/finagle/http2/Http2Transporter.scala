@@ -6,12 +6,19 @@ import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
 import com.twitter.finagle.netty4.http.exp.initClient
-import com.twitter.finagle.transport.{TransportProxy, Transport}
-import com.twitter.util.{Future, Promise, Closable, Time}
-import io.netty.channel.{ChannelPipeline, ChannelDuplexHandler, ChannelHandlerContext,
+import com.twitter.finagle.transport.{Transport, TransportProxy}
+import com.twitter.io.Charsets
+import com.twitter.logging.Logger
+import com.twitter.util.{Closable, Future, Promise, Time}
+import io.netty.buffer.ByteBuf
+import io.netty.channel.{
+  ChannelDuplexHandler,
+  ChannelHandlerContext,
+  ChannelOutboundHandlerAdapter,
+  ChannelPipeline,
   ChannelPromise}
 import io.netty.handler.codec.http.{HttpResponse => Netty4Response, _}
-import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.STREAM_ID
+import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.{STREAM_ID, SCHEME}
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
@@ -41,10 +48,7 @@ private[http2] object Http2Transporter {
       val adapter = new DelegatingDecompressorFrameListener(
         connection,
         // adapters http2 to http 1.1
-        new InboundHttp2ToHttpAdapterBuilder(connection)
-          .maxContentLength(maxResponseSize.inBytes.toInt)
-          .propagateSettings(true)
-          .build()
+        new RichInboundHttp2ToHttpAdapter(connection, maxResponseSize.inBytes.toInt)
       )
       val connectionHandler = new HttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)
@@ -67,6 +71,7 @@ private[http2] object Http2Transporter {
         upgradeHandler,
         new UpgradeRequestHandler())
 
+      pipeline.addLast("schemifier", new SchemifyingHandler("http"))
       initClient(params)(pipeline)
     }
 
@@ -158,3 +163,53 @@ private[http2] object Http2Transporter {
       else super.write(ctx, msg, promise) // this buffers the write until the handler is removed
   }
 }
+
+private[http2] class SchemifyingHandler(defaultScheme: String) extends ChannelOutboundHandlerAdapter {
+
+  private[this] val log = Logger.get()
+
+  /**
+   * We need to make sure that we add the scheme properly, since it'll be rejected
+   * by the http2 codec if we don't.
+   */
+  override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
+    msg match {
+      case req: HttpRequest =>
+        if (!req.headers.contains(SCHEME.text(), defaultScheme, true /*ignoreCase*/))
+          req.headers.add(SCHEME.text(), defaultScheme)
+      case _ => // nop
+    }
+    ctx.write(msg, promise)
+  }
+}
+
+private[http2] class RichInboundHttp2ToHttpAdapter(
+    connection: Http2Connection,
+    maxContentLength: Int)
+  extends InboundHttp2ToHttpAdapter(
+    connection,
+    maxContentLength,
+    false,
+    true) {
+
+  override def onGoAwayRead(
+    ctx: ChannelHandlerContext,
+    lastStreamId: Int,
+    errorCode: Long,
+    debugData: ByteBuf
+  ): Unit = {
+
+    val debugString = debugData.toString(Charsets.Utf8)
+
+    // TODO: this is very ad-hoc right now, we need to come up with a consistent way of
+    // downconverting.
+    val status = if (debugString.startsWith("Header size exceeded max allowed bytes")) {
+      HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
+    } else HttpResponseStatus.BAD_REQUEST
+
+    val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status)
+    Http2Transporter.setStreamId(rep, -1)
+    ctx.fireChannelRead(rep)
+  }
+}
+
