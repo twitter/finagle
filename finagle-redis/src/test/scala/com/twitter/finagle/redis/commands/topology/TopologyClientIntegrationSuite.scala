@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.redis.ServerError
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.finagle.redis.util.StringToBuf
 import com.twitter.util.{Return, Await}

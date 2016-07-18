@@ -1,12 +1,13 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.redis.naggati.SentinelClientTest
-import com.twitter.finagle.redis.tags.{ RedisTest, ClientTest }
-import com.twitter.finagle.redis.util.{BufToString, StringToBuf, CBToString, StringToChannelBuffer}
+import com.twitter.finagle.redis.SentinelClientTest
+import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
+import com.twitter.finagle.redis.util.{BufToString, CBToString, StringToBuf, StringToChannelBuffer}
 import com.twitter.finagle.util.DefaultTimer
+import com.twitter.io.Buf
 import com.twitter.logging.Logger
-import com.twitter.util.{ Await, Awaitable, Future, Time }
+import com.twitter.util.{Await, Awaitable, Future, Time}
 import org.jboss.netty.buffer.ChannelBuffer
 import org.junit.Ignore
 import org.junit.runner.RunWith
@@ -46,7 +47,7 @@ final class SentinelClientIntegrationSuite extends SentinelClientTest {
       j <- 1 to slavesPerMaster
     } withRedisClient(i + masterCount * j) { client =>
       val (host, port) = hostAndPort(redisAddress(i))
-      ready(client.slaveOf("127.0.0.1", port.toString))
+      ready(client.slaveOf(Buf.Utf8("127.0.0.1"), Buf.Utf8(port.toString)))
     }
   }
 

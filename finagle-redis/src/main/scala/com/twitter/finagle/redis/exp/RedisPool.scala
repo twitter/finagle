@@ -8,7 +8,7 @@ import com.twitter.finagle.redis.protocol.{Command, Reply}
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.transport.Transport
-import com.twitter.util.{Future, Local, Time, Timer}
+import com.twitter.util.{Future, Local, Time}
 
 object RedisPool {
 

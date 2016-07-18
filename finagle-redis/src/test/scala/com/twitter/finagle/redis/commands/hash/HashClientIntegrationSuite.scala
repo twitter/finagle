@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util.BufToString
 import com.twitter.io.Buf
@@ -85,7 +85,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar, bufMoo -> Buf.Empty)), TIMEOUT)
       val result = Await.result(client.hMGet(bufFoo, Seq(bufBaz, bufMoo)), TIMEOUT).toList
 
-      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bufBar", ""))
+      assert(result.map(Buf.Utf8.unapply).flatten == Seq("bar", ""))
     }
   }
 
@@ -134,7 +134,7 @@ final class HashClientIntegrationSuite extends RedisClientTest {
     withRedisClient { client =>
       Await.result(client.dels(Seq(bufFoo)), TIMEOUT)
       Await.result(client.hMSet(bufFoo, Map(bufBaz -> bufBar, bufMoo -> bufBoo)), TIMEOUT)
-      assert(Await.result(client.hVals(bufFoo), TIMEOUT).map(BufToString(_)) == Seq("bufBar", "bufBoo"))
+      assert(Await.result(client.hVals(bufFoo), TIMEOUT).map(BufToString(_)) == Seq("bar", "boo"))
     }
   }
 

@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.Redis
 import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
@@ -120,7 +120,7 @@ final class PubSubClientIntegrationSuite2 extends RedisClientTest {
   def ensureMasterSlave() {
     slave.withClient { client =>
       val masterAddr = master.address.get
-      result(client.slaveOf(masterAddr.getHostString, masterAddr.getPort.toString))
+      result(client.slaveOf(Buf.Utf8(masterAddr.getHostString), Buf.Utf8(masterAddr.getPort.toString)))
       waitUntil("master-slave replication") {
         val status = b2s(result(client.info(StringToBuf("replication"))).get)
           .split("\n")

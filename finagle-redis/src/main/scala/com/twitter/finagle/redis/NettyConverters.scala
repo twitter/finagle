@@ -3,7 +3,6 @@ package com.twitter.finagle.redis
 import com.twitter.finagle.netty3.{BufChannelBuffer, ChannelBufferBuf}
 import com.twitter.io.Buf
 import org.jboss.netty.buffer.ChannelBuffer
-import scala.language.implicitConversions
 
 /**
  * A temporary solution to migrate user's code off of Netty types.

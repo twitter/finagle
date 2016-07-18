@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.Client
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util._
 import com.twitter.io.Buf
@@ -94,7 +94,7 @@ final class PubSubClientIntegrationSuite extends RedisClientTest {
       the[Exception] thrownBy ctx.publish("foo")
 
       RedisCluster.start(redis)
-      waitUntilAsserted("recover from network failure") { ctx.publish(foo) }
+      waitUntilAsserted("recover from network failure") { ctx.publish("foo") }
     }
   }
 

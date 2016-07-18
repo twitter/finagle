@@ -4,7 +4,6 @@ import com.twitter.finagle.redis.protocol.StatusReply
 import com.twitter.io.Buf
 import com.twitter.util.Future
 import com.twitter.finagle.redis.protocol._
-import org.jboss.netty.buffer.ChannelBuffer
 
 private[redis] trait BasicServerCommands { self: BaseClient =>
 
@@ -33,7 +32,7 @@ private[redis] trait BasicServerCommands { self: BaseClient =>
   def info(section: Buf): Future[Option[Buf]] =
     doRequest(Info(section)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.value(None)
+      case EmptyBulkReply => Future.None
     }
 
   // TODO: ROLE
@@ -91,7 +90,7 @@ trait ServerCommands extends BasicServerCommands { self: BaseClient =>
 
   // TODO: SAVE
 
-  def slaveOf(host: ChannelBuffer, port: ChannelBuffer): Future[Unit] =
+  def slaveOf(host: Buf, port: Buf): Future[Unit] =
     doRequest(SlaveOf(host, port)) {
       case StatusReply(message) => Future.Unit
     }

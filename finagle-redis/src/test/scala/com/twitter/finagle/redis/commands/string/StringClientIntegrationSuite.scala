@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.protocol.BitOp
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.io.Buf
@@ -39,7 +39,7 @@ final class StringClientIntegrationSuite extends RedisClientTest {
       assert(Await.result(client.get(bufFoo)) == None)
 
       Await.result(client.set(bufFoo, bufBar))
-      assert(Buf.Utf8.unapply(Await.result(client.get(bufFoo)).get).get == "bufBar")
+      assert(Buf.Utf8.unapply(Await.result(client.get(bufFoo)).get).get == "bar")
     }
   }
 
@@ -127,7 +127,7 @@ final class StringClientIntegrationSuite extends RedisClientTest {
       assert(Await.result(client.setNx(bufBaz, bufBar)) == false)
 
       assert(Await.result(client.setRange(bufBaz, 1, bufBaz)) == 4L)
-      assert(Await.result(client.get(bufBaz)) == Some(Buf.Utf8("fbufBaz")))
+      assert(Await.result(client.get(bufBaz)) == Some(Buf.Utf8("fbaz")))
     }
   }
 

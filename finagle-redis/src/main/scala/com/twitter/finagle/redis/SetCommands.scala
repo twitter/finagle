@@ -26,7 +26,7 @@ private[redis] trait SetCommands { self: BaseClient =>
   def sMembers(key: Buf): Future[ImmutableSet[Buf]] =
     doRequest(SMembers(key)) {
       case MBulkReply(list) => Future.value(ReplyFormat.toBuf(list).toSet)
-      case EmptyMBulkReply() => Future.value(ImmutableSet.empty)
+      case EmptyMBulkReply => Future.value(ImmutableSet.empty)
     }
 
   /**
@@ -72,7 +72,7 @@ private[redis] trait SetCommands { self: BaseClient =>
   def sPop(key: Buf): Future[Option[Buf]] =
     doRequest(SPop(key)) {
       case BulkReply(message) => Future.value(Some(message))
-      case EmptyBulkReply() => Future.None
+      case EmptyBulkReply => Future.None
     }
 
   /**
@@ -84,7 +84,7 @@ private[redis] trait SetCommands { self: BaseClient =>
     doRequest(SRandMember(key, count)) {
       case BulkReply(message) => Future.value(Seq(message))
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyBulkReply() | EmptyMBulkReply() => Future.Nil
+      case EmptyBulkReply | EmptyMBulkReply => Future.Nil
     }
 
   /**
@@ -102,6 +102,6 @@ private[redis] trait SetCommands { self: BaseClient =>
     doRequest(SInter(keys)) {
       case MBulkReply(messages) =>
         Future.value(ReplyFormat.toBuf(messages).toSet)
-      case EmptyMBulkReply() => Future.value(ImmutableSet.empty)
+      case EmptyMBulkReply => Future.value(ImmutableSet.empty)
     }
 }

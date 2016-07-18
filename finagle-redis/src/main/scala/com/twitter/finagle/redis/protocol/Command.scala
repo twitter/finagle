@@ -1,9 +1,8 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.redis.ClientError
-import com.twitter.finagle.redis.protocol.commands._
 import com.twitter.finagle.redis.util._
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 
 object RequireClientProtocol extends ErrorConversion {
   override def getException(msg: String) = new ClientError(msg)
@@ -175,163 +174,6 @@ object Commands {
   val AGGREGATE         = "AGGREGATE"
   val COUNT             = "COUNT"
   val PATTERN           = "PATTERN"
-
-  val commandMap: Map[String, Function1[List[Array[Byte]],Command]] = Map(
-    // key commands
-    DEL               -> {Del(_)},
-    DUMP              -> {Dump(_)},
-    EXISTS            -> {Exists(_)},
-    EXPIRE            -> {Expire(_)},
-    EXPIREAT          -> {ExpireAt(_)},
-    KEYS              -> {Keys(_)},
-    MOVE              -> {Move(_)},
-    PERSIST           -> {Persist(_)},
-    PEXPIRE           -> {PExpire(_)},
-    PEXPIREAT         -> {PExpireAt(_)},
-    PTTL              -> {PTtl(_)},
-    RANDOMKEY         -> {_ => Randomkey()},
-    RENAME            -> {Rename(_)},
-    RENAMENX          -> {RenameNx(_)},
-    SCAN              -> {Scan(_)},
-    TTL               -> {Ttl(_)},
-    TYPE              -> {Type(_)},
-
-    // string commands
-    APPEND            -> {Append(_)},
-    BITCOUNT          -> {BitCount(_)},
-    BITOP             -> {BitOp(_)},
-    DECR              -> {Decr(_)},
-    DECRBY            -> {DecrBy(_)},
-    GET               -> {Get(_)},
-    GETBIT            -> {GetBit(_)},
-    GETRANGE          -> {GetRange(_)},
-    GETSET            -> {GetSet(_)},
-    INCR              -> {Incr(_)},
-    INCRBY            -> {IncrBy(_)},
-    MGET              -> {MGet(_)},
-    MSET              -> {MSet(_)},
-    MSETNX            -> {MSetNx(_)},
-    PSETEX            -> {PSetEx(_)},
-    SET               -> {Set(_)},
-    SETBIT            -> {SetBit(_)},
-    SETEX             -> {SetEx(_)},
-    SETNX             -> {SetNx(_)},
-    SETRANGE          -> {SetRange(_)},
-    STRLEN            -> {Strlen(_)},
-
-    // sorted sets
-    ZADD              -> {ZAdd(_)},
-    ZCARD             -> {ZCard(_)},
-    ZCOUNT            -> {ZCount(_)},
-    ZINCRBY           -> {ZIncrBy(_)},
-    ZINTERSTORE       -> {ZInterStore(_)},
-    ZRANGE            -> {ZRange(_)},
-    ZRANGEBYSCORE     -> {ZRangeByScore(_)},
-    ZRANK             -> {ZRank(_)},
-    ZREM              -> {ZRem(_)},
-    ZREMRANGEBYRANK   -> {ZRemRangeByRank(_)},
-    ZREMRANGEBYSCORE  -> {ZRemRangeByScore(_)},
-    ZREVRANGE         -> {ZRevRange(_)},
-    ZREVRANGEBYSCORE  -> {ZRevRangeByScore(_)},
-    ZREVRANK          -> {ZRevRank(_)},
-    ZSCORE            -> {ZScore(_)},
-    ZUNIONSTORE       -> {ZUnionStore(_)},
-
-    // Btree Sorted Set
-    // These are twitter-internal commands and will be removed eventually
-    BADD              -> {BAdd(_)},
-    BCARD             -> {BCard(_)},
-    BREM              -> {BRem(_)},
-    BGET              -> {BGet(_)},
-
-    // Topology
-    // These are twitter-internal commands and will be removed eventually
-    TOPOLOGYADD       -> {TopologyAdd(_)},
-    TOPOLOGYGET       -> {TopologyGet(_)},
-    TOPOLOGYDELETE    -> {TopologyDelete(_)},
-
-    // miscellaneous
-    PING              -> {_ => Ping},
-    FLUSHALL          -> {_ => FlushAll},
-    FLUSHDB           -> {_ => FlushDB},
-    SELECT            -> {Select(_)},
-    AUTH              -> {Auth(_)},
-    INFO              -> {Info(_)},
-    QUIT              -> {_ => Quit},
-    SLAVEOF           -> {SlaveOf(_)},
-    CONFIG            -> {Config(_)},
-    SENTINEL          -> {Sentinel.fromBytes(_)},
-
-    // hash sets
-    HDEL              -> {HDel(_)},
-    HEXISTS           -> {HExists(_)},
-    HGET              -> {HGet(_)},
-    HGETALL           -> {HGetAll(_)},
-    HINCRBY           -> {HIncrBy(_)},
-    HKEYS             -> {HKeys(_)},
-    HLEN              -> {HLen(_)},
-    HMGET             -> {HMGet(_)},
-    HMSET             -> {HMSet(_)},
-    HSCAN             -> {HScan(_)},
-    HSET              -> {HSet(_)},
-    HSETNX            -> {HSetNx(_)},
-    HVALS             -> {HVals(_)},
-
-    // Lists
-    LLEN              -> {LLen(_)},
-    LINDEX            -> {LIndex(_)},
-    LINSERT           -> {LInsert(_)},
-    LPOP              -> {LPop(_)},
-    LPUSH             -> {LPush(_)},
-    LREM              -> {LRem(_)},
-    LSET              -> {LSet(_)},
-    LRANGE            -> {LRange(_)},
-    RPUSH             -> {RPush(_)},
-    RPOP              -> {RPop(_)},
-    LTRIM             -> {LTrim(_)},
-
-    // Sets
-    SADD              -> {SAdd(_)},
-    SMEMBERS          -> {SMembers(_)},
-    SISMEMBER         -> {SIsMember(_)},
-    SCARD             -> {SCard(_)},
-    SREM              -> {SRem(_)},
-    SPOP              -> {SPop(_)},
-    SRANDMEMBER       -> {SRandMember(_)},
-    SINTER            -> {SInter(_)},
-
-    // transactions
-    DISCARD           -> {_ => Discard},
-    EXEC              -> {_ => Exec},
-    MULTI             -> {_ => Multi},
-    UNWATCH           -> {_ => UnWatch},
-    WATCH             -> {Watch(_)},
-
-    // HyperLogLogs
-    PFADD             -> {PFAdd(_)},
-    PFCOUNT           -> {PFCount(_)},
-    PFMERGE           -> {PFMerge(_)},
-
-    // PubSub
-    PUBLISH           -> {Publish(_)},
-    PUBSUB            -> {PubSub(_)}
-
-    // TODO: add Scripts command map
-  )
-
-  def doMatch(cmd: String, args: List[Array[Byte]]) = commandMap.get(cmd.toUpperCase).map {
-    _(args)
-  }.getOrElse(throw ClientError("Unsupported command: " + cmd))
-
-  def trimList[T](list: Seq[T], count: Int, from: String = ""): Seq[T] = {
-    RequireClientProtocol(list != null, "%s Empty list found".format(from))
-    RequireClientProtocol(
-      list.length == count,
-      "%s Expected %d elements, found %d".format(from, count, list.length))
-    val newList = list.take(count)
-    newList.foreach { item => RequireClientProtocol(item != null, "Found empty item in list") }
-    newList
-  }
 }
 
 object CommandBytes {
@@ -417,7 +259,7 @@ object CommandBytes {
   val AUTH              = StringToChannelBuffer("AUTH")
   val INFO              = StringToChannelBuffer("INFO")
   val QUIT              = StringToChannelBuffer("QUIT")
-  val SLAVEOF           = StringToChannelBuffer("SLAVEOF")
+  val SLAVEOF           = StringToBuf("SLAVEOF")
   val CONFIG            = StringToChannelBuffer("CONFIG")
   val SENTINEL          = StringToChannelBuffer("SENTINEL")
 
@@ -502,49 +344,9 @@ object CommandBytes {
 
 
 class CommandCodec extends UnifiedProtocolCodec {
-
-  import RedisCodec._
   import com.twitter.finagle.redis.naggati.Encoder
-  import com.twitter.finagle.redis.naggati.Stages._
-  import com.twitter.logging.Logger
-
-  val log = Logger(getClass)
 
   val encode = new Encoder[Command] {
     def encode(obj: Command) = Some(obj.toChannelBuffer)
-  }
-
-  val decode = readBytes(1) { bytes =>
-    bytes(0) match {
-      case ARG_COUNT_MARKER =>
-        val doneFn = { lines => commandDecode(lines) }
-        RequireClientProtocol.safe {
-          readLine { line => decodeUnifiedFormat(NumberFormat.toLong(line), doneFn) }
-        }
-      case b: Byte =>
-        decodeInlineRequest(b.asInstanceOf[Char])
-    }
-  }
-
-  def decodeInlineRequest(c: Char) = readLine { line =>
-    val listOfArrays = (c + line).split(' ').toList.map {
-      args => args.getBytes(Charsets.Utf8)
-    }
-    val cmd = commandDecode(listOfArrays)
-    emit(cmd)
-  }
-
-  def commandDecode(lines: List[Array[Byte]]): RedisMessage = {
-    RequireClientProtocol(lines != null && lines.length > 0, "Invalid client command protocol")
-    val cmd = BytesToString(lines.head)
-    val args = lines.tail
-    try {
-      Commands.doMatch(cmd, args)
-    } catch {
-      case e: ClientError => throw e
-      case t: Throwable =>
-        log.warning(t, "Unhandled exception %s(%s)".format(t.getClass.toString, t.getMessage))
-        throw new ClientError(t.getMessage)
-    }
   }
 }

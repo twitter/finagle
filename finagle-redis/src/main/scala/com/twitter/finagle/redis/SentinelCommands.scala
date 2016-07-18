@@ -20,13 +20,13 @@ private[redis] trait SentinelCommands { self: BaseClient =>
    * Show a list of monitored masters and their state.
    */
   def masters(): Future[Seq[MasterNode]] =
-    doRequest(SentinelMasters()) {
+    doRequest(SentinelMasters) {
       case MBulkReply(masters) => Future.value(
         masters.map {
           case MBulkReply(messages) => new MasterNode(
             returnMap(ReplyFormat.toString(messages)))
         })
-      case EmptyMBulkReply() => Future.value(Nil)
+      case EmptyMBulkReply => Future.Nil
     }
 
   /**
@@ -48,7 +48,7 @@ private[redis] trait SentinelCommands { self: BaseClient =>
           case MBulkReply(messages) =>
             new SlaveNode(returnMap(ReplyFormat.toString(messages)))
         })
-      case EmptyMBulkReply() => Future.value(Nil)
+      case EmptyMBulkReply => Future.value(Nil)
     }
 
   /**
@@ -61,7 +61,7 @@ private[redis] trait SentinelCommands { self: BaseClient =>
           case MBulkReply(messages) =>
             new SentinelNode(returnMap(ReplyFormat.toString(messages)))
         })
-      case EmptyMBulkReply() => Future.value(Nil)
+      case EmptyMBulkReply => Future.value(Nil)
     }
 
   /**
@@ -71,8 +71,7 @@ private[redis] trait SentinelCommands { self: BaseClient =>
    */
   def getMasterAddrByName(name: String): Future[Option[InetSocketAddress]] =
     doRequest(SentinelGetMasterAddrByName(name)) {
-      case NilMBulkReply() =>
-        Future.value(None)
+      case NilMBulkReply => Future.None
       case MBulkReply(messages) => Future.value(
         ReplyFormat.toChannelBuffers(messages) match {
           case host :: port :: Nil =>
@@ -112,7 +111,7 @@ private[redis] trait SentinelCommands { self: BaseClient =>
    * current Sentinel state.
    */
   def flushConfig(): Future[Unit] =
-    doRequest(SentinelFlushConfig()) {
+    doRequest(SentinelFlushConfig) {
       case StatusReply(msg) => Future.Unit
     }
 

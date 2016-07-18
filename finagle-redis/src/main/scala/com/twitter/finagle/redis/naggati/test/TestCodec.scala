@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.twitter.finagle.redis.naggati
-package test
+package com.twitter.finagle.redis.naggati.test
 
 import scala.collection.mutable
+import com.twitter.finagle.redis.naggati._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.channel._
 
@@ -41,7 +41,6 @@ object TestCodec {
  * environment that collects emitted objects and returns them.
  */
 class TestCodec[A](val codec: Codec[A]) {
-  val downstreamOutput = new mutable.ListBuffer[AnyRef]
   val upstreamOutput = new mutable.ListBuffer[AnyRef]
 
   private def log(e: MessageEvent, list: mutable.ListBuffer[AnyRef]) {
@@ -67,13 +66,7 @@ class TestCodec[A](val codec: Codec[A]) {
       log(e, upstreamOutput)
     }
   }
-  val downstreamTerminus = new SimpleChannelDownstreamHandler() {
-    override def writeRequested(c: ChannelHandlerContext, e: MessageEvent) {
-      log(e, downstreamOutput)
-    }
-  }
   val pipeline = Channels.pipeline()
-  pipeline.addLast("downstreamTerminus", downstreamTerminus)
   pipeline.addLast("decoder", codec)
   pipeline.addLast("upstreamTerminus", upstreamTerminus)
 
@@ -87,10 +80,6 @@ class TestCodec[A](val codec: Codec[A]) {
     def isConnected() = true
     def isBound() = true
     def getConfig() = new DefaultChannelConfig()
-    override def close() = {
-      downstreamOutput += "<CLOSE>"
-      null
-    }
   }
 
   def apply(buffer: ChannelBuffer) = {
@@ -98,12 +87,4 @@ class TestCodec[A](val codec: Codec[A]) {
     codec.messageReceived(context, new UpstreamMessageEvent(pipeline.getChannel, buffer, null))
     upstreamOutput.toList
   }
-
-  def send(obj: Any): Seq[String] = {
-    downstreamOutput.clear()
-    codec.handleDownstream(context, new DownstreamMessageEvent(pipeline.getChannel, Channels.future(pipeline.getChannel), obj, null))
-    getDownstream
-  }
-
-  def getDownstream = toStrings(downstreamOutput.toList)
 }

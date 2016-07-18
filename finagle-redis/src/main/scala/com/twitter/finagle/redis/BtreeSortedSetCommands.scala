@@ -31,7 +31,7 @@ private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
   def bGet(key: Buf, field: Buf): Future[Option[Buf]] =
     doRequest(BGet(key, field)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.None
+      case EmptyBulkReply       => Future.None
     }
 
   /**
@@ -64,7 +64,7 @@ private[redis] trait BtreeSortedSetCommands { self: BaseClient =>
     doRequest(BRange(key, startField, endField)) {
       case MBulkReply(messages) => Future.value(
         returnPairs(ReplyFormat.toBuf(messages)))
-      case EmptyMBulkReply()    => Future.Nil
+      case EmptyMBulkReply      => Future.Nil
     }
   }
 }

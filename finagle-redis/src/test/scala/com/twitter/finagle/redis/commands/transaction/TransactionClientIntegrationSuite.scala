@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.ServerError
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.protocol.{ErrorReply, Get, HDel, HMGet, HSet, IntegerReply, Set}
 import com.twitter.finagle.redis.tags.{RedisTest, ClientTest}
 import com.twitter.finagle.redis.util.ReplyFormat

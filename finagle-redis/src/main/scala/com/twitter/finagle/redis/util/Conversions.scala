@@ -2,7 +2,6 @@ package com.twitter.finagle.redis.util
 
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.protocol._
-import com.twitter.finagle.redis.protocol.Commands.trimList
 import com.twitter.io.{Buf, Charsets}
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
@@ -36,14 +35,6 @@ object BytesToString {
   def fromTuplesWithDoubles(args: Seq[(Array[Byte], Double)],
     charset: Charset = Charsets.Utf8) =
     args map { arg => (BytesToString(arg._1, charset), arg._2) }
-}
-
-object GetMonadArg {
-  def apply(args: Seq[Array[Byte]], command: ChannelBuffer): ChannelBuffer =
-    ChannelBuffers.wrappedBuffer(trimList(args, 1, CBToString(command))(0))
-
-  def apply(args: Seq[Array[Byte]], command: Buf): Buf =
-    Buf.ByteArray.Owned(trimList(args, 1, BufToString(command))(0))
 }
 
 object StringToBytes {
@@ -116,12 +107,12 @@ object ReplyFormat {
   def toString(items: List[Reply]): List[String] = {
     items flatMap {
       case BulkReply(message)   => List(BufToString(message))
-      case EmptyBulkReply()     => EmptyBulkReplyString
+      case EmptyBulkReply       => EmptyBulkReplyString
       case IntegerReply(id)     => List(id.toString)
       case StatusReply(message) => List(message)
       case ErrorReply(message)  => List(message)
       case MBulkReply(messages) => ReplyFormat.toString(messages)
-      case EmptyMBulkReply()    => EmptyMBulkReplyString
+      case EmptyMBulkReply      => EmptyMBulkReplyString
       case _                    => Nil
     }
   }
@@ -132,12 +123,12 @@ object ReplyFormat {
   def toBuf(items: List[Reply]): List[Buf] = {
     items flatMap {
       case BulkReply(message)   => List(message)
-      case EmptyBulkReply()     => EmptyBulkReplyChannelBuffer
+      case EmptyBulkReply       => EmptyBulkReplyChannelBuffer
       case IntegerReply(id)     => List(Buf.ByteArray.Owned(Array(id.toByte)))
       case StatusReply(message) => List(StringToBuf(message))
       case ErrorReply(message)  => List(StringToBuf(message))
       case MBulkReply(messages) => ReplyFormat.toBuf(messages)
-      case EmptyMBulkReply()    => EmptyBulkReplyChannelBuffer
+      case EmptyMBulkReply      => EmptyBulkReplyChannelBuffer
       case _                    => Nil
     }
   }
