@@ -51,19 +51,15 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     import h._
 
     Time.withCurrentTimeFrozen { timeControl =>
-      intercept[Exception] {
-        Await.result(service(123))
+      for (i <- 0 until 3) {
+        assert(factory.isAvailable)
+        assert(service.isAvailable)
+        intercept[Exception] {
+          Await.result(service(123))
+        }
       }
-      intercept[Exception] {
-        Await.result(service(123))
-      }
-      assert(factory.isAvailable)
-      assert(service.isAvailable)
+      // Now failed
 
-      // Now fail:
-      intercept[Exception] {
-        Await.result(service(123))
-      }
       assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
@@ -106,14 +102,10 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     import h._
 
     Time.withCurrentTimeFrozen { timeControl =>
-      intercept[Exception] {
-        Await.result(service(123))
-      }
-      intercept[Exception] {
-        Await.result(service(123))
-      }
-      intercept[Exception] {
-        Await.result(service(123))
+      for (i <- 0 until 3) {
+        intercept[Exception] {
+          Await.result(service(123))
+        }
       }
       assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
@@ -133,11 +125,10 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
-
+      assert(statsReceiver.counters.get(List("probes")) == Some(1))
       assert(statsReceiver.counters.get(List("removals")) == Some(1))
       assert(!factory.isAvailable)
       assert(!service.isAvailable)
-
     }
   }
 
@@ -157,13 +148,12 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
       intercept[Exception] {
         Await.result(service(123))
       }
+      // After another failure, the service should be unavailable
+      intercept[Exception] {
+        Await.result(service(123))
+      }
 
       for (i <- 0 until markDeadForList.length) {
-        // After another failure, the service should be unavailable
-        intercept[Exception] {
-          Await.result(service(123))
-        }
-
         assert(statsReceiver.counters.get(List("removals")) == Some(1))
         assert(!factory.isAvailable)
         assert(!service.isAvailable)
@@ -187,6 +177,13 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
         assert(statsReceiver.counters.get(List("revivals")) == None)
         assert(factory.isAvailable)
         assert(service.isAvailable)
+
+        // After another failure, the service should be unavailable
+        intercept[Exception] {
+          Await.result(service(123))
+        }
+        val probeStat = statsReceiver.counters.get(List("probes"))
+        assert(probeStat.isDefined && probeStat.get >= 1)
       }
     }
   }
@@ -592,11 +589,12 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     when(underlying.status) thenReturn Status.Open
     val exc = new Exception("i broked :-(")
     when(underlying()) thenReturn Future.exception(exc)
+    val timer = new MockTimer
     val factory = new FailureAccrualFactory[Int, Int](
       underlying,
       FailureAccrualPolicy.consecutiveFailures(3, FailureAccrualFactory.jitteredBackoff),
       ResponseClassifier.Default,
-      new MockTimer,
+      timer,
       statsReceiver)
   }
 
@@ -605,19 +603,26 @@ class FailureAccrualFactoryTest extends FunSuite with MockitoSugar {
     import h._
 
     Time.withCurrentTimeFrozen { timeControl =>
-      assert(factory.isAvailable)
-      intercept[Exception] {
-        Await.result(factory())
-      }
-      assert(factory.isAvailable)
-      intercept[Exception] {
-        Await.result(factory())
-      }
-      assert(factory.isAvailable)
-      intercept[Exception] {
-        Await.result(factory())
+      for (i <- 1 to 3) {
+        assert(factory.isAvailable)
+        intercept[Exception] {
+          Await.result(factory())
+        }
       }
       assert(!factory.isAvailable)
+
+      // Advance past period
+      timeControl.advance(10.seconds)
+      timer.tick()
+
+      // Probing should fail due to factory exception. It should stop the probing and mark it dead again
+      intercept[Exception] {
+        Await.result(factory())
+      }
+      assert(statsReceiver.counters.get(List("probes")) == Some(1))
+      assert(statsReceiver.counters.get(List("removals")) == Some(1))
+      assert(!factory.isAvailable)
+      assert(factory.status == Status.Busy)
     }
   }
 
