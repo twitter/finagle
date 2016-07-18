@@ -34,9 +34,9 @@ class DarkTrafficFilterTest extends FunSuite with MockitoSugar {
 
     val filter = new DarkTrafficFilter(darkService, enableSampling, statsReceiver)
 
-    val forwarded = Seq("darkTrafficFilter", "forwarded")
-    val skipped   = Seq("darkTrafficFilter", "skipped")
-    val failed    = Seq("darkTrafficFilter", "failed")
+    val forwarded = Seq("dark_traffic_filter", "forwarded")
+    val skipped   = Seq("dark_traffic_filter", "skipped")
+    val failed    = Seq("dark_traffic_filter", "failed")
 
     val service = mock[Service[String, String]]
     when(service.apply(anyObject())) thenReturn Future.value(response)

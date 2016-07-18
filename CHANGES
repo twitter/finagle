@@ -16,6 +16,15 @@ New Features
     "finagle/future_pool/active_tasks", and "finagle/future_pool/completed_tasks".
     ``RB_ID=850652``
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-exp: Abstract out parts of the DarkTrafficFilter for potential re-use.
+    We also canonicalize the DarkTrafficFilter stats scope which changes from
+    "darkTrafficFilter" to "dark_traffic_filter". E.g.:
+    "dark_traffic_filter/forwarded", "dark_traffic_filter/skipped", and
+    "dark_traffic_filter/failed". ``RB_ID=852548``
+
 6.36.0
 ------
 
