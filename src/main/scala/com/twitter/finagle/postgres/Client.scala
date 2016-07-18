@@ -148,8 +148,13 @@ class Client(
       service =>
         parse(sql, Some(service)).map { name =>
           new PreparedStatementImpl(name, service)
-        }.onFailure {
-          err => service.close()
+        }.rescue {
+          case err => sync(Some(service)).flatMap {
+            _ =>
+              service.close().flatMap {
+                _ => Future.exception(err)
+              }
+          }
         }
     }
 
@@ -169,6 +174,13 @@ class Client(
       service =>
         parse(sql, Some(service)).map { name =>
           new PreparedStatementImpl(name, service)
+	}.rescue {
+          case err => sync(Some(service)).flatMap {
+            _ =>
+              service.close().flatMap {
+                _ => Future.exception(err)
+              }
+          }
         }
     }
 
