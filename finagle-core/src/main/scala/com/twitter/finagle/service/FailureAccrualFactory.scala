@@ -254,7 +254,10 @@ class FailureAccrualFactory[Req, Rep](
     }
   }
 
-  private[this] val onServiceAcquisitionFailure: Throwable => Unit = { _ => didFail() }
+  private[this] val onServiceAcquisitionFailure: Throwable => Unit = self.synchronized { _ =>
+    stopProbing()
+    didFail()
+  }
 
   protected def isSuccess(reqRep: ReqRep): Boolean =
     responseClassifier.applyOrElse(reqRep, ResponseClassifier.Default) match {
@@ -304,6 +307,21 @@ class FailureAccrualFactory[Req, Rep](
     cancelReviveTimerTask()
   }
 
+  /**
+   * Exit 'Probing' state (if necessary)
+   *
+   * The result of the subsequent request will determine whether the factory transitions to
+   * Alive (successful) or Dead (unsuccessful).
+   */
+  private[this] def stopProbing() = self.synchronized {
+    state match {
+      case ProbeOpen =>
+        probesCounter.incr()
+        state = ProbeClosed
+      case _ =>
+    }
+  }
+
   def apply(conn: ClientConnection) = {
     underlying(conn).map { service =>
       // N.B. the reason we can't simply filter the service factory is so that
@@ -316,17 +334,7 @@ class FailureAccrualFactory[Req, Rep](
           // ProbeClosed state. The result of first to complete will determine
           // whether the factory transitions to Alive (successful) or Dead
           // (unsuccessful).
-          state match {
-            case ProbeOpen =>
-              probesCounter.incr()
-              self.synchronized {
-                state match {
-                  case ProbeOpen => state = ProbeClosed
-                  case _ =>
-                }
-              }
-            case _ =>
-          }
+          stopProbing()
 
           service(request).respond { rep =>
             if (isSuccess(ReqRep(request, rep))) didSucceed()
