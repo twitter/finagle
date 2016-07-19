@@ -3,8 +3,9 @@ package com.twitter.finagle.loadbalancer
 import com.twitter.finagle._
 import com.twitter.finagle.stats.{Counter, StatsReceiver}
 import com.twitter.finagle.util.Updater
-import com.twitter.util.{Future, Time, Closable}
+import com.twitter.util.{Closable, Future, Time}
 import scala.annotation.tailrec
+import scala.collection.{immutable, mutable}
 
 /**
  * Basic functionality for a load balancer. Balancer takes care of
@@ -98,6 +99,7 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
 
   private[this] val adds = statsReceiver.counter("adds")
   private[this] val removes = statsReceiver.counter("removes")
+  private[this] val rebuilds = statsReceiver.counter("rebuilds")
 
   protected sealed trait Update
   protected case class NewList(
@@ -106,46 +108,88 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
   protected case class Invoke(fn: Distributor => Unit) extends Update
 
   private[this] val updater = new Updater[Update] {
+
+    /**
+     * We preprocess `updates` according to the following algorithm:
+     *
+     * 1. We collapse `NewList` updates so that the last wins.
+     * 2. We collapse `Rebuild` updates so that the last wins.
+     * 3. We collapse `NewList` and `Rebuild` updates that so that `NewList` wins.
+     * 4. We don't collapse `Invoke` updates.
+     *
+     * NOTE: `Rebuild` is an internal event and may contain a stale serverset
+     * while `NewList` originates from the underlying namer.
+     */
     protected def preprocess(updates: Seq[Update]): Seq[Update] = {
-      if (updates.size == 1)
-        return updates
-
-      val types = updates.reverse.groupBy(_.getClass)
-
-      val update: Seq[Update] = types.get(classOf[NewList]) match {
-        case Some(Seq(last, _*)) => Seq(last)
-        case None => types.getOrElse(classOf[Rebuild], Nil).take(1)
+      if (updates.size == 1) { // We know that `updates` is `ArrayBuffer`
+        return updates         // so `size` is cheap.
       }
 
-      update ++ types.getOrElse(classOf[Invoke], Nil).reverse
+      val result: mutable.ListBuffer[Update] = mutable.ListBuffer.empty
+      var listOrRebuild: Update = null // Not an option to save allocations.
+
+      val it = updates.iterator
+      while (it.hasNext) {
+        it.next() match {
+          case l@NewList(_) =>
+            listOrRebuild = l
+          case r@Rebuild(_) =>
+            if (listOrRebuild == null || listOrRebuild.isInstanceOf[Rebuild]) {
+              listOrRebuild = r
+            }
+          case i@Invoke(_) =>
+            result += i
+        }
+      }
+
+      if (listOrRebuild == null) result
+      else listOrRebuild +=: result
     }
 
+    private[this] val factoryToNode: Node => (ServiceFactory[Req, Rep], Node) =
+      n => n.factory -> n
+
+    private[this] val closeNode: Node => Unit = n => n.close()
+
     def handle(u: Update): Unit = u match {
-      case NewList(svcFactories) =>
-        val newFactories = svcFactories.toSet
-        val (transfer, closed) = dist.vector.partition { node =>
-          newFactories.contains(node.factory)
+      case NewList(newFactories) =>
+        // We get a new list of service factories, and compare against the
+        // current service factories in the distributor. We want to preserve
+        // the existing nodes if possible. We close the set difference of new
+        // factories - old factories, and rebuild the distributor with new
+        // factories, preserving the nodes of the factories in the intersection.
+
+        // We will rebuild `Distributor` with these nodes.
+        val transferred: immutable.VectorBuilder[Node] = new immutable.VectorBuilder[Node]
+
+        // These nodes are currently maintained by `Distributor`.
+        val oldFactories: mutable.HashMap[ServiceFactory[Req, Rep], Node] =
+          dist.vector.map(factoryToNode)(collection.breakOut)
+
+        var numAdded: Int = 0
+
+        for (newFactory <- newFactories) {
+          if (oldFactories.contains(newFactory)) {
+            transferred += oldFactories(newFactory)
+            oldFactories.remove(newFactory)
+          } else {
+            transferred += newNode(newFactory, statsReceiver.scope(newFactory.toString))
+            numAdded += 1
+          }
         }
 
-        for (node <- closed)
-          node.close()
-        removes.incr(closed.size)
+        // Close nodes that weren't transferred.
+        oldFactories.values.foreach(closeNode)
 
-        // we could demand that 'n' proxies hashCode, equals (i.e. is a Proxy)
-        val transferNodes = transfer.map(n => n.factory -> n).toMap
-        var numNew = 0
-        val newNodes = svcFactories.map {
-          case f if transferNodes.contains(f) => transferNodes(f)
-          case f =>
-            numNew += 1
-            newNode(f, statsReceiver.scope(f.toString))
-        }
+        removes.incr(oldFactories.size)
+        adds.incr(numAdded)
 
-        dist = dist.rebuild(newNodes.toVector)
-        adds.incr(numNew)
+        dist = dist.rebuild(transferred.result())
+        rebuilds.incr()
 
       case Rebuild(_dist) if _dist == dist =>
         dist = dist.rebuild()
+        rebuilds.incr()
 
       case Rebuild(_stale) =>
 

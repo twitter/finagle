@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * An Updater processes updates in sequence. At most one one
+ * An Updater processes updates in sequence. At most one
  * update is processed at time; pending updates may be collapsed.
  * 
  * When an update is in progress, new updates are enqueued to 
@@ -21,7 +21,7 @@ import scala.collection.mutable.ArrayBuffer
 private[finagle] trait Updater[T] extends (T => Unit) {
   private[this] val n = new AtomicInteger(0)
   private[this] val q = new ConcurrentLinkedQueue[T]
-  
+
   /**
    * Preprocess a nonempty batch of updates. This allows the updater
    * to collapse, expand, or otherwise manipulate updates before they
@@ -34,22 +34,21 @@ private[finagle] trait Updater[T] extends (T => Unit) {
    */
   protected def handle(elem: T): Unit
 
-  def apply(t: T) {
+  def apply(t: T): Unit = {
     q.offer(t)
     if (n.getAndIncrement() > 0)
       return
 
     do {
-      val elems = new ArrayBuffer[T](1+n.get)
+      val elems = new ArrayBuffer[T](1 + n.get)
       while (n.get > 1) {
         n.decrementAndGet()
         elems += q.poll()
       }
 
       elems += q.poll()
+      preprocess(elems).foreach(handle)
 
-      for (elem <- preprocess(elems.result))
-        handle(elem)
     } while (n.decrementAndGet() > 0)
   }
 }
