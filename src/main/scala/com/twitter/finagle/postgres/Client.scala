@@ -59,7 +59,7 @@ class Client(
 
     val customTypesResult = for {
       service <- serviceF
-      response <- service.apply(new PgRequest(new Query(customTypesQuery)))
+      response <- service.apply(PgRequest(Query(customTypesQuery)))
     } yield response match {
       case SelectResult(fields, rows) =>
         val rowValues = rows.map {
@@ -75,7 +75,10 @@ class Client(
         }
         val fieldNames = fields.map(_.name)
         rowValues.map(row => new Row(fieldNames, row)).map {
-          row => row.get[Int]("oid") -> Client.TypeSpecifier(row.get[String]("typreceive"), row.get[Int]("typelem"))
+          row => row.get[Int]("oid") -> Client.TypeSpecifier(
+            row.get[String]("typreceive"),
+            row.get[String]("type"),
+            row.get[Int]("typelem"))
         }.toMap
     }
 
@@ -88,10 +91,10 @@ class Client(
 
   private[postgres] val typeMap = types.map(Future(_)).getOrElse(retrieveTypeMap())
 
-  // The OIDs to be used when sending parameters for each function
+  // The OIDs to be used when sending parameters
   private[postgres] val encodeOids = typeMap.map {
     tm => tm.toIndexedSeq.map {
-      case (oid, Client.TypeSpecifier(receiveFn, elemOid)) => receiveFn -> oid
+      case (oid, Client.TypeSpecifier(receiveFn, typeName, elemOid)) => typeName -> oid
     }.groupBy(_._1).mapValues(_.map(_._2).min)
   }
 
@@ -217,7 +220,7 @@ class Client(
 
     val paramTypes = encodeOids.map {
       oidMap => params.map {
-        param => oidMap.getOrElse(param.encoder.recvFunction, 0)
+        param => oidMap.getOrElse(param.encoder.typeName, 0)
       }
     }
 
@@ -298,7 +301,7 @@ class Client(
       f => for {
         types <- typeMap
       } yield for {
-        Client.TypeSpecifier(recv, elem) <- types.get(f.dataType)
+        Client.TypeSpecifier(recv, name, elem) <- types.get(f.dataType)
         decoder <- decoders.lift.apply(recv)
       } yield if(f.format != 0) (decoder.decodeBinary _).tupled else (Buffers.readString _).tupled.andThen(decoder.decodeText)
     }.foldLeft(Future(Queue.empty[((ChannelBuffer, Charset)) => Try[Value[T]] forSome {type T}])) {
@@ -363,54 +366,54 @@ class Client(
  */
 object Client {
 
-  case class TypeSpecifier(receiveFunction: String, elemOid: Long = 0)
+  case class TypeSpecifier(receiveFunction: String, typeName: String, elemOid: Long = 0)
 
   private[postgres] val defaultTypes = Map(
-    Type.BOOL -> TypeSpecifier("boolrecv"),
-    Type.BYTE_A -> TypeSpecifier("bytearecv"),
-    Type.CHAR -> TypeSpecifier("charrecv"),
-    Type.NAME -> TypeSpecifier("namerecv"),
-    Type.INT_8 -> TypeSpecifier("int8recv"),
-    Type.INT_2 -> TypeSpecifier("int2recv"),
-    Type.INT_4 -> TypeSpecifier("int4recv"),
-    Type.REG_PROC -> TypeSpecifier("regprocrecv"),
-    Type.TEXT -> TypeSpecifier("textrecv"),
-    Type.OID -> TypeSpecifier("oidrecv"),
-    Type.TID -> TypeSpecifier("tidrecv"),
-    Type.XID -> TypeSpecifier("xidrecv"),
-    Type.CID -> TypeSpecifier("cidrecv"),
-    Type.XML -> TypeSpecifier("xml_recv"),
-    Type.POINT -> TypeSpecifier("point_recv"),
-    Type.L_SEG -> TypeSpecifier("lseg_recv"),
-    Type.PATH -> TypeSpecifier("path_recv"),
-    Type.BOX -> TypeSpecifier("box_recv"),
-    Type.POLYGON -> TypeSpecifier("poly_recv"),
-    Type.LINE -> TypeSpecifier("line_recv"),
-    Type.CIDR -> TypeSpecifier("cidr_recv"),
-    Type.FLOAT_4 -> TypeSpecifier("float4recv"),
-    Type.FLOAT_8 -> TypeSpecifier("float8recv"),
-    Type.ABS_TIME -> TypeSpecifier("abstimerecv"),
-    Type.REL_TIME -> TypeSpecifier("reltimerecv"),
-    Type.T_INTERVAL -> TypeSpecifier("tinternalrecv"),
-    Type.UNKNOWN -> TypeSpecifier("unknownrecv"),
-    Type.CIRCLE -> TypeSpecifier("circle_recv"),
-    Type.MONEY -> TypeSpecifier("cash_recv"),
-    Type.MAC_ADDR -> TypeSpecifier("macaddr_recv"),
-    Type.INET -> TypeSpecifier("inet_recv"),
-    Type.BP_CHAR -> TypeSpecifier("bpcharrecv"),
-    Type.VAR_CHAR -> TypeSpecifier("varcharrecv"),
-    Type.DATE -> TypeSpecifier("date_recv"),
-    Type.TIME -> TypeSpecifier("time_recv"),
-    Type.TIMESTAMP -> TypeSpecifier("timestamp_recv"),
-    Type.TIMESTAMP_TZ -> TypeSpecifier("timestamptz_recv"),
-    Type.INTERVAL -> TypeSpecifier("interval_recv"),
-    Type.TIME_TZ -> TypeSpecifier("timetz_recv"),
-    Type.BIT -> TypeSpecifier("bit_recv"),
-    Type.VAR_BIT -> TypeSpecifier("varbit_recv"),
-    Type.NUMERIC -> TypeSpecifier("numeric_recv"),
-    Type.RECORD -> TypeSpecifier("record_recv"),
-    Type.VOID -> TypeSpecifier("void_recv"),
-    Type.UUID -> TypeSpecifier("uuid_recv")
+    Type.BOOL -> TypeSpecifier("boolrecv", "bool"),
+    Type.BYTE_A -> TypeSpecifier("bytearecv", "bytea"),
+    Type.CHAR -> TypeSpecifier("charrecv", "char"),
+    Type.NAME -> TypeSpecifier("namerecv", "name"),
+    Type.INT_8 -> TypeSpecifier("int8recv", "int8"),
+    Type.INT_2 -> TypeSpecifier("int2recv", "int2"),
+    Type.INT_4 -> TypeSpecifier("int4recv", "int4"),
+    Type.REG_PROC -> TypeSpecifier("regprocrecv", "regproc"),
+    Type.TEXT -> TypeSpecifier("textrecv", "text"),
+    Type.OID -> TypeSpecifier("oidrecv", "oid"),
+    Type.TID -> TypeSpecifier("tidrecv", "tid"),
+    Type.XID -> TypeSpecifier("xidrecv", "xid"),
+    Type.CID -> TypeSpecifier("cidrecv", "cid"),
+    Type.XML -> TypeSpecifier("xml_recv", "xml"),
+    Type.POINT -> TypeSpecifier("point_recv", "point"),
+    Type.L_SEG -> TypeSpecifier("lseg_recv", "lseg"),
+    Type.PATH -> TypeSpecifier("path_recv", "path"),
+    Type.BOX -> TypeSpecifier("box_recv", "box"),
+    Type.POLYGON -> TypeSpecifier("poly_recv", "poly"),
+    Type.LINE -> TypeSpecifier("line_recv", "line"),
+    Type.CIDR -> TypeSpecifier("cidr_recv", "cidr"),
+    Type.FLOAT_4 -> TypeSpecifier("float4recv", "float4"),
+    Type.FLOAT_8 -> TypeSpecifier("float8recv", "float8"),
+    Type.ABS_TIME -> TypeSpecifier("abstimerecv", "abstime"),
+    Type.REL_TIME -> TypeSpecifier("reltimerecv", "reltime"),
+    Type.T_INTERVAL -> TypeSpecifier("tinternalrecv", "tinternal"),
+    Type.UNKNOWN -> TypeSpecifier("unknownrecv", "unknown"),
+    Type.CIRCLE -> TypeSpecifier("circle_recv", "circle"),
+    Type.MONEY -> TypeSpecifier("cash_recv", "cash"),
+    Type.MAC_ADDR -> TypeSpecifier("macaddr_recv", "macaddr"),
+    Type.INET -> TypeSpecifier("inet_recv", "inet"),
+    Type.BP_CHAR -> TypeSpecifier("bpcharrecv", "bpchar"),
+    Type.VAR_CHAR -> TypeSpecifier("varcharrecv", "varchar"),
+    Type.DATE -> TypeSpecifier("date_recv", "date"),
+    Type.TIME -> TypeSpecifier("time_recv", "time"),
+    Type.TIMESTAMP -> TypeSpecifier("timestamp_recv", "timestamp"),
+    Type.TIMESTAMP_TZ -> TypeSpecifier("timestamptz_recv", "timestamptz"),
+    Type.INTERVAL -> TypeSpecifier("interval_recv", "interval"),
+    Type.TIME_TZ -> TypeSpecifier("timetz_recv", "timetz"),
+    Type.BIT -> TypeSpecifier("bit_recv", "bit"),
+    Type.VAR_BIT -> TypeSpecifier("varbit_recv", "varbit"),
+    Type.NUMERIC -> TypeSpecifier("numeric_recv", "numeric"),
+    Type.RECORD -> TypeSpecifier("record_recv", "record"),
+    Type.VOID -> TypeSpecifier("void_recv", "void"),
+    Type.UUID -> TypeSpecifier("uuid_recv", "uuid")
   )
 
   def apply(

@@ -5,6 +5,7 @@ import java.time.{ZoneId, ZonedDateTime}
 
 import com.twitter.finagle.postgres.codec.ServerError
 import com.twitter.finagle.postgres.{Client, OK, Row, Spec}
+import com.twitter.finagle.postgres.Param
 import com.twitter.util.{Await, Duration}
 
 object IntegrationSpec {

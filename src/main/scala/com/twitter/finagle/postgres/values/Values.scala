@@ -198,22 +198,22 @@ object ValueDecoder {
 }
 
 /**
-  * Responsible for encoding a parameter of type T for sending to postgres
-  * @tparam T
+  * Typeclass responsible for encoding a parameter of type T for sending to postgres
+  * @tparam T The type which it encodes
   */
 trait ValueEncoder[-T] {
   def encodeText(t: T): Option[String]
   def encodeBinary(t: T, charset: Charset): Option[ChannelBuffer]
-  def recvFunction: String
-  def elemRecvFunction: Option[String]
+  def typeName: String
+  def elemTypeName: Option[String]
 
-  def contraMap[U](fn: U => T): ValueEncoder[U] = {
+  def contraMap[U](fn: U => T, newTypeName: String = this.typeName, newElemTypeName: Option[String] = elemTypeName): ValueEncoder[U] = {
     val prev = this
     new ValueEncoder[U] {
       def encodeText(u: U) = prev.encodeText(fn(u))
       def encodeBinary(u: U, charset: Charset) = prev.encodeBinary(fn(u), charset)
-      val recvFunction = prev.recvFunction
-      val elemRecvFunction = prev.elemRecvFunction
+      val typeName = newTypeName
+      val elemTypeName = newElemTypeName
     }
   }
 }
@@ -227,14 +227,14 @@ object ValueEncoder extends LowPriorityEncoder {
   }
 
   def instance[T](
-    recv: String,
+    instanceTypeName: String,
     text: T => String,
     binary: (T, Charset) => Option[ChannelBuffer]
   ): ValueEncoder[T] = new ValueEncoder[T] {
     def encodeText(t: T) = Option(t).map(text)
     def encodeBinary(t: T, c: Charset) = binary(t, c)
-    val recvFunction = recv
-    val elemRecvFunction = None
+    val typeName = instanceTypeName
+    val elemTypeName = None
   }
 
   def encodeText[T](t: T, encoder: ValueEncoder[T], charset: Charset = StandardCharsets.UTF_8) =
@@ -265,14 +265,14 @@ object ValueEncoder extends LowPriorityEncoder {
     cb
   }
 
-  implicit val string = instance[String](
-    "textrecv",
+  implicit val string: ValueEncoder[String] = instance(
+    "text",
     identity,
     (s, c) => Option(s).map(s => ChannelBuffers.wrappedBuffer(s.getBytes(c)))
   )
 
-  implicit val boolean: ValueEncoder[Boolean] = instance[Boolean](
-    "boolrecv",
+  implicit val boolean: ValueEncoder[Boolean] = instance(
+    "bool",
     b => if(b) "t" else "f",
     (b, c) => Some {
       val buf = ChannelBuffers.buffer(1)
@@ -281,51 +281,60 @@ object ValueEncoder extends LowPriorityEncoder {
     }
   )
 
-  implicit val bytea = instance[Array[Byte]](
-    "bytearecv",
+  implicit val bytea: ValueEncoder[Array[Byte]] = instance(
+    "bytea",
     bytes => "\\x" + bytes.map(Integer.toHexString(_)).mkString,
     (b, c) => Some(ChannelBuffers.copiedBuffer(b))
   )
-  implicit val int2 = instance[Short]("int2recv", _.toString, (i, c) => Some(buffer(2)(_.writeShort(i))))
-  implicit val int4 = instance[Int]("int4recv", _.toString, (i, c) => Some(buffer(4)(_.writeInt(i))))
-  implicit val int8 = instance[Long]("int8recv", _.toString, (i, c) => Some(buffer(8)(_.writeLong(i))))
-  implicit val float4 = instance[Float]("float4recv", _.toString, (i, c) => Some(buffer(4)(_.writeFloat(i))))
-  implicit val float8 = instance[Double]("float8recv", _.toString, (i, c) => Some(buffer(8)(_.writeDouble(i))))
-  implicit val date = instance[LocalDate]("date_recv", _.toString, (i, c) =>
+  implicit val int2: ValueEncoder[Short] = instance("int2", _.toString, (i, c) => Some(buffer(2)(_.writeShort(i))))
+  implicit val int4: ValueEncoder[Int] = instance("int4", _.toString, (i, c) => Some(buffer(4)(_.writeInt(i))))
+  implicit val int8: ValueEncoder[Long] = instance("int8", _.toString, (i, c) => Some(buffer(8)(_.writeLong(i))))
+  implicit val float4: ValueEncoder[Float] = instance("float4", _.toString, (i, c) => Some(buffer(4)(_.writeFloat(i))))
+  implicit val float8: ValueEncoder[Double] = instance("float8", _.toString, (i, c) => Some(buffer(8)(_.writeDouble(i))))
+  implicit val date: ValueEncoder[LocalDate] = instance("date", _.toString, (i, c) =>
     Option(i).map(i => buffer(4)(_.writeInt((i.getLong(JulianFields.JULIAN_DAY) - 2451545).toInt)))
   )
-  implicit val timestamp = instance[LocalDateTime](
-    "timestamp_recv",
+  implicit val timestamp: ValueEncoder[LocalDateTime] = instance(
+    "timestamp",
     t => java.sql.Timestamp.valueOf(t).toString,
     (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestamp(ts))
   )
-  implicit val timestampTz = instance[ZonedDateTime](
-    "timestamptz_recv",
+  implicit val timestampTz: ValueEncoder[ZonedDateTime] = instance(
+    "timestamptz",
     t => t.toOffsetDateTime.toString,
     (ts, c) => Option(ts).map(ts => DateTimeUtils.writeTimestampTz(ts))
   )
-  implicit val time = instance[LocalTime](
-    "time_recv",
+  implicit val time: ValueEncoder[LocalTime] = instance(
+    "time",
     t => t.toString,
     (t, c) => Option(t).map(t => buffer(8)(_.writeLong(t.toNanoOfDay / 1000)))
   )
-  implicit val timeTz = instance[OffsetTime](
-    "timetz_recv",
+  implicit val timeTz: ValueEncoder[OffsetTime] = instance(
+    "timetz",
     t => t.toString,
     (t, c) => Option(t).map(DateTimeUtils.writeTimeTz)
   )
-  implicit val interval = instance[Interval](
-    "interval_recv",
+  implicit val interval: ValueEncoder[Interval] = instance(
+    "interval",
     i => i.toString,
     (i, c) => Option(i).map(DateTimeUtils.writeInterval)
   )
-  implicit val numeric = instance[BigDecimal](
-    "numeric_recv",
+  implicit val numeric: ValueEncoder[BigDecimal] = instance(
+    "numeric",
     d => d.bigDecimal.toPlainString,
     (d, c) => Option(d).map(d => Numerics.writeNumeric(d))
   )
+  implicit val numericJava: ValueEncoder[java.math.BigDecimal] = instance(
+    "numeric",
+    d => d.toPlainString,
+    (d, c) => Option(d).map(d => Numerics.writeNumeric(BigDecimal(d)))
+  )
+  implicit val numericBigInt: ValueEncoder[BigInt] = instance(
+    "numeric",
+    i => i.toString()
+  )
   implicit val uuid = instance[UUID](
-    "uuid_recv",
+    "uuid",
     u => u.toString,
     (u, c) => Option(u).map(u => buffer(16) {
       b =>
@@ -334,7 +343,7 @@ object ValueEncoder extends LowPriorityEncoder {
     })
   )
   implicit val hstore = instance[Map[String, Option[String]]](
-    "hstore_recv",
+    "hstore",
     m => HStores.formatHStoreString(m),
     (m, c) => Option(m).map(HStores.encodeHStoreBinary(_, c))
   )
@@ -343,8 +352,8 @@ object ValueEncoder extends LowPriorityEncoder {
   }
 
   implicit def option[T](implicit encodeT: ValueEncoder[T]): ValueEncoder[Option[T]] = new ValueEncoder[Option[T]] {
-    val recvFunction = encodeT.recvFunction
-    val elemRecvFunction = None
+    val typeName = encodeT.typeName
+    val elemTypeName = encodeT.elemTypeName
     def encodeText(optT: Option[T]) = optT.flatMap(encodeT.encodeText)
     def encodeBinary(tOpt: Option[T], c: Charset) = tOpt.flatMap(t => encodeT.encodeBinary(t, c))
   }
