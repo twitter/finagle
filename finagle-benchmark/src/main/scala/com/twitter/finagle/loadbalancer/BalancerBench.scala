@@ -14,7 +14,7 @@ object BalancerBench {
 
   def newFactory(): ServiceFactory[Unit, Unit] =
     ServiceFactory.const(new Service[Unit, Unit] {
-      def apply(req: Unit) = Future.Done
+      def apply(req: Unit): Future[Unit] = Future.Done
     })
 
   def newActivity(num: Int): Activity[Set[ServiceFactory[Unit, Unit]]] = {
@@ -32,7 +32,8 @@ object BalancerBench {
     override def close(deadline: Time): Future[Unit] = Future.Done
   }
 
-  case class NullDistibutor(vector: Vector[NullNode]) extends DistributorT[NullNode] {
+  case class NullDistibutor(vec: Vector[NullNode])
+    extends DistributorT[NullNode](vec) {
     override type This = NullDistibutor
     override def pick(): NullNode = vector.head
     override def needsRebuild: Boolean = false

@@ -1,14 +1,12 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.app.App
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{StatsReceiver, NullStatsReceiver, InMemoryStatsReceiver}
+import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.util.{Function => _, _}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
-import scala.collection.mutable
 
 private[loadbalancer] trait RoundRobinSuite {
   // number of servers
@@ -16,18 +14,18 @@ private[loadbalancer] trait RoundRobinSuite {
   // number of reqs
   val R: Int = 100000
   // tolerated variance
-  val ε: Double = 0.0001*R
+  val variance: Double = 0.0001*R
 
   trait RRServiceFactory extends ServiceFactory[Unit, Int] {
     def meanLoad: Double
   }
 
-  val noBrokers = new NoBrokersAvailableException
+  protected val noBrokers: NoBrokersAvailableException = new NoBrokersAvailableException
 
   def newBal(
     fs: Var[Traversable[RRServiceFactory]],
     sr: StatsReceiver = NullStatsReceiver
-  ): ServiceFactory[Unit, Int] = new RoundRobinBalancer(
+  ): RoundRobinBalancer[Unit, Int] = new RoundRobinBalancer(
     Activity(fs.map(Activity.Ok(_))),
     statsReceiver = sr,
     emptyException = noBrokers,
@@ -37,8 +35,8 @@ private[loadbalancer] trait RoundRobinSuite {
   def assertEven(fs: Traversable[RRServiceFactory]) {
     val ml = fs.head.meanLoad
     for (f <- fs) {
-      assert(math.abs(f.meanLoad - ml) < ε,
-        "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, ε))
+      assert(math.abs(f.meanLoad - ml) < variance,
+        "ml=%f; f.ml=%f; ε=%f".format(ml, f.meanLoad, variance))
     }
   }
 }
@@ -59,8 +57,8 @@ class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
       count += 1
 
       Future.value(new Service[Unit, Int] {
-        def apply(req: Unit) = Future.value(id)
-        override def close(deadline: Time) = {
+        def apply(req: Unit): Future[Int] = Future.value(id)
+        override def close(deadline: Time): Future[Unit] = {
           load -= 1
           sum += load
           count += 1
@@ -69,9 +67,9 @@ class RoundRobinBalancerTest extends FunSuite with RoundRobinSuite {
       })
     }
 
-    def close(deadline: Time) = Future.Done
-    override def toString = "LoadedFactory(%d, %d, %s)".format(id, load, stat)
-    override def status = stat
+    def close(deadline: Time): Future[Unit] = Future.Done
+    override def toString: String = "LoadedFactory(%d, %d, %s)".format(id, load, stat)
+    override def status: Status = stat
   }
 
   test("Balances evenly") {

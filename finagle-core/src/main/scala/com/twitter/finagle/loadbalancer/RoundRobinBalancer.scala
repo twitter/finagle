@@ -1,10 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
-import com.twitter.finagle.{ClientConnection, NoBrokersAvailableException, Service,
-  ServiceFactory, ServiceFactoryProxy, Status}
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.StatsReceiver
+import com.twitter.finagle.stats.{Counter, StatsReceiver}
+import com.twitter.finagle.{ClientConnection, NoBrokersAvailableException, Service, ServiceFactory, ServiceFactoryProxy, Status}
 import com.twitter.util.{Activity, Future, Promise, Time}
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * A simple round robin balancer that chooses the next backend in
@@ -23,69 +23,47 @@ class RoundRobinBalancer[Req, Rep](
   private[this] val ready = new Promise[Unit]
   override def onReady: Future[Unit] = ready
 
-  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
-
-  override def apply(conn: ClientConnection): Future[Service[Req,Rep]] = {
-    dist.pick()(conn)
-  }
+  protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
 
   protected class Node(val factory: ServiceFactory[Req, Rep])
-      extends ServiceFactoryProxy[Req,Rep](factory)
-      with NodeT[Req,Rep] { self =>
+    extends ServiceFactoryProxy[Req,Rep](factory)
+    with NodeT[Req,Rep] { self =>
     type This = Node
     // Note: These stats are never updated.
-    def load = 0.0
-    def pending = 0
-    def token = 0
+    def load: Double = 0.0
+    def pending: Int = 0
+    def token: Int = 0
 
     override def close(deadline: Time): Future[Unit] = factory.close(deadline)
     override def apply(conn: ClientConnection): Future[Service[Req,Rep]] = factory(conn)
   }
 
   /**
-    * A simple round robin distributor.
-    */
-  protected class Distributor(val vector: Vector[Node])
-      extends DistributorT[Node] {
+   * A simple round robin distributor.
+   */
+  protected class Distributor(vector: Vector[Node])
+    extends DistributorT[Node](vector) {
     type This = Distributor
 
-    @volatile private[this] var sawDown = false
-    private[this] var currentNode = 0
-
-    private[this] val nodeUp: Node => Boolean = {_.isAvailable}
-    private[this] val nodeDown: Node => Boolean = {!_.isAvailable}
-
-    private[this] val (up, down) = vector.partition(nodeUp) match {
-      case (Vector(), down) => (down, Vector.empty)
-      case updown => updown
-    }
+    private[this] val currentNode = new AtomicLong()
 
     // For each node that's requested, we move the currentNode index
     // around the wheel using mod arithmetic. This is the round robin
     // of our balancer.
-    private def chooseNext(): Int = {
-      synchronized {
-        currentNode = (currentNode + 1) % up.size
-        currentNode
-      }
+    private def chooseNext(vecSize: Int): Int = {
+      val next = currentNode.getAndIncrement()
+      math.abs(next % vecSize).toInt
     }
 
-    /**
-      * Will only return Nodes that have Status.Open
-      */
     def pick(): Node = {
-      if (up.isEmpty) failingNode(emptyException)
-      else {
-        val node = up(chooseNext())
-        node.status match {
-          case Status.Open => node
-          case _ => up.find(_.isAvailable).getOrElse(failingNode(emptyException))
-        }
-      }
-    }
+      if (vector.isEmpty)
+        return failingNode(emptyException)
 
-    def needsRebuild: Boolean = {
-      sawDown || down.exists(nodeUp) || up.exists(nodeDown)
+      val vec = vectorForPick
+      val node = vec(chooseNext(vec.size))
+      if (node.status != Status.Open)
+        sawDown = true
+      node
     }
 
     def rebuild(): This = new Distributor(vector)

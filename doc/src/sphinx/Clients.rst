@@ -548,6 +548,13 @@ Since we have information about the availability of an endpoint in the balancer,
 a viable intersection to validate such changes. Balancers have a "probation" capability built-in
 behind a client parameter [#probation]_.
 
+Behavior when no nodes are available
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When there are no nodes in the `com.twitter.finagle.Status.Open` state, the balancers
+must make a decision. One approach is to fail the request at this point. Instead,
+Finagle makes an optimistic decision that its view of the nodes may be out-of-date
+and picks a node it hopes has become available.
+
 :ref:`Related stats <loadbalancer_stats>`
 
 Circuit Breaking
