@@ -1,20 +1,13 @@
 package com.twitter.finagle.postgres.values
 
-import java.math.BigInteger
 import java.net.InetAddress
 import java.nio.charset.{Charset, StandardCharsets}
-
-import com.twitter.logging.Logger
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
 import java.time._
-import java.time.temporal.{ChronoField, JulianFields}
-import java.util.{Date, TimeZone, UUID}
+import java.time.temporal.JulianFields
+import java.util.UUID
 
 import com.twitter.util.{Return, Try}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import scala.util.matching.Regex
-import scala.util.parsing.combinator.RegexParsers
 
 /*
  * Simple wrapper around a value in a Postgres row.
@@ -220,6 +213,8 @@ trait ValueEncoder[-T] {
 
 object ValueEncoder extends LowPriorityEncoder {
 
+  case class Exported[T](encoder: ValueEncoder[T])
+
   private val nullParam = {
     val buf = ChannelBuffers.buffer(4)
     buf.writeInt(-1)
@@ -331,9 +326,15 @@ object ValueEncoder extends LowPriorityEncoder {
   )
   implicit val numericBigInt: ValueEncoder[BigInt] = instance(
     "numeric",
-    i => i.toString()
+    i => i.toString,
+    (i, c) => Option(i).map(i => Numerics.writeNumeric(BigDecimal(i)))
   )
-  implicit val uuid = instance[UUID](
+  implicit val numericJavaBigInt: ValueEncoder[java.math.BigInteger] = instance(
+    "numeric",
+    i => i.toString,
+    (i, c) => Option(i).map(i => Numerics.writeNumeric(BigDecimal(i)))
+  )
+  implicit val uuid: ValueEncoder[UUID] = instance(
     "uuid",
     u => u.toString,
     (u, c) => Option(u).map(u => buffer(16) {
@@ -342,12 +343,12 @@ object ValueEncoder extends LowPriorityEncoder {
         b.writeLong(u.getLeastSignificantBits)
     })
   )
-  implicit val hstore = instance[Map[String, Option[String]]](
+  implicit val hstore: ValueEncoder[Map[String, Option[String]]] = instance[Map[String, Option[String]]](
     "hstore",
     m => HStores.formatHStoreString(m),
     (m, c) => Option(m).map(HStores.encodeHStoreBinary(_, c))
   )
-  implicit val hstoreNoNulls = hstore.contraMap {
+  implicit val hstoreNoNulls: ValueEncoder[Map[String, String]] = hstore.contraMap {
     m: Map[String, String] => m.mapValues(Option(_))
   }
 
@@ -360,5 +361,5 @@ object ValueEncoder extends LowPriorityEncoder {
 }
 
 trait LowPriorityEncoder {
-
+  implicit def fromExport[T](implicit export: ValueEncoder.Exported[T]): ValueEncoder[T] = export.encoder
 }
