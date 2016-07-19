@@ -344,7 +344,7 @@ class IntegrationSpec extends Spec {
       "create an extension using CREATE EXTENSION" in {
         if(user == "postgres") {
           val client = getClient
-          val result = client.prepareAndExecute("CREATE EXTENSION hstore IF NOT EXISTS")
+          val result = client.prepareAndExecute("CREATE EXTENSION IF NOT EXISTS hstore")
           Await.result(result)
         }
       }

@@ -87,34 +87,34 @@ object ValueDecoder {
     InetAddress.getByAddress(arr)
   }
 
-  val Boolean = instance(s => Return(s == "t" || s == "true"), (b,c) => Try(b.readByte() != 0))
-  val Bytea = instance(
+  implicit val Boolean: ValueDecoder[Boolean] = instance(s => Return(s == "t" || s == "true"), (b,c) => Try(b.readByte() != 0))
+  implicit val Bytea: ValueDecoder[Array[Byte]] = instance(
     s => Try(s.stripPrefix("\\x").sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)),
     (b,c) => Try(Buffers.readBytes(b)))
-  val String = instance(s => Return(s), (b,c) => Try(Buffers.readString(b, c)))
-  val Int2 = instance(s => Try(s.toShort), (b,c) => Try(b.readShort()))
-  val Int4 = instance(s => Try(s.toInt), (b,c) => Try(b.readInt()))
-  val Int8 = instance(s => Try(s.toLong), (b,c) => Try(b.readLong()))
-  val Float4 = instance(s => Try(s.toFloat), (b,c) => Try(b.readFloat()))
-  val Float8 = instance(s => Try(s.toDouble), (b,c) => Try(b.readDouble()))
+  implicit val String: ValueDecoder[String] = instance(s => Return(s), (b,c) => Try(Buffers.readString(b, c)))
+  implicit val Int2: ValueDecoder[Short] = instance(s => Try(s.toShort), (b,c) => Try(b.readShort()))
+  implicit val Int4: ValueDecoder[Int] = instance(s => Try(s.toInt), (b,c) => Try(b.readInt()))
+  implicit val Int8: ValueDecoder[Long] = instance(s => Try(s.toLong), (b,c) => Try(b.readLong()))
+  implicit val Float4: ValueDecoder[Float] = instance(s => Try(s.toFloat), (b,c) => Try(b.readFloat()))
+  implicit val Float8: ValueDecoder[Double] = instance(s => Try(s.toDouble), (b,c) => Try(b.readDouble()))
   val Oid = instance(s => Try(s.toLong), (b,c) => Try(Integer.toUnsignedLong(b.readInt())))
-  val Inet = instance(s => Try(InetAddress.getByName(s)), (b, c) => Try(readInetAddress(b)))
-  val Date = instance(
+  implicit val Inet: ValueDecoder[InetAddress] = instance(s => Try(InetAddress.getByName(s)), (b, c) => Try(readInetAddress(b)))
+  implicit val Date: ValueDecoder[LocalDate] = instance(
     s => Try(LocalDate.parse(s)),
     (b, c) => Try(LocalDate.now().`with`(JulianFields.JULIAN_DAY, b.readInt() + 2451545)))
-  val Time = instance(
+  implicit val Time: ValueDecoder[LocalTime] = instance(
     s => Try(LocalTime.parse(s)),
     (b, c) => Try(LocalTime.ofNanoOfDay(b.readLong() * 1000))
   )
-  val TimeTz = instance(
+  implicit val TimeTz: ValueDecoder[OffsetTime] = instance(
     s => Try(DateTimeUtils.parseTimeTz(s)),
     (b, c) => Try(DateTimeUtils.readTimeTz(b))
   )
-  val Timestamp = instance(
+  implicit val Timestamp: ValueDecoder[LocalDateTime] = instance(
     s => Try(LocalDateTime.ofInstant(java.sql.Timestamp.valueOf(s).toInstant, ZoneId.systemDefault())),
     (b, c) => Try(LocalDateTime.ofInstant(DateTimeUtils.readTimestamp(b), ZoneOffset.UTC))
   )
-  val TimestampTZ = instance(
+  implicit val TimestampTZ: ValueDecoder[ZonedDateTime] = instance(
     s => Try {
       val (str, zoneOffs) = DateTimeUtils.ZONE_REGEX.findFirstMatchIn(s) match {
         case Some(m) => m.group(1) -> (m.group(2) match {
@@ -130,12 +130,12 @@ object ValueDecoder {
     },
     (b, c) => Try(DateTimeUtils.readTimestamp(b).atZone(ZoneId.systemDefault()))
   )
-  val Interval = instance(
+  implicit val Interval: ValueDecoder[Interval] = instance(
     s => Try(com.twitter.finagle.postgres.values.Interval.parse(s)),
     (b, c) => Try(DateTimeUtils.readInterval(b))
   )
-  val Uuid = instance(s => Try(UUID.fromString(s)), (b, c) => Try(new UUID(b.readLong(), b.readLong())))
-  val Numeric = instance(
+  implicit val Uuid: ValueDecoder[UUID] = instance(s => Try(UUID.fromString(s)), (b, c) => Try(new UUID(b.readLong(), b.readLong())))
+  implicit val Numeric: ValueDecoder[BigDecimal] = instance(
     s => Try(BigDecimal(s)),
     (b, c) => Try(Numerics.readNumeric(b))
   )
@@ -147,7 +147,7 @@ object ValueDecoder {
     }
   )
 
-  val HStore = instance(
+  implicit val HStore: ValueDecoder[Map[String, Option[String]]] = instance(
     s => Try {
       HStores.parseHStoreString(s)
         .getOrElse(throw new IllegalArgumentException("Invalid format for hstore"))
