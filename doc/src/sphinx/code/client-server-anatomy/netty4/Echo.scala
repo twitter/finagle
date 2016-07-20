@@ -3,7 +3,7 @@ import com.twitter.finagle._
 import com.twitter.finagle.client.{StackClient, Transporter, StdStackClient}
 import com.twitter.finagle.dispatch.{SerialClientDispatcher, SerialServerDispatcher}
 import com.twitter.finagle.filter.MaskCancelFilter
-import com.twitter.finagle.netty3.{Netty3Transporter, Netty3Listener}
+import com.twitter.finagle.netty4.{Netty4Transporter, Netty4Listener}
 import com.twitter.finagle.server.{StackServer, Listener, StdStackServer}
 import com.twitter.finagle.service.{RetryExceptionsFilter, RetryPolicy, TimeoutFilter}
 import com.twitter.finagle.transport.Transport
@@ -27,7 +27,7 @@ object Echo extends Client[String, String] with Server[String, String] {
 
     //#transporter
     protected def newTransporter(): Transporter[String, String] =
-      Netty3Transporter(StringClientPipeline, params)
+      Netty4Transporter(StringClientPipeline, params)
     //#transporter
 
     protected def newDispatcher(
@@ -60,7 +60,7 @@ object Echo extends Client[String, String] with Server[String, String] {
 
     //#serverlistener
     protected def newListener(): Listener[String, String] =
-      Netty3Listener(StringServerPipeline, params)
+      Netty4Listener(StringServerPipeline, params)
     //#serverlistener
 
     protected def newDispatcher(
@@ -87,7 +87,7 @@ object SimpleListenerExample {
     }
     val serveTransport = (t: Transport[String, String]) =>
       new SerialServerDispatcher(t, service)
-    val listener = Netty3Listener[String, String](
+    val listener = Netty4Listener[String, String](
       StringServerPipeline, StackServer.defaultParams)
     val server = listener.listen(address) { serveTransport(_) }
     //#simplelisten
@@ -111,7 +111,7 @@ object EchoServerExample {
 object BasicClient {
   //#explicitbridge
   val addr = new java.net.InetSocketAddress("localhost", 8080)
-  val transporter = Netty3Transporter[String, String](
+  val transporter = Netty4Transporter[String, String](
     StringClientPipeline, StackClient.defaultParams)
 
   val bridge: Future[Service[String, String]] =

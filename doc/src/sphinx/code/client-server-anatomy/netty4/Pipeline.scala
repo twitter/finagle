@@ -1,9 +1,9 @@
-import org.jboss.netty.handler.codec.string.{StringEncoder, StringDecoder}
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
-import org.jboss.netty.util.CharsetUtil
-
 //#serverpipeline
+import io.netty.handler.codec.string.{StringEncoder, StringDecoder}
+import io.netty.channel._
+import io.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
+import io.netty.util.CharsetUtil
+
 object StringServerPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()
@@ -16,6 +16,11 @@ object StringServerPipeline extends ChannelPipelineFactory {
 //#serverpipeline
 
 //#clientpipeline
+import io.netty.handler.codec.string.{StringEncoder, StringDecoder}
+import io.netty.channel._
+import io.netty.handler.codec.frame.{Delimiters, DelimiterBasedFrameDecoder}
+import io.netty.util.CharsetUtil
+
 object StringClientPipeline extends ChannelPipelineFactory {
   def getPipeline = {
     val pipeline = Channels.pipeline()
