@@ -20,7 +20,7 @@ private[finagle] class HttpTransport[A <: Message, B <: Message](
   def this(self: StreamTransport[A, B]) =
     this(self, new ConnectionManager)
 
-  // Servers are don't use `status` to determine when they should
+  // Servers don't use `status` to determine when they should
   // close a transport, so we close the transport when the connection
   // is ready to be closed.
   manager.onClose.before(self.close())
