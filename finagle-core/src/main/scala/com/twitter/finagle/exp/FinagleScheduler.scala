@@ -1,8 +1,8 @@
 package com.twitter.finagle.exp
 
 import com.twitter.app.GlobalFlag
-import com.twitter.concurrent.{BridgedThreadPoolScheduler, Scheduler, LocalScheduler}
-import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge}
+import com.twitter.concurrent.{BridgedThreadPoolScheduler, LocalScheduler, Scheduler}
+import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge, StatsReceiver}
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.jvm.numProcs
 import java.util.concurrent.{BlockingQueue, ThreadFactory, ThreadPoolExecutor, TimeUnit}
@@ -59,6 +59,22 @@ private[finagle] object FinagleScheduler {
       new ForkJoinScheduler(numWorkers, DefaultStatsReceiver.scope("forkjoin")))
   }
 
+  // exposed for testing
+  private[exp] def addGauges(
+    scheduler: Scheduler,
+    statsReceiver: StatsReceiver,
+    gauges: mutable.MutableList[Gauge]
+  ): Unit = {
+    gauges.synchronized {
+      gauges += statsReceiver.addGauge("dispatches") {
+        scheduler.numDispatches.toFloat
+      }
+      gauges += statsReceiver.addGauge("blocking_ms") {
+        TimeUnit.NANOSECONDS.toMillis(scheduler.blockingTimeNanos)
+      }
+    }
+  }
+
   def init(): Unit = {
     scheduler().split(":").toList match {
       case "bridged" :: Integer(numWorkers) :: Nil => switchToBridged(numWorkers)
@@ -76,13 +92,6 @@ private[finagle] object FinagleScheduler {
         throw new IllegalArgumentException("Wrong scheduler config: %s".format(scheduler()))
     }
 
-    gauges.synchronized {
-      gauges :+ DefaultStatsReceiver.scope("scheduler").addGauge("dispatches") {
-        Scheduler.numDispatches.toFloat
-      }
-      gauges :+ DefaultStatsReceiver.scope("scheduler").addGauge("blocking_ms") {
-        TimeUnit.NANOSECONDS.toMillis(Scheduler.blockingTimeNanos)
-      }
-    }
+    addGauges(Scheduler, DefaultStatsReceiver.scope("scheduler"), gauges)
   }
 }
