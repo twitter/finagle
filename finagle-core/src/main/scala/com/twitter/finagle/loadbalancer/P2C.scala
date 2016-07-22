@@ -27,13 +27,12 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     def rebuild(vec: Vector[Node]): This = new Distributor(vec)
 
     def pick(): Node = {
-      if (vector.isEmpty)
+      if (selections.isEmpty)
         return failingNode(emptyException)
 
-      val vec = vectorForPick
-      val size = vec.size
+      val size = selections.size
 
-      if (size == 1) vec.head else {
+      if (size == 1) selections.head else {
         val a = rng.nextInt(size)
         var b = rng.nextInt(size)
 
@@ -44,8 +43,8 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
           i -= 1
         }
 
-        val nodeA = vec(a)
-        val nodeB = vec(b)
+        val nodeA = selections(a)
+        val nodeB = selections(b)
 
         if (nodeA.status != Status.Open || nodeB.status != Status.Open)
           sawDown = true

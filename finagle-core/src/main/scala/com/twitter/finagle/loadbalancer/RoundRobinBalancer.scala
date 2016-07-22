@@ -59,8 +59,7 @@ class RoundRobinBalancer[Req, Rep](
       if (vector.isEmpty)
         return failingNode(emptyException)
 
-      val vec = vectorForPick
-      val node = vec(chooseNext(vec.size))
+      val node = selections(chooseNext(selections.size))
       if (node.status != Status.Open)
         sawDown = true
       node

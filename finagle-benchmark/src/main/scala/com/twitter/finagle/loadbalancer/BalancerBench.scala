@@ -35,7 +35,7 @@ object BalancerBench {
   case class NullDistibutor(vec: Vector[NullNode])
     extends DistributorT[NullNode](vec) {
     override type This = NullDistibutor
-    override def pick(): NullNode = vector.head
+    override def pick(): NullNode = selections.head
     override def needsRebuild: Boolean = false
     override def rebuild(): NullDistibutor = this
     override def rebuild(vector: Vector[NullNode]): NullDistibutor = NullDistibutor(vector)

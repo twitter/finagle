@@ -19,7 +19,7 @@ protected[loadbalancer] abstract class DistributorT[Node](
    * `up` is the Vector of nodes that were `Status.Open` at creation time.
    * `down` is the Vector of nodes that were not `Status.Open` at creation time.
    */
-  protected[this] val (up: Vector[Node], down: Vector[Node]) =
+  private[this] val (up: Vector[Node], down: Vector[Node]) =
     vector.partition(nodeUp)
 
   /**
@@ -34,7 +34,7 @@ protected[loadbalancer] abstract class DistributorT[Node](
    * If all nodes are down, we might as well try to send requests somewhere
    * as our view of the world may be out of date.
    */
-  protected[this] def vectorForPick: Vector[Node] =
+  protected[this] val selections: Vector[Node] =
     if (up.isEmpty) down else up
 
   /**

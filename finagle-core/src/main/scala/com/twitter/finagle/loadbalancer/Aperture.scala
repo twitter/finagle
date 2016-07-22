@@ -52,9 +52,8 @@ private[loadbalancer] class ApertureLoadBandBalancer[Req, Rep](
   with Aperture[Req, Rep]
   with LoadBand[Req, Rep]
   with Updating[Req, Rep] {
-
+  require(minAperture > 0, s"minAperture must be > 0, but was $minAperture")
   protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
-
 }
 
 object Aperture {
@@ -89,7 +88,7 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   protected def rng: Rng
 
   /**
-   * The minimum allowable aperture. Must be positive.
+   * The minimum allowable aperture. Must be greater than zero.
    */
   protected def minAperture: Int
 
@@ -99,18 +98,24 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
     extends DistributorT[Node](vector) {
     type This = Distributor
 
-    private[this] val (ring, unitWidth, maxAperture) =
-      if (up.isEmpty) {
-        (ZeroRing, RingWidth, RingWidth)
+    private[this] val (ring, unitWidth, maxAperture, minAperture) =
+      if (selections.isEmpty) {
+        (ZeroRing, RingWidth, RingWidth, 0)
       } else {
-        val numNodes = up.size
+        val numNodes = selections.size
         val ring = Ring(numNodes, RingWidth)
-        val unit = RingWidth/numNodes
-        val max = RingWidth/unit
-        (ring, unit, max)
-      }
+        val unit = RingWidth / numNodes
+        val max = RingWidth / unit
 
-    private[this] val minAperture = math.min(Aperture.this.minAperture, maxAperture)
+        // The logic of pick() assumes that the aperture size is less than or
+        // equal to number of available nodes, and may break if that is not true.
+        val min = math.min(
+          math.min(Aperture.this.minAperture, max),
+          numNodes
+        )
+
+        (ring, unit, max, min)
+      }
 
     @volatile private[Aperture] var aperture = initAperture
 
@@ -118,7 +123,7 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
     adjust(0)
 
     protected[Aperture] def adjust(n: Int) {
-      aperture = math.max(minAperture, math.min(maxAperture, aperture+n))
+      aperture = math.max(minAperture, math.min(maxAperture, aperture + n))
     }
 
     def rebuild(): This =
@@ -135,16 +140,15 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
     // We use power of two choices to pick nodes. This keeps things
     // simple, but we could reasonably use a heap here, too.
     def pick(): Node = {
-      if (vector.isEmpty)
+      if (selections.isEmpty)
         return failingNode(emptyException)
 
-      val vec = vectorForPick
-      if (vec.size == 1)
-        return vec(0)
+      if (selections.size == 1)
+        return selections(0)
 
-      val (i, j) = ring.pick2(rng, 0, aperture*unitWidth)
-      val a = vec(i)
-      val b = vec(j)
+      val (i, j) = ring.pick2(rng, 0, aperture * unitWidth)
+      val a = selections(i)
+      val b = selections(j)
 
       if (a.status != Status.Open || b.status != Status.Open)
         sawDown = true
