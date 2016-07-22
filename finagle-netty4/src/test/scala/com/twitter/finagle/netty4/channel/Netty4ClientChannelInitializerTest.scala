@@ -28,7 +28,7 @@ class Netty4ClientChannelInitializerTest extends FunSuite {
     }
 
     val init =
-      new RawNetty4ClientChannelInitializer[ByteBuf, ByteBuf](
+      new RawNetty4ClientChannelInitializer(
         pipelineInit = _.addLast(reverser),
         params = Params.empty)
 

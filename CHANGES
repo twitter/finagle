@@ -25,6 +25,9 @@ Breaking API Changes
   * finagle-redis: Redis codec (i.e., `c.t.f.Codec`) is removed. Use `c.t.f.Redis.client`
     instead. ``RB_ID=848815``
 
+  * finagle-core: As part of a move away from encoding/decoding in the Netty pipeline, removed
+    `FrameEncoder` and `FrameDecoder` types, found in `c.t.f.codec`. ``RB_ID=847716``
+
 New Features
 ~~~~~~~~~~~~
 

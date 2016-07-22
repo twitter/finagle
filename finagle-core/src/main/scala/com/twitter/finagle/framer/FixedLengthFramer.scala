@@ -1,34 +1,33 @@
-package com.twitter.finagle.codec
+package com.twitter.finagle.framer
 
 import com.twitter.io.Buf
-import scala.reflect.ClassTag
+
+private[finagle] object FixedLengthFramer {
+  val NoFrames: IndexedSeq[Buf] = IndexedSeq.empty[Buf]
+}
 
 /**
- * A stateful fixed-length frame decoder.
+ * A stateful fixed-length framer.
  *
- * @param frameSize number of bytes in a `T` frame.
- * @param decodeFrame function which decodes a [[com.twitter.io.Buf]] of
- *                    `frameSize` bytes into a `T` value.
- * @tparam T the frame type.
+ * @param frameSize number of bytes in a frame.
  *
  * @note this class provides no thread-safety and must be explicitly synchronized.
  *       This implies a use-case where a single thread exclusively processes a
  *       byte stream.
  */
-private[finagle] class FixedLengthDecoder[T: ClassTag](frameSize: Int, decodeFrame: Buf => T)
-  extends FrameDecoder[T] {
+private[finagle] class FixedLengthFramer(frameSize: Int) extends Framer {
+  import FixedLengthFramer._
 
   if (frameSize < 1)
     throw new IllegalArgumentException(s"frameSize must be greater than zero, saw: $frameSize")
 
   private[this] var accumulated: Buf = Buf.Empty
-  private[this] val NoFrames: IndexedSeq[T] = IndexedSeq.empty[T]
 
   /**
    * Decode the buffer `b` along with accumulated data into as
-   * many `T`-typed frames as possible.
+   * many fixed-size frames as possible.
    */
-  def apply(b: Buf): IndexedSeq[T] = {
+  def apply(b: Buf): IndexedSeq[Buf] = {
     val merged = accumulated.concat(b)
     val length = merged.length
     if (length < frameSize) {
@@ -36,12 +35,12 @@ private[finagle] class FixedLengthDecoder[T: ClassTag](frameSize: Int, decodeFra
       NoFrames
     } else {
       // length >= frameSize
-      val result = new Array[T](length / frameSize)
+      val result = new Array[Buf](length / frameSize)
       var sliceIdx = 0
       var resultIdx = 0
       while (sliceIdx + frameSize <= length) {
         val slice = merged.slice(sliceIdx, sliceIdx + frameSize)
-        result(resultIdx) = decodeFrame(slice)
+        result(resultIdx) = slice
         sliceIdx += frameSize
         resultIdx += 1
       }

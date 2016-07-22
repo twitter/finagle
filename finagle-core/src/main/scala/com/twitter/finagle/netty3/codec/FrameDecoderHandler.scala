@@ -1,7 +1,7 @@
 package com.twitter.finagle.netty3.codec
 
 import com.twitter.finagle.Failure
-import com.twitter.finagle.codec.FrameDecoder
+import com.twitter.finagle.framer.Framer
 import com.twitter.io.Buf
 import org.jboss.netty.channel._
 
@@ -9,7 +9,7 @@ import org.jboss.netty.channel._
  * Frames Bufs into protocol frames
  */
 private[finagle] class FrameDecoderHandler(
-  framer: FrameDecoder[Buf]) extends SimpleChannelUpstreamHandler {
+  framer: Framer) extends SimpleChannelUpstreamHandler {
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
     e.getMessage match {

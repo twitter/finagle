@@ -1,6 +1,6 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.codec.FrameDecoder
+import com.twitter.finagle.framer.{Framer => FinagleFramer}
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
 import scala.collection.mutable.ArrayBuffer
@@ -30,7 +30,7 @@ private[memcached] object Framer {
  *
  * @note Class contains mutable state. Not thread-safe.
  */
-private[memcached] trait Framer extends FrameDecoder[Buf] {
+private[memcached] trait Framer extends FinagleFramer {
   import Framer._
 
   private[this] var accum: Buf = Buf.Empty

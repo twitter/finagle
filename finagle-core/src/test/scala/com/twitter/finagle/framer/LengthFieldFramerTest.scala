@@ -1,4 +1,4 @@
-package com.twitter.finagle.codec
+package com.twitter.finagle.framer
 
 import com.twitter.io.Buf
 import org.junit.runner.RunWith
@@ -9,7 +9,7 @@ import scala.util.Random
 
 
 @RunWith(classOf[JUnitRunner])
-class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks{
+class LengthFieldFramerTest extends FunSuite with GeneratorDrivenPropertyChecks{
 
   val MaxTestFrameSize = 32
   val MaxTestFrames = 30
@@ -63,7 +63,7 @@ class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks
 
     assert(sizes.sum + sizes.length == stream.length)
 
-    val decoder = new LengthFieldDecoder(
+    val decoder = new LengthFieldFramer(
       lengthFieldBegin = 0,
       lengthFieldLength = 1,
       lengthAdjust = 1,
@@ -88,7 +88,7 @@ class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks
     val packetSizeOne = mkBuf(0x11, 0x00, 0x01, 0x0D)
     val packetSizeZero = mkBuf(0x11, 0x00, 0x00)
 
-    val decoder = new LengthFieldDecoder(
+    val decoder = new LengthFieldFramer(
       lengthFieldBegin = 1,
       lengthFieldLength = 2,
       lengthAdjust = 3,
@@ -105,7 +105,7 @@ class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks
   test("behave properly if the length field is in the middle and the given length counts the header") {
     //               { header     len  header}{ data                     }
     val frame = mkBuf(0x0A, 0x0A, 0x09, 0x0A, 0x0D, 0x0D, 0x0D, 0x0D, 0x0D)
-    val decoder = new LengthFieldDecoder(
+    val decoder = new LengthFieldFramer(
       lengthFieldBegin = 2,
       lengthFieldLength = 1,
       lengthAdjust = 0,
@@ -119,7 +119,7 @@ class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks
 
   test("throw FrameTooLargeException when a frame exceeds maxFrameLength") {
     val frame = mkBuf(0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
-    val decoder = new LengthFieldDecoder(
+    val decoder = new LengthFieldFramer(
       lengthFieldBegin = 0,
       lengthFieldLength = 1,
       lengthAdjust = 1,
@@ -127,13 +127,13 @@ class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks
       bigEndian = true
     )
 
-    intercept[LengthFieldDecoder.FrameTooLargeException] {
+    intercept[LengthFieldFramer.FrameTooLargeException] {
       decoder(frame)
     }
   }
 
   def mk(begin: Int = 0, len: Int = 1, adj: Int = 1, max: Int = 64) = {
-    new LengthFieldDecoder(begin, len, adj, max, bigEndian = true)
+    new LengthFieldFramer(begin, len, adj, max, bigEndian = true)
   }
 
   test("validate field length") {
@@ -155,7 +155,7 @@ class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks
 
   test("handle multi-byte sizes in big endian order") {
     def decode(buf: Buf, size: Int) = {
-      val decoder = new LengthFieldDecoder(
+      val decoder = new LengthFieldFramer(
         lengthFieldBegin = 0,
         lengthFieldLength = size,
         lengthAdjust = size,
@@ -179,7 +179,7 @@ class LengthFieldDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks
 
   test("handle multi-byte sizes in little endian order") {
     def decode(buf: Buf, size: Int) = {
-      val decoder = new LengthFieldDecoder(
+      val decoder = new LengthFieldFramer(
         lengthFieldBegin = 0,
         lengthFieldLength = size,
         lengthAdjust = size,

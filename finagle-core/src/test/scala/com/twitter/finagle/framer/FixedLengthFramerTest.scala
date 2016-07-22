@@ -1,4 +1,4 @@
-package com.twitter.finagle.codec
+package com.twitter.finagle.framer
 
 import com.twitter.io.Buf
 import org.junit.runner.RunWith
@@ -8,10 +8,10 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class FixedLengthDecoderTest extends FunSuite with GeneratorDrivenPropertyChecks {
+class FixedLengthFramerTest extends FunSuite with GeneratorDrivenPropertyChecks {
 
   def stringDecoder(frameSize: Int) =
-    new FixedLengthDecoder(frameSize, Buf.Utf8.unapply(_).getOrElse("????"))
+    new FixedLengthFramer(frameSize).andThen(_.map(Buf.Utf8.unapply(_).getOrElse("????")))
 
   test("FixedLengthDecoder can frame a series of buffers") {
     val decode = stringDecoder(4)
