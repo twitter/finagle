@@ -5,7 +5,7 @@ import com.twitter.concurrent.{BridgedThreadPoolScheduler, LocalScheduler, Sched
 import com.twitter.finagle.stats.{DefaultStatsReceiver, Gauge, StatsReceiver}
 import com.twitter.finagle.util.DefaultLogger
 import com.twitter.jvm.numProcs
-import java.util.concurrent.{BlockingQueue, ThreadFactory, ThreadPoolExecutor, TimeUnit}
+import java.util.concurrent.{LinkedTransferQueue, ThreadFactory, ThreadPoolExecutor, TimeUnit}
 import scala.collection.mutable
 
 object scheduler extends GlobalFlag[String](
@@ -30,15 +30,7 @@ private[finagle] object FinagleScheduler {
   }
 
   private def switchToBridged(numWorkers: Int): Unit = {
-    val queue = try
-      Class.forName(
-        "java.util.concurrent.LinkedTransferQueue"
-      ).newInstance.asInstanceOf[BlockingQueue[Runnable]]
-    catch {
-      case _: ClassNotFoundException =>
-        log.info("bridged scheduler is not available on pre java 7, using local instead")
-        return
-    }
+    val queue = new LinkedTransferQueue[Runnable]()
 
     Scheduler.setUnsafe(new BridgedThreadPoolScheduler(
       "bridged scheduler",
