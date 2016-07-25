@@ -604,6 +604,13 @@ Bug Fixes
   * finagle-thrift: `c.t.f.ThriftRichClient` scoped stats label is now threaded
     properly through `newServiceIface` ``RB_ID=760157``
 
+Bug Fixes
+~~~~~~~~~
+
+  * finagle-core: Fix race condition in `c.t.f.netty3.channel.IdleConnectionFilter` when
+    a connection is closed by the client.
+
+
 6.30.0
 ------
 
