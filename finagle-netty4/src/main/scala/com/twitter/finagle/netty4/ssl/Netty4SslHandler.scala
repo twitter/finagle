@@ -11,7 +11,6 @@ import io.netty.channel._
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import io.netty.handler.ssl.{ApplicationProtocolConfig, SslContext, SslContextBuilder, SslHandler}
 import io.netty.util.concurrent.{Future => NettyFuture, GenericFutureListener}
-import io.netty.util.internal.OneTimeTask
 import java.io.File
 import javax.net.ssl.SSLContext
 import scala.collection.JavaConverters._
@@ -41,7 +40,7 @@ private[netty4] class Netty4SslHandler(params: Stack.Params) extends ChannelInit
     new GenericFutureListener[NettyFuture[Channel]] {
       def operationComplete(f: NettyFuture[Channel]): Unit = {
         val channel = f.getNow
-        channel.eventLoop().execute(new OneTimeTask {
+        channel.eventLoop().execute(new Runnable {
           def run(): Unit = channel.close()
         })
       }
