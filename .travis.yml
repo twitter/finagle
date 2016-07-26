@@ -74,9 +74,9 @@ before_script:
 
 script:
   # run for all environments
-  - ./sbt ++$TRAVIS_SCALA_VERSION "$PROJECT/test"
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverage "$PROJECT/test" coverageReport
 
 # TODO: support code coverage
-# after_success: 
-#   - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
-#   - bash <(curl -s https://codecov.io/bash)
+after_success: 
+  - ./sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+  - bash <(curl -s https://codecov.io/bash)
