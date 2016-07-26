@@ -356,6 +356,9 @@ object Memcached extends finagle.Client[Command, Response]
       finagle.param.ProtocolLibrary("memcached")
   }
 
+  /**
+   * A Memcached server that should be used only for testing
+   */
   case class Server(
       stack: Stack[ServiceFactory[Command, Response]] = StackServer.newStack,
       params: Stack.Params = Server.defaultParams)

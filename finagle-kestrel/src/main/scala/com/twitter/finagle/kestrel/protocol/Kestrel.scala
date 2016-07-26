@@ -1,21 +1,23 @@
 package com.twitter.finagle.kestrel.protocol
 
-import com.twitter.finagle.memcached.protocol.text.client.{Decoder => ClientDecoder}
-import com.twitter.finagle.memcached.protocol.text.server.{Decoder => ServerDecoder}
-import com.twitter.finagle.memcached.protocol.text.{BufToChannelBuf, Encoder}
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
-import com.twitter.finagle.{Codec, CodecFactory, KestrelTracingFilter, ServiceFactory, Stack}
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.finagle.memcached.protocol.text.client.{ClientFramer, ClientDecoder}
+import com.twitter.finagle.memcached.protocol.text.server.{ServerDecoder, ServerFramer}
+import com.twitter.finagle.memcached.protocol.text.{DecodingHandler, Encoder}
+import com.twitter.finagle.netty3.codec.{FrameDecoderHandler, BufCodec}
+import com.twitter.finagle._
+import com.twitter.io.Buf
 import org.jboss.netty.channel._
+import scala.collection.immutable
 
 private[finagle] object KestrelClientPipelineFactory extends ChannelPipelineFactory {
   def getPipeline(): ChannelPipeline = {
     val pipeline = Channels.pipeline()
 
-    pipeline.addLast("decoder", new ClientDecoder)
+    pipeline.addLast("bufCodec", new BufCodec)
+    pipeline.addLast("framer", new FrameDecoderHandler(new ClientFramer))
+    pipeline.addLast("decoder", new DecodingHandler(new ClientDecoder))
     pipeline.addLast("decoding2response", new DecodingToResponse)
 
-    pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
     pipeline.addLast("encoder", new Encoder)
     pipeline.addLast("command2encoding", new CommandToEncoding)
     pipeline
@@ -23,7 +25,7 @@ private[finagle] object KestrelClientPipelineFactory extends ChannelPipelineFact
 }
 
 class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
-  private[this] val storageCommands = collection.Set[ChannelBuffer]("set")
+  private[this] val storageCommands = immutable.Set[Buf](Buf.Utf8("set"))
 
   def this() = this(false)
 
@@ -33,10 +35,11 @@ class Kestrel(failFast: Boolean) extends CodecFactory[Command, Response] {
         def getPipeline(): ChannelPipeline = {
           val pipeline = Channels.pipeline()
 
-          pipeline.addLast("decoder", new ServerDecoder(storageCommands))
+          pipeline.addLast("bufCodec", new BufCodec)
+          pipeline.addLast("framer", new FrameDecoderHandler(new ServerFramer(storageCommands)))
+          pipeline.addLast("decoder", new DecodingHandler(new ServerDecoder(storageCommands)))
           pipeline.addLast("decoding2command", new DecodingToCommand)
 
-          pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
           pipeline.addLast("encoder", new Encoder)
           pipeline.addLast("response2encoding", new ResponseToEncoding)
           pipeline

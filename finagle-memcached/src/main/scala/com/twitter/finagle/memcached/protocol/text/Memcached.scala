@@ -1,18 +1,12 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import org.jboss.netty.buffer.ChannelBuffer
+import com.twitter.finagle.memcached.protocol.text.client.{ClientDecoder, ClientFramer}
+import com.twitter.finagle.memcached.protocol.text.server.{ServerFramer, ServerDecoder}
+import com.twitter.finagle.netty3.codec.{FrameDecoderHandler, BufCodec}
 import org.jboss.netty.channel._
-
 import scala.collection.immutable
-
-import client.DecodingToResponse
-import client.{Decoder => ClientDecoder}
-import server.DecodingToCommand
-import server.{Decoder => ServerDecoder}
-
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.protocol._
-import com.twitter.finagle.memcached.util.ChannelBufferUtils._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.io.Buf
@@ -23,13 +17,16 @@ object Memcached {
 }
 
 object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
+  import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
+
   def getPipeline() = {
     val pipeline = Channels.pipeline()
 
-    pipeline.addLast("decoder", new ClientDecoder)
+    pipeline.addLast("bufCodec", new BufCodec)
+    pipeline.addLast("framer", new FrameDecoderHandler(new ClientFramer))
+    pipeline.addLast("decoder", new DecodingHandler(new ClientDecoder))
     pipeline.addLast("decoding2response", new DecodingToResponse)
 
-    pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
     pipeline.addLast("encoder", new Encoder)
     pipeline.addLast("command2encoding", new CommandToEncoding)
     pipeline
@@ -37,18 +34,20 @@ object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
 }
 
 object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
-  private val storageCommands = collection.Set[ChannelBuffer](
-    "set", "add", "replace", "append", "prepend", "cas")
+  import com.twitter.finagle.memcached.protocol.text.server.DecodingToCommand
+
+  private val storageCommands = immutable.Set[Buf](
+    Buf.Utf8("set"), Buf.Utf8("add"), Buf.Utf8("replace"), Buf.Utf8("append"), Buf.Utf8("prepend"),
+    Buf.Utf8("cas"))
 
   def getPipeline() = {
     val pipeline = Channels.pipeline()
 
-  //        pipeline.addLast("exceptionHandler", new ExceptionHandler)
-
-    pipeline.addLast("decoder", new ServerDecoder(storageCommands))
+    pipeline.addLast("bufCodec", new BufCodec)
+    pipeline.addLast("framer", new FrameDecoderHandler(new ServerFramer(storageCommands)))
+    pipeline.addLast("decoder", new DecodingHandler(new ServerDecoder(storageCommands)))
     pipeline.addLast("decoding2command", new DecodingToCommand)
 
-    pipeline.addLast("buf2channelBuf", new BufToChannelBuf)
     pipeline.addLast("encoder", new Encoder)
     pipeline.addLast("response2encoding", new ResponseToEncoding)
     pipeline
