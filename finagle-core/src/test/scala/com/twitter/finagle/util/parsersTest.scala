@@ -45,7 +45,41 @@ class parsersTest extends FunSuite {
       case _ =>
     }
   }
-  
+
+  test("boolean") {
+    "fALse" match {
+      case bool(b) => assert(b == false)
+      case _ => fail()
+    }
+
+    "1" match {
+      case bool(b) => assert(b)
+      case _ => fail()
+    }
+
+    "abc" match {
+      case bool(_) => fail()
+      case _ =>
+    }
+  }
+
+  test("long") {
+    "abc" match {
+      case long(_) => fail()
+      case _ =>
+    }
+
+    "2L" match {
+      case long(2L) =>
+      case _ => fail()
+    }
+
+    "9223372036854775807" match {
+      case long(l) => assert(l == Long.MaxValue)
+      case _ => fail()
+    }
+  }
+
   test("list") {
     "a:b:c" match {
       case list("a", "b", "c") =>

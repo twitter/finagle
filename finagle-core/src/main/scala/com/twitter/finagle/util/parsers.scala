@@ -36,6 +36,28 @@ private[twitter] object parsers {
         case _: NumberFormatException => None
       }
   }
+
+  object long {
+    def unapply(s: String): Option[Long] = {
+      // strip off trailing 'L' if present
+      val str = if (s.endsWith("L"))
+          s.substring(0, s.length - 1)
+        else s
+
+      try Some(str.toLong) catch {
+        case _: NumberFormatException => None
+      }
+    }
+  }
+
+  object bool {
+    def unapply(s: String): Option[Boolean] =
+      s.toLowerCase match {
+        case "1" | "true" => Some(true)
+        case "0" | "false" => Some(false)
+        case _ => None
+       }
+  }
   
   object duration {
     def unapply(s: String): Option[Duration] =
