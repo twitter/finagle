@@ -208,6 +208,14 @@ class Client(
     }
   }
 
+  /**
+    * Close the underlying connection pool and make this Client eternally down
+    * @return
+    */
+  def close(): Future[Unit] = {
+    factory.close()
+  }
+
   private[this] def sendQuery[T](sql: String)(handler: PartialFunction[PgResponse, Future[T]]) = {
     send(PgRequest(new Query(sql)))(handler)
   }
