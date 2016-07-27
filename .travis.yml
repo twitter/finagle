@@ -5,7 +5,7 @@ language: scala
 
 env:
   global:
-    - JAVA_OPTS="-DSKIP_FLAKY=1 -Xmx4G"
+    - JAVA_OPTS="-DSKIP_FLAKY=1 -Xmx3584M"
 
   matrix:
     - PROJECT=finagle-commons-stats
