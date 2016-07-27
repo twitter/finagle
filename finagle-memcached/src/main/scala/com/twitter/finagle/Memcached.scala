@@ -9,7 +9,9 @@ import com.twitter.finagle.dispatch.{GenSerialClientDispatcher, SerialServerDisp
 import com.twitter.finagle.loadbalancer.{Balancers, ConcurrentLoadBalancerFactory, LoadBalancerFactory}
 import com.twitter.finagle.memcached._
 import com.twitter.finagle.memcached.exp.LocalMemcached
-import com.twitter.finagle.memcached.protocol.text.{MemcachedClientPipelineFactory, MemcachedServerPipelineFactory}
+import com.twitter.finagle.memcached.protocol.text.client.ClientTransport
+import com.twitter.finagle.memcached.protocol.text.server.ServerTransport
+import com.twitter.finagle.memcached.protocol.text.transport.{Netty3ClientFramer, Netty3ServerFramer}
 import com.twitter.finagle.memcached.protocol.{Command, Response, RetrievalCommand, Values}
 import com.twitter.finagle.netty3.{Netty3Listener, Netty3Transporter}
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
@@ -85,7 +87,6 @@ private[finagle] object MemcachedTracingFilter {
  * method on `Memcached.client`. Failing hosts can be ejected from the
  * hash ring if `withEjectFailedHost` is set to true. Note, the current
  * implementation only supports bound [[com.twitter.finagle.Name Names]].
- *
  * @define label
  *
  * Argument `label` is used to assign a label to this client.
@@ -116,6 +117,7 @@ trait MemcachedRichClient { self: finagle.Client[Command, Response] =>
  * Stack based Memcached client.
  *
  * For example, a default client can be built through:
+ *
  * @example {{{
  *   val client = Memcached.newRichClient(dest)
  * }}}
@@ -235,15 +237,15 @@ object Memcached extends finagle.Client[Command, Response]
       params: Stack.Params = this.params
     ): Client = copy(stack, params)
 
-    protected type In = Command
-    protected type Out = Response
+    protected type In = Buf
+    protected type Out = Buf
 
     protected def newTransporter(): Transporter[In, Out] =
-      Netty3Transporter(MemcachedClientPipelineFactory, params)
+      Netty3Transporter(Netty3ClientFramer, params)
 
     protected def newDispatcher(transport: Transport[In, Out]): Service[Command, Response] =
       new PipeliningDispatcher(
-        transport,
+        new ClientTransport(transport),
         params[finagle.param.Stats].statsReceiver.scope(GenSerialClientDispatcher.StatsScope),
         DefaultTimer.twitter
       )
@@ -369,17 +371,17 @@ object Memcached extends finagle.Client[Command, Response]
       params: Stack.Params = this.params
     ): Server = copy(stack, params)
 
-    protected type In = Response
-    protected type Out = Command
+    protected type In = Buf
+    protected type Out = Buf
 
     protected def newListener(): Listener[In, Out] = {
-      Netty3Listener("memcached", MemcachedServerPipelineFactory)
+      Netty3Listener(Netty3ServerFramer, params)
     }
 
     protected def newDispatcher(
       transport: Transport[In, Out],
       service: Service[Command, Response]
-    ): Closable = new SerialServerDispatcher(transport, service)
+    ): Closable = new SerialServerDispatcher(new ServerTransport(transport), service)
 
     // Java-friendly forwarders
     //See https://issues.scala-lang.org/browse/SI-8905

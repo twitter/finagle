@@ -4,6 +4,7 @@ import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.memcached.protocol.text._
 import com.twitter.finagle.memcached.util.ParserUtils
 import com.twitter.io.Buf
+import scala.collection.immutable
 
 private[memcached] object ServerDecoder {
 
@@ -21,7 +22,7 @@ private[memcached] object ServerDecoder {
  *
  * @note Class contains mutable state. Not thread-safe.
  */
-private[finagle] class ServerDecoder(storageCommands: collection.Set[Buf]) extends Decoder {
+private[finagle] class ServerDecoder(storageCommands: immutable.Set[Buf]) extends Decoder {
   import ServerDecoder._
 
   private[this] var state: State = AwaitingCommand
