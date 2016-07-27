@@ -18,7 +18,7 @@ private[loadbalancer] trait P2CSuite {
   // number of servers
   val N: Int = 100
   // number of reqs
-  val R: Int = 100000
+  val R: Int = 1000000
   // tolerated variance
   val ε: Double = 0.0001*R
 

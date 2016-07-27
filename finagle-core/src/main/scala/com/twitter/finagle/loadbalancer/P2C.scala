@@ -34,14 +34,8 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
 
       if (size == 1) selections.head else {
         val a = rng.nextInt(size)
-        var b = rng.nextInt(size)
-
-        // Try to pick b, b != a, up to 10 times.
-        var i = 10
-        while (a == b && i > 0) {
-          b = rng.nextInt(size)
-          i -= 1
-        }
+        var b = rng.nextInt(size - 1)
+        if (b >= a) { b = b + 1 }
 
         val nodeA = selections(a)
         val nodeB = selections(b)
