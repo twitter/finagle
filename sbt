@@ -21,6 +21,8 @@ fi
 
 [ -f ~/.sbtconfig ] && . ~/.sbtconfig
 
+# -Xmx is set slightly below the Travis limit of 4GB to avoid getting SIGKILL'ed
+# https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
 java -ea                          \
   $SBT_OPTS                       \
   $JAVA_OPTS                      \
@@ -35,6 +37,6 @@ java -ea                          \
   -XX:MaxTenuringThreshold=0      \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx4G                          \
+  -Xmx3584M                       \
   -server                         \
   -jar $sbtjar "$@"
