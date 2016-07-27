@@ -35,6 +35,5 @@ java -ea                          \
   -XX:MaxTenuringThreshold=0      \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx4G                          \
   -server                         \
   -jar $sbtjar "$@"
