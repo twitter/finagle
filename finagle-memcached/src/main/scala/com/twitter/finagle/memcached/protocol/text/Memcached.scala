@@ -1,15 +1,13 @@
 package com.twitter.finagle.memcached.protocol.text
 
-import com.twitter.finagle.memcached.protocol.text.client.{ClientDecoder, ClientFramer}
-import com.twitter.finagle.memcached.protocol.text.server.{ServerFramer, ServerDecoder}
 import com.twitter.finagle.netty3.codec.{FrameDecoderHandler, BufCodec}
-import org.jboss.netty.channel._
-import scala.collection.immutable
 import com.twitter.finagle._
 import com.twitter.finagle.memcached.protocol._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.io.Buf
+import org.jboss.netty.channel._
+import scala.collection.immutable
 
 object Memcached {
   def apply(): Memcached = new Memcached()
@@ -17,7 +15,7 @@ object Memcached {
 }
 
 object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
-  import com.twitter.finagle.memcached.protocol.text.client.DecodingToResponse
+  import com.twitter.finagle.memcached.protocol.text.client._
 
   def getPipeline() = {
     val pipeline = Channels.pipeline()
@@ -34,18 +32,15 @@ object MemcachedClientPipelineFactory extends ChannelPipelineFactory {
 }
 
 object MemcachedServerPipelineFactory extends ChannelPipelineFactory {
-  import com.twitter.finagle.memcached.protocol.text.server.DecodingToCommand
-
-  private val storageCommands = immutable.Set[Buf](
-    Buf.Utf8("set"), Buf.Utf8("add"), Buf.Utf8("replace"), Buf.Utf8("append"), Buf.Utf8("prepend"),
-    Buf.Utf8("cas"))
+  import com.twitter.finagle.memcached.protocol.text.server._
+  import com.twitter.finagle.memcached.protocol.StorageCommand.StorageCommands
 
   def getPipeline() = {
     val pipeline = Channels.pipeline()
 
     pipeline.addLast("bufCodec", new BufCodec)
-    pipeline.addLast("framer", new FrameDecoderHandler(new ServerFramer(storageCommands)))
-    pipeline.addLast("decoder", new DecodingHandler(new ServerDecoder(storageCommands)))
+    pipeline.addLast("framer", new FrameDecoderHandler(new ServerFramer(StorageCommands)))
+    pipeline.addLast("decoder", new DecodingHandler(new ServerDecoder(StorageCommands)))
     pipeline.addLast("decoding2command", new DecodingToCommand)
 
     pipeline.addLast("encoder", new Encoder)

@@ -3,6 +3,7 @@ package com.twitter.finagle.memcached.protocol
 import com.twitter.finagle.memcached.util.Bufs
 import com.twitter.io.Buf
 import com.twitter.util.Time
+import scala.collection.immutable
 
 private object KeyValidation {
   private val MaxKeyLength = 250
@@ -69,6 +70,12 @@ trait KeyValidation {
 }
 
 sealed abstract class Command(val name: String)
+
+private[memcached] object StorageCommand {
+  val StorageCommands = immutable.Set[Buf](
+    Buf.Utf8("set"), Buf.Utf8("add"), Buf.Utf8("replace"), Buf.Utf8("append"), Buf.Utf8("prepend"),
+    Buf.Utf8("cas"))
+}
 
 abstract class StorageCommand(
     key: Buf,
