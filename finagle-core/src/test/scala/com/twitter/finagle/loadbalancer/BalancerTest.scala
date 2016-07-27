@@ -40,7 +40,7 @@ class BalancerTest extends FunSuite
     case class Distributor(vec: Vector[Node], gen: Int = 1)
       extends DistributorT[Node](vec) {
       type This = Distributor
-      def pick(): Node = selections.head
+      def pick(): Node = vector.head
       def rebuild(): This = {
         rebuildDistributor()
         copy(gen=gen+1)
@@ -49,6 +49,7 @@ class BalancerTest extends FunSuite
         rebuildDistributor()
         copy(vector, gen=gen+1)
       }
+      def needsRebuild: Boolean = false
     }
 
     class Node(val factory: ServiceFactory[Unit, Unit]) extends NodeT[Unit, Unit] {

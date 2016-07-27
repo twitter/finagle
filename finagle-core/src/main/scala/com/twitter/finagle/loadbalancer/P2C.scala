@@ -23,29 +23,41 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     extends DistributorT[Node](vector) {
     type This = Distributor
 
-    def rebuild(): This = new Distributor(vector)
+    // There is nothing to rebuild (we don't partition in P2C) so we just return
+    // `this` instance.
+    def rebuild(): This = this
     def rebuild(vec: Vector[Node]): This = new Distributor(vec)
 
     def pick(): Node = {
-      if (selections.isEmpty)
+      if (vector.isEmpty)
         return failingNode(emptyException)
 
-      val size = selections.size
+      val size = vector.size
 
-      if (size == 1) selections.head else {
+      if (size == 1) vector.head else {
         val a = rng.nextInt(size)
         var b = rng.nextInt(size - 1)
         if (b >= a) { b = b + 1 }
 
-        val nodeA = selections(a)
-        val nodeB = selections(b)
+        val nodeA = vector(a)
+        val nodeB = vector(b)
 
-        if (nodeA.status != Status.Open || nodeB.status != Status.Open)
-          sawDown = true
-
-        if (nodeA.load < nodeB.load) nodeA else nodeB
+        // If both nodes are in the same health status, we pick the least loaded
+        // one. Otherwise we pick the one that's healthier.
+        if (nodeA.status == nodeB.status) {
+          if (nodeA.load < nodeB.load) nodeA else nodeB
+        } else {
+          if (Status.best(nodeA.status, nodeB.status) == nodeA.status) nodeA else nodeB
+        }
       }
     }
+
+    // Since P2C is probabilistic in its selection, we don't partition and
+    // select only from healthy nodes. Instead, we rely on the near zero
+    // probability of selecting two down nodes (given the layers of retries
+    // above us). However, namers can still force rebuilds when the underlying
+    // set of nodes changes (eg: some of the nodes were unannounced and restarted).
+    def needsRebuild: Boolean = false
   }
 
   protected def initDistributor(): Distributor = new Distributor(Vector.empty)

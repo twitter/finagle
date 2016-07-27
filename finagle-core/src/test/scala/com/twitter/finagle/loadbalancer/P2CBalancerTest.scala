@@ -225,7 +225,15 @@ class P2CBalancerTest extends FunSuite with App with P2CSuite {
     for (f <- init drop N/2) f.stat = Status.Open
     for (_ <- 0 until R) bal()
 
-    assert(init0Load2 == init(0).load)
+    // The probability of picking two dead nodes when 1/2 of the cluster
+    // is down is 0.25. If we repeat the process up to maxEffort, it's going
+    // to be 0.25^5 = 0.001
+    // We run the `bal()` function for 100.000 times so 100.000 * 0.001 = 100
+    // of those dead nodes might get some load.
+    //
+    // In this check we make sure it's less than 100.
+
+    assert(math.abs(init0Load2 - init(0).load) <= R * 0.001)
     assertEven(init drop N/2)
     assertEven(init take N/2)
   }

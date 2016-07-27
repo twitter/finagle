@@ -99,10 +99,10 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
     type This = Distributor
 
     private[this] val (ring, unitWidth, maxAperture, minAperture) =
-      if (selections.isEmpty) {
+      if (vector.isEmpty) {
         (ZeroRing, RingWidth, RingWidth, 0)
       } else {
-        val numNodes = selections.size
+        val numNodes = vector.size
         val ring = Ring(numNodes, RingWidth)
         val unit = RingWidth / numNodes
         val max = RingWidth / unit
@@ -126,11 +126,11 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       aperture = math.max(minAperture, math.min(maxAperture, aperture + n))
     }
 
-    def rebuild(): This =
-      new Distributor(vector, aperture)
+    def rebuild(): This = rebuild(vector)
 
     def rebuild(vector: Vector[Node]): This =
-      new Distributor(vector.sortBy(_.token), aperture)
+      // We shuffle nodes and bring the most healthy ones in the front.
+      new Distributor(vector.sortBy(_.token).sortBy(_.status)(Ordering[Status].reverse), aperture)
 
     /**
      * The number of available serving units.
@@ -140,21 +140,32 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
     // We use power of two choices to pick nodes. This keeps things
     // simple, but we could reasonably use a heap here, too.
     def pick(): Node = {
-      if (selections.isEmpty)
+      if (vector.isEmpty)
         return failingNode(emptyException)
 
-      if (selections.size == 1)
-        return selections(0)
+      if (vector.size == 1)
+        return vector(0)
 
       val (i, j) = ring.pick2(rng, 0, aperture * unitWidth)
-      val a = selections(i)
-      val b = selections(j)
+      val a = vector(i)
+      val b = vector(j)
 
-      if (a.status != Status.Open || b.status != Status.Open)
-        sawDown = true
-
-      if (a.load < b.load) a else b
+      // If both nodes are in the same health status, we pick the least loaded
+      // one. Otherwise we pick the one that's healthier.
+      if (a.status == b.status) {
+        if (a.load < b.load) a else b
+      } else {
+        if (Status.best(a.status, b.status) == a.status) a else b
+      }
     }
+
+    // Since Aperture is probabilistic (it uses P2C) in its selection,
+    // we don't partition and select only from healthy nodes. Instead, we
+    // rely on the near zero probability of selecting two down nodes (given
+    // the layers of retries above us). However, namers can still force
+    // rebuilds when the underlying set of nodes changes (eg: some of the
+    // nodes were unannounced and restarted).
+    def needsRebuild: Boolean = false
   }
 
   protected def initDistributor(): Distributor =

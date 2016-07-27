@@ -17,7 +17,11 @@ trait ApertureTesting {
   trait TestBal extends Balancer[Unit, Unit] with Aperture[Unit, Unit] {
     protected val rng = Rng(12345L)
     protected val emptyException = new Empty
-    protected val maxEffort = 10
+    protected val maxEffort = 3 // 3 makes sense for aperture
+                                // Example: if 1/2 of the cluster is down, picking 2 dead nodes is
+                                // 0.25. If we repeat that 3 times, it's 0.25^3 = 1%
+                                // Simply speaking: if 50% of the cluster is down we will rebuild
+                                // in 1% of the cases/requests
     protected def statsReceiver = NullStatsReceiver
     protected val minAperture = 1
 
@@ -164,9 +168,9 @@ class ApertureTest extends FunSuite with ApertureTesting {
     val bal = new Bal
 
     bal.update(counts.range(10))
-    bal.adjustx(1)
+    bal.adjustx(3)
     bal.applyn(100)
-    assert(counts.aperture == 2)
+    assert(counts.aperture == 4)
 
     // Since tokens are assigned, we don't know apriori what's in the
     // aperture*, so figure it out by observation.
@@ -175,17 +179,12 @@ class ApertureTest extends FunSuite with ApertureTesting {
     // randomness.
     val keys2 = counts.nonzero
     counts(keys2.head).status = Status.Closed
+    counts(keys2.tail.head).status = Status.Closed
 
     bal.applyn(100)
-    assert(counts.aperture == 3)
+    assert(counts.aperture == 6)
     // Apertures are additive.
     assert(keys2.forall(counts.nonzero.contains))
-
-    // When we shrink again, we should use the same keyset.
-    counts(keys2.head).status = Status.Open
-    counts.clear()
-    bal.applyn(100)
-    assert(counts.nonzero == keys2)
   }
 
   test("Empty vectors") {

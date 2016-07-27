@@ -16,7 +16,25 @@ import scala.util.Random
  *      for more details.
  */
 object Balancers {
-  /** Default MaxEffort used in constructors below. */
+
+  /**
+   * This is a fixed number of retries, a LB are willing to make if the dead
+   * node is returned from the underlying distributor.
+   *
+   * For randomized LBs (P2C/LeastLoaded, P2C/EWMA, and Aperture) this value
+   * has an additional meaning: it determines how often the LB will be failing
+   * to pick a healthy node out of the partially-unhealthy replica set. For
+   * example, imagine that half of the replica set is down, the probably of
+   * picking two dead nodes is 0.25. If we repeat that process for 5 times,
+   * the total probability of seeing 5 dead nodes in a row, will be
+   * (0.25 ^ 5) = 0.1%. This means that if half of the cluster is down, the
+   * LB will be making a bad choice (when better choice may have been available)
+   * for 0.1% of requests.
+   *
+   * Please, note that this doesn't mean that 0.1% of requests will be failed
+   * by P2C operating on a half-dead cluster since there is an additional layer
+   * of requeues (see `Retries` module) involved above those "bad picks".
+   */
   val MaxEffort: Int = 5
 
   /**
