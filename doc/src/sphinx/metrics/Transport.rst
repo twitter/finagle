@@ -79,19 +79,6 @@ IdleChannelHandler
   A counter of the number of times a connection was disconnected because of a
   given idle state.
 
-IdleConnectionFilter
-<<<<<<<<<<<<<<<<<<<<
-
-**refused**
-  A counter of the number of connections that have been refused because we have
-  hit the high watermark of connections full and no connections are idle.
-
-**idle**
-  A gauge of the number of connections that are "idle" at this moment.
-
-**closed**
-  A counter of the number of connections that have been closed for being idle.
-
 Thrift
 <<<<<<
 

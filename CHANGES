@@ -10,6 +10,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 
+  * finagle-core: As part of a move away from encoding/decoding in the Netty pipeline, removed
+    `FrameEncoder` and `FrameDecoder` types, found in `c.t.f.codec`. ``RB_ID=847716``
+
+  * finagle-core: Delete IdleConnectionFilter, which is no longer hooked up in the server, and
+    no longer seems to be useful.  ``RB_ID=856377``
+
   * finagle-exp: Abstract out parts of the DarkTrafficFilter for potential re-use.
     We also canonicalize the DarkTrafficFilter stats scope which changes from
     "darkTrafficFilter" to "dark_traffic_filter". E.g.:
@@ -24,9 +30,6 @@ Breaking API Changes
 
   * finagle-redis: Redis codec (i.e., `c.t.f.Codec`) is removed. Use `c.t.f.Redis.client`
     instead. ``RB_ID=848815``
-
-  * finagle-core: As part of a move away from encoding/decoding in the Netty pipeline, removed
-    `FrameEncoder` and `FrameDecoder` types, found in `c.t.f.codec`. ``RB_ID=847716``
 
 New Features
 ~~~~~~~~~~~~

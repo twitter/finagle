@@ -5,7 +5,6 @@ import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.finagle.{Server => FinagleServer, _}
 import com.twitter.finagle.filter.{MaskCancelFilter, RequestSemaphoreFilter, ServerAdmissionControl}
 import com.twitter.finagle.netty3.Netty3Listener
-import com.twitter.finagle.netty3.channel.{IdleConnectionFilter, OpenConnectionsThresholds}
 import com.twitter.finagle.server.{Listener, StackBasedServer, StackServer, StdStackServer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.ssl.{Engine, Ssl}
@@ -579,13 +578,6 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   def hostConnectionMaxLifeTime(howlong: Duration): This =
     configured(params[ExpiringService.Param].copy(lifeTime = howlong))
-
-  /**
-   * @note not all protocol implementations support this, such as
-   *       `com.twitter.finagle.ThriftMux`.
-   */
-  def openConnectionsThresholds(thresholds: OpenConnectionsThresholds): This =
-    configured(IdleConnectionFilter.Param(Some(thresholds)))
 
   /**
    * Configures the traffic class.

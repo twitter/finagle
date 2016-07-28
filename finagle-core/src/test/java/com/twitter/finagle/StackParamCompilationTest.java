@@ -19,8 +19,6 @@ import com.twitter.finagle.filter.RequestSemaphoreFilter;
 import com.twitter.finagle.loadbalancer.Balancers;
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory;
 import com.twitter.finagle.netty3.Netty3Transporter;
-import com.twitter.finagle.netty3.channel.IdleConnectionFilter;
-import com.twitter.finagle.netty3.channel.OpenConnectionsThresholds;
 import com.twitter.finagle.netty3.param.Netty3Timer;
 import com.twitter.finagle.param.Label;
 import com.twitter.finagle.param.Logger;
@@ -66,7 +64,6 @@ public class StackParamCompilationTest {
         .configured(new Retries.Policy(RetryPolicy.Never()).mk())
         .configured(new Tracer(com.twitter.finagle.tracing.DefaultTracer.get()).mk())
         .configured(new FactoryToService.Enabled(true).mk())
-        .configured(new IdleConnectionFilter.Param(Option.<OpenConnectionsThresholds>empty()).mk())
         .configured(
           new DefaultPool.Param(0, Integer.MAX_VALUE, 0, Duration.Top(), Integer.MAX_VALUE).mk())
         .configured(new Transporter.ConnectTimeout(Duration.Top()).mk())
