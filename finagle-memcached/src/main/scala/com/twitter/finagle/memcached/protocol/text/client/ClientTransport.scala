@@ -9,8 +9,6 @@ import com.twitter.util.{Time, Future}
 import java.net.SocketAddress
 import java.security.cert.Certificate
 
-import scala.collection.mutable
-
 /**
  * A Transport that handles encoding Commands to Bufs and decoding framed Bufs to Responses.
  */

@@ -9,7 +9,7 @@ import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
  * The frame handler frames `Buf` pipeline messages, so it must be installed
  * after the handler which converts messages to `Buf`.
  */
-private[netty4] class FrameHandler(framer: Framer) extends ChannelInboundHandlerAdapter {
+private[finagle] class FrameHandler(framer: Framer) extends ChannelInboundHandlerAdapter {
   override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = msg match {
     case buf: Buf =>
       var idx = 0
