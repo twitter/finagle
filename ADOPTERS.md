@@ -29,6 +29,7 @@ URLs if possible) and [submit a pull request][1]!
 * [National Center for Biotechnology Information (NCBI)](https://www.ncbi.nlm.nih.gov/)
 * [Nest](https://nest.com/)
 * The [New York Times](http://www.nytimes.com/)
+* [Nubank](https://www.nubank.com.br/)
 * [OpenAura](http://openaura.com/)
 * [OrchardPlatform](https://orchardplatform.com/)
 * [PagerDuty](https://www.pagerduty.com/)
