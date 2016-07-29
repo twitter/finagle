@@ -6,6 +6,8 @@ import com.twitter.finagle.util.{Ema, Ring, Rng}
 import com.twitter.finagle._
 import com.twitter.util.{Activity, Duration, Future, Return, Throw, Time, Timer}
 import java.util.concurrent.atomic.AtomicInteger
+import scala.collection.immutable.VectorBuilder
+import scala.collection.mutable.ListBuffer
 
 /**
  * The aperture load-band balancer balances load to the smallest
@@ -128,9 +130,33 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
 
     def rebuild(): This = rebuild(vector)
 
-    def rebuild(vector: Vector[Node]): This =
-      // We shuffle nodes and bring the most healthy ones in the front.
-      new Distributor(vector.sortBy(_.token).sortBy(_.status)(Ordering[Status].reverse), aperture)
+    def rebuild(vector: Vector[Node]): This = {
+      // We need to sort the nodes, with priority being given to the most
+      // healthy nodes, then by token. There is an race condition with the
+      // sort: the status can change before the sort is finished but this
+      // is ignored as if the transition simply happened immediately after
+      // the rebuild.
+
+      // The token is immutable, so no race condition here.
+      val byToken = vector.sortBy(_.token)
+
+      // We bring the most healthy nodes to the front.
+      val resultNodes = new VectorBuilder[Node]
+      val busyNodes = new ListBuffer[Node]
+      val closedNodes = new ListBuffer[Node]
+
+      byToken.foreach { node =>
+        node.status match {
+          case Status.Open   => resultNodes += node
+          case Status.Busy   => busyNodes += node
+          case Status.Closed => closedNodes += node
+        }
+      }
+
+      resultNodes ++= busyNodes ++= closedNodes
+
+      new Distributor(resultNodes.result, aperture)
+    }
 
     /**
      * The number of available serving units.
