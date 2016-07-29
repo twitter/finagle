@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.transport.MysqlBufWriter
+import com.twitter.finagle.mysql.transport.MysqlBufWriter
 import java.util.logging.Logger
 import language.implicitConversions
 
@@ -22,7 +22,7 @@ sealed trait Parameter {
 }
 
 /**
- * Note: There is a Java-friendly API for this object: [[com.twitter.finagle.exp.mysql.Parameters]].
+ * Note: There is a Java-friendly API for this object: [[com.twitter.finagle.mysql.Parameters]].
  */
 object Parameter {
 
@@ -77,7 +77,7 @@ object Parameter {
 }
 
 /**
- * A Java adaptation of the [[com.twitter.finagle.exp.mysql.Parameter]] companion object.
+ * A Java adaptation of the [[com.twitter.finagle.mysql.Parameter]] companion object.
  */
 object Parameters {
 

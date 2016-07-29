@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 object Type {
   /**

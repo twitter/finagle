@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.transport.{MysqlBuf, Packet}
+import com.twitter.finagle.mysql.transport.{MysqlBuf, Packet}
 import com.twitter.io.Buf
 import com.twitter.util.Try
 

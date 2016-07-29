@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.transport.{MysqlBuf, MysqlBufWriter}
+import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter}
 
 trait CanBeParameter[-A] { outer =>
   /**

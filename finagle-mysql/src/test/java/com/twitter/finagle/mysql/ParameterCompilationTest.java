@@ -2,9 +2,6 @@ package com.twitter.finagle.mysql;
 
 import org.junit.Test;
 
-import com.twitter.finagle.exp.mysql.Parameter;
-import com.twitter.finagle.exp.mysql.Parameters;
-
 import junit.framework.Assert;
 
 public final class ParameterCompilationTest {

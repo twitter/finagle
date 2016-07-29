@@ -1,7 +1,6 @@
 package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.Parameter
-import com.twitter.finagle.exp.mysql.Parameter.NullParameter
+import com.twitter.finagle.mysql.Parameter.NullParameter
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner

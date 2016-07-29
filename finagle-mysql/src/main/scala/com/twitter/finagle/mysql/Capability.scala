@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 object Capability {
   val LongPassword     = 0x1      // new more secure passwords

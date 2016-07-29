@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.twitter.finagle.Service

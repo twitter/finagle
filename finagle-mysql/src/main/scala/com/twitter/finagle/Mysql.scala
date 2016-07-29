@@ -1,9 +1,8 @@
-package com.twitter.finagle.exp
+package com.twitter.finagle
 
-import com.twitter.finagle._
 import com.twitter.finagle.client.{StackClient, StdStackClient, DefaultPool}
-import com.twitter.finagle.exp.mysql._
-import com.twitter.finagle.exp.mysql.transport.{Packet, TransportImpl}
+import com.twitter.finagle.mysql._
+import com.twitter.finagle.mysql.transport.{Packet, TransportImpl}
 import com.twitter.finagle.param.{Monitor => _, ResponseClassifier => _, ExceptionStatsHandler => _, Tracer => _, _}
 import com.twitter.finagle.service.{ResponseClassifier, RetryBudget}
 import com.twitter.finagle.stats.{ExceptionStatsHandler, StatsReceiver}

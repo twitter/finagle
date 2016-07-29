@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import java.util.logging.Level
 import com.twitter.finagle.{ServiceProxy, ClientConnection, ServiceFactory}
@@ -21,7 +21,7 @@ object Client {
    * and the finagle-mysql netty pipeline.
    * @param statsReceiver collects finagle stats scoped to "mysql"
    */
-  @deprecated("Use the com.twitter.finagle.exp.Mysql object to build a client", "6.6.2")
+  @deprecated("Use the com.twitter.finagle.Mysql object to build a client", "6.6.2")
   def apply(
     host: String,
     username: String,
@@ -30,7 +30,7 @@ object Client {
     logLevel: Level = Level.OFF,
     statsReceiver: StatsReceiver = NullStatsReceiver
   ): Client = {
-    val factory = com.twitter.finagle.exp.Mysql.client
+    val factory = com.twitter.finagle.Mysql.client
       .withCredentials(username, password)
       .withDatabase(dbname)
       .newClient(host)

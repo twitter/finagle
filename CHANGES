@@ -22,6 +22,8 @@ Breaking API Changes
     "dark_traffic_filter/forwarded", "dark_traffic_filter/skipped", and
     "dark_traffic_filter/failed". ``RB_ID=852548``
 
+  * finagle-mysql: Mysql has been promoted out of experimental. Please change all
+    references of com.twitter.finagle.exp.{M,m}ysql to com.twitter.finagle.{M,m}ysql
 
   * finagle-redis: Server-side support for Redis is removed. See this finaglers@ thread
     (https://groups.google.com/forum/#!topic/finaglers/dCyt60TJ7eM) for discussion.

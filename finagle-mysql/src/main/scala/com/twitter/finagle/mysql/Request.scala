@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.transport.{MysqlBuf, MysqlBufWriter, Packet}
+import com.twitter.finagle.mysql.transport.{MysqlBuf, MysqlBufWriter, Packet}
 import com.twitter.io.Buf
 import java.security.MessageDigest
 import java.util.logging.Logger

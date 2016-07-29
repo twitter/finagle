@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.transport.MysqlBuf
+import com.twitter.finagle.mysql.transport.MysqlBuf
 import com.twitter.util.TwitterDateFormat
 import java.sql.{Date, Timestamp}
 import java.text.ParsePosition
@@ -41,7 +41,7 @@ case class RawValue(
 
 /**
  * A type class used for injecting values of a domain type `A` into
- * [[com.twitter.finagle.exp.mysql.Value Values]] for insertion into a MySQL
+ * [[com.twitter.finagle.mysql.Value Values]] for insertion into a MySQL
  * database.
  */
 private[mysql] trait Injectable[A] {
@@ -49,7 +49,7 @@ private[mysql] trait Injectable[A] {
 }
 
 /**
- * A type class used for extracting [[com.twitter.finagle.exp.mysql.Value Values]]
+ * A type class used for extracting [[com.twitter.finagle.mysql.Value Values]]
  * into a domain type `A`.
  */
 private[mysql] trait Extractable[A] {
@@ -71,7 +71,7 @@ class TimestampValue(
 {
   /**
    * Injects a [[java.sql.Timestamp]] into a
-   * [[com.twitter.finagle.exp.mysql.RawValue]] in a given `injectionTimeZone`
+   * [[com.twitter.finagle.mysql.RawValue]] in a given `injectionTimeZone`
    */
   def apply(ts: Timestamp): Value = {
     val bytes = new Array[Byte](11)
@@ -218,7 +218,7 @@ class TimestampValue(
 
 /**
  * Extracts a value in UTC. To use a different time zone, create an instance of
- * [[com.twitter.finagle.exp.mysql.TimestampValue]].
+ * [[com.twitter.finagle.mysql.TimestampValue]].
  */
 @deprecated("Injects `java.sql.Timestamp`s in local time and extracts them in UTC." +
   "To use a different time zone, create an instance of " +

@@ -1,7 +1,7 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.Parameter.NullParameter
-import com.twitter.finagle.exp.mysql.transport.MysqlBuf
+import com.twitter.finagle.mysql.Parameter.NullParameter
+import com.twitter.finagle.mysql.transport.MysqlBuf
 import java.sql.{Date => SQLDate, Timestamp}
 import java.util.{Calendar, Date, TimeZone}
 import org.junit.runner.RunWith

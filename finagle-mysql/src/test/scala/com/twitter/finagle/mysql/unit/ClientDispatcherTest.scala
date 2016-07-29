@@ -1,7 +1,7 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.exp.mysql.transport.{Packet, MysqlBuf}
+import com.twitter.finagle.mysql.transport.{Packet, MysqlBuf}
 import com.twitter.finagle.transport.QueueTransport
 import com.twitter.util.Await
 import com.twitter.io.Buf

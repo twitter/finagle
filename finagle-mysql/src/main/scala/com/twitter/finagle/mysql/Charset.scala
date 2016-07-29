@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import com.twitter.io.Charsets
 import java.nio.charset.{Charset => JCharset}

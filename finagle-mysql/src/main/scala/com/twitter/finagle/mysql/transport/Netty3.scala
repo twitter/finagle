@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql.transport
+package com.twitter.finagle.mysql.transport
 
 import com.twitter.io.Buf
 import com.twitter.util.NonFatal

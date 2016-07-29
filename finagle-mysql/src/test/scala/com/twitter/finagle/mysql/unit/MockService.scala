@@ -1,4 +1,4 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import com.twitter.finagle.{ClientConnection, ServiceFactory, Service}
 import com.twitter.util.{Time, Future}

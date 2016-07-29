@@ -2,8 +2,8 @@ package com.twitter.finagle.mysql;
 
 import org.junit.Test;
 
-import com.twitter.finagle.exp.Mysql;
-import com.twitter.finagle.exp.Mysql.Client;
+import com.twitter.finagle.Mysql;
+import com.twitter.finagle.Mysql.Client;
 import com.twitter.finagle.param.Label;
 
 public final class ClientCompilationTest {

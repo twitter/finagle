@@ -2,8 +2,8 @@ package com.twitter.finagle.example.mysql
 
 import com.twitter.app.App
 import com.twitter.util.{Await, Future}
-import com.twitter.finagle.exp.Mysql
-import com.twitter.finagle.exp.mysql._
+import com.twitter.finagle.Mysql
+import com.twitter.finagle.mysql._
 import java.net.InetSocketAddress
 import java.sql.Date
 import java.util.logging.{Logger, Level}

@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql.integration
+package com.twitter.finagle.mysql.integration
 
-import com.twitter.finagle.exp.mysql._
+import com.twitter.finagle.mysql._
 import com.twitter.util.{Await, TwitterDateFormat}
 import java.sql.Timestamp
 import java.util.TimeZone

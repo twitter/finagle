@@ -1,6 +1,6 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
-import com.twitter.finagle.exp.mysql.transport.Packet
+import com.twitter.finagle.mysql.transport.Packet
 import com.twitter.io.Buf
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

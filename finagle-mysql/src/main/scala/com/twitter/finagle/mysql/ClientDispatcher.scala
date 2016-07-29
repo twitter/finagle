@@ -1,9 +1,9 @@
-package com.twitter.finagle.exp.mysql
+package com.twitter.finagle.mysql
 
 import com.github.benmanes.caffeine.cache.{Caffeine, RemovalCause, RemovalListener}
 import com.twitter.cache.caffeine.CaffeineCache
 import com.twitter.finagle.dispatch.GenSerialClientDispatcher
-import com.twitter.finagle.exp.mysql.transport.{MysqlBuf, Packet}
+import com.twitter.finagle.mysql.transport.{MysqlBuf, Packet}
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{CancelledRequestException, Service, ServiceProxy, WriteException}

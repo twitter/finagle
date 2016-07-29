@@ -2,7 +2,6 @@ package com.twitter.finagle.integration
 
 import com.twitter.concurrent.AsyncQueue
 import com.twitter.finagle._
-import com.twitter.finagle.exp._
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.http.codec.HttpClientDispatcher
 import com.twitter.finagle.http.exp.IdentityStreamTransport
