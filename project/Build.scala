@@ -621,7 +621,7 @@ object Finagle extends Build {
     finagleStats,
     finagleThriftMux,
     finagleZipkin
-  )
+  ).aggregate(finagleBenchmarkThrift)
 
   lazy val finagleSpdy = Project(
     id = "finagle-spdy",

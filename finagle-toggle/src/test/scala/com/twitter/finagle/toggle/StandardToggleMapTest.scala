@@ -1,6 +1,6 @@
 package com.twitter.finagle.toggle
 
-import com.twitter.finagle.server.{ServerInfo, environment}
+import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.{InMemoryStatsReceiver, NullStatsReceiver}
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import org.junit.runner.RunWith
@@ -106,27 +106,29 @@ class StandardToggleMapTest extends FunSuite {
   }
 
   test("apply with resource-based configs and overrides") {
-    environment.let("staging") {
-      val togMap = StandardToggleMap(
-        // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/
-        "com.twitter.finagle.toggle.tests.EnvOverlays",
-        NullStatsReceiver,
-        NullToggleMap,
-        ServerInfo.Flag,
-        newRegistry())
-
-      val togs = togMap.iterator.toSeq
-
-      def assertFraction(id: String, fraction: Double): Unit = {
-        togs.find(_.id == id) match {
-          case None => fail(s"$id not found in $togs")
-          case Some(md) => assert(md.fraction == fraction)
-        }
-      }
-
-      assertFraction("com.twitter.base-is-off", 1.0)
-      assertFraction("com.twitter.only-in-base", 0.0)
+    val serverInfo: ServerInfo = new ServerInfo {
+      def environment: Option[String] = Some("staging")
+      def id: String = "testing"
     }
+    val togMap = StandardToggleMap(
+      // this will have corresponding file(s) in test/resources/com/twitter/toggles/configs/
+      "com.twitter.finagle.toggle.tests.EnvOverlays",
+      NullStatsReceiver,
+      NullToggleMap,
+      serverInfo,
+      newRegistry())
+
+    val togs = togMap.iterator.toSeq
+
+    def assertFraction(id: String, fraction: Double): Unit = {
+      togs.find(_.id == id) match {
+        case None => fail(s"$id not found in $togs")
+        case Some(md) => assert(md.fraction == fraction)
+      }
+    }
+
+    assertFraction("com.twitter.base-is-off", 1.0)
+    assertFraction("com.twitter.only-in-base", 0.0)
   }
 
   test("Toggles use correct ordering") {

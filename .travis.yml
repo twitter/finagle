@@ -61,8 +61,7 @@ notifications:
 before_script:
   # default $SBT_OPTS is irrelevant to sbt lancher
   - unset SBT_OPTS
-  - mkdir -p $HOME/.gitshas
-  - env GIT_SHA_DIR=$HOME/.gitshas ./bin/travisci
+  - curl -s https://raw.githubusercontent.com/twitter/dodo/develop/bin/build | bash -s -- --no-test finagle
   - travis_retry ./sbt ++$TRAVIS_SCALA_VERSION ci:update finagle-memcached/update
   - >
     if [[ "$TRAVIS_JDK_VERSION" = oraclejdk* ]]; then

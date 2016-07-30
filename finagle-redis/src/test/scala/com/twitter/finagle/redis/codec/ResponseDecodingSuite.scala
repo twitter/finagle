@@ -1,9 +1,8 @@
-package com.twitter.finagle.redis.naggati
+package com.twitter.finagle.redis.codec
 
-import com.twitter.finagle.redis.ServerError
+import com.twitter.finagle.redis._
 import com.twitter.finagle.redis.util._
-import com.twitter.finagle.redis.protocol.{BulkReply, ErrorReply, IntegerReply, MBulkReply,
-                                          StatusReply}
+import com.twitter.finagle.redis.protocol.{BulkReply, ErrorReply, IntegerReply, MBulkReply, StatusReply}
 import com.twitter.finagle.redis.protocol.{EmptyBulkReply, EmptyMBulkReply}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -105,11 +104,11 @@ final class ResponseDecodingSuite extends RedisResponseTest {
   }
 
   test("Correctly decode EMPTY bulk reply") {
-    assert(codec(wrap("$-1\r\n")).head.getClass == classOf[EmptyBulkReply])
+    assert(codec(wrap("$-1\r\n")).head == EmptyBulkReply)
   }
 
   test("Correctly decode empty multi-bulk replies") {
-    assert(codec(wrap("*0\r\n")).head.getClass == classOf[EmptyMBulkReply])
+    assert(codec(wrap("*0\r\n")).head == EmptyMBulkReply)
   }
 
   // First multi-bulk array
@@ -324,10 +323,10 @@ final class ResponseDecodingSuite extends RedisResponseTest {
           c match {
             case MBulkReply(List(aa, ab, ac)) =>
               assert(aa == IntegerReply(10))
-              assert(ab == EmptyMBulkReply())
+              assert(ab == EmptyMBulkReply)
               ac match {
                 case MBulkReply(List(aaa, aab)) =>
-                  assert(aaa == EmptyMBulkReply())
+                  assert(aaa == EmptyMBulkReply)
                   assert(aab == IntegerReply(100))
                 case xs => fail("Expected 2-element MBulkReply, got: %s" format xs)
               }

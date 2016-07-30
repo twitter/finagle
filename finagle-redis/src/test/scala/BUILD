@@ -3,6 +3,7 @@ junit_tests(name='scala',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/org/scalatest',
+    '3rdparty/jvm/org/scalacheck',
     'finagle/finagle-core',
     'finagle/finagle-redis',
     'util/util-core'

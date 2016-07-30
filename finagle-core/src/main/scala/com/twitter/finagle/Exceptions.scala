@@ -71,9 +71,10 @@ class RequestException(message: String, cause: Throwable)
  * its error message (e.g. the source and timeout value), and is only used
  * within the confines of Finagle.
  */
-trait TimeoutException extends SourcedException { self: Exception =>
+trait TimeoutException extends SourcedException with HasLogLevel { self: Exception =>
   protected val timeout: Duration
   protected def explanation: String
+  def logLevel: Level = Level.TRACE
 
   override def exceptionMessage = s"exceeded $timeout to $serviceName while $explanation"
 }

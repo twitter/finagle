@@ -1,15 +1,16 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle._
-import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver, NullStatsReceiver}
+import com.twitter.finagle.stats.{InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.util.{Future, Time}
 import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.{Conductors, IntegrationPatience}
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.concurrent.{IntegrationPatience, Conductors}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import scala.language.reflectiveCalls
 
 @RunWith(classOf[JUnitRunner])
 class BalancerTest extends FunSuite
@@ -36,11 +37,10 @@ class BalancerTest extends FunSuite
 
     def rebuildDistributor() {}
 
-    case class Distributor(vector: Vector[Node], gen: Int = 1)
-      extends DistributorT[Node] {
+    case class Distributor(vec: Vector[Node], gen: Int = 1)
+      extends DistributorT[Node](vec) {
       type This = Distributor
-      def pick(): Node = vector.head
-      def needsRebuild = false
+      def pick(): Node = selections.head
       def rebuild(): This = {
         rebuildDistributor()
         copy(gen=gen+1)

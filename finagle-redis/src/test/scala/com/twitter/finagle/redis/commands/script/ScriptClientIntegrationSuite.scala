@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.ScriptCommands._
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.protocol.Reply
 import com.twitter.finagle.redis.{Client, ServerError}
 import com.twitter.io.{Charsets, Buf}
@@ -352,7 +352,7 @@ class ScriptClientIntegrationSuite extends RedisClientTest {
             Nil,
             stringsToBuffers("", "", ""),
             stringsToBuffers("1", ""),
-            stringsToChannelBuffers("1", "")
+            stringsToBuffers("1", "")
           )))
       }
     }

@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.io.Buf
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.buffer.ChannelBuffer
 
 case object Discard extends Command {
   def command = Commands.DISCARD

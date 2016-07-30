@@ -144,7 +144,7 @@ object ScriptCommands {
 
     implicit val unit = new ReplyConverter[Unit] {
       override def cast(reply: Reply): Unit = reply match {
-        case StatusReply(_) | EmptyBulkReply() => ()
+        case StatusReply(_) | EmptyBulkReply => ()
         case r => Future.exception(ReplyCastFailure("Error casting " + r + " to Unit"))
       }
     }
@@ -159,7 +159,7 @@ object ScriptCommands {
     implicit val bool = new ReplyConverter[Boolean] {
       override def cast(reply: Reply): Boolean = reply match {
         case IntegerReply(n) => (n == 1)
-        case EmptyBulkReply() => false
+        case EmptyBulkReply => false
         case StatusReply(_) => true
         case r => throw new ReplyCastFailure("Error casting " + r + " to Boolean")
       }
@@ -168,7 +168,7 @@ object ScriptCommands {
     implicit val buffer = new ReplyConverter[Buf] {
       override def cast(reply: Reply): Buf = reply match {
         case BulkReply(message) => message
-        case EmptyBulkReply() => Buf.Empty
+        case EmptyBulkReply => Buf.Empty
         case r => throw new ReplyCastFailure("Error casting " + r + " to Buf")
       }
     }
@@ -176,7 +176,7 @@ object ScriptCommands {
     implicit val buffers = new ReplyConverter[Seq[Buf]] {
       override def cast(reply: Reply): Seq[Buf] = reply match {
         case MBulkReply(messages) => ReplyFormat.toBuf(messages)
-        case EmptyMBulkReply() => Nil
+        case EmptyMBulkReply => Nil
         case r => throw new ReplyCastFailure("Error casting " + r + " to Seq[Buf]")
       }
     }

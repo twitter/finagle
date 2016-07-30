@@ -1,11 +1,12 @@
 package com.twitter.finagle.netty4
 
-import com.twitter.finagle.{Failure, Stack}
 import com.twitter.finagle.client.{LatencyCompensation, Transporter}
-import com.twitter.finagle.codec.{FrameDecoder, FrameEncoder}
-import com.twitter.finagle.netty4.transport.ChannelTransport
+import com.twitter.finagle.framer.Framer
 import com.twitter.finagle.netty4.channel._
+import com.twitter.finagle.netty4.transport.ChannelTransport
 import com.twitter.finagle.transport.Transport
+import com.twitter.finagle.{Failure, Stack}
+import com.twitter.io.Buf
 import com.twitter.util.{Future, Promise, NonFatal}
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel._
@@ -86,6 +87,8 @@ private[finagle] object Netty4Transporter {
 
       transportP
     }
+
+    override def toString: String = "Netty4Transporter"
   }
 
   /**
@@ -96,22 +99,21 @@ private[finagle] object Netty4Transporter {
     pipelineInit: ChannelPipeline => Unit,
     params: Stack.Params
   ): Transporter[In, Out] = {
-    val init = new RawNetty4ClientChannelInitializer[In, Out](pipelineInit, params)
+    val init = new RawNetty4ClientChannelInitializer(pipelineInit, params)
 
-    build(init, params)
+    build[In, Out](init, params)
   }
 
   /**
    * transporter constructor for protocols which are entirely implemented in
-   * dispatchers (ie; finagle-mux, finagle-mysql)
+   * dispatchers (ie; finagle-mux, finagle-mysql) and expect c.t.io.Bufs
    */
-  def apply[In, Out](
-    enc: Option[FrameEncoder[In]],
-    decoderFactory: Option[() => FrameDecoder[Out]],
+  def apply(
+    framerFactory: Option[() => Framer],
     params: Stack.Params
-  ): Transporter[In, Out] = {
-    val init = new Netty4ClientChannelInitializer[In, Out](params, enc, decoderFactory)
+  ): Transporter[Buf, Buf] = {
+    val init = new Netty4ClientChannelInitializer(params, framerFactory)
 
-    build(init, params)
+    build[Buf, Buf](init, params)
   }
 }

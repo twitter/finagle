@@ -168,7 +168,7 @@ must be preceded by a whitespace character or delimiter such as ``;``,
 ::
 
         # delegation for /s
-        /s => /a      # prefer /b
+        /s => /a      # prefer /a
             | ( /b    # or share traffic between /b and /c
               & /c
               );

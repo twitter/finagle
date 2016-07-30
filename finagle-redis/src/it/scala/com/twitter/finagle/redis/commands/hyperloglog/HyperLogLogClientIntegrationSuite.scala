@@ -1,8 +1,8 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
-import com.twitter.util.{Return, Future, Await}
+import com.twitter.util.{Await, Future, Return}
 import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

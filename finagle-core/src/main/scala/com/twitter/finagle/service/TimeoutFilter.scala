@@ -22,7 +22,8 @@ object TimeoutFilter {
       (this, Param.param)
   }
   object Param {
-    implicit val param = Stack.Param(Param(Duration.Top))
+    implicit val param: Stack.Param[TimeoutFilter.Param] =
+      Stack.Param(Param(Duration.Top))
   }
 
   /**
@@ -36,8 +37,9 @@ object TimeoutFilter {
         LatencyCompensation.Compensation,
         param.Stats,
         ServiceFactory[Req, Rep]] {
-      val role = TimeoutFilter.role
-      val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
+      val role: Stack.Role = TimeoutFilter.role
+      val description: String =
+        "Apply a timeout-derived deadline to requests; adjust existing deadlines."
 
       def make(
         _param: Param,
@@ -71,8 +73,9 @@ object TimeoutFilter {
         param.Timer,
         param.Stats,
         ServiceFactory[Req, Rep]] {
-      val role = TimeoutFilter.role
-      val description = "Apply a timeout-derived deadline to requests; adjust existing deadlines."
+      val role: Stack.Role = TimeoutFilter.role
+      val description: String =
+        "Apply a timeout-derived deadline to requests; adjust existing deadlines."
       def make(
         _param: Param,
         _timer: param.Timer,
@@ -102,7 +105,10 @@ object TimeoutFilter {
 }
 
 /**
- * A [[com.twitter.finagle.Filter]] that applies a global timeout to requests.
+ * A [[com.twitter.finagle.Filter]] that a timeout to requests.
+ *
+ * If the response is not satisfied within the `timeout`,
+ * the [[Future]] will be interrupted via [[Future.raise]].
  *
  * @param timeout the timeout to apply to requests
  * @param exception an exception object to return in cases of timeout exceedance

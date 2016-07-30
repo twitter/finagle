@@ -1,12 +1,10 @@
 package com.twitter.finagle.loadbalancer
 
 import com.twitter.finagle.service.FailingFactory
-import com.twitter.finagle.stats.StatsReceiver
-import com.twitter.finagle.util.{Rng, Ring, Ema}
-import com.twitter.finagle.{
-  ClientConnection, NoBrokersAvailableException, ServiceFactory, ServiceFactoryProxy,
-  ServiceProxy, Status}
-import com.twitter.util.{Activity, Return, Future, Throw, Time, Duration, Timer}
+import com.twitter.finagle.stats.{Counter, StatsReceiver}
+import com.twitter.finagle.util.{Ema, Ring, Rng}
+import com.twitter.finagle._
+import com.twitter.util.{Activity, Duration, Future, Return, Throw, Time, Timer}
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -54,9 +52,8 @@ private[loadbalancer] class ApertureLoadBandBalancer[Req, Rep](
   with Aperture[Req, Rep]
   with LoadBand[Req, Rep]
   with Updating[Req, Rep] {
-
-  protected[this] val maxEffortExhausted = statsReceiver.counter("max_effort_exhausted")
-
+  require(minAperture > 0, s"minAperture must be > 0, but was $minAperture")
+  protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
 }
 
 object Aperture {
@@ -91,40 +88,34 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
   protected def rng: Rng
 
   /**
-   * The minimum allowable aperture. Must be positive.
+   * The minimum allowable aperture. Must be greater than zero.
    */
   protected def minAperture: Int
 
-  private[this] val nodeUp: Node => Boolean = { node =>
-    node.status == Status.Open
-  }
-
   private[this] val gauge = statsReceiver.addGauge("aperture") { aperture }
 
-  protected class Distributor(val vector: Vector[Node], initAperture: Int)
-    extends DistributorT[Node] {
+  protected class Distributor(vector: Vector[Node], initAperture: Int)
+    extends DistributorT[Node](vector) {
     type This = Distributor
 
-    // Indicates if we've seen any down nodes during pick which we expected to be available
-    @volatile private[this] var sawDown = false
-
-    private[this] val (up, down) = vector.partition(nodeUp) match {
-      case (Vector(), down) => (down, Vector.empty)
-      case updown => updown
-    }
-
-    private[this] val (ring, unitWidth, maxAperture) =
-      if (up.isEmpty) {
-        (ZeroRing, RingWidth, RingWidth)
+    private[this] val (ring, unitWidth, maxAperture, minAperture) =
+      if (selections.isEmpty) {
+        (ZeroRing, RingWidth, RingWidth, 0)
       } else {
-        val numNodes = up.size
+        val numNodes = selections.size
         val ring = Ring(numNodes, RingWidth)
-        val unit = RingWidth/numNodes
-        val max = RingWidth/unit
-        (ring, unit, max)
-      }
+        val unit = RingWidth / numNodes
+        val max = RingWidth / unit
 
-    private[this] val minAperture = math.min(Aperture.this.minAperture, maxAperture)
+        // The logic of pick() assumes that the aperture size is less than or
+        // equal to number of available nodes, and may break if that is not true.
+        val min = math.min(
+          math.min(Aperture.this.minAperture, max),
+          numNodes
+        )
+
+        (ring, unit, max, min)
+      }
 
     @volatile private[Aperture] var aperture = initAperture
 
@@ -132,60 +123,57 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
     adjust(0)
 
     protected[Aperture] def adjust(n: Int) {
-      aperture = math.max(minAperture, math.min(maxAperture, aperture+n))
+      aperture = math.max(minAperture, math.min(maxAperture, aperture + n))
     }
 
-    def rebuild() =
+    def rebuild(): This =
       new Distributor(vector, aperture)
 
-    def rebuild(vector: Vector[Node]) =
+    def rebuild(vector: Vector[Node]): This =
       new Distributor(vector.sortBy(_.token), aperture)
 
     /**
      * The number of available serving units.
      */
-    def units = maxAperture
+    def units: Int = maxAperture
 
     // We use power of two choices to pick nodes. This keeps things
     // simple, but we could reasonably use a heap here, too.
     def pick(): Node = {
-      if (up.isEmpty)
+      if (selections.isEmpty)
         return failingNode(emptyException)
 
-      if (up.size == 1)
-        return up(0)
+      if (selections.size == 1)
+        return selections(0)
 
-      val (i, j) = ring.pick2(rng, 0, aperture*unitWidth)
-      val a = up(i)
-      val b = up(j)
+      val (i, j) = ring.pick2(rng, 0, aperture * unitWidth)
+      val a = selections(i)
+      val b = selections(j)
 
       if (a.status != Status.Open || b.status != Status.Open)
         sawDown = true
 
       if (a.load < b.load) a else b
     }
-
-    def needsRebuild: Boolean =
-      sawDown || (down.nonEmpty && down.exists(nodeUp))
   }
 
-  protected def initDistributor() =
+  protected def initDistributor(): Distributor =
     new Distributor(Vector.empty, 1)
 
   /**
    * Adjust the aperture by `n` serving units.
    */
-  protected def adjust(n: Int) = invoke(_.adjust(n))
+  protected def adjust(n: Int): Unit = invoke(_.adjust(n))
 
   /**
    * Widen the aperture by one serving unit.
    */
-  protected def widen() = adjust(1)
+  protected def widen(): Unit = adjust(1)
 
   /**
    * Narrow the aperture by one serving unit.
    */
-  protected def narrow() = adjust(-1)
+  protected def narrow(): Unit = adjust(-1)
 
   /**
    * The current aperture. This is never less than 1, or more
@@ -282,12 +270,12 @@ private[loadbalancer] trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with A
     def load: Double = counter.get
     def pending: Int = counter.get
 
-    override def apply(conn: ClientConnection) = {
+    override def apply(conn: ClientConnection): Future[Service[Req, Rep]] = {
       adjustNode(this, 1)
       super.apply(conn).transform {
         case Return(svc) =>
           Future.value(new ServiceProxy(svc) {
-            override def close(deadline: Time) =
+            override def close(deadline: Time): Future[Unit] =
               super.close(deadline).ensure {
                 adjustNode(Node.this, -1)
               }
@@ -300,10 +288,10 @@ private[loadbalancer] trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with A
     }
   }
 
-  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver) =
+  protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver): Node =
     Node(factory, new AtomicInteger(0), rng.nextInt())
 
   private[this] val failingLoad = new AtomicInteger(0)
-  protected def failingNode(cause: Throwable) = Node(
+  protected def failingNode(cause: Throwable): Node = Node(
     new FailingFactory(cause), failingLoad, 0)
 }

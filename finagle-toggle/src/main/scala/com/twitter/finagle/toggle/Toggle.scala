@@ -47,9 +47,10 @@ object Toggle {
    *           These should generally be fully qualified names to avoid conflicts
    *           between libraries. For example, "com.twitter.finagle.CoolThing".
    *           Valid characters are `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
+   *           See [[isValidId(String)]].
    * @param fraction must be between `0.0 and 1.0`, inclusive.
-   *                 This represents the percentage of inputs that will
-   *                 return `true`.
+   *                 This represents the fraction of inputs that will
+   *                 return `true`. See [[isValidFraction(Double)]].
    * @param description human-readable description of the Toggle's purpose.
    * @param source the origin of this [[Toggle]] which is often given by
    *               `toString` of the [[ToggleMap]] that created it.
@@ -64,8 +65,15 @@ object Toggle {
     validateDescription(id, description)
   }
 
-  private[toggle] def isValidFraction(f: Double): Boolean =
-    f >= 0.0 && f <= 1.0
+  /**
+   * Whether or not the given `fraction` is valid.
+   *
+   * @param fraction must be between `0.0 and 1.0`, inclusive.
+   *                 This represents the fraction of inputs that will
+   *                 return `true`.
+   */
+  def isValidFraction(fraction: Double): Boolean =
+    fraction >= 0.0 && fraction <= 1.0
 
   private[toggle] def validateFraction(id: String, f: Double): Unit = {
     if (!isValidFraction(f))
@@ -90,23 +98,45 @@ object Toggle {
       Set('_', '-', '.')).toSet
   }
 
-  private[toggle] def validateId(id: String): Unit = {
+  /** Return `Some(ErrorMessage)` when invalid. */
+  private def checkId(id: String): Option[String] = {
     val invalidCh = id.find { ch =>
       !AllowedIdChars.contains(ch)
     }
     invalidCh match {
       case Some(ch) =>
-        throw new IllegalArgumentException(s"invalid char '$ch' in id: '$id'")
+        Some(s"invalid char '$ch' in id: '$id'")
+      case None =>
+        // do some minimal verification to make sure it looks "packagey".
+        if (id.length < 3) {
+          Some(s"id too short: '$id'")
+        } else {
+          // test that it has atleast 1 "."
+          val firstDot = id.indexOf('.')
+          if (firstDot <= 0)
+            Some(s"id must be package-like: '$id'")
+          else
+            None
+        }
+    }
+  }
+
+  /**
+   * Whether or not the given `id` is valid.
+   *
+   * @param id the identifying name of the `Toggle`.
+   *           These should generally be fully qualified names to avoid conflicts
+   *           between libraries. For example, "com.twitter.finagle.CoolThing".
+   *           Valid characters are `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
+   */
+  def isValidId(id: String): Boolean =
+    checkId(id).isEmpty
+
+  private[toggle] def validateId(id: String): Unit = {
+    checkId(id) match {
+      case Some(msg) => throw new IllegalArgumentException(msg)
       case None =>
     }
-
-    // do some minimal verification to make sure it looks "packagey".
-    if (id.length < 3)
-      throw new IllegalArgumentException(s"id too short: '$id'")
-    // test that it has atleast 1 "."
-    val firstDot = id.indexOf('.')
-    if (firstDot <= 0)
-      throw new IllegalArgumentException(s"id must be package-like: '$id'")
   }
 
   private[toggle] def apply[T](

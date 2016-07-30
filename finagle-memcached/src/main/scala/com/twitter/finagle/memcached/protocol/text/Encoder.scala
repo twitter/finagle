@@ -78,3 +78,12 @@ class Encoder extends OneToOneEncoder {
       bw.owned()
   }
 }
+
+private[finagle] class BufToChannelBuf extends SimpleChannelDownstreamHandler {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent): Unit =
+    e.getMessage match {
+      case b: Buf => Channels.write(ctx, e.getFuture, BufChannelBuffer(b))
+      case typ => e.getFuture.setFailure(Failure(
+        s"unexpected type ${typ.getClass.getSimpleName} when encoding to ChannelBuffer"))
+    }
+}

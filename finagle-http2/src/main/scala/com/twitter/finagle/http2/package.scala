@@ -8,7 +8,6 @@ package object http2 {
     new Netty4ClientStreamTransport(_),
     new Netty4ServerStreamTransport(_),
     Http2Transporter.apply _,
-    Http2Listener.apply _,
-    "netty4"
+    Http2Listener.apply _
   )
 }

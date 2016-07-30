@@ -19,36 +19,20 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
    */
   protected def rng: Rng
 
-  protected class Distributor(val vector: Vector[Node])
-    extends DistributorT[Node] {
+  protected class Distributor(vector: Vector[Node])
+    extends DistributorT[Node](vector) {
     type This = Distributor
-
-    // Indicates if we've seen any down nodes during pick which we expected to be available
-    @volatile private[this] var sawDown = false
-
-    private[this] val nodeUp: Node => Boolean = { node =>
-      node.status == Status.Open
-    }
-
-    private[this] val (up, down) = vector.partition(nodeUp)
-
-    def needsRebuild: Boolean =
-      sawDown || (down.nonEmpty && down.exists(nodeUp))
 
     def rebuild(): This = new Distributor(vector)
     def rebuild(vec: Vector[Node]): This = new Distributor(vec)
 
-    // TODO: consider consolidating some of this code with `Aperture.Distributor.pick`
     def pick(): Node = {
-      if (vector.isEmpty)
+      if (selections.isEmpty)
         return failingNode(emptyException)
 
-      // if all nodes are down, we might as well try to send requests somewhere
-      // as our view of the world may be out of date.
-      val vec = if (up.isEmpty) down else up
-      val size = vec.size
+      val size = selections.size
 
-      if (size == 1) vec.head else {
+      if (size == 1) selections.head else {
         val a = rng.nextInt(size)
         var b = rng.nextInt(size)
 
@@ -59,8 +43,8 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
           i -= 1
         }
 
-        val nodeA = vec(a)
-        val nodeB = vec(b)
+        val nodeA = selections(a)
+        val nodeB = selections(b)
 
         if (nodeA.status != Status.Open || nodeB.status != Status.Open)
           sawDown = true
@@ -70,5 +54,5 @@ private trait P2C[Req, Rep] { self: Balancer[Req, Rep] =>
     }
   }
 
-  protected def initDistributor() = new Distributor(Vector.empty)
+  protected def initDistributor(): Distributor = new Distributor(Vector.empty)
 }

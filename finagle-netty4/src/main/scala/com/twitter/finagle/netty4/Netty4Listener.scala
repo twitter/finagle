@@ -116,7 +116,7 @@ private[finagle] case class Netty4Listener[In, Out](
       // represents a bound server and if we don't block here there's
       // a race between #listen and #boundAddress being available.
       val ch = bootstrap.bind(addr).awaitUninterruptibly().channel()
-  
+
       /**
        * Immediately close the listening socket then shutdown the netty
        * boss threadpool with ``deadline`` timeout for existing tasks.
@@ -149,4 +149,6 @@ private[finagle] case class Netty4Listener[In, Out](
 
       def boundAddress: SocketAddress = ch.localAddress()
     }
+
+  override def toString: String = "Netty4Listener"
 }

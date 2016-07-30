@@ -42,8 +42,10 @@ object ServerBuilder {
     Req, Rep, ServerConfig.Yes,
     ServerConfig.Yes, ServerConfig.Yes]
 
-  def apply() = new ServerBuilder()
-  def get() = apply()
+  def apply(): ServerBuilder[Nothing, Nothing, Nothing, Nothing, Nothing] =
+    new ServerBuilder()
+  def get(): ServerBuilder[Nothing, Nothing, Nothing, Nothing, Nothing] =
+    apply()
 
   /**
    * Provides a typesafe `build` for Java.
@@ -65,7 +67,7 @@ object ServerConfig {
   sealed trait Yes
   type FullySpecified[Req, Rep] = ServerConfig[Req, Rep, Yes, Yes, Yes]
 
-  def nilServer[Req, Rep] = new FinagleServer[Req, Rep] {
+  def nilServer[Req, Rep]: FinagleServer[Req, Rep] = new FinagleServer[Req, Rep] {
     def serve(addr: SocketAddress, service: ServiceFactory[Req, Rep]): ListeningServer =
       NullServer
   }
@@ -185,7 +187,7 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
 
   private[builder] def this() = this(Stack.Params.empty, Function.const(ServerConfig.nilServer)_)
 
-  override def toString() = "ServerBuilder(%s)".format(params)
+  override def toString: String = "ServerBuilder(%s)".format(params)
 
   protected def copy[Req1, Rep1, HasCodec1, HasBindTo1, HasName1](
     ps: Stack.Params,
@@ -482,6 +484,9 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    *
    * Http.server.withRequestTimeout(howlong)
    * }}}
+   *
+   * @note if the request is not complete after `howlong`, the work that is
+   *       in progress will be interrupted via [[Future.raise]].
    */
   def requestTimeout(howlong: Duration): This =
     configured(TimeoutFilter.Param(howlong))

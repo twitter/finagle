@@ -7,6 +7,41 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-exp: Abstract out parts of the DarkTrafficFilter for potential re-use.
+    We also canonicalize the DarkTrafficFilter stats scope which changes from
+    "darkTrafficFilter" to "dark_traffic_filter". E.g.:
+    "dark_traffic_filter/forwarded", "dark_traffic_filter/skipped", and
+    "dark_traffic_filter/failed". ``RB_ID=852548``
+
+
+  * finagle-redis: Server-side support for Redis is removed. See this finaglers@ thread
+    (https://groups.google.com/forum/#!topic/finaglers/dCyt60TJ7eM) for discussion.
+    Note that constructors for Redis commands no longer accept raw byte arrays.
+     ``RB_ID=848815``
+
+  * finagle-redis: Redis codec (i.e., `c.t.f.Codec`) is removed. Use `c.t.f.Redis.client`
+    instead. ``RB_ID=848815``
+
+  * finagle-core: As part of a move away from encoding/decoding in the Netty pipeline, removed
+    `FrameEncoder` and `FrameDecoder` types, found in `c.t.f.codec`. ``RB_ID=847716``
+
+New Features
+~~~~~~~~~~~~
+
+  * finagle-core: Expose metrics on util's default `FuturePool` implementations
+    `unboundedPool` and `interruptibleUnboundedPool`:
+    "finagle/future_pool/pool_size", "finagle/future_pool/queue_size",
+    "finagle/future_pool/active_tasks", and "finagle/future_pool/completed_tasks".
+    ``RB_ID=850652``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-redis: `c.t.f.redis.Client` now uses the pipelining dispatcher. ``RB_ID=848815``
+
 6.36.0
 ------
 
@@ -89,14 +124,14 @@ Breaking API Changes
       - `SetCommands`: ``RB_ID=845578``
       - `SortedSetCommands`: ``RB_ID=846074``
 
-  * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
-    instead of `c.t.u.Bijection`. ``RB_ID=834383``
-
   * finagle-thrift: As part of the migration off of `Codec`, remove
     `c.t.f.thrift.ThriftClientBufferedCodec` and `c.t.f.thrift.ThriftClientBufferedCodecFactory`
     which were used by `ClientBuilder.codec` and `ServerBuilder.codec`. Replace usage
     with `ClientBuilder.stack(Thrift.client.withBufferedTransport)`
     or `ServerBuilder.stack(Thrift.server.withBufferedTransport)`. ``RB_ID=838146``
+
+  * finagle-memcached: `c.t.f.memcached.Client` now uses `c.t.bijection.Bijection`
+    instead of `c.t.u.Bijection`. ``RB_ID=834383``
 
   * finagle-zipkin: Moved case classes and companion objects `Span`, `ZipkinAnnotation`,
     `BinaryAnnotation`, `Endpoint`, `Sampler` and `SamplingTracer` to finagle-zipkin-core.

@@ -13,7 +13,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
   ): PartialFunction[Reply, Future[Either[ZRangeResults, Seq[Buf]]]] = {
     val parse: PartialFunction[Reply, Either[ZRangeResults, Seq[Buf]]] = {
       case MBulkReply(messages) => withScoresHelper(withScores)(messages)
-      case EmptyMBulkReply() => withScoresHelper(withScores)(Nil)
+      case EmptyMBulkReply => withScoresHelper(withScores)(Nil)
     }
     parse andThen Future.value
   }
@@ -128,7 +128,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
     doRequest(ZScore(key, member)) {
       case BulkReply(message)   =>
         Future.value(Some(NumberFormat.toDouble(BufToString(message))))
-      case EmptyBulkReply()     => Future.value(None)
+      case EmptyBulkReply       => Future.None
     }
 
   /**
@@ -138,7 +138,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
   def zRevRank(key: Buf, member: Buf): Future[Option[JLong]] =
     doRequest(ZRevRank(key, member)) {
       case IntegerReply(n) => Future.value(Some(n))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply  => Future.None
     }
 
   /**
@@ -151,7 +151,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
     doRequest(ZIncrBy(key, amount, member)) {
       case BulkReply(message) =>
         Future.value(Some(NumberFormat.toDouble(BufToString(message))))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply     => Future.None
     }
 
   /**
@@ -161,7 +161,7 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
   def zRank(key: Buf, member: Buf): Future[Option[JLong]] =
     doRequest(ZRank(key, member)) {
       case IntegerReply(n) => Future.value(Some(n))
-      case EmptyBulkReply()   => Future.value(None)
+      case EmptyBulkReply  => Future.None
     }
 
   /**

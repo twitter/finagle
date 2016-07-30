@@ -1,6 +1,6 @@
 package com.twitter.finagle.redis.integration
 
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.finagle.redis.util.StringToBuf
 import com.twitter.util.Await
@@ -38,8 +38,7 @@ final class ListClientIntegrationSuite extends RedisClientTest {
       assert(Await.result(client.lLen(key)) == 0)
       assert(Await.result(client.lPush(bufFoo, List(bufBar))) == 1, "Failed to insert list item.")
       assert(Await.result(client.lLen(key)) == 1)
-      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) ==
-        bufBar)
+      assert(Await.result(client.lPop(key)).getOrElse(fail(PopFailureMessage)) == bufBar)
       assert(Await.result(client.lLen(key)) == 0)
     }
   }

@@ -72,7 +72,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def get(key: Buf): Future[Option[Buf]] =
     doRequest(Get(key)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.None
+      case EmptyBulkReply       => Future.None
   }
 
   /**
@@ -98,7 +98,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def getRange(key: Buf, start: Long, end: Long): Future[Option[Buf]] =
     doRequest(GetRange(key, start, end)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.None
+      case EmptyBulkReply       => Future.None
   }
 
   /**
@@ -113,7 +113,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def getSet(key: Buf, value: Buf): Future[Option[Buf]] =
     doRequest(GetSet(key, value)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.value(None)
+      case EmptyBulkReply       => Future.value(None)
   }
 
   /**
@@ -152,11 +152,11 @@ private[redis] trait StringCommands { self: BaseClient =>
       case MBulkReply(messages) => Future {
         messages.map {
         case BulkReply(message) => Some(message)
-        case EmptyBulkReply()   => None
+        case EmptyBulkReply     => None
         case _ => throw new IllegalStateException()
       }.toSeq
     }
-    case EmptyMBulkReply()    => Future.Nil
+    case EmptyMBulkReply       => Future.Nil
   }
 
   /**
@@ -243,7 +243,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def setExNx(key: Buf, seconds: Long, value: Buf): Future[JBoolean] =
     doRequest(Set(key, value, Some(InSeconds(seconds)), true, false)) {
       case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
+      case EmptyBulkReply => FutureFalse
   }
 
   /**
@@ -257,7 +257,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def setExXx(key: Buf, seconds: Long, value: Buf): Future[JBoolean] =
     doRequest(Set(key, value, Some(InSeconds(seconds)), false, true)) {
       case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
+      case EmptyBulkReply => FutureFalse
   }
 
   /**
@@ -295,7 +295,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def setPxNx(key: Buf, millis: Long, value: Buf): Future[JBoolean] =
     doRequest(Set(key, value, Some(InMilliseconds(millis)), true, false)) {
       case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
+      case EmptyBulkReply => FutureFalse
   }
 
   /**
@@ -309,7 +309,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def setPxXx(key: Buf, millis: Long, value: Buf): Future[JBoolean] =
     doRequest(Set(key, value, Some(InMilliseconds(millis)), false, true)) {
       case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
+      case EmptyBulkReply => FutureFalse
   }
 
   /**
@@ -322,7 +322,7 @@ private[redis] trait StringCommands { self: BaseClient =>
   def setXx(key: Buf, value: Buf): Future[JBoolean] =
     doRequest(Set(key, value, None, false, true)) {
       case StatusReply(_) => FutureTrue
-      case EmptyBulkReply() => FutureFalse
+      case EmptyBulkReply => FutureFalse
   }
 
   /**

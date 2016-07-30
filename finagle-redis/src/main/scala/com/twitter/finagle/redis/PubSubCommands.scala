@@ -15,7 +15,7 @@ private[redis] trait PubSubCommands { self: BaseClient =>
   def pubSubChannels(pattern: Option[Buf] = None): Future[Seq[Buf]] =
     doRequest(PubSubChannels(pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyMBulkReply() => Future.value(Nil)
+      case EmptyMBulkReply => Future.Nil
     }
 
   /**
@@ -29,7 +29,7 @@ private[redis] trait PubSubCommands { self: BaseClient =>
           case List(BulkReply(channel), IntegerReply(num)) => channel -> num
         })(breakOut)
       )
-      case EmptyMBulkReply() => Future.value(Map.empty)
+      case EmptyMBulkReply => Future.value(Map.empty)
     }
 
   /**
@@ -37,7 +37,7 @@ private[redis] trait PubSubCommands { self: BaseClient =>
    * using the PSUBSCRIBE command).
    */
   def pubSubNumPat(): Future[Long] =
-    doRequest(PubSubNumPat()) {
+    doRequest(PubSubNumPat) {
       case IntegerReply(num) => Future.value(num)
     }
 

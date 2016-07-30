@@ -36,12 +36,14 @@ object ClientBuilder {
   type NoCodec =
     ClientBuilder[_, _, ClientConfig.Yes, Nothing, ClientConfig.Yes]
 
-  def apply() = new ClientBuilder()
+  def apply(): ClientBuilder[Nothing, Nothing, Nothing, Nothing, Nothing] =
+    new ClientBuilder()
 
   /**
    * Used for Java access.
    */
-  def get() = apply()
+  def get(): ClientBuilder[Nothing, Nothing, Nothing, Nothing, Nothing] =
+    apply()
 
   /**
    * Provides a typesafe `build` for Java.
@@ -263,7 +265,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
 
   private[builder] def this() = this(ClientConfig.nilClient)
 
-  override def toString() = "ClientBuilder(%s)".format(params)
+  override def toString: String = "ClientBuilder(%s)".format(params)
 
   private def copy[Req1, Rep1, HasCluster1, HasCodec1, HasHostConnectionLimit1](
     client: StackBasedClient[Req1, Rep1]
@@ -536,7 +538,7 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    * discretion of `client` itself and the protocol implementation. For example,
    * the Mux protocol has no use for most connection pool parameters (e.g.
    * `hostConnectionLimit`). Thus when configuring
-   * [[com.twitter.finagle.ThriftMux]] clients (via [[stack(ThriftMux.client)]]),
+   * `com.twitter.finagle.ThriftMux` clients (via `stack(ThriftMux.client)`),
    * such connection pool parameters will not be applied.
    */
   def stack[Req1, Rep1](
@@ -576,6 +578,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *
    * Http.client.withRequestTimeout(duration)
    * }}}
+   *
+   * @note if the request is not complete after `duration` the work that is
+   *       in progress will be interrupted via [[Future.raise]].
+   *
+   * @see [[timeout(Duration)]]
    */
   def requestTimeout(duration: Duration): This =
     configured(TimeoutFilter.Param(duration))
@@ -622,6 +629,11 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    *   .stack(Http.client)
    *   .timeout(duration)
    * }}}
+   *
+   * @note if the request is not complete after `duration` the work that is
+   *       in progress will be interrupted via [[Future.raise]].
+   *
+   * @see [[requestTimeout(Duration)]]
    */
   def timeout(duration: Duration): This =
     configured(GlobalTimeout(duration))
@@ -1399,9 +1411,9 @@ private case class ClientBuilderClient[Req, Rep](
   client: StackClient[Req, Rep]
 ) extends StackClient[Req, Rep] {
 
-  def params = client.params
+  def params: Stack.Params = client.params
   def withParams(ps: Stack.Params) = copy(client.withParams(ps))
-  def stack = client.stack
+  def stack: Stack[ServiceFactory[Req, Rep]] = client.stack
   def withStack(stack: Stack[ServiceFactory[Req, Rep]]) = copy(client.withStack(stack))
 
   def newClient(dest: Name, label: String) =
@@ -1417,8 +1429,8 @@ private object ClientBuilderClient {
 
   private class StatsFilterModule[Req, Rep]
       extends Stack.Module2[Stats, ExceptionStatsHandler, ServiceFactory[Req, Rep]] {
-    override val role = new Stack.Role("ClientBuilder StatsFilter")
-    override val description =
+    val role: Stack.Role = new Stack.Role("ClientBuilder StatsFilter")
+    val description: String =
       "Record request stats scoped to 'tries', measured after any retries have occurred"
 
     override def make(
@@ -1436,8 +1448,8 @@ private object ClientBuilderClient {
 
   private class GlobalTimeoutModule[Req, Rep]
       extends Stack.Module2[GlobalTimeout, Timer, ServiceFactory[Req, Rep]] {
-    override val role = new Stack.Role("ClientBuilder GlobalTimeoutFilter")
-    override val description = "Application-configured global timeout"
+    val role: Stack.Role = new Stack.Role("ClientBuilder GlobalTimeoutFilter")
+    val description: String = "Application-configured global timeout"
 
     override def make(
       globalTimeoutP: GlobalTimeout,
@@ -1458,8 +1470,8 @@ private object ClientBuilderClient {
 
   private class ExceptionSourceFilterModule[Req, Rep]
       extends Stack.Module1[Label, ServiceFactory[Req, Rep]] {
-    override val role = new Stack.Role("ClientBuilder ExceptionSourceFilter")
-    override val description = "Exception source filter"
+    val role: Stack.Role = new Stack.Role("ClientBuilder ExceptionSourceFilter")
+    val description: String = "Exception source filter"
 
     override def make(
       labelP: Label,
@@ -1556,9 +1568,9 @@ private case class CodecClient[Req, Rep](
     val codec = codecFactory(ClientCodecConfig(label))
 
     val prepConn = new Stack.ModuleParams[ServiceFactory[Req, Rep]] {
-      override def parameters: Seq[Stack.Param[_]] = Nil
-      override val role = StackClient.Role.prepConn
-      override val description = "Connection preparation phase as defined by a Codec"
+      def parameters: Seq[Stack.Param[_]] = Nil
+      val role: Stack.Role = StackClient.Role.prepConn
+      val description = "Connection preparation phase as defined by a Codec"
       def make(ps: Stack.Params, next: ServiceFactory[Req, Rep]) = {
         val Stats(stats) = ps[Stats]
         val underlying = codec.prepareConnFactory(next, ps)

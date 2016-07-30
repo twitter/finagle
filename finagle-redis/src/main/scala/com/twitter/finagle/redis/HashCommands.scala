@@ -31,7 +31,7 @@ private[redis] trait HashCommands { self: BaseClient =>
   def hGet(key: Buf, field: Buf): Future[Option[Buf]] =
     doRequest(HGet(key, field)) {
       case BulkReply(message)   => Future.value(Some(message))
-      case EmptyBulkReply()     => Future.None
+      case EmptyBulkReply       => Future.None
     }
 
   /**
@@ -40,7 +40,7 @@ private[redis] trait HashCommands { self: BaseClient =>
   def hGetAll(key: Buf): Future[Seq[(Buf, Buf)]] =
     doRequest(HGetAll(key)) {
       case MBulkReply(messages) => Future.value(returnPairs(ReplyFormat.toBuf(messages)))
-      case EmptyMBulkReply()    => Future.Nil
+      case EmptyMBulkReply      => Future.Nil
   }
 
   /**
@@ -58,7 +58,7 @@ private[redis] trait HashCommands { self: BaseClient =>
   def hKeys(key: Buf): Future[Seq[Buf]] =
     doRequest(HKeys(key)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyMBulkReply()    => Future.Nil
+      case EmptyMBulkReply      => Future.Nil
     }
 
   /**
@@ -75,7 +75,7 @@ private[redis] trait HashCommands { self: BaseClient =>
   def hMGet(key: Buf, fields: Seq[Buf]): Future[Seq[Buf]] =
     doRequest(HMGet(key, fields)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyMBulkReply()    => Future.Nil
+      case EmptyMBulkReply      => Future.Nil
     }
 
   /**
@@ -94,7 +94,7 @@ private[redis] trait HashCommands { self: BaseClient =>
   ): Future[Seq[Buf]] =
     doRequest(HScan(key, cursor, count, pattern)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyMBulkReply()    => Future.Nil
+      case EmptyMBulkReply      => Future.Nil
     }
 
   /**
@@ -122,6 +122,6 @@ private[redis] trait HashCommands { self: BaseClient =>
   def hVals(key: Buf): Future[Seq[Buf]] =
     doRequest(HVals(key)) {
       case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
-      case EmptyMBulkReply()    => Future.Nil
+      case EmptyMBulkReply      => Future.Nil
     }
 }

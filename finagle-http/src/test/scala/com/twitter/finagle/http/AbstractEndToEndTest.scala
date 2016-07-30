@@ -8,7 +8,7 @@ import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.param.Stats
-import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory}
+import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory, ServiceFactoryRef}
 import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver, StatsReceiver}
 import com.twitter.finagle.tracing.Trace
 import com.twitter.io.{Buf, Reader, Writer}
@@ -54,6 +54,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
 
   def clientImpl(): finagle.Http.Client
   def serverImpl(): finagle.Http.Server
+  def initClient(client: HttpService): Unit = {}
+  def initService: HttpService = Service.mk { req: Request =>
+    Future.exception(new Exception("boom!"))
+  }
   def featureImplemented(feature: Feature): Boolean
   def testIfImplemented(feature: Feature)(name: String)(testFn: => Unit): Unit = {
     if (!featureImplemented(feature)) ignore(name)(testFn) else test(name)(testFn)
@@ -76,7 +80,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
   }
 
   private def requestWith(status: Status): Request =
-    Request("http://twitter.com", ("statusCode", status.code.toString))
+    Request("/", ("statusCode", status.code.toString))
 
   private val statusCodeSvc = new HttpService {
     def apply(request: Request) = {
@@ -95,7 +99,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
         def apply(request: Request) = Future.value(Response())
       }
       val client = connect(service)
-      val request = Request("http://twitter.com/" + "a" * 4096)
+      val request = Request("/" + "a" * 4096)
       val response = Await.result(client(request), 5.seconds)
       assert(response.status == Status.RequestURITooLong)
       Await.ready(client.close(), 5.seconds)
@@ -106,7 +110,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
         def apply(request: Request) = Future.value(Response())
       }
       val client = connect(service)
-      val request = Request("http://")
+      val request = Request("/")
       request.headers().add("header", "a" * 8192)
       val response = Await.result(client(request), 5.seconds)
       assert(response.status == Status.RequestHeaderFieldsTooLarge)
@@ -152,7 +156,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       }
 
       val client = connect(service)
-      val response = Await.result(client(Request("http://twitter.com")), 5.seconds)
+      val response = Await.result(client(Request("/")), 5.seconds)
       assert(response.status == Status.InternalServerError)
       Await.ready(client.close(), 5.seconds)
     }
@@ -163,10 +167,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       }
       val client = connect(service)
 
-      val tooBig = Request("http://twitter.com")
+      val tooBig = Request("/")
       tooBig.content = Buf.ByteArray.Owned(new Array[Byte](200))
 
-      val justRight = Request("http://twitter.com")
+      val justRight = Request("/")
       justRight.content = Buf.ByteArray.Owned(Array[Byte](100))
 
       assert(Await.result(client(tooBig), 5.seconds).status == Status.RequestEntityTooLarge)
@@ -180,10 +184,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       }
       val client = connect(service)
 
-      val justRight = Request("http://twitter.com")
+      val justRight = Request("/")
       assert(Await.result(client(justRight), 2.seconds).status == Status.Ok)
 
-      val tooMuch = Request("http://twitter.com")
+      val tooMuch = Request("/")
       tooMuch.setChunked(true)
       val w = tooMuch.writer
       w.write(buf("a"*1000)).before(w.close)
@@ -329,6 +333,38 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val client = connect(service(writer))
       val response = Await.result(client(Request()), 5.seconds)
       assert(response.contentString == "helloworld")
+      Await.ready(client.close(), 5.seconds)
+    }
+
+    test(name + ": stream via ResponseProxy") {
+      class ResponseProxyFilter extends SimpleFilter[Request, Response] {
+        override def apply(request: Request, service: Service[Request, Response]): Future[Response] = {
+          service(request).map { responseOriginal =>
+            new ResponseProxy {
+              override def response: Response = responseOriginal
+            }
+          }
+        }
+      }
+
+      def service = new HttpService {
+        def apply(request: Request) = {
+          val response = Response()
+          response.setChunked(true)
+          response.writer.write(buf("goodbye")).before {
+            response.writer.write(buf("world")).before {
+              response.close()
+            }
+          }
+          Future.value(response)
+        }
+      }
+
+      val serviceWithResponseProxy = (new ResponseProxyFilter).andThen(service)
+
+      val client = connect(serviceWithResponseProxy)
+      val response = Await.result(client(Request()), 5.seconds)
+      assert(response.contentString == "goodbyeworld")
       Await.ready(client.close(), 5.seconds)
     }
 
@@ -596,22 +632,26 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       }
   }
 
-  run("Client/Server")(standardErrors, standardBehaviour, tracing) {
-    service =>
-      val server = serverImpl()
-        .withLabel("server")
-        .configured(Stats(statsRecv))
-        .withMaxRequestSize(100.bytes)
-        .serve("localhost:*", service)
-      val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
-      val client = clientImpl()
-        .configured(Stats(statsRecv))
-        .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
+  run("Client/Server")(standardErrors, standardBehaviour, tracing) { service =>
+    val ref = new ServiceFactoryRef(ServiceFactory.const(initService))
+    val server = serverImpl()
+      .withLabel("server")
+      .configured(Stats(statsRecv))
+      .withMaxRequestSize(100.bytes)
+      .serve("localhost:*", ref)
+    val addr = server.boundAddress.asInstanceOf[InetSocketAddress]
+    val client = clientImpl()
+      .configured(Stats(statsRecv))
+      .newService("%s:%d".format(addr.getHostName, addr.getPort), "client")
 
-      new ServiceProxy(client) {
-        override def close(deadline: Time) =
-          Closable.all(client, server).close(deadline)
-      }
+    val ret = new ServiceProxy(client) {
+      override def close(deadline: Time) =
+        Closable.all(client, server).close(deadline)
+    }
+    initClient(client)
+    ref() = ServiceFactory.const(service)
+    statsRecv.clear()
+    ret
   }
 
   run("ClientBuilder (streaming)")(streaming) {
@@ -670,7 +710,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       }
 
       val client = connect(failService, st, clientName)
-      val e = intercept[Exception](Await.result(client(Request("http://twitter.com")), 5.seconds))
+      val e = intercept[Exception](Await.result(client(Request("/")), 5.seconds))
 
       assert(st.counters(Seq(clientName, "failure_accrual", "removals")) == 1)
       assert(st.counters(Seq(clientName, "retries", "requeues")) == failureAccrualFailures - 1)

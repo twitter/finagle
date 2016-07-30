@@ -37,6 +37,10 @@ perform protocol negotiation upon connection and will downgrade to raw TBinary
 Thrift if servers are not using the upgraded protocol. By default, `finagle-thrift`
 uses the Thrift framed codec and the binary protocol for serialization.
 
+.. note:: Some Thrift server implementations do not handle this protocol
+          negotiation well. If your client should run into this, you can disable
+          it by calling ``Thrift.client.withNoAttemptTTwitterUpgrade``.
+
 Using finagle-thrift
 ~~~~~~~~~~~~~~~~~~~~
 

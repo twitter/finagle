@@ -30,6 +30,10 @@ All Balancers
 **removes**
   A counter of the number of hosts removed from the loadbalancer.
 
+**rebuilds**
+   A counter of the number of times the loadbalancer rebuilds its state
+   (triggered by either an underlying namer or failing nodes).
+
 **max_effort_exhausted**
   A counter of the number of times a balancer failed to find a node that was
   ``Status.Open`` within ``com.twitter.finagle.loadbalancer.Balancer.maxEffort``

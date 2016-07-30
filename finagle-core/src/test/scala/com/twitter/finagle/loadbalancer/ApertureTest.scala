@@ -86,7 +86,6 @@ trait ApertureTesting {
 
 @RunWith(classOf[JUnitRunner])
 class ApertureTest extends FunSuite with ApertureTesting {
-
   class Bal extends TestBal with LeastLoaded[Unit, Unit]
 
   test("Balance only within the aperture") {
@@ -105,6 +104,44 @@ class ApertureTest extends FunSuite with ApertureTesting {
     bal.adjustx(-1)
     bal.applyn(100)
     assert(counts.aperture == 1)
+  }
+
+  test("ApertureLoadBandBalancer requires minAperture > 0") {
+    intercept[IllegalArgumentException] {
+      new ApertureLoadBandBalancer[Unit, Unit](
+        Activity.pending,
+        Duration.Bottom,
+        0,
+        0,
+        minAperture = 0,
+        0,
+        null,
+        Timer.Nil,
+        NullStatsReceiver,
+        new NoBrokersAvailableException()
+      )
+    }
+  }
+
+  test("Enforce min aperture size is not > the number of active nodes") {
+    val counts = new Counts
+    val bal = new TestBal with LeastLoaded[Unit, Unit] {
+      override protected val minAperture = 4
+    }
+
+    bal.update(counts.range(10))
+
+    // Sanity check custom minAperture enforced.
+    bal.adjustx(-100)
+    bal.applyn(1000)
+    assert(counts.aperture == 4)
+
+    // Now close 8, which should override the set min.
+    counts.clear()
+    counts.take(8).foreach(_.status = Status.Closed)
+    bal.update(counts.range(10))
+    bal.applyn(1000)
+    assert(counts.aperture == 2)
   }
 
   test("Don't operate outside of aperture range") {

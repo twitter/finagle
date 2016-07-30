@@ -1,5 +1,6 @@
 package com.twitter.finagle.http
 
+import com.twitter.io.Reader
 import org.jboss.netty.handler.codec.http.HttpResponse
 
 abstract class ResponseProxy extends Response {
@@ -14,4 +15,6 @@ abstract class ResponseProxy extends Response {
   override def encodeString(): String    = response.encodeString()
 
   protected[finagle] def httpResponse: HttpResponse = response.httpResponse
+
+  override def reader: Reader = response.reader
 }

@@ -1,3 +1,19 @@
+FuturePool
+<<<<<<<<<<
+
+These metrics correspond to the state of ``FuturePool.unboundedPool`` and
+``FuturePool.interruptibleUnboundedPool``. Only one set of metrics is
+exported as they share their underlying "thread pool".
+
+**finagle/future_pool/pool_size**
+  A gauge of the number of threads in the pool.
+
+**finagle/future_pool/active_tasks**
+  A gauge of the number of tasks actively executing.
+
+**finagle/future_pool/completed_tasks**
+  A gauge of the number of total tasks that have completed execution.
+
 Scheduler
 <<<<<<<<<
 

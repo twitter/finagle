@@ -1,7 +1,7 @@
 package com.twitter.finagle.redis.integration
 
 import com.twitter.finagle.redis.protocol.{Limit, ZInterval}
-import com.twitter.finagle.redis.naggati.RedisClientTest
+import com.twitter.finagle.redis.RedisClientTest
 import com.twitter.finagle.redis.tags.{ClientTest, RedisTest}
 import com.twitter.util.Await
 import org.junit.Ignore
