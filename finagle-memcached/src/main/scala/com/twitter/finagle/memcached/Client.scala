@@ -924,11 +924,13 @@ private[finagle] class KetamaPartitionedClient(
   private[this] val nodeJoinCount = statsReceiver.counter("joins")
   private[this] val keyRingRedistributeCount = statsReceiver.counter("redistributes")
 
-  statsReceiver.addGauge("live_nodes") {
+  // We need to keep this reference so the gauge is not garbage collected.
+  private[this] val liveNodesGauge = statsReceiver.addGauge("live_nodes") {
     self.synchronized { nodes.count { case (_, Node(_, state)) => state == NodeState.Live } }
   }
 
-  statsReceiver.addGauge("dead_nodes") {
+  // We need to keep this reference so the gauge is not garbage collected.
+  private[this] val deadNodesGauge = statsReceiver.addGauge("dead_nodes") {
     self.synchronized { nodes.count { case (_, Node(_, state)) => state == NodeState.Ejected } }
   }
 
