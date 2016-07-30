@@ -2,7 +2,7 @@ package com.twitter.finagle.redis.protocol
 
 import com.twitter.finagle.netty3.ChannelBufferBuf
 import com.twitter.finagle.redis.util._
-import com.twitter.io.{Buf, Charsets}
+import com.twitter.io.Buf
 import com.twitter.util.Time
 import org.jboss.netty.buffer.ChannelBuffer
 import java.lang.{Long => JLong}
