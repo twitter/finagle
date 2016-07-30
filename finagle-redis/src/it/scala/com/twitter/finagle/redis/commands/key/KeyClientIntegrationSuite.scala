@@ -28,7 +28,7 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       val v = Buf.Utf8("10")
       val key = Buf.Utf8("mykey")
       val value = Buf.Utf8("10")
-      val expectedBytes: Array[Byte] = Array(0, -64, 10, 6, 0, -8, 114, 63, -59, -5, -5, 95, 40)
+      val expectedBytes: Array[Byte] = Array(0, -64, 10, 7, 0, -111, -83, -126, -74, 6, 100, -74, -95)
 
       Await.result(client.set(k, v))
       val actualResult =
@@ -46,18 +46,19 @@ final class KeyClientIntegrationSuite extends RedisClientTest {
       Await.result(client.set(bufFoo, bufBar))
       Await.result(client.set(bufBaz, bufBoo))
 
-      assert(BufToString(Await.result(client.scans(0, None, None)).apply(1)) == "baz")
+      // sort the results since order can change
+      val res = Await.result(client.scans(0L, None, None))
+      val resList = res.flatMap(Buf.Utf8.unapply).sorted
+      assert(resList == Seq("0", "baz", "foo"))
 
       val withCount = Await.result(client.scans(0, Some(10), None))
-      assert(BufToString(withCount(0)) == "0")
-      assert(BufToString(withCount(1)) == "baz")
-      assert(BufToString(withCount(2)) == "foo")
+      val withCountList = withCount.flatMap(Buf.Utf8.unapply).sorted
+      assert(withCountList == Seq("0", "baz", "foo"))
 
       val pattern = StringToBuf("b*")
       val withPattern = Await.result(client.scans(0, None, Some(pattern)))
-
-      assert(BufToString(withPattern(0)) == "0")
-      assert(BufToString(withPattern(1)) == "baz")
+      val withPatternList = withPattern.flatMap(Buf.Utf8.unapply)
+      assert(withPatternList == Seq("0", "baz"))
     }
   }
 
