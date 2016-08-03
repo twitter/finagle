@@ -34,6 +34,13 @@ All Balancers
    A counter of the number of times the loadbalancer rebuilds its state
    (triggered by either an underlying namer or failing nodes).
 
+**updates**
+   A counter of the number of times the underlying namer triggers
+   the loadbalancer to rebuild its state (e.g., because the server set
+   has changed). Note that these kind of events are usually collapsed
+   so the actual number of ``rebuilds`` is usually less than the number
+   of ``updates``.
+
 **max_effort_exhausted**
   A counter of the number of times a balancer failed to find a node that was
   ``Status.Open`` within ``com.twitter.finagle.loadbalancer.Balancer.maxEffort``

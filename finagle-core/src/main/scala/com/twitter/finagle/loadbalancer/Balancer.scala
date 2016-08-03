@@ -100,6 +100,7 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
   private[this] val adds = statsReceiver.counter("adds")
   private[this] val removes = statsReceiver.counter("removes")
   private[this] val rebuilds = statsReceiver.counter("rebuilds")
+  private[this] val updates = statsReceiver.counter("updates")
 
   protected sealed trait Update
   protected case class NewList(
@@ -203,16 +204,17 @@ private[loadbalancer] trait Balancer[Req, Rep] extends ServiceFactory[Req, Rep] 
    * may run asynchronously, is completed, the load balancer balances
    * across these factories and no others.
    */
-  def update(factories: Traversable[ServiceFactory[Req, Rep]]): Unit =
+  def update(factories: Traversable[ServiceFactory[Req, Rep]]): Unit = {
+    updates.incr()
     updater(NewList(factories))
+  }
 
   /**
    * Invoke `fn` on the current distributor. This is done through the updater
    * and is serialized with distributor updates and other invocations.
    */
-  protected def invoke(fn: Distributor => Unit): Unit = {
+  protected def invoke(fn: Distributor => Unit): Unit =
     updater(Invoke(fn))
-  }
 
   @tailrec
   private[this] def pick(nodes: Distributor, count: Int): Node = {
