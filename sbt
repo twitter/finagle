@@ -28,15 +28,12 @@ java -ea                          \
   $JAVA_OPTS                      \
   -Djava.net.preferIPv4Stack=true \
   -XX:+AggressiveOpts             \
-  -XX:+UseParNewGC                \
-  -XX:+UseConcMarkSweepGC         \
-  -XX:+CMSParallelRemarkEnabled   \
-  -XX:+CMSClassUnloadingEnabled   \
+  -XX:+UseG1GC                    \
   -XX:ReservedCodeCacheSize=128m  \
   -XX:SurvivorRatio=128           \
   -XX:MaxTenuringThreshold=0      \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx3584M                       \
+  -Xmx3G                          \
   -server                         \
   -jar $sbtjar "$@"
