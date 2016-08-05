@@ -934,6 +934,8 @@ class EndToEndTest extends FunSuite
     }
   }
 
+  // This test uses excessive memory so skip on SBT builds
+  if (!sys.props.contains("SKIP_SBT"))
   test("ThriftMux client to Thrift server ") {
     val iface = new TestService.FutureIface {
       def query(x: String) = Future.value(x + x)

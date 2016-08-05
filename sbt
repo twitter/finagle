@@ -21,8 +21,7 @@ fi
 
 [ -f ~/.sbtconfig ] && . ~/.sbtconfig
 
-# -Xmx is set slightly below the Travis limit of 4GB to avoid getting SIGKILL'ed
-# https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
+# the -DSKIP_SBT flag is set to skip tests that shouldn't be run with sbt.
 java -ea                          \
   $SBT_OPTS                       \
   $JAVA_OPTS                      \
@@ -37,6 +36,7 @@ java -ea                          \
   -XX:MaxTenuringThreshold=0      \
   -Xss8M                          \
   -Xms512M                        \
-  -Xmx3584M                       \
+  -Xmx2G                          \
+  -DSKIP_SBT=1                    \
   -server                         \
   -jar $sbtjar "$@"
