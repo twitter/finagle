@@ -40,7 +40,7 @@ object exp {
     }
   }
 
-  private[http] val Netty4HttpTransporter: Stack.Params => Transporter[Any, Any] =
+  private[finagle] val Netty4HttpTransporter: Stack.Params => Transporter[Any, Any] =
     (params: Stack.Params) => {
       Netty4Transporter({ pipeline: ChannelPipeline =>
         val maxChunkSize = params[httpparam.MaxChunkSize].size

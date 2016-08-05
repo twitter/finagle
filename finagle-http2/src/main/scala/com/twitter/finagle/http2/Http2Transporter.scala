@@ -1,28 +1,25 @@
 package com.twitter.finagle.http2
 
 import com.twitter.finagle.Http.{param => httpparam}
-import com.twitter.finagle.Stack
+import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.client.Transporter
+import com.twitter.finagle.http2.transport.{
+  UpgradeRequestHandler,
+  SchemifyingHandler,
+  RichInboundHttp2ToHttpAdapter,
+  Http2UpgradingTransport
+}
 import com.twitter.finagle.netty4.Netty4Transporter
-import com.twitter.finagle.netty4.channel.BufferingChannelOutboundHandler
-import com.twitter.finagle.netty4.http.exp.initClient
+import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
 import com.twitter.finagle.transport.{Transport, TransportProxy}
-import com.twitter.io.Charsets
 import com.twitter.logging.Logger
-import com.twitter.util.{Closable, Future, Promise, Time}
-import io.netty.buffer.ByteBuf
-import io.netty.channel.{
-  ChannelDuplexHandler,
-  ChannelHandlerContext,
-  ChannelOutboundHandlerAdapter,
-  ChannelPipeline,
-  ChannelPromise}
-import io.netty.handler.codec.http.{HttpResponse => Netty4Response, _}
-import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.{STREAM_ID, SCHEME}
+import com.twitter.util.{Future, Throw, Return, Promise}
+import io.netty.channel.ChannelPipeline
+import io.netty.handler.codec.http._
+import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.STREAM_ID
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
 
 private[http2] object Http2Transporter {
 
@@ -39,14 +36,19 @@ private[http2] object Http2Transporter {
   def setStreamId(msg: HttpMessage, id: Int): Unit =
     msg.headers.setInt(STREAM_ID.text(), id)
 
-  def apply(params: Stack.Params): Transporter[Any, Any] =
+  def apply(params: Stack.Params): Transporter[Any, Any] = {
     // current http2 client implementation doesn't support
     // netty-style backpressure
     // https://github.com/netty/netty/issues/3667#issue-69640214
-    new Http2Transporter(Netty4Transporter[Any, Any](
+    val underlying = Netty4Transporter[Any, Any](
       init(params),
       params + Netty4Transporter.Backpressure(false)
-    ))
+    )
+
+    val underlyingHttp11 = Netty4HttpTransporter(params)
+
+    new Http2Transporter(underlying, underlyingHttp11)
+  }
 
   // constructing an http2 cleartext transport
   private[http2] def init(params: Stack.Params): ChannelPipeline => Unit =
@@ -76,151 +78,118 @@ private[http2] object Http2Transporter {
         maxChunkSize.inBytes.toInt
       )
       val upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler)
+      val bufferedWrites = new UpgradeRequestHandler()
       val upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, Int.MaxValue)
 
-      pipeline.addLast(sourceCodec,
-        upgradeHandler,
-        new UpgradeRequestHandler())
-
+      pipeline.addLast(sourceCodec, upgradeHandler, bufferedWrites)
       pipeline.addLast("schemifier", new SchemifyingHandler("http"))
       initClient(params)(pipeline)
     }
 
-  // borrows heavily from the netty http2 example
-  class UpgradeRequestHandler extends ChannelDuplexHandler with BufferingChannelOutboundHandler {
-    override def channelRead(ctx: ChannelHandlerContext, msg: Any): Unit = {
-      // receives an upgrade response
-      // removes self from pipeline
-      // drops message
-      // Done with this handler, remove it from the pipeline.
-      msg match {
-        case settings: Http2Settings => // drop!
-          ctx.pipeline.remove(this)
-        case _ =>
-          ctx.fireChannelRead(msg)
-      }
-    }
-
-    private[this] val first = new AtomicBoolean(true)
-
-    /**
-     * We write the first message directly and it serves as the upgrade request.
-     * The rest of the handlers will mutate it to look like a good upgrade
-     * request.  We buffer the rest of the writes until we upgrade successfully.
-     */
-    override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit =
-      if (first.compareAndSet(true, false)) ctx.writeAndFlush(msg, promise)
-      else super.write(ctx, msg, promise) // this buffers the write until the handler is removed
-  }
-
-  private def unsafeCast(t: Transport[HttpObject, HttpObject]): Transport[Any, Any] =
+  def unsafeCast(t: Transport[HttpObject, HttpObject]): Transport[Any, Any] =
     t.map(_.asInstanceOf[HttpObject], _.asInstanceOf[Any])
 }
 
-private[http2] class Http2Transporter(underlying: Transporter[Any, Any])
+/**
+ * This `Transporter` makes `Transports` that speak netty http/1.1, but write
+ * http/2 to the wire if they can.
+ *
+ * The `Transports` this hands out should be used serially, and will upgrade to
+ * http/2 if possible.  It caches connections associated with a given socket
+ * address, so that you can increase concurrency over a single connection by
+ * getting another transport, the same way that serial protocols increase
+ * concurrency.  Plainly, these transports have the same semantics as serial
+ * netty4 http/1.1 transports, but allows them to be multiplexed under the hood.
+ *
+ * Since the decision on whether to multiplex a connection or not is made after
+ * knowing the result of an upgrade, Http2Transporter is also in charge of
+ * upgrading, and caches upgrade results.
+ *
+ * Since the cleartext upgrade is a request, it's possible to write another
+ * request while the upgrade is in progress, which it does over http/1.1, and
+ * doesn't attempt to upgrade.
+ */
+private[http2] class Http2Transporter(
+    underlying: Transporter[Any, Any],
+    underlyingHttp11: Transporter[Any, Any])
   extends Transporter[Any, Any] {
-
-  import Http2Transporter.unsafeCast
-
-  protected[this] val transporterCache =
-    new ConcurrentHashMap[SocketAddress, Future[MultiplexedTransporter]]
-
-  private[this] def newConnection(addr: SocketAddress): Future[Transport[Any, Any]] =
-    underlying(addr).map { transport =>
-      new TransportProxy[Any, Any](transport) {
-        def write(msg: Any): Future[Unit] =
-          transport.write(msg)
-
-        def read(): Future[Any] =
-          transport.read().flatMap {
-            case req: Netty4Response =>
-              Future.value(req)
-            case settings: Http2Settings =>
-              // drop for now
-              // TODO: we should handle settings properly
-              read()
-            case req => Future.exception(new IllegalArgumentException(
-              s"expected a Netty4Response, got a ${req.getClass.getName}"))
-          }
-      }
-    }
-
-  @scala.annotation.tailrec
-  final def apply(addr: SocketAddress): Future[Transport[Any, Any]] =
-    Option(transporterCache.get(addr)) match {
-      case Some(f) =>
-        f.flatMap { multiplexed =>
-          multiplexed(addr).map(unsafeCast _)
-        }
-
-      case None =>
-        val p = Promise[MultiplexedTransporter]()
-        if (transporterCache.putIfAbsent(addr, p) == null) {
-          val f = newConnection(addr).map { trans =>
-            new MultiplexedTransporter(
-              Transport.cast[HttpObject, HttpObject](trans),
-              Closable.make { time: Time =>
-                transporterCache.remove(addr, p)
-                Future.Done
-              }
-            )
-          }
-          p.become(f)
-          f.flatMap { multiplexed =>
-            multiplexed(addr).map(unsafeCast _)
-          }
-        } else {
-          apply(addr) // lost the race, try again
-        }
-    }
-}
-
-private[http2] class SchemifyingHandler(defaultScheme: String) extends ChannelOutboundHandlerAdapter {
 
   private[this] val log = Logger.get()
 
-  /**
-   * We need to make sure that we add the scheme properly, since it'll be rejected
-   * by the http2 codec if we don't.
-   */
-  override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise): Unit = {
-    msg match {
-      case req: HttpRequest =>
-        if (!req.headers.contains(SCHEME.text(), defaultScheme, true /*ignoreCase*/))
-          req.headers.add(SCHEME.text(), defaultScheme)
-      case _ => // nop
+  import Http2Transporter._
+
+  protected[this] val transporterCache =
+    new ConcurrentHashMap[SocketAddress, Future[Option[() => Transport[HttpObject, HttpObject]]]]()
+
+  private[this] def onUpgradeFinished(
+    f: Future[Option[() => Transport[HttpObject, HttpObject]]],
+    addr: SocketAddress
+  ): Future[Transport[Any, Any]] = f.transform {
+    case Return(Some(fn)) => Future.value(unsafeCast(fn()))
+    case Return(None) =>
+      // we didn't upgrade
+      underlyingHttp11(addr)
+    case Throw(exn) =>
+      // kick us out of the cache so we can try to reestablish the connection
+      transporterCache.remove(addr, f)
+      apply(addr)
+  }
+
+  // uses http11 underneath, but marks itself as dead if the upgrade succeeds or
+  // the connection fails
+  private[this] def onUpgradeInProgress(
+    f: Future[Option[_]]
+  ): Transport[Any, Any] => Transport[Any, Any] = { http11: Transport[Any, Any] =>
+    val ref = new RefTransport(http11)
+    f.respond {
+      case Return(None) => // we failed the upgrade, so we can keep the connection
+      case _ =>
+        // we shut down if we pass the upgrade or fail entirely
+        // we're assuming here that a well behaved dispatcher will propagate our status to a pool
+        // that will close us
+        // TODO: if we fail entirely, we should try to reregister on the new connection attempt
+        ref.update { trans =>
+          new TransportProxy[Any, Any](trans) {
+            def write(any: Any): Future[Unit] = trans.write(any)
+            def read(): Future[Any] = trans.read()
+            override def status: Status = Status.Closed
+          }
+        }
     }
-    ctx.write(msg, promise)
+    ref
+  }
+
+  private[this] def upgrade(addr: SocketAddress): Future[Transport[Any, Any]] = {
+    val conn: Future[Transport[Any, Any]] = underlying(addr)
+    val p = Promise[Option[() => Transport[HttpObject, HttpObject]]]()
+    if (transporterCache.putIfAbsent(addr, p) == null) {
+      conn.transform {
+        case Return(trans) =>
+          val ref = new RefTransport(trans)
+          ref.update { t =>
+            t.onClose.ensure {
+              transporterCache.remove(addr, p)
+            }
+            new Http2UpgradingTransport(t, ref, p)
+          }
+          Future.value(ref)
+        case Throw(e) =>
+          p.setException(e)
+          Future.exception(e)
+      }
+    } else apply(addr)
+  }
+
+  final def apply(addr: SocketAddress): Future[Transport[Any, Any]] = Option(transporterCache.get(addr)) match {
+    case Some(f) =>
+      if (f.isDefined) {
+        onUpgradeFinished(f, addr)
+      } else {
+        // fall back to http/1.1 while upgrading
+        val conn = underlyingHttp11(addr)
+        conn.map(onUpgradeInProgress(f))
+      }
+    case None =>
+      upgrade(addr)
   }
 }
-
-private[http2] class RichInboundHttp2ToHttpAdapter(
-    connection: Http2Connection,
-    maxContentLength: Int)
-  extends InboundHttp2ToHttpAdapter(
-    connection,
-    maxContentLength,
-    false,
-    true) {
-
-  override def onGoAwayRead(
-    ctx: ChannelHandlerContext,
-    lastStreamId: Int,
-    errorCode: Long,
-    debugData: ByteBuf
-  ): Unit = {
-
-    val debugString = debugData.toString(Charsets.Utf8)
-
-    // TODO: this is very ad-hoc right now, we need to come up with a consistent way of
-    // downconverting.
-    val status = if (debugString.startsWith("Header size exceeded max allowed bytes")) {
-      HttpResponseStatus.REQUEST_HEADER_FIELDS_TOO_LARGE
-    } else HttpResponseStatus.BAD_REQUEST
-
-    val rep = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status)
-    Http2Transporter.setStreamId(rep, -1)
-    ctx.fireChannelRead(rep)
-  }
-}
-
