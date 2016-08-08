@@ -2,7 +2,7 @@ package com.twitter.finagle.zookeeper
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.{Announcer, Addr, Address}
-import com.twitter.util.{Await, Duration, RandomSocket, Var}
+import com.twitter.util.{Await, Duration, Var}
 import java.io.{InputStreamReader, BufferedReader}
 import java.net.{InetSocketAddress, URL}
 import org.junit.runner.RunWith
@@ -14,8 +14,8 @@ import org.scalatest.{BeforeAndAfter, FunSuite, Tag}
 
 @RunWith(classOf[JUnitRunner])
 class ZkAnnouncerTest extends FunSuite with BeforeAndAfter {
-  val port1 = RandomSocket.nextPort()
-  val port2 = RandomSocket.nextPort()
+  val port1 = 80
+  val port2 = 81
   val zkTimeout = 100.milliseconds
   var inst: ZkInstance = _
   val factory = new ZkClientFactory(zkTimeout)
