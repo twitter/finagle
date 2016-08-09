@@ -9,18 +9,16 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 @RunWith(classOf[JUnitRunner])
 class NameInterpreterTest extends FunSuite with BeforeAndAfter {
 
-  val dtab = Dtab.read("/test=>/$/inet/some-host/1234")
+  val dtab = Dtab.read("/test=>/$/inet/localhost/1234")
   val name = Path.read("/test")
 
   after {
     NameInterpreter.global = DefaultInterpreter
   }
 
-
-  // CSL-2175
-  ignore("NameInterpreter uses dtab when interpreter is not set") {
+  test("NameInterpreter uses dtab when interpreter is not set") {
     assert(NameInterpreter.bind(dtab, name).sample() ==
-      NameTree.Leaf(Path.read("/$/inet/some-host/1234")))
+      NameTree.Leaf(Path.read("/$/inet/localhost/1234")))
   }
 
   test("NameInterpreter uses it when interpreter is set") {

@@ -89,54 +89,51 @@ class ZookeeperServerSetClusterSpec extends FunSuite with MockitoSugar {
     verify(serverSet).join(localAddress, Map("alt" -> altLocalAddress).asJava, Status.ALIVE)
   }
 
-  // CSL-2175
-  if (!sys.props.contains("SKIP_FLAKY")) {
-    test("ZookeeperServerSetCluster receives a registration from ZooKeeper") {
-      forClient(None) { (cluster, registerHost) =>
-        val (current, futureChanges) = cluster.snap
-        assert(current.isEmpty)
+  test("ZookeeperServerSetCluster receives a registration from ZooKeeper") {
+    forClient(None) { (cluster, registerHost) =>
+      val (current, futureChanges) = cluster.snap
+      assert(current.isEmpty)
 
-        val remoteAddress = new InetSocketAddress("host", port1)
-        registerHost(remoteAddress, EmptyEndpointMap)
+      val remoteAddress = new InetSocketAddress(port1)
+      registerHost(remoteAddress, EmptyEndpointMap)
 
-        val changes = Await.result(futureChanges, 1.minute)
-        assert(changes.head == Cluster.Add(remoteAddress: SocketAddress))
-      }
+      val changes = Await.result(futureChanges, 1.minute)
+      assert(changes.head == Cluster.Add(remoteAddress: SocketAddress))
     }
+  }
 
-    test("ZookeeperServerSetCluster is able to block till server set is ready") {
-      forClient(None) { (cluster, registerHost) =>
-        assert(!cluster.ready.isDefined)
+  test("ZookeeperServerSetCluster is able to block till server set is ready") {
+    forClient(None) { (cluster, registerHost) =>
+      assert(!cluster.ready.isDefined)
 
-        val remoteAddress = new InetSocketAddress("host", port1)
-        registerHost(remoteAddress, EmptyEndpointMap)
+      val remoteAddress = new InetSocketAddress(port1)
+      registerHost(remoteAddress, EmptyEndpointMap)
 
-        assert(cluster.ready.isDefined)
-        val (hosts, _) = cluster.snap
-        assert(hosts == Seq(remoteAddress: SocketAddress))
-      }
+      assert(cluster.ready.isDefined)
+      val (hosts, _) = cluster.snap
+      assert(hosts == Seq(remoteAddress: SocketAddress))
     }
+  }
 
-    test("ZookeeperServerSetCluster is able to use an additional endpoint") {
-      forClient(Some("other-endpoint")) { (cluster, registerHost) =>
-        val (current, futureChanges) = cluster.snap
-        assert(current.isEmpty)
+  test("ZookeeperServerSetCluster is able to use an additional endpoint") {
+    forClient(Some("other-endpoint")) { (cluster, registerHost) =>
+      val (current, futureChanges) = cluster.snap
+      assert(current.isEmpty)
 
-        val remoteAddress = new InetSocketAddress("host", port1)
-        val otherRemoteAddress = new InetSocketAddress("host", port2)
-        registerHost(remoteAddress, Map("other-endpoint" -> otherRemoteAddress))
+      val remoteAddress = new InetSocketAddress(port1)
+      val otherRemoteAddress = new InetSocketAddress(port2)
+      registerHost(remoteAddress, Map("other-endpoint" -> otherRemoteAddress))
 
-        val changes = Await.result(futureChanges, 1.minute)
-        assert(changes.head == Cluster.Add(otherRemoteAddress: SocketAddress))
-      }
+      val changes = Await.result(futureChanges, 1.minute)
+      assert(changes.head == Cluster.Add(otherRemoteAddress: SocketAddress))
     }
+  }
 
-    test("ZookeeperServerSetCluster ignores a server which does not specify the additional endpoint") {
-      forClient(Some("this-endpoint")) { (cluster, registerHost) =>
-        val remoteAddress = new InetSocketAddress("host", port1)
-        registerHost(remoteAddress, EmptyEndpointMap)
-        assert(!cluster.ready.isDefined)
-      }
+  test("ZookeeperServerSetCluster ignores a server which does not specify the additional endpoint") {
+    forClient(Some("this-endpoint")) { (cluster, registerHost) =>
+      val remoteAddress = new InetSocketAddress(port1)
+      registerHost(remoteAddress, EmptyEndpointMap)
+      assert(!cluster.ready.isDefined)
     }
   }
 }
