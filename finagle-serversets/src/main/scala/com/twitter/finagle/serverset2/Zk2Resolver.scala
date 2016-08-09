@@ -162,7 +162,11 @@ class Zk2Resolver(
       // The stabilizer ensures that we qualify changes by putting
       // removes in a limbo state for at least one removalEpoch, and emitting
       // at most one update per batchEpoch.
-      val stabilized = Stabilizer(va, removalEpoch, batchEpoch)
+      val stabilized =
+        if (removalEpoch.period == Duration.Zero && batchEpoch.period == Duration.Zero)
+          va
+        else
+          Stabilizer(va, removalEpoch, batchEpoch)
 
       // Finally we output `State`s, which are always nonpending
       // address coupled with statistics from the stabilization
