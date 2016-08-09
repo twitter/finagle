@@ -310,6 +310,9 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
     val param.Framed(framed) = params[param.Framed]
     protected val param.ProtocolFactory(protocolFactory) = params[param.ProtocolFactory]
 
+    override val Server.param.MaxReusableBufferSize(maxThriftBufferSize) =
+      params[Server.param.MaxReusableBufferSize]
+
     protected def newListener(): Listener[In, Out] = {
       val pipeline =
         if (framed) thrift.ThriftServerFramedPipelineFactory
@@ -330,6 +333,16 @@ object Thrift extends Client[ThriftClientRequest, Array[Byte]]
 
     def withBufferedTransport(): Server =
       configured(param.Framed(false))
+
+    /**
+     * Produce a [[com.twitter.finagle.Thrift.Server]] with the specified max
+     * size of the reusable buffer for thrift responses. If this size
+     * is exceeded, the buffer is not reused and a new buffer is
+     * allocated for the next thrift response.
+     * @param size Max size of the reusable buffer for thrift responses in bytes.
+     */
+    def withMaxReusableBufferSize(size: Int): Server =
+      configured(Server.param.MaxReusableBufferSize(size))
 
     // Java-friendly forwarders
     // See https://issues.scala-lang.org/browse/SI-8905

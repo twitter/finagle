@@ -42,6 +42,9 @@ New Features
     "finagle/future_pool/active_tasks", and "finagle/future_pool/completed_tasks".
     ``RB_ID=850652``
 
+  * finagle-thrift: maxThriftBufferSize is now tunable via parameter for Thrift
+    servers. It previously only was for ThriftMux servers. ``RB_ID=860102``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
