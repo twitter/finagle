@@ -14,8 +14,8 @@ private[finagle] object BufAsByteBuf {
           Unpooled.EMPTY_BUFFER
         case ByteBufAsBuf.Owned(underlying) =>
           underlying
-        case _: Buf.ByteArray =>
-          Unpooled.wrappedBuffer(Buf.ByteArray.Owned.extract(buf))
+        case Buf.ByteArray.Owned(bytes, begin, end) =>
+          Unpooled.wrappedBuffer(bytes, begin, end)
         case _ =>
           Unpooled.wrappedBuffer(Buf.ByteBuffer.Owned.extract(buf))
       }
@@ -27,7 +27,7 @@ private[finagle] object BufAsByteBuf {
 
   object Shared {
     /**
-     * A read-only copying `ByteBuf` wrapper for [[Buf]]
+     * A read-only copying `ByteBuf` wrapper for [[Buf]].
      */
     def apply(buf: Buf): ByteBuf = {
       val bb = buf match {
