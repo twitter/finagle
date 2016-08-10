@@ -6,6 +6,7 @@ import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class StandardToggleMapTest extends FunSuite {
@@ -129,6 +130,30 @@ class StandardToggleMapTest extends FunSuite {
 
     assertFraction("com.twitter.base-is-off", 1.0)
     assertFraction("com.twitter.only-in-base", 0.0)
+  }
+
+  test("selectResource ignores duplicate inputs") {
+    // this will have a corresponding file in test/resources/com/twitter/toggles/configs/
+    val rsc = getClass.getClassLoader
+      .getResources("com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.StandardToggleMapTest.json")
+      .asScala.toSeq.head
+
+    val selected = StandardToggleMap.selectResource("configName", Seq(rsc, rsc))
+    assert(selected == rsc)
+  }
+
+  test("selectResource fails with multiple unique inputs") {
+    // these will have a corresponding file in test/resources/com/twitter/toggles/configs/
+    val rsc1 = getClass.getClassLoader
+      .getResources("com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.StandardToggleMapTest.json")
+      .asScala.toSeq.head
+    val rsc2 = getClass.getClassLoader
+      .getResources("com/twitter/toggles/configs/com.twitter.finagle.toggle.tests.Valid.json")
+      .asScala.toSeq.head
+
+    intercept[IllegalArgumentException] {
+      StandardToggleMap.selectResource("configName", Seq(rsc1, rsc2))
+    }
   }
 
   test("Toggles use correct ordering") {

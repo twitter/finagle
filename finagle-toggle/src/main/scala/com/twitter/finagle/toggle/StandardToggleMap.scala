@@ -4,6 +4,8 @@ import com.twitter.finagle.server.ServerInfo
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.logging.Logger
 import com.twitter.util.{Return, Throw}
+import java.net.URL
+import java.security.{DigestInputStream, MessageDigest}
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
 import scala.collection.JavaConverters._
 
@@ -131,6 +133,39 @@ object StandardToggleMap {
     withEnv.orElse(withoutEnv)
   }
 
+  private[this] def checksum(url: URL): Long = {
+    val md = MessageDigest.getInstance("SHA-1")
+    val is = new DigestInputStream(url.openStream(), md)
+    try {
+      val bs = new Array[Byte](128)
+      while (is.read(bs, 0, 128) != -1) { /* just consume the input */ }
+    } finally {
+      is.close()
+    }
+    val d = md.digest()
+    // use the first 8 bytes which should be unique enough for our purposes.
+    ( d(0) & 0xffL)        |
+    ((d(1) & 0xffL) << 8)  |
+    ((d(2) & 0xffL) << 16) |
+    ((d(3) & 0xffL) << 24) |
+    ((d(4) & 0xffL) << 32) |
+    ((d(5) & 0xffL) << 40) |
+    ((d(6) & 0xffL) << 48) |
+    ((d(7) & 0xffL) << 56)
+  }
+
+  // exposed for testing
+  private[toggle] def selectResource(configName: String, urls: Seq[URL]): URL = {
+    assert(urls.nonEmpty)
+    // if the resources are duplicates, that is ok and any can be used.
+    // if they are different, we can't be sure which was intended to be used, and fail fast.
+    if (urls.size > 1 && urls.map(checksum).distinct.size > 1) {
+      throw new IllegalArgumentException(
+        s"Multiple differing Toggle config resources found for $configName, ${urls.mkString(", ")}")
+    }
+    urls.head
+  }
+
   private[this] def loadJsonConfigWithEnv(
     libraryName: String,
     configName: String,
@@ -139,13 +174,11 @@ object StandardToggleMap {
     val classLoader = getClass.getClassLoader
     val rscPath = s"com/twitter/toggles/configs/$configName.json"
     val rscs = classLoader.getResources(rscPath).asScala.toSeq
-    if (rscs.size > 1) {
-      throw new IllegalArgumentException(
-        s"Multiple Toggle config resources found for $configName, ${rscs.mkString(",")}")
-    } else if (rscs.isEmpty) {
+
+    if (rscs.isEmpty) {
       NullToggleMap
     } else {
-      val rsc = rscs.head
+      val rsc = selectResource(configName, rscs)
       log.debug(s"Toggle config resources found for $configName, using $rsc")
       JsonToggleMap.parse(rsc, descriptionMode) match {
         case Throw(t) =>
