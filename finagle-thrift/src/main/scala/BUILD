@@ -13,7 +13,4 @@ scala_library(name='scala',
     'util/util-core',
   ],
   sources=rglobs('*.scala'),
-  resources=[
-    'finagle/finagle-thrift/src/main/resources'
-  ],
 )
