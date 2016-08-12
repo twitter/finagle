@@ -12,6 +12,7 @@ URLs if possible) and [submit a pull request][1]!
 * [Buoyant](http://buoyant.io/)
 * [Chartboost](https://www.chartboost.com/)
 * [Crimson Hexagon](http://www.crimsonhexagon.com/)
+* [Criteo](http://www.criteo.com/)
 * [Despegar](http://www.despegar.com/)
 * [DICE](http://dice.se/)
 * [Dwango](http://dwango.co.jp/)
