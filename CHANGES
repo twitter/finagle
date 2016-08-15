@@ -45,8 +45,8 @@ New Features
   * finagle-thrift: maxThriftBufferSize is now tunable via parameter for Thrift
     servers. It previously only was for ThriftMux servers. ``RB_ID=860102``
 
-Runtime Behavior Changes
-~~~~~~~~~~~~~~~~~~~~~~~~
+  * finagle-http: HttpTransport now eagerly closes client connection after
+    processing non-keepalive requests.
 
   * finagle-redis: `c.t.f.redis.Client` now uses the pipelining dispatcher. ``RB_ID=848815``
 

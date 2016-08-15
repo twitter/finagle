@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.finagle.http.{Message, Request, Response}
-import com.twitter.util.Future
+import com.twitter.util.{Future, Promise}
 
 /**
  * The HTTP connection manager implements connection management in
@@ -12,6 +12,7 @@ private[finagle] class ConnectionManager {
   private[this] var isKeepAlive = false
   private[this] var isIdle = true
   private[this] var activeStreams = 0
+  private[this] val closeP = new Promise[Unit]
 
   def observeMessage(message: Message, onFinish: Future[Unit]): Unit = synchronized {
     message match {
@@ -42,8 +43,9 @@ private[finagle] class ConnectionManager {
       activeStreams += 1
       onFinish.ensure {
         endStream()
+        if (shouldClose) closeP.setDone()
       }
-    }
+    } else if (shouldClose) closeP.setDone()
   }
 
   private[this] def endStream(): Unit = synchronized {
@@ -52,4 +54,5 @@ private[finagle] class ConnectionManager {
   }
 
   def shouldClose(): Boolean = synchronized { isIdle && !isKeepAlive }
+  def onClose: Future[Unit] = closeP
 }
