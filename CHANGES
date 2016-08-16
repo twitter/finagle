@@ -50,9 +50,8 @@ New Features
 
   * finagle-redis: `c.t.f.redis.Client` now uses the pipelining dispatcher. ``RB_ID=848815``
 
-  * finagle-serversets: `c.t.f.serverset2.Zk2Resolver` skips ServerSet
-    stabilization (i.e. is a no-op) if both batch window and removal
-    window parameters are zero seconds long. ``RB_ID=859276``
+  * finagle-serversets: `c.t.f.serverset2.Stabilizer` no longer uses a timer to implement
+    stabilization periods if the periods are 0 seconds long. ``RB_ID=861561``
 
 6.36.0
 ------

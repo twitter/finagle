@@ -34,9 +34,16 @@ class StabilizerTest extends FunSuite {
     val batchStable = Stabilizer(va, removalEpoch, slowBatchEpoch)
     val ref2 = new AtomicReference[Addr]
     batchStable.changes.register(Witness(ref2))
+    
+    val immediateRemovalEpoch = new Epoch(removalEvent, 0.seconds)
+    val immediateBatchEpoch = new Epoch(batchEvent, 0.seconds)
+    val immediate = Stabilizer(va, immediateRemovalEpoch, immediateBatchEpoch)
+    val ref3 = new AtomicReference[Addr]
+    immediate.changes.register(Witness(ref3))
 
     def assertStabilized(addr: Addr) = assert(ref.get == addr)
     def assertBatchStabilized(addr: Addr) = assert(ref2.get == addr)
+    def assertImmediateStabilized(addr: Addr) = assert(ref3.get == addr)
     def pulse() = {
       removalEvent.notify(())
       batchEvent.notify(())
@@ -245,6 +252,47 @@ class StabilizerTest extends FunSuite {
       timeControl.advance(1.seconds)
       va() = Addr.Bound(addr1)
       assertBatchStabilized(Addr.Bound(addr1))
+    }
+  })
+  
+  test("Removals are reflected immediately when removal window is 0 seconds")(new Ctx {
+    setVa(Addr.Bound(addr1, addr2))
+    assertStabilized(Addr.Bound(addr1, addr2))
+    assertImmediateStabilized(Addr.Bound(addr1, addr2))
+
+    // addr2 leaves
+    setVa(Addr.Bound(addr1))
+    assertStabilized(Addr.Bound(addr1, addr2))
+    assertImmediateStabilized(Addr.Bound(addr1))
+    
+    pulse()
+    pulse()
+    assertStabilized(Addr.Bound(addr1))
+    assertImmediateStabilized(Addr.Bound(addr1))
+  })
+  
+  test("Bound addresses are still cached when removal window is 0 seconds")(new Ctx {
+    setVa(Addr.Bound(addr1, addr2))
+    assertImmediateStabilized(Addr.Bound(addr1, addr2))
+    
+    setVa(Addr.Failed(new Exception))
+    assertImmediateStabilized(Addr.Bound(addr1, addr2))
+  })
+  
+  test("Additions are reflected immediately when batch window is 0 seconds")(new Ctx {
+    Time.withCurrentTimeFrozen { timeControl =>
+      va() = Addr.Bound(addr1)
+      assertBatchStabilized(Addr.Bound(addr1))
+      assertImmediateStabilized(Addr.Bound(addr1))
+      
+      va() = Addr.Bound(addr1, addr2)
+      assertBatchStabilized(Addr.Bound(addr1))
+      assertImmediateStabilized(Addr.Bound(addr1, addr2))
+      
+      timeControl.advance(30.seconds)
+      batchEvent.notify(())
+      assertBatchStabilized(Addr.Bound(addr1, addr2))
+      assertImmediateStabilized(Addr.Bound(addr1, addr2))
     }
   })
 }
