@@ -248,7 +248,7 @@ trait SentinelClientTest extends RedisTest with BeforeAndAfterAll {
     RedisCluster.start(count = count, mode = RedisMode.Standalone)
     RedisCluster.start(count = sentinelCount, mode = RedisMode.Sentinel)
   }
-  override def afterAll(): Unit = RedisCluster.stop()
+  override def afterAll(): Unit = RedisCluster.stopAll()
 
   val sentinelCount: Int
 

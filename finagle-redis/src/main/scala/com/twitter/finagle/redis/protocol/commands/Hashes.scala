@@ -97,7 +97,7 @@ case class HScan(
       case None        => bufs
     }
     val withPattern = pattern match {
-      case Some(pattern) => withCount ++ Seq(CommandBytes.PATTERN, pattern)
+      case Some(pattern) => withCount ++ Seq(CommandBytes.MATCH, pattern)
       case None          => withCount
     }
     RedisCodec.bufToUnifiedChannelBuffer(withPattern)
