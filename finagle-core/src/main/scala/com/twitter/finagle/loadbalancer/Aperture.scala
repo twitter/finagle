@@ -7,7 +7,7 @@ import com.twitter.finagle._
 import com.twitter.util.{Activity, Duration, Future, Return, Throw, Time, Timer}
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.immutable.VectorBuilder
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ListBuffer
 
 /**
  * The aperture load-band balancer balances load to the smallest
@@ -56,14 +56,6 @@ private[loadbalancer] class ApertureLoadBandBalancer[Req, Rep](
   with Updating[Req, Rep] {
   require(minAperture > 0, s"minAperture must be > 0, but was $minAperture")
   protected[this] val maxEffortExhausted: Counter = statsReceiver.counter("max_effort_exhausted")
-
-  override def update(factories: Traversable[ServiceFactory[Req, Rep]]): Unit = {
-    // Since updates originate from changes in the underlying namer, we want to make
-    // sure that each client receiving these updates is seeded with a random order.
-    // This is particularly important for aperture since the client's load assignment
-    // is biased towards the aperture size (which is relatively stable across clients).
-    super.update(Aperture.shuffle(factories, rng))
-  }
 }
 
 object Aperture {
@@ -75,31 +67,6 @@ object Aperture {
 
   // Ring that maps to 0 for every value.
   private val ZeroRing = Ring(1, RingWidth)
-
-  // Adopted from scala.util.Random.shuffle (Fisher–Yates shuffle).
-  // Reasons we copy the implementation are:
-  //  - Save allocations when building a result (do no use CBF).
-  //  - We want to use our own, thread-local `Rng` to make tests
-  //    predictable and maximize performance under high contention.
-  private[loadbalancer] def shuffle[Req, Rep](
-    factories: Traversable[ServiceFactory[Req, Rep]], rng: Rng
-  ): Traversable[ServiceFactory[Req, Rep]] = {
-    val shuffled = new ArrayBuffer[ServiceFactory[Req, Rep]] ++= factories
-
-    def swap(i1: Int, i2: Int): Unit = {
-      val tmp = shuffled(i1)
-      shuffled(i1) = shuffled(i2)
-      shuffled(i2) = tmp
-    }
-
-    var n = shuffled.length
-    while (n > 1) {
-      swap(n - 1, rng.nextInt(n))
-      n -= 1
-    }
-
-    shuffled
-  }
 }
 
 /**
@@ -171,13 +138,6 @@ private[loadbalancer] trait Aperture[Req, Rep] { self: Balancer[Req, Rep] =>
       // the rebuild.
 
       // The token is immutable, so no race condition here.
-      //
-      // We sort by token (which is monotonically incremented on node creation)
-      // for the following reasons:
-      //  - reuse nodes that were around a bit longer hence in the warm state
-      //    (i.e., with connections established).
-      //  - avoid resource/connection leaks when old nodes with established
-      //    connections are pushed out of the aperture.
       val byToken = vector.sortBy(_.token)
 
       // We bring the most healthy nodes to the front.
@@ -298,7 +258,6 @@ private[loadbalancer] trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with A
   protected def highLoad: Double
 
   private[this] val total = new AtomicInteger(0)
-  private[this] val token = new AtomicInteger(0)
   private[this] val monoTime = new Ema.Monotime
   private[this] val ema = new Ema(smoothWin.inNanoseconds)
 
@@ -367,16 +326,7 @@ private[loadbalancer] trait LoadBand[Req, Rep] { self: Balancer[Req, Rep] with A
   }
 
   protected def newNode(factory: ServiceFactory[Req, Rep], statsReceiver: StatsReceiver): Node =
-    // Since we only care about ordering across distinct calls to update `token` is
-    // an integer counter. We assume that Int.MaxValue gives us enough capacity to handle
-    // a reasonable amount of updates from the namer.
-    // Example: an underlying namer updates 5000 nodes
-    //  - every week: Int.MaxValue is enough to keep us running for 92 years.
-    //  - every day: Int.MaxValue is enough ... for 13 years.
-    //  - every hour: Int.MaxValue is enough ... for 208 days.
-    //
-    // TODO: Replace Int with Long.
-    Node(factory, new AtomicInteger(0), token.getAndIncrement())
+    Node(factory, new AtomicInteger(0), rng.nextInt())
 
   private[this] val failingLoad = new AtomicInteger(0)
   protected def failingNode(cause: Throwable): Node = Node(
