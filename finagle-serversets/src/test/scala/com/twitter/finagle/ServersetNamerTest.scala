@@ -1,6 +1,6 @@
 package com.twitter.finagle
 
-import com.twitter.util.Var
+import com.twitter.util.{Activity, Var}
 import java.net.InetSocketAddress
 import org.junit.runner.RunWith
 import org.scalatest.junit.{AssertionsForJUnit, JUnitRunner}
@@ -52,5 +52,13 @@ class ServersetNamerTest
     val path = Path.read("/hosts/twitter/service/role/env/job:endpoint/extra")
     assert(namer.bind(NameTree.Leaf(path)).sample() == NameTree.Neg)
     assert(named == 1)
+  }
+  
+  test("invalid job syntax") {
+    val namer = mkNamer { _ => fail("resolve0 should not be called") }
+    val path = Path.read("/hosts/twitter/service/role/env/job#")
+    val act = namer.bind(NameTree.Leaf(path))
+    val Activity.Failed(e: IllegalArgumentException) = act.run.sample()
+    assert(e.getMessage == "invalid job syntax: job#")
   }
 }
