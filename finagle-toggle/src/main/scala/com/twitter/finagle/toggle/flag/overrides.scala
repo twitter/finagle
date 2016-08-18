@@ -11,7 +11,7 @@ import com.twitter.app.GlobalFlag
  * -com.twitter.finagle.toggle.flag.overrides=com.twitter.finagle.NewThing=0.1,com.twitter.finagle.OtherThing=0.99
  * }}}
  *
- * Methods [[overrides.let]] and [[overrides.letClear]]
+ * Methods [[overrides$.let(id:String,fraction:Double*]] and [[overrides.letClear]]
  * are available to help writing unit tests that manipulate
  * flag-based `Toggle` values.
  *

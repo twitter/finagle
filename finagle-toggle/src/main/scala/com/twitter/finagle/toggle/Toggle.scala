@@ -47,10 +47,10 @@ object Toggle {
    *           These should generally be fully qualified names to avoid conflicts
    *           between libraries. For example, "com.twitter.finagle.CoolThing".
    *           Valid characters are `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
-   *           See [[isValidId(String)]].
+   *           See [[Toggle$.isValidId]].
    * @param fraction must be between `0.0 and 1.0`, inclusive.
    *                 This represents the fraction of inputs that will
-   *                 return `true`. See [[isValidFraction(Double)]].
+   *                 return `true`. See [[Toggle$.isValidFraction]].
    * @param description human-readable description of the Toggle's purpose.
    * @param source the origin of this [[Toggle]] which is often given by
    *               `toString` of the [[ToggleMap]] that created it.

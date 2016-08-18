@@ -46,7 +46,7 @@ object ServerInfo {
   registerServerInfo(global())
 
   /**
-   * Initialize the global [[ServerInfo]] returned by [[apply()]].
+   * Initialize the global [[ServerInfo]] returned by [[ServerInfo$.apply]].
    *
    * May only be called once.
    */

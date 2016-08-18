@@ -31,8 +31,8 @@ import scala.collection.JavaConverters._
  * The JSON file-based configuration works via Java resources and must be
  * placed in specific locations in your classpath's resources:
  * `resources/com/twitter/toggles/configs/`. The file-names take the form
- * `$libraryName.json` for the library owner's configuration and
- * `$libraryName-service.json` for the service owner's configuration. As an
+ * `\$libraryName.json` for the library owner's configuration and
+ * `\$libraryName-service.json` for the service owner's configuration. As an
  * example, finagle-core would have a
  * `resources/com/twitter/toggles/configs/com.twitter.finagle.json` and service
  * owners can customize toggles via
@@ -41,9 +41,9 @@ import scala.collection.JavaConverters._
  * The JSON files also support optional environment-specific overrides via
  * files that are examined before the non-environment-specific configs.
  * These environment-specific configs must be placed at
- * `resources/com/twitter/toggles/configs/com.twitter.finagle-$environment.json`
- * or `resources/com/twitter/toggles/configs/com.twitter.finagle-service-$environment.json`
- * where the `environment` from [[ServerInfo.apply()]] is used to determine which
+ * `resources/com/twitter/toggles/configs/com.twitter.finagle-\$environment.json`
+ * or `resources/com/twitter/toggles/configs/com.twitter.finagle-service-\$environment.json`
+ * where the `environment` from [[com.twitter.finagle.server.ServerInfo$.apply]] is used to determine which
  * one to load.
  */
 object StandardToggleMap {
@@ -74,7 +74,7 @@ object StandardToggleMap {
    *                    `A-Z`, `a-z`, `0-9`, `_`, `-`, `.`.
    * @param statsReceiver used to record the outcomes of Toggles. For general
    *                      usage this should not be scoped so that the metrics
-   *                      always end up scoped to "toggles/$libraryName".
+   *                      always end up scoped to "toggles/\$libraryName".
    */
   def apply(libraryName: String, statsReceiver: StatsReceiver): ToggleMap =
     apply(

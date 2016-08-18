@@ -23,8 +23,8 @@ trait ServiceLoadedToggleMap extends ToggleMap {
 object ServiceLoadedToggleMap {
 
   /**
-   * Uses [[LoadService]] to find at most one [[ServiceLoadedToggleMap]]
-   * with the given `libraryName`.
+   * Uses `com.twitter.app.LoadService` to find at most one [[ServiceLoadedToggleMap]]
+   * with the given libraryName`.
    *
    * If no matches are found, a [[NullToggleMap]] is returned.
    *

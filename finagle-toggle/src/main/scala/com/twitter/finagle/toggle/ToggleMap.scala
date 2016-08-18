@@ -105,7 +105,7 @@ object ToggleMap {
    * across a cluster or over time.
    *
    * @param statsReceiver in typical usage by [[StandardToggleMap]], will be
-   *                      scoped to "toggles/$libraryName".
+   *                      scoped to "toggles/\$libraryName".
    */
   def observed(toggleMap: ToggleMap, statsReceiver: StatsReceiver): ToggleMap = {
     new Proxy with Composite {
