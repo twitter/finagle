@@ -6,20 +6,64 @@ import com.twitter.finagle.util.{Ema, Rng}
 import com.twitter.logging.{Level, Logger}
 import com.twitter.util._
 
-private[finagle] object ThresholdAdmissionFilter {
+private[finagle] object NackAdmissionFilter {
   private val overloadFailure = Future.exception(Failure("failed fast because service is overloaded"))
   private val logger = Logger.get(getClass)
+  private val role = new Stack.Role("NackAdmissionFilter")
+  private val DefaultWindow = 100L
+  private val DefaultSuccessRateThreshold = 99D/100
+
+  /**
+   * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
+   * [[com.twitter.finagle.filter.NackAdmissionFilter]] module.
+   */
+  case class Param(window: Long, successRateThreshold: Double) {
+    def mk(): (Param, Stack.Param[Param]) =
+      (this, Param.param)
+  }
+
+  object Param {
+    implicit val param: Stack.Param[NackAdmissionFilter.Param] =
+      Stack.Param(Param(DefaultWindow, DefaultSuccessRateThreshold))
+  }
+
+  private[finagle] def module[Req, Rep]: Stackable[ServiceFactory[Req, Rep]] =
+    new Stack.Module2[
+      NackAdmissionFilter.Param,
+      param.Stats,
+      ServiceFactory[Req, Rep]] {
+      val description = "Probabilistically drops requests to the underlying service."
+      val role = NackAdmissionFilter.role
+
+      def make(
+        _param: Param,
+        _stats: param.Stats,
+        next: ServiceFactory[Req, Rep]
+      ): ServiceFactory[Req, Rep] = {
+        val param.Stats(stats) = _stats
+
+        // Create the filter with the given window and success rate threshold.
+        val filter = new NackAdmissionFilter[Req, Rep](
+          _param.window, _param.successRateThreshold, Rng.threadLocal,
+          stats.scope("nack_admission_control"))
+
+        // Insert the filter into the client stack. We use `FactoryToService`
+        // and `ServiceFactory.const` to ensure that the filter operates across
+        // all endpoints rather than just per-endpoint.
+        ServiceFactory.const(filter.andThen(new FactoryToService(next)))
+      }
+    }
 }
 
 /**
  * This filter probabilistically drops requests if the success rate falls
- * below an arbitrary threshold, which is determined by the `multiplier`.
- * In the case that most or all of the cluster which the client is speaking
- * to is overloaded, this will help the cluster cool off.
+ * below the `successRateThreshold`. In the case that most or all of the
+ * cluster which the client is speaking to is overloaded, this will help the
+ * cluster cool off.
  *
- * The implementation of this filter is heavily inspired by the O'Reilly's
- * "Site Reliability Engineering: How Google Runs Production Systems", by
- * Beyer, Jones, Petoff, and Murphy, 1e.
+ * The implementation of this filter is heavily inspired by Chapter 21, section
+ * "Client-Side Throttling" of O'Reilly's "Site Reliability Engineering: How
+ * Google Runs Production Systems", by Beyer, Jones, Petoff, and Murphy, 1e.
  *
  * @param window Size of moving window for exponential moving average, which is
  * used to keep track of the ratio of failed responses to successful responses
@@ -38,64 +82,68 @@ private[finagle] object ThresholdAdmissionFilter {
  * cluster performance, but will keep a more accurate estimate of the long-
  * term average success rate.
  *
- * TODO: Include guidance for choosing a specific window depending on service
- *       characteristics.
- *
- * @param multiplier Constant which determines how aggressively the filter
- * drops requests. For example, if set to 2, then the lowest success rate
- * the filter will tolerate before probabilistically dropping requests is 50%;
- * if set to 3, then the lowest success rate tolerated is 33.3%. In general,
- * if set to x, the lowest success rate tolerated is 1/x.
+ * @param successRateThreshold Constant which determines how aggressively the
+ * filter drops requests. For example, if set to 1/2, then the lowest success
+ * rate the filter will tolerate before probabilistically dropping requests is
+ * 50%; if set to 1/3, then the lowest success rate tolerated is 33.3%. In
+ * general, if set to x, the lowest success rate tolerated is x.
  *
  * @param random Random number generator used in probability calculation.
  */
-private[finagle] class ThresholdAdmissionFilter[Req, Rep](
-    window: Duration,
-    multiplier: Double,
+private[finagle] class NackAdmissionFilter[Req, Rep](
+    window: Long,
+    successRateThreshold: Double,
     random: Rng,
     statsReceiver: StatsReceiver)
   extends SimpleFilter[Req, Rep] {
-  import ThresholdAdmissionFilter._
+  import NackAdmissionFilter._
 
-  private val windowInMs = window.inMilliseconds
-  require(windowInMs > 0, s"window must be positive: $windowInMs")
-  require(multiplier > 1, s"multiplier must be greater than 1: $multiplier")
+  require(window > 0, s"window must be positive: $window")
+  require(successRateThreshold < 1, s"successRateThreshold must lie in (0, 1): $successRateThreshold")
+  require(successRateThreshold > 0, s"successRateThreshold must lie in (0, 1): $successRateThreshold")
+
+  private[this] val multiplier = 1D/successRateThreshold
 
   // EMA representing the success rate. We update it whenever we get a response
   // from the cluster via [[updateSuccessLikelihood]]. We update it with 1 when
   // we get a successful response and with 0 when we get a failure response.
-  val successLikelihoodEma = new Ema(windowInMs)
+  // Therefore its value is a Double in the range [0, 1].
+  private[finagle] val successLikelihoodEma = new Ema(window)
 
   // Boolean representing whether the first request has been sent.
-  var sentRequest = false
+  private[this] var sentRequest = false
+
+  private[finagle] def hasSentRequest: Boolean = synchronized {
+    sentRequest
+  }
 
   // EMA timestamp. Uses a time delta of 1. For example, when we send the first
   // request, we increment the stamp to 1; when we send the second request, we
   // increment the stamp to 2.
-  private var successLikelihoodStamp: Long = 0
+  private[this] var successLikelihoodStamp: Long = 0
 
-  val fastFailureCounter = statsReceiver.counter("fastFailures")
-  val successLikelihoodHistogram = statsReceiver.stat("successLikelihood")
+  private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
+  private[this] val successProbabilityHistogram = statsReceiver.stat("success_probability")
 
-  private def updateSuccessLikelihood(v: Long) = {
+  private[this] def updateSuccessLikelihood(v: Long) = {
     synchronized {
       successLikelihoodEma(successLikelihoodStamp) = v
       successLikelihoodStamp += 1
     }
-    successLikelihoodHistogram.add(successLikelihoodEma.last.toFloat)
+    successProbabilityHistogram.add(successLikelihoodEma.last.toFloat)
   }
 
   // Serve the given request, and update [[successLikelihoodEma]] depending on the
   // response status.
   // TODO: Use Response Classification.
-  private val afterSend: Try[Rep] => Unit = {
+  private[this] val afterSend: Try[Rep] => Unit = {
     case Return(_) =>
       updateSuccessLikelihood(1)
     case Throw(_) =>
       updateSuccessLikelihood(0)
   }
 
-  private def sendRequest(req: Req, service: Service[Req, Rep]): Future[Rep] = {
+  private[this] def sendRequest(req: Req, service: Service[Req, Rep]): Future[Rep] = {
     service(req).respond(afterSend)
   }
 
@@ -112,7 +160,7 @@ private[finagle] class ThresholdAdmissionFilter[Req, Rep](
       if (randomDouble >= failureProbability) {
         sendRequest(req, service)
       } else {
-        fastFailureCounter.incr()
+        droppedRequestCounter.incr()
         if (logger.isLoggable(Level.DEBUG)) {
           logger.debug(s"""Dropping request\tsuccessLikelihood=$currentSuccessLikelihoodEma\tsuccessProduct=$successProduct""")
         }

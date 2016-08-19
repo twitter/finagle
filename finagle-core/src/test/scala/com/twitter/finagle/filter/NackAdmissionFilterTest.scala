@@ -14,11 +14,12 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ThresholdAdmissionFilterTest extends FunSuite {
+class NackAdmissionFilterTest extends FunSuite {
   import Tolerance._
-  // NB: [[window]] and [[multiplier]] values are arbitrary.
-  val window: Duration = Duration.fromMilliseconds(100)
-  val multiplier: Double = 2.0
+  // NB: [[DefaultWindow]] and [[DefaultSuccessRateThreshold]] values are
+  //     arbitrary.
+  val DefaultWindow: Long = 100
+  val DefaultSuccessRateThreshold: Double = 1D/2
   val DefaultTimeout: Duration = 2.seconds
 
   class CustomRng(_doubleVal: Double) extends Rng {
@@ -31,16 +32,19 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     def nextLong(n: Long) = 1
   }
 
-  class Ctx(random: Rng = Rng.threadLocal) {
+  class Ctx(random: Rng = Rng.threadLocal,
+            _window: Long = DefaultWindow,
+            _successRateThreshold: Double = DefaultSuccessRateThreshold
+           ) {
     val log: Logger = DefaultLogger
     val timer: MockTimer = new MockTimer
     val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver()
 
     val svc: Service[Int, Int] = Service.mk[Int, Int](v => Future.value(v))
-    val failingSvc: Service[Int, Int] =  new FailedService(Failure.rejected("mock failure"))
+    val failingSvc: Service[Int, Int] = new FailedService(Failure.rejected("mock failure"))
 
-    val filter: ThresholdAdmissionFilter[Int, Int] = new ThresholdAdmissionFilter[Int, Int](
-      window, multiplier, random, statsReceiver)
+    val filter: NackAdmissionFilter[Int, Int] = new NackAdmissionFilter[Int, Int](
+      _window, _successRateThreshold, random, statsReceiver)
 
     def successfulResponse(): Unit = {
       assert(Await.result(filter(1, svc), DefaultTimeout) == 1)
@@ -59,7 +63,7 @@ class ThresholdAdmissionFilterTest extends FunSuite {
      * Simulates not sending a request and therefore not receiving a
      * response. This does not change [[filter]]'s [[successLikelihoodEma]],
      * but it does check that the filter drops the request and creates a
-     * [[ThresholdAdmissionFilter.overloadFailure]]. If it passes, then we
+     * [[NackAdmissionFilter.overloadFailure]]. If it passes, then we
      * know that the success rate is below the failure threshold.
      */
     def testDropsRequest(): Unit = {
@@ -108,14 +112,13 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     def expectedEmaAfterFailures(
         originalEma: Double,
         numFailures: Int,
-        window: Duration,
+        window: Long,
         unit: TimeUnit = TimeUnit.MILLISECONDS): Double = {
       require(originalEma >= 0, "originalEma must lie in the interval [0, 1]")
       require(originalEma <= 1, "originalEma must lie in the interval [0, 1]")
-      val windowSize = window.inUnit(unit)
-      require(windowSize > 0, "window size must be positive")
+      require(window > 0, "window size must be positive")
 
-      val w: Double = Math.exp(-1.0/windowSize)
+      val w: Double = Math.exp(-1.0/window)
       Math.pow(w, numFailures) * originalEma
     }
 
@@ -124,23 +127,24 @@ class ThresholdAdmissionFilterTest extends FunSuite {
      * rate to drop below the failure threshold.
      *
      * @param originalEma EMA value to start from.
-     * @param multiplier EMA multiplier.
+     * @param successRateThreshold EMA multiplier.
      * @param window Window size.
      * @param unit [[TimeUnit]] for window.
      * @return Required number of failures.
      */
     def failuresToDropRequests(
         originalEma: Double,
-        multiplier: Double,
-        window: Duration,
+        successRateThreshold: Double,
+        window: Long,
         unit: TimeUnit = TimeUnit.MILLISECONDS): Int = {
       require(originalEma >= 0, "originalEma must lie in the interval [0, 1]")
       require(originalEma <= 1, "originalEma must lie in the interval [0, 1]")
-      require(multiplier >= 1, "multiplier must be >= 1")
-      val windowSize = window.inUnit(unit)
-      require(windowSize > 0, "window size must be positive")
+      require(successRateThreshold > 0, "multiplier must lie in (0, 1)")
+      require(successRateThreshold < 1, "multiplier must lie in (0, 1)")
+      require(window > 0, "window size must be positive")
 
-      val w: Double = Math.exp(-1.0/windowSize)
+      val w: Double = Math.exp(-1.0/window)
+      val multiplier: Double = 1D/successRateThreshold
       -(Math.log(multiplier * originalEma) / Math.log(w)).toInt
     }
   }
@@ -150,7 +154,7 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     import ctx._
 
     testGetSuccessfulResponse()
-    assert(filter.sentRequest)
+    assert(filter.hasSentRequest)
     assert(filter.successLikelihoodEma.last == 1)
   }
 
@@ -159,7 +163,7 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     import ctx._
 
     testGetFailedResponse()
-    assert(filter.sentRequest)
+    assert(filter.hasSentRequest)
     assert(filter.successLikelihoodEma.last == 0)
   }
 
@@ -174,11 +178,12 @@ class ThresholdAdmissionFilterTest extends FunSuite {
 
     testGetSuccessfulResponse()
     val numFailures = failuresToDropRequests(
-      filter.successLikelihoodEma.last, multiplier, window)
+      filter.successLikelihoodEma.last, DefaultSuccessRateThreshold, DefaultWindow)
     for (_ <- 0 until numFailures) { testGetFailedResponse() }
 
-    val sentRequest = filter.sentRequest
+    val sentRequest = filter.hasSentRequest
     val successRate = filter.successLikelihoodEma.last
+    val multiplier = 1D/DefaultSuccessRateThreshold
     assert(sentRequest)
     assert(0 < successRate && successRate < 1)
     assert(1 <= multiplier * successRate)
@@ -193,11 +198,12 @@ class ThresholdAdmissionFilterTest extends FunSuite {
 
     testGetSuccessfulResponse()
     val numFailures = failuresToDropRequests(
-      filter.successLikelihoodEma.last, multiplier, window)
+      filter.successLikelihoodEma.last, DefaultSuccessRateThreshold, DefaultWindow)
     for (_ <- 0 to numFailures) { failRequestsWithoutTest() }
 
-    val sentRequest = filter.sentRequest
+    val sentRequest = filter.hasSentRequest
     val successRate = filter.successLikelihoodEma.last
+    val multiplier = 1D/DefaultSuccessRateThreshold
     assert(sentRequest)
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
@@ -206,7 +212,7 @@ class ThresholdAdmissionFilterTest extends FunSuite {
 
   test("doesn't drop requests after success rate improves past failure threshold") {
     /**
-     * We'll change customRng so it will always drop or always send requests,
+     * We change customRng so it will always drop or always send requests,
      * depending on whether we want the cluster to become unhealthy or recover.
      */
     val customRng: CustomRng = new CustomRng(0)
@@ -216,12 +222,13 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     // Initialize the EMA with a success...
     testGetSuccessfulResponse()
     val numFailures = failuresToDropRequests(
-      filter.successLikelihoodEma.last, multiplier, window)
+      filter.successLikelihoodEma.last, DefaultSuccessRateThreshold, DefaultWindow)
     // Let the cluster become unhealthy...
     for (_ <- 0 to numFailures) { failRequestsWithoutTest() }
 
-    val sentRequest = filter.sentRequest
+    val sentRequest = filter.hasSentRequest
     val successRate = filter.successLikelihoodEma.last
+    val multiplier = 1D/DefaultSuccessRateThreshold
     assert(sentRequest)
     assert(0 < successRate && successRate < 1)
     assert(1 > multiplier * successRate)
@@ -251,14 +258,14 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     // counter correctly counts 9 fast / hard failures, and not 10.
     for (_ <- 0 to 9) { failRequestsWithoutTest() }
 
-    assert(statsReceiver.counter("fastFailures")() == 9)
+    assert(statsReceiver.counter("dropped_requests")() == 9)
   }
 
   test("expected EMA equals empirical value after n consecutive failures") {
     val ctx = new Ctx()
     import ctx._
 
-    val expectedEma: Double = expectedEmaAfterFailures(1.0, 10, window)
+    val expectedEma: Double = expectedEmaAfterFailures(1.0, 10, DefaultWindow)
     // 1 success, so that the Ema starts at 1
     testGetSuccessfulResponse()
     // then 10 failures
@@ -272,7 +279,7 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    val numberOfFailures: Int = failuresToDropRequests(1.0, multiplier, window)
+    val numberOfFailures: Int = failuresToDropRequests(1.0, DefaultSuccessRateThreshold, DefaultWindow)
     testGetSuccessfulResponse()
 
     for (_ <- 0 to numberOfFailures) { failRequestsWithoutTest() }
@@ -284,10 +291,70 @@ class ThresholdAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    val numberOfFailures: Int = failuresToDropRequests(1.0, multiplier, window)
+    val numberOfFailures: Int = failuresToDropRequests(1.0, DefaultSuccessRateThreshold, DefaultWindow)
     testGetSuccessfulResponse()
 
     for (_ <- 0 until numberOfFailures) { failRequestsWithoutTest() }
     testGetSuccessfulResponse()
+  }
+
+  test("negative window value throws IllegalArgumentException") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val _window: Long = -10
+    val errMsg: String = s"requirement failed: window must be positive: ${_window}"
+    val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
+      new Ctx(lowRng, _window)
+    }
+    assert(thrown.getMessage == errMsg)
+  }
+
+  test("window value of zero throws IllegalArgumentException") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val _window: Long = 0
+    val errMsg: String = s"requirement failed: window must be positive: ${_window}"
+    val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
+      new Ctx(lowRng, _window)
+    }
+    assert(thrown.getMessage == errMsg)
+  }
+
+  test("negative successRateThreshold value throws IllegalArgumentException") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val _successRateThreshold: Double = -5.5
+    val errMsg: String = s"requirement failed: successRateThreshold must lie in (0, 1): ${_successRateThreshold}"
+    val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
+      new Ctx(lowRng, DefaultWindow, _successRateThreshold)
+    }
+    assert(thrown.getMessage == errMsg)
+  }
+
+  test("successRateThreshold value of 0 throws IllegalArgumentException") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val _successRateThreshold: Double = 0
+    val errMsg: String = s"requirement failed: successRateThreshold must lie in (0, 1): ${_successRateThreshold}"
+    val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
+      new Ctx(lowRng, DefaultWindow, _successRateThreshold)
+    }
+    assert(thrown.getMessage == errMsg)
+  }
+
+  test("successRateThreshold value of 1 throws IllegalArgumentException") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val _successRateThreshold: Double = 1
+    val errMsg: String = s"requirement failed: successRateThreshold must lie in (0, 1): ${_successRateThreshold}"
+    val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
+      new Ctx(lowRng, DefaultWindow, _successRateThreshold)
+    }
+    assert(thrown.getMessage == errMsg)
+  }
+
+  test("successRateThreshold value greater than 1 throws IllegalArgumentException") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val _successRateThreshold: Double = 1.5
+    val errMsg: String = s"requirement failed: successRateThreshold must lie in (0, 1): ${_successRateThreshold}"
+    val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
+      new Ctx(lowRng, DefaultWindow, _successRateThreshold)
+    }
+    assert(thrown.getMessage == errMsg)
   }
 }
