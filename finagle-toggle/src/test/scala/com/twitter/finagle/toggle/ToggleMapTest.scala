@@ -379,4 +379,23 @@ class ToggleMapTest extends FunSuite
     assert(Seq(tm0, tm1, tm2) == ToggleMap.components(
       ToggleMap.observed(tm0.orElse(tm1).orElse(tm2), NullStatsReceiver)))
   }
+
+  test("ToggleMap.On") {
+    val toggle = ToggleMap.On("com.on.toggle")
+    forAll(IntGen) { i =>
+      assert(toggle.isDefinedAt(i))
+      assert(toggle(i))
+    }
+    assert(Iterator.empty.sameElements(ToggleMap.On.iterator))
+  }
+
+  test("ToggleMap.Off") {
+    val toggle = ToggleMap.Off("com.off.toggle")
+    forAll(IntGen) { i =>
+      assert(toggle.isDefinedAt(i))
+      assert(!toggle(i))
+    }
+    assert(Iterator.empty.sameElements(ToggleMap.Off.iterator))
+  }
+
 }

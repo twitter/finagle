@@ -24,17 +24,20 @@ class ToggleTest extends FunSuite
   private val IntGen =
     Gen.chooseNum(Int.MinValue, Int.MaxValue)
 
+  private val on = Toggle.on[Int]("com.twitter.on")
+  private val off = Toggle.off[Int]("com.twitter.off")
+
   test("True") {
     forAll(IntGen) { i =>
-      assert(Toggle.True.isDefinedAt(i))
-      assert(Toggle.True(i))
+      assert(on.isDefinedAt(i))
+      assert(on(i))
     }
   }
 
   test("False") {
     forAll(IntGen) { i =>
-      assert(Toggle.False.isDefinedAt(i))
-      assert(!Toggle.False(i))
+      assert(off.isDefinedAt(i))
+      assert(!off(i))
     }
   }
 
@@ -49,8 +52,8 @@ class ToggleTest extends FunSuite
   }
 
   test("orElse(Toggle) basics") {
-    val trueOrFalse = Toggle.True.orElse(Toggle.False)
-    val trueOrTrue = Toggle.True.orElse(Toggle.True)
+    val trueOrFalse = on.orElse(off)
+    val trueOrTrue = on.orElse(on)
     Seq(trueOrFalse, trueOrTrue).foreach { tog =>
       forAll(IntGen) { i =>
         assert(tog.isDefinedAt(i))
@@ -58,8 +61,8 @@ class ToggleTest extends FunSuite
       }
     }
 
-    val falseOrFalse = Toggle.False.orElse(Toggle.False)
-    val falseOrTrue = Toggle.False.orElse(Toggle.True)
+    val falseOrFalse = off.orElse(off)
+    val falseOrTrue = off.orElse(on)
     Seq(falseOrFalse, falseOrTrue).foreach { tog =>
       forAll(IntGen) { i =>
         assert(falseOrFalse.isDefinedAt(i))
@@ -76,13 +79,13 @@ class ToggleTest extends FunSuite
       assert(!undef12.isDefinedAt(i))
     }
 
-    val t = undef12.orElse(Toggle.True)
+    val t = undef12.orElse(on)
     forAll(IntGen) { i =>
       assert(t.isDefinedAt(i))
       assert(t(i))
     }
 
-    val f = undef12.orElse(Toggle.False)
+    val f = undef12.orElse(off)
     forAll(IntGen) { i =>
       assert(f.isDefinedAt(i))
       assert(!f(i))

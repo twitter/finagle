@@ -172,6 +172,14 @@ These metrics track the state of name resolution and service discovery.
 
 .. include:: metrics/ServiceDiscovery.rst
 
+Toggles
+-------
+
+These metrics correspond to :ref:`feature toggles <toggles>`.
+
+**toggles/<libraryName>/checksum**
+  A gauge summarizing the current state of a `ToggleMap` which may be useful
+  for comparing state across a cluster or over time.
 
 HTTP
 ----

@@ -151,24 +151,20 @@ object Toggle {
   private[this] val AlwaysTrue: PartialFunction[Any, Boolean] =
     { case _ => true }
 
-  private[toggle] def on[T](id: String): Toggle[T] =
+  /**
+   * A [[Toggle]] which is defined for all inputs and always returns `true`.
+   */
+  def on[T](id: String): Toggle[T] =
     apply(id, AlwaysTrue)
 
   private[this] val AlwaysFalse: PartialFunction[Any, Boolean] =
     { case _ => false }
 
-  private[toggle] def off[T](id: String): Toggle[T] =
-    apply(id, AlwaysFalse)
-
-  /**
-   * A [[Toggle]] which is defined for all inputs and always returns `true`.
-   */
-  val True: Toggle[Any] = on("com.twitter.finagle.toggle.True")
-
   /**
    * A [[Toggle]] which is defined for all inputs and always returns `false`.
    */
-  val False: Toggle[Any] = off("com.twitter.finagle.toggle.False")
+  def off[T](id: String): Toggle[T] =
+    apply(id, AlwaysFalse)
 
   /**
    * A [[Toggle]] which is defined for no inputs.

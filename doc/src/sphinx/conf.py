@@ -44,17 +44,19 @@ release = sbt_versions.find_release(os.path.abspath('../../../project/Build.scal
 version = sbt_versions.release_to_version(release)
 
 # e.g. :issue:`36` :ticket:`8`
+# or :src:`BufferingPool <com/twitter/finagle/pool/BufferingPool.scala>`
 extlinks = {
   'issue': ('https://github.com/twitter/finagle/issues/%s', 'issue #'),
   'ex': ('https://github.com/twitter/finagle/blob/finagle-example/src/main/scala/%s', 'Finagle example '),
   'api': ('http://twitter.github.io/finagle/docs/#%s', ''),
   'util': ('http://twitter.github.io/util/docs/#%s', ''),
-  'util-stats-src':("https://github.com/twitter/util/blob/master/util-stats/src/main/scala/%s", 'util-stats github repo'),
   'util-core-src':("https://github.com/twitter/util/blob/master/util-core/src/main/scala/%s", 'util-core github repo'),
-  'finagle-mux-src':("https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/%s", 'finagle-mux github repo'),
+  'util-stats-src':("https://github.com/twitter/util/blob/master/util-stats/src/main/scala/%s", 'util-stats github repo'),
   'finagle-http-src':("https://github.com/twitter/finagle/blob/master/finagle-http/src/main/scala/%s", 'finagle-http github repo'),
   'finagle-netty4-src':("https://github.com/twitter/finagle/blob/master/finagle-netty4/src/main/scala/%s", 'finagle-netty4 github repo'),
+  'finagle-mux-src':("https://github.com/twitter/finagle/blob/master/finagle-mux/src/main/scala/%s", 'finagle-mux github repo'),
   'finagle-thriftmux-src':("https://github.com/twitter/finagle/blob/master/finagle-thriftmux/src/main/scala/%s", 'finagle-thriftmux github repo'),
+  'finagle-toggle-src':("https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/%s", 'finagle-toggle github repo'),
   'src':("https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/%s", 'finagle-core github repo')
 }
 

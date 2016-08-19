@@ -316,6 +316,9 @@ object ToggleMap {
       fractionAndToggle.get()._2(t)
   }
 
+  /**
+   * Create an empty [[Mutable]] instance.
+   */
   def newMutable(): Mutable = new Mutable {
 
     override def toString: String =
@@ -440,5 +443,25 @@ object ToggleMap {
 
   private val MdDescFn: Toggle.Metadata => Option[String] =
     md => md.description
+
+  /**
+   * A [[ToggleMap]] which returns [[Toggle.on]] for all `ids`.
+   *
+   * @note [[ToggleMap.iterator]] will always be empty.
+   */
+  val On: ToggleMap = new ToggleMap {
+    def apply(id: String): Toggle[Int] = Toggle.on(id)
+    def iterator: Iterator[Metadata] = Iterator.empty
+  }
+
+  /**
+   * A [[ToggleMap]] which returns [[Toggle.off]] for all `ids`.
+   *
+   * @note [[ToggleMap.iterator]] will always be empty.
+   */
+  val Off: ToggleMap = new ToggleMap {
+    def apply(id: String): Toggle[Int] = Toggle.off(id)
+    def iterator: Iterator[Metadata] = Iterator.empty
+  }
 
 }
