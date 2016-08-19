@@ -7,7 +7,6 @@ import com.twitter.jvm.numProcs
 import com.twitter.util.Awaitable
 import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
 import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.util.internal.PlatformDependent
 import java.util.concurrent.{ExecutorService, Executors}
 
 /**
@@ -46,9 +45,12 @@ package object netty4 {
   private[netty4] object WorkerPool extends NioEventLoopGroup(numWorkers(), Executor)
 
   // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
-  //     because we need to disable the leak-detector.
+  //     because we need to disable the leak-detector and
+  //     because we don't prefer direct byte buffers.
+  //
+  // See CSL-3027 for more details.
   private[netty4] val UnpooledAllocator = new UnpooledByteBufAllocator(
-    /* preferDirect */ PlatformDependent.directBufferPreferred(),
+    /* preferDirect */ false,
     /* disableLeakDetector */ true
   )
 

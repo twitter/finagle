@@ -74,7 +74,7 @@ class Netty4ServerChannelInitializerTest
       init.initChannel(srv)
 
       srv.pipeline.fireChannelActive()
-      srv.pipeline.fireChannelRead(Unpooled.EMPTY_BUFFER)
+      srv.pipeline.fireChannelRead(Unpooled.wrappedBuffer("foo".getBytes))
       Thread.sleep(10) // We need at least one ms to elapse between read and readComplete.
       // Netty's read timeout handler uses System.nanoTime
       // to mark time so we're stuck sleeping.

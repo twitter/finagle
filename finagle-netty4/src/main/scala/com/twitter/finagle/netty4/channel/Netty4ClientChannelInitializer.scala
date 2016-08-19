@@ -137,6 +137,9 @@ private[netty4] abstract class AbstractNetty4ClientChannelInitializer(
       case (host, credentials) => pipe.addFirst("http proxy connect",
         new HttpProxyConnectHandler(host, credentials))
     }
+
+    // Copy direct byte buffers onto heap before doing anything else.
+    pipe.addFirst("direct to heap", DirectToHeapInboundHandler)
   }
 }
 

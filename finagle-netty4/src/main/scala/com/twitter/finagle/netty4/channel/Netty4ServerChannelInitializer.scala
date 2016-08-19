@@ -90,6 +90,9 @@ private[netty4] class Netty4ServerChannelInitializer(
 
     // Add SslHandler to the pipeline.
     pipeline.addFirst("ssl init", new Netty4SslHandler(params))
+
+    // Copy direct byte buffers onto heap before doing anything else.
+    pipeline.addFirst("direct to heap", DirectToHeapInboundHandler)
   }
 }
 
