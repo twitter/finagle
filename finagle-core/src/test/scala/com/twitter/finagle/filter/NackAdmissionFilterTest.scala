@@ -6,21 +6,18 @@ import com.twitter.finagle.util.{DefaultLogger, Rng}
 import com.twitter.finagle.{Failure, Service}
 import com.twitter.finagle.service.FailedService
 import com.twitter.util._
-import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 import org.junit.runner.RunWith
-import org.scalactic.Tolerance
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class NackAdmissionFilterTest extends FunSuite {
-  import Tolerance._
   // NB: [[DefaultWindow]] and [[DefaultSuccessRateThreshold]] values are
   //     arbitrary.
-  val DefaultWindow: Long = 100
-  val DefaultSuccessRateThreshold: Double = 1D/2
-  val DefaultTimeout: Duration = 2.seconds
+  val DefaultWindow: Duration = 1.second
+  val DefaultSuccessRateThreshold: Double = 0.5
+  val DefaultTimeout: Duration = 1.second
 
   class CustomRng(_doubleVal: Double) extends Rng {
     require(_doubleVal >= 0, "_doubleVal must lie in the interval [0, 1]")
@@ -33,15 +30,18 @@ class NackAdmissionFilterTest extends FunSuite {
   }
 
   class Ctx(random: Rng = Rng.threadLocal,
-            _window: Long = DefaultWindow,
-            _successRateThreshold: Double = DefaultSuccessRateThreshold
-           ) {
+            _window: Duration = DefaultWindow,
+            _successRateThreshold: Double = DefaultSuccessRateThreshold) {
     val log: Logger = DefaultLogger
     val timer: MockTimer = new MockTimer
     val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver()
 
     val svc: Service[Int, Int] = Service.mk[Int, Int](v => Future.value(v))
     val failingSvc: Service[Int, Int] = new FailedService(Failure.rejected("mock failure"))
+
+    // Used to ensure that the success rate is safely above the success rate
+    // threshold.
+    val extraProbability: Double = 0.005
 
     val filter: NackAdmissionFilter[Int, Int] = new NackAdmissionFilter[Int, Int](
       _window, _successRateThreshold, random, statsReceiver)
@@ -98,55 +98,6 @@ class NackAdmissionFilterTest extends FunSuite {
     def testGetSuccessfulResponse(): Unit = {
       successfulResponse()
     }
-
-    /**
-     * Calculates the expected successLikelihood EMA value after a sequence of
-     * consecutive failures.
-     *
-     * @param originalEma EMA value to start from.
-     * @param numFailures Number of consecutive failures to simulate.
-     * @param window Window size.
-     * @param unit [[TimeUnit]] for window.
-     * @return Expected value of EMA.
-     */
-    def expectedEmaAfterFailures(
-        originalEma: Double,
-        numFailures: Int,
-        window: Long,
-        unit: TimeUnit = TimeUnit.MILLISECONDS): Double = {
-      require(originalEma >= 0, "originalEma must lie in the interval [0, 1]")
-      require(originalEma <= 1, "originalEma must lie in the interval [0, 1]")
-      require(window > 0, "window size must be positive")
-
-      val w: Double = Math.exp(-1.0/window)
-      Math.pow(w, numFailures) * originalEma
-    }
-
-    /**
-     * Calculates the number of consecutive failures required for the success
-     * rate to drop below the failure threshold.
-     *
-     * @param originalEma EMA value to start from.
-     * @param successRateThreshold EMA multiplier.
-     * @param window Window size.
-     * @param unit [[TimeUnit]] for window.
-     * @return Required number of failures.
-     */
-    def failuresToDropRequests(
-        originalEma: Double,
-        successRateThreshold: Double,
-        window: Long,
-        unit: TimeUnit = TimeUnit.MILLISECONDS): Int = {
-      require(originalEma >= 0, "originalEma must lie in the interval [0, 1]")
-      require(originalEma <= 1, "originalEma must lie in the interval [0, 1]")
-      require(successRateThreshold > 0, "multiplier must lie in (0, 1)")
-      require(successRateThreshold < 1, "multiplier must lie in (0, 1)")
-      require(window > 0, "window size must be positive")
-
-      val w: Double = Math.exp(-1.0/window)
-      val multiplier: Double = 1D/successRateThreshold
-      -(Math.log(multiplier * originalEma) / Math.log(w)).toInt
-    }
   }
 
   test("increments successLikelihood EMA when successfully serving a request") {
@@ -155,7 +106,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
     testGetSuccessfulResponse()
     assert(filter.hasSentRequest)
-    assert(filter.successLikelihoodEma.last == 1)
+    assert(filter.emaValue == 1)
   }
 
   test("doesn't increment successLikelihood EMA when we get a failed response") {
@@ -164,7 +115,7 @@ class NackAdmissionFilterTest extends FunSuite {
 
     testGetFailedResponse()
     assert(filter.hasSentRequest)
-    assert(filter.successLikelihoodEma.last == 0)
+    assert(filter.emaValue == 0)
   }
 
   test("doesn't drop requests prematurely") {
@@ -177,12 +128,14 @@ class NackAdmissionFilterTest extends FunSuite {
     import ctx._
 
     testGetSuccessfulResponse()
-    val numFailures = failuresToDropRequests(
-      filter.successLikelihoodEma.last, DefaultSuccessRateThreshold, DefaultWindow)
-    for (_ <- 0 until numFailures) { testGetFailedResponse() }
+    // Make the server reject requests just before the EMA drops below the
+    // success rate threshold
+    while (filter.emaValue > DefaultSuccessRateThreshold + extraProbability) {
+      testGetFailedResponse()
+    }
 
     val sentRequest = filter.hasSentRequest
-    val successRate = filter.successLikelihoodEma.last
+    val successRate = filter.emaValue
     val multiplier = 1D/DefaultSuccessRateThreshold
     assert(sentRequest)
     assert(0 < successRate && successRate < 1)
@@ -197,12 +150,14 @@ class NackAdmissionFilterTest extends FunSuite {
     import ctx._
 
     testGetSuccessfulResponse()
-    val numFailures = failuresToDropRequests(
-      filter.successLikelihoodEma.last, DefaultSuccessRateThreshold, DefaultWindow)
-    for (_ <- 0 to numFailures) { failRequestsWithoutTest() }
+    // Make the server reject requests so that the EMA drops below the success
+    // rate threshold
+    while (filter.emaValue >= DefaultSuccessRateThreshold) {
+      failRequestsWithoutTest()
+    }
 
     val sentRequest = filter.hasSentRequest
-    val successRate = filter.successLikelihoodEma.last
+    val successRate = filter.emaValue
     val multiplier = 1D/DefaultSuccessRateThreshold
     assert(sentRequest)
     assert(0 < successRate && successRate < 1)
@@ -221,13 +176,13 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // Initialize the EMA with a success...
     testGetSuccessfulResponse()
-    val numFailures = failuresToDropRequests(
-      filter.successLikelihoodEma.last, DefaultSuccessRateThreshold, DefaultWindow)
     // Let the cluster become unhealthy...
-    for (_ <- 0 to numFailures) { failRequestsWithoutTest() }
+    while (filter.emaValue >= DefaultSuccessRateThreshold) {
+      failRequestsWithoutTest()
+    }
 
     val sentRequest = filter.hasSentRequest
-    val successRate = filter.successLikelihoodEma.last
+    val successRate = filter.emaValue
     val multiplier = 1D/DefaultSuccessRateThreshold
     assert(sentRequest)
     assert(0 < successRate && successRate < 1)
@@ -237,13 +192,15 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // Now make the Rng always send requests...
     customRng.doubleVal = 1
-    // Let the cluster become healthy...
-    // TODO: Write a method to determine the required number of successes here
-    for (_ <- 0 to numFailures) { testGetSuccessfulResponse() }
+    // Let the cluster become healthy, with some buffer for an additional
+    // rejection from the server...
+    while (filter.emaValue < DefaultSuccessRateThreshold + extraProbability) {
+      testGetSuccessfulResponse()
+    }
     // Make the Rng pessimistic again...
     customRng.doubleVal = 0
     // ... but now the success rate is above the failure threshold, so new
-    // requests are not dropped.
+    // requests are not dropped, even after another rejection from the server.
     testGetFailedResponse()
     testGetSuccessfulResponse()
   }
@@ -261,47 +218,56 @@ class NackAdmissionFilterTest extends FunSuite {
     assert(statsReceiver.counter("dropped_requests")() == 9)
   }
 
-  test("expected EMA equals empirical value after n consecutive failures") {
-    val ctx = new Ctx()
-    import ctx._
-
-    val expectedEma: Double = expectedEmaAfterFailures(1.0, 10, DefaultWindow)
-    // 1 success, so that the Ema starts at 1
-    testGetSuccessfulResponse()
-    // then 10 failures
-    for (_ <- 0 to 9) { failRequestsWithoutTest() }
-    val actualEma = filter.successLikelihoodEma.last
-    assert(expectedEma === actualEma +- 0.001)
-  }
-
-  test("expected number of failures is sufficient to fail fast") {
+  test("EMA below success rate threshold is sufficient to fail fast") {
     val lowRng: CustomRng = new CustomRng(0)
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    val numberOfFailures: Int = failuresToDropRequests(1.0, DefaultSuccessRateThreshold, DefaultWindow)
     testGetSuccessfulResponse()
-
-    for (_ <- 0 to numberOfFailures) { failRequestsWithoutTest() }
+    // Make the server reject requests until the EMA drops below the success
+    // rate threshold.
+    while (filter.emaValue >= DefaultSuccessRateThreshold) {
+      failRequestsWithoutTest()
+    }
     testDropsRequest()
   }
 
-  test("expected number of failures is necessary to fail fast") {
+  test("EMA below success rate threshold is necessary to fail fast") {
     val lowRng: CustomRng = new CustomRng(0)
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    val numberOfFailures: Int = failuresToDropRequests(1.0, DefaultSuccessRateThreshold, DefaultWindow)
+    testGetSuccessfulResponse()
+    // Make the server reject requests until the EMA is just above the success
+    // rate threshold.
+    while (filter.emaValue < DefaultSuccessRateThreshold + extraProbability) {
+      failRequestsWithoutTest()
+    }
+    testGetSuccessfulResponse()
+  }
+
+  test("EMA value is affected only by responses in rolling window") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val ctx = new Ctx(lowRng, 100.milliseconds)
+    val extraEma = 0.005
+    import ctx._
+
+    testGetSuccessfulResponse()
+    // EMA decreases
+    for (_ <- 0 to 99) { failRequestsWithoutTest() }
+    // Wait for window to safely pass
+    Time.sleep(101.milliseconds)
+    // increase EMA
     testGetSuccessfulResponse()
 
-    for (_ <- 0 until numberOfFailures) { failRequestsWithoutTest() }
-    testGetSuccessfulResponse()
+    // EMA should be very close to 1
+    assert(filter.emaValue > 1 - extraEma)
   }
 
   test("negative window value throws IllegalArgumentException") {
     val lowRng: CustomRng = new CustomRng(0)
-    val _window: Long = -10
-    val errMsg: String = s"requirement failed: window must be positive: ${_window}"
+    val _window: Duration = -10.seconds
+    val errMsg: String = s"requirement failed: window size must be positive: ${_window.inNanoseconds}"
     val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
       new Ctx(lowRng, _window)
     }
@@ -310,8 +276,8 @@ class NackAdmissionFilterTest extends FunSuite {
 
   test("window value of zero throws IllegalArgumentException") {
     val lowRng: CustomRng = new CustomRng(0)
-    val _window: Long = 0
-    val errMsg: String = s"requirement failed: window must be positive: ${_window}"
+    val _window: Duration = 0.seconds
+    val errMsg: String = s"requirement failed: window size must be positive: ${_window.inNanoseconds}"
     val thrown: IllegalArgumentException = intercept[IllegalArgumentException] {
       new Ctx(lowRng, _window)
     }

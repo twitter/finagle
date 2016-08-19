@@ -1,5 +1,6 @@
 package com.twitter.finagle.filter
 
+import com.twitter.conversions.time._
 import com.twitter.finagle._
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.util.{Ema, Rng}
@@ -10,14 +11,34 @@ private[finagle] object NackAdmissionFilter {
   private val overloadFailure = Future.exception(Failure("failed fast because service is overloaded"))
   private val logger = Logger.get(getClass)
   private val role = new Stack.Role("NackAdmissionFilter")
-  private val DefaultWindow = 100L
-  private val DefaultSuccessRateThreshold = 99D/100
+
+  /**
+   * By default, the EMA window is 2 minutes: any response that the filter
+   * receives over a 2 minute rolling window affects the EMA's value. In other
+   * words, the EMA "forgets" history older than 2 minutes.
+   *
+   * E.g., if the server fails every request received for one minute, then
+   * two minutes pass without the server receiving any requests, and then
+   * the server receives a small number of successes, the EMA will end up
+   * being very close to 1.
+   */
+  private val DefaultWindow = 2.minutes
+
+  /**
+   * By default, the client will send all requests when the success rate EMA is
+   * between 50% and 100%. If the EMA drops below 50%, the filter will drop any
+   * given request with probability proportional to the EMA.
+   *
+   * E.g., if the EMA is 20%, the filter will drop any given request with
+   * 100 - (2 * 20) = 60% probability.
+   */
+  private val DefaultSuccessRateThreshold = 0.5
 
   /**
    * A class eligible for configuring a [[com.twitter.finagle.Stackable]]
    * [[com.twitter.finagle.filter.NackAdmissionFilter]] module.
    */
-  case class Param(window: Long, successRateThreshold: Double) {
+  case class Param(window: Duration, successRateThreshold: Double) {
     def mk(): (Param, Stack.Param[Param]) =
       (this, Param.param)
   }
@@ -67,12 +88,10 @@ private[finagle] object NackAdmissionFilter {
  *
  * @param window Size of moving window for exponential moving average, which is
  * used to keep track of the ratio of failed responses to successful responses
- * and compute the client's success rate. Note that the window is not a
- * [[Duration]]; in other words, we can interpret its unit as representing
- * event time, not system time. For example, if set to 1, then only the most
- * recent response will be used to calculate the EMA. If set to 100, then the
- * past 100 responses will be used to calculate the EMA. The window size
- * influences how the EMA behaves in roughly the following ways:
+ * and compute the client's success rate. E.g., if set to 1 second, then only
+ * requests occurring over the previous second will be used to calculate the
+ * EMA. The window size influences how the EMA behaves in roughly the following
+ * ways:
  *
  * - an EMA with a smaller window size will respond more quickly to
  * changes in cluster performance, but will keep a less accurate
@@ -91,14 +110,15 @@ private[finagle] object NackAdmissionFilter {
  * @param random Random number generator used in probability calculation.
  */
 private[finagle] class NackAdmissionFilter[Req, Rep](
-    window: Long,
+    window: Duration,
     successRateThreshold: Double,
     random: Rng,
     statsReceiver: StatsReceiver)
   extends SimpleFilter[Req, Rep] {
   import NackAdmissionFilter._
 
-  require(window > 0, s"window must be positive: $window")
+  val windowInNs = window.inNanoseconds
+  require(windowInNs > 0, s"window size must be positive: $windowInNs")
   require(successRateThreshold < 1, s"successRateThreshold must lie in (0, 1): $successRateThreshold")
   require(successRateThreshold > 0, s"successRateThreshold must lie in (0, 1): $successRateThreshold")
 
@@ -108,7 +128,13 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
   // from the cluster via [[updateSuccessLikelihood]]. We update it with 1 when
   // we get a successful response and with 0 when we get a failure response.
   // Therefore its value is a Double in the range [0, 1].
-  private[finagle] val successLikelihoodEma = new Ema(window)
+  private[this] val successLikelihoodEma = new Ema(windowInNs)
+
+  private[finagle] def emaValue: Double = {
+    successLikelihoodEma.last
+  }
+
+  private[this] val monoTime = new Ema.Monotime
 
   // Boolean representing whether the first request has been sent.
   private[this] var sentRequest = false
@@ -117,19 +143,11 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
     sentRequest
   }
 
-  // EMA timestamp. Uses a time delta of 1. For example, when we send the first
-  // request, we increment the stamp to 1; when we send the second request, we
-  // increment the stamp to 2.
-  private[this] var successLikelihoodStamp: Long = 0
-
   private[this] val droppedRequestCounter = statsReceiver.counter("dropped_requests")
   private[this] val successProbabilityHistogram = statsReceiver.stat("success_probability")
 
   private[this] def updateSuccessLikelihood(v: Long) = {
-    synchronized {
-      successLikelihoodEma(successLikelihoodStamp) = v
-      successLikelihoodStamp += 1
-    }
+    successLikelihoodEma.update(monoTime.nanos(), v)
     successProbabilityHistogram.add(successLikelihoodEma.last.toFloat)
   }
 
