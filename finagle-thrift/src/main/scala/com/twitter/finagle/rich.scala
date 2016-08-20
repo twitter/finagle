@@ -238,6 +238,22 @@ private[twitter] object ThriftUtil {
   }
 
   /**
+   * Construct a multiplexed binary [[com.twitter.finagle.Service]].
+   */
+  def serverFromIfaces(
+    ifaces: Map[String, AnyRef],
+    protocolFactory: TProtocolFactory,
+    stats: StatsReceiver,
+    maxThriftBufferSize: Int,
+    label: String
+  ): BinaryService = {
+    val services = ifaces.map { case (serviceName, impl) =>
+      serviceName -> serverFromIface(impl, protocolFactory, stats, maxThriftBufferSize, serviceName)
+    }
+    new MultiplexedFinagleService(services, protocolFactory, maxThriftBufferSize)
+  }
+
+  /**
    * Construct a binary [[com.twitter.finagle.Service]] for a given Thrift
    * interface using whichever Thrift code-generation toolchain is available.
    * (Legacy version for backward-compatibility).
@@ -380,7 +396,18 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
    * $clientUse
    */
   def newIface[Iface](name: Name, label: String, cls: Class[_]): Iface = {
-    val underlying = newService(name, label)
+    newIface(name, label, cls, protocolFactory, newService(name, label))
+  }
+
+  /**
+   * $clientUse
+   */
+  def newIface[Iface](
+    name: Name,
+    label: String,
+    cls: Class[_],
+    protocolFactory: TProtocolFactory,
+    service: Service[ThriftClientRequest, Array[Byte]]): Iface = {
     val clientLabel = (label, defaultClientName) match {
       case ("", "") => Showable.show(name)
       case ("", l1) => l1
@@ -390,9 +417,8 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
     val responseClassifier =
       params[com.twitter.finagle.param.ResponseClassifier].responseClassifier
 
-    constructIface(underlying, cls, protocolFactory, sr, responseClassifier)
+    constructIface(service, cls, protocolFactory, sr, responseClassifier)
   }
-
 
   /**
    * Construct a Finagle Service interface for a Scrooge-generated thrift object.
@@ -447,6 +473,43 @@ trait ThriftRichClient { self: Client[ThriftClientRequest, Array[Byte]] =>
   def newMethodIface[ServiceIface, FutureIface](serviceIface: ServiceIface)(
     implicit builder: MethodIfaceBuilder[ServiceIface, FutureIface]
   ): FutureIface = builder.newMethodIface(serviceIface)
+
+  def multiplex[T](dest: Name, label: String)(build: MultiplexedThriftClient => T): T = {
+    build(new MultiplexedThriftClient(dest, label))
+  }
+
+  def multiplex[T](dest: String, label: String)(build: MultiplexedThriftClient => T): T = {
+    multiplex(Resolver.eval(dest), label)(build)
+  }
+
+  def multiplex[T](dest: String)(build: MultiplexedThriftClient => T): T = {
+    val (n, l) = Resolver.evalLabeled(dest)
+    multiplex(n, l)(build)
+  }
+
+  class MultiplexedThriftClient(dest: Name, label: String) {
+
+    val service = newService(dest, label)
+
+    def newIface[Iface: ClassTag](serviceName: String): Iface = {
+      val cls = implicitly[ClassTag[Iface]].runtimeClass
+      newIface[Iface](serviceName, cls)
+    }
+
+    def newIface[Iface](serviceName: String, cls: Class[_]): Iface = {
+      val multiplexedProtocol = Protocols.multiplex(serviceName, protocolFactory)
+      ThriftRichClient.this.newIface(dest, label, cls, multiplexedProtocol, service)
+    }
+
+    def newServiceIface[ServiceIface](serviceName: String)(
+      implicit builder: ServiceIfaceBuilder[ServiceIface]
+    ): ServiceIface = {
+      val multiplexedProtocol = Protocols.multiplex(serviceName, protocolFactory)
+      val statsLabel = if (label.isEmpty) defaultClientName else label
+      val scopedStats = stats.scope(statsLabel)
+      builder.newServiceIface(service, multiplexedProtocol, scopedStats)
+    }
+  }
 }
 
 /**
@@ -511,4 +574,16 @@ trait ThriftRichServer { self: Server[Array[Byte], Array[Byte]] =>
    */
   def serveIface(addr: SocketAddress, iface: AnyRef): ListeningServer =
     serve(addr, serverFromIface(iface, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+
+  /**
+   * $serveIface
+   */
+  def serveIfaces(addr: String, ifaces: Map[String, AnyRef]): ListeningServer =
+    serve(addr, serverFromIfaces(ifaces, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
+
+  /**
+   * $serveIface
+   */
+  def serveIfaces(addr: SocketAddress, ifaces: Map[String, AnyRef]): ListeningServer =
+    serve(addr, serverFromIfaces(ifaces, protocolFactory, serverStats, maxThriftBufferSize, serverLabel))
 }
