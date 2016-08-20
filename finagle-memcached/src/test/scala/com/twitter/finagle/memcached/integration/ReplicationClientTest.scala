@@ -273,11 +273,18 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     Await.result(client1.set("foo", Buf.Utf8("bar")))
     assert(Await.result(replicatedClient.getsAll("foo")) == ConsistentReplication(
       Some((Buf.Utf8("bar"), RCasUnique(Seq(Buf.Utf8("2"), Buf.Utf8("1")))))))
-    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Seq(Buf.Utf8("2"), Buf.Utf8("1")))) == ConsistentReplication(CasResult.Stored))
-    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Seq(Buf.Utf8("3"), Buf.Utf8("2")))) == ConsistentReplication(CasResult.Stored))
+    assert(
+      Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Seq(Buf.Utf8("2"), Buf.Utf8("1")))) ==
+        ConsistentReplication(CasResult.Stored))
+    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Seq(Buf.Utf8("3"), Buf.Utf8("2")))) ==
+      ConsistentReplication(CasResult.Stored))
     Await.result(client1.set("foo", Buf.Utf8("bar")))
     Await.result(client2.set("foo", Buf.Utf8("bar")))
-    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Seq(Buf.Utf8("4"), Buf.Utf8("3")))) == ConsistentReplication(CasResult.NotFound))
+
+    // We have modified "foo" since the last fetch (by setting "foo" on each client),
+    // so the CAS tokens don't match and we expect "EXISTS" to be returned from Memcached.
+    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("baz"), Seq(Buf.Utf8("4"), Buf.Utf8("3"))))==
+      ConsistentReplication(CasResult.Exists))
     assert(Await.result(replicatedClient.delete("foo")) == ConsistentReplication(true))
     assert(Await.result(replicatedClient.getsAll("foo")) == ConsistentReplication(None))
 
@@ -290,13 +297,15 @@ class ReplicationClientTest extends FunSuite with BeforeAndAfterEach {
     assert(Await.result(client1.delete("foo")) == true)
     assert(Await.result(replicatedClient.getsAll("foo")) == InconsistentReplication(
       Seq(Return(None), Return(Some((Buf.Utf8("baz"), SCasUnique(Buf.Utf8("5"))))))))
-    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("bar"), Seq(Buf.Utf8("7"), Buf.Utf8("5")))) match {
-      case InconsistentReplication(Seq(Throw(_), Return(CasResult.NotFound))) => true
-      case _ => false
-    })
+
+    // "foo" was not found on the first replica because we deleted it, so we expect NOT_FOUND
+    // "foo" was found on the second replica with matching CAS, so we expect STORED
+    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("bar"), Seq(Buf.Utf8("7"), Buf.Utf8("5")))) ==
+      InconsistentReplication(Seq(Return(CasResult.NotFound), Return(CasResult.Stored))))
+
     Await.result(client1.set("foo", Buf.Utf8("bar")))
-    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("bar"), Seq(Buf.Utf8("6"), Buf.Utf8("6")))) == InconsistentReplication(
-      Seq(Return(CasResult.Exists), Return(CasResult.Stored))))
+    assert(Await.result(replicatedClient.checkAndSet("foo", Buf.Utf8("bar"), Seq(Buf.Utf8("6"), Buf.Utf8("6")))) ==
+      InconsistentReplication(Seq(Return(CasResult.Exists), Return(CasResult.Stored))))
 
     // inconsistent replica state
     firstTestServerPool(0).stop()

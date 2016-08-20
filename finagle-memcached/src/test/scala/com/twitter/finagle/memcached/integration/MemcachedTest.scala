@@ -1,10 +1,9 @@
 package com.twitter.finagle.memcached.integration
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.memcached.protocol.text.{Memcached => MemcachedProtocol}
 import com.twitter.finagle.memcached.util.AtomicMap
 import com.twitter.finagle.{Name, Address}
-import com.twitter.finagle.builder.{ServerBuilder, ClientBuilder}
+import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.memcached.protocol.ClientError
 import com.twitter.finagle.Memcached
 import com.twitter.finagle.memcached.{java => _, _}
@@ -118,19 +117,27 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
 
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
     test("gets") {
-      Await.result(client.set("foos", Buf.Utf8("xyz")))
-      Await.result(client.set("bazs", Buf.Utf8("xyz")))
-      Await.result(client.set("bazs", Buf.Utf8("zyx")))
+      // create a client that connects to only one server so we can predict CAS tokens
+      val client = Memcached.client.newRichClient(
+        Name.bound(Address(server1.get.address)), "client")
+
+      Await.result(client.set("foos", Buf.Utf8("xyz"))) // CAS: 1
+      Await.result(client.set("bazs", Buf.Utf8("xyz"))) // CAS: 2
+      Await.result(client.set("bazs", Buf.Utf8("zyx"))) // CAS: 3
+      Await.result(client.set("bars", Buf.Utf8("xyz"))) // CAS: 4
+      Await.result(client.set("bars", Buf.Utf8("zyx"))) // CAS: 5
+      Await.result(client.set("bars", Buf.Utf8("yxz"))) // CAS: 6
       val result =
         Await.result(
-          client.gets(Seq("foos", "bazs", "somethingelse"))
+          client.gets(Seq("foos", "bazs", "bars", "somethingelse"))
         ).map { case (key, (Buf.Utf8(value), Buf.Utf8(casUnique))) =>
           (key, (value, casUnique))
         }
       val expected =
         Map(
           "foos" -> (("xyz", "1")), // the "cas unique" values are predictable from a fresh memcached
-          "bazs" -> (("zyx", "3"))
+          "bazs" -> (("zyx", "3")),
+          "bars" -> (("yxz", "6"))
         )
       assert(result == expected)
     }
@@ -176,7 +183,12 @@ class MemcachedTest extends FunSuite with BeforeAndAfter {
 
   if (Option(System.getProperty("USE_EXTERNAL_MEMCACHED")).isDefined) {
     test("stats") {
-      val stats = Await.result(client.stats())
+      // We can't use a partitioned client to get stats, because we don't hash to a server based on
+      // a key. Instead, we create a ConnectedClient, which is connected to one server.
+      val service = Memcached.client.newService(Name.bound(Address(server1.get.address)), "client")
+
+      val connectedClient = Client(service)
+      val stats = Await.result(connectedClient.stats())
       assert(stats != null)
       assert(!stats.isEmpty)
       stats.foreach { stat =>
