@@ -53,6 +53,13 @@ New Features
   * finagle-serversets: `c.t.f.serverset2.Stabilizer` no longer uses a timer to implement
     stabilization periods if the periods are 0 seconds long. ``RB_ID=861561``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-http: HttpTransport now eagerly closes client connection after
+    processing non-keepalive requests.
+
+
 6.36.0
 ------
 
