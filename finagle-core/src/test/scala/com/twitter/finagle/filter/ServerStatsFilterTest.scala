@@ -1,7 +1,6 @@
 package com.twitter.finagle.filter
 
-import com.twitter.finagle.{Deadline, Service}
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.Service
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.{Stopwatch, Time, Future}
 import com.twitter.conversions.time._

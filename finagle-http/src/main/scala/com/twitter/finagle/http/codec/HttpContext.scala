@@ -1,7 +1,6 @@
 package com.twitter.finagle.http.codec
 
-import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.http.Message
 import com.twitter.logging.Logger
 import com.twitter.util.{NonFatal, Time}

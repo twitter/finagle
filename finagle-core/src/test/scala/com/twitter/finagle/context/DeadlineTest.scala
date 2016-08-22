@@ -1,4 +1,4 @@
-package com.twitter.finagle
+package com.twitter.finagle.context
 
 import com.twitter.util.{Await, Time, Duration, Return}
 import org.junit.runner.RunWith

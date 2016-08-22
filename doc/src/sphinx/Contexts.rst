@@ -69,7 +69,7 @@ A broadcast ``Context`` that represents the client identifier of a request.
 Current request deadline
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-``com.twitter.finagle.Deadline.current`` —
+``com.twitter.finagle.context.Deadline.current`` —
 A broadcast ``Context`` that represents when the request should be completed by.
 
 Current TLS peer certificate

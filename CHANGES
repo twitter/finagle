@@ -7,6 +7,12 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Deprecations
+~~~~~~~~~~~~
+
+* finagle-core: `c.t.f.Deadline` is deprecated in favor of `c.t.f.context.Deadline`.
+  ``RB_ID=864148``
+
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~
 

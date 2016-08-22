@@ -1,8 +1,8 @@
 package com.twitter.finagle.http.filter
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Deadline, Service}
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.Service
+import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.http.{Status, Response, Request}
 import com.twitter.finagle.http.codec.HttpContext
 import com.twitter.util.{Await, Future}

@@ -4,7 +4,7 @@ import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.util.TimeConversions._
 import com.twitter.util._
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.tracing._
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{atLeastOnce, spy, verify}

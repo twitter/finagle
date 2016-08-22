@@ -1,9 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.conversions.time._
-import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
-import com.twitter.finagle.Deadline
+import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.http.{Message, Method, Request, Version}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite

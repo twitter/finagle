@@ -1,7 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.stats.InMemoryStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.util._

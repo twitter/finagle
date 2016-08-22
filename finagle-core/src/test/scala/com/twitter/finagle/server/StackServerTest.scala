@@ -2,7 +2,7 @@ package com.twitter.finagle.server
 
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.param.{Stats, Timer}
 import com.twitter.finagle.service.{ExpiringService, TimeoutFilter}
 import com.twitter.finagle.stack.Endpoint

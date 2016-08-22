@@ -1,8 +1,7 @@
 package com.twitter.finagle.tracing
 
-import com.twitter.finagle.Deadline
 import com.twitter.finagle.benchmark.StdBenchAnnotations
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Deadline, Contexts}
 import com.twitter.finagle.thrift.ClientId
 import com.twitter.util.Time
 import org.openjdk.jmh.annotations._

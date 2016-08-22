@@ -1,6 +1,7 @@
 package com.twitter.finagle.service
 
 import com.twitter.finagle._
+import com.twitter.finagle.context.Deadline
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.{Duration, Future, Time}
 

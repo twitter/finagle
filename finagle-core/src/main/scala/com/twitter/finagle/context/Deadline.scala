@@ -1,9 +1,8 @@
-package com.twitter.finagle
+package com.twitter.finagle.context
 
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.finagle.context.Contexts
 import com.twitter.io.Buf
-import com.twitter.util.{Try, Return, Throw, Time, Duration}
+import com.twitter.util.{Duration, Return, Throw, Time, Try}
 
 /**
  * A deadline is the time by which some action (e.g., a request) must

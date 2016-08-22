@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.context.Contexts
+import com.twitter.finagle.context.{Contexts, Deadline}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory, ServiceFactoryRef}
