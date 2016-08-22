@@ -53,6 +53,14 @@ New Features
   * finagle-serversets: `c.t.f.serverset2.Stabilizer` no longer uses a timer to implement
     stabilization periods if the periods are 0 seconds long. ``RB_ID=861561``
 
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-core: `c.t.f.FixedInetResolver` now optionally retries failed DNS
+    lookups with provided backoff, and `c.t.f.serverset2.Zk2Resolver` uses this
+    retry functionality infinitely, exponentially backing off from 1 second to
+    5 minutes. ``RB_ID=860058``
+
 6.36.0
 ------
 

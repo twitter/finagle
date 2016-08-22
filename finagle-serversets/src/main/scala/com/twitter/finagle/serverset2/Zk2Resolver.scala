@@ -5,7 +5,8 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.addr.WeightedAddress
 import com.twitter.finagle.serverset2.ServiceDiscoverer.ClientHealth
 import com.twitter.finagle.serverset2.addr.ZkMetadata
-import com.twitter.finagle.{FixedInetResolver, Addr, Resolver}
+import com.twitter.finagle.{Addr, FixedInetResolver, InetResolver, Resolver}
+import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.{DefaultStatsReceiver, StatsReceiver}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.logging.Logger
@@ -58,6 +59,7 @@ private[serverset2] object Zk2Resolver {
  * @param batchWindow: how long do we batch up change notifications before finalizing a ServerSet
  * @param unhealthyWindow: how long must the zk client be unhealthy for us to report before
  *                       reporting trouble
+ * @param inetResolver: used to perform address resolution
  * @param timer: timer to use for stabilization and zk sessions
  */
 class Zk2Resolver(
@@ -65,20 +67,36 @@ class Zk2Resolver(
     removalWindow: Duration,
     batchWindow: Duration,
     unhealthyWindow: Duration,
-    timer: Timer = DefaultTimer.twitter)
+    inetResolver: InetResolver,
+    timer: Timer)
   extends Resolver {
   import Zk2Resolver._
 
-  def this() = this(DefaultStatsReceiver.scope("zk2"), 40.seconds, 5.seconds, 5.minutes, DefaultTimer.twitter)
+  def this(statsReceiver: StatsReceiver,
+    removalWindow: Duration,
+    batchWindow: Duration,
+    unhealthyWindow: Duration,
+    timer: Timer) =
+    this(statsReceiver, removalWindow, batchWindow, unhealthyWindow,
+      FixedInetResolver(statsReceiver, dnsCacheSize(), Backoff.exponentialJittered(1.second, 5.minutes),
+        DefaultTimer.twitter), timer)
+
+  def this(statsReceiver: StatsReceiver,
+    removalWindow: Duration,
+    batchWindow: Duration,
+    unhealthyWindow: Duration) =
+    this(statsReceiver, removalWindow, batchWindow, unhealthyWindow, DefaultTimer.twitter)
 
   def this(statsReceiver: StatsReceiver) =
-    this(statsReceiver, 40.seconds, 5.seconds, 5.minutes, DefaultTimer.twitter)
+    this(statsReceiver, 40.seconds, 5.seconds, 5.minutes)
+
+  def this() =
+    this(DefaultStatsReceiver.scope("zk2"))
 
   val scheme = "zk2"
 
   private[this] implicit val injectTimer = timer
 
-  private[this] val inetResolver = FixedInetResolver(statsReceiver, dnsCacheSize())
   private[this] val sessionTimeout = 10.seconds
   private[this] val removalEpoch = Epoch(removalWindow)
   private[this] val batchEpoch = Epoch(batchWindow)

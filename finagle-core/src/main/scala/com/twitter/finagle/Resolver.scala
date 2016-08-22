@@ -130,10 +130,10 @@ object InetResolver {
 }
 
 private[finagle] class InetResolver(
-  resolveHost: String => Future[Seq[InetAddress]],
-  statsReceiver: StatsReceiver,
-  pollIntervalOpt: Option[Duration]
-) extends Resolver {
+    resolveHost: String => Future[Seq[InetAddress]],
+    statsReceiver: StatsReceiver,
+    pollIntervalOpt: Option[Duration])
+  extends Resolver {
   import InetSocketAddressUtil._
 
   type HostPortMetadata = (String, Int, Addr.Metadata)
@@ -234,6 +234,7 @@ private[finagle] class InetResolver(
  * do not occur.
  */
 object FixedInetResolver {
+  private[this] val log = Logger()
 
   val scheme = "fixedinet"
 
@@ -242,26 +243,55 @@ object FixedInetResolver {
   
   def apply(unscopedStatsReceiver: StatsReceiver): InetResolver =
     apply(unscopedStatsReceiver, 16000)
-  
+
+  def apply(unscopedStatsReceiver: StatsReceiver, maxCacheSize: Long): InetResolver =
+    apply(unscopedStatsReceiver, maxCacheSize, Stream.empty, DefaultTimer.twitter)
+
   /**
    * Uses a [[com.twitter.util.Future]] cache to memoize lookups.
    *
    * @param maxCacheSize Specifies the maximum number of `Futures` that can be cached.
    *                     No maximum size limit if Long.MaxValue.
+   * @param backoffs Optionally retry DNS resolution failures using this sequence of
+   *                 durations for backoff. Stream.empty means don't retry.
    */
-  def apply(unscopedStatsReceiver: StatsReceiver, maxCacheSize: Long): InetResolver = {
+  def apply(
+    unscopedStatsReceiver: StatsReceiver,
+    maxCacheSize: Long,
+    backoffs: Stream[Duration],
+    timer: Timer
+  ): InetResolver = {
     val statsReceiver = unscopedStatsReceiver.scope("inet").scope("dns")
-    new FixedInetResolver(cache(new DnsResolver(statsReceiver), maxCacheSize), statsReceiver)
+    new FixedInetResolver(cache(
+      new DnsResolver(statsReceiver), maxCacheSize, backoffs, timer), statsReceiver)
   }
 
   // A size-bounded FutureCache backed by a LoaderCache
   private[finagle] def cache(
     resolveHost: String => Future[Seq[InetAddress]],
-    maxCacheSize: Long
+    maxCacheSize: Long,
+    backoffs: Stream[Duration] = Stream.empty,
+    timer: Timer = DefaultTimer.twitter
   ): LoadingCache[String, Future[Seq[InetAddress]]] = {
+
     val cacheLoader = new CacheLoader[String, Future[Seq[InetAddress]]]() {
-      def load(host: String): Future[Seq[InetAddress]] = resolveHost(host)
+      def load(host: String): Future[Seq[InetAddress]] = {
+        // Optionally retry failed DNS resolutions with specified backoff.
+        def retryingLoad(nextBackoffs: Stream[Duration]): Future[Seq[InetAddress]] = {
+          resolveHost(host).rescue { case exc: UnknownHostException =>
+            nextBackoffs match {
+              case nextBackoff #:: restBackoffs =>
+                log.debug(s"Caught UnknownHostException resolving host '$host'. Retrying in $nextBackoff...")
+                Future.sleep(nextBackoff)(timer).before(retryingLoad(restBackoffs))
+              case Stream.Empty =>
+                Future.exception(exc)
+            }
+          }
+        }
+        retryingLoad(backoffs)
+      }
     }
+
     var builder = Caffeine
       .newBuilder()
       .recordStats()

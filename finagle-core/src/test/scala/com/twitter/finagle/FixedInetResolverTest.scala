@@ -1,7 +1,9 @@
 package com.twitter.finagle
 
+import com.twitter.conversions.time._
+import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.stats.InMemoryStatsReceiver
-import com.twitter.util.{Future, Await}
+import com.twitter.util.{Await, Future, MockTimer, Time}
 import java.net.{UnknownHostException, InetAddress}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -31,12 +33,12 @@ class FixedInetResolverTest extends FunSuite {
 
   trait Ctx {
     var numLookups = 0
-    var shouldFail = false
+    var shouldFailTimes = 0
     val statsReceiver = new InMemoryStatsReceiver
 
     def resolve(host: String): Future[Seq[InetAddress]] = {
       numLookups += 1
-      if (shouldFail) Future.exception(new UnknownHostException())
+      if (shouldFailTimes+1 > numLookups) Future.exception(new UnknownHostException())
       else Future.value(Seq[InetAddress](InetAddress.getLoopbackAddress))
     }
 
@@ -111,8 +113,8 @@ class FixedInetResolverTest extends FunSuite {
     new Ctx {
       // make the same request n-times, but make them all fail
       val hostname = "1.2.3.4:100"
-      shouldFail = true
       val iterations = 10
+      shouldFailTimes = iterations
       for(i <- 1 to iterations) {
         val request = resolver.bind(hostname).changes.filter(_ != Addr.Pending)
 
@@ -125,6 +127,46 @@ class FixedInetResolverTest extends FunSuite {
       // there should have only been N lookups, and N failures
       assert(numLookups == iterations)
       assert(statsReceiver.counter("failures")() == iterations)
+    }
+  }
+
+  test("Caching resolver can auto-retry failed DNS lookups") {
+    new Ctx {
+      val maxCacheSize = 1
+      shouldFailTimes = 10
+      val nBackoffs = Backoff.exponentialJittered(1.milliseconds, 100.milliseconds).take(shouldFailTimes)
+      val mockTimer = new MockTimer
+      val cache = FixedInetResolver.cache(resolve, maxCacheSize, nBackoffs, mockTimer)
+      val resolver2 = new FixedInetResolver(cache, statsReceiver)
+      // make the same request n-times
+
+      def assertBoundWithBackoffs(hostname: String): Unit = {
+        val request = resolver2.bind(hostname).changes.filter(_ != Addr.Pending)
+
+        // Walk through backoffs with a synthetic timer
+        Time.withCurrentTimeFrozen { tc =>
+          val addrFuture = request.toFuture()
+          nBackoffs.foreach { backoff =>
+            assert(!addrFuture.isDefined) // Resolution shouldn't have completed yet
+            tc.advance(backoff)
+            mockTimer.tick()
+          }
+
+          // Resolution should be successful without further delay
+          Await.result(addrFuture, 0.seconds) match {
+            case Addr.Bound(_, _) =>
+            case _ => fail("Resolution should have succeeded")
+          }
+        }
+        cache.cleanUp()
+      }
+
+      // Should retry under the hood
+      assertBoundWithBackoffs("example.com:100")
+      assert(numLookups == shouldFailTimes + 1)
+      assert(statsReceiver.counter("successes")() == 1)
+      assert(statsReceiver.gauges(Seq("cache", "size"))() == 1)
+      assert(statsReceiver.gauges(Seq("cache", "evicts"))() == 0)
     }
   }
 }
