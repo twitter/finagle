@@ -37,7 +37,14 @@ class NackAdmissionFilterTest extends FunSuite {
     val statsReceiver: InMemoryStatsReceiver = new InMemoryStatsReceiver()
 
     val svc: Service[Int, Int] = Service.mk[Int, Int](v => Future.value(v))
-    val failingSvc: Service[Int, Int] = new FailedService(Failure.rejected("mock failure"))
+
+    val nackFailure: Failure = Failure.rejected("mock failure")
+    val interruptedFailure: Failure = new Failure("interrupted", None, Failure.Interrupted)
+    val namingFailure: Failure = new Failure("naming", None, Failure.Naming)
+
+    val failingSvc: Service[Int, Int] = new FailedService(nackFailure)
+    val failingInterruptedSvc: Service[Int, Int] = new FailedService(interruptedFailure)
+    val failingNamingSvc: Service[Int, Int] = new FailedService(namingFailure)
 
     // Used to ensure that the success rate is safely above the success rate
     // threshold.
@@ -50,9 +57,9 @@ class NackAdmissionFilterTest extends FunSuite {
       assert(Await.result(filter(1, svc), DefaultTimeout) == 1)
     }
 
-    def failedResponse(msg: String): Unit = {
+    def failedResponse(msg: String, svc: Service[Int, Int] = failingSvc): Unit = {
       val thrown: Failure = intercept[Failure] {
-        Await.result(filter(1, failingSvc), DefaultTimeout)
+        Await.result(filter(1, svc), DefaultTimeout)
       }
       if (msg.nonEmpty) {
         assert(thrown.getMessage == msg)
@@ -244,6 +251,23 @@ class NackAdmissionFilterTest extends FunSuite {
       failRequestsWithoutTest()
     }
     testGetSuccessfulResponse()
+  }
+
+  test("only NACKs decrease the EMA") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val ctx = new Ctx(lowRng)
+    import ctx._
+
+    testGetSuccessfulResponse()
+    val originalEma = filter.emaValue
+
+    failedResponse("interrupted", failingInterruptedSvc)
+    assert(filter.emaValue == originalEma)
+    failedResponse("naming", failingNamingSvc)
+    assert(filter.emaValue == originalEma)
+
+    testGetFailedResponse()
+    assert(filter.emaValue < originalEma)
   }
 
   test("EMA value is affected only by responses in rolling window") {

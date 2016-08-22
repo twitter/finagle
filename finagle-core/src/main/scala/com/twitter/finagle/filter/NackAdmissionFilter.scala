@@ -151,14 +151,13 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
     successProbabilityHistogram.add(successLikelihoodEma.last.toFloat)
   }
 
-  // Serve the given request, and update [[successLikelihoodEma]] depending on the
-  // response status.
-  // TODO: Use Response Classification.
+  // Increase the EMA if the response is a success or a non-retryable failure
+  // (that is, not a NACK). Decrease the EMA if the response is a NACK.
   private[this] val afterSend: Try[Rep] => Unit = {
-    case Return(_) =>
-      updateSuccessLikelihood(1)
-    case Throw(_) =>
+    case Throw(f: Failure) if f.isFlagged(Failure.Restartable) =>
       updateSuccessLikelihood(0)
+    case _ =>
+      updateSuccessLikelihood(1)
   }
 
   private[this] def sendRequest(req: Req, service: Service[Req, Rep]): Future[Rep] = {
