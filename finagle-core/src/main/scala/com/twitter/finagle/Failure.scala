@@ -148,6 +148,12 @@ object Failure {
   val Wrapped: Long = 1L << 2
 
   /**
+   * Flag rejected indicates that the work was rejected and therefore cannot be
+   * completed. This may indicate an overload condition.
+   */
+  val Rejected: Long = 1L << 3
+
+  /**
    * Flag naming indicates a naming failure. This is Finagle-internal.
    */
   private[finagle] val Naming: Long = 1L << 32
@@ -211,6 +217,7 @@ object Failure {
         if (f.isFlagged(Interrupted)) flags += "interrupted"
         if (f.isFlagged(Restartable)) flags += "restartable"
         if (f.isFlagged(Wrapped))     flags += "wrapped"
+        if (f.isFlagged(Rejected))    flags += "rejected"
         if (f.isFlagged(Naming))      flags += "naming"
         flags
       case _ => Set.empty
@@ -246,22 +253,23 @@ object Failure {
     wrap(exc, 0L)
 
   /**
-   * Create a new [[Restartable]] failure with the given message.
+   * Create a new [[Restartable]] and [[Rejected]] failure with the given message.
    */
   def rejected(why: String): Failure =
-    new Failure(why, None, Failure.Restartable, logLevel = Level.DEBUG)
+    new Failure(why, None, Failure.Restartable | Failure.Rejected, logLevel = Level.DEBUG)
 
   /**
-   * Create a new [[Restartable]] failure with the given cause.
+   * Create a new [[Restartable]] and [[Rejected]] failure with the given cause.
    */
   def rejected(cause: Throwable): Failure =
-    Failure(cause, Failure.Restartable, logLevel = Level.DEBUG)
+    Failure(cause, Failure.Restartable | Failure.Rejected, logLevel = Level.DEBUG)
 
   /**
-   * Create a new [[Restartable]] failure with the given message and cause.
+   * Create a new [[Restartable]] and [[Rejected]] failure with the given
+   * message and cause.
    */
   def rejected(why: String, cause: Throwable): Failure =
-    new Failure(why, Option(cause), Failure.Restartable, logLevel = Level.DEBUG)
+    new Failure(why, Option(cause), Failure.Restartable | Failure.Rejected, logLevel = Level.DEBUG)
 
   /**
    * A default [[Restartable]] failure.

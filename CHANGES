@@ -59,6 +59,10 @@ New Features
   * finagle-serversets: `c.t.f.serverset2.Stabilizer` no longer uses a timer to implement
     stabilization periods if the periods are 0 seconds long. ``RB_ID=861561``
 
+  * finagle-core: 'c.t.f.Failure' has a new flag, Rejected, to indicate that a given request was
+    rejected. All Failures generated with the Failure.rejected constructor are flagged Rejected and
+    Restartable. ``RB_ID=863356``
+
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -19,6 +19,7 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     Failure.Restartable,
     Failure.Interrupted,
     Failure.Wrapped,
+    Failure.Rejected,
     Failure.Naming)
 
   val flag2 = for (f1 <- flag; f2 <- flag if f1 != f2) yield f1|f2
@@ -90,6 +91,13 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
     }
   }
 
+  test("Failure.rejected sets correct flags") {
+    val flags = Failure.Restartable | Failure.Rejected
+    assert(Failure.rejected(":(").isFlagged(flags))
+    assert(Failure.rejected(":(", new Exception).isFlagged(flags))
+    assert(Failure.rejected(new Exception).isFlagged(flags))
+  }
+
   test("Failure.ProcessFailures") {
     val echo = Service.mk((exc: Throwable) => Future.exception(exc))
     val service = (new Failure.ProcessFailures) andThen echo
@@ -111,12 +119,12 @@ class FailureTest extends FunSuite with AssertionsForJUnit with GeneratorDrivenP
 
   test("Failure.flagsOf") {
     val failures = Seq(
-      Failure("abc", new Exception, Failure.Interrupted|Failure.Restartable|Failure.Naming|Failure.Wrapped),
+      Failure("abc", new Exception, Failure.Interrupted|Failure.Restartable|Failure.Naming|Failure.Rejected|Failure.Wrapped),
       Failure("abc"),
       new Exception
     )
     val categories = Seq(
-      Set("interrupted", "restartable", "wrapped", "naming"),
+      Set("interrupted", "restartable", "wrapped", "rejected", "naming"),
       Set(),
       Set()
     )

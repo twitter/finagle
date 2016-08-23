@@ -54,7 +54,7 @@ class Netty4TransporterTest extends FunSuite with Eventually with IntegrationPat
     val exc = intercept[Failure] {
       Await.result(p, Duration.fromSeconds(15))
     }
-    assert(exc.flags == Failure.Restartable)
+    assert(exc.flags == (Failure.Restartable | Failure.Rejected))
     intercept[java.nio.channels.UnsupportedAddressTypeException] {
       throw exc.cause.get
     }
