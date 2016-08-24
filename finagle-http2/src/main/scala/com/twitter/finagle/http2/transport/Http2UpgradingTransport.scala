@@ -29,7 +29,7 @@ private[http2] class Http2UpgradingTransport(
       ref.update(identity)
       ref.read()
     case _@UpgradeEvent.UPGRADE_SUCCESSFUL =>
-      val casted = Transport.cast[HttpObject, HttpObject](t)
+      val casted = Transport.cast[HttpObject, Http2ClientDowngrader.StreamMessage](t)
       val multiplexed = new MultiplexedTransporter(casted)
       p.setValue(Some(multiplexed))
       ref.update { _ =>

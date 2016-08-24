@@ -1,11 +1,14 @@
 package com.twitter.finagle.http2.transport
 
 import com.twitter.concurrent.AsyncQueue
-import com.twitter.finagle.http2.Http2Transporter
-import com.twitter.finagle.transport.{Transport, TransportProxy}
+import com.twitter.finagle.Status
+import com.twitter.finagle.transport.Transport
 import com.twitter.logging.Logger
-import com.twitter.util.Future
-import io.netty.handler.codec.http.{HttpObject, LastHttpContent, FullHttpResponse, FullHttpRequest}
+import com.twitter.util.{Future, Time}
+import io.netty.handler.codec.http.{HttpObject, LastHttpContent, FullHttpRequest, HttpMessage}
+import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.STREAM_ID
+import java.net.SocketAddress
+import java.security.cert.Certificate
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import scala.collection.JavaConverters._
@@ -21,7 +24,7 @@ import scala.collection.JavaConverters._
  * create a new Transport.
  */
 private[http2] class MultiplexedTransporter(
-    underlying: Transport[HttpObject, HttpObject])
+    underlying: Transport[HttpObject, Http2ClientDowngrader.StreamMessage])
   extends (() => Transport[HttpObject, HttpObject]) {
 
   private[this] val queues: ConcurrentHashMap[Int, AsyncQueue[HttpObject]] =
@@ -53,7 +56,7 @@ private[http2] class MultiplexedTransporter(
   // and dispatching, or making the distinction between streams and sessions
   // explicit.
   private[http2] class ChildTransport
-    extends TransportProxy[HttpObject, HttpObject](underlying) { child =>
+    extends Transport[HttpObject, HttpObject] { child =>
 
     // see http://httpwg.org/specs/rfc7540.html#StreamIdentifiers
     // stream ids initiated by the client must be odd
@@ -64,9 +67,13 @@ private[http2] class MultiplexedTransporter(
 
     private[this] val log = Logger.get(getClass.getName)
 
+    /** Utility for setting the HTTP/2 stream id on a HTTP/1 message. */
+    private[this] def setStreamId(msg: HttpMessage, id: Int): Unit =
+      msg.headers.setInt(STREAM_ID.text(), id)
+
     def write(obj: HttpObject): Future[Unit] = obj match {
       case request: FullHttpRequest => child.synchronized {
-        Http2Transporter.setStreamId(request, curId)
+        setStreamId(request, curId)
 
         if (obj.isInstanceOf[LastHttpContent]) {
           finishedWriting = true
@@ -75,7 +82,8 @@ private[http2] class MultiplexedTransporter(
         underlying.write(obj)
       }
       case _ =>
-        Future.exception(new UnsupportedOperationException(s"we don't handle streaming requests right now: $obj"))
+        Future.exception(
+          new UnsupportedOperationException(s"we don't handle streaming requests right now: $obj"))
     }
 
     private[this] def tryToIncrementStream(): Unit = child.synchronized {
@@ -105,7 +113,7 @@ private[http2] class MultiplexedTransporter(
     // TODO: the correct goaway behavior is to wait for requests lower than
     // lastStreamId and assume everything higher will never see a response.
     // instead, we fail everything else in-flight.
-    private[this] def failEverything(response: FullHttpResponse): Unit = {
+    private[this] def failEverything(response: HttpObject): Unit = {
       queues.asScala.toMap.foreach { case (k, q) =>
         q.offer(response)
       }
@@ -125,32 +133,46 @@ private[http2] class MultiplexedTransporter(
     // if the response is read before the stream calls read) may be scheduled in
     // a different order, or on a different thread. it's unlikely, but racy.
 
-    // please note that we're guaranteed to get FullHttpResponse because
-    // RichInboundHttp2ToHttpAdapter only supports fully buffered responses (for
-    // now)
-    def read(): Future[HttpObject] = child.synchronized {
-      underlying.read().onSuccess {
-        case response: FullHttpResponse =>
-          val streamId = Http2Transporter.getStreamId(response).get
-          if (streamId == -1) {
-            failEverything(response)
-          } else {
-            tryToInitializeQueue(streamId).offer(response)
-          }
-        case rep =>
-          val name = rep.getClass.getName
-          log.warning(s"we only support FullHttpResponse right now but got $name. "
-            + s"$name#toString returns: $rep")
-      }
+    import Http2ClientDowngrader._
+    private[this] val handleRead: StreamMessage => Unit = {
+      case Message(msg, streamId) => tryToInitializeQueue(streamId).offer(msg)
+      case GoAway(response) => failEverything(response)
+      case Rst(streamId) => // tear down stream
+      case rep =>
+        val name = rep.getClass.getName
+        log.warning(s"we only support Message, GoAway, Rst right now but got $name. "
+          + s"$name#toString returns: $rep")
+    }
 
-      // we can improve interrupt behavior here
-      val actual = tryToInitializeQueue(curId).poll()
-      actual.onSuccess { case _: LastHttpContent =>
+    private[this] val checkStreamStatus: HttpObject => Unit = {
+      case _: LastHttpContent =>
         child.synchronized {
           finishedReading = true
           tryToIncrementStream()
         }
-      }
+      case _ =>
+        // nop
     }
+
+    def read(): Future[HttpObject] = child.synchronized {
+
+      underlying.read().onSuccess(handleRead)
+
+      // we can improve interrupt behavior here
+      val actual = tryToInitializeQueue(curId).poll()
+      actual.onSuccess(checkStreamStatus)
+    }
+
+    def status: Status = underlying.status
+
+    def onClose: Future[Throwable] = underlying.onClose
+
+    def localAddress: SocketAddress = underlying.localAddress
+
+    def remoteAddress: SocketAddress = underlying.remoteAddress
+
+    def peerCertificate: Option[Certificate] = underlying.peerCertificate
+
+    def close(deadline: Time): Future[Unit] = underlying.close(deadline)
   }
 }

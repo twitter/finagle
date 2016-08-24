@@ -4,10 +4,10 @@ import com.twitter.finagle.Http.{param => httpparam}
 import com.twitter.finagle.{Stack, Status}
 import com.twitter.finagle.client.Transporter
 import com.twitter.finagle.http2.transport.{
-  UpgradeRequestHandler,
+  Http2ClientDowngrader,
+  Http2UpgradingTransport,
   SchemifyingHandler,
-  RichInboundHttp2ToHttpAdapter,
-  Http2UpgradingTransport
+  UpgradeRequestHandler
 }
 import com.twitter.finagle.netty4.Netty4Transporter
 import com.twitter.finagle.netty4.http.exp.{initClient, Netty4HttpTransporter}
@@ -16,25 +16,11 @@ import com.twitter.logging.Logger
 import com.twitter.util.{Future, Throw, Return, Promise}
 import io.netty.channel.ChannelPipeline
 import io.netty.handler.codec.http._
-import io.netty.handler.codec.http2.HttpConversionUtil.ExtensionHeaderNames.STREAM_ID
 import io.netty.handler.codec.http2._
 import java.net.SocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
 private[http2] object Http2Transporter {
-
-  /** Utility for retrieving the HTTP/2 stream id from a HTTP/1 message. */
-  def getStreamId(msg: HttpMessage): Option[Int] = {
-    val num = msg.headers.getInt(STREAM_ID.text())
-
-    // java / scala primitive compatibility stuff
-    if (num == null) None
-    else Some(num)
-  }
-
-  /** Utility for setting the HTTP/2 stream id on a HTTP/1 message. */
-  def setStreamId(msg: HttpMessage, id: Int): Unit =
-    msg.headers.setInt(STREAM_ID.text(), id)
 
   def apply(params: Stack.Params): Transporter[Any, Any] = {
     // current http2 client implementation doesn't support
@@ -60,8 +46,8 @@ private[http2] object Http2Transporter {
       // decompresses data frames according to the content-encoding header
       val adapter = new DelegatingDecompressorFrameListener(
         connection,
-        // adapters http2 to http 1.1
-        new RichInboundHttp2ToHttpAdapter(connection, maxResponseSize.inBytes.toInt)
+        // adapts http2 to http 1.1
+        new Http2ClientDowngrader(connection)
       )
       val connectionHandler = new HttpToHttp2ConnectionHandlerBuilder()
         .frameListener(adapter)

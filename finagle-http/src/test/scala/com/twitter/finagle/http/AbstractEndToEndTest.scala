@@ -31,6 +31,7 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
   object MaxHeaderSize extends Feature
   object SetContentLength extends Feature
   object CompressedContent extends Feature
+  object StreamedContentString extends Feature
 
   var saveBase: Dtab = Dtab.empty
   private val statsRecv: InMemoryStatsReceiver = new InMemoryStatsReceiver()
@@ -332,7 +333,18 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
       val writer = Reader.writable()
       val client = connect(service(writer))
       val response = Await.result(client(Request()), 5.seconds)
-      assert(response.contentString == "helloworld")
+
+      // content string only works in streamed responses as a historical artifact.
+      // although you might expect response.contentString to block until it buffers
+      // the entire response, it basically just takes the first chunk and writes it as
+      // the content.
+      val actual = if (!featureImplemented(StreamedContentString)) {
+        val Buf.Utf8(string) = Await.result(Reader.readAll(response.reader), 5.seconds)
+        string
+      } else {
+        response.contentString
+      }
+      assert(actual == "helloworld")
       Await.ready(client.close(), 5.seconds)
     }
 
@@ -364,7 +376,8 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
 
       val client = connect(serviceWithResponseProxy)
       val response = Await.result(client(Request()), 5.seconds)
-      assert(response.contentString == "goodbyeworld")
+      val Buf.Utf8(actual) = Await.result(Reader.readAll(response.reader), 5.seconds)
+      assert(actual == "goodbyeworld")
       Await.ready(client.close(), 5.seconds)
     }
 

@@ -18,7 +18,8 @@ class EndToEndTest extends AbstractEndToEndTest {
 
   // must be lazy for initialization order reasons
   private[this] lazy val featuresHttp2DoesNotSupport = Set[Feature](
-    HandlesExpect
+    HandlesExpect,
+    StreamedContentString
   )
   override def initClient(client: HttpService): Unit = {
     val request = Request("/")
