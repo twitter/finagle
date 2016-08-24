@@ -547,9 +547,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     copy(client.withParams(client.params ++ params))
   }
 
-  @deprecated("Use tcpConnectTimeout instead", "5.0.1")
-  def connectionTimeout(duration: Duration): This = tcpConnectTimeout(duration)
-
   /**
    * Specify the TCP connection timeout.
    *
@@ -1166,11 +1163,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
   def tracerFactory(factory: com.twitter.finagle.tracing.Tracer.Factory): This =
     tracer(factory())
 
-  // API compatibility method
-  @deprecated("Use tracer() instead", "7.0.0")
-  def tracerFactory(t: com.twitter.finagle.tracing.Tracer): This =
-    tracer(t)
-
   /**
    * Specifies a tracer that receives trace events.
    * See [[com.twitter.finagle.tracing]] for details.
@@ -1252,13 +1244,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
    */
   def failureAccrualFactory(factory: util.Timer => ServiceFactoryWrapper): This =
     configured(FailureAccrualFactory.Replaced(factory))
-
-  @deprecated(
-    "No longer experimental: Use failFast()." +
-    "The new default value is true, so replace .expFailFast(true) with nothing at all",
-    "5.3.10")
-  def expFailFast(enabled: Boolean): This =
-    failFast(enabled)
 
   /**
    * Marks a host dead on connection failure. The host remains dead
@@ -1347,13 +1332,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     ClientBuilderClient.newClient(client, dest, label)
   }
 
-  @deprecated("Used for ABI compat", "5.0.1")
-  def buildFactory(
-    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
-  ): ServiceFactory[Req, Rep] = buildFactory()(
-    new ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]{})
-
   /**
    * Construct a Service.
    *
@@ -1373,13 +1351,6 @@ class ClientBuilder[Req, Rep, HasCluster, HasCodec, HasHostConnectionLimit] priv
     val DestName(dest) = params[DestName]
     ClientBuilderClient.newService(client, dest, label)
   }
-
-  @deprecated("Used for ABI compat", "5.0.1")
-  def build(
-    THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:
-      ThisConfig =:= FullySpecifiedConfig
-  ): Service[Req, Rep] = build()(
-    new ClientConfigEvidence[HasCluster, HasCodec, HasHostConnectionLimit]{})
 
   private[this] def validated = {
     if (!params.contains[DestName])

@@ -22,6 +22,13 @@ Breaking API Changes
   * finagle-core: Delete IdleConnectionFilter, which is no longer hooked up in the server, and
     no longer seems to be useful.  ``RB_ID=856377``
 
+  * finagle-core: Remove deprecated methods from `c.t.f.builder.ClientBuilder` ``RB_ID=864622``
+
+      - `connectionTimeout`, use `tcpConnectTimeout`
+      - `expFailFast`, use `failFast`
+      - `buildFactory`, use other `buildFactory` methods
+      - `build`, use other `build` methods
+
   * finagle-exp: Abstract out parts of the DarkTrafficFilter for potential re-use.
     We also canonicalize the DarkTrafficFilter stats scope which changes from
     "darkTrafficFilter" to "dark_traffic_filter". E.g.:
