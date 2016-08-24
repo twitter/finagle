@@ -58,6 +58,13 @@ New Features
   * finagle-thrift: maxThriftBufferSize is now tunable via parameter for Thrift
     servers. It previously only was for ThriftMux servers. ``RB_ID=860102``
 
+  * finagle-core: Mux Clients now propagate the number of times the client retried
+    the request in the request's c.t.f.context.Context, available via
+    c.t.f.context.Retries. ``RB_ID=862640``
+
+Runtime Behavior Changes
+~~~~~~~~~~~~~~~~~~~~~~~~
+
   * finagle-http: HttpTransport now eagerly closes client connection after
     processing non-keepalive requests.
 

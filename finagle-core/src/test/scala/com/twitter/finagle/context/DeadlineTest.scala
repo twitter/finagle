@@ -1,6 +1,6 @@
 package com.twitter.finagle.context
 
-import com.twitter.util.{Await, Time, Duration, Return}
+import com.twitter.util.{Time, Duration, Return}
 import org.junit.runner.RunWith
 import org.scalacheck.Gen
 import org.scalatest.FunSuite

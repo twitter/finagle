@@ -1,10 +1,12 @@
 package com.twitter.finagle.service
 
 import com.twitter.conversions.time._
+import com.twitter.finagle.context
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{FailedFastException, Service}
-import com.twitter.finagle.stats.InMemoryStatsReceiver
+import com.twitter.finagle.{ServiceFactory, FailedFastException, Service}
+import com.twitter.finagle.stats.{NullStatsReceiver, InMemoryStatsReceiver}
 import com.twitter.util._
+import java.util.concurrent.atomic.AtomicInteger
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
@@ -148,6 +150,42 @@ class RequeueFilterTest extends FunSuite {
       intercept[FailedFastException] {
         Await.result(response, 1.second)
       }
+    }
+  }
+
+  test("retries propagated in context") {
+    val minRetries = 10
+    val percentRequeues = 0.5
+    val filter = new RequeueFilter[Throwable, Int](
+      RetryBudget(1.second, minRetries, 0.0, Stopwatch.timeMillis),
+      Backoff.constant(Duration.Zero),
+      NullStatsReceiver,
+      () => true,
+      percentRequeues,
+      DefaultTimer.twitter)
+
+    val stats = new InMemoryStatsReceiver()
+
+    val retriesStat = stats.stat("retry_context_retries")
+
+    val svcFactory = ServiceFactory.const(
+      filter.andThen(Service.mk[Throwable, Int] { req =>
+        context.Retries.current.foreach { retries => retriesStat.add(retries.retries) }
+        Future.exception(req)
+      })
+    )
+
+    val svc = Await.result(svcFactory(), 5.seconds)
+
+    Time.withCurrentTimeFrozen { _ =>
+      intercept[FailedFastException] {
+        Await.result(svc(new FailedFastException("bad")), 5.seconds)
+      }
+
+      // We should have retried 5 times
+      val retriesInContext = List(0, 1, 2, 3, 4, 5)
+
+      assert(stats.stat("retry_context_retries")().map(_.toInt) == retriesInContext)
     }
   }
 }

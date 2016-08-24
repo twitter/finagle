@@ -82,21 +82,6 @@ class EndToEndTest extends FunSuite
     }
   }
 
-  test("end-to-end thriftmux: propagate Contexts") {
-    new ThriftMuxTestServer {
-      val client = ThriftMux.client.newIface[TestService.FutureIface](
-        Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
-
-      assert(await(client.query("ok")) == "okok")
-
-      Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(await(client.query("ok")) == "hello context world")
-      }
-
-      await(server.close())
-    }
-  }
-
   test("end-to-end thriftmux: propagate Dtab.local") {
     new ThriftMuxTestServer {
       val client =
@@ -119,37 +104,6 @@ class EndToEndTest extends FunSuite
         Thrift.client.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
       1 to 5 foreach { _ =>
         assert(await(client.query("ok")) == "okok")
-      }
-
-      await(server.close())
-    }
-  }
-
-  test("end-to-end thriftmux server + Finagle thrift client: propagate Contexts") {
-    new ThriftMuxTestServer {
-      val client =
-        Thrift.client.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
-
-      assert(await(client.query("ok")) == "okok")
-
-      Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(await(client.query("ok")) == "hello context world")
-      }
-
-      await(server.close())
-    }
-  }
-
-  test("end-to-end thriftmux server + Finagle thrift client: propagate Dtab.local") {
-    new ThriftMuxTestServer {
-      val client =
-        Thrift.client.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
-
-      assert(await(client.query("ok")) == "okok")
-
-      Dtab.unwind {
-        Dtab.local = Dtab.read("/foo=>/bar")
-        assert(await(client.query("ok")) == "/foo=>/bar")
       }
 
       await(server.close())
@@ -264,20 +218,6 @@ class EndToEndTest extends FunSuite
         await(clientClosable.close())
       }
       await(serverClosable.close())
-    }
-  }
-
-  test("thriftmux server + Finagle thrift client: propagate Contexts") {
-    new ThriftMuxTestServer {
-      val client = Thrift.client.newIface[TestService.FutureIface](Name.bound(Address(server.boundAddress.asInstanceOf[InetSocketAddress])), "client")
-
-      assert(await(client.query("ok")) == "okok")
-
-      Contexts.broadcast.let(testContext, TestContext(Buf.Utf8("hello context world"))) {
-        assert(await(client.query("ok")) == "hello context world")
-      }
-
-      await(server.close())
     }
   }
 

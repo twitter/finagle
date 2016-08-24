@@ -1,10 +1,11 @@
 package com.twitter.finagle.client
 
 import com.twitter.finagle._
+import com.twitter.finagle.context
 import com.twitter.finagle.context.Contexts
 import com.twitter.finagle.factory.{
   BindingFactory, RefcountedFactory, StatsFactoryWrapper, TimeoutFactory}
-import com.twitter.finagle.filter.{DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
+import com.twitter.finagle.filter.{ClearContextValueFilter, DtabStatsFilter, ExceptionSourceFilter, MonitorFilter}
 import com.twitter.finagle.loadbalancer.LoadBalancerFactory
 import com.twitter.finagle.param._
 import com.twitter.finagle.service._
@@ -264,6 +265,15 @@ object StackClient {
      *  * `Retries` retries `RetryPolicy.RetryableWriteException`s
      *    automatically. It must appear above `FactoryToService` so
      *    that service acquisition failures are retried.
+     *
+     *  * `ClearContextValueFilter` clears the configured Context key,
+     *    `Retries`, in the request's Context. This module must
+     *    come before `Retries` so that it doesn't clear the `Retries`
+     *    set by this client. `Retries` is only meant to be propagated
+     *    one hop from the client to the server. The client overwrites `Retries`
+     *    in the `RequeueFilter` with its own value; however, if the client
+     *    has removed `Retries` in its configuration, we want `Retries`
+     *    to be cleared so the server doesn't see a value set by another client.
      */
     stk.push(LoadBalancerFactory.module)
     stk.push(StatsFactoryWrapper.module)
@@ -273,6 +283,7 @@ object StackClient {
     stk.push(Role.prepFactory, identity[ServiceFactory[Req, Rep]](_))
     stk.push(FactoryToService.module)
     stk.push(Retries.moduleRequeueable)
+    stk.push(ClearContextValueFilter.module(context.Retries))
 
     /*
      * These modules deal with name resolution and request

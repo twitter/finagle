@@ -216,7 +216,9 @@ object Finagle extends Build {
     finagleHttp,
     finagleMySQL,
     finagleMemcached,
-    finagleMux
+    finagleMux,
+    finagleThrift,
+    finagleThriftMux
   )
 
   lazy val finagleToggle = Project(
