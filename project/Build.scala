@@ -210,7 +210,7 @@ object Finagle extends Build {
       sharedSettings
   ).settings(
     name := "finagle-integration",
-    libraryDependencies ++= Seq(util("core"))
+    libraryDependencies ++= Seq(util("core")) ++ scroogeLibs
   ).dependsOn(
     finagleCore,
     finagleHttp,
@@ -218,7 +218,7 @@ object Finagle extends Build {
     finagleMemcached,
     finagleMux,
     finagleThrift,
-    finagleThriftMux
+    finagleThriftMux % "test->compile;test->test"
   )
 
   lazy val finagleToggle = Project(
