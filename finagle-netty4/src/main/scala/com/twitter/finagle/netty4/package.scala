@@ -6,7 +6,6 @@ import com.twitter.finagle.util.ProxyThreadFactory
 import com.twitter.jvm.numProcs
 import com.twitter.util.Awaitable
 import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
-import io.netty.channel.nio.NioEventLoopGroup
 import java.util.concurrent.{ExecutorService, Executors}
 
 /**
@@ -16,8 +15,8 @@ import java.util.concurrent.{ExecutorService, Executors}
  */
 package object netty4 {
 
-  // NB Setting this system property works around a bug in n4's content [de|en]coder 
-  //    where they allocate buffers using the global default allocator rather than 
+  // NB Setting this system property works around a bug in n4's content [de|en]coder
+  //    where they allocate buffers using the global default allocator rather than
   //    the allocator configured in the client/server boostrap. By setting this value
   //    we're changing the global default to unpooled.
   //
@@ -29,20 +28,6 @@ package object netty4 {
   System.setProperty("io.netty.maxDirectMemory", "0")
 
   object numWorkers extends GlobalFlag((numProcs() * 2).ceil.toInt, "number of netty4 worker threads")
-
-  // global worker thread pool for finagle clients and servers.
-  private[netty4] val Executor: ExecutorService = {
-    val threadFactory = new ProxyThreadFactory(
-      new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true),
-      ProxyThreadFactory.newProxiedRunnable(
-        () => Awaitable.enableBlockingTimeTracking(),
-        () => Awaitable.disableBlockingTimeTracking()
-      )
-    )
-    Executors.newCachedThreadPool(threadFactory)
-  }
-
-  private[netty4] object WorkerPool extends NioEventLoopGroup(numWorkers(), Executor)
 
   // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
   //     because we need to disable the leak-detector and
@@ -60,6 +45,29 @@ package object netty4 {
     private[netty4] implicit object Allocator extends Stack.Param[Allocator] {
       // TODO investigate pooled allocator CSL-2089
       override val default: Allocator = Allocator(UnpooledAllocator)
+    }
+
+    /**
+     * A class eligible for configuring the [[java.util.concurrent.ExecutorService]] used
+     * to execute I/O work for clients and servers. The default is global and shared
+     * among clients and servers such that we can inline work on the I/O threads. Modifying
+     * the default has performance and instrumentation implications and should only be
+     * done so with care. If there is particular work you would like to schedule off
+     * the I/O threads, consider scheduling that work on a separate thread pool
+     * more granularly (e.g. [[FuturePool]] is a good tool for this).
+     */
+    case class WorkerPool(executorService: ExecutorService)
+    implicit object WorkerPool extends Stack.Param[WorkerPool] {
+      override val default: WorkerPool = {
+        val threadFactory = new ProxyThreadFactory(
+          new NamedPoolThreadFactory("finagle/netty4", makeDaemons = true),
+          ProxyThreadFactory.newProxiedRunnable(
+            () => Awaitable.enableBlockingTimeTracking(),
+            () => Awaitable.disableBlockingTimeTracking()
+          )
+        )
+        WorkerPool(Executors.newCachedThreadPool(threadFactory))
+      }
     }
   }
 }

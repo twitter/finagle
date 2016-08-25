@@ -10,6 +10,7 @@ import com.twitter.io.Buf
 import com.twitter.util.{Future, Promise, NonFatal}
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel._
+import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import java.lang.{Boolean => JBool, Integer => JInt}
 import java.net.SocketAddress
@@ -52,9 +53,13 @@ private[finagle] object Netty4Transporter {
       val compensatedConnectTimeoutMs =
         (compensation + connectTimeout).inMillis.min(Int.MaxValue)
 
+      val workerPool = new NioEventLoopGroup(
+        numWorkers(),
+        params[param.WorkerPool].executorService)
+
       val bootstrap =
         new Bootstrap()
-          .group(WorkerPool)
+          .group(workerPool)
           .channel(classOf[NioSocketChannel])
           .option(ChannelOption.ALLOCATOR, allocator)
           .option[JBool](ChannelOption.TCP_NODELAY, noDelay)

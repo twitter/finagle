@@ -89,9 +89,13 @@ private[finagle] case class Netty4Listener[In, Out](
           new NamedPoolThreadFactory("finagle/netty4/boss", makeDaemons = true)
         )
 
+      val workerPool = new NioEventLoopGroup(
+        numWorkers(),
+        params[param.WorkerPool].executorService)
+
       val bootstrap = new ServerBootstrap()
       bootstrap.channel(classOf[NioServerSocketChannel])
-      bootstrap.group(bossLoop, WorkerPool)
+      bootstrap.group(bossLoop, workerPool)
       bootstrap.childOption[JBool](ChannelOption.TCP_NODELAY, noDelay)
 
       bootstrap.option(ChannelOption.ALLOCATOR, allocator)
