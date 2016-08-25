@@ -440,7 +440,8 @@ class ServerBuilder[Req, Rep, HasCodec, HasBindTo, HasName] private[builder](
    * burst of traffic that exceeds this limit, the burst is rejected
    * with a `Failure.Rejected` exception. Note, this failure signals
    * a graceful rejection which is transmitted to clients by certain
-   * protocols in Finagle (e.g. Http, ThriftMux).
+   * protocols in Finagle (e.g. Http, ThriftMux). The limit is global
+   * to all sessions.
    *
    * To migrate to the Stack-based APIs, use `ServerAdmissionControlParams.concurrencyLimit`.
    * For example:
