@@ -28,13 +28,26 @@ local default_settings =
 {
     debug_level  = DEBUG,
     port         = 9990,
-    heur_enabled = true,
+    heur_enabled = true
 }
 
-function dprint (s)
-end
+local dprint = function() end
 local dprint2 = function() end
-dprint2 = dprint
+local function resetDebugLevel()
+    if default_settings.debug_level > debug_level.DISABLED then
+        dprint = function(...)
+            info(table.concat({"Lua: ", ...}," "))
+        end
+
+        if default_settings.debug_level > debug_level.LEVEL_1 then
+            dprint2 = dprint
+        end
+    else
+        dprint = function() end
+        dprint2 = dprint
+    end
+end
+resetDebugLevel()
 
 dprint2("Wireshark version = ".. get_version())
 dprint2("Lua version = ".. _VERSION)
@@ -64,7 +77,7 @@ local MIN_MUX_LEN = 8
 local TAG_MARKER = 0
 local TAG_PING = 1
 
-local MIN_TAG = TAG_PING + 1
+local MIN_TAG = TAG_PING
 local MAX_TAG = bit32.lshift(1, 23) - 1
 local MSB_TAG = bit32.lshift(1, 23)
 
@@ -90,6 +103,8 @@ local MSG_TYPE_RINIT = 188 -- -68 & 0xff
 
 local MSG_TYPE_RERR = 128 -- -128 & 0xff
 
+local MSG_TYPE_OLD_RERR = 127
+
 local MESSAGE_TYPES = {
   [MSG_TYPE_TREQ] = "Treq",
   [MSG_TYPE_RREQ] = "Rreq",
@@ -104,7 +119,8 @@ local MESSAGE_TYPES = {
   [MSG_TYPE_TLEASE] = "Tlease",
   [MSG_TYPE_TINIT] = "Tinit",
   [MSG_TYPE_RINIT] = "Rinit",
-  [MSG_TYPE_RERR] = "Rerr"
+  [MSG_TYPE_RERR] = "Rerr",
+  [MSG_TYPE_OLD_RERR] = "OldRerr"
 }
 
 ----------------------------------------
@@ -320,8 +336,6 @@ local function heur_dissect_mux(tvbuf,pktinfo,root)
         dprint("heur_dissect_mux: tvb shorter than MIN_MUX_LEN of: ".. MIN_MUX_LEN)
         return false
     end
-
-    local tvbr = tvbuf:range(0,MIN_MUX_LEN)
 
     -- the first 4 bytes are size id, validate that it is the right size
     local size = tvbuf:range(0, 4):int()
