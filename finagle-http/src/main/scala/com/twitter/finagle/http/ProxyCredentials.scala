@@ -1,6 +1,7 @@
 package com.twitter.finagle.http
 
 import com.twitter.util.Base64StringEncoder
+import java.nio.charset.StandardCharsets
 import scala.collection.JavaConversions._
 
 object ProxyCredentials {
@@ -18,8 +19,8 @@ object ProxyCredentials {
 }
 
 case class ProxyCredentials(username: String, password: String) {
-  lazy val basicAuthorization = {
-    val bytes = "%s:%s".format(username, password).getBytes
+  lazy val basicAuthorization: String = {
+    val bytes = "%s:%s".format(username, password).getBytes(StandardCharsets.UTF_8)
     "Basic " + Base64StringEncoder.encode(bytes)
   }
 }

@@ -10,7 +10,9 @@ import scala.collection.JavaConverters._
 /**
  * Request parameter map.
  *
- * This is a multi-map.  Use getAll() get all values for a key.
+ * This is a persistent (immutable) multi-map.
+ *
+ * Use `getAll()` to get all values for a key.
  */
 abstract class ParamMap
   extends immutable.Map[String, String]
@@ -60,43 +62,58 @@ abstract class ParamMap
 
   /* Equivalent to get(name).getOrElse(default). */
   def getOrElse(name: String, default: => String): String =
-    get(name).getOrElse(default)
+    get(name) match {
+      case Some(v) => v
+      case None => default
+    }
 
   /** Get Short value.  Uses forgiving StringUtil.toSomeShort to parse. */
   def getShort(name: String): Option[Short] =
-    get(name) map { StringUtil.toSomeShort(_) }
+    get(name).map(ParamMap.ToShort)
 
   /** Get Short value or default.  Equivalent to getShort(name).getOrElse(default). */
   def getShortOrElse(name: String, default: => Short): Short =
-    getShort(name) getOrElse default
+    getShort(name) match {
+      case Some(v) => v
+      case None => default
+    }
 
   /** Get Int value.  Uses forgiving StringUtil.toSomeInt to parse. */
   def getInt(name: String): Option[Int] =
-    get(name) map { StringUtil.toSomeInt(_) }
+    get(name).map(ParamMap.ToInt)
 
   /** Get Int value or default.  Equivalent to getInt(name).getOrElse(default). */
   def getIntOrElse(name: String, default: => Int): Int =
-    getInt(name) getOrElse default
+    getInt(name) match {
+      case Some(v) => v
+      case None => default
+    }
 
   /** Get Long value.  Uses forgiving StringUtil.toLong to parse. */
   def getLong(name: String): Option[Long] =
-    get(name) map { StringUtil.toSomeLong(_) }
+    get(name).map(ParamMap.ToLong)
 
   /** Get Long value or default.  Equivalent to getLong(name).getOrElse(default). */
   def getLongOrElse(name: String, default: => Long): Long =
-    getLong(name) getOrElse default
+    getLong(name) match {
+      case Some(v) => v
+      case None => default
+    }
 
   /** Get Boolean value.  Uses StringUtil.toBoolean to parse. */
   def getBoolean(name: String): Option[Boolean] =
-    get(name) map { StringUtil.toBoolean(_) }
+    get(name).map(ParamMap.ToBoolean)
 
   /** Get Boolean value or default. Equivalent to getBoolean(name).getOrElse(default). */
   def getBooleanOrElse(name: String, default: => Boolean): Boolean =
-    getBoolean(name) getOrElse default
+    getBoolean(name) match {
+      case Some(v) => v
+      case None => default
+    }
 
-  override def toString = {
+  override def toString: String = {
     val encoder = new QueryStringEncoder("", Charset.forName("utf-8"))
-    iterator foreach { case (k, v) =>
+    iterator.foreach { case (k, v) =>
       encoder.addParam(k, v)
     }
     encoder.toString
@@ -111,7 +128,10 @@ class MapParamMap(
   extends ParamMap {
 
   def get(name: String): Option[String] =
-    underlying.get(name) flatMap { _.headOption }
+    underlying.get(name) match {
+      case Some(ss) => ss.headOption
+      case None => None
+    }
 
   def getAll(name: String): Iterable[String] =
     underlying.getOrElse(name, Nil)
@@ -141,7 +161,7 @@ object MapParamMap {
   ): Map[String, Seq[String]] = {
     tuples
       .groupBy { case (k, v) => k }
-      .mapValues { case values => values.map { _._2 } }
+      .mapValues { values => values.map { _._2 } }
   }
 }
 
@@ -171,7 +191,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
 
   private[this] val postParams: JMap[String, JList[String]] = {
     if (request.method != Method.Trace &&
-        request.mediaType == Some(MediaType.WwwForm) &&
+        request.mediaType.contains(MediaType.WwwForm) &&
         request.length > 0) {
       parseParams("?" + request.contentString)
     } else {
@@ -207,7 +227,7 @@ class RequestParamMap(val request: Request) extends ParamMap {
     jiterator(postParams) ++ jiterator(getParams)
 
   override def keySet: Set[String] =
-    (postParams.keySet.asScala.toSet ++ getParams.keySet.asScala.toSet)
+    postParams.keySet.asScala.toSet ++ getParams.keySet.asScala.toSet
 
   override def keysIterator: Iterator[String] =
     keySet.iterator
@@ -252,4 +272,9 @@ object ParamMap {
     MapParamMap(map)
 
   private[http] val EmptyJMap = new java.util.HashMap[String, JList[String]]
+
+  private val ToShort = { s: String => StringUtil.toSomeShort(s) }
+  private val ToInt = { s: String => StringUtil.toSomeInt(s) }
+  private val ToLong = { s: String => StringUtil.toSomeLong(s) }
+  private val ToBoolean = { s: String => StringUtil.toBoolean(s) }
 }

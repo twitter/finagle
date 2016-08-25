@@ -24,8 +24,8 @@ class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
   }
 
   def addCallback(callback: String, request: Req, service: Service[Req, Response]): Future[Response] =
-    service(request) map { response =>
-      if (response.mediaType == Some(MediaType.Json)) {
+    service(request).map { response =>
+      if (response.mediaType.contains(MediaType.Json)) {
         response.content = Seq(
           JsonpFilter.Comment,
           Buf.Utf8(callback),
@@ -42,7 +42,7 @@ class JsonpFilter[Req <: Request] extends SimpleFilter[Req, Response] {
   def getCallback(request: Request): Option[String] = {
     // Ignore HEAD, though in practice this should be behind the HeadFilter
     if (request.method != Method.Head)
-      request.params.get("callback") flatMap { callback =>
+      request.params.get("callback").flatMap { callback =>
         val sanitizedCallback = JsonpFilter.SanitizerRegex.replaceAllIn(callback, "")
         if (!sanitizedCallback.isEmpty)
           Some(sanitizedCallback)

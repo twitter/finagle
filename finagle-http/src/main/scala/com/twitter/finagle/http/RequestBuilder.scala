@@ -1,18 +1,17 @@
 package com.twitter.finagle.http
 
-import com.twitter.finagle.http.netty.Bijections
+import com.twitter.finagle.http.netty.Bijections._
 import com.twitter.finagle.netty3.BufChannelBuffer
 import com.twitter.util.Base64StringEncoder
 import com.twitter.io.Buf
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpPostRequestEncoder, HttpDataFactory}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpHeaders}
+import org.jboss.netty.handler.codec.http.multipart.{DefaultHttpDataFactory, HttpDataFactory, HttpPostRequestEncoder}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest}
 import scala.annotation.implicitNotFound
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-
-import Bijections._
 
 /*
  * HTML form element.
@@ -157,7 +156,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
 
   type This = RequestBuilder[HasUrl, HasForm]
 
-  private[this] val SCHEME_WHITELIST = Seq("http","https")
+  private[this] val SchemeWhitelist = Seq("http","https")
 
   private[http] def this() = this(RequestConfig())
 
@@ -171,7 +170,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * the Authorization header using the authority portion of the URL.
    */
   def url(u: URL): RequestBuilder[Yes, HasForm] = {
-    require(SCHEME_WHITELIST.contains(u.getProtocol), "url must be http(s)")
+    require(SchemeWhitelist.contains(u.getProtocol), s"url must be http(s), was ${u.getProtocol}")
     val uri = u.toURI
     val host = uri.getHost.toLowerCase
     val hostValue =
@@ -185,7 +184,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
       if (userInfo == null || userInfo.isEmpty)
         withHost
       else {
-        val auth = "Basic " + Base64StringEncoder.encode(userInfo.getBytes)
+        val auth = "Basic " + Base64StringEncoder.encode(userInfo.getBytes(StandardCharsets.UTF_8))
         withHost.updated(HttpHeaders.Names.AUTHORIZATION, Seq(auth))
       }
     new RequestBuilder(config.copy(url = Some(u), headers = updated))
@@ -197,7 +196,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    */
    def addFormElement(kv: (String, String)*): RequestBuilder[HasUrl, Yes] = {
      val elems = config.formElements
-     val updated = kv.foldLeft(elems) { case (es, (k, v)) => es :+ new SimpleElement(k, v) }
+     val updated = kv.foldLeft(elems) { case (es, (k, v)) => es :+ SimpleElement(k, v) }
      new RequestBuilder(config.copy(formElements = updated))
    }
 
@@ -248,14 +247,14 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Java convenience variant.
    */
   def setHeader(name: String, values: java.lang.Iterable[String]): This = {
-    setHeader(name, values.toSeq)
+    setHeader(name, values.asScala.toSeq)
   }
 
   /**
    * Add a new header with the specified name and value.
    */
   def addHeader(name: String, value: String): This = {
-    val values = config.headers.get(name).getOrElse(Seq())
+    val values = config.headers.getOrElse(name, Seq.empty)
     val updated = config.headers.updated(
       name, values ++ Seq(value))
     new RequestBuilder(config.copy(headers = updated))
@@ -265,7 +264,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
    * Add group of headers expressed as a Map
    */
   def addHeaders(headers: Map[String, String]): This = {
-      headers.foldLeft(this) { case (b, (k, v)) => b.addHeader(k, v) }
+    headers.foldLeft(this) { case (b, (k, v)) => b.addHeader(k, v) }
   }
 
   /**
@@ -301,7 +300,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
     implicit HTTP_REQUEST_BUILDER_IS_NOT_FULLY_SPECIFIED: RequestBuilder.RequestEvidence[HasUrl, HasForm]
   ): Request = {
     content match {
-      case Some(content) => withContent(method, content)
+      case Some(ct) => withContent(method, ct)
       case None => withoutContent(method)
     }
   }
@@ -356,7 +355,7 @@ class RequestBuilder[HasUrl, HasForm] private[http](
         HttpPostRequestEncoderEx.addBodyFileUpload(encoder, dataFactory, req.httpRequest)(
           name, filename.getOrElse(""),
           BufChannelBuffer(content),
-          contentType.getOrElse(null),
+          contentType.orNull,
           false)
 
       case SimpleElement(name, value) =>
@@ -383,10 +382,10 @@ class RequestBuilder[HasUrl, HasForm] private[http](
   }
 
   // absoluteURI if proxied, otherwise relativeURI
-  private[this] def resource(): String = {
+  private[this] def resource: String = {
     val url = config.url.get
     if (config.proxied) {
-      return url.toString
+      url.toString
     } else {
       val builder = new StringBuilder()
 
@@ -428,14 +427,8 @@ class RequestBuilder[HasUrl, HasForm] private[http](
 private object HttpPostRequestEncoderEx {
   //TODO: HttpPostBodyUtil not accessible from netty 3.5.0.Final jar
   //      This HttpPostBodyUtil simulates what we need.
-  object HttpPostBodyUtil {
-    val DEFAULT_TEXT_CONTENT_TYPE = "text/plain"
-    val DEFAULT_BINARY_CONTENT_TYPE = "application/octet-stream"
-    object TransferEncodingMechanism {
-      val BINARY = "binary"
-      val BIT7 = "7bit"
-    }
-  }
+  val BinaryTransferEncodingMechanism = "binary"
+  val SevenBitTransferEncodingMechanism = "7bit"
 
   /*
    * allow specifying post body as ChannelBuffer, the logic is adapted from netty code.
@@ -448,20 +441,14 @@ private object HttpPostRequestEncoderEx {
 
     val scontentType =
       if (contentType == null) {
-        if (isText) {
-          HttpPostBodyUtil.DEFAULT_TEXT_CONTENT_TYPE
-        } else {
-          HttpPostBodyUtil.DEFAULT_BINARY_CONTENT_TYPE
-        }
+        if (isText) MediaType.PlainText
+        else MediaType.OctetStream
       } else {
         contentType
       }
     val contentTransferEncoding =
-      if (!isText) {
-        HttpPostBodyUtil.TransferEncodingMechanism.BINARY
-      } else {
-        HttpPostBodyUtil.TransferEncodingMechanism.BIT7
-      }
+      if (!isText) BinaryTransferEncodingMechanism
+      else SevenBitTransferEncodingMechanism
 
     val fileUpload = factory.createFileUpload(request, name, filename, scontentType, contentTransferEncoding, null, content.readableBytes)
     fileUpload.setContent(content)

@@ -5,8 +5,8 @@ import com.twitter.finagle.http.{ParamMap, Method}
 
 /** Base class for path extractors. */
 abstract class Path {
-  def /(child: String) = new /(this, child)
-  def :?(params: ParamMap) = new :?(this, params)
+  def /(child: String): / = new /(this, child)
+  def :?(params: ParamMap): :? = new :?(this, params)
   def toList: List[String]
   def parent: Path
   def lastOption: Option[String]
@@ -34,12 +34,12 @@ object Path {
 
   def apply(list: List[String]): Path = list.foldLeft(Root: Path)(_ / _)
 
-  def unapplySeq(path: Path) = Some(path.toList)
+  def unapplySeq(path: Path): Option[List[String]] = Some(path.toList)
 }
 
 
-case class :?(val path: Path, params: ParamMap) {
-  override def toString = params.toString
+case class :?(path: Path, params: ParamMap) {
+  override def toString: String = params.toString
 }
 
 
@@ -54,7 +54,7 @@ object ~ {
     path match {
       case Root => None
       case parent / last =>
-        unapply(last) map {
+        unapply(last).map {
           case (base, ext) => (parent / base, ext)
         }
     }
@@ -80,7 +80,7 @@ object -> {
    *   (request.method, Path(request.path)) match {
    *     case Methd.Get -> Root / "test.json" => ...
    */
-  def unapply(x: (Method, Path)) = Some(x)
+  def unapply(x: (Method, Path)): Some[(Method, Path)] = Some(x)
 }
 
 
@@ -92,9 +92,9 @@ object -> {
 case class /(parent: Path, child: String) extends Path {
   lazy val toList: List[String] = parent.toList ++ List(child)
   def lastOption: Option[String] = Some(child)
-  lazy val asString = parent.toString + "/" + child
-  override def toString = asString
-  def startsWith(other: Path) = {
+  lazy val asString: String = parent.toString + "/" + child
+  override def toString: String = asString
+  def startsWith(other: Path): Boolean = {
     val components = other.toList
     (toList take components.length) == components
   }
@@ -109,10 +109,10 @@ case class /(parent: Path, child: String) extends Path {
  */
 case object Root extends Path {
   def toList: List[String] = Nil
-  def parent = this
+  def parent: Path = this
   def lastOption: Option[String] = None
-  override def toString = ""
-  def startsWith(other: Path) = other == Root
+  override def toString: String = ""
+  def startsWith(other: Path): Boolean = other == Root
 }
 
 
@@ -172,7 +172,7 @@ object Long extends Numeric(_.toLong)
  *     case Root / "user" :? A(a) :& B(b) => ...
  */
 object :& {
-  def unapply(params: ParamMap) = Some((params, params))
+  def unapply(params: ParamMap): Some[(ParamMap, ParamMap)] = Some((params, params))
 }
 
 
@@ -183,7 +183,7 @@ object :& {
  *     case Root / "user" :? ScreenName(screenName) => ...
  */
 abstract class ParamMatcher(name: String) {
-  def unapply(params: ParamMap) = params.get(name)
+  def unapply(params: ParamMap): Option[String] = params.get(name)
 }
 
 
@@ -195,7 +195,7 @@ abstract class ParamMatcher(name: String) {
  */
 abstract class IntParamMatcher(name: String) {
   def unapply(params: ParamMap): Option[Int] =
-    params.get(name) flatMap { value =>
+    params.get(name).flatMap { value =>
       try {
         Some(value.toInt)
       } catch {
@@ -214,7 +214,7 @@ abstract class IntParamMatcher(name: String) {
  */
 abstract class LongParamMatcher(name: String) {
   def unapply(params: ParamMap): Option[Long] =
-    params.get(name) flatMap { value =>
+    params.get(name).flatMap { value =>
       try {
         Some(value.toLong)
       } catch {
@@ -232,7 +232,7 @@ abstract class LongParamMatcher(name: String) {
  */
 abstract class DoubleParamMatcher(name: String) {
   def unapply(params: ParamMap): Option[Double] =
-    params.get(name) flatMap { value =>
+    params.get(name).flatMap { value =>
       try {
         Some(value.toDouble)
       } catch {

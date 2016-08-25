@@ -33,7 +33,7 @@ abstract class Request extends Message {
   def ctx: Request.Schema.Record = _ctx
   private[this] val _ctx = Request.Schema.newRecord()
 
-  def isRequest = true
+  def isRequest: Boolean = true
 
   /**
    * Returns a [[ParamMap]] instance, which maintains query string and url-encoded
@@ -66,7 +66,7 @@ abstract class Request extends Message {
   /**
    * Sets the HTTP method of this request to the given `method`.
    */
-  def method_=(method: Method) = setMethod(from(method))
+  def method_=(method: Method): Unit = setMethod(from(method))
 
   /**
    * Returns the URI of this request.
@@ -76,7 +76,7 @@ abstract class Request extends Message {
   /**
    * Set the URI of this request to the given `uri`.
    */
-  def uri_=(uri: String) = setUri(uri)
+  def uri_=(uri: String): Unit = setUri(uri)
 
   /** Path from URI. */
   @BeanProperty
@@ -129,11 +129,11 @@ abstract class Request extends Message {
 
   /** Get parameter value.  Returns value or null. */
   def getParam(name: String): String =
-    params.get(name).orNull
+    getParam(name, null)
 
   /** Get parameter value.  Returns value or default. */
   def getParam(name: String, default: String): String =
-    params.get(name).getOrElse(default)
+    params.getOrElse(name, default)
 
   /** Get Short param.  Returns value or 0. */
   def getShortParam(name: String): Short =
@@ -156,7 +156,7 @@ abstract class Request extends Message {
     params.getLongOrElse(name, 0L)
 
   /** Get Long param.  Returns value or default. */
-  def getLongParam(name: String, default: Long=0L): Long =
+  def getLongParam(name: String, default: Long): Long =
     params.getLongOrElse(name, default)
 
   /** Get Boolean param.  Returns value or false. */
@@ -173,10 +173,10 @@ abstract class Request extends Message {
 
   /** Get all parameters. */
   def getParams(): JList[JMap.Entry[String, String]] =
-    (params.toList.map { case (k, v) =>
+    params.toList.map { case (k, v) =>
       // cast to appease asJava
-      (new AbstractMap.SimpleImmutableEntry(k, v)).asInstanceOf[JMap.Entry[String, String]]
-    }).asJava
+      new AbstractMap.SimpleImmutableEntry(k, v).asInstanceOf[JMap.Entry[String, String]]
+    }.asJava
 
   /** Check if parameter exists. */
   def containsParam(name: String): Boolean =
@@ -208,16 +208,16 @@ abstract class Request extends Message {
   }
 
   override def toString: String =
-    "Request(\"" + method + " " + uri + "\", from " + remoteSocketAddress + ")"
+    s"""Request("$method $uri", from $remoteSocketAddress)"""
 
   protected[finagle] def httpRequest: HttpRequest
   protected[finagle] def getHttpRequest(): HttpRequest = httpRequest
   protected[finagle] def httpMessage: HttpMessage = httpRequest
 
   protected[finagle] def getMethod(): HttpMethod = httpRequest.getMethod
-  protected[finagle] def setMethod(method: HttpMethod) { httpRequest.setMethod(method) }
+  protected[finagle] def setMethod(method: HttpMethod): Unit = httpRequest.setMethod(method)
   protected[finagle] def getUri(): String = httpRequest.getUri()
-  protected[finagle] def setUri(uri: String) { httpRequest.setUri(uri) }
+  protected[finagle] def setUri(uri: String): Unit = httpRequest.setUri(uri)
 }
 
 
@@ -243,8 +243,8 @@ object Request {
     val req = decoder.poll().asInstanceOf[HttpRequest]
     assert(req ne null)
     new Request {
-      val httpRequest = req
-      lazy val remoteSocketAddress = new InetSocketAddress(0)
+      val httpRequest: HttpRequest = req
+      lazy val remoteSocketAddress: InetSocketAddress = new InetSocketAddress(0)
     }
   }
 
@@ -288,8 +288,8 @@ object Request {
   def apply(version: Version, method: Method, uri: String): Request = {
     val reqIn = new DefaultHttpRequest(from(version), from(method), uri)
     new Request {
-      val httpRequest = reqIn
-      lazy val remoteSocketAddress = new InetSocketAddress(0)
+      val httpRequest: HttpRequest = reqIn
+      lazy val remoteSocketAddress: InetSocketAddress = new InetSocketAddress(0)
     }
   }
 
@@ -339,16 +339,16 @@ object Request {
     readerIn: Reader,
     remoteAddr: InetSocketAddress
   ): Request = new Request {
-    override val reader = readerIn
-    val httpRequest = reqIn
-    lazy val remoteSocketAddress = remoteAddr
+    override val reader: Reader = readerIn
+    val httpRequest: HttpRequest = reqIn
+    lazy val remoteSocketAddress: InetSocketAddress = remoteAddr
   }
 
   /** Create Request from HttpRequest and Channel.  Used by Codec. */
   private[finagle] def apply(httpRequestArg: HttpRequest, channel: Channel): Request =
     new Request {
-      val httpRequest = httpRequestArg
-      lazy val remoteSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+      val httpRequest: HttpRequest = httpRequestArg
+      lazy val remoteSocketAddress: InetSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
     }
 
   /** Create a query string from URI and parameters. */
