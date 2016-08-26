@@ -7,6 +7,9 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+6.37.0
+------
+
 Deprecations
 ~~~~~~~~~~~~
 
@@ -76,9 +79,6 @@ Runtime Behavior Changes
   * finagle-core: 'c.t.f.Failure' has a new flag, Rejected, to indicate that a given request was
     rejected. All Failures generated with the Failure.rejected constructor are flagged Rejected and
     Restartable. ``RB_ID=863356``
-
-Runtime Behavior Changes
-~~~~~~~~~~~~~~~~~~~~~~~~
 
   * finagle-core: `c.t.f.FixedInetResolver` now optionally retries failed DNS
     lookups with provided backoff, and `c.t.f.serverset2.Zk2Resolver` uses this
