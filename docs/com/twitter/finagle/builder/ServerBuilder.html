@@ -758,7 +758,8 @@ by the server at any given time. If the server receives a
 burst of traffic that exceeds this limit, the burst is rejected
 with a <code>Failure.Rejected</code> exception. Note, this failure signals
 a graceful rejection which is transmitted to clients by certain
-protocols in Finagle (e.g. Http, ThriftMux).</p><p>To migrate to the Stack-based APIs, use <code>ServerAdmissionControlParams.concurrencyLimit</code>.
+protocols in Finagle (e.g. Http, ThriftMux). The limit is global
+to all sessions.</p><p>To migrate to the Stack-based APIs, use <code>ServerAdmissionControlParams.concurrencyLimit</code>.
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 Http.server.withAdmissionControl.concurrencyLimit(<span class="num">10</span>, <span class="num">0</span>)</pre></div></div>
@@ -889,24 +890,6 @@ Http.server.withLabel(<span class="lit">"my_server"</span>)</pre></div></div>
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ServerBuilder#openConnectionsThresholds" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="openConnectionsThresholds(thresholds:com.twitter.finagle.netty3.channel.OpenConnectionsThresholds):ServerBuilder.this.This"></a>
-      <a id="openConnectionsThresholds(OpenConnectionsThresholds):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">openConnectionsThresholds</span><span class="params">(<span name="thresholds">thresholds: <a href="../netty3/channel/OpenConnectionsThresholds.html" class="extype" name="com.twitter.finagle.netty3.channel.OpenConnectionsThresholds">OpenConnectionsThresholds</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ServerBuilder[Req,Rep,HasCodec,HasBindTo,HasName]" class="extmbr" name="com.twitter.finagle.builder.ServerBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ServerBuilder@openConnectionsThresholds(thresholds:com.twitter.finagle.netty3.channel.OpenConnectionsThresholds):ServerBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>not all protocol implementations support this, such as
-      <code>com.twitter.finagle.ThriftMux</code>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#params" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="params:com.twitter.finagle.Stack.Params"></a>
       <a id="params:Params"></a>
@@ -1003,7 +986,8 @@ Http.server.withStatsReceiver(receiver)</pre></div></div>
       <p class="shortcomment cmt">To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.</p><div class="fullcomment"><div class="comment cmt"><p>To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
-Http.server.withRequestTimeout(howlong)</pre></div></div>
+Http.server.withRequestTimeout(howlong)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>if the request is not complete after <code>howlong</code>, the work that is
+      in progress will be interrupted via <span class="extype" name="Future.raise">Future.raise</span>.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ServerBuilder#responseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="responseClassifier:com.twitter.finagle.service.ResponseClassifier"></a>
       <a id="responseClassifier:ResponseClassifier"></a>

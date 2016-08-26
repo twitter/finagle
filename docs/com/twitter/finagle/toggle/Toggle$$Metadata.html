@@ -53,9 +53,10 @@
 </p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>the identifying name of the <code>Toggle</code>.
           These should generally be fully qualified names to avoid conflicts
           between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.
-          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.</p></dd><dt class="param">fraction</dt><dd class="cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
-                This represents the percentage of inputs that will
-                return <code>true</code>.</p></dd><dt class="param">description</dt><dd class="cmt"><p>human-readable description of the Toggle's purpose.</p></dd><dt class="param">source</dt><dd class="cmt"><p>the origin of this <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is often given by
+          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.
+          See <a href="Toggle$.html#isValidId(id:String):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidId">Toggle$.isValidId</a>.</p></dd><dt class="param">fraction</dt><dd class="cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
+                This represents the fraction of inputs that will
+                return <code>true</code>. See <a href="Toggle$.html#isValidFraction(fraction:Double):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidFraction">Toggle$.isValidFraction</a>.</p></dd><dt class="param">description</dt><dd class="cmt"><p>human-readable description of the Toggle's purpose.</p></dd><dt class="param">source</dt><dd class="cmt"><p>the origin of this <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is often given by
               <code>toString</code> of the <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> that created it.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Equals" class="extype" target="_top">Equals</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
@@ -114,9 +115,10 @@
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>the identifying name of the <code>Toggle</code>.
           These should generally be fully qualified names to avoid conflicts
           between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.
-          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.</p></dd><dt class="param">fraction</dt><dd class="cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
-                This represents the percentage of inputs that will
-                return <code>true</code>.</p></dd><dt class="param">description</dt><dd class="cmt"><p>human-readable description of the Toggle's purpose.</p></dd><dt class="param">source</dt><dd class="cmt"><p>the origin of this <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is often given by
+          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.
+          See <a href="Toggle$.html#isValidId(id:String):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidId">Toggle$.isValidId</a>.</p></dd><dt class="param">fraction</dt><dd class="cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
+                This represents the fraction of inputs that will
+                return <code>true</code>. See <a href="Toggle$.html#isValidFraction(fraction:Double):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidFraction">Toggle$.isValidFraction</a>.</p></dd><dt class="param">description</dt><dd class="cmt"><p>human-readable description of the Toggle's purpose.</p></dd><dt class="param">source</dt><dd class="cmt"><p>the origin of this <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is often given by
               <code>toString</code> of the <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> that created it.</p></dd></dl></div>
     </li></ol>
             </div>
@@ -292,8 +294,8 @@
       </a>
     </span>
       <p class="shortcomment cmt">must be between <code>0.0 and 1.0</code>, inclusive.</p><div class="fullcomment"><div class="comment cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
-                This represents the percentage of inputs that will
-                return <code>true</code>.</p></div></div>
+                This represents the fraction of inputs that will
+                return <code>true</code>. See <a href="Toggle$.html#isValidFraction(fraction:Double):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidFraction">Toggle$.isValidFraction</a>.</p></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -330,7 +332,8 @@
       <p class="shortcomment cmt">the identifying name of the <code>Toggle</code>.</p><div class="fullcomment"><div class="comment cmt"><p>the identifying name of the <code>Toggle</code>.
           These should generally be fully qualified names to avoid conflicts
           between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.
-          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.</p></div></div>
+          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.
+          See <a href="Toggle$.html#isValidId(id:String):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidId">Toggle$.isValidId</a>.</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>

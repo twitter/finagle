@@ -51,7 +51,8 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that applies a global timeout to requests.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">com.twitter.finagle.Filter</a> that a timeout to requests.</p><p>If the response is not satisfied within the <code>timeout</code>,
+the <span class="extype" name="Future">Future</span> will be interrupted via <span class="extype" name="Future.raise">Future.raise</span>.
 </p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p>The sections on
      <a href="https://twitter.github.io/finagle/guide/Clients.html#timeouts-expiration" target="_blank">clients</a>
      and <a href="https://twitter.github.io/finagle/guide/Servers.html#request-timeout" target="_blank">servers</a>

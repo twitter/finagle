@@ -51,7 +51,8 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>The serverset namer takes <a href="finagle/Path.html" class="extype" name="com.twitter.finagle.Path">Paths</a> of the form</p><pre>hosts/path...</pre><p>and returns a dynamic represention of the resolution of the path into a
 tree of <a href="finagle/Name.html" class="extype" name="com.twitter.finagle.Name">Names</a>.</p><p>The namer synthesizes nodes for each endpoint in the serverset.
-Endpoint names are delimited by the ':' character. For example</p><pre>/$/com.twitter.serverset/sdzookeeper.local.twitter.com:<span class="num">2181</span>/twitter/service/cuckoo/prod/read:http</pre><p>is the endpoint <code>http</code> of serverset <code>/twitter/service/cuckoo/prod/read</code> on
+Endpoint names are delimited by the ':' character and shard IDs are delimited by the '#' character.
+For example:</p><pre>/$/com.twitter.serverset/sdzookeeper.local.twitter.com:<span class="num">2181</span>/twitter/service/cuckoo/prod/read:http#<span class="num">0</span></pre><p>is the endpoint <code>http</code> of shard 0 of serverset <code>/twitter/service/cuckoo/prod/read</code> on
 the ensemble <code>sdzookeeper.local.twitter.com:2181</code>.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
@@ -443,35 +444,35 @@ to 100 is allowed.
     </span>
       <p class="shortcomment cmt">Resolve a resolver string to a Var[Addr].</p><div class="fullcomment"><div class="comment cmt"><p>Resolve a resolver string to a Var[Addr].</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>BaseServersetNamer</dd></dl></div>
     </li><li name="com.twitter.BaseServersetNamer#resolveServerset" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="resolveServerset(hosts:String,path:String,endpoint:String):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
-      <a id="resolveServerset(String,String,String):Var[Addr]"></a>
+      <a id="resolveServerset(hosts:String,path:String,endpoint:Option[String],shardId:Option[Int]):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
+      <a id="resolveServerset(String,String,Option[String],Option[Int]):Var[Addr]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">resolveServerset</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Var" class="extype" target="_top">Var</a>[<a href="finagle/Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
+        <span class="name">resolveServerset</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="endpoint">endpoint: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="shardId">shardId: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Option" class="extype" target="_top">Option</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Var" class="extype" target="_top">Var</a>[<a href="finagle/Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#com.twitter.serverset@resolveServerset(hosts:String,path:String,endpoint:String):com.twitter.util.Var[com.twitter.finagle.Addr]" title="Permalink" target="_top">
+      <a href="../../index.html#com.twitter.serverset@resolveServerset(hosts:String,path:String,endpoint:Option[String],shardId:Option[Int]):com.twitter.util.Var[com.twitter.finagle.Addr]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd><dt>Definition Classes</dt><dd>BaseServersetNamer</dd></dl></div>
-    </li><li name="com.twitter.BaseServersetNamer#resolveServerset" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="resolveServerset(hosts:String,path:String):com.twitter.util.Var[com.twitter.finagle.Addr]"></a>
-      <a id="resolveServerset(String,String):Var[Addr]"></a>
+    </li><li name="com.twitter.BaseServersetNamer#resolverScheme" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="resolverScheme:String"></a>
+      <a id="resolverScheme:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">resolveServerset</span><span class="params">(<span name="hosts">hosts: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Var" class="extype" target="_top">Var</a>[<a href="finagle/Addr.html" class="extype" name="com.twitter.finagle.Addr">Addr</a>]</span>
+        <span class="name">resolverScheme</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#com.twitter.serverset@resolveServerset(hosts:String,path:String):com.twitter.util.Var[com.twitter.finagle.Addr]" title="Permalink" target="_top">
+      <a href="../../index.html#com.twitter.serverset@resolverScheme:String" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

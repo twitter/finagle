@@ -420,8 +420,8 @@ may need to be updated with current availabilities.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Will only return Nodes that have Status.Open
-</p><div class="fullcomment"><div class="comment cmt"><p>Will only return Nodes that have Status.Open
+      <p class="shortcomment cmt">Pick the next node.</p><div class="fullcomment"><div class="comment cmt"><p>Pick the next node.
+This is the main entry point for a load balancer implementation.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor">Distributor</a> → <a href="DistributorT.html" class="extype" name="com.twitter.finagle.loadbalancer.DistributorT">DistributorT</a></dd></dl></div>
     </li><li name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor#rebuild" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="rebuild(vector:Vector[RoundRobinBalancer.this.Node]):Distributor.this.This"></a>
@@ -459,6 +459,42 @@ may need to be updated with current availabilities.)
     </span>
       <p class="shortcomment cmt">Rebuild this distributor.</p><div class="fullcomment"><div class="comment cmt"><p>Rebuild this distributor.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor">Distributor</a> → <a href="DistributorT.html" class="extype" name="com.twitter.finagle.loadbalancer.DistributorT">DistributorT</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor#sawDown" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sawDown:Boolean"></a>
+      <a id="sawDown:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">var</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sawDown</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.RoundRobinBalancer$Distributor@sawDown:Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Indicates if we've seen any down nodes during <code>pick</code> which we expected to be available</p><div class="fullcomment"><div class="comment cmt"><p>Indicates if we've seen any down nodes during <code>pick</code> which we expected to be available</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor#selections" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="selections:Vector[RoundRobinBalancer.this.Node]"></a>
+      <a id="selections:Vector[Node]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">selections</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="RoundRobinBalancer$Node.html" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Node">Node</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.RoundRobinBalancer$Distributor@selections:Vector[RoundRobinBalancer.this.Node]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Utility used by <span class="extype" name="pick()">pick()</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Utility used by <span class="extype" name="pick()">pick()</span>.</p><p>If all nodes are down, we might as well try to send requests somewhere
+as our view of the world may be out of date.
+</p></div><dl class="attributes block"> <dt>Attributes</dt><dd>protected[this] </dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -493,8 +529,8 @@ may need to be updated with current availabilities.)
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor#vector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="vector:Vector[RoundRobinBalancer.this.Node]"></a>
+    </li><li name="com.twitter.finagle.loadbalancer.DistributorT#vector" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="vector:Vector[Node]"></a>
       <a id="vector:Vector[Node]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -505,12 +541,11 @@ may need to be updated with current availabilities.)
         <span class="name">vector</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="RoundRobinBalancer$Node.html" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Node">Node</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.RoundRobinBalancer$Distributor@vector:Vector[RoundRobinBalancer.this.Node]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.RoundRobinBalancer$Distributor@vector:Vector[Node]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The vector of nodes over which we are currently balancing.</p><div class="fullcomment"><div class="comment cmt"><p>The vector of nodes over which we are currently balancing.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor">Distributor</a> → <a href="DistributorT.html" class="extype" name="com.twitter.finagle.loadbalancer.DistributorT">DistributorT</a></dd></dl></div>
+      <p class="shortcomment cmt">the nodes over which we are currently balancing.</p><div class="fullcomment"><div class="comment cmt"><p>the nodes over which we are currently balancing.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DistributorT.html" class="extype" name="com.twitter.finagle.loadbalancer.DistributorT">DistributorT</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

@@ -28,7 +28,7 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img alt="Trait" src="../../../../lib/trait_big.png" />
+        <img alt="Class" src="../../../../lib/class_big.png" />
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></p>
         <h1>DistributorT</h1><h3><span class="morelinks"><div>Related Doc:
             <a href="package.html" class="extype" name="com.twitter.finagle.loadbalancer">package loadbalancer</a>
@@ -41,8 +41,8 @@
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
         <span class="name">DistributorT</span><span class="tparams">[<span name="Node">Node</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
@@ -57,7 +57,7 @@ data across updates.
           <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="RoundRobinBalancer$Distributor.html" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor">Distributor</a></div>
+            <div class="subClasses hiddenContent"><a href="RoundRobinBalancer$Distributor.html" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer.Distributor">Distributor</a>, <a href="BalancerBench$$NullDistibutor.html" class="extype" name="com.twitter.finagle.loadbalancer.BalancerBench.NullDistibutor">NullDistibutor</a></div>
           </div></div>
         
 
@@ -92,7 +92,27 @@ data across updates.
 
       <div id="template">
         <div id="allMembers">
-        
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="com.twitter.finagle.loadbalancer.DistributorT#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(vector:Vector[Node]):com.twitter.finagle.loadbalancer.DistributorT[Node]"></a>
+      <a id="&lt;init&gt;:DistributorT[Node]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DistributorT</span><span class="params">(<span name="vector">vector: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="com.twitter.finagle.loadbalancer.DistributorT.Node">Node</span>]</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.DistributorT@&lt;init&gt;(vector:Vector[Node]):com.twitter.finagle.loadbalancer.DistributorT[Node]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">vector</dt><dd class="cmt"><p>the nodes over which we are currently balancing.</p></dd></dl></div>
+    </li></ol>
+            </div>
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
@@ -153,7 +173,8 @@ may need to be updated with current availabilities.)
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Pick the next node.</p><div class="fullcomment"><div class="comment cmt"><p>Pick the next node. This is the main load balancer.
+      <p class="shortcomment cmt">Pick the next node.</p><div class="fullcomment"><div class="comment cmt"><p>Pick the next node.
+This is the main entry point for a load balancer implementation.
 </p></div></div>
     </li><li name="com.twitter.finagle.loadbalancer.DistributorT#rebuild" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="rebuild(vector:Vector[Node]):DistributorT.this.This"></a>
@@ -189,23 +210,6 @@ may need to be updated with current availabilities.)
       </a>
     </span>
       <p class="shortcomment cmt">Rebuild this distributor.</p>
-    </li><li name="com.twitter.finagle.loadbalancer.DistributorT#vector" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="vector:Vector[Node]"></a>
-      <a id="vector:Vector[Node]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">vector</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="com.twitter.finagle.loadbalancer.DistributorT.Node">Node</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.DistributorT@vector:Vector[Node]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The vector of nodes over which we are currently balancing.</p>
     </li></ol>
             </div>
 
@@ -495,6 +499,23 @@ may need to be updated with current availabilities.)
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.loadbalancer.DistributorT#vector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="vector:Vector[Node]"></a>
+      <a id="vector:Vector[Node]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">vector</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="com.twitter.finagle.loadbalancer.DistributorT.Node">Node</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.DistributorT@vector:Vector[Node]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">the nodes over which we are currently balancing.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

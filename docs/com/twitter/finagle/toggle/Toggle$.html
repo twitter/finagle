@@ -112,9 +112,10 @@
 </p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>the identifying name of the <code>Toggle</code>.
           These should generally be fully qualified names to avoid conflicts
           between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.
-          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.</p></dd><dt class="param">fraction</dt><dd class="cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
-                This represents the percentage of inputs that will
-                return <code>true</code>.</p></dd><dt class="param">description</dt><dd class="cmt"><p>human-readable description of the Toggle's purpose.</p></dd><dt class="param">source</dt><dd class="cmt"><p>the origin of this <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is often given by
+          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.
+          See <a href="#isValidId(id:String):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidId">Toggle$.isValidId</a>.</p></dd><dt class="param">fraction</dt><dd class="cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
+                This represents the fraction of inputs that will
+                return <code>true</code>. See <a href="#isValidFraction(fraction:Double):Boolean" class="extmbr" name="com.twitter.finagle.toggle.Toggle#isValidFraction">Toggle$.isValidFraction</a>.</p></dd><dt class="param">description</dt><dd class="cmt"><p>human-readable description of the Toggle's purpose.</p></dd><dt class="param">source</dt><dd class="cmt"><p>the origin of this <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is often given by
               <code>toString</code> of the <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> that created it.</p></dd></dl></div>
     </li></ol>
             </div>
@@ -174,40 +175,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.toggle.Toggle#False" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="False:com.twitter.finagle.toggle.Toggle[Any]"></a>
-      <a id="False:Toggle[Any]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">False</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.toggle.Toggle$@False:com.twitter.finagle.toggle.Toggle[Any]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is defined for all inputs and always returns <code>false</code>.</p>
-    </li><li name="com.twitter.finagle.toggle.Toggle#True" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="True:com.twitter.finagle.toggle.Toggle[Any]"></a>
-      <a id="True:Toggle[Any]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">True</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.toggle.Toggle$@True:com.twitter.finagle.toggle.Toggle[Any]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is defined for all inputs and always returns <code>true</code>.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -356,6 +323,47 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.toggle.Toggle#isValidFraction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isValidFraction(fraction:Double):Boolean"></a>
+      <a id="isValidFraction(Double):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isValidFraction</span><span class="params">(<span name="fraction">fraction: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Double" class="extype" target="_top">Double</a></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.toggle.Toggle$@isValidFraction(fraction:Double):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Whether or not the given <code>fraction</code> is valid.</p><div class="fullcomment"><div class="comment cmt"><p>Whether or not the given <code>fraction</code> is valid.
+</p></div><dl class="paramcmts block"><dt class="param">fraction</dt><dd class="cmt"><p>must be between <code>0.0 and 1.0</code>, inclusive.
+                This represents the fraction of inputs that will
+                return <code>true</code>.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.toggle.Toggle#isValidId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isValidId(id:String):Boolean"></a>
+      <a id="isValidId(String):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isValidId</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.toggle.Toggle$@isValidId(id:String):Boolean" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Whether or not the given <code>id</code> is valid.</p><div class="fullcomment"><div class="comment cmt"><p>Whether or not the given <code>id</code> is valid.
+</p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>the identifying name of the <code>Toggle</code>.
+          These should generally be fully qualified names to avoid conflicts
+          between libraries. For example, &quot;com.twitter.finagle.CoolThing&quot;.
+          Valid characters are <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>_</code>, <code>-</code>, <code>.</code>.</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -407,6 +415,40 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.toggle.Toggle#off" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="off[T](id:String):com.twitter.finagle.toggle.Toggle[T]"></a>
+      <a id="off[T](String):Toggle[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">off</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.off.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.toggle.Toggle$@off[T](id:String):com.twitter.finagle.toggle.Toggle[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is defined for all inputs and always returns <code>false</code>.</p>
+    </li><li name="com.twitter.finagle.toggle.Toggle#on" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="on[T](id:String):com.twitter.finagle.toggle.Toggle[T]"></a>
+      <a id="on[T](String):Toggle[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">on</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a>[<span class="extype" name="com.twitter.finagle.toggle.Toggle.on.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.toggle.Toggle$@on[T](id:String):com.twitter.finagle.toggle.Toggle[T]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A <a href="Toggle.html" class="extype" name="com.twitter.finagle.toggle.Toggle">Toggle</a> which is defined for all inputs and always returns <code>true</code>.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

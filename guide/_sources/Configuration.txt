@@ -1,6 +1,9 @@
 Configuration
 =============
 
+Clients and Servers
+-------------------
+
 Prior to :doc:`version 6.0 <changelog>`, the ``ClientBuilder``/``ServerBuilder`` API was the
 primary method for configuring the modules inside a Finagle :ref:`client <finagle_clients>`
 or :ref:`server <finagle_servers>`. We are moving away from this model for various
@@ -48,7 +51,7 @@ demonstrates how to use ``.configured`` to override TCP socket options provided 
           you're doing.
 
 Design Principles
------------------
+~~~~~~~~~~~~~~~~~
 
 Finagle has many different components and we tried to faithfully model our configuration
 to help understand the constituents and the resulting behavior. For the sake of consistency,
@@ -75,3 +78,116 @@ the current version of the ``with`` API is designed with the following principle
    parameters exposed via ``with``-prefixed methods, you should never assume the same about
    the `Stack API` (i.e., ``.configured``). It's *easy* to configure basic parameters; it's
    *possible* to configure expert-level parameters.
+
+.. _toggles:
+
+Feature Toggles
+---------------
+
+Feature toggles are a commonly used mechanism for modifying system behavior.
+For background, here is a `detailed discussion <http://martinfowler.com/articles/feature-toggles.html>`_
+of the topic. As implemented in Finagle they provide a good balance of control between
+library and service owners which enables library owners to rollout functionality in a
+measured and controlled manner.
+
+Concepts
+~~~~~~~~
+
+A :finagle-toggle-src:`Toggle <com/twitter/finagle/toggle/Toggle.scala>` is a partial
+function from a type-`T` to `Boolean`. These are used to decide whether a feature is
+enabled or not for a given request or service configuration.
+
+A :finagle-toggle-src:`ToggleMap <com/twitter/finagle/toggle/ToggleMap.scala>` is
+a collection of `Int`-typed `Toggles`. It provides a means of getting a `Toggle`
+for a given an identifier as well as an `Iterator` over the metadata for its `Toggles`.
+Various basic implementations exist on the `ToggleMap` companion object.
+
+Usage
+~~~~~
+
+If a `Toggle` is on the request path, it is recommended that it be stored in
+a member variable to avoid unnecessary overhead on the common path. If the `Toggle` is
+used only at startup this is unnecessary.
+
+Here is an example :ref:`Filter <filters>` which uses a `Toggle` on the request path:
+
+.. code-block:: scala
+
+  package com.example.service
+
+  import com.twitter.finagle.{Service, SimpleFilter}
+  import com.twitter.finagle.http.{Request, Response}
+  import com.twitter.finagle.toggle.{Toggle, ToggleMap}
+  import com.twitter.finagle.util.Rng
+
+  class ExampleFilter(
+      toggleMap: ToggleMap,
+      newBackend: Service[Request, Response])
+    extends SimpleFilter[Request, Response] {
+
+    private[this] val useNewBackend: Toggle[Int] = toggleMap("com.example.service.UseNewBackend")
+
+    def apply(req: Request, service: Service[Request, Response]): Future[Response] = {
+      if (useNewBackend(Rng.threadLocal.nextInt()))
+        newBackend(req)
+      else
+        service(req)
+    }
+  }
+
+Note that we pass a `ToggleMap` into the constructor and typically this would be
+the instance created via
+`StandardToggleMap.apply("com.example.service", com.twitter.finagle.stats.DefaultStatsReceiver)`.
+This allows for testing of the code with control of whether the `Toggle` is
+enabled or disabled by using `ToggleMap.On` or `ToggleMap.Off`. This could have also been
+achieved by passing the `Toggle` into the constructor and then using `Toggle.on` or
+`Toggle.off` in tests.
+
+Setting Toggle Values
+~~~~~~~~~~~~~~~~~~~~~
+
+Library Owners
+^^^^^^^^^^^^^^
+
+The base configuration for `StandardToggles` should be defined in a JSON
+configuration file at `resources/com/twitter/toggles/configs/$libraryName.json`.
+The :finagle-toggle-src:`JSON schema <com/twitter/finagle/toggle/JsonToggleMap.scala>`
+allows for descriptions and comments.
+
+Dynamically changing the values across a cluster is specific to a particular deployment
+and can be wired in via a
+:finagle-toggle-src:`service-loaded ToggleMap <com/twitter/finagle/toggle/ServiceLoadedToggleMap.scala>`.
+
+Deterministic unit tests can be written that modify a `Toggle`\'s settings via
+:finagle-toggle-src:`flag overrides <com/twitter/finagle/toggle/flag/overrides.scala>`
+using:
+
+.. code-block:: scala
+
+  import com.twitter.finagle.toggle.flag
+
+  flag.overrides.let("your.toggle.id.here", fractionToUse) {
+    // code that uses the flag in this block will have the
+    // flag's fraction set to `fractionToUse`.
+  }
+
+Service Owners
+^^^^^^^^^^^^^^
+
+At runtime, the in-process `Toggle` values can be modified using TwitterServer's
+"/admin/toggles" `API endpoint
+<http://twitter.github.io/twitter-server/Admin.html#admin-toggles>`_.
+This provides a quick way to try out a change in a limited fashion.
+
+For setting more permanent `Toggle` values, include a JSON configuration file at
+`resources/com/twitter/toggles/configs/$libraryName-service.json`.
+The :finagle-toggle-src:`JSON schema <com/twitter/finagle/toggle/JsonToggleMap.scala>`
+allows for descriptions and comments.
+
+The JSON configuration also supports optional environment-specific overrides via
+files that are examined before the non-environment-specific configs.
+These environment-specific configs must be placed at
+`resources/com/twitter/toggles/configs/$libraryName-service-$environment.json`
+where the `environment` from
+:finagle-toggle-src:`ServerInfo.apply() <com/twitter/finagle/server/ServerInfo.scala>`
+is used to determine which one to load.

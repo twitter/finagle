@@ -163,9 +163,9 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Uses <span class="extype" name="LoadService">LoadService</span> to find at most one <a href="ServiceLoadedToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ServiceLoadedToggleMap">ServiceLoadedToggleMap</a>
-with the given <code>libraryName</code>.</p><div class="fullcomment"><div class="comment cmt"><p>Uses <span class="extype" name="LoadService">LoadService</span> to find at most one <a href="ServiceLoadedToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ServiceLoadedToggleMap">ServiceLoadedToggleMap</a>
-with the given <code>libraryName</code>.</p><p>If no matches are found, a <a href="NullToggleMap$.html" class="extype" name="com.twitter.finagle.toggle.NullToggleMap">NullToggleMap</a> is returned.</p><p><b>Note:</b> only 0 or 1 matches are allowed, anything more
+      <p class="shortcomment cmt">Uses <code>com.twitter.app.LoadService</code> to find at most one <a href="ServiceLoadedToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ServiceLoadedToggleMap">ServiceLoadedToggleMap</a>
+with the given libraryName<code>.</code></p><div class="fullcomment"><div class="comment cmt"><p>Uses <code>com.twitter.app.LoadService</code> to find at most one <a href="ServiceLoadedToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ServiceLoadedToggleMap">ServiceLoadedToggleMap</a>
+with the given libraryName<code>.</code></p><p>If no matches are found, a <a href="NullToggleMap$.html" class="extype" name="com.twitter.finagle.toggle.NullToggleMap">NullToggleMap</a> is returned.</p><p><b>Note:</b> only 0 or 1 matches are allowed, anything more
 will cause an <code>IllegalStateException</code> to be thrown. This is done
 so that which <a href="ToggleMap.html" class="extype" name="com.twitter.finagle.toggle.ToggleMap">ToggleMap</a> used at runtime is deterministic.
 </p></div><dl class="paramcmts block"><dt class="param">libraryName</dt><dd class="cmt"><p>the name of the <a href="ServiceLoadedToggleMap.html#libraryName:String" class="extmbr" name="com.twitter.finagle.toggle.ServiceLoadedToggleMap#libraryName">ServiceLoadedToggleMap.libraryName</a> that

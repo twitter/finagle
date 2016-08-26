@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clients &mdash; Finagle 6.36.0 documentation</title>
+    <title>Clients &mdash; Finagle 6.37.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.36.0',
+        VERSION:     '6.37.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.36.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.37.0 documentation" href="index.html" />
     <link rel="next" title="Contexts" href="Contexts.html" />
     <link rel="prev" title="Servers" href="Servers.html" />
    
@@ -531,6 +531,13 @@ Historically, Finagle has employed solutions like <cite>com.twitter.finagle.addr
 Since we have information about the availability of an endpoint in the balancer, it may represent
 a viable intersection to validate such changes. Balancers have a &#8220;probation&#8221; capability built-in
 behind a client parameter <a class="footnote-reference" href="#probation" id="id20">[9]</a>.</p>
+</div>
+<div class="section" id="behavior-when-no-nodes-are-available">
+<h4>Behavior when no nodes are available<a class="headerlink" href="#behavior-when-no-nodes-are-available" title="Permalink to this headline">¶</a></h4>
+<p>When there are no nodes in the <cite>com.twitter.finagle.Status.Open</cite> state, the balancers
+must make a decision. One approach is to fail the request at this point. Instead,
+Finagle makes an optimistic decision that its view of the nodes may be out-of-date
+and picks a node it hopes has become available.</p>
 <p><a class="reference internal" href="Metrics.html#loadbalancer-stats"><span class="std std-ref">Related stats</span></a></p>
 </div>
 </div>
@@ -948,6 +955,7 @@ Alvaro Videla&#8217;s <a class="reference external" href="http://videlalvaro.git
 <li><a class="reference internal" href="#power-of-two-choices-p2c-peak-ewma">Power of Two Choices (P2C) + Peak EWMA </a></li>
 <li><a class="reference internal" href="#aperture-least-loaded">Aperture + Least Loaded </a></li>
 <li><a class="reference internal" href="#role-of-balancers-in-resiliency">Role of Balancers in Resiliency</a></li>
+<li><a class="reference internal" href="#behavior-when-no-nodes-are-available">Behavior when no nodes are available</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#circuit-breaking">Circuit Breaking</a><ul>

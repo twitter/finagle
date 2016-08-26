@@ -149,7 +149,7 @@ to easily inject a balancer into the Finagle stack via client configuration.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.twitter.finagle.loadbalancer.Balancers#MaxEffort" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MaxEffort:Int"></a>
       <a id="MaxEffort:Int"></a>
       <h4 class="signature">
@@ -165,7 +165,20 @@ to easily inject a balancer into the Finagle stack via client configuration.
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Default MaxEffort used in constructors below.</p>
+      <p class="shortcomment cmt">This is a fixed number of retries, a LB are willing to make if the dead
+node is returned from the underlying distributor.</p><div class="fullcomment"><div class="comment cmt"><p>This is a fixed number of retries, a LB are willing to make if the dead
+node is returned from the underlying distributor.</p><p>For randomized LBs (P2C/LeastLoaded, P2C/EWMA, and Aperture) this value
+has an additional meaning: it determines how often the LB will be failing
+to pick a healthy node out of the partially-unhealthy replica set. For
+example, imagine that half of the replica set is down, the probably of
+picking two dead nodes is 0.25. If we repeat that process for 5 times,
+the total probability of seeing 5 dead nodes in a row, will be
+(0.25 ^ 5) = 0.1%. This means that if half of the cluster is down, the
+LB will be making a bad choice (when better choice may have been available)
+for 0.1% of requests.</p><p>Please, note that this doesn't mean that 0.1% of requests will be failed
+by P2C operating on a half-dead cluster since there is an additional layer
+of requeues (see <code>Retries</code> module) involved above those &quot;bad picks&quot;.
+</p></div></div>
     </li><li name="com.twitter.finagle.loadbalancer.Balancers#aperture" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="aperture(smoothWin:com.twitter.util.Duration,lowLoad:Double,highLoad:Double,minAperture:Int,timer:com.twitter.util.Timer,maxEffort:Int,rng:com.twitter.finagle.util.Rng):com.twitter.finagle.loadbalancer.LoadBalancerFactory"></a>
       <a id="aperture(Duration,Double,Double,Int,Timer,Int,Rng):LoadBalancerFactory"></a>

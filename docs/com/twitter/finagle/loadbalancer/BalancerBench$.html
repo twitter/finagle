@@ -28,10 +28,12 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img alt="Object" src="../../../../lib/object_big.png" />
+        <a href="BalancerBench.html" title="See companion class"><img alt="Object/Class" src="../../../../lib/object_to_class_big.png" /></a>
         <p id="owner"><a href="../../../package.html" class="extype" name="com">com</a>.<a href="../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="package.html" class="extype" name="com.twitter.finagle.loadbalancer">loadbalancer</a></p>
-        <h1>BalancerBench</h1><h3><span class="morelinks"><div>Related Doc:
-            <a href="package.html" class="extype" name="com.twitter.finagle.loadbalancer">package loadbalancer</a>
+        <h1><a href="BalancerBench.html" title="See companion class">BalancerBench</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="BalancerBench.html" title="See companion class">class BalancerBench</a>
+            | <a href="package.html" class="extype" name="com.twitter.finagle.loadbalancer">package loadbalancer</a>
           </div></span></h3><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.loadbalancer.BalancerBench$" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
@@ -88,7 +90,81 @@
         <div id="allMembers">
         
 
-        
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.twitter.finagle.loadbalancer.BalancerBench.NullBalancer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullBalancerextendsServiceFactory[Unit,Unit]withBalancer[Unit,Unit]"></a>
+      <a id="NullBalancer:NullBalancer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BalancerBench$$NullBalancer.html"><span class="name">NullBalancer</span></a><span class="result"> extends <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>] with <span class="extype" name="com.twitter.finagle.loadbalancer.Balancer">Balancer</span>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.BalancerBench$@NullBalancerextendsServiceFactory[Unit,Unit]withBalancer[Unit,Unit]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.loadbalancer.BalancerBench.NullDistibutor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullDistibutorextendsDistributorT[com.twitter.finagle.loadbalancer.BalancerBench.NullNode]withProductwithSerializable"></a>
+      <a id="NullDistibutor:NullDistibutor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BalancerBench$$NullDistibutor.html"><span class="name">NullDistibutor</span></a><span class="params">(<span name="vec">vec: <span class="extype" name="scala.Vector">Vector</span>[<a href="BalancerBench$$NullNode.html" class="extype" name="com.twitter.finagle.loadbalancer.BalancerBench.NullNode">NullNode</a>]</span>)</span><span class="result"> extends <a href="DistributorT.html" class="extype" name="com.twitter.finagle.loadbalancer.DistributorT">DistributorT</a>[<a href="BalancerBench$$NullNode.html" class="extype" name="com.twitter.finagle.loadbalancer.BalancerBench.NullNode">NullNode</a>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.BalancerBench$@NullDistibutorextendsDistributorT[com.twitter.finagle.loadbalancer.BalancerBench.NullNode]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.loadbalancer.BalancerBench.NullNode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NullNodeextendsServiceFactoryProxy[Unit,Unit]withNodeT[Unit,Unit]withProductwithSerializable"></a>
+      <a id="NullNode:NullNode"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BalancerBench$$NullNode.html"><span class="name">NullNode</span></a><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>]</span>)</span><span class="result"> extends <a href="../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>] with <a href="NodeT.html" class="extype" name="com.twitter.finagle.loadbalancer.NodeT">NodeT</a>[<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.BalancerBench$@NullNodeextendsServiceFactoryProxy[Unit,Unit]withNodeT[Unit,Unit]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.loadbalancer.BalancerBench.UpdateState" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="UpdateStateextendsAnyRef"></a>
+      <a id="UpdateState:UpdateState"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BalancerBench$$UpdateState.html"><span class="name">UpdateState</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.loadbalancer.BalancerBench$@UpdateStateextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@State</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
 
         
 

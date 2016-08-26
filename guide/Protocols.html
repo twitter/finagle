@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocols &mdash; Finagle 6.36.0 documentation</title>
+    <title>Protocols &mdash; Finagle 6.37.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.36.0',
+        VERSION:     '6.37.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.36.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.37.0 documentation" href="index.html" />
     <link rel="next" title="Extending Finagle" href="Extending.html" />
     <link rel="prev" title="Names and Naming in Finagle" href="Names.html" />
    
@@ -96,6 +96,12 @@ Wily delegations. In order to maintain backwards compatibility, TTwitter clients
 perform protocol negotiation upon connection and will downgrade to raw TBinary
 Thrift if servers are not using the upgraded protocol. By default, <cite>finagle-thrift</cite>
 uses the Thrift framed codec and the binary protocol for serialization.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Some Thrift server implementations do not handle this protocol
+negotiation well. If your client should run into this, you can disable
+it by calling <code class="docutils literal"><span class="pre">Thrift.client.withNoAttemptTTwitterUpgrade</span></code>.</p>
+</div>
 <div class="section" id="using-finagle-thrift">
 <h3>Using finagle-thrift<a class="headerlink" href="#using-finagle-thrift" title="Permalink to this headline">¶</a></h3>
 <p>At Twitter, we use our open-source Thrift code-generator called
@@ -247,7 +253,7 @@ The project provides a simple query API with support for prepared statements and
 transactions while taking advantage of Finagle&#8217;s <a class="reference internal" href="Clients.html#client-modules"><span class="std std-ref">client stack</span></a> for
 connection pooling. The implementation supports both the MySQL binary and string protocols.</p>
 <p>A client can be constructed using the
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.Mysql$">Mysql</a> protocol object:</p>
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.Mysql$">Mysql</a> protocol object:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Mysql</span><span class="o">.</span><span class="n">client</span>
   <span class="o">.</span><span class="n">withCredentials</span><span class="o">(</span><span class="s">&quot;&lt;user&gt;&quot;</span><span class="o">,</span> <span class="s">&quot;&lt;password&gt;&quot;</span><span class="o">)</span>
   <span class="o">.</span><span class="n">withDatabase</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
@@ -261,7 +267,7 @@ connection pooling. The implementation supports both the MySQL binary and string
 </div>
 <p>We configure the <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.client.DefaultPool">client&#8217;s connection pool</a> to be
 compatible with our MySQL server. The constructor returns a Finagle <a class="reference internal" href="ServicesAndFilters.html#service-factory"><span class="std std-ref">ServiceFactory</span></a>
-from <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Request">mysql.Request</a> to <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Result">mysql.Result</a>
+from <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.mysql.Request">mysql.Request</a> to <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.mysql.Result">mysql.Result</a>
 which we can use to query the db:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">product</span> <span class="k">=</span> <span class="n">client</span><span class="o">().</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">service</span> <span class="k">=&gt;</span>
   <span class="c1">// `service` is checked out from the pool.</span>
@@ -275,8 +281,8 @@ which we can use to query the db:</p>
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>A <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.ResultSet">ResultSet</a> makes it easy to extract
-<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Value">Values</a> based on column names. For example, we can
+<p>A <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.mysql.ResultSet">ResultSet</a> makes it easy to extract
+<a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.mysql.Value">Values</a> based on column names. For example, we can
 implement the above <cite>processRow</cite> as a pattern match on expected values:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="n">processRow</span><span class="o">(</span><span class="n">row</span><span class="k">:</span> <span class="kt">Row</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
   <span class="n">row</span><span class="o">(</span><span class="s">&quot;product&quot;</span><span class="o">).</span><span class="n">flatMap</span> <span class="o">{</span>
@@ -304,7 +310,7 @@ implement the above <cite>processRow</cite> as a pattern match on expected value
 </pre></div>
 </div>
 <p>Note that <cite>select</cite> takes care of checking out the service and returning it to the pool. <cite>select</cite> and
-other useful methods are available on <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.exp.mysql.Client">mysql.Client</a> which is returned
+other useful methods are available on <a class="reference external" href="http://twitter.github.io/finagle/docs/#com.twitter.finagle.mysql.Client">mysql.Client</a> which is returned
 from the call to <cite>newRichClient</cite>.</p>
 <p>For a more involved example see the Finagle <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-example/src/main/scala/com/twitter/finagle/example/mysql/Example.scala">example project</a>.</p>
 </div>

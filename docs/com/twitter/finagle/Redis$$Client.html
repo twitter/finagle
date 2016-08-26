@@ -1012,7 +1012,8 @@ via a least loaded metric.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+      <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><p>If the request has not completed within the given <code>timeout</code>, the pending
+work will be interrupted via <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future@raise(interrupt:Throwable):Unit" class="extype" target="_top">com.twitter.util.Future.raise</a>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
 (if there are retries, they each get a fresh request timeout). The timeout is applied
 only after a connection has been acquired. That is: it is applied to the interval
 between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
@@ -1051,7 +1052,7 @@ For client-side response classification using <a href="builder/ClientBuilder.htm
 see <code>com.twitter.finagle.builder.ClientBuilder.responseClassifier</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Redis.Client">Client</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
 <a href="service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
-which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http/service/HttpResponseClassifier$.html" class="extype" name="com.twitter.finagle.http.service.HttpResponseClassifier">com.twitter.finagle.http.service.HttpResponseClassifier</a> for some
+which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some
 HTTP classification tools.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Redis.Client#withRetryBackoff" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withRetryBackoff(backoff:Stream[com.twitter.util.Duration]):com.twitter.finagle.Redis.Client"></a>

@@ -106,7 +106,8 @@
     </span>
       <p class="shortcomment cmt">The serverset namer takes <a href="finagle/Path.html" class="extype" name="com.twitter.finagle.Path">Paths</a> of the form</p><div class="fullcomment"><div class="comment cmt"><p>The serverset namer takes <a href="finagle/Path.html" class="extype" name="com.twitter.finagle.Path">Paths</a> of the form</p><pre>hosts/path...</pre><p>and returns a dynamic represention of the resolution of the path into a
 tree of <a href="finagle/Name.html" class="extype" name="com.twitter.finagle.Name">Names</a>.</p><p>The namer synthesizes nodes for each endpoint in the serverset.
-Endpoint names are delimited by the ':' character. For example</p><pre>/$/com.twitter.serverset/sdzookeeper.local.twitter.com:<span class="num">2181</span>/twitter/service/cuckoo/prod/read:http</pre><p>is the endpoint <code>http</code> of serverset <code>/twitter/service/cuckoo/prod/read</code> on
+Endpoint names are delimited by the ':' character and shard IDs are delimited by the '#' character.
+For example:</p><pre>/$/com.twitter.serverset/sdzookeeper.local.twitter.com:<span class="num">2181</span>/twitter/service/cuckoo/prod/read:http#<span class="num">0</span></pre><p>is the endpoint <code>http</code> of shard 0 of serverset <code>/twitter/service/cuckoo/prod/read</code> on
 the ensemble <code>sdzookeeper.local.twitter.com:2181</code>.
 </p></div></div>
     </li></ol>

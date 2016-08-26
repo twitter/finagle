@@ -311,7 +311,7 @@ the list for each request.
                 <span class="name">@unspecialized</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.loadbalancer.RoundRobinBalancer#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.loadbalancer.Balancer#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(conn:com.twitter.finagle.ClientConnection):com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a>
       <a id="apply(ClientConnection):Future[Service[Req,Rep]]"></a>
       <h4 class="signature">
@@ -331,7 +331,7 @@ the list for each request.
 underlying channel and the returned service has exclusive use of
 its underlying connection. To relinquish the use of the reserved
 Service, the user must call Service.close().
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.loadbalancer.RoundRobinBalancer">RoundRobinBalancer</a> → Balancer → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd>Balancer → <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a> → Function1</dd></dl></div>
     </li><li name="com.twitter.finagle.ServiceFactory#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply():com.twitter.util.Future[com.twitter.finagle.Service[Req,Rep]]"></a>
       <a id="apply():Future[Service[Req,Rep]]"></a>

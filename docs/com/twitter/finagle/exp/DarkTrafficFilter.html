@@ -45,14 +45,14 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">DarkTrafficFilter</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]</span>
+        <span class="name">DarkTrafficFilter</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>] with <a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Forwards dark traffic to the given service when the given function returns true for a request.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>], (<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a>, <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>], (<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -70,7 +70,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.twitter.finagle.exp.DarkTrafficFilter"><span>DarkTrafficFilter</span></li><li class="in" name="com.twitter.finagle.SimpleFilter"><span>SimpleFilter</span></li><li class="in" name="com.twitter.finagle.Filter"><span>Filter</span></li><li class="in" name="scala.Function2"><span>Function2</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.twitter.finagle.exp.DarkTrafficFilter"><span>DarkTrafficFilter</span></li><li class="in" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter"><span>AbstractDarkTrafficFilter</span></li><li class="in" name="com.twitter.finagle.SimpleFilter"><span>SimpleFilter</span></li><li class="in" name="com.twitter.finagle.Filter"><span>Filter</span></li><li class="in" name="scala.Function2"><span>Function2</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -122,7 +122,8 @@
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">darkService</dt><dd class="cmt"><p>Service to take dark traffic</p></dd><dt class="param">enableSampling</dt><dd class="cmt"><p>if function returns true, the request will forward</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>keeps stats for requests forwarded, skipped and failed.</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">darkService</dt><dd class="cmt"><p>Service to take dark traffic</p></dd><dt class="param">enableSampling</dt><dd class="cmt"><p>if function returns true, the request will forward</p></dd><dt class="param">statsReceiver</dt><dd class="cmt"><p>keeps stats for requests forwarded, skipped and failed.</p></dd><dt class="param">forwardAfterService</dt><dd class="cmt"><p>forward the dark request after the service has processed the request
+       instead of concurrently.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -445,6 +446,23 @@ on a configuration file, for instance.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.DarkTrafficFilter#handleFailedInvocation" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="handleFailedInvocation(t:Throwable):Unit"></a>
+      <a id="handleFailedInvocation(Throwable):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">handleFailedInvocation</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Unit" class="extype" target="_top">Unit</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.DarkTrafficFilter@handleFailedInvocation(t:Throwable):Unit" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter">DarkTrafficFilter</a> → <a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -530,6 +548,57 @@ on a configuration file, for instance.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter#sendDarkRequest" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sendDarkRequest[Req](request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[_]"></a>
+      <a id="sendDarkRequest[Req](Req)((Req)⇒Boolean,(Req)⇒Future[_]):Future[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sendDarkRequest</span><span class="tparams">[<span name="Req">Req</span>]</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span></span>)</span><span class="params">(<span name="shouldInvoke">shouldInvoke: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span>) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="invokeDarkService">invokeDarkService: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.sendDarkRequest.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[_]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.DarkTrafficFilter@sendDarkRequest[Req](request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[_]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter#serviceConcurrently" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="serviceConcurrently[Req,Rep](service:com.twitter.finagle.Service[Req,Rep],request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[Rep]"></a>
+      <a id="serviceConcurrently[Req,Rep](Service[Req,Rep],Req)((Req)⇒Boolean,(Req)⇒Future[_]):Future[Rep]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">serviceConcurrently</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Rep">Rep</span>]</span>, <span name="request">request: <span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span></span>)</span><span class="params">(<span name="shouldInvoke">shouldInvoke: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>) ⇒ <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>, <span name="invokeDarkService">invokeDarkService: (<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[_]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter.serviceConcurrently.Rep">Rep</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.DarkTrafficFilter@serviceConcurrently[Req,Rep](service:com.twitter.finagle.Service[Req,Rep],request:Req)(shouldInvoke:Req=&gt;Boolean,invokeDarkService:Req=&gt;com.twitter.util.Future[_]):com.twitter.util.Future[Rep]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.exp.DarkTrafficFilter#statsReceiver" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="statsReceiver:com.twitter.finagle.stats.StatsReceiver"></a>
+      <a id="statsReceiver:StatsReceiver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">statsReceiver</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.DarkTrafficFilter@statsReceiver:com.twitter.finagle.stats.StatsReceiver" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">keeps stats for requests forwarded, skipped and failed.</p><div class="fullcomment"><div class="comment cmt"><p>keeps stats for requests forwarded, skipped and failed.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter">DarkTrafficFilter</a> → <a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -662,7 +731,9 @@ on a configuration file, for instance.
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.twitter.finagle.SimpleFilter">
+        <div class="parent" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">
+              <h3>Inherited from <a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></h3>
+            </div><div class="parent" name="com.twitter.finagle.SimpleFilter">
               <h3>Inherited from <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="com.twitter.finagle.Filter">
               <h3>Inherited from <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]</h3>

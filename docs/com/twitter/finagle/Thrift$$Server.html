@@ -393,7 +393,7 @@ case class.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.twitter.finagle.ThriftRichServer#maxThriftBufferSize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.twitter.finagle.Thrift.Server#maxThriftBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="maxThriftBufferSize:Int"></a>
       <a id="maxThriftBufferSize:Int"></a>
       <h4 class="signature">
@@ -409,7 +409,7 @@ case class.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="ThriftRichServer.html" class="extype" name="com.twitter.finagle.ThriftRichServer">ThriftRichServer</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -987,6 +987,27 @@ invalid interface implementation will result in a runtime error.</p></div><dl cl
       <p class="shortcomment cmt">Configures this server or client with given <code>label</code> (default: empty string).</p><div class="fullcomment"><div class="comment cmt"><p>Configures this server or client with given <code>label</code> (default: empty string).</p><p>The <code>label</code> value is used for stats reporting to scope stats reported
 from different clients/servers to a single stats receiver.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a> → <a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.Thrift.Server#withMaxReusableBufferSize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withMaxReusableBufferSize(size:Int):com.twitter.finagle.Thrift.Server"></a>
+      <a id="withMaxReusableBufferSize(Int):Server"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withMaxReusableBufferSize</span><span class="params">(<span name="size">size: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>)</span><span class="result">: <a href="" class="extype" name="com.twitter.finagle.Thrift.Server">Server</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Thrift$$Server@withMaxReusableBufferSize(size:Int):com.twitter.finagle.Thrift.Server" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Produce a <a href="" class="extype" name="com.twitter.finagle.Thrift.Server">com.twitter.finagle.Thrift.Server</a> with the specified max
+size of the reusable buffer for thrift responses.</p><div class="fullcomment"><div class="comment cmt"><p>Produce a <a href="" class="extype" name="com.twitter.finagle.Thrift.Server">com.twitter.finagle.Thrift.Server</a> with the specified max
+size of the reusable buffer for thrift responses. If this size
+is exceeded, the buffer is not reused and a new buffer is
+allocated for the next thrift response.</p></div><dl class="paramcmts block"><dt class="param">size</dt><dd class="cmt"><p>Max size of the reusable buffer for thrift responses in bytes.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift.Server#withMonitor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withMonitor(monitor:com.twitter.util.Monitor):com.twitter.finagle.Thrift.Server"></a>
       <a id="withMonitor(Monitor):Server"></a>
@@ -1058,7 +1079,8 @@ from different clients/servers to a single stats receiver.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
+      <p class="shortcomment cmt">Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><div class="fullcomment"><div class="comment cmt"><p>Configures the request <code>timeout</code> of this server or client (default: unbounded).</p><p>If the request has not completed within the given <code>timeout</code>, the pending
+work will be interrupted via <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future@raise(interrupt:Throwable):Unit" class="extype" target="_top">com.twitter.util.Future.raise</a>.</p><h4> Client's Request Timeout </h4><p>The client request timeout is the maximum amount of time given to a single request
 (if there are retries, they each get a fresh request timeout). The timeout is applied
 only after a connection has been acquired. That is: it is applied to the interval
 between the dispatch of the request and the receipt of the response.</p><h4> Server's Request Timeout </h4><p>The server request timeout is the maximum amount of time, a server is allowed to
@@ -1097,7 +1119,7 @@ For client-side response classification using <a href="builder/ClientBuilder.htm
 see <code>com.twitter.finagle.builder.ClientBuilder.responseClassifier</code>
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="param/CommonParams.html" class="extype" name="com.twitter.finagle.param.CommonParams">CommonParams</a></dd><dt>Note</dt><dd><span class="cmt"><p>If unspecified, the default classifier is
 <a href="service/ResponseClassifier$.html#Default:com.twitter.finagle.service.ResponseClassifier" class="extmbr" name="com.twitter.finagle.service.ResponseClassifier#Default">com.twitter.finagle.service.ResponseClassifier.Default</a>
-which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><a href="http/service/HttpResponseClassifier$.html" class="extype" name="com.twitter.finagle.http.service.HttpResponseClassifier">com.twitter.finagle.http.service.HttpResponseClassifier</a> for some
+which is a total function fully covering the input domain.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><code>com.twitter.finagle.http.service.HttpResponseClassifier</code> for some
 HTTP classification tools.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Thrift.Server#withSession" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withSession:com.twitter.finagle.param.SessionParams[com.twitter.finagle.Thrift.Server]"></a>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &mdash; Finagle 6.36.0 documentation</title>
+    <title>Configuration &mdash; Finagle 6.37.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.36.0',
+        VERSION:     '6.37.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.36.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.37.0 documentation" href="index.html" />
     <link rel="next" title="Servers" href="Servers.html" />
     <link rel="prev" title="Services &amp; Filters" href="ServicesAndFilters.html" />
    
@@ -68,6 +68,8 @@
             
   <div class="section" id="configuration">
 <h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="clients-and-servers">
+<h2>Clients and Servers<a class="headerlink" href="#clients-and-servers" title="Permalink to this headline">¶</a></h2>
 <p>Prior to <a class="reference internal" href="changelog.html"><span class="doc">version 6.0</span></a>, the <code class="docutils literal"><span class="pre">ClientBuilder</span></code>/<code class="docutils literal"><span class="pre">ServerBuilder</span></code> API was the
 primary method for configuring the modules inside a Finagle <a class="reference internal" href="Clients.html#finagle-clients"><span class="std std-ref">client</span></a>
 or <a class="reference internal" href="Servers.html#finagle-servers"><span class="std std-ref">server</span></a>. We are moving away from this model for various
@@ -113,7 +115,7 @@ it&#8217;s highly recommended to avoid it unless you&#8217;re absolutely sure wh
 you&#8217;re doing.</p>
 </div>
 <div class="section" id="design-principles">
-<h2>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h2>
+<h3>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h3>
 <p>Finagle has many different components and we tried to faithfully model our configuration
 to help understand the constituents and the resulting behavior. For the sake of consistency,
 the current version of the <code class="docutils literal"><span class="pre">with</span></code> API is designed with the following principles in mind.</p>
@@ -139,6 +141,103 @@ the <cite>Stack API</cite> (i.e., <code class="docutils literal"><span class="pr
 </ol>
 </div>
 </div>
+<div class="section" id="feature-toggles">
+<span id="toggles"></span><h2>Feature Toggles<a class="headerlink" href="#feature-toggles" title="Permalink to this headline">¶</a></h2>
+<p>Feature toggles are a commonly used mechanism for modifying system behavior.
+For background, here is a <a class="reference external" href="http://martinfowler.com/articles/feature-toggles.html">detailed discussion</a>
+of the topic. As implemented in Finagle they provide a good balance of control between
+library and service owners which enables library owners to rollout functionality in a
+measured and controlled manner.</p>
+<div class="section" id="concepts">
+<h3>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/Toggle.scala">Toggle</a> is a partial
+function from a type-<cite>T</cite> to <cite>Boolean</cite>. These are used to decide whether a feature is
+enabled or not for a given request or service configuration.</p>
+<p>A <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ToggleMap.scala">ToggleMap</a> is
+a collection of <cite>Int</cite>-typed <cite>Toggles</cite>. It provides a means of getting a <cite>Toggle</cite>
+for a given an identifier as well as an <cite>Iterator</cite> over the metadata for its <cite>Toggles</cite>.
+Various basic implementations exist on the <cite>ToggleMap</cite> companion object.</p>
+</div>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<p>If a <cite>Toggle</cite> is on the request path, it is recommended that it be stored in
+a member variable to avoid unnecessary overhead on the common path. If the <cite>Toggle</cite> is
+used only at startup this is unnecessary.</p>
+<p>Here is an example <a class="reference internal" href="ServicesAndFilters.html#filters"><span class="std std-ref">Filter</span></a> which uses a <cite>Toggle</cite> on the request path:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">package</span> <span class="nn">com.example.service</span>
+
+<span class="k">import</span> <span class="nn">com.twitter.finagle.</span><span class="o">{</span><span class="nc">Service</span><span class="o">,</span> <span class="nc">SimpleFilter</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.http.</span><span class="o">{</span><span class="nc">Request</span><span class="o">,</span> <span class="nc">Response</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.</span><span class="o">{</span><span class="nc">Toggle</span><span class="o">,</span> <span class="nc">ToggleMap</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">com.twitter.finagle.util.Rng</span>
+
+<span class="k">class</span> <span class="nc">ExampleFilter</span><span class="o">(</span>
+    <span class="n">toggleMap</span><span class="k">:</span> <span class="kt">ToggleMap</span><span class="o">,</span>
+    <span class="n">newBackend</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span>
+  <span class="k">extends</span> <span class="nc">SimpleFilter</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">]</span> <span class="o">{</span>
+
+  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">useNewBackend</span><span class="k">:</span> <span class="kt">Toggle</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="n">toggleMap</span><span class="o">(</span><span class="s">&quot;com.example.service.UseNewBackend&quot;</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Request</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">Request</span>, <span class="kt">Response</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Response</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">useNewBackend</span><span class="o">(</span><span class="nc">Rng</span><span class="o">.</span><span class="n">threadLocal</span><span class="o">.</span><span class="n">nextInt</span><span class="o">()))</span>
+      <span class="n">newBackend</span><span class="o">(</span><span class="n">req</span><span class="o">)</span>
+    <span class="k">else</span>
+      <span class="n">service</span><span class="o">(</span><span class="n">req</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Note that we pass a <cite>ToggleMap</cite> into the constructor and typically this would be
+the instance created via
+<cite>StandardToggleMap.apply(&#8220;com.example.service&#8221;, com.twitter.finagle.stats.DefaultStatsReceiver)</cite>.
+This allows for testing of the code with control of whether the <cite>Toggle</cite> is
+enabled or disabled by using <cite>ToggleMap.On</cite> or <cite>ToggleMap.Off</cite>. This could have also been
+achieved by passing the <cite>Toggle</cite> into the constructor and then using <cite>Toggle.on</cite> or
+<cite>Toggle.off</cite> in tests.</p>
+</div>
+<div class="section" id="setting-toggle-values">
+<h3>Setting Toggle Values<a class="headerlink" href="#setting-toggle-values" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="library-owners">
+<h4>Library Owners<a class="headerlink" href="#library-owners" title="Permalink to this headline">¶</a></h4>
+<p>The base configuration for <cite>StandardToggles</cite> should be defined in a JSON
+configuration file at <cite>resources/com/twitter/toggles/configs/$libraryName.json</cite>.
+The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/JsonToggleMap.scala">JSON schema</a>
+allows for descriptions and comments.</p>
+<p>Dynamically changing the values across a cluster is specific to a particular deployment
+and can be wired in via a
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/ServiceLoadedToggleMap.scala">service-loaded ToggleMap</a>.</p>
+<p>Deterministic unit tests can be written that modify a <cite>Toggle</cite>&#8216;s settings via
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/flag/overrides.scala">flag overrides</a>
+using:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">com.twitter.finagle.toggle.flag</span>
+
+<span class="n">flag</span><span class="o">.</span><span class="n">overrides</span><span class="o">.</span><span class="n">let</span><span class="o">(</span><span class="s">&quot;your.toggle.id.here&quot;</span><span class="o">,</span> <span class="n">fractionToUse</span><span class="o">)</span> <span class="o">{</span>
+  <span class="c1">// code that uses the flag in this block will have the</span>
+  <span class="c1">// flag&#39;s fraction set to `fractionToUse`.</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="service-owners">
+<h4>Service Owners<a class="headerlink" href="#service-owners" title="Permalink to this headline">¶</a></h4>
+<p>At runtime, the in-process <cite>Toggle</cite> values can be modified using TwitterServer&#8217;s
+&#8220;/admin/toggles&#8221; <a class="reference external" href="http://twitter.github.io/twitter-server/Admin.html#admin-toggles">API endpoint</a>.
+This provides a quick way to try out a change in a limited fashion.</p>
+<p>For setting more permanent <cite>Toggle</cite> values, include a JSON configuration file at
+<cite>resources/com/twitter/toggles/configs/$libraryName-service.json</cite>.
+The <a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/toggle/JsonToggleMap.scala">JSON schema</a>
+allows for descriptions and comments.</p>
+<p>The JSON configuration also supports optional environment-specific overrides via
+files that are examined before the non-environment-specific configs.
+These environment-specific configs must be placed at
+<cite>resources/com/twitter/toggles/configs/$libraryName-service-$environment.json</cite>
+where the <cite>environment</cite> from
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-toggle/src/main/scala/com/twitter/finagle/server/ServerInfo.scala">ServerInfo.apply()</a>
+is used to determine which one to load.</p>
+</div>
+</div>
+</div>
+</div>
 
 
           </div>
@@ -160,7 +259,20 @@ the <cite>Stack API</cite> (i.e., <code class="docutils literal"><span class="pr
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#clients-and-servers">Clients and Servers</a><ul>
 <li><a class="reference internal" href="#design-principles">Design Principles</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#feature-toggles">Feature Toggles</a><ul>
+<li><a class="reference internal" href="#concepts">Concepts</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#setting-toggle-values">Setting Toggle Values</a><ul>
+<li><a class="reference internal" href="#library-owners">Library Owners</a></li>
+<li><a class="reference internal" href="#service-owners">Service Owners</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

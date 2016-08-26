@@ -122,32 +122,6 @@ server in order to consolidate statistics across a number of channels.
       </a>
     </span>
       <p class="shortcomment cmt">This handler closes a channel if it receives an IDLE event.</p>
-    </li><li name="com.twitter.finagle.netty3.channel.IdleConnectionFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="IdleConnectionFilter[Req,Rep]extendsServiceFactoryProxy[Req,Rep]"></a>
-      <a id="IdleConnectionFilter[Req,Rep]:IdleConnectionFilter[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="IdleConnectionFilter.html"><span class="name">IdleConnectionFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../../ServiceFactoryProxy.html" class="extype" name="com.twitter.finagle.ServiceFactoryProxy">ServiceFactoryProxy</a>[<span class="extype" name="com.twitter.finagle.netty3.channel.IdleConnectionFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.netty3.channel.IdleConnectionFilter.Rep">Rep</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@IdleConnectionFilter[Req,Rep]extendsServiceFactoryProxy[Req,Rep]" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Filter responsible for tracking idle connection, it will refuse requests and try to close idle
-connections based on the number of active connections.</p><div class="fullcomment"><div class="comment cmt"><p>Filter responsible for tracking idle connection, it will refuse requests and try to close idle
-connections based on the number of active connections.</p><p>Each time a message from a new connection arrive (based on nb of connections):
-- if below low watermark: accept the connection.
-- if above low watermark: collect (close) idle connections, but accept the connection.
-- if above high watermark: collect (close) idle connections, and refuse/accept the
-  connection depending if we managed to close an idle connection.</p><p>NB: the connection is tracked after the server response, so that the server processing time is
-not count in the idle timeout.</p><p>Note: this will not properly handle multiple outstanding messages per connection and should not
-be used for duplex protocols such as finagle-mux.
-</p></div></div>
     </li><li name="com.twitter.finagle.netty3.channel.LeftFoldUpstreamHandler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LeftFoldUpstreamHandlerextendsAnyRef"></a>
       <a id="LeftFoldUpstreamHandler:LeftFoldUpstreamHandler"></a>
@@ -165,49 +139,12 @@ be used for duplex protocols such as finagle-mux.
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.netty3.channel.OpenConnectionsThresholds" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OpenConnectionsThresholdsextendsProductwithSerializable"></a>
-      <a id="OpenConnectionsThresholds:OpenConnectionsThresholds"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="OpenConnectionsThresholds.html"><span class="name">OpenConnectionsThresholds</span></a><span class="params">(<span name="lowWaterMark">lowWaterMark: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="highWaterMark">highWaterMark: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Int" class="extype" target="_top">Int</a></span>, <span name="idleTimeout">idleTimeout: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@OpenConnectionsThresholdsextendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li></ol>
             </div>
 
         
 
-        <div id="values" class="values members">
-              <h3>Value Members</h3>
-              <ol><li name="com.twitter.finagle.netty3.channel.IdleConnectionFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="IdleConnectionFilter"></a>
-      <a id="IdleConnectionFilter:IdleConnectionFilter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="IdleConnectionFilter$.html"><span class="name">IdleConnectionFilter</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.netty3.channel.package@IdleConnectionFilter" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li></ol>
-            </div>
+        
 
         
 

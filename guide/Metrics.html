@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Metrics &mdash; Finagle 6.36.0 documentation</title>
+    <title>Metrics &mdash; Finagle 6.37.0 documentation</title>
     
     <link rel="stylesheet" href="_static/finagle.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '6.36.0',
+        VERSION:     '6.37.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Finagle 6.36.0 documentation" href="index.html" />
+    <link rel="top" title="Finagle 6.37.0 documentation" href="index.html" />
     <link rel="next" title="FAQ" href="FAQ.html" />
     <link rel="prev" title="Extending Finagle" href="Extending.html" />
    
@@ -204,6 +204,20 @@ connections in the load balancer.</dd>
 <div class="section" id="finagle">
 <h2>Finagle<a class="headerlink" href="#finagle" title="Permalink to this headline">¶</a></h2>
 <p id="finagle-stats">These metrics track various Finagle internals.</p>
+<div class="section" id="futurepool">
+<h3>FuturePool<a class="headerlink" href="#futurepool" title="Permalink to this headline">¶</a></h3>
+<p>These metrics correspond to the state of <code class="docutils literal"><span class="pre">FuturePool.unboundedPool</span></code> and
+<code class="docutils literal"><span class="pre">FuturePool.interruptibleUnboundedPool</span></code>. Only one set of metrics is
+exported as they share their underlying &#8220;thread pool&#8221;.</p>
+<dl class="docutils">
+<dt><strong>finagle/future_pool/pool_size</strong></dt>
+<dd>A gauge of the number of threads in the pool.</dd>
+<dt><strong>finagle/future_pool/active_tasks</strong></dt>
+<dd>A gauge of the number of tasks actively executing.</dd>
+<dt><strong>finagle/future_pool/completed_tasks</strong></dt>
+<dd>A gauge of the number of total tasks that have completed execution.</dd>
+</dl>
+</div>
 <div class="section" id="scheduler">
 <h3>Scheduler<a class="headerlink" href="#scheduler" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -300,6 +314,15 @@ being load-balanced across. Does not apply to
 <dd>A counter of the number of hosts added to the loadbalancer.</dd>
 <dt><strong>removes</strong></dt>
 <dd>A counter of the number of hosts removed from the loadbalancer.</dd>
+<dt><strong>rebuilds</strong></dt>
+<dd>A counter of the number of times the loadbalancer rebuilds its state
+(triggered by either an underlying namer or failing nodes).</dd>
+<dt><strong>updates</strong></dt>
+<dd>A counter of the number of times the underlying namer triggers
+the loadbalancer to rebuild its state (e.g., because the server set
+has changed). Note that these kind of events are usually collapsed
+so the actual number of <code class="docutils literal"><span class="pre">rebuilds</span></code> is usually less than the number
+of <code class="docutils literal"><span class="pre">updates</span></code>.</dd>
 <dt><strong>max_effort_exhausted</strong></dt>
 <dd>A counter of the number of times a balancer failed to find a node that was
 <code class="docutils literal"><span class="pre">Status.Open</span></code> within <code class="docutils literal"><span class="pre">com.twitter.finagle.loadbalancer.Balancer.maxEffort</span></code>
@@ -494,6 +517,18 @@ strategies.</p>
 <dd>A counter of the number of requests whose deadline has expired.</dd>
 </dl>
 </div>
+<div class="section" id="nack-admission-control">
+<h3>Nack Admission Control<a class="headerlink" href="#nack-admission-control" title="Permalink to this headline">¶</a></h3>
+<p id="id3">These metrics reflect the behavior of the
+<a class="reference external" href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/filter/NackAdmissionFilter.scala">NackAdmissionFilter</a>.</p>
+<dl class="docutils">
+<dt><strong>dropped_requests</strong></dt>
+<dd>A counter of the number of requests probabilistically dropped.</dd>
+<dt><strong>accept_probability</strong></dt>
+<dd>A histogram of the filter&#8217;s estimated probability of a request not being
+nacked.</dd>
+</dl>
+</div>
 </div>
 <div class="section" id="threshold-failure-detector">
 <h2>Threshold Failure Detector<a class="headerlink" href="#threshold-failure-detector" title="Permalink to this headline">¶</a></h2>
@@ -594,18 +629,6 @@ a Netty pipeline.</dd>
 given idle state.</dd>
 </dl>
 </div>
-<div class="section" id="idleconnectionfilter">
-<h3>IdleConnectionFilter<a class="headerlink" href="#idleconnectionfilter" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt><strong>refused</strong></dt>
-<dd>A counter of the number of connections that have been refused because we have
-hit the high watermark of connections full and no connections are idle.</dd>
-<dt><strong>idle</strong></dt>
-<dd>A gauge of the number of connections that are &#8220;idle&#8221; at this moment.</dd>
-<dt><strong>closed</strong></dt>
-<dd>A counter of the number of connections that have been closed for being idle.</dd>
-</dl>
-</div>
 <div class="section" id="thrift">
 <h3>Thrift<a class="headerlink" href="#thrift" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
@@ -623,9 +646,9 @@ your server.</dd>
 </div>
 <div class="section" id="service-discovery">
 <h2>Service Discovery<a class="headerlink" href="#service-discovery" title="Permalink to this headline">¶</a></h2>
-<p id="id3">These metrics track the state of name resolution and service discovery.</p>
-<div class="section" id="id4">
-<h3>Name Resolution<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p id="id4">These metrics track the state of name resolution and service discovery.</p>
+<div class="section" id="id5">
+<h3>Name Resolution<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <p>Finagle clients resolve <a class="reference internal" href="Names.html"><span class="doc">names</span></a> into sets of network
 addresses to which sockets can be opened. A number of the moving parts
 involved in this process are cached (i.e.
@@ -762,6 +785,15 @@ operations).</dd>
 </div>
 </div>
 </div>
+<div class="section" id="toggles">
+<h2>Toggles<a class="headerlink" href="#toggles" title="Permalink to this headline">¶</a></h2>
+<p>These metrics correspond to <a class="reference internal" href="Configuration.html#toggles"><span class="std std-ref">feature toggles</span></a>.</p>
+<dl class="docutils">
+<dt><strong>toggles/&lt;libraryName&gt;/checksum</strong></dt>
+<dd>A gauge summarizing the current state of a <cite>ToggleMap</cite> which may be useful
+for comparing state across a cluster or over time.</dd>
+</dl>
+</div>
 <div class="section" id="http">
 <h2>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h2>
 <p id="http-stats">These stats pertain to the HTTP protocol.</p>
@@ -875,6 +907,7 @@ ThriftMux server.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#finagle">Finagle</a><ul>
+<li><a class="reference internal" href="#futurepool">FuturePool</a></li>
 <li><a class="reference internal" href="#scheduler">Scheduler</a></li>
 <li><a class="reference internal" href="#timer">Timer</a></li>
 <li><a class="reference internal" href="#clientregistry">ClientRegistry</a></li>
@@ -912,6 +945,7 @@ ThriftMux server.</dd>
 <li><a class="reference internal" href="#dispatching">Dispatching</a></li>
 <li><a class="reference internal" href="#admission-control">Admission Control</a><ul>
 <li><a class="reference internal" href="#deadline-admission-control">Deadline Admission Control</a></li>
+<li><a class="reference internal" href="#nack-admission-control">Nack Admission Control</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#threshold-failure-detector">Threshold Failure Detector</a><ul>
@@ -924,12 +958,11 @@ ThriftMux server.</dd>
 <li><a class="reference internal" href="#channelrequeststatshandler">ChannelRequestStatsHandler</a></li>
 <li><a class="reference internal" href="#channelstatshandler">ChannelStatsHandler</a></li>
 <li><a class="reference internal" href="#idlechannelhandler">IdleChannelHandler</a></li>
-<li><a class="reference internal" href="#idleconnectionfilter">IdleConnectionFilter</a></li>
 <li><a class="reference internal" href="#thrift">Thrift</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#service-discovery">Service Discovery</a><ul>
-<li><a class="reference internal" href="#id4">Name Resolution</a></li>
+<li><a class="reference internal" href="#id5">Name Resolution</a></li>
 <li><a class="reference internal" href="#initial-resolution">Initial Resolution</a></li>
 <li><a class="reference internal" href="#address-stabilization">Address Stabilization</a></li>
 <li><a class="reference internal" href="#zookeeper-diagnostics">ZooKeeper Diagnostics</a><ul>
@@ -939,6 +972,7 @@ ThriftMux server.</dd>
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#toggles">Toggles</a></li>
 <li><a class="reference internal" href="#http">HTTP</a></li>
 <li><a class="reference internal" href="#mux">Mux</a></li>
 <li><a class="reference internal" href="#thriftmux">ThriftMux</a></li>

@@ -149,6 +149,26 @@ do not occur.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.FixedInetResolver#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="apply(unscopedStatsReceiver:com.twitter.finagle.stats.StatsReceiver,maxCacheSize:Long,backoffs:Stream[com.twitter.util.Duration],timer:com.twitter.util.Timer):com.twitter.finagle.InetResolver"></a>
+      <a id="apply(StatsReceiver,Long,Stream[Duration],Timer):InetResolver"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">apply</span><span class="params">(<span name="unscopedStatsReceiver">unscopedStatsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>, <span name="maxCacheSize">maxCacheSize: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>, <span name="backoffs">backoffs: <span class="extype" name="scala.Stream">Stream</span>[<a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a>]</span>, <span name="timer">timer: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Timer" class="extype" target="_top">Timer</a></span>)</span><span class="result">: <span class="extype" name="com.twitter.finagle.InetResolver">InetResolver</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.FixedInetResolver$@apply(unscopedStatsReceiver:com.twitter.finagle.stats.StatsReceiver,maxCacheSize:Long,backoffs:Stream[com.twitter.util.Duration],timer:com.twitter.util.Timer):com.twitter.finagle.InetResolver" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Uses a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> cache to memoize lookups.</p><div class="fullcomment"><div class="comment cmt"><p>Uses a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> cache to memoize lookups.
+</p></div><dl class="paramcmts block"><dt class="param">maxCacheSize</dt><dd class="cmt"><p>Specifies the maximum number of <code>Futures</code> that can be cached.
+                    No maximum size limit if Long.MaxValue.</p></dd><dt class="param">backoffs</dt><dd class="cmt"><p>Optionally retry DNS resolution failures using this sequence of
+                durations for backoff. Stream.empty means don't retry.</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.FixedInetResolver#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(unscopedStatsReceiver:com.twitter.finagle.stats.StatsReceiver,maxCacheSize:Long):com.twitter.finagle.InetResolver"></a>
       <a id="apply(StatsReceiver,Long):InetResolver"></a>
       <h4 class="signature">
@@ -164,9 +184,7 @@ do not occur.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Uses a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> cache to memoize lookups.</p><div class="fullcomment"><div class="comment cmt"><p>Uses a <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">com.twitter.util.Future</a> cache to memoize lookups.
-</p></div><dl class="paramcmts block"><dt class="param">maxCacheSize</dt><dd class="cmt"><p>Specifies the maximum number of <code>Futures</code> that can be cached.
-                    No maximum size limit if Long.MaxValue.</p></dd></dl></div>
+      
     </li><li name="com.twitter.finagle.FixedInetResolver#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="apply(unscopedStatsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.InetResolver"></a>
       <a id="apply(StatsReceiver):InetResolver"></a>

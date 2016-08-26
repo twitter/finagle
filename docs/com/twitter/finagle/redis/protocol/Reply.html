@@ -54,7 +54,7 @@
           <div class="superTypes hiddenContent"><a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div><div class="toggleContainer block">
             <span class="toggle">Known Subclasses</span>
-            <div class="subClasses hiddenContent"><a href="BulkReply.html" class="extype" name="com.twitter.finagle.redis.protocol.BulkReply">BulkReply</a>, <a href="EmptyBulkReply.html" class="extype" name="com.twitter.finagle.redis.protocol.EmptyBulkReply">EmptyBulkReply</a>, <a href="EmptyMBulkReply.html" class="extype" name="com.twitter.finagle.redis.protocol.EmptyMBulkReply">EmptyMBulkReply</a>, <a href="ErrorReply.html" class="extype" name="com.twitter.finagle.redis.protocol.ErrorReply">ErrorReply</a>, <a href="IntegerReply.html" class="extype" name="com.twitter.finagle.redis.protocol.IntegerReply">IntegerReply</a>, <a href="MBulkReply.html" class="extype" name="com.twitter.finagle.redis.protocol.MBulkReply">MBulkReply</a>, <a href="MultiLineReply.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiLineReply">MultiLineReply</a>, <a href="NilMBulkReply.html" class="extype" name="com.twitter.finagle.redis.protocol.NilMBulkReply">NilMBulkReply</a>, <a href="NoReply$.html" class="extype" name="com.twitter.finagle.redis.protocol.NoReply">NoReply</a>, <a href="SingleLineReply.html" class="extype" name="com.twitter.finagle.redis.protocol.SingleLineReply">SingleLineReply</a>, <a href="StatusReply.html" class="extype" name="com.twitter.finagle.redis.protocol.StatusReply">StatusReply</a></div>
+            <div class="subClasses hiddenContent"><a href="BulkReply.html" class="extype" name="com.twitter.finagle.redis.protocol.BulkReply">BulkReply</a>, <a href="EmptyBulkReply$.html" class="extype" name="com.twitter.finagle.redis.protocol.EmptyBulkReply">EmptyBulkReply</a>, <a href="EmptyMBulkReply$.html" class="extype" name="com.twitter.finagle.redis.protocol.EmptyMBulkReply">EmptyMBulkReply</a>, <a href="ErrorReply.html" class="extype" name="com.twitter.finagle.redis.protocol.ErrorReply">ErrorReply</a>, <a href="IntegerReply.html" class="extype" name="com.twitter.finagle.redis.protocol.IntegerReply">IntegerReply</a>, <a href="MBulkReply.html" class="extype" name="com.twitter.finagle.redis.protocol.MBulkReply">MBulkReply</a>, <a href="MultiLineReply.html" class="extype" name="com.twitter.finagle.redis.protocol.MultiLineReply">MultiLineReply</a>, <a href="NilMBulkReply$.html" class="extype" name="com.twitter.finagle.redis.protocol.NilMBulkReply">NilMBulkReply</a>, <a href="NoReply$.html" class="extype" name="com.twitter.finagle.redis.protocol.NoReply">NoReply</a>, <a href="SingleLineReply.html" class="extype" name="com.twitter.finagle.redis.protocol.SingleLineReply">SingleLineReply</a>, <a href="StatusReply.html" class="extype" name="com.twitter.finagle.redis.protocol.StatusReply">StatusReply</a></div>
           </div></div>
         
 
@@ -93,30 +93,10 @@
 
         
 
-        <div id="values" class="values members">
-              <h3>Abstract Value Members</h3>
-              <ol><li name="com.twitter.finagle.redis.protocol.RedisMessage#toChannelBuffer" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="toChannelBuffer:org.jboss.netty.buffer.ChannelBuffer"></a>
-      <a id="toChannelBuffer:ChannelBuffer"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toChannelBuffer</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.Reply@toChannelBuffer:org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
-        <img src="../../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a></dd></dl></div>
-    </li></ol>
-            </div>
+        
 
         <div id="values" class="values members">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -401,6 +381,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a></dd></dl></div>
+    </li><li name="com.twitter.finagle.redis.protocol.Reply#toChannelBuffer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toChannelBuffer:org.jboss.netty.buffer.ChannelBuffer"></a>
+      <a id="toChannelBuffer:ChannelBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toChannelBuffer</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.Reply@toChannelBuffer:org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.twitter.finagle.redis.protocol.Reply">Reply</a> → <a href="RedisMessage.html" class="extype" name="com.twitter.finagle.redis.protocol.RedisMessage">RedisMessage</a></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>

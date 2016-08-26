@@ -90,7 +90,24 @@ stabilized (moved elsewhere) at any time.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.twitter.finagle.exp.BackupRequestFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.exp.AbstractDarkTrafficFilter" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="AbstractDarkTrafficFilterextendsAnyRef"></a>
+      <a id="AbstractDarkTrafficFilter:AbstractDarkTrafficFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="AbstractDarkTrafficFilter.html"><span class="name">AbstractDarkTrafficFilter</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@AbstractDarkTrafficFilterextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.exp.BackupRequestFilter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="BackupRequestFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
       <a id="BackupRequestFilter[Req,Rep]:BackupRequestFilter[Req,Rep]"></a>
       <h4 class="signature">
@@ -144,7 +161,7 @@ are idempotent).</p></span></dd></dl></div>
               
         </dd></dl></div>
     </li><li name="com.twitter.finagle.exp.DarkTrafficFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]"></a>
+      <a id="DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]withAbstractDarkTrafficFilter"></a>
       <a id="DarkTrafficFilter[Req,Rep]:DarkTrafficFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -152,10 +169,10 @@ are idempotent).</p></span></dd></dl></div>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="DarkTrafficFilter.html"><span class="name">DarkTrafficFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>]</span>
+        <a href="DarkTrafficFilter.html"><span class="name">DarkTrafficFilter</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.exp.DarkTrafficFilter.Rep">Rep</span>] with <a href="AbstractDarkTrafficFilter.html" class="extype" name="com.twitter.finagle.exp.AbstractDarkTrafficFilter">AbstractDarkTrafficFilter</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.exp.package@DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.exp.package@DarkTrafficFilter[Req,Rep]extendsSimpleFilter[Req,Rep]withAbstractDarkTrafficFilter" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -203,24 +220,6 @@ forwarded.
                 <span class="name">@Threads</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.twitter.finagle.exp.MysqlRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="MysqlRichClientextendsAnyRef"></a>
-      <a id="MysqlRichClient:MysqlRichClient"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.exp.package@MysqlRichClientextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Supplements a <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> with convenient
-builder methods for constructing a mysql client.</p>
     </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftForwardingWarmUpFilterextendsForwardingWarmUpFilter[Array[Byte],Array[Byte]]"></a>
       <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
@@ -279,45 +278,6 @@ builder methods for constructing a mysql client.</p>
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.exp.MySqlClientTracingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MySqlClientTracingFilter"></a>
-      <a id="MySqlClientTracingFilter:MySqlClientTracingFilter"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="MySqlClientTracingFilter$.html"><span class="name">MySqlClientTracingFilter</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.exp.package@MySqlClientTracingFilter" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.exp.Mysql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Mysql"></a>
-      <a id="Mysql:Mysql"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Mysql$.html"><span class="name">Mysql</span></a><span class="result"> extends <a href="../Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.exp.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.exp.mysql.Result">Result</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.exp.MysqlRichClient">MysqlRichClient</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.exp.package@Mysql" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <div class="block">Example:
-               <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client = Mysql.client
-  .withCredentials(<span class="lit">"<username>"</span>, <span class="lit">"<password>"</span>)
-  .withDatabase(<span class="lit">"<db>"</span>)
-  .newRichClient(<span class="lit">"inet!localhost:3306"</span>)</pre></li></ol>
-            </div></dl></div>
     </li><li name="com.twitter.finagle.exp.ThriftForwardingWarmUpFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ThriftForwardingWarmUpFilter"></a>
       <a id="ThriftForwardingWarmUpFilter:ThriftForwardingWarmUpFilter"></a>
@@ -331,23 +291,6 @@ builder methods for constructing a mysql client.</p>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.exp.package@ThriftForwardingWarmUpFilter" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.twitter.finagle.exp.mysql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="mysql"></a>
-      <a id="mysql:mysql"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">package</span>
-      </span>
-      <span class="symbol">
-        <a href="mysql/package.html"><span class="name">mysql</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.exp.package@mysql" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

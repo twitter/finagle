@@ -1395,7 +1395,8 @@ That is: it is applied to the interval between the dispatch of
 the request and the receipt of the response.</p><p>To migrate to the Stack-based APIs, use <code>CommonParams.withRequestTimeout</code>.
 For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
-Http.client.withRequestTimeout(duration)</pre></div></div>
+Http.client.withRequestTimeout(duration)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>if the request is not complete after <code>duration</code> the work that is
+      in progress will be interrupted via <span class="extype" name="Future.raise">Future.raise</span>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="timeout(Duration)">timeout(Duration)</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#responseClassifier" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="responseClassifier:com.twitter.finagle.service.ResponseClassifier"></a>
       <a id="responseClassifier:ResponseClassifier"></a>
@@ -1646,7 +1647,7 @@ builder parameters will be used by the resultant <code>Client</code>; it is up t
 discretion of <code>client</code> itself and the protocol implementation. For example,
 the Mux protocol has no use for most connection pool parameters (e.g.
 <code>hostConnectionLimit</code>). Thus when configuring
-<a href="../ThriftMux$.html" class="extype" name="com.twitter.finagle.ThriftMux">com.twitter.finagle.ThriftMux</a> clients (via <span class="extype" name="stack(ThriftMux.client)">stack(ThriftMux.client)</span>),
+<code>com.twitter.finagle.ThriftMux</code> clients (via <code>stack(ThriftMux.client)</code>),
 such connection pool parameters will not be applied.</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -1710,7 +1711,8 @@ For example:</p><pre><span class="kw">import</span> com.twitter.finagle.Http
 
 ClientBuilder()
   .stack(Http.client)
-  .timeout(duration)</pre></div></div>
+  .timeout(duration)</pre></div><dl class="attributes block"> <dt>Note</dt><dd><span class="cmt"><p>if the request is not complete after <code>duration</code> the work that is
+      in progress will be interrupted via <span class="extype" name="Future.raise">Future.raise</span>.</p></span></dd><dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="requestTimeout(Duration)">requestTimeout(Duration)</span></p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.builder.ClientBuilder#tls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tls(sslContext:javax.net.ssl.SSLContext,hostname:Option[String]):ClientBuilder.this.This"></a>
       <a id="tls(SSLContext,Option[String]):This"></a>
@@ -1982,107 +1984,7 @@ Http.client.withTransport.writeTimeout(duration)</pre></div></div>
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.builder.ClientBuilder#build" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="build(THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:=:=[ClientBuilder.this.ThisConfig,ClientBuilder.this.FullySpecifiedConfig]):com.twitter.finagle.Service[Req,Rep]"></a>
-      <a id="build(=:=[ThisConfig,FullySpecifiedConfig]):Service[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">build</span><span class="params">(<span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ClientConfig[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ClientConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@build(THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:=:=[ClientBuilder.this.ThisConfig,ClientBuilder.this.FullySpecifiedConfig]):com.twitter.finagle.Service[Req,Rep]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#buildFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="buildFactory(THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:=:=[ClientBuilder.this.ThisConfig,ClientBuilder.this.FullySpecifiedConfig]):com.twitter.finagle.ServiceFactory[Req,Rep]"></a>
-      <a id="buildFactory(=:=[ThisConfig,FullySpecifiedConfig]):ServiceFactory[Req,Rep]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Used for ABI compat">buildFactory</span><span class="params">(<span name="THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION">THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION: <span class="extype" name="scala.Predef.=:=">=:=</span>[<a href="#ThisConfig=com.twitter.finagle.builder.ClientConfig[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.ThisConfig">ThisConfig</a>, <a href="#FullySpecifiedConfig=com.twitter.finagle.builder.ClientConfig.FullySpecified[Req,Rep]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.FullySpecifiedConfig">FullySpecifiedConfig</a>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Req">Req</span>, <span class="extype" name="com.twitter.finagle.builder.ClientBuilder.Rep">Rep</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@buildFactory(THE_BUILDER_IS_NOT_FULLY_SPECIFIED_SEE_ClientBuilder_DOCUMENTATION:=:=[ClientBuilder.this.ThisConfig,ClientBuilder.this.FullySpecifiedConfig]):com.twitter.finagle.ServiceFactory[Req,Rep]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Used for ABI compat</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#connectionTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="connectionTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This"></a>
-      <a id="connectionTimeout(Duration):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.0.1) Use tcpConnectTimeout instead">connectionTimeout</span><span class="params">(<span name="duration">duration: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Duration" class="extype" target="_top">Duration</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@connectionTimeout(duration:com.twitter.util.Duration):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.0.1)</i> Use tcpConnectTimeout instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#expFailFast" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="expFailFast(enabled:Boolean):ClientBuilder.this.This"></a>
-      <a id="expFailFast(Boolean):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 5.3.10)">expFailFast</span><span class="params">(<span name="enabled">enabled: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@expFailFast(enabled:Boolean):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 5.3.10)</i></p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#tracerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tracerFactory(t:com.twitter.finagle.tracing.Tracer):ClientBuilder.this.This"></a>
-      <a id="tracerFactory(Tracer):This"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name deprecated" title="Deprecated: (Since version 7.0.0) Use tracer() instead">tracerFactory</span><span class="params">(<span name="t">t: <a href="../tracing/Tracer.html" class="extype" name="com.twitter.finagle.tracing.Tracer">Tracer</a></span>)</span><span class="result">: <a href="#This=com.twitter.finagle.builder.ClientBuilder[Req,Rep,HasCluster,HasCodec,HasHostConnectionLimit]" class="extmbr" name="com.twitter.finagle.builder.ClientBuilder.This">This</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.builder.ClientBuilder@tracerFactory(t:com.twitter.finagle.tracing.Tracer):ClientBuilder.this.This" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@deprecated</span>
-              
-        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 7.0.0)</i> Use tracer() instead</p></dd></dl></div>
-    </li><li name="com.twitter.finagle.builder.ClientBuilder#tracerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.builder.ClientBuilder#tracerFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tracerFactory(factory:com.twitter.finagle.tracing.Tracer.Factory):ClientBuilder.this.This"></a>
       <a id="tracerFactory(Factory):This"></a>
       <h4 class="signature">

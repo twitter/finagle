@@ -47,7 +47,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">DtabStatsFilter</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rsp">Rsp</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">DtabStatsFilter</span><span class="tparams">[<span name="Req">Req</span>, <span name="Rep">Rep</span>]</span><span class="result"> extends <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4>
       
@@ -55,7 +55,7 @@
 requests with a non-empty Dtab.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>], (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
+          <div class="superTypes hiddenContent"><a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>], <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>], (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>], <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Any" class="extype" target="_top">Any</a></div>
         </div></div>
         
 
@@ -93,8 +93,8 @@ requests with a non-empty Dtab.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.filter.DtabStatsFilter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.filter.DtabStatsFilter[Req,Rsp]"></a>
-      <a id="&lt;init&gt;:DtabStatsFilter[Req,Rsp]"></a>
+      <a id="&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.filter.DtabStatsFilter[Req,Rep]"></a>
+      <a id="&lt;init&gt;:DtabStatsFilter[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
@@ -104,7 +104,7 @@ requests with a non-empty Dtab.
         <span class="name">DtabStatsFilter</span><span class="params">(<span name="statsReceiver">statsReceiver: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.finagle.stats.StatsReceiver" class="extype" target="_top">StatsReceiver</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.filter.DtabStatsFilter[Req,Rsp]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@&lt;init&gt;(statsReceiver:com.twitter.finagle.stats.StatsReceiver):com.twitter.finagle.filter.DtabStatsFilter[Req,Rep]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -171,14 +171,14 @@ requests with a non-empty Dtab.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#agnosticAndThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="agnosticAndThen(next:com.twitter.finagle.Filter.TypeAgnostic):com.twitter.finagle.Filter[ReqIn,RepOut,ReqOut,RepIn]"></a>
-      <a id="agnosticAndThen(TypeAgnostic):Filter[Req,Rsp,Req,Rsp]"></a>
+      <a id="agnosticAndThen(TypeAgnostic):Filter[Req,Rep,Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">agnosticAndThen</span><span class="params">(<span name="next">next: <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">agnosticAndThen</span><span class="params">(<span name="next">next: <a href="../Filter$$TypeAgnostic.html" class="extype" name="com.twitter.finagle.Filter.TypeAgnostic">TypeAgnostic</a></span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@agnosticAndThen(next:com.twitter.finagle.Filter.TypeAgnostic):com.twitter.finagle.Filter[ReqIn,RepOut,ReqOut,RepIn]" title="Permalink" target="_top">
@@ -191,14 +191,14 @@ requests with a non-empty Dtab.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen(factory:com.twitter.finagle.ServiceFactory[ReqOut,RepIn]):com.twitter.finagle.ServiceFactory[ReqIn,RepOut]"></a>
-      <a id="andThen(ServiceFactory[Req,Rsp]):ServiceFactory[Req,Rsp]"></a>
+      <a id="andThen(ServiceFactory[Req,Rep]):ServiceFactory[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">andThen</span><span class="params">(<span name="factory">factory: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../ServiceFactory.html" class="extype" name="com.twitter.finagle.ServiceFactory">ServiceFactory</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@andThen(factory:com.twitter.finagle.ServiceFactory[ReqOut,RepIn]):com.twitter.finagle.ServiceFactory[ReqIn,RepOut]" title="Permalink" target="_top">
@@ -209,14 +209,14 @@ requests with a non-empty Dtab.
                the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen(f:ReqOut=&gt;com.twitter.util.Future[RepIn]):ReqIn=&gt;com.twitter.util.Future[RepOut]"></a>
-      <a id="andThen((Req)⇒Future[Rsp]):(Req)⇒Future[Rsp]"></a>
+      <a id="andThen((Req)⇒Future[Rep]):(Req)⇒Future[Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">andThen</span><span class="params">(<span name="f">f: (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>)</span><span class="result">: (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@andThen(f:ReqOut=&gt;com.twitter.util.Future[RepIn]):ReqIn=&gt;com.twitter.util.Future[RepOut]" title="Permalink" target="_top">
@@ -226,14 +226,14 @@ requests with a non-empty Dtab.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen(service:com.twitter.finagle.Service[ReqOut,RepIn]):com.twitter.finagle.Service[ReqIn,RepOut]"></a>
-      <a id="andThen(Service[Req,Rsp]):Service[Req,Rsp]"></a>
+      <a id="andThen(Service[Req,Rep]):Service[Req,Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">andThen</span><span class="params">(<span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>)</span><span class="result">: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@andThen(service:com.twitter.finagle.Service[ReqOut,RepIn]):com.twitter.finagle.Service[ReqIn,RepOut]" title="Permalink" target="_top">
@@ -243,14 +243,14 @@ requests with a non-empty Dtab.
       <p class="shortcomment cmt">Terminates a filter chain in a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Terminates a filter chain in a <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>. For example,</p><pre>myFilter.andThen(myService)</pre></div><dl class="paramcmts block"><dt class="param">service</dt><dd class="cmt"><p>a service that takes the output request type and the input response type.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThen" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThen[Req2,Rep2](next:com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2]):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
-      <a id="andThen[Req2,Rep2](Filter[Req,Rsp,Req2,Rep2]):Filter[Req,Rsp,Req2,Rep2]"></a>
+      <a id="andThen[Req2,Rep2](Filter[Req,Rep,Req2,Rep2]):Filter[Req,Rep,Req2,Rep2]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThen</span><span class="tparams">[<span name="Req2">Req2</span>, <span name="Rep2">Rep2</span>]</span><span class="params">(<span name="next">next: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>
+        <span class="name">andThen</span><span class="tparams">[<span name="Req2">Req2</span>, <span name="Rep2">Rep2</span>]</span><span class="params">(<span name="next">next: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThen.Rep2">Rep2</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@andThen[Req2,Rep2](next:com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2]):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]" title="Permalink" target="_top">
@@ -261,14 +261,14 @@ requests with a non-empty Dtab.
 lifted into Future.exception.</p></span></dd></dl></div>
     </li><li name="com.twitter.finagle.Filter#andThenIf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="andThenIf[Req2&gt;:ReqOut,Rep2&lt;:RepIn](condAndFilter:(Boolean,com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2])):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]"></a>
-      <a id="andThenIf[Req2&gt;:Req,Rep2&lt;:Rsp]((Boolean,Filter[Req,Rsp,Req2,Rep2])):Filter[Req,Rsp,Req2,Rep2]"></a>
+      <a id="andThenIf[Req2&gt;:Req,Rep2&lt;:Rep]((Boolean,Filter[Req,Rep,Req2,Rep2])):Filter[Req,Rep,Req2,Rep2]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">andThenIf</span><span class="tparams">[<span name="Req2">Req2 &gt;: <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span></span>, <span name="Rep2">Rep2 &lt;: <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span></span>]</span><span class="params">(<span name="condAndFilter">condAndFilter: (<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>, <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>])</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>]</span>
+        <span class="name">andThenIf</span><span class="tparams">[<span name="Req2">Req2 &gt;: <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span></span>, <span name="Rep2">Rep2 &lt;: <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span></span>]</span><span class="params">(<span name="condAndFilter">condAndFilter: (<a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Boolean" class="extype" target="_top">Boolean</a>, <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>])</span>)</span><span class="result">: <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Req2">Req2</span>, <span class="extype" name="com.twitter.finagle.Filter.andThenIf.Rep2">Rep2</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@andThenIf[Req2&gt;:ReqOut,Rep2&lt;:RepIn](condAndFilter:(Boolean,com.twitter.finagle.Filter[ReqOut,RepIn,Req2,Rep2])):com.twitter.finagle.Filter[ReqIn,RepOut,Req2,Rep2]" title="Permalink" target="_top">
@@ -280,18 +280,18 @@ useful if you are statically wiring together filter chains based
 on a configuration file, for instance.
 </p></div><dl class="paramcmts block"><dt class="param">condAndFilter</dt><dd class="cmt"><p>a tuple of boolean and filter.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a></dd></dl></div>
     </li><li name="com.twitter.finagle.filter.DtabStatsFilter#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="apply(request:Req,service:com.twitter.finagle.Service[Req,Rsp]):com.twitter.util.Future[Rsp]"></a>
-      <a id="apply(Req,Service[Req,Rsp]):Future[Rsp]"></a>
+      <a id="apply(request:Req,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.util.Future[Rep]"></a>
+      <a id="apply(Req,Service[Req,Rep]):Future[Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">apply</span><span class="params">(<span name="request">request: <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span></span>, <span name="service">service: <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>)</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@apply(request:Req,service:com.twitter.finagle.Service[Req,Rsp]):com.twitter.util.Future[Rsp]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@apply(request:Req,service:com.twitter.finagle.Service[Req,Rep]):com.twitter.util.Future[Rep]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -339,14 +339,14 @@ on a configuration file, for instance.
         </dd></dl></div>
     </li><li name="scala.Function2#curried" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="curried:T1=&gt;(T2=&gt;R)"></a>
-      <a id="curried:(Req)⇒(Service[Req,Rsp])⇒Future[Rsp]"></a>
+      <a id="curried:(Req)⇒(Service[Req,Rep])⇒Future[Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">curried</span><span class="result">: (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>) ⇒ (<a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@curried:T1=&gt;(T2=&gt;R)" title="Permalink" target="_top">
@@ -552,14 +552,14 @@ on a configuration file, for instance.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Function2 → AnyRef → Any</dd></dl></div>
     </li><li name="scala.Function2#tupled" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tupled:((T1,T2))=&gt;R"></a>
-      <a id="tupled:((Req,Service[Req,Rsp]))⇒Future[Rsp]"></a>
+      <a id="tupled:((Req,Service[Req,Rep]))⇒Future[Rep]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>])) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</span>
+        <span class="name">tupled</span><span class="result">: ((<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>])) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.twitter.finagle.filter.DtabStatsFilter@tupled:((T1,T2))=&gt;R" title="Permalink" target="_top">
@@ -649,11 +649,11 @@ on a configuration file, for instance.
 
         <div id="inheritedMembers">
         <div class="parent" name="com.twitter.finagle.SimpleFilter">
-              <h3>Inherited from <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</h3>
+              <h3>Inherited from <a href="../SimpleFilter.html" class="extype" name="com.twitter.finagle.SimpleFilter">SimpleFilter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="com.twitter.finagle.Filter">
-              <h3>Inherited from <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</h3>
+              <h3>Inherited from <a href="../Filter.html" class="extype" name="com.twitter.finagle.Filter">Filter</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.Function2">
-              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rsp">Rsp</span>]</h3>
+              <h3>Inherited from (<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <a href="../Service.html" class="extype" name="com.twitter.finagle.Service">Service</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Req">Req</span>, <span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]) ⇒ <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Future" class="extype" target="_top">Future</a>[<span class="extype" name="com.twitter.finagle.filter.DtabStatsFilter.Rep">Rep</span>]</h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">

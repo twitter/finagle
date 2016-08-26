@@ -54,6 +54,8 @@ Services implement *application logic*. You might, for instance,
 define a ``Service[http.Request, http.Response]`` to implement your
 application's external API.
 
+.. _filters:
+
 Filters
 -------
 

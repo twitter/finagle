@@ -606,28 +606,6 @@ particular category of connection failure.
       </a>
     </span>
       <p class="shortcomment cmt">Indicates that connecting to a given <code>remoteAddress</code> was refused.</p>
-    </li><li name="com.twitter.finagle.Deadline" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="DeadlineextendsOrdered[com.twitter.finagle.Deadline]withProductwithSerializable"></a>
-      <a id="Deadline:Deadline"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Deadline.html"><span class="name">Deadline</span></a><span class="params">(<span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Ordered">Ordered</span>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.Deadline">Deadline</a>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@DeadlineextendsOrdered[com.twitter.finagle.Deadline]withProductwithSerializable" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A deadline is the time by which some action (e.g., a request) must
-complete.</p><div class="fullcomment"><div class="comment cmt"><p>A deadline is the time by which some action (e.g., a request) must
-complete. A deadline has a timestamp in addition to the deadline.
-This timestamp denotes the time at which the deadline was enacted.</p><p>This is done so that they may be reconciled over process boundaries;
-e.g., to account for variable latencies in message deliveries.
-</p></div><dl class="paramcmts block"><dt class="param">timestamp</dt><dd class="cmt"><p>the time at which the deadline was enacted.</p></dd><dt class="param">deadline</dt><dd class="cmt"><p>the time by which the action must complete.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Dentry" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DentryextendsProductwithSerializable"></a>
       <a id="Dentry:Dentry"></a>
@@ -1050,6 +1028,24 @@ discovered for given <code>scheme</code>.</p><p>Resolvers are discovered via Fin
 mechanism. These exceptions typically suggest that there are multiple
 libraries on the classpath with conflicting scheme definitions.
 </p></div></div>
+    </li><li name="com.twitter.finagle.MysqlRichClient" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MysqlRichClientextendsAnyRef"></a>
+      <a id="MysqlRichClient:MysqlRichClient"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="MysqlRichClient.html"><span class="name">MysqlRichClient</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.AnyRef" class="extype" target="_top">AnyRef</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@MysqlRichClientextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Supplements a <a href="Client.html" class="extype" name="com.twitter.finagle.Client">com.twitter.finagle.Client</a> with convenient
+builder methods for constructing a mysql client.</p>
     </li><li name="com.twitter.finagle.Name" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="NameextendsAnyRef"></a>
       <a id="Name:Name"></a>
@@ -1918,7 +1914,7 @@ to indicate the health of <a href="Service.html" class="extype" name="com.twitte
     </span>
       <p class="shortcomment cmt">A mixin trait to provide a rich Thrift server API.</p>
     </li><li name="com.twitter.finagle.TimeoutException" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="TimeoutExceptionextendsExceptionwithSourcedException"></a>
+      <a id="TimeoutExceptionextendsExceptionwithSourcedExceptionwithHasLogLevel"></a>
       <a id="TimeoutException:TimeoutException"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1926,10 +1922,10 @@ to indicate the health of <a href="Service.html" class="extype" name="com.twitte
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="TimeoutException.html"><span class="name">TimeoutException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a></span>
+        <a href="TimeoutException.html"><span class="name">TimeoutException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span> with <a href="SourcedException.html" class="extype" name="com.twitter.finagle.SourcedException">SourcedException</a> with <a href="https://twitter.github.io/util/docs/index.html#com.twitter.logging.HasLogLevel" class="extype" target="_top">HasLogLevel</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@TimeoutExceptionextendsExceptionwithSourcedException" title="Permalink" target="_top">
+      <a href="../../../index.html#com.twitter.finagle.package@TimeoutExceptionextendsExceptionwithSourcedExceptionwithHasLogLevel" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -2051,6 +2047,26 @@ These exceptions should generally be retryable.
       </a>
     </span>
       <p class="shortcomment cmt">Indicates that a write to a given <code>remoteAddress</code> timed out.</p>
+    </li><li name="com.twitter.finagle.Deadline" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DeadlineextendsDeadline"></a>
+      <a id="Deadline:Deadline"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$Deadline.html"><span class="name deprecated" title="Deprecated: (Since version 2016-08-22) Use com.twitter.finagle.context.Deadline instead">Deadline</span></a><span class="result"> extends <a href="context/Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">finagle.context.Deadline</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@DeadlineextendsDeadline" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-08-22)</i> Use <code>com.twitter.finagle.context.Deadline</code> instead</p></dd></dl></div>
     </li><li name="com.twitter.finagle.Group" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="Group[T]extendsAnyRef"></a>
       <a id="Group[T]:Group[T]"></a>
@@ -2362,23 +2378,6 @@ their corresponding backup requests succeeded first. See
       </a>
     </span>
       
-    </li><li name="com.twitter.finagle.Deadline" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Deadline"></a>
-      <a id="Deadline:Deadline"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Deadline$.html"><span class="name">Deadline</span></a><span class="result"> extends <a href="context/MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.Deadline">Deadline</a>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.twitter.finagle.package@Deadline" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A broadcast context for deadlines.</p>
     </li><li name="com.twitter.finagle.Dentry" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Dentry"></a>
       <a id="Dentry:Dentry"></a>
@@ -2603,7 +2602,8 @@ do not occur.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Stack based Memcached client.</p><div class="fullcomment"><div class="comment cmt"><p>Stack based Memcached client.</p><p>For example, a default client can be built through:</p></div><dl class="attributes block"> <div class="block">Examples:
+      <p class="shortcomment cmt">Stack based Memcached client.</p><div class="fullcomment"><div class="comment cmt"><p>Stack based Memcached client.</p><p>For example, a default client can be built through:
+</p></div><dl class="attributes block"> <div class="block">Examples:
                <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client =
   Memcached.client
     .withEjectFailedHost(<span class="kw">true</span>)
@@ -2629,6 +2629,45 @@ do not occur.
       </a>
     </span>
       <p class="shortcomment cmt">A client and server for the mux protocol described in <a href="mux/package.html" class="extype" name="com.twitter.finagle.mux">com.twitter.finagle.mux</a>.</p>
+    </li><li name="com.twitter.finagle.MySqlClientTracingFilter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MySqlClientTracingFilter"></a>
+      <a id="MySqlClientTracingFilter:MySqlClientTracingFilter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MySqlClientTracingFilter$.html"><span class="name">MySqlClientTracingFilter</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@MySqlClientTracingFilter" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.twitter.finagle.Mysql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Mysql"></a>
+      <a id="Mysql:Mysql"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Mysql$.html"><span class="name">Mysql</span></a><span class="result"> extends <a href="Client.html" class="extype" name="com.twitter.finagle.Client">Client</a>[<a href="mysql/Request.html" class="extype" name="com.twitter.finagle.mysql.Request">Request</a>, <a href="mysql/Result.html" class="extype" name="com.twitter.finagle.mysql.Result">Result</a>] with <a href="MysqlRichClient.html" class="extype" name="com.twitter.finagle.MysqlRichClient">MysqlRichClient</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@Mysql" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="attributes block"> <div class="block">Example:
+               <ol><li class="cmt"><p></p><pre><span class="kw">val</span> client = Mysql.client
+  .withCredentials(<span class="lit">"<username>"</span>, <span class="lit">"<password>"</span>)
+  .withDatabase(<span class="lit">"<db>"</span>)
+  .newRichClient(<span class="lit">"inet!localhost:3306"</span>)</pre></li></ol>
+            </div></dl></div>
     </li><li name="com.twitter.finagle.Name" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Name"></a>
       <a id="Name:Name"></a>
@@ -3217,6 +3256,23 @@ stabilized (moved elsewhere) at any time.
       </a>
     </span>
       
+    </li><li name="com.twitter.finagle.http2" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="http2"></a>
+      <a id="http2:http2"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="http2/package.html"><span class="name">http2</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@http2" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.httpproxy" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="httpproxy"></a>
       <a id="httpproxy:httpproxy"></a>
@@ -3397,6 +3453,23 @@ milliseconds. Whenever a lease has not been issued, a client can assume it holds
 an indefinite lease. Adhering to the lease is optional, but the server may
 reject requests or provide degraded service should the lease expire. This is
 used by servers to implement features like garbage collection avoidance.</p></div></div>
+    </li><li name="com.twitter.finagle.mysql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="mysql"></a>
+      <a id="mysql:mysql"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="mysql/package.html"><span class="name">mysql</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@mysql" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.twitter.finagle.namer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="namer"></a>
       <a id="namer:namer"></a>
@@ -3849,7 +3922,27 @@ generator.
 
         <div id="values" class="values members">
               <h3>Deprecated Value Members</h3>
-              <ol><li name="com.twitter.finagle.ThriftMuxClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.twitter.finagle.Deadline" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Deadline"></a>
+      <a id="Deadline:Deadline"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$Deadline$.html"><span class="name deprecated" title="Deprecated: (Since version 2016-08-22) Use com.twitter.finagle.context.Deadline instead">Deadline</span></a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.package@Deadline" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2016-08-22)</i> Use <code>com.twitter.finagle.context.Deadline</code> instead</p></dd></dl></div>
+    </li><li name="com.twitter.finagle.ThriftMuxClient" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ThriftMuxClient"></a>
       <a id="ThriftMuxClient:ThriftMuxClient"></a>
       <h4 class="signature">

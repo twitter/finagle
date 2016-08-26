@@ -87,6 +87,28 @@ are indexed by type Key[A] in a typesafe manner. Later bindings
 shadow earlier ones.</p><p>Note that the implementation of context maintains all bindings
 in a linked list; context lookup requires a linear search.
 </p></div></div>
+    </li><li name="com.twitter.finagle.context.Deadline" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DeadlineextendsOrdered[com.twitter.finagle.context.Deadline]withProductwithSerializable"></a>
+      <a id="Deadline:Deadline"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Deadline.html"><span class="name">Deadline</span></a><span class="params">(<span name="timestamp">timestamp: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>, <span name="deadline">deadline: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.util.Time" class="extype" target="_top">Time</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Ordered">Ordered</span>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.package@DeadlineextendsOrdered[com.twitter.finagle.context.Deadline]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A deadline is the time by which some action (e.g., a request) must
+complete.</p><div class="fullcomment"><div class="comment cmt"><p>A deadline is the time by which some action (e.g., a request) must
+complete. A deadline has a timestamp in addition to the deadline.
+This timestamp denotes the time at which the deadline was enacted.</p><p>This is done so that they may be reconciled over process boundaries;
+e.g., to account for variable latencies in message deliveries.
+</p></div><dl class="paramcmts block"><dt class="param">timestamp</dt><dd class="cmt"><p>the time at which the deadline was enacted.</p></dd><dt class="param">deadline</dt><dd class="cmt"><p>the time by which the action must complete.</p></dd></dl></div>
     </li><li name="com.twitter.finagle.context.LocalContext" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LocalContextextendsContext"></a>
       <a id="LocalContext:LocalContext"></a>
@@ -173,6 +195,23 @@ tree.
       </a>
     </span>
       <p class="shortcomment cmt"><a href="Context.html" class="extype" name="com.twitter.finagle.context.Context">com.twitter.finagle.context.Context</a>s that are managed by Finagle.</p>
+    </li><li name="com.twitter.finagle.context.Deadline" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Deadline"></a>
+      <a id="Deadline:Deadline"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Deadline$.html"><span class="name">Deadline</span></a><span class="result"> extends <a href="MarshalledContext$Key.html" class="extype" name="com.twitter.finagle.context.MarshalledContext.Key">Key</a>[<a href="Deadline.html" class="extype" name="com.twitter.finagle.context.Deadline">Deadline</a>] with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.twitter.finagle.context.package@Deadline" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A broadcast context for deadlines.</p>
     </li><li name="com.twitter.finagle.context.RemoteInfo" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RemoteInfo"></a>
       <a id="RemoteInfo:RemoteInfo"></a>

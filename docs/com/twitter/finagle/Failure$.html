@@ -167,6 +167,26 @@
 interruption.</p><div class="fullcomment"><div class="comment cmt"><p>Flag interrupted indicates that the error was caused due to an
 interruption. (e.g., by invoking <span class="extype" name="Future.raise">Future.raise</span>.)
 </p></div></div>
+    </li><li name="com.twitter.finagle.Failure#Rejected" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Rejected:Long"></a>
+      <a id="Rejected:Long"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Rejected</span><span class="result">: <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Long" class="extype" target="_top">Long</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.twitter.finagle.Failure$@Rejected:Long" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Flag rejected indicates that the work was rejected and therefore cannot be
+completed.</p><div class="fullcomment"><div class="comment cmt"><p>Flag rejected indicates that the work was rejected and therefore cannot be
+completed. This may indicate an overload condition.
+</p></div></div>
     </li><li name="com.twitter.finagle.Failure#Restartable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Restartable:Long"></a>
       <a id="Restartable:Long"></a>
@@ -595,7 +615,8 @@ it returns a new failure with the given flags.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> failure with the given message and cause.</p>
+      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> and <a href="#Rejected:Long" class="extmbr" name="com.twitter.finagle.Failure#Rejected">Rejected</a> failure with the given
+message and cause.</p>
     </li><li name="com.twitter.finagle.Failure#rejected" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rejected(cause:Throwable):com.twitter.finagle.Failure"></a>
       <a id="rejected(Throwable):Failure"></a>
@@ -612,7 +633,7 @@ it returns a new failure with the given flags.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> failure with the given cause.</p>
+      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> and <a href="#Rejected:Long" class="extmbr" name="com.twitter.finagle.Failure#Rejected">Rejected</a> failure with the given cause.</p>
     </li><li name="com.twitter.finagle.Failure#rejected" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rejected(why:String):com.twitter.finagle.Failure"></a>
       <a id="rejected(String):Failure"></a>
@@ -629,7 +650,7 @@ it returns a new failure with the given flags.
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> failure with the given message.</p>
+      <p class="shortcomment cmt">Create a new <a href="#Restartable:Long" class="extmbr" name="com.twitter.finagle.Failure#Restartable">Restartable</a> and <a href="#Rejected:Long" class="extmbr" name="com.twitter.finagle.Failure#Rejected">Rejected</a> failure with the given message.</p>
     </li><li name="com.twitter.finagle.Failure#rejected" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rejected:com.twitter.finagle.Failure"></a>
       <a id="rejected:Failure"></a>

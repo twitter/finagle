@@ -28,12 +28,10 @@
         </head>
         <body class="type">
       <div id="definition">
-        <a href="SlaveOf$.html" title="See companion object"><img alt="Class/Object" src="../../../../../lib/class_to_object_big.png" /></a>
+        <img alt="Class" src="../../../../../lib/class_big.png" />
         <p id="owner"><a href="../../../../package.html" class="extype" name="com">com</a>.<a href="../../../package.html" class="extype" name="com.twitter">twitter</a>.<a href="../../package.html" class="extype" name="com.twitter.finagle">finagle</a>.<a href="../package.html" class="extype" name="com.twitter.finagle.redis">redis</a>.<a href="package.html" class="extype" name="com.twitter.finagle.redis.protocol">protocol</a></p>
-        <h1><a href="SlaveOf$.html" title="See companion object">SlaveOf</a></h1><h3><span class="morelinks"><div>
-            Related Docs:
-            <a href="SlaveOf$.html" title="See companion object">object SlaveOf</a>
-            | <a href="package.html" class="extype" name="com.twitter.finagle.redis.protocol">package protocol</a>
+        <h1>SlaveOf</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="com.twitter.finagle.redis.protocol">package protocol</a>
           </div></span></h3><span class="permalink">
       <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.SlaveOf" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
@@ -47,7 +45,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">SlaveOf</span><span class="params">(<span name="host">host: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="port">port: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
+        <span class="name">SlaveOf</span><span class="params">(<span name="host">host: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="port">port: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span><span class="result"> extends <a href="Command.html" class="extype" name="com.twitter.finagle.redis.protocol.Command">Command</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Product" class="extype" target="_top">Product</a> with <a href="http://www.scala-lang.org/api/2.11.8/index.html#scala.Serializable" class="extype" target="_top">Serializable</a></span>
       </span>
       </h4>
       
@@ -91,7 +89,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.twitter.finagle.redis.protocol.SlaveOf#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(host:org.jboss.netty.buffer.ChannelBuffer,port:org.jboss.netty.buffer.ChannelBuffer):com.twitter.finagle.redis.protocol.SlaveOf"></a>
+      <a id="&lt;init&gt;(host:com.twitter.io.Buf,port:com.twitter.io.Buf):com.twitter.finagle.redis.protocol.SlaveOf"></a>
       <a id="&lt;init&gt;:SlaveOf"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,10 +97,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SlaveOf</span><span class="params">(<span name="host">host: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>, <span name="port">port: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span>
+        <span class="name">SlaveOf</span><span class="params">(<span name="host">host: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>, <span name="port">port: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.SlaveOf@&lt;init&gt;(host:org.jboss.netty.buffer.ChannelBuffer,port:org.jboss.netty.buffer.ChannelBuffer):com.twitter.finagle.redis.protocol.SlaveOf" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.SlaveOf@&lt;init&gt;(host:com.twitter.io.Buf,port:com.twitter.io.Buf):com.twitter.finagle.redis.protocol.SlaveOf" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -282,18 +280,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.protocol.SlaveOf#host" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="host:org.jboss.netty.buffer.ChannelBuffer"></a>
-      <a id="host:ChannelBuffer"></a>
+      <a id="host:com.twitter.io.Buf"></a>
+      <a id="host:Buf"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">host</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+        <span class="name">host</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.SlaveOf@host:org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.SlaveOf@host:com.twitter.io.Buf" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -367,18 +365,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.twitter.finagle.redis.protocol.SlaveOf#port" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="port:org.jboss.netty.buffer.ChannelBuffer"></a>
-      <a id="port:ChannelBuffer"></a>
+      <a id="port:com.twitter.io.Buf"></a>
+      <a id="port:Buf"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">port</span><span class="result">: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>
+        <span class="name">port</span><span class="result">: <a href="https://twitter.github.io/util/docs/index.html#com.twitter.io.Buf" class="extype" target="_top">Buf</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.SlaveOf@port:org.jboss.netty.buffer.ChannelBuffer" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.twitter.finagle.redis.protocol.SlaveOf@port:com.twitter.io.Buf" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
