@@ -79,6 +79,7 @@ object Command {
   val ZREVRANGE         = Buf.Utf8("ZREVRANGE")
   val ZREVRANGEBYSCORE  = Buf.Utf8("ZREVRANGEBYSCORE")
   val ZREVRANK          = Buf.Utf8("ZREVRANK")
+  val ZSCAN             = Buf.Utf8("ZSCAN")
   val ZSCORE            = Buf.Utf8("ZSCORE")
   val ZUNIONSTORE       = Buf.Utf8("ZUNIONSTORE")
 
@@ -91,6 +92,7 @@ object Command {
   val SPOP              = Buf.Utf8("SPOP")
   val SRANDMEMBER       = Buf.Utf8("SRANDMEMBER")
   val SINTER            = Buf.Utf8("SINTER")
+  val SSCAN             = Buf.Utf8("SSCAN")
 
   // Miscellaneous
   val PING              = Buf.Utf8("PING")

@@ -200,4 +200,15 @@ private[redis] trait SortedSetCommands { self: BaseClient =>
     doRequest(ZRange(key, start, stop, if (withScores) Some(WithScores) else None)) {
       parseMBulkReply(withScores)
     }
+
+  /**
+    * Returns keys in given set `key`, starting at `cursor`.
+    */
+  def zScan(
+    key: Buf, cursor: JLong, count: Option[JLong], pattern: Option[Buf]
+  ): Future[Seq[Buf]] =
+    doRequest(ZScan(key, cursor, count, pattern)) {
+      case MBulkReply(messages) => Future.value(ReplyFormat.toBuf(messages))
+      case EmptyMBulkReply      => Future.Nil
+    }
 }

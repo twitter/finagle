@@ -1,6 +1,9 @@
 package com.twitter.finagle.redis.protocol
 
 import com.twitter.io.Buf
+import java.lang.{Long => JLong}
+
+import com.twitter.finagle.redis.util.StringToBuf
 
 case class SAdd(key: Buf, values: Seq[Buf]) extends StrictKeyCommand {
   RequireClientProtocol(values.nonEmpty, "values must not be empty")
@@ -40,4 +43,25 @@ case class SRandMember(key: Buf, count: Option[Int] = None) extends StrictKeyCom
 }
 case class SInter(keys: Seq[Buf]) extends StrictKeysCommand {
   def name: Buf = Command.SINTER
+}
+
+case class SScan(
+  key: Buf,
+  cursor: Long,
+  count: Option[JLong] = None,
+  pattern: Option[Buf] = None
+  ) extends Command {
+  def command: String  = Commands.SSCAN
+  def toBuf: Buf = {
+    val bufs = Seq(CommandBytes.HSCAN, key, StringToBuf(cursor.toString))
+    val withCount = count match {
+      case Some(count) => bufs ++ Seq(CommandBytes.COUNT, StringToBuf(count.toString))
+      case None => bufs
+    }
+    val withPattern = pattern match {
+      case Some(pattern) => withCount ++ Seq(CommandBytes.PATTERN, pattern)
+      case None => withCount
+    }
+    RedisCodec.toUnifiedBuf(withPattern)
+  }
 }
