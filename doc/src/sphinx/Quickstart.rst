@@ -22,7 +22,7 @@ Setting up SBT
 
 We'll use sbt_ to build our project. Finagle is published to Maven Central,
 so little setup is needed: see the ``build.sbt`` in the ``quickstart`` directory.
-Also ensure that you're using ``scala`` ``2.11`` as of ``6.36.0``.
+We no longer support ``scala`` ``2.10``.
 
 .. parsed-literal::
 
