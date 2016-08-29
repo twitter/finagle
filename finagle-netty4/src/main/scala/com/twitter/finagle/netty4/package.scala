@@ -1,9 +1,7 @@
 package com.twitter.finagle
 
-import com.twitter.app.GlobalFlag
 import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.util.ProxyThreadFactory
-import com.twitter.jvm.numProcs
 import com.twitter.util.Awaitable
 import io.netty.buffer.{UnpooledByteBufAllocator, ByteBufAllocator}
 import java.util.concurrent.{ExecutorService, Executors}
@@ -26,8 +24,6 @@ package object netty4 {
   // this forces netty to use a "cleaner" for direct byte buffers
   // which we need as long as we don't release them.
   System.setProperty("io.netty.maxDirectMemory", "0")
-
-  object numWorkers extends GlobalFlag((numProcs() * 2).ceil.toInt, "number of netty4 worker threads")
 
   // nb: we can't use io.netty.buffer.UnpooledByteBufAllocator.DEFAULT
   //     because we need to disable the leak-detector and
@@ -54,7 +50,7 @@ package object netty4 {
      * the default has performance and instrumentation implications and should only be
      * done so with care. If there is particular work you would like to schedule off
      * the I/O threads, consider scheduling that work on a separate thread pool
-     * more granularly (e.g. [[FuturePool]] is a good tool for this).
+     * more granularly (e.g. [[com.twitter.util.FuturePool]] is a good tool for this).
      */
     case class WorkerPool(executorService: ExecutorService)
     implicit object WorkerPool extends Stack.Param[WorkerPool] {

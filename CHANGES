@@ -7,14 +7,24 @@ Note that ``RB_ID=#`` correspond to associated messages in commits.
 6.x
 -----
 
+Breaking API Changes
+~~~~~~~~~~~~~~~~~~~~
+
+  * finagle-netty4: Move `numWorkers` flag out of the package object so it gets a
+    user friendly name: `c.t.f.netty4.numWorkers` instead of `c.t.f.netty4$.package$.numWorkers`.
+    ``RB_ID=123567``
+
+  * finagle-core: `c.t.f.netty3.WorkerPool` is no longer visible outside of `c.t.f.netty3`.
+    ``RB_ID=123567``
+
 6.37.0
 ------
 
 Deprecations
 ~~~~~~~~~~~~
 
-* finagle-core: `c.t.f.Deadline` is deprecated in favor of `c.t.f.context.Deadline`.
-  ``RB_ID=864148``
+  * finagle-core: `c.t.f.Deadline` is deprecated in favor of `c.t.f.context.Deadline`.
+    ``RB_ID=864148``
 
 Breaking API Changes
 ~~~~~~~~~~~~~~~~~~~~

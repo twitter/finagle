@@ -4,6 +4,7 @@ import com.twitter.concurrent.NamedPoolThreadFactory
 import com.twitter.finagle.util.ProxyThreadFactory
 import com.twitter.util.Awaitable
 import java.util.concurrent.{ExecutorService, Executors}
+import org.jboss.netty.channel.socket.nio.NioWorkerPool
 import org.jboss.netty.util.{ThreadNameDeterminer, ThreadRenamingRunnable}
 
 /**
@@ -31,4 +32,6 @@ package object netty3 {
     )
     Executors.newCachedThreadPool(threadFactory)
   }
+
+  private[netty3] val WorkerPool: NioWorkerPool = new NioWorkerPool(Executor, numWorkers())
 }
