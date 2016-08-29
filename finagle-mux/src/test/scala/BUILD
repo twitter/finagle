@@ -2,12 +2,13 @@ junit_tests(name='scala',
   dependencies=[
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
-    '3rdparty/jvm/io/netty',
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',
-    'finagle/finagle-core',
-    'finagle/finagle-mux',
-    'util/util-core'
+    'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-mux/src/main/scala:scala',
+    'util/util-app/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.scala'),
   resources=[

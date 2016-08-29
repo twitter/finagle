@@ -3,9 +3,9 @@ junit_tests(name='scala',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/scalatest',
-    'finagle/finagle-core',
     'finagle/finagle-stream',
-    'util/util-core'
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala')

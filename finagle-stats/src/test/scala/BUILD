@@ -4,7 +4,12 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/scalacheck',
     '3rdparty/jvm/org/scalatest',
     'science/src/java/com/twitter/common/metrics:metrics',
-    'finagle/finagle-stats'
+    'finagle/finagle-stats/src/main/scala',
+    'finagle/finagle-http/src/main/scala:scala',
+    'util/util-app/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
+    'util/util-events/src/main/scala:scala',
+    'util/util-stats/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala')

@@ -4,6 +4,8 @@ junit_tests(name='java',
     '3rdparty/jvm/io/netty',
     'finagle/finagle-core',
     'util/util-core',
+    '3rdparty/jvm/com/google/guava:guava',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.java'),
 )

@@ -6,13 +6,16 @@ scala_library(name='scala',
   ),
   dependencies=[
     'science/src/java/com/twitter/common/stats:stats',
-    'finagle/finagle-core',
     'util/util-registry',
     'util/util-stats',
+    'science/src/java/com/twitter/common/base:base',
+    'science/src/java/com/twitter/common/stats:stats-provider',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-commons-stats/src/main/resources'
   ],
+  # Exposes a service-loaded class.
+  scope='forced',
 )

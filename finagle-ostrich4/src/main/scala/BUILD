@@ -5,17 +5,19 @@ scala_library(name='scala',
     repo = artifactory,
   ),
   dependencies=[
-    '3rdparty/jvm/io/netty',
-    'finagle/finagle-core',
-    'finagle/finagle-http',
     'ostrich',
-    'util/util-core',
     'util/util-registry',
     'util/util-stats',
+    'finagle/finagle-core/src/main/scala:scala',
+    'finagle/finagle-http/src/main/scala:scala',
+    'util/util-app/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala'),
   resources=[
     'finagle/finagle-ostrich4/src/main/resources'
   ],
+  # Exposes a service-loaded class.
+  scope='forced',
 )

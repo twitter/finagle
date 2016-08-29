@@ -4,9 +4,10 @@ junit_tests(name='scala',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/org/scalatest',
     '3rdparty/jvm/org/scalacheck',
-    'finagle/finagle-core',
     'finagle/finagle-redis',
-    'util/util-core'
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
+    'util/util-logging/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala')

@@ -4,10 +4,10 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/io/netty',
     '3rdparty/jvm/org/scalatest',
-    'finagle/finagle-core',
     'finagle/finagle-ostrich4',
     'ostrich',
-    'util/util-core'
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
   ],
   fatal_warnings=True,
   sources=rglobs('*.scala')

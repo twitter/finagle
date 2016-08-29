@@ -7,11 +7,12 @@ java_library(name='java',
   dependencies=[
     '3rdparty/jvm/com/google/guava',
     'science/src/java/com/twitter/common/zookeeper:client',
-    '3rdparty/jvm/io/netty',
     '3rdparty/jvm/org/scala-lang:scala-library',
-    'finagle/finagle-core',
     'finagle/finagle-memcached/src/main/scala',
-    'util/util-core',
+    '3rdparty/jvm/com/google/inject:guice',
+    'finagle/finagle-core/src/main/scala:scala',
+    'util/util-core/src/main/scala:scala',
+    'util/util-stats/src/main/scala:scala',
   ],
   sources=rglobs('*.java')
 )

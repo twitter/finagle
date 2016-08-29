@@ -4,10 +4,11 @@ junit_tests(name='scala',
     '3rdparty/jvm/junit',
     '3rdparty/jvm/org/mockito:mockito-all',
     '3rdparty/jvm/org/scalatest',
-    'finagle/finagle-core',
     'finagle/finagle-exception',
     'util/util-codec',
-    'util/util-core'
+    '3rdparty/jvm/com/fasterxml/jackson/module:jackson-module-scala',
+    'finagle/finagle-exception/src/main/thrift:thrift-scala',
+    'util/util-core/src/main/scala:scala',
   ],
   sources=rglobs('*.scala')
 )

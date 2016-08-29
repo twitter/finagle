@@ -6,10 +6,10 @@ junit_tests(name='scala',
     '3rdparty/jvm/org/scalatest',
     'finagle/finagle-toggle',
     'util/util-app/src/main/java',
-    'util/util-app/src/main/scala',
-    'util/util-core',
+    scoped('util/util-app/src/main/scala', scope='forced'),
     'util/util-logging',
     'util/util-stats',
+    'util/util-core/src/main/scala:scala',
   ],
   resources=[
     'finagle/finagle-toggle/src/test/resources'
