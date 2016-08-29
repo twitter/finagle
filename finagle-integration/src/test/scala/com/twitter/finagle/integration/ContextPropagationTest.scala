@@ -118,7 +118,7 @@ class ContextPropagationTest extends FunSuite with MockitoSugar {
 
     assert(Await.result(client.query("ok"), 2.seconds) == "ok")
   }
-  
+
   test("thriftmux server + thriftmux client: server does not see Retries " +
     "set by another client if client removed RequeueFilter") {
     val assertRetriesFilter = new SimpleFilter[Array[Byte], Array[Byte]] {

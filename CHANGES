@@ -58,12 +58,16 @@ New Features
     "finagle/future_pool/active_tasks", and "finagle/future_pool/completed_tasks".
     ``RB_ID=850652``
 
-  * finagle-thrift: maxThriftBufferSize is now tunable via parameter for Thrift
-    servers. It previously only was for ThriftMux servers. ``RB_ID=860102``
-
   * finagle-core: Mux Clients now propagate the number of times the client retried
     the request in the request's c.t.f.context.Context, available via
     c.t.f.context.Retries. ``RB_ID=862640``
+
+  * finagle-http: HTTP Clients now propagate the number of times the client retried
+    the request in the request's c.t.f.context.Context, available via
+    c.t.f.context.Retries. ``RB_ID=864852``
+
+  * finagle-thrift: maxThriftBufferSize is now tunable via parameter for Thrift
+    servers. It previously only was for ThriftMux servers. ``RB_ID=860102``
 
 Runtime Behavior Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,7 +1,7 @@
 package com.twitter.finagle.http.codec
 
 import com.twitter.conversions.time._
-import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.http.{Message, Method, Request, Version}
 import org.junit.runner.RunWith
 import org.scalatest.FunSuite
@@ -12,16 +12,16 @@ class HttpContextTest extends FunSuite {
 
   def newMsg(): Message = Request(Version.Http11, Method.Get, "/")
 
-  test("written request context matches read request context") {
+  test("written request deadline matches read request deadline") {
     val m = newMsg()
     val writtenDeadline = Deadline.ofTimeout(5.seconds)
     Contexts.broadcast.let(Deadline, writtenDeadline) {
       HttpContext.write(m)
 
-      // Clear the deadline value in the context
+      // Clear Deadline in the context
       Contexts.broadcast.letClear(Deadline) {
 
-        // ensure the deadline was cleared
+        // Ensure the Deadline was cleared
         assert(Deadline.current == None)
 
         HttpContext.read(m) {
@@ -32,9 +32,31 @@ class HttpContextTest extends FunSuite {
     }
   }
 
+  test("written request retries matches read request retries") {
+    val m = newMsg()
+    val writtenRetries = Retries(5)
+    Contexts.broadcast.let(Retries, writtenRetries) {
+      HttpContext.write(m)
+
+      // Clear Retries in the Context
+      Contexts.broadcast.letClear(Retries) {
+
+        // Ensure the Retries was cleared
+        assert(Retries.current == None)
+
+        HttpContext.read(m) {
+          val readRetries = Retries.current.get
+          assert(writtenRetries == readRetries)
+        }
+      }
+    }
+  }
+
+
+
   test("invalid context header value causes context to not be set") {
     val m = newMsg()
-    m.headers.set("Finagle-Ctx-com.twitter.finagle.foo", ",,,");
+    m.headers.set("Finagle-Ctx-com.twitter.finagle.foo", ",,,")
     HttpContext.read(m) {
       assert(Contexts.broadcast.marshal.isEmpty)
     }

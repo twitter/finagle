@@ -5,7 +5,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle
 import com.twitter.finagle._
 import com.twitter.finagle.builder.{ClientBuilder, ServerBuilder}
-import com.twitter.finagle.context.{Contexts, Deadline}
+import com.twitter.finagle.context.{Contexts, Deadline, Retries}
 import com.twitter.finagle.http.service.HttpResponseClassifier
 import com.twitter.finagle.param.Stats
 import com.twitter.finagle.service.{ResponseClass, FailureAccrualFactory, ServiceFactoryRef}
@@ -304,6 +304,10 @@ abstract class AbstractEndToEndTest extends FunSuite with BeforeAndAfter {
         def apply(request: Request) = {
           val deadline = Deadline.current.get
           assert(deadline.deadline == writtenDeadline.deadline)
+
+          val retries = Retries.current.get
+          assert(retries == Retries(0))
+
           val response = Response(request)
           Future.value(response)
         }
