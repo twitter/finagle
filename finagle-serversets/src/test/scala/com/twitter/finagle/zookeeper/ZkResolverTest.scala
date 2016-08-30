@@ -35,7 +35,7 @@ class ZkResolverTest extends FunSuite with BeforeAndAfter {
 
   def toSpan(d: Duration): Span = Span(d.inNanoseconds, Nanoseconds)
 
-  // Flaky tests. See https://jira.twitter.biz/browse/COORD-437 for details.
+  // Flaky tests. See COORD-437 for details.
   if (!sys.props.contains("SKIP_FLAKY")) {
     test("represent the underlying ServerSet") {
       val serverSet = new ServerSetImpl(inst.zookeeperClient, "/foo/bar/baz")
