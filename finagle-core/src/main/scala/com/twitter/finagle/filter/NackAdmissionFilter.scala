@@ -201,4 +201,8 @@ private[finagle] class NackAdmissionFilter[Req, Rep](
     }
     res
   }
+
+  // Start the Ema at 1. This prevents it from updating to 0 if the first
+  // request is NACKed.
+  updateAcceptLikelihood(1)
 }

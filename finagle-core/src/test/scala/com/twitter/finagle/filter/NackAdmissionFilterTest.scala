@@ -111,22 +111,26 @@ class NackAdmissionFilterTest extends FunSuite {
     }
   }
 
-  test("increments acceptProbability when successfully serving a request") {
+  test("increases acceptProbability when request is not NACKed") {
     val ctx = new Ctx
     import ctx._
 
-    testGetSuccessfulResponse()
+    // Decrease Ema to just below 1
+    testGetNack()
     assert(filter.hasSentRequest)
-    assert(filter.emaValue == 1)
+    val firstEmaValue = filter.emaValue
+    // Increment Ema
+    testGetSuccessfulResponse()
+    assert(filter.emaValue > firstEmaValue)
   }
 
-  test("doesn't increment acceptProbability when we get a failed response") {
+  test("decreases acceptProbability when request is NACKed") {
     val ctx = new Ctx
     import ctx._
 
     testGetNack()
     assert(filter.hasSentRequest)
-    assert(filter.emaValue == 0)
+    assert(filter.emaValue < 1)
   }
 
   test("doesn't drop requests prematurely") {
@@ -138,7 +142,6 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    testGetSuccessfulResponse()
     // Make the server reject requests just before the EMA drops below the
     // accept rate threshold
     while (filter.emaValue > DefaultAcceptRateThreshold + extraProbability) {
@@ -160,7 +163,6 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    testGetSuccessfulResponse()
     // Make the server nack requests so that the EMA drops below the accept
     // rate threshold
     while (filter.emaValue >= DefaultAcceptRateThreshold) {
@@ -185,8 +187,6 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(customRng)
     import ctx._
 
-    // Initialize the EMA with a success...
-    testGetSuccessfulResponse()
     // Let the cluster become unhealthy...
     while (filter.emaValue >= DefaultAcceptRateThreshold) {
       nackWithoutTest()
@@ -218,9 +218,11 @@ class NackAdmissionFilterTest extends FunSuite {
 
   test("statsReceiver increments dropped_requests counter correctly") {
     val lowRng: CustomRng = new CustomRng(0)
-    val ctx = new Ctx(lowRng)
+    val ctx = new Ctx(lowRng, 100.milliseconds)
     import ctx._
 
+    // Pass time so NACKs can significantly reduce the Ema value
+    Time.sleep(200.milliseconds)
     // Explicitly, we successfully _send_ the first request, but return a
     // nack. We then drop the next nine requests. This is why the counter
     // correctly counts 9 fast / hard failures, and not 10.
@@ -234,7 +236,6 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    testGetSuccessfulResponse()
     // Make the server nack requests until the EMA drops below the accept
     // rate threshold.
     while (filter.emaValue >= DefaultAcceptRateThreshold) {
@@ -248,7 +249,6 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    testGetSuccessfulResponse()
     // Make the server nack requests until the EMA is just below the accept
     // rate threshold.
     while (filter.emaValue < DefaultAcceptRateThreshold + extraProbability) {
@@ -262,7 +262,6 @@ class NackAdmissionFilterTest extends FunSuite {
     val ctx = new Ctx(lowRng)
     import ctx._
 
-    testGetSuccessfulResponse()
     val originalEma = filter.emaValue
 
     failedResponse("interrupted", failingInterruptedSvc)
@@ -277,10 +276,9 @@ class NackAdmissionFilterTest extends FunSuite {
   test("EMA value is affected only by responses in rolling window") {
     val lowRng: CustomRng = new CustomRng(0)
     val ctx = new Ctx(lowRng, 100.milliseconds)
-    val extraEma = 0.005
+    val extraEma = 0.05
     import ctx._
 
-    testGetSuccessfulResponse()
     // EMA decreases
     for (_ <- 0 to 99) { nackWithoutTest() }
     // Wait for window to safely pass
@@ -290,6 +288,18 @@ class NackAdmissionFilterTest extends FunSuite {
 
     // EMA should be very close to 1
     assert(filter.emaValue > 1 - extraEma)
+  }
+
+  test("EMA value cannot start at 0 if first request is NACKed") {
+    val lowRng: CustomRng = new CustomRng(0)
+    val ctx = new Ctx(lowRng, 100.milliseconds)
+    import ctx._
+
+    // First request is NACKed...
+    nackWithoutTest()
+
+    // ... but the Ema is > 0.
+    assert(filter.emaValue > 0)
   }
 
   test("negative window value throws IllegalArgumentException") {
